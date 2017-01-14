@@ -82,6 +82,83 @@ $(document).ready(function(event) {
 
 	<article>
 		 <header>
+		  	<h1 class="entry-title"><a href="14842935189837.html">第4条：多用类型常量，少用#define预处理指令</a></h1>
+			<p class="meta"><time datetime="2017-01-13T15:45:18+08:00" 
+			pubdate data-updated="true">2017/1/13</time></p>
+		 </header>
+	  	<div class="entry-content">
+		  	
+		  	<p>对于一般掌握了Objective-C和C语言的人，也许会用这种方法来定义一个类似动画的时间常量：</p>
+
+<pre><code>#define ANIMATION_DURATION = 0.3
+</code></pre>
+
+<p>上述预处理指令会吧源代码中的ANIMATION_DURATION字符串替换为0.3。<br/>
+在OC中我们常常用更好的方法来定义，比方说，下面这行代码定义了一个类型为NSTimeInterval的常量：</p>
+
+<pre><code>static const NSTimeInterval KAnimationDuration = 0.3；
+</code></pre>
+
+<p>要注意的是此方式定义的常量包含类型信息，其好处就是清楚的描述了常量的含义，有助于编写开发文档。</p>
+
+<p>还要注意常量的名称。常用的命名法是：若常量局限于某“编译单元（也就是实现文件之内，implementation）”,一般在前面加上字母k；若长亮在类之外课件，则通常以类名为前缀。之后将会更加详细的说命名问题。</p>
+
+<p>定义常量的位置很重要。我们总是很喜欢在头文件里声明预处理命令，这样是很糟糕的。例如，ANIMATION_DURATION这个常量名就不应该在头文件中，因为所有引入了这份头文件的其他文件中都会出现这个名字。static const定义的常量也不应该出现在头文件中。因为OC没有命名空间这一概念，所以那样做就等于声明了一个名字叫kANIMATIONDURATION的全局变量。此名称应该加上前缀，以表明其所属的类，例如可以改为EOCViewClassAnimationDuration。</p>
+
+<p>如果不打算去公开某个常量，则应该将其定义为在使用该常量的实现文件中，比如说，要开发一个使用UIKit框架的iOS应用程序，其中UIView子类中含有表示动画播放时间的常量，那么可以这样写：</p>
+
+<pre><code>//EOCAnimatedView.h
+#import &lt;UIKit/UIKit.h&gt;
+@interface EOCAnimatedView:UIView
+-(void)animate;
+@end
+
+//EOCAnimatedView.m
+#import EOCAnimatedView.h
+
+static const NSTimeInterval kAnimationDuration  = 0.3;
+
+@implemention EOCAnimatedView
+
+-(void)animate{
+  [UIViewanimateWithDuration:KAnimationDuration 
+                    animate:^(){
+                        //Perform animations
+                    }]
+}
+</code></pre>
+
+<p>变量一定要同时用static和const来声明。如果试图修改const所声明的变量，编译器会报错。static修饰符意味着该变量仅仅在定义此变量的便一单元中可见。编译器每收到一个编译单元，就会输出一份目标文件。在OC中“编译单元”一词 通常指每个类的实现文件（以.m为后缀名）其作用域仅限于由EOCAnimatedView.m所生成的目标文件中。假如声明此变量时不加static,则编译器会为它创建一个“外部符号”(external symbol)。此时,若是另一个编译单元中也声 明了同名变量，那么编译器就拋出一条错误消息。</p>
+
+<p>有时候需要对外公开某个常量，想要接受常值变量的注册者不需要知道实际的字符串值，只需要以常值变量来注册自己想要接受的通知就可以</p>
+
+<p>此类常量应该放在“全局变量表”中，以便可以在定义该常量的编译单元之外使用。因此可以这样的来定义：</p>
+
+<pre><code>// in the header file
+extern NSString *const EOCStringConstant;
+
+//in the implementation
+NSString *const EOCStringConstant = @&quot;value&quot;;
+</code></pre>
+
+<p>这个常量在头文件中声明，在实现文件里面定义。这类常量只能定义一次。</p>
+
+<p>这样定义常量要优于#define，一旦在.m文件中定义好全局常量后，可以随处使用。</p>
+
+<p><strong>要点</strong><br/>
+* 不要用预处理指令定义常量，这样定义出来的常量不包含类型信息，编译器只是会在编译之前执行查找与替换操作。即使有人重新定义了常量值，编译器也不会产生警告信息。<br/>
+* 在实现文件中使用static const来定义“只在编译单元内可见的常量”。由于此类常量不在全局符号表中，所以无需为其名称添加前缀。<br/>
+* 再投问价那种使用extern来声明全局变量，并且在相关的实现文件中定义其值。这种常量要出现在全局符号表中，所以其名称应该加以区隔，通常用与之有关的类名做前缀。</p>
+
+
+		</div>
+
+		
+
+	</article>
+ 
+	<article>
+		 <header>
 		  	<h1 class="entry-title"><a href="14842776114163.html">第一章 熟悉Objective-C</a></h1>
 			<p class="meta"><time datetime="2017-01-13T11:20:11+08:00" 
 			pubdate data-updated="true">2017/1/13</time></p>
@@ -460,7 +537,7 @@ authoritative——权威性
 	  <ul id="recent_posts">
 	  
 	      <li class="post">
-	        <a href="Effective%20OC2.0.html"><strong>Effective OC2.0&nbsp;(1)</strong></a>
+	        <a href="Effective%20OC2.0.html"><strong>Effective OC2.0&nbsp;(2)</strong></a>
 	        
 	        
 	        
@@ -478,6 +555,12 @@ authoritative——权威性
 	<section>
 	  <h1>Recent Posts</h1>
 	  <ul id="recent_posts">
+	  
+	      
+		      <li class="post">
+		        <a href="14842935189837.html">第4条：多用类型常量，少用#define预处理指令</a>
+		      </li>
+	     
 	  
 	      
 		      <li class="post">
