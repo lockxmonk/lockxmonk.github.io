@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <title>
     
-  第4条：多用类型常量，少用#define预处理指令 - LZH007
+  感知机 - LZH007
   
 
   </title>
@@ -81,71 +81,70 @@ $(document).ready(function(event) {
 <div>
 	<article class="hentry" role="article">
 	<header>
-			  	<h1 class="entry-title">第4条：多用类型常量，少用#define预处理指令</h1>
-				<p class="meta"><time datetime="2017-01-13T15:45:18+08:00" pubdate data-updated="true">2017/1/13</time></p>
+			  	<h1 class="entry-title">感知机</h1>
+				<p class="meta"><time datetime="2017-03-09T15:15:58+08:00" pubdate data-updated="true">2017/3/9</time></p>
 			 </header>
 		  	<div class="entry-content">
-			  	<p>对于一般掌握了Objective-C和C语言的人，也许会用这种方法来定义一个类似动画的时间常量：</p>
+			  	<p>感知机是二类分类的线性分类模型，其输入为实例的特征向量，输出为实例的类别（一般为+1和-1），感知机对应于输入空间（特征空间）中将实例划分为正负两类的分离超平面，属于判别模型。感知机学习旨在求出将训练数据进行线性划分的分离超平面。感知机也是神经网络与支持向量机的基础。</p>
 
-<pre><code>#define ANIMATION_DURATION = 0.3
-</code></pre>
+<h2 id="toc_0">感知机模型</h2>
 
-<p>上述预处理指令会吧源代码中的ANIMATION_DURATION字符串替换为0.3。<br/>
-在OC中我们常常用更好的方法来定义，比方说，下面这行代码定义了一个类型为NSTimeInterval的常量：</p>
+<p>感知机的定义为：<br/>
+<img src="media/14890437581129/14890447646559.jpg" alt=""/></p>
 
-<pre><code>static const NSTimeInterval KAnimationDuration = 0.3；
-</code></pre>
+<p>感知机有如下的几何解释：<br/>
+线性方程：w*x + b = 0<br/>
+对应于特征空间R中的一个超平面S，其中w是超平面的法向量，b是超平面的截距，这个超平面将特征空间划分为两个部分，位于两部分的点就被划分为正，负两类，如下图所示：<br/>
+<img src="media/14890437581129/14890449623708.jpg" alt=""/></p>
 
-<p>要注意的是此方式定义的常量包含类型信息，其好处就是清楚的描述了常量的含义，有助于编写开发文档。</p>
+<p>所以求感知机的模型，也就是去求得模型参数w，b。感知机预测，通过学习得到的感知机模型，对于新输入实例给出其对应的输出类别。</p>
 
-<p>还要注意常量的名称。常用的命名法是：若常量局限于某“编译单元（也就是实现文件之内，implementation）”,一般在前面加上字母k；若长亮在类之外课件，则通常以类名为前缀。之后将会更加详细的说命名问题。</p>
+<h2 id="toc_1">感知机的学习策略</h2>
 
-<p>定义常量的位置很重要。我们总是很喜欢在头文件里声明预处理命令，这样是很糟糕的。例如，ANIMATION_DURATION这个常量名就不应该在头文件中，因为所有引入了这份头文件的其他文件中都会出现这个名字。static const定义的常量也不应该出现在头文件中。因为OC没有命名空间这一概念，所以那样做就等于声明了一个名字叫kANIMATIONDURATION的全局变量。此名称应该加上前缀，以表明其所属的类，例如可以改为EOCViewClassAnimationDuration。</p>
+<h3 id="toc_2">数据集的线性可分性</h3>
 
-<p>如果不打算去公开某个常量，则应该将其定义为在使用该常量的实现文件中，比如说，要开发一个使用UIKit框架的iOS应用程序，其中UIView子类中含有表示动画播放时间的常量，那么可以这样写：</p>
+<p><img src="media/14890437581129/14890453486666.jpg" alt=""/></p>
 
-<pre><code>//EOCAnimatedView.h
-#import &lt;UIKit/UIKit.h&gt;
-@interface EOCAnimatedView:UIView
--(void)animate;
-@end
+<h3 id="toc_3">感知机学习策略</h3>
 
-//EOCAnimatedView.m
-#import EOCAnimatedView.h
+<p>如果训练数据集是线性可分的，那么我们需要确定一个学习策略，也就是定义（经验）损失函数并将损失函数极小化。</p>
 
-static const NSTimeInterval kAnimationDuration  = 0.3;
+<p>损失函数的一个自然选择是误分类点的总数。但是，这样的损失函数不是参数w,b的连续可导函数，不易优化。损失函数的另一个选择是误分类点到超平面S的总距离，这是感知机所采用的。为此，首先写出输入控件R中任一点x到平面S的距离：<img src="media/14890437581129/14890456220821.jpg" alt=""/><br/>
+这里，||w||是w的2范数。<br/>
+其次，对于五分类的数据（x，y）来说，<br/>
+<code>-y(w*x+b)&gt;0</code>成立。因为当<code>w*x+b&gt;0</code>时，<code>y=-1</code>，而当<code>w*x+b&lt;0</code>时<code>y=+1</code>，因此，误分类点x到超平面S的距离是：<br/>
+<img src="media/14890437581129/14890460147136.jpg" alt=""/><br/>
+这样，假设超平面S的误分类点集合为M，那么所有的误分类点到超平面S的总距离为：<br/>
+<img src="media/14890437581129/14890462066356.jpg" alt=""/></p>
 
-@implemention EOCAnimatedView
+<p>所以，感知机的损失函数定义为：<img src="media/14890437581129/14890462888502.jpg" alt=""/></p>
 
--(void)animate{
-  [UIViewanimateWithDuration:KAnimationDuration 
-                    animate:^(){
-                        //Perform animations
-                    }]
-}
-</code></pre>
+<p>显然，损失函数是非负的，如果没有误分类点，那么损失函数为0，而误分类点越少，误分类点离超平面越近，损失函数值越小。一个特定的样本点的损失函数：在误分类时是参数w，b的线性函数，在正确分类时是0，因此给定训练数据集T，损失函数是w，b的连续可导函数。<br/>
+总的来说我们的感知机学习策略就是在假设空间中选取使损失函数式最小的模型参数w，b。</p>
 
-<p>变量一定要同时用static和const来声明。如果试图修改const所声明的变量，编译器会报错。static修饰符意味着该变量仅仅在定义此变量的便一单元中可见。编译器每收到一个编译单元，就会输出一份目标文件。在OC中“编译单元”一词 通常指每个类的实现文件（以.m为后缀名）其作用域仅限于由EOCAnimatedView.m所生成的目标文件中。假如声明此变量时不加static,则编译器会为它创建一个“外部符号”(external symbol)。此时,若是另一个编译单元中也声 明了同名变量，那么编译器就拋出一条错误消息。</p>
+<h2 id="toc_4">感知机学习算法</h2>
 
-<p>有时候需要对外公开某个常量，想要接受常值变量的注册者不需要知道实际的字符串值，只需要以常值变量来注册自己想要接受的通知就可以</p>
+<p>我们的策略已经明确，就是求解损失函数式的最优化，我们这里最优化的方法是随机梯度下降法。</p>
 
-<p>此类常量应该放在“全局变量表”中，以便可以在定义该常量的编译单元之外使用。因此可以这样的来定义：</p>
+<h3 id="toc_5">感知机学习算法的原始形式</h3>
 
-<pre><code>// in the header file
-extern NSString *const EOCStringConstant;
+<p>感知机学习算法是对以下最优化问题的算法，给定一个训练集：<img src="media/14890437581129/14890473616479.jpg" alt=""/><br/>
+感知机学习算法是误分类驱动的，具体采用随机梯度下降法（stochastic gradient descent)。首先，任意选取一个超平面然后用梯度下降法不断地极小化目标函数<code>（2.5）</code>。极小化过程中不是一次使M中所有误分类点的梯度下降， 而是一次随机选取一个误分类点使其梯度下降。<br/>
+假设误分类点集合M是固定的，那么损失函数的梯度由<img src="media/14890437581129/14890475151426.jpg" alt=""/><br/>
+给出。<br/>
+随机选取一个误分类点<code>(x,y)</code>，对w,b进行更新：<img src="media/14890437581129/14890475562013.jpg" alt=""/><br/>
+式中η(0&lt;η≤1)是步长，在统计学习中又称为学习率，这样，通过迭代可以期待损失函数不断减小，直到为0，综上所述，得到如下算法：<img src="media/14890437581129/14890483224015.jpg" alt=""/><br/>
+这种学习算法直观上有如下解释：当一个实例点被误分类，即位于分离超平面的错误一侧时，则调整w,b的值，使分离超平面向该误分类点的一侧移动，以减少该误分类点与超平面间的距离，直至超平面越过该误分类点使其被正确分类。</p>
 
-//in the implementation
-NSString *const EOCStringConstant = @&quot;value&quot;;
-</code></pre>
+<p>上述算法是感知机学习的基本算法，对应于后面的对偶形式，称为原始形式。感知机学习算法简单且易于实现。</p>
 
-<p>这个常量在头文件中声明，在实现文件里面定义。这类常量只能定义一次。</p>
+<p>该算法使用方法如下：<br/>
+<img src="media/14890437581129/14890503525005.jpg" alt=""/><br/>
+<img src="media/14890437581129/14890503748369.jpg" alt=""/><br/>
+<img src="media/14890437581129/14890503942221.jpg" alt=""/><br/>
+这是在计算中误分类点先后取<code>x1,x3,x3,x3,x1,x3,x3</code>得到的分离超平面和感 知机模型，如果在计算中误分类点依次取<code>x1,x3,x3,x3,x2,x3,x3,x3,x1,x3,x3</code>那么得到的分离超平面是2x<sup>1</sup>+x<sup>2</sup>-5=0</p>
 
-<p>这样定义常量要优于#define，一旦在.m文件中定义好全局常量后，可以随处使用。</p>
-
-<p><strong>要点</strong><br/>
-* 不要用预处理指令定义常量，这样定义出来的常量不包含类型信息，编译器只是会在编译之前执行查找与替换操作。即使有人重新定义了常量值，编译器也不会产生警告信息。<br/>
-* 在实现文件中使用static const来定义“只在编译单元内可见的常量”。由于此类常量不在全局符号表中，所以无需为其名称添加前缀。<br/>
-* 再投问价那种使用extern来声明全局变量，并且在相关的实现文件中定义其值。这种常量要出现在全局符号表中，所以其名称应该加以区隔，通常用与之有关的类名做前缀。</p>
+<p>可见，感知机学习算法由于采用不同的初值或选取不同的误分类点，解可以不同。</p>
 
 			</div>
 
@@ -157,7 +156,7 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
 			<strong>Categories:</strong>&nbsp; 
 			<span class="categories">
 			
-			    <a class='category' href='Effective%20OC2.0.html'>Effective OC2.0</a>&nbsp;
+			    <a class='category' href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a>&nbsp;
 			 
 			</span>
 		    </p>
@@ -175,12 +174,9 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
 
 	    <p class="meta">
 	    
-	        <a class="basic-alignment left" href="14843637552703.html" 
-	        title="Previous Post: 第5条：用枚举表示状态、选项、状态码">&laquo; 第5条：用枚举表示状态、选项、状态码</a>
 	    
-	    
-	        <a class="basic-alignment right" href="14842776114163.html" 
-	        title="Next Post: 第一章 熟悉Objective-C">第一章 熟悉Objective-C &raquo;</a>
+	        <a class="basic-alignment right" href="14880098771062.html" 
+	        title="Next Post: 91-176">91-176 &raquo;</a>
 	    
 	    </p>
 	  </footer>
