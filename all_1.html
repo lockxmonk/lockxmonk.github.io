@@ -82,6 +82,161 @@ $(document).ready(function(event) {
 
 	<article>
 		 <header>
+		  	<h1 class="entry-title"><a href="14842776114163.html">第一章 熟悉Objective-C</a></h1>
+			<p class="meta"><time datetime="2017-01-13T11:20:11+08:00" 
+			pubdate data-updated="true">2017/1/13</time></p>
+		 </header>
+	  	<div class="entry-content">
+		  	
+		  	<h2 id="toc_0">第1条：了解Objective—C语言的起源</h2>
+
+<p>OC语言使用“消息结构”（messageing structure）而不是函数调用。OC是由Smalltalk演化而来。主要区别为：</p>
+
+<pre><code>//Messaging(OC)  
+
+Object *obj = [Object new];  
+[obj performWith:par1 and:par2];
+   
+//Function(C++)  
+
+Object *obj = new Object;    
+obj-&gt;perform(par1,par2);   
+</code></pre>
+
+<p>关键区别在于：使用消息结构的语言，其运行时所应执行的代码由运行环境所决定；而使用函数调用的语言，则由编译器决定。</p>
+
+<p>所有的OC语言的对象都应该如下声明：</p>
+
+<pre><code>NSString *str = @“The string”；
+</code></pre>
+
+<p>因为所有的对象所占内存总是分配在“堆空间”中，而绝不会分配在“栈”（stack）上。一般变量分配在栈上。<img src="media/14841901813337/QQ20170112-0@2x.png" alt="QQ20170112-0@2x"/></p>
+
+<p>要点：<br/>
+* OC为C语言添加了面向对象的特性，是它的超集。OC使用动态绑定的消息结构，也就是说，在运行时才会检查对象类型。接收一条消息之后，究竟应该执行何种代码，由运行时环境决定而不是编译器。<br/>
+* 理解C语言的核心概念有助于写好OC程序。尤其是要掌握内存模型和指针。</p>
+
+<h2 id="toc_1">第2条：在类的头文件中尽量少引入其它头文件</h2>
+
+<p>例如：<br/>
+创建一个EOCPerson的类，其中属性中包含有EOCEmployer的类。</p>
+
+<pre><code>//EOCPerson.h
+#import&lt;Foundation/Foundation.h&gt;
+@interface EOCPerson:NSObject
+@property (nonatomic,copy) NSString *firstname;
+@property (nonatomic,copy) NSString *lastname;
+@property (nonatomic,strong) EOCEmployer *employer;
+@end
+</code></pre>
+
+<p>这样做常见的方法是在头部引入：</p>
+
+<pre><code>#import “EOCEmployer.h”
+</code></pre>
+
+<p>但是我们在这里不需要知道EOCEmployer这个类的全部细节，只需要知道这里有一个类就好。所以有一个方法为：</p>
+
+<pre><code>@class EOCEmployer；
+</code></pre>
+
+<p>这叫做前向声明。现在EOCPerson的头文件变为：</p>
+
+<pre><code>//EOCPerson.h
+#import&lt;Foundation/Foundation.h&gt;
+
+@class EOCEmployer；
+
+@interface EOCPerson:NSObject
+@property (nonatomic,copy) NSString *firstname;
+@property (nonatomic,copy) NSString *lastname;
+@property (nonatomic,strong) EOCEmployer *employer;
+@end
+</code></pre>
+
+<p>但是EOCPerson类的实现文件则需要引入EOCEmployer类的头文件，因为知道其中所有的接口细节。于是，实现文件就是：</p>
+
+<pre><code>//EOCPerson.m
+#import &quot;EOCPerson.h&quot;;
+#import &quot;EOCEmployer.h&quot;
+
+@implementation EOCPerson
+//.....
+@end
+</code></pre>
+
+<p>要点：<br/>
+* 除非的确有必要，否则不要引入头文件。一般来说，应该在某个类的头文件中使用向前声明来提及别的类，并在实现文件中引入那些类的头文件。这样做可以尽量降低类之间的耦合。<br/>
+* 有时无法使用向前声明，比如要声明某各类所遵循的一项协议，这种情况下，尽量吧“该类所遵循的协议“的这条声明移至”class-continuation分类“中。如果不行的话，就把协议单独放在一个头文件中，然后将其引入。</p>
+
+<h2 id="toc_2">第3条：多用字面量语法，少用与之等价的方法</h2>
+
+<p>从OC1.0开始，有一种非常简单的方式创建NSString对象。这就是”字符串字面量（string literal）“，其语法如下所示：</p>
+
+<pre><code>NSString *string = @”effective OC 2.0“；
+</code></pre>
+
+<p>如果不用这种语法的话，就要以常见的alloc以及init方法来分配和初始化对象了。</p>
+
+<h3 id="toc_3">字面数值</h3>
+
+<p>有时候需要把整数、浮点数、布尔值封入OC对象中。这种情况下可以使用NSNumber类，该类可以处理多种类型的数值。最原始的创建方法为：</p>
+
+<pre><code>NSNumber *someNumber = [NSNumber numberWithInt:1];
+</code></pre>
+
+<p>上面这行代码创建了一个数字，将它的值设为了1.然而使用字面量能令代码更为整洁：</p>
+
+<pre><code>NSNumber *someNumber = @1；
+</code></pre>
+
+<h3 id="toc_4">字面量数组</h3>
+
+<p>创建方法为：</p>
+
+<pre><code>NSArray *animals =@[@&quot;cat&quot;,@&quot;dog&quot;,@&quot;mouse&quot;,@&quot;badger&quot;];
+</code></pre>
+
+<p>使用字面量获取则为：</p>
+
+<pre><code>NSString *dog = animals[1];
+</code></pre>
+
+<h3 id="toc_5">字面量字典</h3>
+
+<p>”字典“（dictionary）是一种映射性数据结构，可以向其中添加键值对。与数组一样字面量编写方式为：</p>
+
+<pre><code>NSDictionary *personData = @{@&quot;firstName&quot;:@&quot;Matt&quot;,
+                            @&quot;lastName&quot;:@&quot;Galloway&quot;,
+                            @&quot;age&quot;:@28}
+
+</code></pre>
+
+<h3 id="toc_6">可变数组与字典</h3>
+
+<p>通过取下标操作，可以访问数组中某个下标或者字典中某个键所对应的元素。如果数组与字典对象试课变得（mutable），那么也能通过下标修改其中的元素值。例如：</p>
+
+<pre><code>mutableArray[1] = @&quot;dog&quot;;
+mutableDictionary[@&quot;lastName&quot;] = @&quot;Galloway&quot;; 
+</code></pre>
+
+<h2 id="toc_7">要点</h2>
+
+<ul>
+<li>应该使用字面量语法来创建字符串、数值、数组、字典。与创建此类对象的常规方法相比，这么做更加简明扼要。</li>
+<li>应该通过下标来操作和访问数组小标或者字典中的键所对应的元素。</li>
+<li>用字面量语法创建数组或者字典时，若值中有nil，则会抛出异常。因此，务必保证值中不包含有nil。</li>
+</ul>
+
+
+		</div>
+
+		
+
+	</article>
+ 
+	<article>
+		 <header>
 		  	<h1 class="entry-title"><a href="14839432188714.html">英语考试翻译总结</a></h1>
 			<p class="meta"><time datetime="2017-01-09T14:26:58+08:00" 
 			pubdate data-updated="true">2017/1/9</time></p>
@@ -326,7 +481,7 @@ authoritative——权威性
 	      </li>
 	  
 	      <li class="post">
-	        <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法&nbsp;(1)</strong></a>
+	        <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法&nbsp;(2)</strong></a>
 	        
 	        
 	        
@@ -337,6 +492,12 @@ authoritative——权威性
 	<section>
 	  <h1>Recent Posts</h1>
 	  <ul id="recent_posts">
+	  
+	      
+		      <li class="post">
+		        <a href="14891071598954.html">感知机算法的收敛性</a>
+		      </li>
+	     
 	  
 	      
 		      <li class="post">
@@ -363,10 +524,6 @@ authoritative——权威性
 	     
 	  
 	      
-		      <li class="post">
-		        <a href="14842935189837.html">第4条：多用类型常量，少用#define预处理指令</a>
-		      </li>
-	     
 	  
 	      
 	  
