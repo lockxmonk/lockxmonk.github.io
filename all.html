@@ -82,6 +82,97 @@ $(document).ready(function(event) {
 
 	<article>
 		 <header>
+		  	<h1 class="entry-title"><a href="14891936534415.html">k近邻法</a></h1>
+			<p class="meta"><time datetime="2017-03-11T08:54:13+08:00" 
+			pubdate data-updated="true">2017/3/11</time></p>
+		 </header>
+	  	<div class="entry-content">
+		  	
+		  	<p>k近邻法（k-nearestneighbor,k-NN)是一种基本分类与回归方法。本书只讨论分类问题中的k近邻法。k近邻法的输入为实例的特征向量，对应于特征空间 的点；输出为实例的类别，可以取多类。k近邻法假设给定一个训练数据集，其中的实例类别己定。分类时，对新的实例，根据其k个最近邻的训练实例的类别， 通过多数表决等方式进行预测。因此，k近邻法不具有显式的学习过程。近邻法实际上利用训练数据集对特征向量空间进行划分，并作为其分类的“模型“，k值的选择、距离度量及分类决策规则是k近邻法的三个基本要素。k近邻法1968年由Cover和Hart提出。</p>
+
+<h2 id="toc_0">k近邻算法</h2>
+
+<p>k近邻算法简单、直观：给定一个训练数据集，对新的输入实例，在训练数据集中找到与该实例最邻近的k个实例，这k个实例的多数属于某个类，就把该输入实例分为这个类，下面叙述k邻近算法。<br/>
+<img src="media/14891936534415/14891944741165.jpg" alt=""/><br/>
+<img src="media/14891936534415/14891946432255.jpg" alt=""/></p>
+
+<h2 id="toc_1">k近邻模型</h2>
+
+<p>k近邻法使用的模型实际上对应于对特征空间的划分。模型由三个基本要素——距离度量、k值的选择和分类决策规则决定。</p>
+
+<h3 id="toc_2">模型</h3>
+
+<p>k近邻算法中，当训练集、距离度量（如欧氏距离）、k值及分类局侧规则（如多数表决）确定后，对于任何一个新的输入实例，它所属的类唯一地确定。这相当于根据上述要素将特征空间划分为一些子空间，确定子空间里的每个点所属的类。这一事实从最近邻算法中可以看得很清楚。</p>
+
+<p>特征空间中，对每个训练实例点\(x_i\),距离该点比其他点更近的所有点组成一个区域，叫作单元（cell).每个训练实例点拥有一个单元，所有训练实例点的单元构成对特征空间的一个划分。最近邻法将实例\(x_i\)的类\(y_i\),作为其单元中所有点的类标记（class label)。这样，每个单元的实例点的类别是确定的。下图是二维特征空间划分的一个例子。<br/>
+<img src="media/14891936534415/14891961608422.jpg" alt=""/></p>
+
+<h3 id="toc_3">距离度量</h3>
+
+<p>特征空间中两个实例点的距离是两个实例点相似程度的反映.k近邻模型的特征空间一般是n维实数向量空间\(R^n\)。使用的距离是欧氏距离，但也可以是其他距离，如更一般的\(L_p\)距离（\(L_p -distance\))或Minkowski距离（Minkowski distance)。<br/>
+关于特征空间中两坐标点的距离定义为：<br/>
+<img src="media/14891936534415/14891974598310.jpg" alt=""/></p>
+
+<p>不同的距离定义，所求出的最近邻点是不同的。<br/>
+<img src="media/14891936534415/14891979526147.jpg" alt=""/></p>
+
+<h3 id="toc_4">k值的选择</h3>
+
+<p>k值的选择会对k近邻法的结果产生重大影响。</p>
+
+<p>如果选择较小的k值，就相当于用较小的邻域中的训练实例进行预测，“学习”的近似误差（approximation error)会减小，只有与输入实例较近的（相似的）训练实例才会对预测结果起作用。但缺点是“学习”的估计误差（estimation error) 会增大，预测结果会对近邻的实例点非常敏感。如果邻近的实例点恰巧是噪声，预测就会出错.换句话说，值的减小就意味着整体模型变得复杂，容易发生过拟合。</p>
+
+<p>如果选择较大的k值，就相当于用较大邻域中的训练实例进行预测。其优点是可以减少学习的估计误差。但缺点是学习的近似误差会增大。这时与输入实例 较远的（不相似的）训练实例也会对预测起作用，使预测发生错误.k值的增大就意味着整体的模型变得简单。</p>
+
+<p>如果k=N,那么无论输入实例是什么，都将简单地预测它属于在训练实例中最多的类。这时，模型过于简单，完全忽略训练实例中的大量有用信息，是不可取的。</p>
+
+<p>在应用中，k值一般取一个比较小的数值。通常采用交叉验证法来选取最优的k值。</p>
+
+<h3 id="toc_5">分类决策规则</h3>
+
+<p>k近邻法中的分类决策规则往往是多数表决，即由输入实例的k个邻近的训练实例中的多数类决定输入实例的类。</p>
+
+<p>多数表决规则（majority voting rule)有如下解释：如果分类的损失函数为0-1损失函数，分类函数为：<br/>
+<img src="media/14891936534415/14891994327344.jpg" alt=""/></p>
+
+<p>那么误分类的概率为：<br/>
+<img src="media/14891936534415/14891994564311.jpg" alt=""/><br/>
+对给定的实例\(x \in \chi\),其中最邻近的k个训练实例点构成集合\(N_k(x)\),如果涵盖\(N_k(x)\)的区域的类别是\(C_j\),那么误分类率是：<br/>
+<img src="media/14891936534415/14891997004694.jpg" alt=""/><br/>
+要使误分类率最小即经验风险最小，就要使\(\sum_{x_i\in{N_k(x)}}I(y_i=c_j)\)最大，<mark>所以多数表决规则等价于风险最小化</mark>。</p>
+
+<h2 id="toc_6">k近邻法的实现：kd树</h2>
+
+<p>实现k近邻法时，主要考虑的问题是如何对训练数据进行快速k近邻捜索。这点在特征空间的维数大及训练数据容量大时尤其必要。</p>
+
+<p>k近邻法最简单的实现方法是线性扫描（linear  scan)。这时要计算输入实例与每一个训练实例的距离。当训练集很大时，计算非常耗时，这种方法是不可行的。</p>
+
+<p>为了提高k近邻搜索的效率，可以考虑使用特殊的结构存储训练数据，以减少计算距离的次数。具体方法很多，下面介绍其中的kd树(kd tree)方法.</p>
+
+<h3 id="toc_7">构造kd树</h3>
+
+<p>kd树是一种对k维空间中的实例点进行存储以便对其进行快速检索的树形数据结构。kd树是二叉树，表示对k维空间的一个划分（partition)。构造kd树相 当于不断地用垂直于坐标轴的超平面将k维空间切分，构成一系列的k维超矩形区域。kd树的每个结点对应于一个k维超矩形区域。</p>
+
+<p>构造kd树的方法如下：构造根结点，使根结点对应于k维空间中包含所有实例点的超矩形区域；通过下面的递归方法，不断地对k维空间进行切分，生成子结 点。在超矩形区域（结点）上选择一个坐标轴和在此坐标轴上的一个切分点，确定一个超平面，这个超平面通过选定的切分点并垂直于选定的坐标轴，将当前超矩形区域切分为左右两个子区域（子结点）：这时，实例被分到两个子区域.这个过程直到子区域内没有实例时终止（终止时的结点为叶结点）。在此过程中，将实例保存在相应的结点上。</p>
+
+<p>通常，依次选择坐标轴对空间切分，选择训练实例点在选定坐标轴上的中位数（median)为切分点，这样得到的kd树是平衡的。<mark>注意，平衡的kd树搜索时的效率未必是最优的</mark>。<br/>
+下面给出构造kd树的算法：<br/>
+<img src="media/14891936534415/14892010553846.jpg" alt=""/><br/>
+<img src="media/14891936534415/14892019093068.jpg" alt=""/></p>
+
+<p>下面给出一个例子，来反应上述算法的用途：<br/>
+<strong>（中位数：一组数据按大小顺序排列起来，处在中间位置的一个数或两个数的平均值。）</strong><br/>
+<img src="media/14891936534415/14892021282433.jpg" alt=""/></p>
+
+
+		</div>
+
+		
+
+	</article>
+ 
+	<article>
+		 <header>
 		  	<h1 class="entry-title"><a href="14891071598954.html">感知机算法的收敛性</a></h1>
 			<p class="meta"><time datetime="2017-03-10T08:52:39+08:00" 
 			pubdate data-updated="true">2017/3/10</time></p>
@@ -565,83 +656,6 @@ switch (currentState) {
 		
 
 	</article>
- 
-	<article>
-		 <header>
-		  	<h1 class="entry-title"><a href="14842935189837.html">第4条：多用类型常量，少用#define预处理指令</a></h1>
-			<p class="meta"><time datetime="2017-01-13T15:45:18+08:00" 
-			pubdate data-updated="true">2017/1/13</time></p>
-		 </header>
-	  	<div class="entry-content">
-		  	
-		  	<p>对于一般掌握了Objective-C和C语言的人，也许会用这种方法来定义一个类似动画的时间常量：</p>
-
-<pre><code>#define ANIMATION_DURATION = 0.3
-</code></pre>
-
-<p>上述预处理指令会吧源代码中的ANIMATION_DURATION字符串替换为0.3。<br/>
-在OC中我们常常用更好的方法来定义，比方说，下面这行代码定义了一个类型为NSTimeInterval的常量：</p>
-
-<pre><code>static const NSTimeInterval KAnimationDuration = 0.3；
-</code></pre>
-
-<p>要注意的是此方式定义的常量包含类型信息，其好处就是清楚的描述了常量的含义，有助于编写开发文档。</p>
-
-<p>还要注意常量的名称。常用的命名法是：若常量局限于某“编译单元（也就是实现文件之内，implementation）”,一般在前面加上字母k；若长亮在类之外课件，则通常以类名为前缀。之后将会更加详细的说命名问题。</p>
-
-<p>定义常量的位置很重要。我们总是很喜欢在头文件里声明预处理命令，这样是很糟糕的。例如，ANIMATION_DURATION这个常量名就不应该在头文件中，因为所有引入了这份头文件的其他文件中都会出现这个名字。static const定义的常量也不应该出现在头文件中。因为OC没有命名空间这一概念，所以那样做就等于声明了一个名字叫kANIMATIONDURATION的全局变量。此名称应该加上前缀，以表明其所属的类，例如可以改为EOCViewClassAnimationDuration。</p>
-
-<p>如果不打算去公开某个常量，则应该将其定义为在使用该常量的实现文件中，比如说，要开发一个使用UIKit框架的iOS应用程序，其中UIView子类中含有表示动画播放时间的常量，那么可以这样写：</p>
-
-<pre><code>//EOCAnimatedView.h
-#import &lt;UIKit/UIKit.h&gt;
-@interface EOCAnimatedView:UIView
--(void)animate;
-@end
-
-//EOCAnimatedView.m
-#import EOCAnimatedView.h
-
-static const NSTimeInterval kAnimationDuration  = 0.3;
-
-@implemention EOCAnimatedView
-
--(void)animate{
-  [UIViewanimateWithDuration:KAnimationDuration 
-                    animate:^(){
-                        //Perform animations
-                    }]
-}
-</code></pre>
-
-<p>变量一定要同时用static和const来声明。如果试图修改const所声明的变量，编译器会报错。static修饰符意味着该变量仅仅在定义此变量的便一单元中可见。编译器每收到一个编译单元，就会输出一份目标文件。在OC中“编译单元”一词 通常指每个类的实现文件（以.m为后缀名）其作用域仅限于由EOCAnimatedView.m所生成的目标文件中。假如声明此变量时不加static,则编译器会为它创建一个“外部符号”(external symbol)。此时,若是另一个编译单元中也声 明了同名变量，那么编译器就拋出一条错误消息。</p>
-
-<p>有时候需要对外公开某个常量，想要接受常值变量的注册者不需要知道实际的字符串值，只需要以常值变量来注册自己想要接受的通知就可以</p>
-
-<p>此类常量应该放在“全局变量表”中，以便可以在定义该常量的编译单元之外使用。因此可以这样的来定义：</p>
-
-<pre><code>// in the header file
-extern NSString *const EOCStringConstant;
-
-//in the implementation
-NSString *const EOCStringConstant = @&quot;value&quot;;
-</code></pre>
-
-<p>这个常量在头文件中声明，在实现文件里面定义。这类常量只能定义一次。</p>
-
-<p>这样定义常量要优于#define，一旦在.m文件中定义好全局常量后，可以随处使用。</p>
-
-<p><strong>要点</strong><br/>
-* 不要用预处理指令定义常量，这样定义出来的常量不包含类型信息，编译器只是会在编译之前执行查找与替换操作。即使有人重新定义了常量值，编译器也不会产生警告信息。<br/>
-* 在实现文件中使用static const来定义“只在编译单元内可见的常量”。由于此类常量不在全局符号表中，所以无需为其名称添加前缀。<br/>
-* 再投问价那种使用extern来声明全局变量，并且在相关的实现文件中定义其值。这种常量要出现在全局符号表中，所以其名称应该加以区隔，通常用与之有关的类名做前缀。</p>
-
-
-		</div>
-
-		
-
-	</article>
   
 	<div class="pagination">
 	 <a class="prev" href="all_1.html">&larr; Older</a> 
@@ -678,7 +692,7 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
 	      </li>
 	  
 	      <li class="post">
-	        <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法&nbsp;(2)</strong></a>
+	        <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法&nbsp;(3)</strong></a>
 	        
 	        
 	        
@@ -689,6 +703,12 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
 	<section>
 	  <h1>Recent Posts</h1>
 	  <ul id="recent_posts">
+	  
+	      
+		      <li class="post">
+		        <a href="14891936534415.html">k近邻法</a>
+		      </li>
+	     
 	  
 	      
 		      <li class="post">
@@ -715,10 +735,6 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
 	     
 	  
 	      
-		      <li class="post">
-		        <a href="14843637552703.html">第5条：用枚举表示状态、选项、状态码</a>
-		      </li>
-	     
 	  
 	      
 	  
