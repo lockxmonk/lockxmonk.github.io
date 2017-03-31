@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <title>
     
-  英语考试词汇部分总结 - LZH007
+  决策树生成--CART算法 - LZH007
   
 
   </title>
@@ -81,140 +81,51 @@ $(document).ready(function(event) {
 <div>
 	<article class="hentry" role="article">
 	<header>
-			  	<h1 class="entry-title">英语考试词汇部分总结</h1>
-				<p class="meta"><time datetime="2017-01-07T14:12:04+08:00" pubdate data-updated="true">2017/1/7</time></p>
+			  	<h1 class="entry-title">决策树生成--CART算法</h1>
+				<p class="meta"><time datetime="2017-03-30T15:05:55+08:00" pubdate data-updated="true">2017/3/30</time></p>
 			 </header>
 		  	<div class="entry-content">
-			  	<h2 id="toc_0">第一章</h2>
+			  	<h2 id="toc_0">CART算法</h2>
 
-<pre><code> striking——显著地，突出的
- slender ——苗条的，瘦的
- impeccable——无瑕疵的，没有缺点的
- discernible——可辨别的，可识别的
- sloppy——草率的，粗心的
- sagaciousness——睿智，聪颖
- arrogance——自大，傲慢
- vow——誓言
- homonym——同音异议词
- glisten——晶莹剔透
- fix the blame on——归罪与。。 
-</code></pre>
+<p>分类与回归树(classification and regression tree, CART)模型由 Breiman等人在1984年提出，是应用广泛的决策树学习方法.CART同样由特征选择、树 的生成及剪枝组成，<mark>既可以用于分类也可以用于回归.</mark>以下将用于分类与回归的树统称为决策树.</p>
 
-<pre><code>mess up——screwed up——搞砸
-poking——stab——戳
-toting——drag——拖，手提
-called my kid name——insult kids——责怪孩子
-predictor——indicator——指示，预示
-manifesto——presentation——展示，告示
-anagram——word play——文字游戏
-traumatize——hurt——使。。。收到创伤
-collaborative——cooperative——合作
-disciplinarians——authoritarian——权利主义者
-</code></pre>
+<p>CART是在给定输入随机变量X的条件下输出随机变量Y的条件概率分布的学习方法.CART假设决策树是二叉树，内部结点特征的取值为“是”和“否”，左分支是取值为“是”的分支，右分支是取值为“否”的分支.这样的决策树等价于递归地二分每个特征，将输入空间即特征空间划分为有限个单元，并在这些单元上确定预测的概率分布，也就是在输入给定的条件下输出的条件概率分布.</p>
 
-<h2 id="toc_1">第二章</h2>
+<p><strong>CART算法由以下两步组成：</strong></p>
 
-<pre><code>molecular——分子
-hyperactive——过度活跃的
-integrated——整合，合并
-retention——保留
-condense——浓缩
-clerical——文书方面的
-alert——警告
-aesthetically——美学上的
-compelling——令人瞩目的
-undeniably——不能否认的
-</code></pre>
+<p>1.决策树生成：基于训练数据集生成决策树，生成的决策树要尽量大：<br/>
+2.决策树剪枝：用验证数据集对己生成的树进行剪枝并选择最优子树，这时用损失函数最小作为剪枝的标准.</p>
 
-<pre><code>dispel——eliminate——驱散，消除
-overwhelming——tough——艰难，压倒性的
-extrinsic——exterior——外在的
-infamous——notorious——声名狼藉的
-recruit——select——雇佣，选择
-aptitude——talent——天赋
-enrichment——abundance——丰富，充裕
-outperformed——outdone——胜过，优于
-replicate——repeat——重复，复制
-integral——entire——完整的，全部的
-</code></pre>
+<h3 id="toc_1">CART生成</h3>
 
-<h2 id="toc_2">第三章</h2>
+<p>决策树的生成就是递归地构建二叉决策树的过程.对回归树用平方误差最小化准则，对分类树用基尼指数(Gini index)最小化准则，进行特征选择，生成二叉树.</p>
 
-<pre><code>in theory——在理论上
-deficiency——缺陷，缺少
-reveling in——得意于，纵情于
-influx——流入
-for the sake of——为了，原因是
-preoccupation——全神贯注
-deviation——偏差
-facilitate——方便，便于
-elaborate——详细描述
-boggle at——吃惊，害怕
-</code></pre>
+<h4 id="toc_2">1.回归树的生成</h4>
 
-<pre><code>fused——merged——混合，合并
-encompass——comprise——由。。。组成
-fortified——strengthened——加强
-segregation——separation——分离
-mounting——increasing——日益增长
-ethnically——racially——种族的，民族的
-muffle——repress——消除，安抚
-wiping——clearing out——擦除
-touched upon——触及到
-counter——contrary to——相反
-</code></pre>
+<p>假设X与Y分别为输入和输出变量，并且Y是连续变量，给定训练数据集:<br/>
+    \(D={(x_1,y_1),(x_2,y_2),...(x_N,y_N)}\)<br/>
+考虑如何生成回归树。</p>
 
-<h2 id="toc_3">第四章</h2>
+<p>一个回归树对应着输入空间（即特征空间）的一个划分以及在划分的单元上 的输出值.假设己将输入空间划分为M个单元\(R_1,R_2,R_3...R_M\),并且在每个单元\(R_M\)上 有一个固定的输出值\(c_m\)，于是回归树模型可表示为:<br/>
+<img src="media/14908575557810/14909500378632.jpg" alt=""/></p>
 
-<pre><code>villain——混蛋，恶棍
-with regard to——关于，涉及到
-eclipse——日蚀
-condemn——谴责
-immense——巨大的，极大的
-treacherous——骗人的，奸诈的
-wield——使用
-depict——描绘
-mediate——调解，解决
-alternative——非正常的，独特的
-</code></pre>
+<p>当输入空间的划分确定时，可以用平方误差\(\sum_{x_i\in R}(y_i-f(x_i))^2\)来表示回归树对于训练数据的预测误差，用平方误差最小的准则求解每个单元上的最优输出值.易知，单元\(R_m\)上的\(c_m\)的最优值\(\hat c_m\)是\(R_m\)上的所有输入实例\(x_i\)对应的输出\(y_i\)的均值，即:<br/>
+<img src="media/14908575557810/14909504677321.jpg" alt=""/></p>
 
-<pre><code>in conflict with——in opposition to——和。。冲突
-visionary——foreseer——有先见之明的人
-brink——edge——边缘
-reckless——bold——不仔细的，鲁莽的
-integrate——put together——整合
-initiate——lead——开始，带领
-be consistent with——be the same as——与。。一致
-setback——discouragement——挫折
-dazzle——impress——使人印象深刻
-strive for——try hard for——努力追求
-</code></pre>
+<p>问题是怎样对输入空间进行划分,这里采用启发式的方法，选择第j个变量\(x^{(j)}\)和它取的值s，作为切分变量（splitting variable)和切分点（splitting point),并定义两个区域：<br/>
+<img src="media/14908575557810/14909505605933.jpg" alt=""/><br/>
+然后寻找最优切分变量j和最优切分点s，最优地，求解：<br/>
+<img src="media/14908575557810/14909506372664.jpg" alt=""/><br/>
+对固定输入变量j可以找到最优切分点s:<br/>
+<img src="media/14908575557810/14909506657025.jpg" alt=""/><br/>
+便利所有输入变量，找到最优的切分变量j，构成一个对\((j,s)\).依此将输入空间划分为两个区域。接着，对每个区域重复上述划分过程，直到满足停止条件为止.这样就生成一棵回归树。这样的回归树通常称为最小二乘回归树(least squares regression tree)，现将算法叙述如下：</p>
 
-<h2 id="toc_4">第五章</h2>
+<p>最小二乘回归树生成算法：<br/>
+<img src="media/14908575557810/14909510077124.jpg" alt=""/></p>
 
-<pre><code>magnitude——extent——量级，大小
-boost——raised——促进，提升
-access——opportunity to use——可以使用
-exponential leap——rapid increase——指数级增长
-demise——death——死亡
-sagacity——insight——洞察力
-conducive——beneficial——有助于
-defy——refute——反驳
-available——obtainable——可获得的
-supersede——replace——取代
-</code></pre>
+<h4 id="toc_3">2.分类树的生成</h4>
 
-<pre><code>permeate——渗透
-unprecedented——空前的
-dissemination——传播
-notorious——声名狼藉
-herald——预示，标志
-authoritarian——独裁主义
-premium——高端，优质
-underscore——强调
-downside——缺点，负面
-authoritative——权威性 
-</code></pre>
+<p>分类树用基尼指数选择最有特征，同时决定该特征的最优二值切分点。</p>
 
 			</div>
 
@@ -223,10 +134,8 @@ authoritative——权威性
 		<footer>
 		 <p class="meta">
 
-			<strong>Categories:</strong>&nbsp; 
-			<span class="categories">
 			
-			    <a class='category' href='English%20Study.html'>English Study</a>&nbsp;
+			<span class="categories">
 			 
 			</span>
 		    </p>
@@ -244,9 +153,9 @@ authoritative——权威性
 
 	    <p class="meta">
 	    
-	        <a class="basic-alignment left" href="14839432188714.html" 
-	        title="Previous Post: 英语考试翻译总结">&laquo; 英语考试翻译总结</a>
 	    
+	        <a class="basic-alignment right" href="14898241272608.html" 
+	        title="Next Post: 决策树的生成">决策树的生成 &raquo;</a>
 	    
 	    </p>
 	  </footer>
