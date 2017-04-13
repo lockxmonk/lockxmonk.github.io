@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <title>
     
-  感知机算法的收敛性 - LZH007
+  模型学习的最优化算法（接上一文） - LZH007
   
 
   </title>
@@ -81,55 +81,40 @@ $(document).ready(function(event) {
 <div>
 	<article class="hentry" role="article">
 	<header>
-			  	<h1 class="entry-title">感知机算法的收敛性</h1>
-				<p class="meta"><time datetime="2017-03-10T08:52:39+08:00" pubdate data-updated="true">2017/3/10</time></p>
+			  	<h1 class="entry-title">模型学习的最优化算法（接上一文）</h1>
+				<p class="meta"><time datetime="2017-04-13T08:48:59+08:00" pubdate data-updated="true">2017/4/13</time></p>
 			 </header>
 		  	<div class="entry-content">
-			  	<ul>
-<li>
-<a href="#toc_0">感知机学习算法的对偶形式</a>
-</li>
-</ul>
+			  	<p>逻辑斯谛回归模型、最大嫡模型学习归结为以似然函数为目标函数的最优化问题，通常通过迭代算法求解.从最优化的观点看，这时的目标函数具有很好的性质.<font color=red>它是光滑的凸函数，因此多种最优化的方法都适用，保证能找到全局最优解.</font>常用的方法有改进的迭代尺度法、梯度下降法、牛顿法或拟牛顿法.牛顿法或拟牛顿法一般收敛速度更快.</p>
 
+<p>这次主要学习基于改进的迭代尺度法与拟牛顿法的最大熵模型学习算法。（还有梯度下降法，这次不过多学习）</p>
 
-<p>算法的收敛性主要是证明，对于线性可分数据集感知机学习算法原始形式收敛，即经过有限 次迭代可以得到一个将训练数据集完全正确划分的分离超平面及感知机模型。</p>
+<h2 id="toc_0">改进的迭代尺度法</h2>
 
-<p>将偏置b并入权重向量w，记做\(\hat{w} = (w^T,b)^T\)同样也将输入向量加以扩充，加进常数1，记做：\(\hat{x} = (x^T,1)^T\),这样，\(\hat{x}\in R^{n+1}\)，\(\hat{w}\in R^{n+1}\) 显然，\(\hat{w}*\hat{x}=w*x+b\)。<br/>
-<img src="media/14891071598954/14891094628135.jpg" alt=""/></p>
+<p>改进的迭代尺度法（improved iterative scaling，IIS)是一种最大熵模型学习的最优化算法.</p>
 
-<p>上述定理主要说明误分类的次数<code>k</code>是有上界的，算法具有收敛性。</p>
+<p>已知最大熵模型为：<br/>
+<img src="media/14920445399813/14920447866369.jpg" alt=""/><br/>
+对数似然函数为：<br/>
+<img src="media/14920445399813/14920449425684.jpg" alt=""/><br/>
+目标是通过极大似然估计学习模型参数，即求对数似然函数的极大值\(\hat{w}\)</p>
 
-<p>下面是该定理的证明过程：<br/>
-<img src="media/14891071598954/14891100385544.jpg" alt=""/><br/>
-<img src="media/14891071598954/14891100637572.jpg" alt=""/><br/>
-<img src="media/14891071598954/14891105642852.jpg" alt=""/><br/>
-<img src="media/14891071598954/14891105771778.jpg" alt=""/></p>
+<p>改进的迭代尺度算法（iis）的想法是：假设最大熵模型当前的参数向量是\(w=(w_1,w_2,...,w_n)^T\),我们 希望找到一个新的参数向量\(w+\delta = (w_1+\delta_1,w_2+\delta_2,....,w_n+\delta_n)^T\)，使得模型的对数似然函数值增大.如果能有这样一种参数向量更新的方法\(\tau:w \rightarrow w+\delta\),那么就 可以重复使用这一方法，直至找到对数似然函数的最大值.</p>
 
-<blockquote>
-<p>所以定理表明，误分类的次数<code>k</code>是有上界的，经过有限次搜索可以找到将训练数据完全正确分开的分离超平面。也就是说，当训练数据集线性可分时，感知机学习算法原始形式迭代是收敛的。但是感知机学习算法存在许多解，这些解既依赖于初值的选择，也依赖于迭代过程中误分类点的选择顺序。为了得到唯一的超平面，需要对分离超平面增加约束条件。这就是线性支持向量机的想法。当训练集线性不可分时，感知机学习算法不收敛，迭代结果 就会发生震荡。</p>
-</blockquote>
+<p>对于给定的经验分布\(\tilde P(x,y)\),模型参数从\(w到w+\delta\)，对数似然函数的改变量是：<br/>
+<img src="media/14920445399813/14920457816508.jpg" alt=""/></p>
 
-<h2 id="toc_0">感知机学习算法的对偶形式</h2>
+<p>如果能找到适当的\(\delta使下届A(\delta | w)\)提高，那么对数似然函数也会提高。然而，函数\(A(\delta | w)\)中的\(\delta\)是一个向量，含有多个变量，不容易同时优化，IIS试图以此只优化其中一个变量\(\delta_i\)，而固定其他变量\(\delta_j,i  \neq j\).</p>
 
-<p>现在考虑感知机学习算法的对偶形式。感知机学习算法的原始形式和对偶形式与支持向量机学习算法的原始形式和对偶形式相对应。</p>
+<p>为达到这一目的，IIS进一步降低下界\(A(\delta | w)\),具体的，IIS引进一个量\(f^{\#}(x,y)\):<br/>
+<img src="media/14920445399813/14920481227290.jpg" alt=""/><br/>
+因为\(f_i\)是一个二值函数，故\(f^{\#}(x,y)\)表示所有特征在（x，y）出现的次数，这样，\(A(\delta | w)\)可以改写为：</p>
 
-<p>对偶形式的基本思想是，将w和b表示为实例\(x_{i}\)和标记\(y_i\)的线性组合形式，通过求解其系数而求得w和b。不失一般性,在算法2.1中可假设初始值\(w_0,b_0\)均为0，对误分类点\((x_i,y_i)\)通过：<br/>
-\(w\leftarrow w+ηy_ix_i\)<br/>
-\(b\leftarrow b+ηy_i\)<br/>
-逐步修改w，b，设修改n次，则w,b关于\((x_i,y_i)\)的增量分别是\(α_ix_iy_i和α_iy_i\)这里\(α=n_iη\)。这样，从学习过程不难看出，最后学习到的w,b可以分别表示为：<img src="media/14891071598954/14891128523346.jpg" alt=""/><br/>
-这里，\(\alpha_i\geq0,i=1,2,...N,当\eta=1时\)，表示第i个实例点由于误分而进行更新的次数。实例点更新次数越多，意味着它距离分离超平面越近，也就越难正确分类。换句话说，这样的实例对学习结果影响最大。</p>
+<p><img src="media/14920445399813/14920483320007.jpg" alt=""/></p>
 
-<p>下面对照原始形式来叙述感知机学习算法的对偶形式。<br/>
-<img src="media/14891071598954/14891134427824.jpg" alt=""/><br/>
-<img src="media/14891071598954/14891134670827.jpg" alt=""/><br/>
-对偶形式中训练实例仅以内积的形式出现。为了方便，可以预先将训练集中实例间的内积计算出来并以矩阵的形式存储，这个矩阵就是所谓的Gram矩阵。<br/>
-\(G = [x_i * x_j]_{N*N}\)</p>
-
-<p>同样根据该算法有例题如下：<br/>
-<img src="media/14891071598954/14891137936409.jpg" alt=""/><br/>
-<img src="media/14891071598954/14891170220533.jpg" alt=""/><br/>
-对照例2.1，结果一致，迭代步骤也是互相对应的。<br/>
-与原始形式一样，感知机学习算法的对偶形式迭代是收敛的。</p>
+<p><strong>下面给出IIS算法：</strong><br/>
+<img src="media/14920445399813/14920487060621.jpg" alt=""/><br/>
+<img src="media/14920445399813/14920491294532.jpg" alt=""/></p>
 
 			</div>
 
@@ -138,10 +123,8 @@ $(document).ready(function(event) {
 		<footer>
 		 <p class="meta">
 
-			<strong>Categories:</strong>&nbsp; 
-			<span class="categories">
 			
-			    <a class='category' href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a>&nbsp;
+			<span class="categories">
 			 
 			</span>
 		    </p>
@@ -159,12 +142,9 @@ $(document).ready(function(event) {
 
 	    <p class="meta">
 	    
-	        <a class="basic-alignment left" href="14891936534415.html" 
-	        title="Previous Post: k近邻法">&laquo; k近邻法</a>
 	    
-	    
-	        <a class="basic-alignment right" href="14890437581129.html" 
-	        title="Next Post: 感知机">感知机 &raquo;</a>
+	        <a class="basic-alignment right" href="14917858710123.html" 
+	        title="Next Post: logistic regression(逻辑斯蒂回归)">logistic regression(逻辑斯蒂回归) &raquo;</a>
 	    
 	    </p>
 	  </footer>
