@@ -4,7 +4,7 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-04-13T11:33:16+08:00</updated>
+  <updated>2017-04-15T11:13:32+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
@@ -12,6 +12,218 @@
   </author>
   <generator uri="http://www.coderforart.com/">CoderForArt</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[使用模块]]></title>
+    <link href="https://lockxmonk.github.io/14922429288489.html"/>
+    <updated>2017-04-15T15:55:28+08:00</updated>
+    <id>https://lockxmonk.github.io/14922429288489.html</id>
+    <content type="html"><![CDATA[
+<h2 id="toc_0">模块介绍</h2>
+
+<p>python中的文件关联模块和java语言类似，一个<code>abc.py</code>的文件就是一个名字叫abc的模块，一个<code>xyz.py</code>的文件就是一个名字叫xyz的模块。</p>
+
+<p>现在，假设我们的<code>abc和xyz</code>这两个模块名字与其他模块冲突了，于是我们可以通过包来组织模块，避免冲突。方法是选择一个顶层包名，比如<code>mycompany</code>，按照如下目录存放：<br/>
+<img src="media/14922429288489/14922430767659.jpg" alt=""/></p>
+
+<p>引入了包以后，只要顶层的包名不与别人冲突，那所有模块都不会与别人冲突。现在，abc.py模块的名字就变成了mycompany.abc，类似的，xyz.py的模块名变成了mycompany.xyz。</p>
+
+<p>请注意，每一个包目录下面都会有一个<code>__init__.py</code>的文件，这个文件是必须存在的，否则，Python就把这个目录当成普通目录，而不是一个包。<code>__init__.py</code>可以是空文件，也可以有Python代码，因为<code>__init__.py</code>本身就是一个模块，而它的模块名就是<code>mycompany</code>。</p>
+
+<p>类似的，可以有多级目录，组成多级层次的包结构，比如如下的目录结构：<br/>
+<img src="media/14922429288489/14922431763848.jpg" alt=""/></p>
+
+<h2 id="toc_1">模块的使用</h2>
+
+<p>Python本身就内置了很多非常有用的模块，只要安装完毕，这些模块就可以立刻使用。</p>
+
+<p>我们以内建的<code>sys</code>模块为例，编写一个<code>hello</code>的模块：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+
+&#39;a test module&#39;
+
+_author_ = &#39;梁中豪&#39;
+
+import sys
+
+def test():
+    args = sys.argv
+    if len(args)==1:
+        print &#39;Hello ,world!&#39;
+    elif len(args)==2:
+        print &#39;Hello ,%s!&#39; % args[1]
+    else:
+        print &#39;Too many arguments!&#39;
+if __name__==&#39;_main_&#39;:
+    test()
+</code></pre>
+
+<p>第1行注释表示.py文件本身使用标准UTF-8编码；</p>
+
+<p>第4行是一个字符串，表示模块的文档注释，任何模块代码的第一个字符串都被视为模块的文档注释；</p>
+
+<p>第6行使用__author__变量把作者写进去，这样当你公开源代码后别人就可以瞻仰你的大名；</p>
+
+<p>以上就是Python模块的标准文件模板，当然也可以全部删掉不写，但是，按标准办事肯定没错。</p>
+
+<p>后面开始就是真正的代码部分。</p>
+
+<p>使用sys模块的第一步，就是导入该模块：<code>import sys</code><br/>
+导入<code>sys</code>模块后，我们就有了变量<code>sys</code>指向该模块，利用<code>sys</code>这个变量，就可以访问<code>sys</code>模块的所有功能。</p>
+
+<p><code>sys</code>模块有一个<code>argv</code>变量，用<code>list</code>存储了命令行的所有参数。<code>argv</code>至少有一个元素，因为第一个参数永远是该.py文件的名称，例如：</p>
+
+<p>运行<code>python hello.py</code>获得的<code>sys.argv</code>就是<code>[&#39;hello.py&#39;]</code>；</p>
+
+<p>运行<code>python hello.py Michael</code>获得的<code>sys.argv</code>就是<code>[&#39;hello.py&#39;, &#39;Michael]</code>。</p>
+
+<p>最后，注意到这两行代码：</p>
+
+<pre><code class="language-py">if __name__==&#39;__main__&#39;:
+    test()
+</code></pre>
+
+<p>当我们在命令行运行<code>hello</code>模块文件时，Python解释器把一个特殊变量<code>__name__置为__main__</code>，而如果在其他地方导入该<code>hello</code>模块时，if判断将失败，因此，这种if测试可以让一个模块通过命令行运行时执行一些额外的代码，最常见的就是运行测试。</p>
+
+<p>可以启动python交互环境，导入hello模块来测试下：</p>
+
+<pre><code>$ python
+Python 2.7.5 (default, Aug 25 2013, 00:04:04) 
+[GCC 4.2.1 Compatible Apple LLVM 5.0 (clang-500.0.68)] on darwin
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; import hello
+&gt;&gt;&gt; hello.test()
+Hello, world!
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[偏函数]]></title>
+    <link href="https://lockxmonk.github.io/14922391300067.html"/>
+    <updated>2017-04-15T14:52:10+08:00</updated>
+    <id>https://lockxmonk.github.io/14922391300067.html</id>
+    <content type="html"><![CDATA[
+<p>Python的<code>functools</code>模块提供了很多有用的功能，其中一个就是偏函数（Partial function）。要注意，这里的偏函数和数学意义上的偏函数不一样。</p>
+
+<p><code>int()</code>函数可以把字符串转换为整数<br/>
+例如：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+num = int(&#39;12345&#39;)
+num1 = int(&#39;12345&#39;, base=8)
+num2 = int(&#39;12345&#39;, 16)
+print num, num1, num2
+</code></pre>
+
+<p><img src="media/14922391300067/14922396420577.jpg" alt=""/></p>
+
+<p>其中<code>base</code>参数可以指定转换的进制</p>
+
+<p>假设要转换大量的二进制字符串，每次都传入<code>int(x, base=2)</code>非常麻烦，于是，我们想到，可以定义一个<code>int2()</code>的函数，默认把<code>base=2</code>传进去：</p>
+
+<pre><code class="language-py">def int2(x,base=2):
+    return int(x,base)
+
+</code></pre>
+
+<p>这样我们转换二进制就很方便，<code>functools.partial</code>就是帮助我们创建一个偏函数的，不需要我们自己定义<code>int2()</code>，可以直接使用下面的代码创建一个新的函数<code>int2</code>：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import functools
+int2 = functools.partial(int, base=8)
+num = int2(&#39;10000&#39;)
+num1 = int2(&#39;10000&#39;,base=2)
+print num,num1  
+</code></pre>
+
+<p><img src="media/14922391300067/14922410514665.jpg" alt=""/></p>
+
+<p>创建偏函数时，实际上可以接收函数对象、<code>*args和**kw</code>这3个参数:</p>
+
+<pre><code class="language-py">int2 = functools.partial(int, base=2)
+#相当于下面
+kw = { base: 2 }
+int(&#39;10010&#39;, **kw)
+
+max2 = functools.partial(max, 10)
+#相当于下面，实际上会把10作为*args的一部分自动加到左边
+args = (10, 5, 6, 7)
+max(*args)
+</code></pre>
+
+<blockquote>
+<p>总结：当函数的参数个数太多，需要简化时，使用<code>functools.partial</code>可以创建一个新的函数，这个新函数可以固定住原函数的部分参数，从而在调用时更简单。</p>
+</blockquote>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[支持向量机]]></title>
+    <link href="https://lockxmonk.github.io/14921577512970.html"/>
+    <updated>2017-04-14T16:15:51+08:00</updated>
+    <id>https://lockxmonk.github.io/14921577512970.html</id>
+    <content type="html"><![CDATA[
+<p>支持向量机（support vector machines，SVM)是一种二类分类模型。它的基本模型是定义在特征空间上的间隔最大的线性分类器，间隔最大使它有别于感知机；支持向量机还包括核技巧，这使它成为实质上的非线性分类器.<font color=red>支持向量机的学习策略就是间隔最大化，可形式化为一个求解凸二次规划（convex quadratic programming)的问题，也等价于正则化的合页损失函数的最小化问题.</font>支持向量机的<strong><em>学习算法是求解凸二次规划的最优化算法</em></strong>.</p>
+
+<p>支持向量机学习方法包含构建由简至繁的模型：线性可分支持向量机（linear support vector machine in linearly separable ease)、线性支持向量机（linear support vector machine)及非线性支持向量机（ncm-linear support vector machine).简单模型是复杂模型的基础，也是复杂模型的特殊情况.当训练数据线性可分时，通过硬间隔最大化（hard margin maximization)，学习一个线性的分类器，<strong><em>即线性可分支持向量机，又称为硬间隔支持向量机</em></strong>；当训练数据近似线性可分时，通过软间隔最大化（soft margin maximization)，也学习一个线性的分类器，<strong><em>即线性支持向量机，又称为软间隔支持向量机</em></strong>；<strong><em>当训练数据线性不可分时，通过使用核技巧 (kernel trick)及软间隔最大化，学习非线性支持向量机</em></strong>.</p>
+
+<p>当输入空间为欧氏空间或离散集合、特征空间为希尔伯特空间时，<strong><em>核函数(kernel fimcticm)表示将输入从输入空间映射到特征空间得到的特征向量之间的内积.</em></strong>通过使用核函数可以学习非线性支持向量机，等价于隐式地在高维的特征空间中学习线性支持向量机.这样的方法称为核技巧.<strong>核方法（kernel method)是比支持向量机更为一般的机器学习方法</strong>.</p>
+
+<p>Cortes与Vapnik提出线性支持向量机，Boser、Guyon与Vapnik又引入核技巧，提出非线性支持向量机.</p>
+
+<p>本次一次学习3类支持向量机、核函数以及一种跨苏学习方法——序列最小最优化算法(SMO)</p>
+
+<h2 id="toc_0">线性可支持性良机与硬间隔最大化</h2>
+
+<h3 id="toc_1">线性可支持向量机</h3>
+
+<p>考虑一个二类分类问题，假设输入空间与特征空间为两个不同的空间.输入空间为欧氏空间或离散集合，特征空间为欧氏空间或希尔伯特空间.线性可分支持向量机、线性支持向量机假设这两个空间的元素一一对应，并将输入空间中的输入映射为特征空间中的特征向量.非线性支持向量机利用一个从输入空间到特征空间的非线性映射将输入映射为特征向量.所以，输入都由输入空间转换到特征空间，支持向量机的学习是在特征空间进行的.</p>
+
+<p>假设给定一个特征空间上的训练数据集：<br/>
+\(T={\{x_1,y_1},(x_2,y_2),...(x_N,y_N)\}\)<br/>
+,其中，\(x_i \in \mathcal{X}=R^n,y_i \in \mathcal{Y}={\{+1,-1}\},i=1,2,...N,x_i\)为第i个特征向量，也成为实例，\(y_i为x_i的类标记，当y_i=+1时，称x_i为正例；当y_i=-1时，称x_i为负例,(x_i,y_i)成为样本点，再假设训练数据集是线性可分的\)</p>
+
+<p>学习的目标是在特征空间中找到一个分离超平面，能将实例分到不同的类，分离超平面对应于方程\(w*x+b=0\),它由法向量w和截距b决定，可用(w,b)来表示.分离超平面将特征空间划分为两部分，一部分是正类，一部分是负类.法向量指向的一侧为正类，另一侧为负类.</p>
+
+<p>一般地，当训练数据集线性可分时，存在无穷个分离超平面可将两类数据正确分开.感知机利用误分类最小的策略，求得分离超平面，不过这时的解有无穷多个,<font color=red>线性可分支持向量机利用间隔最大化求最优分离超平面，这时，解是唯一的.</font></p>
+
+<p><strong><em>下面给出线性可支持向量机的定义</em></strong>：<br/>
+<img src="media/14921577512970/14922239390041.jpg" alt=""/></p>
+
+<p>考虑如图7.1所示的二维特征空间中的分类问题.图中“。”表示正例，“x” 表示负例。训练数据集线性可分，这时有许多直线能将两类数据正确划分.线性可分支持向量机对应着将两类数据正确划分并且间隔最大的直线，如图7.1所示.<br/>
+<img src="media/14921577512970/14922248209178.jpg" alt=""/></p>
+
+<p>间隔最大及相应的约束最优化问题将在下面叙述.这里先介绍<font color=red>函数间隔和几何间隔的概念</font>.</p>
+
+<h3 id="toc_2">函数间隔和几何间隔</h3>
+
+<p>在图7.1中，有A,B,C三个点，表示3个实例，均在分离超平面的正类一侧，预测它们的类.点A距分离超平面较远，若预测该点为正类，就比较确信预测是正确的；点C距分离超平面较近，若预测该点为正类就不那么确信；点B介于点A与C之间，预测其为正类的确信度也在A与C之间.</p>
+
+<p>一般来说，一个点距离分离超平面的远近可以表示分类预测的确信程度.在超平面w*x+ b = 0确定的情况下，|w*x+b丨能够相对地表示点x距离超平面的远近.而w*+b的符号与类标记y的符号是否一致能够表示分类是否正确.所以可用量y(w*x+b)来表示分类的正确性及确信度，这就是函数间隔（fimctional margin)的概念.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[拟牛顿法（最大熵模型的学习）]]></title>
+    <link href="https://lockxmonk.github.io/14921570225186.html"/>
+    <updated>2017-04-14T16:03:42+08:00</updated>
+    <id>https://lockxmonk.github.io/14921570225186.html</id>
+    <content type="html"><![CDATA[
+<p>最大熵模型学习还可以应用牛顿法或者拟牛顿法。<br/>
+对于最大熵模型而言，<br/>
+<img src="media/14921570225186/14921574471740.jpg" alt=""/><br/>
+<img src="media/14921570225186/14921574611293.jpg" alt=""/><br/>
+相应的拟牛顿法BFGS算法如下。<br/>
+<img src="media/14921570225186/14921576945600.jpg" alt=""/></p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[装饰器]]></title>
@@ -1282,419 +1494,6 @@ sess.run(init)
 
 <p>这个结果好吗？嗯，并不太好。事实上，这个结果是很差的。这是因为我们仅仅使用了一个非常简单的模型。不过，做一些小小的改进，我们就可以得到97％的正确率。最好的模型甚至可以获得超过99.7％的准确率！（想了解更多信息，可以看看这个关于各种模型的<a href="http://rodrigob.github.io/are_we_there_yet/build/classification_datasets_results.html">性能对比列表</a>。)<br/>
 附件：<a href="media/14878150947508/input_data.py">input_data</a></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第5条：用枚举表示状态、选项、状态码]]></title>
-    <link href="https://lockxmonk.github.io/14843637552703.html"/>
-    <updated>2017-01-14T11:15:55+08:00</updated>
-    <id>https://lockxmonk.github.io/14843637552703.html</id>
-    <content type="html"><![CDATA[
-<p>枚举只是一种常量命名的方式。某个对象所经历的各种状态就可以定义为一个简单的枚举集。比如说，用枚举表示socket connection的状态：</p>
-
-<pre><code>enum  EOCConnectionState{
-    EOCConnectionStateDisconnected，
-    EOCConnectionStateConnecting，
-    EOCConnectionStateConnected，
-}
-</code></pre>
-
-<p>这样便于理解，其中编译器会自动为每一个枚举分配一个独有的编号，从0开始，实现枚举所用的数据类型取决于编译器，不过其二进制位（bit)的个数必须能完全表示下枚举编号才行。在前例中，由于最大编号是2,所以使用1个字节的char类型即可。</p>
-
-<p>然而定义枚举变量的方式却不太简洁，要依如下语法编写：</p>
-
-<pre><code>enum EOCConnectionState state = EOCConnectionStateDisconnected;
-</code></pre>
-
-<p>若是每次不用敲入enum而只需写EOCConnectionState就好了。要想这样做，则需使用typedef关键字重新定义枚举类型：</p>
-
-<pre><code>enum EOCConnectionState {
-EOCConnectionStateDisconnected,
-EOCConnectionStateConnecting,
-EOCConnectionStateConnected,
-)；
-typedef enum EOCConnectionState EOCConnectionState;
-</code></pre>
-
-<p>现在可以用简写的EOCConnectionState来代替完整的enum EOCConnectionState 了：</p>
-
-<pre><code>EOCConnectionState state = EOCConnectionStateDisconnected;
-
-</code></pre>
-
-<p>在C++之后可以指定用何种“底层数据类型”来保存枚举类型的变量。这样做的好处是可以向前声明枚举变量了。若不指定底层数据类型，则无法向前声明枚举类型，因为编译器不清楚底层数据类型的大小,所以在用到此枚举类型时，也就不知道究竞该给变量分配多少空间。</p>
-
-<p>指定底层数据类型所用的语法是：</p>
-
-<pre><code>enum EOCConnectionStateConnectionState : NSInteger { /*...*/ };
-
-</code></pre>
-
-<p>还可以不使用编译器所分配的序号，而是手工指定某个枚举成员所对应的值。语法如下：</p>
-
-<pre><code>enum EOCConnectionStateConnectionState {
-EOCConnectionStateDisconnected = 1,
-EOCConnectionStateConnectingf
-EOCConnectionStateConnected
-}；
-</code></pre>
-
-<p>上述代码把EOCConnectionStateDisconnected的值设为1,而不使用编译器所分配的0，如前所述，接下来几个枚举的值都会在上一个的基础上递增1。比如说，EOCConnectionState-Connected的值就是3。</p>
-
-<p>还有一种情况应该使用枚举类型，那就是定义选项的时候。若这些选项可以彼此组合，则更应如此。只要枚举定义得对，各选项之间就可通过“按位或操作符”（bitwise OR operator)来组合。例如，iOSUI框架中有如下枚举类型，用来表示某个视图应该如何在水平或垂直方向上调整大小：</p>
-
-<pre><code>enum UIViewAutoresizing {
-   UIViewAutoresizingNone                  =0，
-   UIViewAutoresizingFlexibleLeftMargin    =1&lt;&lt;0,
-   UIViewAutoresizingFlexibleWidth         =1&lt;&lt;1,
-   UIViewAutoresizingFlexibleRightMargin   =1&lt;&lt;2,
-   □IViewAutoresizingFlexibleTopMargin     =1&lt;&lt;3,
-   UIViewAutoresizingFlexibleHeight        =1&lt;&lt;4,
-   UIViewAutoresizingFlexibleBottomMargin  =1&lt;&lt;5,
-}
-</code></pre>
-
-<p>每个选项均可以启用或者禁用，，使用上述方式来定义枚举值即可保证这一点，因为在每个枚举值所对应的二进制表示中，只有1个二进制位的值是1。用“按位或操作符”可组合多个选项，例如：<br/>
-<code>UIViewAutoResizingFlexibleWidth|UIViewAutoresizingFlexibleHeight<br/>
-</code><br/>
-下图列出了每个枚举成员的二进制值，并演示了刚才那两个枚举组合之后的值。用“按位或操作符”(bitwise OR operator)即可判断出是否已启用某个选项：</p>
-
-<pre><code>enum UIViewAutoresizing resizing =
-UIViewAutoresizingFlexiblGWidth | UIViewAutoresizingFlexibleHeight;
-
-if (resizing &amp; UIViewAutoresizingFlexibleWidth) {
-// UIViewAutoresizingFlexibleWidth is set
-}
-</code></pre>
-
-<p><img src="media/14843637552703/14845291672791.jpg" alt=""/><br/>
-　　上图中每个枚举值的二进制表示，以及对其中两个枚举值执行按位或操作之后的二进制值。</p>
-
-<p>　　在Foundation框架中也定义了一些辅助的宏，用这些宏来定义枚举类型时，也可以指定用于保存枚举值的底层数据类型。这些宏具备向后兼容（backward compatibility)能力，<font color=red><strong>如果目标平台的编译器支持新标准，那就使用新式语法，</strong></font>否则改用旧式语法。这些宏是用#define预处理指令来定义的，其中一个用于定义像EOCConnectionState这种普通的枚举类型，另一个用于定义像UIViewAutoresizing这种包含一系列选项的枚举类型，其用法如下：</p>
-
-<pre><code>typedef NS^ENUM(NSUInteger, EOCConnectionState) {
-    EOCConnectionStateDisconnected,
-    EOCConnectionStateConnecting,
-    EOCConnectionStateConnected,
-}；
-typedef NS_OPTIONS(NSUInteger, EOCPermittedDirection) {
-    EOCPermittedDirectionUp =   1   &lt;&lt;  0,
-    EOCPermittedDirectionDown   =   1   &lt;&lt;  1,
-    EOCPermittedDirectionLeft   =   1   &lt;&lt;  2,
-    EOCPermittedDirectionRight  =   1   &lt;&lt;  3,
-</code></pre>
-
-<p>最后还有一种枚举的用法，就是在switch语句里，有时可以这样定义：</p>
-
-<pre><code>typedef NS_ENUM(NSUInteger, EOCConnectionState) {
-    EOCConnectionStateDisconnected,
-    EOCConnectionStateConnecting,
-    EOCConnectionStateConnected,
-}；
-switch (currentState) {
-    EOCConnectionStateDisconnected:
-        // Handle disconnected state
-        break;
-    EOCConnectionStateConnecting:
-        // Handle connecting state
-        break;
-    EOCConnectionStateConnected:
-        // Handle connected state
-        break;
-}
-</code></pre>
-
-<p>我们总习惯在switch语句中加上default分支。然而，若是用枚举来定义状态机（state machine),则最好不要有default分支,因为不加default的话，如果稍后又加了一种状态，那么编译器就会发出警告信息，提示新加入的状态并未在switch分支中处理。假如写上了 default分支，那么它就会处理这个新状态，从而导致编译器不发瞀告信息，不利于程序的编写。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>应该用枚举来表示状态机的状态、传递给方法的选项以及状态码等值，给这些值起个易懂的名字。</li>
-<li>如果把传递给某个方法的选项表示为枚举类型，而多个选项又可同时使用，那么就将各选项值定义为2的幂，以便通过按位或操作将其组合起来。</li>
-<li>用NS_ENUM与NS_OPTIONS宏来定义枚举类型，并指明其底层数据类型。这样做可以确保枚举是用开发者所选的底层数据类型实现出来的，而不会采用编泽器所选的类型。</li>
-<li>在处理枚举类型的switch语句中不要实现default分支。这样的话，加入新枚举之后，编译器就会提示开发者：switch语句并未处理所有枚举，有利于定位TODO方位。</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第4条：多用类型常量，少用#define预处理指令]]></title>
-    <link href="https://lockxmonk.github.io/14842935189837.html"/>
-    <updated>2017-01-13T15:45:18+08:00</updated>
-    <id>https://lockxmonk.github.io/14842935189837.html</id>
-    <content type="html"><![CDATA[
-<p>对于一般掌握了Objective-C和C语言的人，也许会用这种方法来定义一个类似动画的时间常量：</p>
-
-<pre><code>#define ANIMATION_DURATION = 0.3
-</code></pre>
-
-<p>上述预处理指令会吧源代码中的ANIMATION_DURATION字符串替换为0.3。<br/>
-在OC中我们常常用更好的方法来定义，比方说，下面这行代码定义了一个类型为NSTimeInterval的常量：</p>
-
-<pre><code>static const NSTimeInterval KAnimationDuration = 0.3；
-</code></pre>
-
-<p>要注意的是此方式定义的常量包含类型信息，其好处就是清楚的描述了常量的含义，有助于编写开发文档。</p>
-
-<p>还要注意常量的名称。常用的命名法是：若常量局限于某“编译单元（也就是实现文件之内，implementation）”,一般在前面加上字母k；若长亮在类之外课件，则通常以类名为前缀。之后将会更加详细的说命名问题。</p>
-
-<p>定义常量的位置很重要。我们总是很喜欢在头文件里声明预处理命令，这样是很糟糕的。例如，ANIMATION_DURATION这个常量名就不应该在头文件中，因为所有引入了这份头文件的其他文件中都会出现这个名字。static const定义的常量也不应该出现在头文件中。因为OC没有命名空间这一概念，所以那样做就等于声明了一个名字叫kANIMATIONDURATION的全局变量。此名称应该加上前缀，以表明其所属的类，例如可以改为EOCViewClassAnimationDuration。</p>
-
-<p>如果不打算去公开某个常量，则应该将其定义为在使用该常量的实现文件中，比如说，要开发一个使用UIKit框架的iOS应用程序，其中UIView子类中含有表示动画播放时间的常量，那么可以这样写：</p>
-
-<pre><code>//EOCAnimatedView.h
-#import &lt;UIKit/UIKit.h&gt;
-@interface EOCAnimatedView:UIView
--(void)animate;
-@end
-
-//EOCAnimatedView.m
-#import EOCAnimatedView.h
-
-static const NSTimeInterval kAnimationDuration  = 0.3;
-
-@implemention EOCAnimatedView
-
--(void)animate{
-  [UIViewanimateWithDuration:KAnimationDuration 
-                    animate:^(){
-                        //Perform animations
-                    }]
-}
-</code></pre>
-
-<p>变量一定要同时用static和const来声明。如果试图修改const所声明的变量，编译器会报错。static修饰符意味着该变量仅仅在定义此变量的便一单元中可见。编译器每收到一个编译单元，就会输出一份目标文件。在OC中“编译单元”一词 通常指每个类的实现文件（以.m为后缀名）其作用域仅限于由EOCAnimatedView.m所生成的目标文件中。假如声明此变量时不加static,则编译器会为它创建一个“外部符号”(external symbol)。此时,若是另一个编译单元中也声 明了同名变量，那么编译器就拋出一条错误消息。</p>
-
-<p>有时候需要对外公开某个常量，想要接受常值变量的注册者不需要知道实际的字符串值，只需要以常值变量来注册自己想要接受的通知就可以</p>
-
-<p>此类常量应该放在“全局变量表”中，以便可以在定义该常量的编译单元之外使用。因此可以这样的来定义：</p>
-
-<pre><code>// in the header file
-extern NSString *const EOCStringConstant;
-
-//in the implementation
-NSString *const EOCStringConstant = @&quot;value&quot;;
-</code></pre>
-
-<p>这个常量在头文件中声明，在实现文件里面定义。这类常量只能定义一次。</p>
-
-<p>这样定义常量要优于#define，一旦在.m文件中定义好全局常量后，可以随处使用。</p>
-
-<p><strong>要点</strong><br/>
-* 不要用预处理指令定义常量，这样定义出来的常量不包含类型信息，编译器只是会在编译之前执行查找与替换操作。即使有人重新定义了常量值，编译器也不会产生警告信息。<br/>
-* 在实现文件中使用static const来定义“只在编译单元内可见的常量”。由于此类常量不在全局符号表中，所以无需为其名称添加前缀。<br/>
-* 再投问价那种使用extern来声明全局变量，并且在相关的实现文件中定义其值。这种常量要出现在全局符号表中，所以其名称应该加以区隔，通常用与之有关的类名做前缀。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第一章 熟悉Objective-C]]></title>
-    <link href="https://lockxmonk.github.io/14842776114163.html"/>
-    <updated>2017-01-13T11:20:11+08:00</updated>
-    <id>https://lockxmonk.github.io/14842776114163.html</id>
-    <content type="html"><![CDATA[
-<h2 id="toc_0">第1条：了解Objective—C语言的起源</h2>
-
-<p>OC语言使用“消息结构”（messageing structure）而不是函数调用。OC是由Smalltalk演化而来。主要区别为：</p>
-
-<pre><code>//Messaging(OC)  
-
-Object *obj = [Object new];  
-[obj performWith:par1 and:par2];
-   
-//Function(C++)  
-
-Object *obj = new Object;    
-obj-&gt;perform(par1,par2);   
-</code></pre>
-
-<p>关键区别在于：使用消息结构的语言，其运行时所应执行的代码由运行环境所决定；而使用函数调用的语言，则由编译器决定。</p>
-
-<p>所有的OC语言的对象都应该如下声明：</p>
-
-<pre><code>NSString *str = @“The string”；
-</code></pre>
-
-<p>因为所有的对象所占内存总是分配在“堆空间”中，而绝不会分配在“栈”（stack）上。一般变量分配在栈上。<img src="media/14841901813337/QQ20170112-0@2x.png" alt="QQ20170112-0@2x"/></p>
-
-<p>要点：<br/>
-* OC为C语言添加了面向对象的特性，是它的超集。OC使用动态绑定的消息结构，也就是说，在运行时才会检查对象类型。接收一条消息之后，究竟应该执行何种代码，由运行时环境决定而不是编译器。<br/>
-* 理解C语言的核心概念有助于写好OC程序。尤其是要掌握内存模型和指针。</p>
-
-<h2 id="toc_1">第2条：在类的头文件中尽量少引入其它头文件</h2>
-
-<p>例如：<br/>
-创建一个EOCPerson的类，其中属性中包含有EOCEmployer的类。</p>
-
-<pre><code>//EOCPerson.h
-#import&lt;Foundation/Foundation.h&gt;
-@interface EOCPerson:NSObject
-@property (nonatomic,copy) NSString *firstname;
-@property (nonatomic,copy) NSString *lastname;
-@property (nonatomic,strong) EOCEmployer *employer;
-@end
-</code></pre>
-
-<p>这样做常见的方法是在头部引入：</p>
-
-<pre><code>#import “EOCEmployer.h”
-</code></pre>
-
-<p>但是我们在这里不需要知道EOCEmployer这个类的全部细节，只需要知道这里有一个类就好。所以有一个方法为：</p>
-
-<pre><code>@class EOCEmployer；
-</code></pre>
-
-<p>这叫做前向声明。现在EOCPerson的头文件变为：</p>
-
-<pre><code>//EOCPerson.h
-#import&lt;Foundation/Foundation.h&gt;
-
-@class EOCEmployer；
-
-@interface EOCPerson:NSObject
-@property (nonatomic,copy) NSString *firstname;
-@property (nonatomic,copy) NSString *lastname;
-@property (nonatomic,strong) EOCEmployer *employer;
-@end
-</code></pre>
-
-<p>但是EOCPerson类的实现文件则需要引入EOCEmployer类的头文件，因为知道其中所有的接口细节。于是，实现文件就是：</p>
-
-<pre><code>//EOCPerson.m
-#import &quot;EOCPerson.h&quot;;
-#import &quot;EOCEmployer.h&quot;
-
-@implementation EOCPerson
-//.....
-@end
-</code></pre>
-
-<p>要点：<br/>
-* 除非的确有必要，否则不要引入头文件。一般来说，应该在某个类的头文件中使用向前声明来提及别的类，并在实现文件中引入那些类的头文件。这样做可以尽量降低类之间的耦合。<br/>
-* 有时无法使用向前声明，比如要声明某各类所遵循的一项协议，这种情况下，尽量吧“该类所遵循的协议“的这条声明移至”class-continuation分类“中。如果不行的话，就把协议单独放在一个头文件中，然后将其引入。</p>
-
-<h2 id="toc_2">第3条：多用字面量语法，少用与之等价的方法</h2>
-
-<p>从OC1.0开始，有一种非常简单的方式创建NSString对象。这就是”字符串字面量（string literal）“，其语法如下所示：</p>
-
-<pre><code>NSString *string = @”effective OC 2.0“；
-</code></pre>
-
-<p>如果不用这种语法的话，就要以常见的alloc以及init方法来分配和初始化对象了。</p>
-
-<h3 id="toc_3">字面数值</h3>
-
-<p>有时候需要把整数、浮点数、布尔值封入OC对象中。这种情况下可以使用NSNumber类，该类可以处理多种类型的数值。最原始的创建方法为：</p>
-
-<pre><code>NSNumber *someNumber = [NSNumber numberWithInt:1];
-</code></pre>
-
-<p>上面这行代码创建了一个数字，将它的值设为了1.然而使用字面量能令代码更为整洁：</p>
-
-<pre><code>NSNumber *someNumber = @1；
-</code></pre>
-
-<h3 id="toc_4">字面量数组</h3>
-
-<p>创建方法为：</p>
-
-<pre><code>NSArray *animals =@[@&quot;cat&quot;,@&quot;dog&quot;,@&quot;mouse&quot;,@&quot;badger&quot;];
-</code></pre>
-
-<p>使用字面量获取则为：</p>
-
-<pre><code>NSString *dog = animals[1];
-</code></pre>
-
-<h3 id="toc_5">字面量字典</h3>
-
-<p>”字典“（dictionary）是一种映射性数据结构，可以向其中添加键值对。与数组一样字面量编写方式为：</p>
-
-<pre><code>NSDictionary *personData = @{@&quot;firstName&quot;:@&quot;Matt&quot;,
-                            @&quot;lastName&quot;:@&quot;Galloway&quot;,
-                            @&quot;age&quot;:@28}
-
-</code></pre>
-
-<h3 id="toc_6">可变数组与字典</h3>
-
-<p>通过取下标操作，可以访问数组中某个下标或者字典中某个键所对应的元素。如果数组与字典对象试课变得（mutable），那么也能通过下标修改其中的元素值。例如：</p>
-
-<pre><code>mutableArray[1] = @&quot;dog&quot;;
-mutableDictionary[@&quot;lastName&quot;] = @&quot;Galloway&quot;; 
-</code></pre>
-
-<h2 id="toc_7">要点</h2>
-
-<ul>
-<li>应该使用字面量语法来创建字符串、数值、数组、字典。与创建此类对象的常规方法相比，这么做更加简明扼要。</li>
-<li>应该通过下标来操作和访问数组小标或者字典中的键所对应的元素。</li>
-<li>用字面量语法创建数组或者字典时，若值中有nil，则会抛出异常。因此，务必保证值中不包含有nil。</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[英语考试翻译总结]]></title>
-    <link href="https://lockxmonk.github.io/14839432188714.html"/>
-    <updated>2017-01-09T14:26:58+08:00</updated>
-    <id>https://lockxmonk.github.io/14839432188714.html</id>
-    <content type="html"><![CDATA[
-<h2 id="toc_0">第一章</h2>
-
-<ol>
-<li>我曾经有一个老师当他的学生们搞砸了一些事情的时候叫他们傻瓜。这个老师是我们的管弦乐指挥，他是一个暴躁的乌克兰移民者，名字叫Jerry Kupchynsky，并且当某人走音时他将会停下整个组的人去怒吼。</li>
-<li>传统的智慧认为老师应该帮助学生去梳理知识，而不是将知识灌输进他们的脑袋中。作业和合作学习是备受欢迎的；像讲课和背诵这些传统的方法被认为是“钻杀”被人反对，被贬为是一种一定正确的方法去吸干年轻人的创造力和积极性。</li>
-<li>长期受人怀疑的死记硬背现在被认为是那些来自印度的家庭的孩子在全国拼字比赛中大胜同龄人的一个原因。</li>
-<li>当然，令人担心的是失败会使孩子们的心灵受到损伤，削弱他们的自尊。</li>
-<li>研究人员认为最有效的老师通常带领学生们通过合作学习和讨论来获取知识。</li>
-</ol>
-
-<h2 id="toc_1">第二章</h2>
-
-<ol>
-<li>一个新的研究消除了某些美国人所珍视的观点，即音乐可以提升孩子的智商。</li>
-<li>对于这一点，只有几十个研究曾经测试过传闻中的学习音乐给智力带来的好处，并且只有五个使用了随机控制研究，即研究被设计去分离那些因果效应。</li>
-<li>尽管只持续了15分钟，但是这种效应被吹嘘成为可持续促进孩子的智商提高，乔治亚州州长 Zell Mille 曾经在1988年保证每年有超过100万美元资金去为州里的每一个孩子提供一张古典音乐唱片。</li>
-<li>我们教孩子们莎士比亚不是因为我们认为它将帮助孩子们在SAT中做的更好，我们做这些是因为我们相信莎士比亚是重要的。</li>
-<li>总管人类历史和古代，音乐已经成为了人类动物的一种不可或缺的品质，世界上每一种文化的一个共性——包括儿童音乐。</li>
-</ol>
-
-<h2 id="toc_2">第三章</h2>
-
-<ol>
-<li>据估计有大约3亿中国人在使用英语读和写，但是没有受到足够的练习，因此加剧了这种经常被嘲笑的中式英语的使用。</li>
-<li>正如罗马将他们的语言在所占领的地域内传播作为一种统治的标记，如今与之等价的是将一种语言作为通用语的标签。</li>
-<li>随着众多有着不同语音和语法结构语言的交互，英语改变成其他语言将产生一些混合语言，这些语言不一定有着“正确”的英语语法，并且会强调本地语言所特有的不同的语音和语调，这些都是不足为奇的。</li>
-<li>中式英语从其他语言中的浮现，并且努力去摆脱中式英语是短期的调整，但是从长远来看，看到混合语言的规范化将不足为奇。</li>
-<li>语言对于文化和历史背景来说是独一无二的，并且保留剩下的世界语言遗产和见证一个新语言的出现，都在扩大语言熔炉的过程中至关重要。</li>
-</ol>
-
-<h2 id="toc_3">第四章</h2>
-
-<ol>
-<li>一部分原因来自于他对于风险与回报的独特视角，这种观点违背了投资人对于短期利益的观点。</li>
-<li>迪士尼的个性中混合了美国小镇居民怀旧的价值观，这种价值观伴随着现代科学和技术将会改变我们生活的信心。</li>
-<li>电影的成功帮助迪士尼促进了建立高端企业文化的原则，这种原则对公司未来的成功起到了重要的作用。</li>
-<li>如果缺少了才华，劳动和员工的奉献，任何一个迪士尼项目都无法落地。</li>
-<li>他知道要令直觉有意义必须要让他被实现，并且需要一系列的严密的分析和实打实的辛勤工作，同时需要围绕在他身边的那些艺术家的真正才华作为支撑。</li>
-</ol>
-
-<h2 id="toc_4">第五章</h2>
-
-<ol>
-<li>3D打印的兴起——通过互联网下载设计模型并且小规模的生产——可能预示着新一代生产者的出现，他们将“为发达国家带来空前多样化的产品”。</li>
-<li>在未来，新的技术和信息系统将简化日常杂务，每天的任务：想象一下一个可以自动摆放食物的冰箱，一个可以清洁，甩干，和折叠的洗衣机，在这之前可以根据一周的天气，运用算法推荐最合适的着装。</li>
-<li>对于全球来说，互联网的出现所带来的最大的影响是权利从政府和机构到个人的权利再分配。</li>
-<li>不像传统的媒体，他们的记者和编辑将精确性背景放到首位，基于互联网的媒体允许任何上网的人去发布不准确的消息，诽谤，或者是大范围的宣传——通常作者没有承担什么后果。</li>
-<li>因为技术渗透到了所有的这些领域，下一代的专家，记者和政策制定者将需要去掌握每一个领域，从而去理解技术作为一个当今世界改变的催化剂，是怎样快速的改变着工业，政府还有处于政治学核心的古老动态关系，即国家与个人的关系。</li>
-</ol>
 
 ]]></content>
   </entry>

@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <title>
     
-  Sorted（排序） - LZH007
+  偏函数 - LZH007
   
 
   </title>
@@ -81,36 +81,61 @@ $(document).ready(function(event) {
 <div>
 	<article class="hentry" role="article">
 	<header>
-			  	<h1 class="entry-title">Sorted（排序）</h1>
-				<p class="meta"><time datetime="2017-04-13T11:25:37+08:00" pubdate data-updated="true">2017/4/13</time></p>
+			  	<h1 class="entry-title">偏函数</h1>
+				<p class="meta"><time datetime="2017-04-15T14:52:10+08:00" pubdate data-updated="true">2017/4/15</time></p>
 			 </header>
 		  	<div class="entry-content">
-			  	<p><strong>1.用sorted进行排序</strong></p>
+			  	<p>Python的<code>functools</code>模块提供了很多有用的功能，其中一个就是偏函数（Partial function）。要注意，这里的偏函数和数学意义上的偏函数不一样。</p>
+
+<p><code>int()</code>函数可以把字符串转换为整数<br/>
+例如：</p>
 
 <pre><code class="language-py"># -*- coding: utf-8 -*-
-num =[2,5,6,4,3,29,12]
-print sorted(num)
+num = int(&#39;12345&#39;)
+num1 = int(&#39;12345&#39;, base=8)
+num2 = int(&#39;12345&#39;, 16)
+print num, num1, num2
+</code></pre>
+
+<p><img src="media/14922391300067/14922396420577.jpg" alt=""/></p>
+
+<p>其中<code>base</code>参数可以指定转换的进制</p>
+
+<p>假设要转换大量的二进制字符串，每次都传入<code>int(x, base=2)</code>非常麻烦，于是，我们想到，可以定义一个<code>int2()</code>的函数，默认把<code>base=2</code>传进去：</p>
+
+<pre><code class="language-py">def int2(x,base=2):
+    return int(x,base)
 
 </code></pre>
 
-<p><img src="media/14920539372230/14920542668861.jpg" alt=""/></p>
-
-<p><strong>2.默认情况下，对字符串排序，是按照ASCII的大小比较的，由于&#39;Z&#39; &lt; &#39;a&#39;，结果，大写字母Z会排在小写字母a的前面。<br/>
-现在，我们提出排序应该忽略大小写，按照字母序排序。</strong></p>
+<p>这样我们转换二进制就很方便，<code>functools.partial</code>就是帮助我们创建一个偏函数的，不需要我们自己定义<code>int2()</code>，可以直接使用下面的代码创建一个新的函数<code>int2</code>：</p>
 
 <pre><code class="language-py"># -*- coding: utf-8 -*-
-def cmp_ignore_case(s1, s2):
-    u1 = s1.upper()
-    u2 = s2.upper()
-    if u1 &lt; u2:
-        return -1
-    if u1 &gt; u2:
-        return 1
-    return 0
-print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], cmp_ignore_case)
+import functools
+int2 = functools.partial(int, base=8)
+num = int2(&#39;10000&#39;)
+num1 = int2(&#39;10000&#39;,base=2)
+print num,num1  
 </code></pre>
 
-<p><img src="media/14920539372230/14920543761031.jpg" alt=""/></p>
+<p><img src="media/14922391300067/14922410514665.jpg" alt=""/></p>
+
+<p>创建偏函数时，实际上可以接收函数对象、<code>*args和**kw</code>这3个参数:</p>
+
+<pre><code class="language-py">int2 = functools.partial(int, base=2)
+#相当于下面
+kw = { base: 2 }
+int(&#39;10010&#39;, **kw)
+
+max2 = functools.partial(max, 10)
+#相当于下面，实际上会把10作为*args的一部分自动加到左边
+args = (10, 5, 6, 7)
+max(*args)
+</code></pre>
+
+<blockquote>
+<p>总结：当函数的参数个数太多，需要简化时，使用<code>functools.partial</code>可以创建一个新的函数，这个新函数可以固定住原函数的部分参数，从而在调用时更简单。</p>
+</blockquote>
 
 			</div>
 
@@ -140,12 +165,12 @@ print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], 
 
 	    <p class="meta">
 	    
-	        <a class="basic-alignment left" href="14920643245223.html" 
-	        title="Previous Post: 返回函数">&laquo; 返回函数</a>
+	        <a class="basic-alignment left" href="14922429288489.html" 
+	        title="Previous Post: 使用模块">&laquo; 使用模块</a>
 	    
 	    
-	        <a class="basic-alignment right" href="14920527647833.html" 
-	        title="Next Post: Filter">Filter &raquo;</a>
+	        <a class="basic-alignment right" href="14921577512970.html" 
+	        title="Next Post: 支持向量机">支持向量机 &raquo;</a>
 	    
 	    </p>
 	  </footer>

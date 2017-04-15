@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <title>
     
-  Sorted（排序） - LZH007
+  使用模块 - LZH007
   
 
   </title>
@@ -81,36 +81,88 @@ $(document).ready(function(event) {
 <div>
 	<article class="hentry" role="article">
 	<header>
-			  	<h1 class="entry-title">Sorted（排序）</h1>
-				<p class="meta"><time datetime="2017-04-13T11:25:37+08:00" pubdate data-updated="true">2017/4/13</time></p>
+			  	<h1 class="entry-title">使用模块</h1>
+				<p class="meta"><time datetime="2017-04-15T15:55:28+08:00" pubdate data-updated="true">2017/4/15</time></p>
 			 </header>
 		  	<div class="entry-content">
-			  	<p><strong>1.用sorted进行排序</strong></p>
+			  	<h2 id="toc_0">模块介绍</h2>
+
+<p>python中的文件关联模块和java语言类似，一个<code>abc.py</code>的文件就是一个名字叫abc的模块，一个<code>xyz.py</code>的文件就是一个名字叫xyz的模块。</p>
+
+<p>现在，假设我们的<code>abc和xyz</code>这两个模块名字与其他模块冲突了，于是我们可以通过包来组织模块，避免冲突。方法是选择一个顶层包名，比如<code>mycompany</code>，按照如下目录存放：<br/>
+<img src="media/14922429288489/14922430767659.jpg" alt=""/></p>
+
+<p>引入了包以后，只要顶层的包名不与别人冲突，那所有模块都不会与别人冲突。现在，abc.py模块的名字就变成了mycompany.abc，类似的，xyz.py的模块名变成了mycompany.xyz。</p>
+
+<p>请注意，每一个包目录下面都会有一个<code>__init__.py</code>的文件，这个文件是必须存在的，否则，Python就把这个目录当成普通目录，而不是一个包。<code>__init__.py</code>可以是空文件，也可以有Python代码，因为<code>__init__.py</code>本身就是一个模块，而它的模块名就是<code>mycompany</code>。</p>
+
+<p>类似的，可以有多级目录，组成多级层次的包结构，比如如下的目录结构：<br/>
+<img src="media/14922429288489/14922431763848.jpg" alt=""/></p>
+
+<h2 id="toc_1">模块的使用</h2>
+
+<p>Python本身就内置了很多非常有用的模块，只要安装完毕，这些模块就可以立刻使用。</p>
+
+<p>我们以内建的<code>sys</code>模块为例，编写一个<code>hello</code>的模块：</p>
 
 <pre><code class="language-py"># -*- coding: utf-8 -*-
-num =[2,5,6,4,3,29,12]
-print sorted(num)
 
+
+&#39;a test module&#39;
+
+_author_ = &#39;梁中豪&#39;
+
+import sys
+
+def test():
+    args = sys.argv
+    if len(args)==1:
+        print &#39;Hello ,world!&#39;
+    elif len(args)==2:
+        print &#39;Hello ,%s!&#39; % args[1]
+    else:
+        print &#39;Too many arguments!&#39;
+if __name__==&#39;_main_&#39;:
+    test()
 </code></pre>
 
-<p><img src="media/14920539372230/14920542668861.jpg" alt=""/></p>
+<p>第1行注释表示.py文件本身使用标准UTF-8编码；</p>
 
-<p><strong>2.默认情况下，对字符串排序，是按照ASCII的大小比较的，由于&#39;Z&#39; &lt; &#39;a&#39;，结果，大写字母Z会排在小写字母a的前面。<br/>
-现在，我们提出排序应该忽略大小写，按照字母序排序。</strong></p>
+<p>第4行是一个字符串，表示模块的文档注释，任何模块代码的第一个字符串都被视为模块的文档注释；</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def cmp_ignore_case(s1, s2):
-    u1 = s1.upper()
-    u2 = s2.upper()
-    if u1 &lt; u2:
-        return -1
-    if u1 &gt; u2:
-        return 1
-    return 0
-print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], cmp_ignore_case)
+<p>第6行使用__author__变量把作者写进去，这样当你公开源代码后别人就可以瞻仰你的大名；</p>
+
+<p>以上就是Python模块的标准文件模板，当然也可以全部删掉不写，但是，按标准办事肯定没错。</p>
+
+<p>后面开始就是真正的代码部分。</p>
+
+<p>使用sys模块的第一步，就是导入该模块：<code>import sys</code><br/>
+导入<code>sys</code>模块后，我们就有了变量<code>sys</code>指向该模块，利用<code>sys</code>这个变量，就可以访问<code>sys</code>模块的所有功能。</p>
+
+<p><code>sys</code>模块有一个<code>argv</code>变量，用<code>list</code>存储了命令行的所有参数。<code>argv</code>至少有一个元素，因为第一个参数永远是该.py文件的名称，例如：</p>
+
+<p>运行<code>python hello.py</code>获得的<code>sys.argv</code>就是<code>[&#39;hello.py&#39;]</code>；</p>
+
+<p>运行<code>python hello.py Michael</code>获得的<code>sys.argv</code>就是<code>[&#39;hello.py&#39;, &#39;Michael]</code>。</p>
+
+<p>最后，注意到这两行代码：</p>
+
+<pre><code class="language-py">if __name__==&#39;__main__&#39;:
+    test()
 </code></pre>
 
-<p><img src="media/14920539372230/14920543761031.jpg" alt=""/></p>
+<p>当我们在命令行运行<code>hello</code>模块文件时，Python解释器把一个特殊变量<code>__name__置为__main__</code>，而如果在其他地方导入该<code>hello</code>模块时，if判断将失败，因此，这种if测试可以让一个模块通过命令行运行时执行一些额外的代码，最常见的就是运行测试。</p>
+
+<p>可以启动python交互环境，导入hello模块来测试下：</p>
+
+<pre><code>$ python
+Python 2.7.5 (default, Aug 25 2013, 00:04:04) 
+[GCC 4.2.1 Compatible Apple LLVM 5.0 (clang-500.0.68)] on darwin
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; import hello
+&gt;&gt;&gt; hello.test()
+Hello, world!
+</code></pre>
 
 			</div>
 
@@ -140,12 +192,9 @@ print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], 
 
 	    <p class="meta">
 	    
-	        <a class="basic-alignment left" href="14920643245223.html" 
-	        title="Previous Post: 返回函数">&laquo; 返回函数</a>
 	    
-	    
-	        <a class="basic-alignment right" href="14920527647833.html" 
-	        title="Next Post: Filter">Filter &raquo;</a>
+	        <a class="basic-alignment right" href="14922391300067.html" 
+	        title="Next Post: 偏函数">偏函数 &raquo;</a>
 	    
 	    </p>
 	  </footer>

@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <title>
     
-  Sorted（排序） - LZH007
+  拟牛顿法（最大熵模型的学习） - LZH007
   
 
   </title>
@@ -81,36 +81,16 @@ $(document).ready(function(event) {
 <div>
 	<article class="hentry" role="article">
 	<header>
-			  	<h1 class="entry-title">Sorted（排序）</h1>
-				<p class="meta"><time datetime="2017-04-13T11:25:37+08:00" pubdate data-updated="true">2017/4/13</time></p>
+			  	<h1 class="entry-title">拟牛顿法（最大熵模型的学习）</h1>
+				<p class="meta"><time datetime="2017-04-14T16:03:42+08:00" pubdate data-updated="true">2017/4/14</time></p>
 			 </header>
 		  	<div class="entry-content">
-			  	<p><strong>1.用sorted进行排序</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-num =[2,5,6,4,3,29,12]
-print sorted(num)
-
-</code></pre>
-
-<p><img src="media/14920539372230/14920542668861.jpg" alt=""/></p>
-
-<p><strong>2.默认情况下，对字符串排序，是按照ASCII的大小比较的，由于&#39;Z&#39; &lt; &#39;a&#39;，结果，大写字母Z会排在小写字母a的前面。<br/>
-现在，我们提出排序应该忽略大小写，按照字母序排序。</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def cmp_ignore_case(s1, s2):
-    u1 = s1.upper()
-    u2 = s2.upper()
-    if u1 &lt; u2:
-        return -1
-    if u1 &gt; u2:
-        return 1
-    return 0
-print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], cmp_ignore_case)
-</code></pre>
-
-<p><img src="media/14920539372230/14920543761031.jpg" alt=""/></p>
+			  	<p>最大熵模型学习还可以应用牛顿法或者拟牛顿法。<br/>
+对于最大熵模型而言，<br/>
+<img src="media/14921570225186/14921574471740.jpg" alt=""/><br/>
+<img src="media/14921570225186/14921574611293.jpg" alt=""/><br/>
+相应的拟牛顿法BFGS算法如下。<br/>
+<img src="media/14921570225186/14921576945600.jpg" alt=""/></p>
 
 			</div>
 
@@ -122,7 +102,7 @@ print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], 
 			<strong>Categories:</strong>&nbsp; 
 			<span class="categories">
 			
-			    <a class='category' href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a>&nbsp;
+			    <a class='category' href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a>&nbsp;
 			 
 			</span>
 		    </p>
@@ -140,12 +120,12 @@ print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], 
 
 	    <p class="meta">
 	    
-	        <a class="basic-alignment left" href="14920643245223.html" 
-	        title="Previous Post: 返回函数">&laquo; 返回函数</a>
+	        <a class="basic-alignment left" href="14921577512970.html" 
+	        title="Previous Post: 支持向量机">&laquo; 支持向量机</a>
 	    
 	    
-	        <a class="basic-alignment right" href="14920527647833.html" 
-	        title="Next Post: Filter">Filter &raquo;</a>
+	        <a class="basic-alignment right" href="14921324340299.html" 
+	        title="Next Post: 装饰器">装饰器 &raquo;</a>
 	    
 	    </p>
 	  </footer>

@@ -7,7 +7,7 @@
   <meta charset="utf-8">
   <title>
     
-  Sorted（排序） - LZH007
+  Python练习 - LZH007
   
 
   </title>
@@ -78,78 +78,82 @@ $(document).ready(function(event) {
 </nav>
   <div id="main">
     <div id="content"> 
-<div>
-	<article class="hentry" role="article">
-	<header>
-			  	<h1 class="entry-title">Sorted（排序）</h1>
-				<p class="meta"><time datetime="2017-04-13T11:25:37+08:00" pubdate data-updated="true">2017/4/13</time></p>
-			 </header>
-		  	<div class="entry-content">
-			  	<p><strong>1.用sorted进行排序</strong></p>
+<div class="blog-index">
+
+	<article>
+		 <header>
+		  	<h1 class="entry-title"><a href="14920527647833.html">Filter</a></h1>
+			<p class="meta"><time datetime="2017-04-13T11:06:04+08:00" 
+			pubdate data-updated="true">2017/4/13</time></p>
+		 </header>
+	  	<div class="entry-content">
+		  	
+		  	<p><strong>1.请尝试用filter()删除1~100的素数。</strong></p>
 
 <pre><code class="language-py"># -*- coding: utf-8 -*-
-num =[2,5,6,4,3,29,12]
-print sorted(num)
+num = range(1, 101)
 
+def prime_num(s):
+    for x in range(2, s):
+        if (s % x) == 0:
+            return True
+        else:
+            return False
+print filter(prime_num, num)
 </code></pre>
 
-<p><img src="media/14920539372230/14920542668861.jpg" alt=""/></p>
+<p>结果：<br/>
+<img src="media/14920527647833/14920538585519.jpg" alt=""/></p>
 
-<p><strong>2.默认情况下，对字符串排序，是按照ASCII的大小比较的，由于&#39;Z&#39; &lt; &#39;a&#39;，结果，大写字母Z会排在小写字母a的前面。<br/>
-现在，我们提出排序应该忽略大小写，按照字母序排序。</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def cmp_ignore_case(s1, s2):
-    u1 = s1.upper()
-    u2 = s2.upper()
-    if u1 &lt; u2:
-        return -1
-    if u1 &gt; u2:
-        return 1
-    return 0
-print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], cmp_ignore_case)
-</code></pre>
-
-<p><img src="media/14920539372230/14920543761031.jpg" alt=""/></p>
-
-			</div>
-
-		
-	  
-		<footer>
-		 <p class="meta">
-
-			<strong>Categories:</strong>&nbsp; 
-			<span class="categories">
-			
-			    <a class='category' href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a>&nbsp;
-			 
-			</span>
-		    </p>
-		    <p class="meta">
-		      
-		 </p>
-	    
-		<div class="sharing">
-		  
-          
-
-          
 
 		</div>
 
-	    <p class="meta">
-	    
-	        <a class="basic-alignment left" href="14920643245223.html" 
-	        title="Previous Post: 返回函数">&laquo; 返回函数</a>
-	    
-	    
-	        <a class="basic-alignment right" href="14920527647833.html" 
-	        title="Next Post: Filter">Filter &raquo;</a>
-	    
-	    </p>
-	  </footer>
+		
+
 	</article>
+ 
+	<article>
+		 <header>
+		  	<h1 class="entry-title"><a href="14920523812017.html">Map/Reduce</a></h1>
+			<p class="meta"><time datetime="2017-04-13T10:59:41+08:00" 
+			pubdate data-updated="true">2017/4/13</time></p>
+		 </header>
+	  	<div class="entry-content">
+		  	
+		  	<p>1.利用map()函数，把用户输入的不规范的英文名字，变为首字母大写，其他小写的规范名字。输入：[&#39;adam&#39;, &#39;LISA&#39;, &#39;barT&#39;]，输出：[&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]。</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def upper(s):
+    return s.capitalize()
+print(map(upper, [&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]) )
+</code></pre>
+
+<p><img src="media/14920523812017/14920538865556.jpg" alt=""/></p>
+
+<p>2.Python提供的sum()函数可以接受一个list并求和，请编写一个prod()函数，可以接受一个list并利用reduce()求积。</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def prod(x,y):
+    return x*y
+m = [1,2,3,4]
+print (reduce(prod,m))
+</code></pre>
+
+<p><img src="media/14920523812017/14920539075590.jpg" alt=""/></p>
+
+
+		</div>
+
+		
+
+	</article>
+  
+	<div class="pagination">
+	
+<a href="archives.html">Blog Archives</a>
+	 <a class="next" href="Python练习.html">Newer &rarr;</a>  
+	    
+	</div>
 </div>
  <aside class="sidebar"> 
 
