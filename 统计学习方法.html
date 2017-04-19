@@ -1,94 +1,232 @@
-
-<!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
     
   统计学习方法 - LZH007
   
-
   </title>
-  <meta name="author" content="">
-  <meta name="description" content="LZH的技术杂事小博客~">
+ <meta name="description" content="LZH的技术杂事小博客~">
+ <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
 
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
-  <link href="asset/css/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
-  <script src="asset/js/modernizr-2.0.js"></script>
-  <script src="asset/js/jquery.min.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/solarized_light.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+    <script src="asset/highlightjs/highlight.pack.js"></script>
+    <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
 
-  <style type="text/css">
-  .cat-children-p{ padding: 6px 0px;}
-  .hljs{background: none;}
-  </style>
-  <script type="text/javascript">
-  var isAddSildbar = true;
-  </script>
-  <script src="asset/js/octopress.js" type="text/javascript"></script>
-</head>
-<script type="text/javascript">
-//链接新开窗口
-function addBlankTargetForLinks () {
-  $('a[href^="http"]').each(function(){
-      $(this).attr('target', '_blank');
-  });
-}
-$(document).ready(function(event) {
-  addBlankTargetForLinks();
-});
-</script>
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="index.html">LZH007</a></h1>
-  
-    <h2>LZH的技术杂事小博客~</h2>
-  
-</hgroup>
 
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="http://google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:lockxmonk.github.io" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
 
-  <li id=""><a target="self" href="index.html">Home</a></li>
-
-  <li id=""><a target="_self" href="archives.html">Archives</a></li>
-
-</ul>
+<div id="header">
+    <h1><a href="index.html">LZH007</a></h1>
+</div>
 
 </nav>
-  <div id="main">
-    <div id="content"> 
-<div class="blog-index">
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
 
-	<article>
-		 <header>
-		  	<h1 class="entry-title"><a href="14921577512970.html">支持向量机</a></h1>
-			<p class="meta"><time datetime="2017-04-14T16:15:51+08:00" 
-			pubdate data-updated="true">2017/4/14</time></p>
-		 </header>
-	  	<div class="entry-content">
-		  	
-		  	<p>支持向量机（support vector machines，SVM)是一种二类分类模型。它的基本模型是定义在特征空间上的间隔最大的线性分类器，间隔最大使它有别于感知机；支持向量机还包括核技巧，这使它成为实质上的非线性分类器.<font color=red>支持向量机的学习策略就是间隔最大化，可形式化为一个求解凸二次规划（convex quadratic programming)的问题，也等价于正则化的合页损失函数的最小化问题.</font>支持向量机的<strong><em>学习算法是求解凸二次规划的最优化算法</em></strong>.</p>
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+      <li><a href="index.html">Home</a></li>
+      
+        <li class="divider"></li>
+        <li><label>Effective OC2.0</label></li>
+
+          
+            <li><a title="第5条：用枚举表示状态、选项、状态码" href="14843637552703.html">第5条：用枚举表示状态、选项、状态码</a></li>
+          
+            <li><a title="第4条：多用类型常量，少用#define预处理指令" href="14842935189837.html">第4条：多用类型常量，少用#define预处理指令</a></li>
+          
+            <li><a title="第一章 熟悉Objective-C" href="14842776114163.html">第一章 熟悉Objective-C</a></li>
+          
+
+      
+        <li class="divider"></li>
+        <li><label>English Study</label></li>
+
+          
+            <li><a title="英语考试翻译总结" href="14839432188714.html">英语考试翻译总结</a></li>
+          
+            <li><a title="英语考试词汇部分总结" href="14837695242474.html">英语考试词汇部分总结</a></li>
+          
+
+      
+        <li class="divider"></li>
+        <li><label>深度学习</label></li>
+
+          
+            <li><a title="MNIST机器学习入门" href="14878150947508.html">MNIST机器学习入门</a></li>
+          
+
+      
+        <li class="divider"></li>
+        <li><label>统计学习方法</label></li>
+
+          
+            <li><a title="支持向量机" href="14921577512970.html">支持向量机</a></li>
+          
+            <li><a title="拟牛顿法（最大熵模型的学习）" href="14921570225186.html">拟牛顿法（最大熵模型的学习）</a></li>
+          
+            <li><a title="模型学习的最优化算法（接上一文）" href="14920445399813.html">模型学习的最优化算法（接上一文）</a></li>
+          
+            <li><a title="logistic regression(逻辑斯蒂回归)" href="14917858710123.html">logistic regression(逻辑斯蒂回归)</a></li>
+          
+            <li><a title="决策树生成--CART算法" href="14908575557810.html">决策树生成--CART算法</a></li>
+          
+            <li><a title="决策树的生成" href="14898241272608.html">决策树的生成</a></li>
+          
+            <li><a title="决策树" href="14897993109270.html">决策树</a></li>
+          
+            <li><a title="朴素贝叶斯法" href="14893694433396.html">朴素贝叶斯法</a></li>
+          
+            <li><a title="k近邻法" href="14891936534415.html">k近邻法</a></li>
+          
+            <li><a title="感知机算法的收敛性" href="14891071598954.html">感知机算法的收敛性</a></li>
+          
+            <li><a title="感知机" href="14890437581129.html">感知机</a></li>
+          
+
+      
+        <li class="divider"></li>
+        <li><label>Python练习</label></li>
+
+          
+            <li><a title="" href="14925924499918.html"></a></li>
+          
+            <li><a title="使用模块" href="14922429288489.html">使用模块</a></li>
+          
+            <li><a title="偏函数" href="14922391300067.html">偏函数</a></li>
+          
+            <li><a title="装饰器" href="14921324340299.html">装饰器</a></li>
+          
+            <li><a title="匿名函数" href="14921312042142.html">匿名函数</a></li>
+          
+            <li><a title="返回函数" href="14920643245223.html">返回函数</a></li>
+          
+            <li><a title="Sorted（排序）" href="14920539372230.html">Sorted（排序）</a></li>
+          
+            <li><a title="Filter" href="14920527647833.html">Filter</a></li>
+          
+            <li><a title="Map/Reduce" href="14920523812017.html">Map/Reduce</a></li>
+          
+
+      
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+        <section id="main-content" role="main" class="scroll-container">
+
+          <div class="row">
+            <div class="large-3 medium-3 columns">
+              <div class="hide-for-small">
+                <div class="sidebar">
+                <nav>
+                  <ul id="side-nav" class="side-nav">
+
+                    
+                      <li class="side-title"><span>Effective OC2.0</span></li>
+                        
+                          <li><a title="第5条：用枚举表示状态、选项、状态码" href="14843637552703.html">第5条：用枚举表示状态、选项、状态码</a></li>
+                        
+                          <li><a title="第4条：多用类型常量，少用#define预处理指令" href="14842935189837.html">第4条：多用类型常量，少用#define预处理指令</a></li>
+                        
+                          <li><a title="第一章 熟悉Objective-C" href="14842776114163.html">第一章 熟悉Objective-C</a></li>
+                        
+
+                    
+                      <li class="side-title"><span>English Study</span></li>
+                        
+                          <li><a title="英语考试翻译总结" href="14839432188714.html">英语考试翻译总结</a></li>
+                        
+                          <li><a title="英语考试词汇部分总结" href="14837695242474.html">英语考试词汇部分总结</a></li>
+                        
+
+                    
+                      <li class="side-title"><span>深度学习</span></li>
+                        
+                          <li><a title="MNIST机器学习入门" href="14878150947508.html">MNIST机器学习入门</a></li>
+                        
+
+                    
+                      <li class="side-title"><span>统计学习方法</span></li>
+                        
+                          <li><a title="支持向量机" href="14921577512970.html">支持向量机</a></li>
+                        
+                          <li><a title="拟牛顿法（最大熵模型的学习）" href="14921570225186.html">拟牛顿法（最大熵模型的学习）</a></li>
+                        
+                          <li><a title="模型学习的最优化算法（接上一文）" href="14920445399813.html">模型学习的最优化算法（接上一文）</a></li>
+                        
+                          <li><a title="logistic regression(逻辑斯蒂回归)" href="14917858710123.html">logistic regression(逻辑斯蒂回归)</a></li>
+                        
+                          <li><a title="决策树生成--CART算法" href="14908575557810.html">决策树生成--CART算法</a></li>
+                        
+                          <li><a title="决策树的生成" href="14898241272608.html">决策树的生成</a></li>
+                        
+                          <li><a title="决策树" href="14897993109270.html">决策树</a></li>
+                        
+                          <li><a title="朴素贝叶斯法" href="14893694433396.html">朴素贝叶斯法</a></li>
+                        
+                          <li><a title="k近邻法" href="14891936534415.html">k近邻法</a></li>
+                        
+                          <li><a title="感知机算法的收敛性" href="14891071598954.html">感知机算法的收敛性</a></li>
+                        
+                          <li><a title="感知机" href="14890437581129.html">感知机</a></li>
+                        
+
+                    
+                      <li class="side-title"><span>Python练习</span></li>
+                        
+                          <li><a title="" href="14925924499918.html"></a></li>
+                        
+                          <li><a title="使用模块" href="14922429288489.html">使用模块</a></li>
+                        
+                          <li><a title="偏函数" href="14922391300067.html">偏函数</a></li>
+                        
+                          <li><a title="装饰器" href="14921324340299.html">装饰器</a></li>
+                        
+                          <li><a title="匿名函数" href="14921312042142.html">匿名函数</a></li>
+                        
+                          <li><a title="返回函数" href="14920643245223.html">返回函数</a></li>
+                        
+                          <li><a title="Sorted（排序）" href="14920539372230.html">Sorted（排序）</a></li>
+                        
+                          <li><a title="Filter" href="14920527647833.html">Filter</a></li>
+                        
+                          <li><a title="Map/Reduce" href="14920523812017.html">Map/Reduce</a></li>
+                        
+
+                    
+                  </ul>
+                </nav>
+                </div>
+              </div>
+            </div>
+            <div class="large-9 medium-9 columns">
+
+ 
+
+
+	
+		<div class="markdown-body">
+		<h1>支持向量机</h1>
+
+		<p>支持向量机（support vector machines，SVM)是一种二类分类模型。它的基本模型是定义在特征空间上的间隔最大的线性分类器，间隔最大使它有别于感知机；支持向量机还包括核技巧，这使它成为实质上的非线性分类器.<font color=red>支持向量机的学习策略就是间隔最大化，可形式化为一个求解凸二次规划（convex quadratic programming)的问题，也等价于正则化的合页损失函数的最小化问题.</font>支持向量机的<strong><em>学习算法是求解凸二次规划的最优化算法</em></strong>.</p>
 
 <p>支持向量机学习方法包含构建由简至繁的模型：线性可分支持向量机（linear support vector machine in linearly separable ease)、线性支持向量机（linear support vector machine)及非线性支持向量机（ncm-linear support vector machine).简单模型是复杂模型的基础，也是复杂模型的特殊情况.当训练数据线性可分时，通过硬间隔最大化（hard margin maximization)，学习一个线性的分类器，<strong><em>即线性可分支持向量机，又称为硬间隔支持向量机</em></strong>；当训练数据近似线性可分时，通过软间隔最大化（soft margin maximization)，也学习一个线性的分类器，<strong><em>即线性支持向量机，又称为软间隔支持向量机</em></strong>；<strong><em>当训练数据线性不可分时，通过使用核技巧 (kernel trick)及软间隔最大化，学习非线性支持向量机</em></strong>.</p>
 
@@ -126,491 +264,143 @@ $(document).ready(function(event) {
 
 <p>一般来说，一个点距离分离超平面的远近可以表示分类预测的确信程度.在超平面w*x+ b = 0确定的情况下，|w*x+b丨能够相对地表示点x距离超平面的远近.而w*+b的符号与类标记y的符号是否一致能够表示分类是否正确.所以可用量y(w*x+b)来表示分类的正确性及确信度，这就是函数间隔（fimctional margin)的概念.</p>
 
+<p><strong>下面给出函数间隔的定义：</strong></p>
 
-		</div>
+<p><img src="media/14921577512970/14925656291102.jpg" alt=""/></p>
 
-		
+<p>函数间隔可以表示分类预测的正确性及确信度.<strong><em>但是选择分离超平面时，只有函数间隔还不够.因为只要成比例地改变w和例如将它们改为2w和2b,超平面并没有改变，但函数间隔却成为原来的2倍</em></strong>.这一事实启示我们，可以对分离超平面的法向量w加某些约束，如规范化，||w||=1，使得间隔是确定的.这时函数间隔成为几何间隔（geometric margin).</p>
 
-	</article>
- 
-	<article>
-		 <header>
-		  	<h1 class="entry-title"><a href="14921570225186.html">拟牛顿法（最大熵模型的学习）</a></h1>
-			<p class="meta"><time datetime="2017-04-14T16:03:42+08:00" 
-			pubdate data-updated="true">2017/4/14</time></p>
-		 </header>
-	  	<div class="entry-content">
-		  	
-		  	<p>最大熵模型学习还可以应用牛顿法或者拟牛顿法。<br/>
-对于最大熵模型而言，<br/>
-<img src="media/14921570225186/14921574471740.jpg" alt=""/><br/>
-<img src="media/14921570225186/14921574611293.jpg" alt=""/><br/>
-相应的拟牛顿法BFGS算法如下。<br/>
-<img src="media/14921570225186/14921576945600.jpg" alt=""/></p>
+<p>下图给出了超平面（w，b）及其法向量w，点A表示某一实例\(x_i\)，其类标记为\(y_i =+1\)，点A与超平面（w，b）的距离由线段AB给出，记作\(\gamma_i\)。<br/>
+<img src="media/14921577512970/14925666238039.jpg" alt=""/><br/>
+一般的，当样本点\((x_i,y_i)\)被超平面\((w,b)\)正确分类是，点\(x_i\)与超平面\((w,b)\)的距离是：<br/>
+<img src="media/14921577512970/14925667203290.jpg" alt=""/><br/>
+所以：由这一事实导出几何间隔的概念。<br/>
+<img src="media/14921577512970/14925667539444.jpg" alt=""/></p>
 
+<p>下面具体给出几何间隔的定义：<br/>
+<img src="media/14921577512970/14925669395725.jpg" alt=""/></p>
 
-		</div>
+<p>从函数间隔和几何间隔的定义（式(7.3)〜式(7.6))可知，函数间隔和几何间隔有下面的关系：<br/>
+<img src="media/14921577512970/14925676726509.jpg" alt=""/></p>
 
-		
+<p><strong><em>如果||w||=1,那么函数间隔和几何间隔相等.如果超平面参数w和b成比例地改变（超平面没有改变)，函数间隔也按此比例改变，而几何间隔不变.</em></strong></p>
 
-	</article>
- 
-	<article>
-		 <header>
-		  	<h1 class="entry-title"><a href="14920445399813.html">模型学习的最优化算法（接上一文）</a></h1>
-			<p class="meta"><time datetime="2017-04-13T08:48:59+08:00" 
-			pubdate data-updated="true">2017/4/13</time></p>
-		 </header>
-	  	<div class="entry-content">
-		  	
-		  	<p>逻辑斯谛回归模型、最大嫡模型学习归结为以似然函数为目标函数的最优化问题，通常通过迭代算法求解.从最优化的观点看，这时的目标函数具有很好的性质.<font color=red>它是光滑的凸函数，因此多种最优化的方法都适用，保证能找到全局最优解.</font>常用的方法有改进的迭代尺度法、梯度下降法、牛顿法或拟牛顿法.牛顿法或拟牛顿法一般收敛速度更快.</p>
+<h2 id="toc_3">间隔最大化</h2>
 
-<p>这次主要学习基于改进的迭代尺度法与拟牛顿法的最大熵模型学习算法。（还有梯度下降法，这次不过多学习）</p>
+<p>支持向量机学习的基本想法是求解能够正确划分训练数据集并且<strong><em>几何间隔</em></strong>最大的分离超平面.对线性可分的训练数据集而言，线性可分分离超平面有无穷多个（等价于感知机)，<strong><em>但是几何间隔最大的分离超平面是唯一的</em></strong>.这里的间隔最大化又称为硬间隔最大化（与将要讨论的训练数据集近似线性可分时的软间隔最大化相对应).</p>
 
-<h2 id="toc_0">改进的迭代尺度法</h2>
+<p><font color=red>间隔最大化的直观解释是：对训练数据集找到几何间隔最大的超平面意味着以充分大的确信度对训练数据进行分类.也就是说，不仅将正负实例点分开，而且对最难分的实例点（离超平面最近的点）也有足够大的确信度将它们分开.这样的超平面应该对未知的新实例有很好的分类预测能力.</font></p>
 
-<p>改进的迭代尺度法（improved iterative scaling，IIS)是一种最大熵模型学习的最优化算法.</p>
+<h4 id="toc_4">1. 最大间隔分离超平面</h4>
 
-<p>已知最大熵模型为：<br/>
-<img src="media/14920445399813/14920447866369.jpg" alt=""/><br/>
-对数似然函数为：<br/>
-<img src="media/14920445399813/14920449425684.jpg" alt=""/><br/>
-目标是通过极大似然估计学习模型参数，即求对数似然函数的极大值\(\hat{w}\)</p>
+<p>下面考虑如何求得一个几何间隔最大的分离超平面，即最大间隔分离超平面.具体地，这个问题可以表示为下面的约束最优化问题：<br/>
+<img src="media/14921577512970/14925687970547.jpg" alt=""/><br/>
+即我们希望最大化超平面(w,b)关于训练数据集的几何间隔\(\gamma\),约束条件表示的是超平面(w, b)关于每个训练样本点的几何间隔至少是\(\gamma\).</p>
 
-<p>改进的迭代尺度算法（iis）的想法是：假设最大熵模型当前的参数向量是\(w=(w_1,w_2,...,w_n)^T\),我们 希望找到一个新的参数向量\(w+\delta = (w_1+\delta_1,w_2+\delta_2,....,w_n+\delta_n)^T\)，使得模型的对数似然函数值增大.如果能有这样一种参数向量更新的方法\(\tau:w \rightarrow w+\delta\),那么就 可以重复使用这一方法，直至找到对数似然函数的最大值.</p>
+<p>考虑几何间隔和函数间隔的关系式(7.8),可将这个问题改写为:<br/>
+<img src="media/14921577512970/14925690130129.jpg" alt=""/><br/>
+这是一个凸二次规划（convex quadratic programming)问题，凸优化问题是指约束最优化问题。</p>
 
-<p>对于给定的经验分布\(\tilde P(x,y)\),模型参数从\(w到w+\delta\)，对数似然函数的改变量是：<br/>
-<img src="media/14920445399813/14920457816508.jpg" alt=""/></p>
+<p>凸优化问题是指约束最优化问题：<br/>
+    <img src="media/14921577512970/14925706995554.jpg" alt=""/></p>
 
-<p>如果能找到适当的\(\delta使下届A(\delta | w)\)提高，那么对数似然函数也会提高。然而，函数\(A(\delta | w)\)中的\(\delta\)是一个向量，含有多个变量，不容易同时优化，IIS试图以此只优化其中一个变量\(\delta_i\)，而固定其他变量\(\delta_j,i  \neq j\).</p>
+<p>当目标函数f(w)是二次函数且约束函数\(g_i(w)\)是仿射函数时，上述凸最优化问题成为凸二次规划问题。</p>
 
-<p>为达到这一目的，IIS进一步降低下界\(A(\delta | w)\),具体的，IIS引进一个量\(f^{\#}(x,y)\):<br/>
-<img src="media/14920445399813/14920481227290.jpg" alt=""/><br/>
-因为\(f_i\)是一个二值函数，故\(f^{\#}(x,y)\)表示所有特征在（x，y）出现的次数，这样，\(A(\delta | w)\)可以改写为：</p>
+<blockquote>
+<p>仿射函数即由1阶多项式构成的函数，一般形式为 f(x)=Ax+b，这里A是一个 m×k 矩阵，x是一个k向量,b是一个m向量，实际上反映了一种从 k维到m维的空间映射关系。</p>
+</blockquote>
 
-<p><img src="media/14920445399813/14920483320007.jpg" alt=""/></p>
+<p>如果求出了约束最优化问题(7.13)〜(7.14)的解\(w^*,b^*\)，那么就可以得到最大间隔分离超平面\(w^*·x + b = 0\)及分类决策函数\(f(x)=sign(w^*+b^*)\),即线性可分支持向量机模型.</p>
 
-<p><strong>下面给出IIS算法：</strong><br/>
-<img src="media/14920445399813/14920487060621.jpg" alt=""/><br/>
-<img src="media/14920445399813/14920491294532.jpg" alt=""/></p>
+<p>根据上面所得出的结论，就有下面的支持向量机的学习算法————<strong>最大间隔法(maximum margin method )</strong></p>
 
+<p><img src="media/14921577512970/14925717155289.jpg" alt=""/></p>
 
-		</div>
+<h4 id="toc_5">2.最大间隔分离超平面的存在唯一性</h4>
 
-		
+<p>线性可分训练数据集的最大间隔分离超平面是存在且唯一的。</p>
 
-	</article>
- 
-	<article>
-		 <header>
-		  	<h1 class="entry-title"><a href="14917858710123.html">logistic regression(逻辑斯蒂回归)</a></h1>
-			<p class="meta"><time datetime="2017-04-10T08:57:51+08:00" 
-			pubdate data-updated="true">2017/4/10</time></p>
-		 </header>
-	  	<div class="entry-content">
-		  	
-		  	<p>简介：逻辑斯谛回归（logistic regression)是统计学习中的经典分类方法.最大熵是 概率模型学习的一个准则，将其推广到分类问题得到最大熵模型(maximum entropy model).逻辑斯谛回归模型与最大熵模型都属于对数线性模型.</p>
+<p><strong>定理7.1 (最大间隔分离趄平面的存在唯一性）</strong>若训练数据集T线性可分，则可将训练数据集中的样本点完全正确分开的最大间隔分离超平面存在且唯一.</p>
 
-<h2 id="toc_0">逻辑斯蒂回归模型</h2>
+<blockquote>
+<p>这里关于唯一性的证明不在总结。相关资料可以阅读《统计学习方法》p101.</p>
+</blockquote>
 
-<h3 id="toc_1">逻辑斯蒂分布</h3>
+<h4 id="toc_6">3.支持向量和间隔边界</h4>
 
-<p><img src="media/14917858710123/14918919297549.jpg" alt=""/></p>
+<p><font color=red>在线性可分情况下，训练数据集的样本点中与分离超平面距离最近的样本点的实例称为支持向量（support vector).</font>支持向量是使约束条件式(7.14)等号成立的点，即：<br/>
+<img src="media/14921577512970/14925722828338.jpg" alt=""/><br/>
+对\(y_i=+1\)的正例点，支持向量在超平面：<br/>
+<img src="media/14921577512970/14925723574226.jpg" alt=""/></p>
 
-<h3 id="toc_2">二项逻辑斯蒂回归模型</h3>
+<p>对\(y_i=-1\)的负例点，支持向量在超平面：<br/>
+<img src="media/14921577512970/14925723990202.jpg" alt=""/></p>
 
-<p>二项逻辑斯诗回归模型（binomial logistic regression model)是一种分类模型，由条件概率分布\(P(Y|X)\)表示，形式为参数化的逻辑斯谛分布.这里，随机变量X取值为实数，随机变量Y取值为1或0.我们通过监督学习的方法来估计模型参数.</p>
+<p>如下图所示，在\(H_1和H_2上的点就是支持向量\)<br/>
+<img src="media/14921577512970/14925724626444.jpg" alt=""/></p>
 
-<p><img src="media/14917858710123/14918930389977.jpg" alt=""/><br/>
-现在考査逻辑斯谛回归模型的特点.一个事件的几率（odds)是指该事件发生的概率与该事件不发生的概率的比值.如果事件发生的概率是p,那么该亊件的几率是\(\frac{1}{1-p}\) ,该事件的对数几率(log odds)或logit函数是<br/>
-<img src="media/14917858710123/14918936472837.jpg" alt=""/><br/>
-<font color = red>这就是说，在逻辑斯谛回归模型中，输出y = l的对数几率是输入x的线性函数.或者说，输出Y=1的对数几率是由输入x的线性函数表示的模型，即逻辑斯谛回归模型.</font></p>
+<p>注意到\(H_1\)和\(H_2\)平行，并且没有实例点落在它们中间.在\(H_1\)与\(H_2\)之间形成一条长带，分离超平面与它们平行且位于它们中央.长带的宽度，即\(H_1\)与\(H_2\)之间的距离称为间隔（margin).间隔依赖于分离超平面的法向量w，等于\(\frac{2}{||w||}\).<br/>
+\(H_1\)和\(H_2\)称为间隔边界.</p>
 
-<p>换一个角度看，考虑对输入x进行分类的线性函数\(w*x\),其值域为实数域.注意，这里\(x\in R^{n+1},w \in R^{n+1}\).通过逻辑斯谛回归模型定义式(6.5)可以将线性函数\(w*x\)转换为概率：<br/>
-<img src="media/14917858710123/14918951209571.jpg" alt=""/></p>
+<p><font color=red>在决定分离超平面时只有支持向量起作用，而其他实例点并不起作用</font>。如果移动支持向量将改变所求的解；但是如果在间隔边界以外移动其他实例点，<strong>甚至去掉这些点，则解是不会改变的</strong>.<font color=red>由于支持向量在确定分离超平面中起着决定性作用，所以将这种分类模型称为支持向量机</font>.支持向量的个数一般很少，所以支 持向量机由很少的“重要的”训练样本确定.</p>
 
-<p><strong>这时，线性函数的值越接近正无穷，概率值就越接近1；线性函数的值越接近负无穷，概率值就越接近0(如图6.1所示).这样的模型就是逻辑斯谛回归模型.</strong></p>
+<p><strong>下面举例说明：</strong></p>
 
-<h3 id="toc_3">模型参数估计</h3>
-
-<p>逻辑斯谛回归模型学习时，对于给定的训练数据集\(T=\{{(x_1,y_1),(x_2,y_2)...(x_N,y_N)\}}\),其中\(x_i\in R^n,y_i \in \{{0,1\}}\)，<strong>可以应用极大似然估计法估计模型参数，从而得到逻辑斯谛回归模型.</strong><br/>
-<img src="media/14917858710123/14918969386189.jpg" alt=""/></p>
-
-<h3 id="toc_4">多项了逻辑斯蒂回归</h3>
-
-<p>上面介绍的逻辑斯谛回归模型是二项分类模型，用于二类分类.可以将其推广为多项逻辑斯缔回归模型(multi-nominal logistic regression model)，用于多类分类.假设离散型随机变量Y的取值集合是{1,2...K}，那么多项逻辑斯谛回归模型是:<br/>
-<img src="media/14917858710123/14918973306162.jpg" alt=""/><br/>
-二项逻辑斯谛回归的参数估计法也可以推广到多项逻辑斯讳回归.</p>
-
-<h1 id="toc_5">最大熵模型</h1>
-
-<p>最大熵模型（maximum entropy model)由最大熵原理推导实现.这里首先叙述一般的最大熵原理，然后讲解最大熵模型的推导，最后给出最大熵模型学习的形式。</p>
-
-<h2 id="toc_6">最大熵原理</h2>
-
-<p>最大熵原理是概率模型学习的一个准则.<font color=red>最大熵原理认为，学习概率模型时，在所有可能的概率模型（分布）中，熵最大的模型是最好的模型.通常用约束条件来确定概率模型的集合，所以，最大熵原理也可以表述为在满足约束条件的模型集合中选取熵最大的模型.</font></p>
-
-<p>假设离散随机变量X的概率分布是p(X),则其熵是：<br/>
-<img src="media/14917858710123/14919006601164.jpg" alt=""/><br/>
-直观地，<font color=red>最大熵原理认为要选择的概率模型首先必须满足已有的事实，即约束条件.在没有更多信息的情况下，那些不确定的部分都是“等可能的”.最大熵原理通过熵的最大化来表示等可能性.</font>“等可能”不容易操作，而熵则是一个可优化的数值指标.</p>
-
-<p>首先，可以通过一个简单的例子来了解一下最大熵原理.<br/>
-<img src="media/14917858710123/14919019478267.jpg" alt=""/></p>
-
-<p>图6.2提供了用最大熵原理进行概率模型选择的几何解释.概率模型集合P可由欧氏空间中的单纯形(simplex)表示，如左图的三角形(2-单纯形).一个点代表一个模型，整个单纯形代表模型集合.右图上的一条直线对应于一个约束 条件，直线的交集对应于满足所有约束条件的模型集合.一般地，这样的模型仍有无穷多个.学习的目的是在可能的模型集合中选择最优模型，而最大熵原理则给出最优模型选择的一个准则.<br/>
-<img src="media/14917858710123/14919593499530.jpg" alt=""/></p>
-
-<h3 id="toc_7">最大熵模型的定义</h3>
-
-<p>最大熵原理是统计学习的一般原理，将它应用到分类得到最大熵模型. </p>
-
-<p>假设分类模型是一个条件概率分布\(P(Y|X),X \in \mathcal{X} \subseteq R^n\)表示输入，\(Y \in \mathcal{Y}\)表示输出，\(\mathcal{X}\)和\(\mathcal{Y}\)分别是输入和输出的集合.这个模型表示的是对于给定的输入\(\mathcal{X}\)，以条作概率\(P(Y|X)\)输出Y.<br/>
-给定一个训练数据集<br/>
-\(T= {\{(x_1,y_1),(x_2,y_2),...(x_N,y_N)}\}\)<br/>
-学习的目标是用最大熵原理选择最好的分类模型。</p>
-
-<p>首先考虑模型应该满足的条件，给定训练数据集，可以确定联合分布P(X,Y)的经验分布和边缘分布P(X)的经验分布，分别以\(\tilde{P}(X,Y)和\tilde{P}(X)\)表示。这里：<br/>
-<img src="media/14917858710123/14919609290680.jpg" alt=""/><br/>
- 用特征函数\(f(x,y)描述输入x和输出y之间的某一个事实\)。其定义是：<br/>
- <img src="media/14917858710123/14919611561526.jpg" alt=""/><br/>
-特征函数f(x,y)关于经验分布\(\tilde{P}(X,Y)\)的期望值，用\(E_\tilde{P}(f)\)表示：<br/>
-<img src="media/14917858710123/14919613926643.jpg" alt=""/><br/>
-特征函数f(x,y)关于模型P(Y|X)与经验分布\(\tilde{P}(X)\)的期望值，用\(E_{P}(f)\)表示：<br/>
-<img src="media/14917858710123/14919617357953.jpg" alt=""/></p>
-
-<p>最大熵模型的定义为：<br/>
-<img src="media/14917858710123/14919625972087.jpg" alt=""/></p>
-
-<h3 id="toc_8">最大熵模型的学习</h3>
-
-<p>最大熵模型的学习过程就是求解最大熵模型的过程.最大熵模型的学习可以形式化为约束最优化问题.<br/>
-对于给定的训练数据集\(T= {\{(x_1,y_1),(x_2,y_2),...(x_N,y_N)}\}\)以及特征函数\(f_i(x,y),i=1,2,...n\),最大熵模型的学习等价于约束最优化问题：<br/>
-<img src="media/14917858710123/14919630413332.jpg" alt=""/><br/>
-求解约束最优化问题(6.14)〜(6.16)，所得出的解，就是最大熵模型学习的解.下面给出具体推导.<br/>
-这里，将约束最优化的原始问题转换为无约束最优化的对偶问题.通过求解对偶问题求解原始问题.<br/>
-<img src="media/14917858710123/14919633775267.jpg" alt=""/><br/>
-<img src="media/14917858710123/14919633957280.jpg" alt=""/></p>
-
-<p>下面举例来说明最大熵模型的计算：</p>
-
-<p><strong>例：假设随机变量X有5个取值{A,B,C,D,E}，要估计各个值的概率P(A),P(B),P(C),P(D),P(E).</strong></p>
-
-<p><img src="media/14917858710123/14919642672585.jpg" alt=""/><br/>
-<img src="media/14917858710123/14919642856866.jpg" alt=""/><br/>
-<img src="media/14917858710123/14919643007948.jpg" alt=""/></p>
-
-<h3 id="toc_9">极大似然估计</h3>
-
-<p>从以上最大熵模型学习中可以看出，最大熵模型是由式(6.22)、式(6.23)表示的 条件概率分布.下面证明对偶函数的极大化等价于最大嫡模型的极大似然估计.</p>
-
-<p>己知训练数据的经验概率分布\(\tilde{P}(X,Y)\),条件概率分布\(P(Y|X)\)的对数似然 函数表示为:<br/>
-<img src="media/14917858710123/14919659054476.jpg" alt=""/><br/>
-当提哦啊煎概率分布P(y|x)是最大熵模型(6.22)和(6.23)时,对数似然函数\(L_ \tilde{p}(P_w)\)为：<br/>
-<img src="media/14917858710123/14919660761710.jpg" alt=""/><br/>
-比较算式(6.26)和式(6.27),可得：<br/>
-<img src="media/14917858710123/14920442862315.jpg" alt=""/></p>
-
-<p>既然对偶函数\(\psi(w)\)等价于对数似然函数\(L_{\tilde p}(P_w)\) ,于是证明了最大熵模型学习中的对偶函数极大化等价于最大熵模型的极大似然估计这一事实.<br/>
-这样，最大熵模型的学习问题就转换为具体求解对数似然函数极大化或对偶函数极大化的问题.</p>
-
-<p>可以将最大熵模型写成更一般的形式.<br/>
-<img src="media/14917858710123/14920444597468.jpg" alt=""/><br/>
-最大熵模型与逻辑斯谛回归模型有类似的形式，它们又称为对数线性模型(log linear model).模型学习就是在给定的训练数据条件下对模型进行极大似然估计或正则化的极大似然估计.</p>
+<p><img src="media/14921577512970/14925909777337.jpg" alt=""/></p>
 
 
 		</div>
-
-		
-
-	</article>
- 
-	<article>
-		 <header>
-		  	<h1 class="entry-title"><a href="14908575557810.html">决策树生成--CART算法</a></h1>
-			<p class="meta"><time datetime="2017-03-30T15:05:55+08:00" 
-			pubdate data-updated="true">2017/3/30</time></p>
-		 </header>
-	  	<div class="entry-content">
-		  	
-		  	<h2 id="toc_0">CART算法</h2>
-
-<p>分类与回归树(classification and regression tree, CART)模型由 Breiman等人在1984年提出，是应用广泛的决策树学习方法.CART同样由特征选择、树 的生成及剪枝组成，<mark>既可以用于分类也可以用于回归.</mark>以下将用于分类与回归的树统称为决策树.</p>
-
-<p>CART是在给定输入随机变量X的条件下输出随机变量Y的条件概率分布的学习方法.CART假设决策树是二叉树，内部结点特征的取值为“是”和“否”，左分支是取值为“是”的分支，右分支是取值为“否”的分支.这样的决策树等价于递归地二分每个特征，将输入空间即特征空间划分为有限个单元，并在这些单元上确定预测的概率分布，也就是在输入给定的条件下输出的条件概率分布.</p>
-
-<p><strong>CART算法由以下两步组成：</strong></p>
-
-<p>1.决策树生成：基于训练数据集生成决策树，生成的决策树要尽量大：<br/>
-2.决策树剪枝：用验证数据集对己生成的树进行剪枝并选择最优子树，这时用损失函数最小作为剪枝的标准.</p>
-
-<h3 id="toc_1">CART生成</h3>
-
-<p>决策树的生成就是递归地构建二叉决策树的过程.对回归树用平方误差最小化准则，对分类树用基尼指数(Gini index)最小化准则，进行特征选择，生成二叉树.</p>
-
-<h4 id="toc_2">1.回归树的生成</h4>
-
-<p>假设X与Y分别为输入和输出变量，并且Y是连续变量，给定训练数据集:<br/>
-    \(D={(x_1,y_1),(x_2,y_2),...(x_N,y_N)}\)<br/>
-考虑如何生成回归树。</p>
-
-<p>一个回归树对应着输入空间（即特征空间）的一个划分以及在划分的单元上 的输出值.假设己将输入空间划分为M个单元\(R_1,R_2,R_3...R_M\),并且在每个单元\(R_M\)上 有一个固定的输出值\(c_m\)，于是回归树模型可表示为:<br/>
-<img src="media/14908575557810/14909500378632.jpg" alt=""/></p>
-
-<p>当输入空间的划分确定时，可以用平方误差\(\sum_{x_i\in R}(y_i-f(x_i))^2\)来表示回归树对于训练数据的预测误差，用平方误差最小的准则求解每个单元上的最优输出值.易知，单元\(R_m\)上的\(c_m\)的最优值\(\hat c_m\)是\(R_m\)上的所有输入实例\(x_i\)对应的输出\(y_i\)的均值，即:<br/>
-<img src="media/14908575557810/14909504677321.jpg" alt=""/></p>
-
-<p>问题是怎样对输入空间进行划分,这里采用启发式的方法，选择第j个变量\(x^{(j)}\)和它取的值s，作为切分变量（splitting variable)和切分点（splitting point),并定义两个区域：<br/>
-<img src="media/14908575557810/14909505605933.jpg" alt=""/><br/>
-然后寻找最优切分变量j和最优切分点s，最优地，求解：<br/>
-<img src="media/14908575557810/14909506372664.jpg" alt=""/><br/>
-对固定输入变量j可以找到最优切分点s:<br/>
-<img src="media/14908575557810/14909506657025.jpg" alt=""/><br/>
-便利所有输入变量，找到最优的切分变量j，构成一个对\((j,s)\).依此将输入空间划分为两个区域。接着，对每个区域重复上述划分过程，直到满足停止条件为止.这样就生成一棵回归树。这样的回归树通常称为最小二乘回归树(least squares regression tree)，现将算法叙述如下：</p>
-
-<p>最小二乘回归树生成算法：<br/>
-<img src="media/14908575557810/14909510077124.jpg" alt=""/></p>
-
-<h4 id="toc_3">2.分类树的生成</h4>
-
-<p>分类树用基尼指数选择最有特征，同时决定该特征的最优二值切分点。</p>
-
-<p><strong>基尼指数：</strong><br/>
-<img src="media/14908575557810/14913540871077.jpg" alt=""/><br/>
-如果样本集合D根据特征A是否取某一可能值a被分割成\(D_1和D_2\)两部分，即：<br/>
-<img src="media/14908575557810/14913550101283.jpg" alt=""/></p>
-
-<p>基尼指数Gini(D)表示集合D的不确定性，基尼指数Gini(D,A)表示经A=a分割后集合D的不确定性。基尼指数值越大，样本集合的不确定性也就越大，这一点与熵相似。</p>
-
-<p>图5.7显示二类分类问题中基尼指数Gini(p)、熵（单位比特）之半和分类误差率的关系.横坐标表示概率P，纵坐标表示损失.可以看出基尼指数和 熵之半的曲线很接近，都可以近似地代表分类误差率.<br/>
-<img src="media/14908575557810/14913559817897.jpg" alt=""/></p>
-
-<p><strong>CART生成算法：</strong><br/>
-<img src="media/14908575557810/14913560936133.jpg" alt=""/><br/>
-<img src="media/14908575557810/14913561059742.jpg" alt=""/></p>
-
-<p><strong>下面继续用例题来说明该算法：</strong><br/>
-<img src="media/14898241272608/14908402191601.jpg" alt=""/><br/>
-根据上表所给的训练数据集，应用CART算法生成决策树。</p>
-
-<p><img src="media/14908575557810/14913582940784.jpg" alt=""/></p>
-
-<h4 id="toc_4">CART剪枝</h4>
-
-<p>CART剪枝算法从“完全生长”的决策树的底端剪去一些子树，使决策树变小(模型变简单)，从而能够对未知数据有更准确的预测.CART剪枝算法由两步组成：首先从生成算法产生的决策树\(T_0\)底端开始不断剪枝，直到\(T_0\)的根结点，形成一个子树序列\( {T_0,T_1,...,T_n}\);然后通过交叉验证法在独立的验证数据集上对子树序列进行测试，从中选择最优子树.</p>
-
-<p>1.<strong>剪枝</strong>，形成一个子树序列<br/>
-在剪枝过程中，计算子树的损失函数：<br/>
-<img src="media/14908575557810/14913604606599.jpg" alt=""/><br/>
-其中，T为任意子树，C(T)为对训练数据的预测误差(如基尼指数)，丨T丨为子树的叶结点个数，\(α \geq0\)为参数，\(C_{\alpha}(T)\)为参数是\(\alpha\)时的子树T的整体损失.参数\(\alpha\)权衡训练数据的拟合程度与模型的复杂度.</p>
-
-<p>对固定的\(\alpha\), —定存在使损失函数\(C_{\alpha}(T)\)最小的子树，将其表示为\(T_{\alpha}\)。\(T_{\alpha}\)在损失函数\(C_{\alpha}(T)\)最小的意义下是最优的.容易验证这样的最优子树是唯一的.当\(\alpha\)大的时候，最优子树\(T_{\alpha}\)偏小；当\(\alpha\)小的时候，最优子树\(T_{\alpha}\)偏大.极端情况，当\(\alpha\) = 0时，整体树是最优的.当\(\alpha \rightarrow \infty \)时，根结点组成的单结点树是最优的.</p>
-
-<p>Breiman等人证明：可以用递归的方法对树进行剪枝.将\(\alpha\)从小增大，\(0=\alpha_0&lt;\alpha_1&lt;...&lt;\alpha_n&lt;\infty,\)，产生一系列的区间\([\alpha_i,\alpha_{i+1}),i=0,1,...n;\)，剪枝得到的子树 序列对应着区间\(\alpha \in [\alpha_i,\alpha_{i+1}),i=0,1,...n;\)的最优子树序列\( {T_0,T_1,...,T_n}\),序列中的子树是嵌套的.</p>
-
-<p><img src="media/14908575557810/14913621104324.jpg" alt=""/><br/>
-<img src="media/14908575557810/14913625337737.jpg" alt=""/></p>
-
-<p><strong>CART剪枝算法：</strong><br/>
-<img src="media/14908575557810/14913629643758.jpg" alt=""/></p>
-
-
-		</div>
-
-		
-
-	</article>
- 
-	<article>
-		 <header>
-		  	<h1 class="entry-title"><a href="14898241272608.html">决策树的生成</a></h1>
-			<p class="meta"><time datetime="2017-03-18T16:02:07+08:00" 
-			pubdate data-updated="true">2017/3/18</time></p>
-		 </header>
-	  	<div class="entry-content">
-		  	
-		  	<p>这次将学习决策树的生成算法，首先了解ID3的生成算法，然后再学习C4.5的生成算法，这些都是决策树学习的经典算法。</p>
-
-<h2 id="toc_0">ID3算法</h2>
-
-<p>ID3算法的核心是在决策树各个结点上应用信息增益准则选择特征，递归地构建决策树.具体方法是：从根结点（root node)开始，对结点计算所有可能的特征的信息增益，选择信息增益最大的特征作为结点的特征，由该特征的不同取值建立子结点：再对子结点递归地调用以上方法，构建决策树；直到所有特征的 信息增益均很小或没有特征可以选择为止.最后得到一个决策树.ID3相当于用极大似然法进行概率模型的选择.</p>
-
-<p><strong>该算法的具体步骤为：</strong><br/>
-<img src="media/14898241272608/14908400085381.jpg" alt=""/><br/>
-<img src="media/14898241272608/14908400481942.jpg" alt=""/></p>
-
-<p><strong>这里我们继续使用之前用过的表来进行计算：</strong><br/>
-<img src="media/14898241272608/14908402191601.jpg" alt=""/><br/>
-利用ID3算法建立决策树：<br/>
-<img src="media/14898241272608/14908417653584.jpg" alt=""/><br/>
-<mark>但是ID3只有树的生成，容易发生过拟合现象。</mark></p>
-
-<h2 id="toc_1">C4.5d的生成算法</h2>
-
-<p>C4.5算法与ID3算法相似，C4.5算法对ID3算法进行了改进.C4.5在生成的过程中，用<mark>信息增益比</mark>来选择特征(ID3为信息增益).<br/>
-<img src="media/14898241272608/14908421490687.jpg" alt=""/></p>
-
-<h1 id="toc_2">决策树的剪枝</h1>
-
-<p>决策树生成算法递归地产生决策树，直到不能继续下去为止.这样产生的树往往对训练数据的分类很准确，但对未知的测试数据的分类却没有那么准确，即出现过拟合现象.<mark>过拟合的原因在于学习时过多地考虑如何提高对训练数据的正确分类，从而构建出过于复杂的决策树</mark>.解决这个问题的办法是考虑决策树的复 杂度，对已生成的决策树进行简化.</p>
-
-<p>在决策树学习中将已生成的树进行简化的过程称为剪枝（pruning).具体地，剪枝从已生成的树上裁掉一些子树或叶结点，并将其根结点或父结点作为新的叶结点，从而简化分类树模型.</p>
-
-<p>这里学习一种简单的决策树学习的剪枝算法。</p>
-
-<p>决策树的剪枝往往通过极小化决策树整体的损失函数(loss fimction)或代价函数(costfimction)来实现.设树T的叶结点个数为\(|T|\)，t是树T的叶结点，该叶结点有\(N_{t}\)个样本点，其中k类的样本点有\(N_{tk}个，k=1,2,3...,K,H_i(T)\)为叶结点t上的经验熵，\(a\geq0\)为参数，则决策树学习的损失函数可以定义为:<br/>
-<img src="media/14898241272608/14908428498530.jpg" alt=""/><br/>
-式(5.14)中，c(t)表示模型对训练数据的预测误差，即模型与训练数据的拟合程度，|T|表示模型复杂度，参数\(a\geq0\)控制两者之间的影响.较大的\(\alpha\)促使选择较简单的模型(树)，较小的\(\alpha\)促使选择较复杂的模型(树).\(\alpha = 0\)意味着只考虑 模型与训练数据的拟合程度，不考虑模型的复杂度.</p>
-
-<p>剪枝，就是当\(\alpha\)确定时，选择损失函数最小的模型，即损失函数最小的子树.当\(\alpha\)值确定时，子树越大，往往与训练数据的拟合越好，但是模型的复杂度就越高；相反，子树越小，模型的复杂度就越低，但是往往与训练数据的拟合不好.损失函数正好表示了对两者的平衡.</p>
-
-<p>可以看出，决策树生成只考虑了通过提高信息增益（或信息增益比）对训练数据进行更好的拟合.而决策树剪枝通过优化损失函数还考虑了减小模型复杂度，决策树生成学习局部的模型，而决策树剪枝学习整体的模型.</p>
-
-<p>式(5.11)或式(5.14)定义的损失函数的极小化等价于正则化的极大似然估计.所以，利用损失函数最小原则进行剪枝就是用正则化的极大似然估计进行模型选择.</p>
-
-<p>下图是决策树的剪枝过程示意图。<br/>
-<img src="media/14898241272608/14908438468056.jpg" alt=""/></p>
-
-<p>剪枝算法如下：<br/>
-<img src="media/14898241272608/14908438815566.jpg" alt=""/><br/>
-<img src="media/14898241272608/14908438965218.jpg" alt=""/></p>
-
-
-		</div>
-
-		
-
-	</article>
-  
-	<div class="pagination">
-	 <a class="prev" href="统计学习方法_1.html">&larr; Older</a> 
-<a href="archives.html">Blog Archives</a>
-	 
-	    
-	</div>
-</div>
- <aside class="sidebar"> 
-
-	<section>
-	  <h1>Categories</h1>
-	  <ul id="recent_posts">
-	  
-	      <li class="post">
-	        <a href="Effective%20OC2.0.html"><strong>Effective OC2.0&nbsp;(3)</strong></a>
-	        
-	        
-	        
-	      </li>
-	  
-	      <li class="post">
-	        <a href="English%20Study.html"><strong>English Study&nbsp;(2)</strong></a>
-	        
-	        
-	        
-	      </li>
-	  
-	      <li class="post">
-	        <a href="%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0.html"><strong>深度学习&nbsp;(1)</strong></a>
-	        
-	        
-	        
-	      </li>
-	  
-	      <li class="post">
-	        <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法&nbsp;(11)</strong></a>
-	        
-	        
-	        
-	      </li>
-	  
-	      <li class="post">
-	        <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习&nbsp;(8)</strong></a>
-	        
-	        
-	        
-	      </li>
-	   
-	  </ul>
-	</section>
-	<section>
-	  <h1>Recent Posts</h1>
-	  <ul id="recent_posts">
-	  
-	      
-		      <li class="post">
-		        <a href="14922429288489.html">使用模块</a>
-		      </li>
-	     
-	  
-	      
-		      <li class="post">
-		        <a href="14922391300067.html">偏函数</a>
-		      </li>
-	     
-	  
-	      
-		      <li class="post">
-		        <a href="14921577512970.html">支持向量机</a>
-		      </li>
-	     
-	  
-	      
-		      <li class="post">
-		        <a href="14921570225186.html">拟牛顿法（最大熵模型的学习）</a>
-		      </li>
-	     
-	  
-	      
-		      <li class="post">
-		        <a href="14921324340299.html">装饰器</a>
-		      </li>
-	     
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	  
-	      
-	   
-	  </ul>
-	</section>
 	
-</aside> </div></div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2014 -  -
-  <span class="credit">Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a> &nbsp;&nbsp; Theme by <a href="http://octopress.org">Octopress</a></span>
-</p>
 
-</footer>
+ 
+	
+
+ 
+	
+
+ 
+	
+
+ 
+	
+
+ 
+	
 
   
-    
+  
+</div></div>
 
-<script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+
+<div class="page-bottom">
+  <div class="row">
+  <hr />
+  <div class="small-9 columns">
+  <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+  <div class="small-3 columns">
+  <p class="copyright text-right"><a href="#header">TOP</a></p>
+  </div>
+   
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+    
+    
+    <script src="asset/js/foundation.min.js"></script>
+    <script src="asset/js/foundation/foundation.offcanvas.js"></script>
+    <script>
+      $(document).foundation();
+
+     
+    </script>
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
 <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
-</body>
+  </body>
 </html>
