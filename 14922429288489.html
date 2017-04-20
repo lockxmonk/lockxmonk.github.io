@@ -105,7 +105,9 @@
         <li><label>Python练习</label></li>
 
           
-            <li><a title="" href="14925924499918.html"></a></li>
+            <li><a title="使用_future_" href="14926579397626.html">使用_future_</a></li>
+          
+            <li><a title="使用第三方模块" href="14925924499918.html">使用第三方模块</a></li>
           
             <li><a title="使用模块" href="14922429288489.html">使用模块</a></li>
           
@@ -192,7 +194,9 @@
                     
                       <li class="side-title"><span>Python练习</span></li>
                         
-                          <li><a title="" href="14925924499918.html"></a></li>
+                          <li><a title="使用_future_" href="14926579397626.html">使用_future_</a></li>
+                        
+                          <li><a title="使用第三方模块" href="14925924499918.html">使用第三方模块</a></li>
                         
                           <li><a title="使用模块" href="14922429288489.html">使用模块</a></li>
                         
@@ -221,6 +225,22 @@
 
  <div class="markdown-body">
 <h1>使用模块</h1>
+
+<ul>
+<li>
+<a href="#toc_0">模块介绍</a>
+</li>
+<li>
+<a href="#toc_1">模块的使用</a>
+</li>
+<li>
+<a href="#toc_2">别名</a>
+</li>
+<li>
+<a href="#toc_3">作用域</a>
+</li>
+</ul>
+
 
 <h2 id="toc_0">模块介绍</h2>
 
@@ -313,6 +333,18 @@ except ImportError: # 导入失败会捕获到ImportError
 
 <p>这样就可以优先导入<code>cStringIO</code>。如果有些平台不提供<code>cStringIO</code>，还可以降级使用<code>StringIO</code>。导入<code>cStringIO</code>时，用<code>import ... as ...</code>指定了别名<code>StringIO</code>，因此，后续代码引用<code>StringIO</code>即可正常工作。</p>
 
+<h2 id="toc_3">作用域</h2>
+
+<p>在一个模块中，我们可能会定义很多函数和变量，但有的函数和变量我们希望给别人使用，有的函数和变量我们希望仅仅在模块内部使用。在Python中，是通过<code>_</code>前缀来实现的。</p>
+
+<p>正常的函数和变量名是公开的（public），可以被直接引用，比如：<code>abc，x123，PI</code>等；</p>
+
+<p>类似<code>__xxx__</code>这样的变量是特殊变量，可以被直接引用，但是有特殊用途，比如上面的<code>__author__</code>，<code>__name__</code>就是特殊变量，<code>hello</code>模块定义的文档注释也可以用特殊变量<code>__doc__</code>访问，<strong><em>我们自己的变量一般不要用这种变量名</em></strong>；</p>
+
+<p><font color=red>类似<code>_xxx</code>和<code>__xxx</code>这样的函数或变量就是非公开的（private），不应该被直接引用，比如<code>_abc，__abc</code>等；</font></p>
+
+<p>之所以我们说，<code>private</code>函数和变量“不应该”被直接引用，而不是“不能”被直接引用，是因为Python并没有一种方法可以完全限制访问<code>private</code>函数或变量，但是，从编程习惯上不应该引用<code>private</code>函数或变量。</p>
+
 
 </div>
 
@@ -323,7 +355,7 @@ except ImportError: # 导入失败会捕获到ImportError
   <div class="large-6 columns">
 	<div class="text-left" style="padding:15px 0px;">
 		
-	        <a href="14925924499918.html"  title="Previous Post: ">&laquo; </a>
+	        <a href="14925924499918.html"  title="Previous Post: 使用第三方模块">&laquo; 使用第三方模块</a>
 	    
 	</div>
   </div>

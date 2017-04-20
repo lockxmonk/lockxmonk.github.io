@@ -105,7 +105,9 @@
         <li><label>Python练习</label></li>
 
           
-            <li><a title="" href="14925924499918.html"></a></li>
+            <li><a title="使用_future_" href="14926579397626.html">使用_future_</a></li>
+          
+            <li><a title="使用第三方模块" href="14925924499918.html">使用第三方模块</a></li>
           
             <li><a title="使用模块" href="14922429288489.html">使用模块</a></li>
           
@@ -192,7 +194,9 @@
                     
                       <li class="side-title"><span>Python练习</span></li>
                         
-                          <li><a title="" href="14925924499918.html"></a></li>
+                          <li><a title="使用_future_" href="14926579397626.html">使用_future_</a></li>
+                        
+                          <li><a title="使用第三方模块" href="14925924499918.html">使用第三方模块</a></li>
                         
                           <li><a title="使用模块" href="14922429288489.html">使用模块</a></li>
                         
@@ -224,23 +228,99 @@
 
 	
 		<div class="markdown-body">
-		<h1>匿名函数</h1>
+		<h1>装饰器</h1>
 
-		<p>当我们在传入函数时，有些时候，不需要显式地定义函数，直接传入匿名函数更方便。</p>
+		<p>函数也是一个对象，而且函数对象可以被赋值给变量，所以，通过变量也能调用该函数。</p>
 
-<p>关键字<code>lambda</code>表示匿名函数</p>
-
-<p><strong>匿名函数有个限制，就是只能有一个表达式，不用写<code>return</code>，返回值就是该表达式的结果。</strong></p>
-
-<p>例如：</p>
+<p>函数对象有一个<code>__name__</code>属性，可以拿到函数的名字：</p>
 
 <pre><code class="language-py"># -*- coding: utf-8 -*-
-print map(lambda x:x*x, [1,2,3,4,5,6])
+def now():
+    print &#39;1992-12-14&#39;
+f = now
+f()
+print now.__name__,f.__name__
+
 </code></pre>
 
-<p><img src="media/14921312042142/14921315287449.jpg" alt=""/></p>
+<p><img src="media/14921324340299/14921328219891.jpg" alt=""/></p>
 
-<p><font color=red>其中冒号前面的x表示函数参数。</font></p>
+<p><strong>现在，假设我们要增强<code>now()</code>函数的功能，比如，在函数调用前后自动打印日志，但又不希望修改<code>now()</code>函数的定义，这种在代码运行期间动态增加功能的方式，称之为“装饰器”<code>（Decorator）</code>。</strong></p>
+
+<p>本质上，<code>decorator</code>就是一个返回函数的高阶函数。所以，我们要定义一个能打印日志的<code>decorator</code>，可以定义如下：</p>
+
+<pre><code class="language-py">def log(func):
+    def wrapper(*args, **kw):
+        print &#39;call %s():&#39; % func.__name__
+        return func(*args, **kw)
+    return wrapper
+</code></pre>
+
+<p>观察上面的log，因为它是一个decorator，所以接受一个函数作为参数，并返回一个函数。我们要借助Python的@语法，把decorator置于函数的定义处：</p>
+
+<pre><code>@log
+def now():
+    print &#39;2013-12-25&#39;
+</code></pre>
+
+<p><img src="media/14921324340299/14921338711853.jpg" alt=""/></p>
+
+<p><strong>练习题：请编写一个decorator，能在函数调用的前后打印出&#39;begin call&#39;和&#39;end call&#39;的日志。</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def log(func):
+    def wrapper(*args, **kw):
+        print  &#39;begin call&#39;
+        res =  func(*args, **kw)
+        print &#39;end call2&#39;
+        return res
+    return wrapper
+@log
+def now():
+    print &#39;test&#39;
+now()
+</code></pre>
+
+<p><img src="media/14921324340299/14921348025676.jpg" alt=""/></p>
+
+<p><strong>练习题：再思考一下能否写出一个@log的decorator，使它既支持：</strong></p>
+
+<pre><code class="language-py">@log
+def f():
+    pass
+</code></pre>
+
+<p><strong>又支持</strong></p>
+
+<pre><code class="language-py">@log(&#39;execute&#39;)
+def f():
+    pass
+</code></pre>
+
+<p>解答：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import functools
+
+def log(text):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args ,**kw):
+            if len(text)&gt;0:
+                print &#39;%s %s()&#39; % (text, func.__name__)
+            else:
+                print &#39;%s()&#39; % func.__name__
+            return func(*args,**kw)
+        return wrapper
+    return decorator
+
+@log(&#39;sdfsf&#39;)
+def now():
+    print &#39;test&#39;
+now()
+</code></pre>
+
+<p><img src="media/14921324340299/14921357641252.jpg" alt=""/></p>
 
 
 		</div>

@@ -105,7 +105,9 @@
         <li><label>Python练习</label></li>
 
           
-            <li><a title="" href="14925924499918.html"></a></li>
+            <li><a title="使用_future_" href="14926579397626.html">使用_future_</a></li>
+          
+            <li><a title="使用第三方模块" href="14925924499918.html">使用第三方模块</a></li>
           
             <li><a title="使用模块" href="14922429288489.html">使用模块</a></li>
           
@@ -192,7 +194,9 @@
                     
                       <li class="side-title"><span>Python练习</span></li>
                         
-                          <li><a title="" href="14925924499918.html"></a></li>
+                          <li><a title="使用_future_" href="14926579397626.html">使用_future_</a></li>
+                        
+                          <li><a title="使用第三方模块" href="14925924499918.html">使用第三方模块</a></li>
                         
                           <li><a title="使用模块" href="14922429288489.html">使用模块</a></li>
                         
@@ -226,7 +230,40 @@
 		<div class="markdown-body">
 		<h1>支持向量机</h1>
 
-		<p>支持向量机（support vector machines，SVM)是一种二类分类模型。它的基本模型是定义在特征空间上的间隔最大的线性分类器，间隔最大使它有别于感知机；支持向量机还包括核技巧，这使它成为实质上的非线性分类器.<font color=red>支持向量机的学习策略就是间隔最大化，可形式化为一个求解凸二次规划（convex quadratic programming)的问题，也等价于正则化的合页损失函数的最小化问题.</font>支持向量机的<strong><em>学习算法是求解凸二次规划的最优化算法</em></strong>.</p>
+		<ul>
+<li>
+<a href="#toc_0">线性可支持性良机与硬间隔最大化</a>
+<ul>
+<li>
+<a href="#toc_1">线性可支持向量机</a>
+</li>
+<li>
+<a href="#toc_2">函数间隔和几何间隔</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_3">间隔最大化</a>
+<ul>
+<li>
+<ul>
+<li>
+<a href="#toc_4">1. 最大间隔分离超平面</a>
+</li>
+<li>
+<a href="#toc_5">2.最大间隔分离超平面的存在唯一性</a>
+</li>
+<li>
+<a href="#toc_6">3.支持向量和间隔边界</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>支持向量机（support vector machines，SVM)是一种二类分类模型。它的基本模型是定义在特征空间上的间隔最大的线性分类器，间隔最大使它有别于感知机；支持向量机还包括核技巧，这使它成为实质上的非线性分类器.<font color=red>支持向量机的学习策略就是间隔最大化，可形式化为一个求解凸二次规划（convex quadratic programming)的问题，也等价于正则化的合页损失函数的最小化问题.</font>支持向量机的<strong><em>学习算法是求解凸二次规划的最优化算法</em></strong>.</p>
 
 <p>支持向量机学习方法包含构建由简至繁的模型：线性可分支持向量机（linear support vector machine in linearly separable ease)、线性支持向量机（linear support vector machine)及非线性支持向量机（ncm-linear support vector machine).简单模型是复杂模型的基础，也是复杂模型的特殊情况.当训练数据线性可分时，通过硬间隔最大化（hard margin maximization)，学习一个线性的分类器，<strong><em>即线性可分支持向量机，又称为硬间隔支持向量机</em></strong>；当训练数据近似线性可分时，通过软间隔最大化（soft margin maximization)，也学习一个线性的分类器，<strong><em>即线性支持向量机，又称为软间隔支持向量机</em></strong>；<strong><em>当训练数据线性不可分时，通过使用核技巧 (kernel trick)及软间隔最大化，学习非线性支持向量机</em></strong>.</p>
 
