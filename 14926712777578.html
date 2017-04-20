@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Effective OC2.0 - LZH007
+  类和实例 - LZH007
   
   </title>
  <meta name="description" content="LZH的技术杂事小博客~">
@@ -235,150 +235,287 @@
             </div>
             <div class="large-9 medium-9 columns">
 
- 
-
-
-	
-		<div class="markdown-body">
-		<h1>第5条：用枚举表示状态、选项、状态码</h1>
-
-		<p>枚举只是一种常量命名的方式。某个对象所经历的各种状态就可以定义为一个简单的枚举集。比如说，用枚举表示socket connection的状态：</p>
-
-<pre><code>enum  EOCConnectionState{
-    EOCConnectionStateDisconnected，
-    EOCConnectionStateConnecting，
-    EOCConnectionStateConnected，
-}
-</code></pre>
-
-<p>这样便于理解，其中编译器会自动为每一个枚举分配一个独有的编号，从0开始，实现枚举所用的数据类型取决于编译器，不过其二进制位（bit)的个数必须能完全表示下枚举编号才行。在前例中，由于最大编号是2,所以使用1个字节的char类型即可。</p>
-
-<p>然而定义枚举变量的方式却不太简洁，要依如下语法编写：</p>
-
-<pre><code>enum EOCConnectionState state = EOCConnectionStateDisconnected;
-</code></pre>
-
-<p>若是每次不用敲入enum而只需写EOCConnectionState就好了。要想这样做，则需使用typedef关键字重新定义枚举类型：</p>
-
-<pre><code>enum EOCConnectionState {
-EOCConnectionStateDisconnected,
-EOCConnectionStateConnecting,
-EOCConnectionStateConnected,
-)；
-typedef enum EOCConnectionState EOCConnectionState;
-</code></pre>
-
-<p>现在可以用简写的EOCConnectionState来代替完整的enum EOCConnectionState 了：</p>
-
-<pre><code>EOCConnectionState state = EOCConnectionStateDisconnected;
-
-</code></pre>
-
-<p>在C++之后可以指定用何种“底层数据类型”来保存枚举类型的变量。这样做的好处是可以向前声明枚举变量了。若不指定底层数据类型，则无法向前声明枚举类型，因为编译器不清楚底层数据类型的大小,所以在用到此枚举类型时，也就不知道究竞该给变量分配多少空间。</p>
-
-<p>指定底层数据类型所用的语法是：</p>
-
-<pre><code>enum EOCConnectionStateConnectionState : NSInteger { /*...*/ };
-
-</code></pre>
-
-<p>还可以不使用编译器所分配的序号，而是手工指定某个枚举成员所对应的值。语法如下：</p>
-
-<pre><code>enum EOCConnectionStateConnectionState {
-EOCConnectionStateDisconnected = 1,
-EOCConnectionStateConnectingf
-EOCConnectionStateConnected
-}；
-</code></pre>
-
-<p>上述代码把EOCConnectionStateDisconnected的值设为1,而不使用编译器所分配的0，如前所述，接下来几个枚举的值都会在上一个的基础上递增1。比如说，EOCConnectionState-Connected的值就是3。</p>
-
-<p>还有一种情况应该使用枚举类型，那就是定义选项的时候。若这些选项可以彼此组合，则更应如此。只要枚举定义得对，各选项之间就可通过“按位或操作符”（bitwise OR operator)来组合。例如，iOSUI框架中有如下枚举类型，用来表示某个视图应该如何在水平或垂直方向上调整大小：</p>
-
-<pre><code>enum UIViewAutoresizing {
-   UIViewAutoresizingNone                  =0，
-   UIViewAutoresizingFlexibleLeftMargin    =1&lt;&lt;0,
-   UIViewAutoresizingFlexibleWidth         =1&lt;&lt;1,
-   UIViewAutoresizingFlexibleRightMargin   =1&lt;&lt;2,
-   □IViewAutoresizingFlexibleTopMargin     =1&lt;&lt;3,
-   UIViewAutoresizingFlexibleHeight        =1&lt;&lt;4,
-   UIViewAutoresizingFlexibleBottomMargin  =1&lt;&lt;5,
-}
-</code></pre>
-
-<p>每个选项均可以启用或者禁用，，使用上述方式来定义枚举值即可保证这一点，因为在每个枚举值所对应的二进制表示中，只有1个二进制位的值是1。用“按位或操作符”可组合多个选项，例如：<br/>
-<code>UIViewAutoResizingFlexibleWidth|UIViewAutoresizingFlexibleHeight<br/>
-</code><br/>
-下图列出了每个枚举成员的二进制值，并演示了刚才那两个枚举组合之后的值。用“按位或操作符”(bitwise OR operator)即可判断出是否已启用某个选项：</p>
-
-<pre><code>enum UIViewAutoresizing resizing =
-UIViewAutoresizingFlexiblGWidth | UIViewAutoresizingFlexibleHeight;
-
-if (resizing &amp; UIViewAutoresizingFlexibleWidth) {
-// UIViewAutoresizingFlexibleWidth is set
-}
-</code></pre>
-
-<p><img src="media/14843637552703/14845291672791.jpg" alt=""/><br/>
-　　上图中每个枚举值的二进制表示，以及对其中两个枚举值执行按位或操作之后的二进制值。</p>
-
-<p>　　在Foundation框架中也定义了一些辅助的宏，用这些宏来定义枚举类型时，也可以指定用于保存枚举值的底层数据类型。这些宏具备向后兼容（backward compatibility)能力，<font color=red><strong>如果目标平台的编译器支持新标准，那就使用新式语法，</strong></font>否则改用旧式语法。这些宏是用#define预处理指令来定义的，其中一个用于定义像EOCConnectionState这种普通的枚举类型，另一个用于定义像UIViewAutoresizing这种包含一系列选项的枚举类型，其用法如下：</p>
-
-<pre><code>typedef NS^ENUM(NSUInteger, EOCConnectionState) {
-    EOCConnectionStateDisconnected,
-    EOCConnectionStateConnecting,
-    EOCConnectionStateConnected,
-}；
-typedef NS_OPTIONS(NSUInteger, EOCPermittedDirection) {
-    EOCPermittedDirectionUp =   1   &lt;&lt;  0,
-    EOCPermittedDirectionDown   =   1   &lt;&lt;  1,
-    EOCPermittedDirectionLeft   =   1   &lt;&lt;  2,
-    EOCPermittedDirectionRight  =   1   &lt;&lt;  3,
-</code></pre>
-
-<p>最后还有一种枚举的用法，就是在switch语句里，有时可以这样定义：</p>
-
-<pre><code>typedef NS_ENUM(NSUInteger, EOCConnectionState) {
-    EOCConnectionStateDisconnected,
-    EOCConnectionStateConnecting,
-    EOCConnectionStateConnected,
-}；
-switch (currentState) {
-    EOCConnectionStateDisconnected:
-        // Handle disconnected state
-        break;
-    EOCConnectionStateConnecting:
-        // Handle connecting state
-        break;
-    EOCConnectionStateConnected:
-        // Handle connected state
-        break;
-}
-</code></pre>
-
-<p>我们总习惯在switch语句中加上default分支。然而，若是用枚举来定义状态机（state machine),则最好不要有default分支,因为不加default的话，如果稍后又加了一种状态，那么编译器就会发出警告信息，提示新加入的状态并未在switch分支中处理。假如写上了 default分支，那么它就会处理这个新状态，从而导致编译器不发瞀告信息，不利于程序的编写。</p>
-
-<h2 id="toc_0">要点</h2>
+ <div class="markdown-body">
+<h1>类和实例</h1>
 
 <ul>
-<li>应该用枚举来表示状态机的状态、传递给方法的选项以及状态码等值，给这些值起个易懂的名字。</li>
-<li>如果把传递给某个方法的选项表示为枚举类型，而多个选项又可同时使用，那么就将各选项值定义为2的幂，以便通过按位或操作将其组合起来。</li>
-<li>用NS_ENUM与NS_OPTIONS宏来定义枚举类型，并指明其底层数据类型。这样做可以确保枚举是用开发者所选的底层数据类型实现出来的，而不会采用编泽器所选的类型。</li>
-<li>在处理枚举类型的switch语句中不要实现default分支。这样的话，加入新枚举之后，编译器就会提示开发者：switch语句并未处理所有枚举，有利于定位TODO方位。</li>
+<li>
+<a href="#toc_0">数据封装</a>
+</li>
+<li>
+<a href="#toc_1">访问限制</a>
+</li>
+<li>
+<a href="#toc_2">继承和多态</a>
+</li>
+<li>
+<a href="#toc_3">获取对象信息</a>
+<ul>
+<li>
+<a href="#toc_4">使用type()</a>
+</li>
+<li>
+<a href="#toc_5">使用isinstance()</a>
+</li>
+<li>
+<a href="#toc_6">使用dir()</a>
+</li>
+</ul>
+</li>
 </ul>
 
 
-		</div>
-	
+<p>在Python中，定义类是通过<code>class</code>关键字：</p>
 
- 
-	
+<pre><code class="language-py">class Student(object):
+    pass
+</code></pre>
 
- 
-	
+<p><code>class</code>后面紧接着是类名，即<code>Student</code>，类名通常是大写开头的单词，紧接着是<code>(object)</code>，表示该类是从哪个类继承下来的，继承的概念我们后面再讲，通常，<strong>如果没有合适的继承类，就使用object类，这是所有类最终都会继承的类</strong>。</p>
 
-  
-  
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.name = name
+        self.score = score
+</code></pre>
+
+<p>注意到<code>__init__</code>方法的第一个参数永远是self，表示创建的实例本身，因此，在<code>__init__</code>方法内部，就可以把各种属性绑定到<code>self</code>，因为<code>self</code>就指向创建的实例本身。</p>
+
+<p>和普通的函数相比，在类中定义的函数只有一点不同，<font color=red>就是第一个参数永远是实例变量self，并且，调用时，不用传递该参数。除此之外，类的方法和普通函数没有什么区别，所以，你仍然可以用默认参数、可变参数和关键字参数。</font></p>
+
+<h2 id="toc_0">数据封装</h2>
+
+<p>面向对象编程的一个重要特点就是数据封装，创建实例需要给出<code>name</code>和<code>score</code>，而如何打印，都是在Student类的内部定义的，这些数据和逻辑被“封装”起来了，调用很容易，但却不用知道内部实现的细节。</p>
+
+<p>例如下面增加一个成绩分类的方法：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.name = name
+        self.score = score
+
+    def print_score(self):
+        print &#39;%s:%s&#39; % (self.name, self.score)
+
+    def get_grade(self):
+        if self.score &gt;= 90:
+            print &#39;A&#39;
+        elif self.score &gt;= 60:
+            print &#39;B&#39;
+        else:
+            print &#39;C&#39;
+
+bart = Students(&#39;Bart&#39;, 59)
+lisa = Students(&#39;梁中豪&#39;, 100)
+bart.print_score()
+bart.get_grade()
+lisa.print_score()
+lisa.get_grade()
+</code></pre>
+
+<h2 id="toc_1">访问限制</h2>
+
+<p>在Class内部，可以有属性和方法，而外部代码可以通过直接调用实例变量的方法来操作数据，这样，就隐藏了内部的复杂逻辑。</p>
+
+<p>但是，从前面Student类的定义来看，外部代码还是可以自由地修改一个实例的<code>name</code>、<code>score</code>属性</p>
+
+<p>如果要让内部属性不被外部访问，可以把属性的名称前加上两个下划线<code>__</code>，<font color=red>在Python中，实例的变量名如果以<code>__</code>开头，就变成了一个私有变量（private），只有内部可以访问，外部不能访问，</font>所以，我们把Student类改一改：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.__name = name
+        self.__score = score
+
+    def print_score(self):
+        print &#39;%s:%s&#39; % (self.__name, self.__score)
+
+   
+bart = Students(&#39;Bart&#39;, 59)
+lisa = Students(&#39;梁中豪&#39;, 100)
+bart.print_score()
+lisa.__name
+</code></pre>
+
+<p>改完后，对于外部代码来说，没什么变动，但是已经无法从外部访问实例变量.<code>__name</code>和实例变量<code>.__score</code>了：<br/>
+<img src="media/14926712777578/14926727380387.jpg" alt=""/><br/>
+如果又要允许外部代码修改score,可以给Student类增加set_score方法.这里跟java很像。不在过多叙述。</p>
+
+<h2 id="toc_2">继承和多态</h2>
+
+<p>在OOP程序设计中，当我们定义一个class的时候，可以从某个现有的class继承，新的class称为子类（Subclass），而被继承的class称为基类、父类或超类（Base class、Super class）。</p>
+
+<p>继承最大的好处是子类获得了父类的全部功能。由于<code>Animial</code>实现了<code>run()</code>方法，因此，<code>Dog</code>和<code>Cat</code>作为它的子类，什么事也没干，就自动拥有了<code>run()</code>方法，当然也可以对父类方法进行重写。</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Animal(object):
+    &quot;&quot;&quot;docstring for Animal&quot;&quot;&quot;
+
+    def run(self):
+        print &#39;Animal is running..&#39;
+
+
+class Dog(Animal):
+    pass
+
+
+class Cat(Animal):
+    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
+
+    def run(self):
+        print &#39;Cat is running..&#39;
+
+dog = Dog()
+dog.run()
+
+cat = Cat()
+cat.run()
+
+</code></pre>
+
+<p><img src="media/14926712777578/14926743181176.jpg" alt=""/></p>
+
+<h2 id="toc_3">获取对象信息</h2>
+
+<p>当我们拿到一个对象的引用时，如何知道这个对象是什么类型？</p>
+
+<h3 id="toc_4">使用type()</h3>
+
+<p>基本类型都可以用<code>type()</code>判断：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+print type(123),type(&#39;str&#39;),type(None)
+</code></pre>
+
+<p><img src="media/14926712777578/14926750871663.jpg" alt=""/></p>
+
+<p>Python把每种type类型都定义好了常量，放在types模块里，使用之前，需要先导入：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import types
+print type(&#39;abc&#39;)==types.StringType
+print type(u&#39;abc&#39;)==types.UnicodeType
+print type([])==types.ListType
+print type(str) == types.TypeType
+</code></pre>
+
+<p><img src="media/14926712777578/14926752976543.jpg" alt=""/><br/>
+<strong>最后注意到有一种类型就叫TypeType，所有类型本身的类型就是TypeType.比如<code>int，str</code>等</strong></p>
+
+<h3 id="toc_5">使用isinstance()</h3>
+
+<p>我们使用<code>isinstance()</code>来判断class的类型，例如：</p>
+
+<pre><code class="language-py">class Animals(object):
+    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
+    pass
+class Cat(Animals):
+    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
+    pass
+class Dog(Animals):
+    &quot;&quot;&quot;docstring for Dog&quot;&quot;&quot;
+    pass
+a = Animals()
+d = Dog()
+h = Cat()
+print isinstance(h, Cat),isinstance(d, Dog),isinstance(a, Animals)
+</code></pre>
+
+<p><img src="media/14926712777578/14926756201012.jpg" alt=""/></p>
+
+<p>当然也可以用<code>isinstance()</code>来判断基本类型</p>
+
+<h3 id="toc_6">使用dir()</h3>
+
+<p>如果要获得一个对象的所有属性和方法，可以使用<code>dir()</code>函数，它返回一个包含字符串的<code>list</code>，比如，获得一个str对象的所有属性和方法：</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; dir(&#39;abc&#39;)
+</code></pre>
+
+<p><img src="media/14926712777578/14926758082813.jpg" alt=""/></p>
+
+<p><strong>仅仅把属性和方法列出来是不够的，配合<code>getattr()、setattr()以及hasattr()</code>，我们可以直接操作一个对象的状态：</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+class Animals(object):
+    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
+
+    def __init__(self):
+        self.x = 9
+
+    def power(self):
+        print self.x * self.x
+obj = Animals()
+
+print hasattr(obj, &#39;x&#39;)  # 有属性&#39;x&#39;吗？
+print hasattr(obj, &#39;y&#39;)  # 有属性&#39;y&#39;吗？
+print setattr(obj, &#39;y&#39;, 19)  # 设置一个属性&#39;y&#39;
+print getattr(obj, &#39;y&#39;)  # 获取属性&#39;y&#39;
+print obj.y
+</code></pre>
+
+<p><img src="media/14926712777578/14926764199501.jpg" alt=""/></p>
+
+<p>也可以获得对象的方法：</p>
+
+<pre><code class="language-py">fn = getattr(obj, &#39;power&#39;)
+print fn,fn(),
+</code></pre>
+
+<p><img src="media/14926712777578/14926765852729.jpg" alt=""/></p>
+
+
+</div>
+
+<br /><br />
+<hr />
+
+<div class="row clearfix">
+  <div class="large-6 columns">
+	<div class="text-left" style="padding:15px 0px;">
+		
+	        <a href="14926766188460.html"  title="Previous Post: 面向对象高级编程">&laquo; 面向对象高级编程</a>
+	    
+	</div>
+  </div>
+  <div class="large-6 columns">
+	<div class="text-right" style="padding:15px 0px;">
+		
+	        <a href="14926690841704.html" 
+	        title="Next Post: 面向对象编程">面向对象编程 &raquo;</a>
+	    
+	</div>
+  </div>
+</div>
+
+<div class="row">
+<div style="padding:0px 0.93em;" class="share-comments">
+
+</div>
+</div>
+<script type="text/javascript">
+	$(function(){
+		var currentURL = '14926712777578.html';
+		$('#side-nav a').each(function(){
+			if($(this).attr('href') == currentURL){
+				$(this).parent().addClass('active');
+			}
+		});
+	});
+</script>  
 </div></div>
 
 

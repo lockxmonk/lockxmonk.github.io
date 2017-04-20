@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Effective OC2.0 - LZH007
+  面向对象高级编程 - LZH007
   
   </title>
  <meta name="description" content="LZH的技术杂事小博客~">
@@ -235,150 +235,106 @@
             </div>
             <div class="large-9 medium-9 columns">
 
- 
+ <div class="markdown-body">
+<h1>面向对象高级编程</h1>
+
+<p>正常情况下，当我们定义了一个class，创建了一个class的实例后，我们可以给该实例绑定任何属性和方法，这就是动态语言的灵活性。</p>
+
+<p><strong><em>我们可以动态的给某一个实例绑定属性、方法。要绑定该类所有的实例的话，则可以将方法绑定到该类上。</em></strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
 
 
-	
-		<div class="markdown-body">
-		<h1>第5条：用枚举表示状态、选项、状态码</h1>
+class Student(object):
+    &quot;&quot;&quot;docstring for Student&quot;&quot;&quot;
+    pass
+s = Student()
+s.name = &#39;梁中豪&#39;  # 动态给实例绑定一个属性
 
-		<p>枚举只是一种常量命名的方式。某个对象所经历的各种状态就可以定义为一个简单的枚举集。比如说，用枚举表示socket connection的状态：</p>
+from types import MethodType
 
-<pre><code>enum  EOCConnectionState{
-    EOCConnectionStateDisconnected，
-    EOCConnectionStateConnecting，
-    EOCConnectionStateConnected，
-}
+
+def set_age(self, age):  # 定义一个函数作为实例方法
+    self.age = age
+s.set_age = MethodType(set_age, s, Student)  # 给实例绑定一个方法
+s.set_age(25)
+
+# 为了给所有实例都绑定方法，可以给class绑定方法：
+
+
+def set_score(self, score):  # 定义一个函数作为实例方法
+    self.score = score
+Student.set_score = MethodType(set_score, None, Student)
+s.set_score(100) #给class绑定方法后，所有实例均可调用
+s2 = Student()
+s2.set_score(90)
+print s.name, s.age, s.score, s2.score
 </code></pre>
 
-<p>这样便于理解，其中编译器会自动为每一个枚举分配一个独有的编号，从0开始，实现枚举所用的数据类型取决于编译器，不过其二进制位（bit)的个数必须能完全表示下枚举编号才行。在前例中，由于最大编号是2,所以使用1个字节的char类型即可。</p>
+<p><img src="media/14926766188460/14926773474695.jpg" alt=""/></p>
 
-<p>然而定义枚举变量的方式却不太简洁，要依如下语法编写：</p>
+<h2 id="toc_0">使用__slots__</h2>
 
-<pre><code>enum EOCConnectionState state = EOCConnectionStateDisconnected;
-</code></pre>
+<p>如果我们想要限制class的属性怎么办？比如，只允许对Student实例添加<code>name和age</code>属性。那么可以使用一个特殊的<code>__slots__</code>变量。</p>
 
-<p>若是每次不用敲入enum而只需写EOCConnectionState就好了。要想这样做，则需使用typedef关键字重新定义枚举类型：</p>
+<pre><code class="language-py"># -*- coding: utf-8 -*-
 
-<pre><code>enum EOCConnectionState {
-EOCConnectionStateDisconnected,
-EOCConnectionStateConnecting,
-EOCConnectionStateConnected,
-)；
-typedef enum EOCConnectionState EOCConnectionState;
-</code></pre>
 
-<p>现在可以用简写的EOCConnectionState来代替完整的enum EOCConnectionState 了：</p>
-
-<pre><code>EOCConnectionState state = EOCConnectionStateDisconnected;
-
-</code></pre>
-
-<p>在C++之后可以指定用何种“底层数据类型”来保存枚举类型的变量。这样做的好处是可以向前声明枚举变量了。若不指定底层数据类型，则无法向前声明枚举类型，因为编译器不清楚底层数据类型的大小,所以在用到此枚举类型时，也就不知道究竞该给变量分配多少空间。</p>
-
-<p>指定底层数据类型所用的语法是：</p>
-
-<pre><code>enum EOCConnectionStateConnectionState : NSInteger { /*...*/ };
+class Student(object):
+    &quot;&quot;&quot;docstring for Student&quot;&quot;&quot;
+    __slots__ = (&#39;name&#39;,&#39;age&#39;)
+    
+s = Student()
+s.name = &#39;梁中豪&#39;
+s.age = 21
+print s.name, s.age
+s.score = 90
+print s.score
 
 </code></pre>
 
-<p>还可以不使用编译器所分配的序号，而是手工指定某个枚举成员所对应的值。语法如下：</p>
+<p><img src="media/14926766188460/14926779162430.jpg" alt=""/></p>
 
-<pre><code>enum EOCConnectionStateConnectionState {
-EOCConnectionStateDisconnected = 1,
-EOCConnectionStateConnectingf
-EOCConnectionStateConnected
-}；
-</code></pre>
-
-<p>上述代码把EOCConnectionStateDisconnected的值设为1,而不使用编译器所分配的0，如前所述，接下来几个枚举的值都会在上一个的基础上递增1。比如说，EOCConnectionState-Connected的值就是3。</p>
-
-<p>还有一种情况应该使用枚举类型，那就是定义选项的时候。若这些选项可以彼此组合，则更应如此。只要枚举定义得对，各选项之间就可通过“按位或操作符”（bitwise OR operator)来组合。例如，iOSUI框架中有如下枚举类型，用来表示某个视图应该如何在水平或垂直方向上调整大小：</p>
-
-<pre><code>enum UIViewAutoresizing {
-   UIViewAutoresizingNone                  =0，
-   UIViewAutoresizingFlexibleLeftMargin    =1&lt;&lt;0,
-   UIViewAutoresizingFlexibleWidth         =1&lt;&lt;1,
-   UIViewAutoresizingFlexibleRightMargin   =1&lt;&lt;2,
-   □IViewAutoresizingFlexibleTopMargin     =1&lt;&lt;3,
-   UIViewAutoresizingFlexibleHeight        =1&lt;&lt;4,
-   UIViewAutoresizingFlexibleBottomMargin  =1&lt;&lt;5,
-}
-</code></pre>
-
-<p>每个选项均可以启用或者禁用，，使用上述方式来定义枚举值即可保证这一点，因为在每个枚举值所对应的二进制表示中，只有1个二进制位的值是1。用“按位或操作符”可组合多个选项，例如：<br/>
-<code>UIViewAutoResizingFlexibleWidth|UIViewAutoresizingFlexibleHeight<br/>
-</code><br/>
-下图列出了每个枚举成员的二进制值，并演示了刚才那两个枚举组合之后的值。用“按位或操作符”(bitwise OR operator)即可判断出是否已启用某个选项：</p>
-
-<pre><code>enum UIViewAutoresizing resizing =
-UIViewAutoresizingFlexiblGWidth | UIViewAutoresizingFlexibleHeight;
-
-if (resizing &amp; UIViewAutoresizingFlexibleWidth) {
-// UIViewAutoresizingFlexibleWidth is set
-}
-</code></pre>
-
-<p><img src="media/14843637552703/14845291672791.jpg" alt=""/><br/>
-　　上图中每个枚举值的二进制表示，以及对其中两个枚举值执行按位或操作之后的二进制值。</p>
-
-<p>　　在Foundation框架中也定义了一些辅助的宏，用这些宏来定义枚举类型时，也可以指定用于保存枚举值的底层数据类型。这些宏具备向后兼容（backward compatibility)能力，<font color=red><strong>如果目标平台的编译器支持新标准，那就使用新式语法，</strong></font>否则改用旧式语法。这些宏是用#define预处理指令来定义的，其中一个用于定义像EOCConnectionState这种普通的枚举类型，另一个用于定义像UIViewAutoresizing这种包含一系列选项的枚举类型，其用法如下：</p>
-
-<pre><code>typedef NS^ENUM(NSUInteger, EOCConnectionState) {
-    EOCConnectionStateDisconnected,
-    EOCConnectionStateConnecting,
-    EOCConnectionStateConnected,
-}；
-typedef NS_OPTIONS(NSUInteger, EOCPermittedDirection) {
-    EOCPermittedDirectionUp =   1   &lt;&lt;  0,
-    EOCPermittedDirectionDown   =   1   &lt;&lt;  1,
-    EOCPermittedDirectionLeft   =   1   &lt;&lt;  2,
-    EOCPermittedDirectionRight  =   1   &lt;&lt;  3,
-</code></pre>
-
-<p>最后还有一种枚举的用法，就是在switch语句里，有时可以这样定义：</p>
-
-<pre><code>typedef NS_ENUM(NSUInteger, EOCConnectionState) {
-    EOCConnectionStateDisconnected,
-    EOCConnectionStateConnecting,
-    EOCConnectionStateConnected,
-}；
-switch (currentState) {
-    EOCConnectionStateDisconnected:
-        // Handle disconnected state
-        break;
-    EOCConnectionStateConnecting:
-        // Handle connecting state
-        break;
-    EOCConnectionStateConnected:
-        // Handle connected state
-        break;
-}
-</code></pre>
-
-<p>我们总习惯在switch语句中加上default分支。然而，若是用枚举来定义状态机（state machine),则最好不要有default分支,因为不加default的话，如果稍后又加了一种状态，那么编译器就会发出警告信息，提示新加入的状态并未在switch分支中处理。假如写上了 default分支，那么它就会处理这个新状态，从而导致编译器不发瞀告信息，不利于程序的编写。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>应该用枚举来表示状态机的状态、传递给方法的选项以及状态码等值，给这些值起个易懂的名字。</li>
-<li>如果把传递给某个方法的选项表示为枚举类型，而多个选项又可同时使用，那么就将各选项值定义为2的幂，以便通过按位或操作将其组合起来。</li>
-<li>用NS_ENUM与NS_OPTIONS宏来定义枚举类型，并指明其底层数据类型。这样做可以确保枚举是用开发者所选的底层数据类型实现出来的，而不会采用编泽器所选的类型。</li>
-<li>在处理枚举类型的switch语句中不要实现default分支。这样的话，加入新枚举之后，编译器就会提示开发者：switch语句并未处理所有枚举，有利于定位TODO方位。</li>
-</ul>
+<p><font color=red>使用<code>__slots__</code>要注意，<code>__slots__</code>定义的属性仅对当前类起作用，对继承的子类是不起作用的.<br/>
+</font></p>
 
 
-		</div>
-	
+</div>
 
- 
-	
+<br /><br />
+<hr />
 
- 
-	
+<div class="row clearfix">
+  <div class="large-6 columns">
+	<div class="text-left" style="padding:15px 0px;">
+		
+	</div>
+  </div>
+  <div class="large-6 columns">
+	<div class="text-right" style="padding:15px 0px;">
+		
+	        <a href="14926712777578.html" 
+	        title="Next Post: 类和实例">类和实例 &raquo;</a>
+	    
+	</div>
+  </div>
+</div>
 
-  
-  
+<div class="row">
+<div style="padding:0px 0.93em;" class="share-comments">
+
+</div>
+</div>
+<script type="text/javascript">
+	$(function(){
+		var currentURL = '14926766188460.html';
+		$('#side-nav a').each(function(){
+			if($(this).attr('href') == currentURL){
+				$(this).parent().addClass('active');
+			}
+		});
+	});
+</script>  
 </div></div>
 
 
