@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  感知机 - LZH007
+  使用元类 - LZH007
   
   </title>
  <meta name="description" content="LZH的技术杂事小博客~">
@@ -240,94 +240,114 @@
             <div class="large-9 medium-9 columns">
 
  <div class="markdown-body">
-<h1>感知机</h1>
+<h1>使用元类</h1>
 
-<ul>
-<li>
-<a href="#toc_0">感知机模型</a>
-</li>
-<li>
-<a href="#toc_1">感知机的学习策略</a>
-<ul>
-<li>
-<a href="#toc_2">数据集的线性可分性</a>
-</li>
-<li>
-<a href="#toc_3">感知机学习策略</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_4">感知机学习算法</a>
-<ul>
-<li>
-<a href="#toc_5">感知机学习算法的原始形式</a>
-</li>
-</ul>
-</li>
-</ul>
+<p>动态语言和静态语言最大的不同，就是函数和类的定义，不是编译时定义的，而是<strong>运行时动态创建的</strong>。</p>
+
+<p>比方说我们要定义一个<code>Hello</code>的class：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Hello(object):
+    def hello(self, name=&#39;world&#39;):
+        print(&#39;Hello, %s.&#39; % name)
+h = Hello()
+h.hello()
+print (type(Hello))
+print (type(h))
+</code></pre>
+
+<p><img src="media/14927355881897/14927620006235.jpg" alt=""/></p>
+
+<p><font color=red><strong><code>type()</code>函数可以查看一个类型或变量的类型，<code>Hello</code>是一个class，它的类型就是<code>type</code>，而<code>h</code>是一个实例，它的类型就是<code>class Hello</code>。</strong></font></p>
+
+<p>我们说class的定义是运行时动态创建的，而<strong>创建class的方法就是使用<code>type()</code>函数</strong>。</p>
+
+<p><code>type()</code>函数既可以返回一个对象的类型，又可以创建出新的类型，比如，<strong>我们可以通过<code>type()</code>函数创建出Hello类，而无需通过<code>class Hello(object)...</code>的定义</strong>：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def fn(self, name=&#39;world&#39;):   # 先定义函数
+    print(&#39;Hello, %s.&#39; % name)
+
+Hello = type(&#39;Hello&#39;, (object,), dict(hello=fn))  # 创建Hello class
+h = Hello()
+h.hello()
+print(type(Hello))
+print(type(h))
+
+</code></pre>
+
+<p><img src="media/14927355881897/14927623112362.jpg" alt=""/></p>
+
+<p><strong>要创建一个class对象，type()函数依次传入3个参数：</strong></p>
+
+<ol>
+<li>class的名称；</li>
+<li>继承的父类集合，注意Python支持多重继承，如果只有一个父类，别忘了tuple的单元素写法；</li>
+<li>class的方法名称与函数绑定，这里我们把函数<code>fn</code>绑定到方法名<code>hello</code>上。</li>
+</ol>
+
+<p>通过<code>type()</code>函数创建的类和直接写class是完全一样的，因为Python解释器遇到class定义时，仅仅是扫描一下class定义的语法，然后调用<code>type()</code>函数创建出class。</p>
+
+<blockquote>
+<p>正常情况下，我们都用<code>class Xxx...</code>来定义类，但是，<code>type()</code>函数也允许我们动态创建出类来，也就是说，动态语言本身支持运行期动态创建类，这和静态语言有非常大的不同，要在静态语言运行期创建类，必须构造源代码字符串再调用编译器，或者借助一些工具生成字节码实现，本质上都是动态编译，会非常复杂。</p>
+</blockquote>
+
+<h2 id="toc_0">metaclass</h2>
+
+<p>除了使用<code>type()</code>动态创建类以外，要控制类的创建行为，还可以使用metaclass。<br/>
+简单的解释就是：先定义metaclass，就可以创建类，最后创建实例。</p>
+
+<p>所以，metaclass允许你创建类或者修改类。换句话说，你可以把类看成是metaclass创建出来的“实例”。</p>
+
+<p><strong>metaclass是Python面向对象里最难理解，也是最难使用的魔术代码。正常情况下，你不会碰到需要使用metaclass的情况，所以，以下内容看不懂也没关系，因为基本上你不会用到。</strong></p>
+
+<p>我们先看一个简单的例子，这个metaclass可以给我们自定义的MyList增加一个add方法：</p>
+
+<p>定义<code>ListMetaclass</code>，按照默认习惯，metaclass的类名总是以Metaclass结尾，以便清楚地表示这是一个metaclass：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+# metaclass是创建类，所以必须从`type`类型派生：
+class ListMetaclass(type):
+
+    def __new__(cls, name, bases, attrs):
+        attrs[&#39;add&#39;] = lambda self, value: self.append(value)
+        return type.__new__(cls, name, bases, attrs)
 
 
-<p>感知机是二类分类的线性分类模型，其输入为实例的特征向量，输出为实例的类别（一般为+1和-1），感知机对应于输入空间（特征空间）中将实例划分为正负两类的分离超平面，属于判别模型。感知机学习旨在求出将训练数据进行线性划分的分离超平面。感知机也是神经网络与支持向量机的基础。</p>
+class MyList(list):
+    __metaclass__ = ListMetaclass  # 指示使用ListMetaclass来定制类
+</code></pre>
 
-<h2 id="toc_0">感知机模型</h2>
+<p>当我们写下<code>__metaclass__ = ListMetaclass</code>语句时，魔术就生效了，它指示Python解释器在创建<code>MyList</code>时，要通过<code>ListMetaclass.__new__()</code>来创建，在此，我们可以修改类的定义，比如，加上新的方法，然后，返回修改后的定义。</p>
 
-<p>感知机的定义为：<br/>
-<img src="media/14890437581129/14890447646559.jpg" alt=""/></p>
+<p><code>__new__()</code><strong>方法接收到的参数依次是</strong>：</p>
 
-<p>感知机有如下的几何解释：<br/>
-线性方程：w*x + b = 0<br/>
-对应于特征空间R中的一个超平面S，其中w是超平面的法向量，b是超平面的截距，这个超平面将特征空间划分为两个部分，位于两部分的点就被划分为正，负两类，如下图所示：<br/>
-<img src="media/14890437581129/14890449623708.jpg" alt=""/></p>
+<ol>
+<li><p>当前准备创建的类的对象；</p></li>
+<li><p>类的名字；</p></li>
+<li><p>类继承的父类集合；</p></li>
+<li><p>类的方法集合。</p></li>
+</ol>
 
-<p>所以求感知机的模型，也就是去求得模型参数w，b。感知机预测，通过学习得到的感知机模型，对于新输入实例给出其对应的输出类别。</p>
+<p>我们测试输出为：</p>
 
-<h2 id="toc_1">感知机的学习策略</h2>
+<pre><code class="language-py">L = MyList()
+L.add(1)
+print L
+</code></pre>
 
-<h3 id="toc_2">数据集的线性可分性</h3>
+<p><img src="media/14927355881897/14927637008533.jpg" alt=""/></p>
 
-<p><img src="media/14890437581129/14890453486666.jpg" alt=""/></p>
+<p>动态修改有什么意义？直接在MyList定义中写上add()方法不是更简单吗？正常情况下，确实应该直接写，通过metaclass修改纯属变态。</p>
 
-<h3 id="toc_3">感知机学习策略</h3>
+<p>但是，总会遇到需要通过metaclass修改类定义的。ORM就是一个典型的例子。</p>
 
-<p>如果训练数据集是线性可分的，那么我们需要确定一个学习策略，也就是定义（经验）损失函数并将损失函数极小化。</p>
+<p>ORM全称“Object Relational Mapping”，即对象-关系映射，就是把关系数据库的一行映射为一个对象，也就是一个类对应一个表，这样，写代码更简单，不用直接操作SQL语句。</p>
 
-<p>损失函数的一个自然选择是误分类点的总数。但是，这样的损失函数不是参数w,b的连续可导函数，不易优化。损失函数的另一个选择是误分类点到超平面S的总距离，这是感知机所采用的。为此，首先写出输入控件R中任一点x到平面S的距离：<img src="media/14890437581129/14890456220821.jpg" alt=""/><br/>
-这里，||w||是w的2范数。<br/>
-其次，对于五分类的数据（x，y）来说，<br/>
-<code>-y(w*x+b)&gt;0</code>成立。因为当<code>w*x+b&gt;0</code>时，<code>y=-1</code>，而当<code>w*x+b&lt;0</code>时<code>y=+1</code>，因此，误分类点x到超平面S的距离是：<br/>
-<img src="media/14890437581129/14890460147136.jpg" alt=""/><br/>
-这样，假设超平面S的误分类点集合为M，那么所有的误分类点到超平面S的总距离为：<br/>
-<img src="media/14890437581129/14890462066356.jpg" alt=""/></p>
+<p>要编写一个ORM框架，所有的类都只能动态定义，因为只有使用者才能根据表的结构定义出对应的类来。</p>
 
-<p>所以，感知机的损失函数定义为：<img src="media/14890437581129/14890462888502.jpg" alt=""/></p>
-
-<p>显然，损失函数是非负的，如果没有误分类点，那么损失函数为0，而误分类点越少，误分类点离超平面越近，损失函数值越小。一个特定的样本点的损失函数：在误分类时是参数w，b的线性函数，在正确分类时是0，因此给定训练数据集T，损失函数是w，b的连续可导函数。<br/>
-总的来说我们的感知机学习策略就是在假设空间中选取使损失函数式最小的模型参数w，b。</p>
-
-<h2 id="toc_4">感知机学习算法</h2>
-
-<p>我们的策略已经明确，就是求解损失函数式的最优化，我们这里最优化的方法是随机梯度下降法。</p>
-
-<h3 id="toc_5">感知机学习算法的原始形式</h3>
-
-<p>感知机学习算法是对以下最优化问题的算法，给定一个训练集：<img src="media/14890437581129/14890473616479.jpg" alt=""/><br/>
-感知机学习算法是误分类驱动的，具体采用随机梯度下降法（stochastic gradient descent)。首先，任意选取一个超平面然后用梯度下降法不断地极小化目标函数<code>（2.5）</code>。极小化过程中不是一次使M中所有误分类点的梯度下降， 而是一次随机选取一个误分类点使其梯度下降。<br/>
-假设误分类点集合M是固定的，那么损失函数的梯度由<img src="media/14890437581129/14890475151426.jpg" alt=""/><br/>
-给出。<br/>
-随机选取一个误分类点<code>(x,y)</code>，对w,b进行更新：<img src="media/14890437581129/14890475562013.jpg" alt=""/><br/>
-式中η(0&lt;η≤1)是步长，在统计学习中又称为学习率，这样，通过迭代可以期待损失函数不断减小，直到为0，综上所述，得到如下算法：<img src="media/14890437581129/14890483224015.jpg" alt=""/><br/>
-这种学习算法直观上有如下解释：当一个实例点被误分类，即位于分离超平面的错误一侧时，则调整w,b的值，使分离超平面向该误分类点的一侧移动，以减少该误分类点与超平面间的距离，直至超平面越过该误分类点使其被正确分类。</p>
-
-<p>上述算法是感知机学习的基本算法，对应于后面的对偶形式，称为原始形式。感知机学习算法简单且易于实现。</p>
-
-<p>该算法使用方法如下：<br/>
-<img src="media/14890437581129/14890503525005.jpg" alt=""/><br/>
-<img src="media/14890437581129/14890503748369.jpg" alt=""/><br/>
-<img src="media/14890437581129/14890503942221.jpg" alt=""/><br/>
-这是在计算中误分类点先后取<code>x1,x3,x3,x3,x1,x3,x3</code>得到的分离超平面和感 知机模型，如果在计算中误分类点依次取<code>x1,x3,x3,x3,x2,x3,x3,x3,x1,x3,x3</code>那么得到的分离超平面是2x<sup>1</sup>+x<sup>2</sup>-5=0</p>
-
-<p>可见，感知机学习算法由于采用不同的初值或选取不同的误分类点，解可以不同。</p>
+<p>具体方法参见<a href="http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001386820064557c69858840b4c48d2b8411bc2ea9099ba000">廖老师的教学网站</a></p>
 
 
 </div>
@@ -339,15 +359,13 @@
   <div class="large-6 columns">
 	<div class="text-left" style="padding:15px 0px;">
 		
-	        <a href="14891071598954.html"  title="Previous Post: 感知机算法的收敛性">&laquo; 感知机算法的收敛性</a>
-	    
 	</div>
   </div>
   <div class="large-6 columns">
 	<div class="text-right" style="padding:15px 0px;">
 		
-	        <a href="14878150947508.html" 
-	        title="Next Post: MNIST机器学习入门">MNIST机器学习入门 &raquo;</a>
+	        <a href="14926766188460.html" 
+	        title="Next Post: 面向对象高级编程">面向对象高级编程 &raquo;</a>
 	    
 	</div>
   </div>
@@ -360,7 +378,7 @@
 </div>
 <script type="text/javascript">
 	$(function(){
-		var currentURL = '14890437581129.html';
+		var currentURL = '14927355881897.html';
 		$('#side-nav a').each(function(){
 			if($(this).attr('href') == currentURL){
 				$(this).parent().addClass('active');

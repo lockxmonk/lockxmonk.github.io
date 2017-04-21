@@ -105,6 +105,8 @@
         <li><label>Python练习</label></li>
 
           
+            <li><a title="使用元类" href="14927355881897.html">使用元类</a></li>
+          
             <li><a title="面向对象高级编程" href="14926766188460.html">面向对象高级编程</a></li>
           
             <li><a title="类和实例" href="14926712777578.html">类和实例</a></li>
@@ -200,6 +202,8 @@
                     
                       <li class="side-title"><span>Python练习</span></li>
                         
+                          <li><a title="使用元类" href="14927355881897.html">使用元类</a></li>
+                        
                           <li><a title="面向对象高级编程" href="14926766188460.html">面向对象高级编程</a></li>
                         
                           <li><a title="类和实例" href="14926712777578.html">类和实例</a></li>
@@ -240,31 +244,30 @@
 
 	
 		<div class="markdown-body">
-		<h1>Map/Reduce</h1>
+		<h1>Filter</h1>
 
-		<p>1.利用map()函数，把用户输入的不规范的英文名字，变为首字母大写，其他小写的规范名字。输入：[&#39;adam&#39;, &#39;LISA&#39;, &#39;barT&#39;]，输出：[&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]。</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def upper(s):
-    return s.capitalize()
-print(map(upper, [&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]) )
-</code></pre>
-
-<p><img src="media/14920523812017/14920538865556.jpg" alt=""/></p>
-
-<p>2.Python提供的sum()函数可以接受一个list并求和，请编写一个prod()函数，可以接受一个list并利用reduce()求积。</p>
+		<p><strong>1.请尝试用filter()删除1~100的素数。</strong></p>
 
 <pre><code class="language-py"># -*- coding: utf-8 -*-
-def prod(x,y):
-    return x*y
-m = [1,2,3,4]
-print (reduce(prod,m))
+num = range(1, 101)
+
+def prime_num(s):
+    for x in range(2, s):
+        if (s % x) == 0:
+            return True
+        else:
+            return False
+print filter(prime_num, num)
 </code></pre>
 
-<p><img src="media/14920523812017/14920539075590.jpg" alt=""/></p>
+<p>结果：<br/>
+<img src="media/14920527647833/14920538585519.jpg" alt=""/></p>
 
 
 		</div>
+	
+
+ 
 	
 
   
