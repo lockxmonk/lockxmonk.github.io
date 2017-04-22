@@ -105,6 +105,10 @@
         <li><label>Python练习</label></li>
 
           
+            <li><a title="调试" href="14928307466218.html">调试</a></li>
+          
+            <li><a title="错误、调试和测试" href="14928231077736.html">错误、调试和测试</a></li>
+          
             <li><a title="使用元类" href="14927355881897.html">使用元类</a></li>
           
             <li><a title="面向对象高级编程" href="14926766188460.html">面向对象高级编程</a></li>
@@ -202,6 +206,10 @@
                     
                       <li class="side-title"><span>Python练习</span></li>
                         
+                          <li><a title="调试" href="14928307466218.html">调试</a></li>
+                        
+                          <li><a title="错误、调试和测试" href="14928231077736.html">错误、调试和测试</a></li>
+                        
                           <li><a title="使用元类" href="14927355881897.html">使用元类</a></li>
                         
                           <li><a title="面向对象高级编程" href="14926766188460.html">面向对象高级编程</a></li>
@@ -244,141 +252,156 @@
 
 	
 		<div class="markdown-body">
-		<h1>英语考试词汇部分总结</h1>
+		<h1>第一章 熟悉Objective-C</h1>
 
-		<h2 id="toc_0">第一章</h2>
+		<h2 id="toc_0">第1条：了解Objective—C语言的起源</h2>
 
-<pre><code> striking——显著地，突出的
- slender ——苗条的，瘦的
- impeccable——无瑕疵的，没有缺点的
- discernible——可辨别的，可识别的
- sloppy——草率的，粗心的
- sagaciousness——睿智，聪颖
- arrogance——自大，傲慢
- vow——誓言
- homonym——同音异议词
- glisten——晶莹剔透
- fix the blame on——归罪与。。 
+<p>OC语言使用“消息结构”（messageing structure）而不是函数调用。OC是由Smalltalk演化而来。主要区别为：</p>
+
+<pre><code>//Messaging(OC)  
+
+Object *obj = [Object new];  
+[obj performWith:par1 and:par2];
+   
+//Function(C++)  
+
+Object *obj = new Object;    
+obj-&gt;perform(par1,par2);   
 </code></pre>
 
-<pre><code>mess up——screwed up——搞砸
-poking——stab——戳
-toting——drag——拖，手提
-called my kid name——insult kids——责怪孩子
-predictor——indicator——指示，预示
-manifesto——presentation——展示，告示
-anagram——word play——文字游戏
-traumatize——hurt——使。。。收到创伤
-collaborative——cooperative——合作
-disciplinarians——authoritarian——权利主义者
+<p>关键区别在于：使用消息结构的语言，其运行时所应执行的代码由运行环境所决定；而使用函数调用的语言，则由编译器决定。</p>
+
+<p>所有的OC语言的对象都应该如下声明：</p>
+
+<pre><code>NSString *str = @“The string”；
 </code></pre>
 
-<h2 id="toc_1">第二章</h2>
+<p>因为所有的对象所占内存总是分配在“堆空间”中，而绝不会分配在“栈”（stack）上。一般变量分配在栈上。<img src="media/14841901813337/QQ20170112-0@2x.png" alt="QQ20170112-0@2x"/></p>
 
-<pre><code>molecular——分子
-hyperactive——过度活跃的
-integrated——整合，合并
-retention——保留
-condense——浓缩
-clerical——文书方面的
-alert——警告
-aesthetically——美学上的
-compelling——令人瞩目的
-undeniably——不能否认的
+<p>要点：<br/>
+* OC为C语言添加了面向对象的特性，是它的超集。OC使用动态绑定的消息结构，也就是说，在运行时才会检查对象类型。接收一条消息之后，究竟应该执行何种代码，由运行时环境决定而不是编译器。<br/>
+* 理解C语言的核心概念有助于写好OC程序。尤其是要掌握内存模型和指针。</p>
+
+<h2 id="toc_1">第2条：在类的头文件中尽量少引入其它头文件</h2>
+
+<p>例如：<br/>
+创建一个EOCPerson的类，其中属性中包含有EOCEmployer的类。</p>
+
+<pre><code>//EOCPerson.h
+#import&lt;Foundation/Foundation.h&gt;
+@interface EOCPerson:NSObject
+@property (nonatomic,copy) NSString *firstname;
+@property (nonatomic,copy) NSString *lastname;
+@property (nonatomic,strong) EOCEmployer *employer;
+@end
 </code></pre>
 
-<pre><code>dispel——eliminate——驱散，消除
-overwhelming——tough——艰难，压倒性的
-extrinsic——exterior——外在的
-infamous——notorious——声名狼藉的
-recruit——select——雇佣，选择
-aptitude——talent——天赋
-enrichment——abundance——丰富，充裕
-outperformed——outdone——胜过，优于
-replicate——repeat——重复，复制
-integral——entire——完整的，全部的
+<p>这样做常见的方法是在头部引入：</p>
+
+<pre><code>#import “EOCEmployer.h”
 </code></pre>
 
-<h2 id="toc_2">第三章</h2>
+<p>但是我们在这里不需要知道EOCEmployer这个类的全部细节，只需要知道这里有一个类就好。所以有一个方法为：</p>
 
-<pre><code>in theory——在理论上
-deficiency——缺陷，缺少
-reveling in——得意于，纵情于
-influx——流入
-for the sake of——为了，原因是
-preoccupation——全神贯注
-deviation——偏差
-facilitate——方便，便于
-elaborate——详细描述
-boggle at——吃惊，害怕
+<pre><code>@class EOCEmployer；
 </code></pre>
 
-<pre><code>fused——merged——混合，合并
-encompass——comprise——由。。。组成
-fortified——strengthened——加强
-segregation——separation——分离
-mounting——increasing——日益增长
-ethnically——racially——种族的，民族的
-muffle——repress——消除，安抚
-wiping——clearing out——擦除
-touched upon——触及到
-counter——contrary to——相反
+<p>这叫做前向声明。现在EOCPerson的头文件变为：</p>
+
+<pre><code>//EOCPerson.h
+#import&lt;Foundation/Foundation.h&gt;
+
+@class EOCEmployer；
+
+@interface EOCPerson:NSObject
+@property (nonatomic,copy) NSString *firstname;
+@property (nonatomic,copy) NSString *lastname;
+@property (nonatomic,strong) EOCEmployer *employer;
+@end
 </code></pre>
 
-<h2 id="toc_3">第四章</h2>
+<p>但是EOCPerson类的实现文件则需要引入EOCEmployer类的头文件，因为知道其中所有的接口细节。于是，实现文件就是：</p>
 
-<pre><code>villain——混蛋，恶棍
-with regard to——关于，涉及到
-eclipse——日蚀
-condemn——谴责
-immense——巨大的，极大的
-treacherous——骗人的，奸诈的
-wield——使用
-depict——描绘
-mediate——调解，解决
-alternative——非正常的，独特的
+<pre><code>//EOCPerson.m
+#import &quot;EOCPerson.h&quot;;
+#import &quot;EOCEmployer.h&quot;
+
+@implementation EOCPerson
+//.....
+@end
 </code></pre>
 
-<pre><code>in conflict with——in opposition to——和。。冲突
-visionary——foreseer——有先见之明的人
-brink——edge——边缘
-reckless——bold——不仔细的，鲁莽的
-integrate——put together——整合
-initiate——lead——开始，带领
-be consistent with——be the same as——与。。一致
-setback——discouragement——挫折
-dazzle——impress——使人印象深刻
-strive for——try hard for——努力追求
+<p>要点：<br/>
+* 除非的确有必要，否则不要引入头文件。一般来说，应该在某个类的头文件中使用向前声明来提及别的类，并在实现文件中引入那些类的头文件。这样做可以尽量降低类之间的耦合。<br/>
+* 有时无法使用向前声明，比如要声明某各类所遵循的一项协议，这种情况下，尽量吧“该类所遵循的协议“的这条声明移至”class-continuation分类“中。如果不行的话，就把协议单独放在一个头文件中，然后将其引入。</p>
+
+<h2 id="toc_2">第3条：多用字面量语法，少用与之等价的方法</h2>
+
+<p>从OC1.0开始，有一种非常简单的方式创建NSString对象。这就是”字符串字面量（string literal）“，其语法如下所示：</p>
+
+<pre><code>NSString *string = @”effective OC 2.0“；
 </code></pre>
 
-<h2 id="toc_4">第五章</h2>
+<p>如果不用这种语法的话，就要以常见的alloc以及init方法来分配和初始化对象了。</p>
 
-<pre><code>magnitude——extent——量级，大小
-boost——raised——促进，提升
-access——opportunity to use——可以使用
-exponential leap——rapid increase——指数级增长
-demise——death——死亡
-sagacity——insight——洞察力
-conducive——beneficial——有助于
-defy——refute——反驳
-available——obtainable——可获得的
-supersede——replace——取代
+<h3 id="toc_3">字面数值</h3>
+
+<p>有时候需要把整数、浮点数、布尔值封入OC对象中。这种情况下可以使用NSNumber类，该类可以处理多种类型的数值。最原始的创建方法为：</p>
+
+<pre><code>NSNumber *someNumber = [NSNumber numberWithInt:1];
 </code></pre>
 
-<pre><code>permeate——渗透
-unprecedented——空前的
-dissemination——传播
-notorious——声名狼藉
-herald——预示，标志
-authoritarian——独裁主义
-premium——高端，优质
-underscore——强调
-downside——缺点，负面
-authoritative——权威性 
+<p>上面这行代码创建了一个数字，将它的值设为了1.然而使用字面量能令代码更为整洁：</p>
+
+<pre><code>NSNumber *someNumber = @1；
 </code></pre>
+
+<h3 id="toc_4">字面量数组</h3>
+
+<p>创建方法为：</p>
+
+<pre><code>NSArray *animals =@[@&quot;cat&quot;,@&quot;dog&quot;,@&quot;mouse&quot;,@&quot;badger&quot;];
+</code></pre>
+
+<p>使用字面量获取则为：</p>
+
+<pre><code>NSString *dog = animals[1];
+</code></pre>
+
+<h3 id="toc_5">字面量字典</h3>
+
+<p>”字典“（dictionary）是一种映射性数据结构，可以向其中添加键值对。与数组一样字面量编写方式为：</p>
+
+<pre><code>NSDictionary *personData = @{@&quot;firstName&quot;:@&quot;Matt&quot;,
+                            @&quot;lastName&quot;:@&quot;Galloway&quot;,
+                            @&quot;age&quot;:@28}
+
+</code></pre>
+
+<h3 id="toc_6">可变数组与字典</h3>
+
+<p>通过取下标操作，可以访问数组中某个下标或者字典中某个键所对应的元素。如果数组与字典对象试课变得（mutable），那么也能通过下标修改其中的元素值。例如：</p>
+
+<pre><code>mutableArray[1] = @&quot;dog&quot;;
+mutableDictionary[@&quot;lastName&quot;] = @&quot;Galloway&quot;; 
+</code></pre>
+
+<h2 id="toc_7">要点</h2>
+
+<ul>
+<li>应该使用字面量语法来创建字符串、数值、数组、字典。与创建此类对象的常规方法相比，这么做更加简明扼要。</li>
+<li>应该通过下标来操作和访问数组小标或者字典中的键所对应的元素。</li>
+<li>用字面量语法创建数组或者字典时，若值中有nil，则会抛出异常。因此，务必保证值中不包含有nil。</li>
+</ul>
 
 
 		</div>
+	
+
+ 
+	
+
+ 
 	
 
   
