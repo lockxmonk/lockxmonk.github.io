@@ -105,6 +105,8 @@
         <li><label>Python练习</label></li>
 
           
+            <li><a title="单元测试" href="14928429198094.html">单元测试</a></li>
+          
             <li><a title="调试" href="14928307466218.html">调试</a></li>
           
             <li><a title="错误、调试和测试" href="14928231077736.html">错误、调试和测试</a></li>
@@ -206,6 +208,8 @@
                     
                       <li class="side-title"><span>Python练习</span></li>
                         
+                          <li><a title="单元测试" href="14928429198094.html">单元测试</a></li>
+                        
                           <li><a title="调试" href="14928307466218.html">调试</a></li>
                         
                           <li><a title="错误、调试和测试" href="14928231077736.html">错误、调试和测试</a></li>
@@ -249,6 +253,28 @@
 
  <div class="markdown-body">
 <h1>调试</h1>
+
+<ul>
+<li>
+<a href="#toc_0">断言</a>
+</li>
+<li>
+<a href="#toc_1">logging</a>
+</li>
+<li>
+<a href="#toc_2">pdb</a>
+</li>
+<li>
+<a href="#toc_3">pdb.set_trace()</a>
+</li>
+<li>
+<a href="#toc_4">IDE</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_5">总结</a>
+
 
 <p>程序能一次写完并正常运行的概率很小，基本不超过1%。总会有各种各样的bug需要修正。有的bug很简单，看看错误信息就知道，有的bug很复杂，我们需要知道出错时，哪些变量的值是正确的，哪些变量的值是错误的，因此，需要一整套调试程序的手段来修复bug。</p>
 
@@ -311,6 +337,51 @@ logging.basicConfig(level=logging.INFO)
 
 <p><code>logging</code>的另一个好处是通过简单的配置，<strong>一条语句可以同时输出到不同的地方，比如console和文件</strong>。</p>
 
+<h2 id="toc_2">pdb</h2>
+
+<p>第4种方式是启动Python的调试器pdb，让程序以单步方式运行，可以随时查看运行状态。我们先准备好程序：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+s = &#39;0&#39;
+n = int(s)
+print 10 / n
+</code></pre>
+
+<p>然后启动：<br/>
+<img src="media/14928307466218/14928416845706.jpg" alt=""/></p>
+
+<p>输入命令<code>l</code>来查看代码,输入命令<code>n</code>可以单步执行代码,任何时候都可以输入命令<code>p</code> 变量名来查看变量,输入命令<code>q</code>结束调试，退出程序.</p>
+
+<h2 id="toc_3">pdb.set_trace()</h2>
+
+<p>这个方法也是用<code>pdb</code>，但是不需要单步执行，我们只需要<code>import pdb</code>，然后，在可能出错的地方放一个<code>pdb.set_trace()</code>，就可以设置一个断点：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import pdb
+
+s = &#39;0&#39;
+n = int(s)
+pdb.set_trace()  # 运行到这里会自动暂停
+print 10 / n
+
+</code></pre>
+
+<p><img src="media/14928307466218/14928418957951.jpg" alt=""/><br/>
+运行代码，程序会自动在<code>pdb.set_trace()</code>暂停并进入pdb调试环境，可以用命令<code>p</code>查看变量，或者用命令<code>c</code>继续运行</p>
+
+<p>这个方式比直接启动pdb单步调试效率要高很多，但也高不到哪去。</p>
+
+<h2 id="toc_4">IDE</h2>
+
+<p>如果想要有好的设置断点、单步执行体验，就需要一个支持调试功能的IDE。目前比较好的<strong>Python IDE有PyCharm</strong>：<br/>
+<a href="https://www.jetbrains.com/pycharm">https://www.jetbrains.com/pycharm</a></p>
+
+<p>写程序最痛苦的事情莫过于调试，程序往往会以你意想不到的流程来运行，你期待执行的语句其实根本没有执行，这时候，就需要调试了。</p>
+
+<h1 id="toc_5">总结</h1>
+
+<p><strong>虽然用IDE调试起来比较方便，但是最后你会发现，<code>logging</code>才是终极武器。</strong></p>
+
 
 </div>
 
@@ -321,6 +392,8 @@ logging.basicConfig(level=logging.INFO)
   <div class="large-6 columns">
 	<div class="text-left" style="padding:15px 0px;">
 		
+	        <a href="14928429198094.html"  title="Previous Post: 单元测试">&laquo; 单元测试</a>
+	    
 	</div>
   </div>
   <div class="large-6 columns">

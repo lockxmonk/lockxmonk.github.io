@@ -4,7 +4,7 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-04-22T11:12:05+08:00</updated>
+  <updated>2017-04-22T11:33:32+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
@@ -14,11 +14,210 @@
 
   
   <entry>
+    <title type="html"><![CDATA[单元测试]]></title>
+    <link href="https://lockxmonk.github.io/14928429198094.html"/>
+    <updated>2017-04-22T14:35:19+08:00</updated>
+    <id>https://lockxmonk.github.io/14928429198094.html</id>
+    <content type="html"><![CDATA[
+<p>我们来编写一个<code>Dict</code>类，这个类的行为和<code>dict</code>一致，但是可以通过属性来访问，用起来就像下面这样：</p>
+
+<pre><code>&gt;&gt;&gt; d = Dict(a=1, b=2)
+&gt;&gt;&gt; d[&#39;a&#39;]
+1
+&gt;&gt;&gt; d.a
+1
+</code></pre>
+
+<p>mydict.py代码为：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Dict(dict):
+
+    def __init__(self, **kw):
+        super(Dict, self).__init__(**kw)
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(r &quot; &#39;Dict&#39; object has no atr &#39;%s&#39; &quot; % key)
+        else:
+            pass
+        finally:
+            pass
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+</code></pre>
+
+<p>为了编写单元测试，我们需要引入Python自带的<code>unittest</code>模块，编写<code>mydict_test.py</code>如下：</p>
+
+<pre><code class="language-py">import unittest
+
+from mydict import Dict
+
+
+class TestDict(unittest.TestCase):
+
+    def test_init(self):
+        d = Dict(a=1, b=&#39;test&#39;)
+        self.assertEquals(d.a, 1)
+        self.assertEquals(d.b, &#39;test&#39;)
+        self.assertTrue(isinstance(d, dict))
+
+    def test_key(self):
+        d = Dict()
+        d[&#39;key&#39;] = &#39;value&#39;
+        self.assertEquals(d.key, &#39;value&#39;)
+
+    def test_attr(self):
+        d = Dict()
+        d.key = &#39;value&#39;
+        self.assertTrue(&#39;key&#39; in d)
+        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
+
+    def test_keyerror(self):
+        d = Dict()
+        with self.assertRaises(KeyError):
+            value = d[&#39;empty&#39;]
+
+    def test_attrerror(self):
+        d = Dict()
+        with self.assertRaises(AttributeError)
+            value = d.empty
+
+</code></pre>
+
+<p>编写单元测试时，我们需要编写一个测试类，从<code>unittest.TestCase</code>继承。</p>
+
+<p>以<code>test</code>开头的方法就是测试方法，不以<code>test</code>开头的方法不被认为是测试方法，测试的时候不会被执行。</p>
+
+<p>对每一类测试都需要编写一个<code>test_xxx()</code>方法。由于<code>unittest.TestCase</code>提供了很多内置的条件判断，我们只需要调用这些方法就可以断言输出是否是我们所期望的。最常用的断言就是<code>assertEquals()：</code></p>
+
+<pre><code class="language-py">self.assertEquals(abs(-1), 1) # 断言函数返回的结果与1相等
+</code></pre>
+
+<p>另一种重要的断言就是期待抛出指定类型的<code>Error</code>，比如通过<code>d[&#39;empty&#39;]</code>访问不存在的key时，断言会抛出<code>KeyError</code>：</p>
+
+<pre><code class="language-py">with self.assertRaises(KeyError):
+    value = d[&#39;empty&#39;]
+</code></pre>
+
+<p>而通过<code>d.empty</code>访问不存在的<code>key</code>时，我们期待抛出<code>AttributeError</code>：</p>
+
+<pre><code class="language-py">with self.assertRaises(AttributeError):
+    value = d.empty
+</code></pre>
+
+<h2 id="toc_0">运行单元测试</h2>
+
+<p>一旦编写好单元测试，我们就可以运行单元测试。最简单的运行方式是在<code>mydict_test.py</code>的最后加上两行代码：</p>
+
+<pre><code class="language-py">if __name__ == &#39;__main__&#39;:
+    unittest.main()
+</code></pre>
+
+<p>这样就可以把<code>mydict_test.py</code>当做正常的python脚本运行：</p>
+
+<p><img src="media/14928429198094/14928450280463.jpg" alt=""/></p>
+
+<p>另一种更常见的方法是在命令行通过参数<code>-m unittest</code>直接运行单元测试:<br/>
+<img src="media/14928429198094/14928451217135.jpg" alt=""/></p>
+
+<p>这是推荐的做法，因为这样可以一次批量运行很多单元测试，并且，有很多工具可以自动来运行这些单元测试。</p>
+
+<h2 id="toc_1">setUp与tearDown</h2>
+
+<p>可以在单元测试中编写两个特殊的<code>setUp()</code>和<code>tearDown()</code>方法。这两个方法会分别在每<strong>调用一个测试方法的前后分别被执行</strong>。</p>
+
+<p><code>setUp()和tearDown()</code>方法有什么用呢？设想你的测试需要启动一个数据库，这时，就可以在<code>setUp()</code>方法中连接数据库，在<code>tearDown()</code>方法中关闭数据库，这样，不必在每个测试方法中重复相同的代码：</p>
+
+<pre><code class="language-py">import unittest
+
+from mydict import Dict
+
+class TestDict(unittest.TestCase):
+
+    def setUp(self):    
+        print &#39;setUp...&#39;
+
+    def tearDown(self):
+        print &#39;tearDown...&#39;
+    
+    def test_init(self):    
+        d = Dict(a=1, b=&#39;test&#39;)
+        self.assertEquals(d.a, 1)   
+        self.assertEquals(d.b, &#39;test&#39;)
+        self.assertTrue(isinstance(d, dict))
+
+    def test_key(self):
+        d = Dict()
+        d[&#39;key&#39;] = &#39;value&#39;
+        self.assertEquals(d.key, &#39;value&#39;)
+
+    def test_attr(self):
+        d = Dict()
+        d.key = &#39;value&#39;
+        self.assertTrue(&#39;key&#39; in d)
+        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
+
+    def test_keyerror(self):
+        d = Dict()
+        with self.assertRaises(KeyError):
+            value = d[&#39;empty&#39;]
+
+    def test_attrerror(self):
+        d = Dict()
+        with self.assertRaises(AttributeError):
+            value = d.empty
+
+if __name__ == &#39;__main__&#39;:
+     unittest.main()
+</code></pre>
+
+<p><img src="media/14928429198094/14928470586520.jpg" alt=""/></p>
+
+<h2 id="toc_2">总结</h2>
+
+<ol>
+<li><p>单元测试可以有效地测试某个程序模块的行为，是未来重构代码的信心保证。</p></li>
+<li><p>单元测试的测试用例要覆盖常用的输入组合、边界条件和异常。</p></li>
+<li><p>单元测试代码要非常简单，如果测试代码太复杂，那么测试代码本身就可能有bug。</p></li>
+<li><p>单元测试通过了并不意味着程序就没有bug了，但是不通过程序肯定有bug。</p></li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[调试]]></title>
     <link href="https://lockxmonk.github.io/14928307466218.html"/>
     <updated>2017-04-22T11:12:26+08:00</updated>
     <id>https://lockxmonk.github.io/14928307466218.html</id>
     <content type="html"><![CDATA[
+<ul>
+<li>
+<a href="#toc_0">断言</a>
+</li>
+<li>
+<a href="#toc_1">logging</a>
+</li>
+<li>
+<a href="#toc_2">pdb</a>
+</li>
+<li>
+<a href="#toc_3">pdb.set_trace()</a>
+</li>
+<li>
+<a href="#toc_4">IDE</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_5">总结</a>
+
+
 <p>程序能一次写完并正常运行的概率很小，基本不超过1%。总会有各种各样的bug需要修正。有的bug很简单，看看错误信息就知道，有的bug很复杂，我们需要知道出错时，哪些变量的值是正确的，哪些变量的值是错误的，因此，需要一整套调试程序的手段来修复bug。</p>
 
 <p>第一种方法简单直接粗暴有效，就是用<code>print</code>把可能有问题的变量打印出来看看.（这种方法不详细说明了，基本每个写代码的人都比较熟悉这种方法）</p>
@@ -79,6 +278,51 @@ logging.basicConfig(level=logging.INFO)
 这就是<code>logging</code>的好处，它允许你指定记录信息的级别，有<code>debug，info，warning，error</code>等几个级别，当我们指定<code>level=INFO</code>时，<code>logging.debug</code>就不起作用了。同理，指定<code>level=WARNING</code>后，<code>debug和info</code>就不起作用了。这样一来，你可以放心地输出不同级别的信息，也不用删除，最后统一控制输出哪个级别的信息。</p>
 
 <p><code>logging</code>的另一个好处是通过简单的配置，<strong>一条语句可以同时输出到不同的地方，比如console和文件</strong>。</p>
+
+<h2 id="toc_2">pdb</h2>
+
+<p>第4种方式是启动Python的调试器pdb，让程序以单步方式运行，可以随时查看运行状态。我们先准备好程序：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+s = &#39;0&#39;
+n = int(s)
+print 10 / n
+</code></pre>
+
+<p>然后启动：<br/>
+<img src="media/14928307466218/14928416845706.jpg" alt=""/></p>
+
+<p>输入命令<code>l</code>来查看代码,输入命令<code>n</code>可以单步执行代码,任何时候都可以输入命令<code>p</code> 变量名来查看变量,输入命令<code>q</code>结束调试，退出程序.</p>
+
+<h2 id="toc_3">pdb.set_trace()</h2>
+
+<p>这个方法也是用<code>pdb</code>，但是不需要单步执行，我们只需要<code>import pdb</code>，然后，在可能出错的地方放一个<code>pdb.set_trace()</code>，就可以设置一个断点：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import pdb
+
+s = &#39;0&#39;
+n = int(s)
+pdb.set_trace()  # 运行到这里会自动暂停
+print 10 / n
+
+</code></pre>
+
+<p><img src="media/14928307466218/14928418957951.jpg" alt=""/><br/>
+运行代码，程序会自动在<code>pdb.set_trace()</code>暂停并进入pdb调试环境，可以用命令<code>p</code>查看变量，或者用命令<code>c</code>继续运行</p>
+
+<p>这个方式比直接启动pdb单步调试效率要高很多，但也高不到哪去。</p>
+
+<h2 id="toc_4">IDE</h2>
+
+<p>如果想要有好的设置断点、单步执行体验，就需要一个支持调试功能的IDE。目前比较好的<strong>Python IDE有PyCharm</strong>：<br/>
+<a href="https://www.jetbrains.com/pycharm">https://www.jetbrains.com/pycharm</a></p>
+
+<p>写程序最痛苦的事情莫过于调试，程序往往会以你意想不到的流程来运行，你期待执行的语句其实根本没有执行，这时候，就需要调试了。</p>
+
+<h1 id="toc_5">总结</h1>
+
+<p><strong>虽然用IDE调试起来比较方便，但是最后你会发现，<code>logging</code>才是终极武器。</strong></p>
 
 ]]></content>
   </entry>
@@ -1960,163 +2204,6 @@ print (reduce(prod,m))
 <p><strong>下面给出IIS算法：</strong><br/>
 <img src="media/14920445399813/14920487060621.jpg" alt=""/><br/>
 <img src="media/14920445399813/14920491294532.jpg" alt=""/></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[logistic regression(逻辑斯蒂回归)]]></title>
-    <link href="https://lockxmonk.github.io/14917858710123.html"/>
-    <updated>2017-04-10T08:57:51+08:00</updated>
-    <id>https://lockxmonk.github.io/14917858710123.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">逻辑斯蒂回归模型</a>
-<ul>
-<li>
-<a href="#toc_1">逻辑斯蒂分布</a>
-</li>
-<li>
-<a href="#toc_2">二项逻辑斯蒂回归模型</a>
-</li>
-<li>
-<a href="#toc_3">模型参数估计</a>
-</li>
-<li>
-<a href="#toc_4">多项了逻辑斯蒂回归</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_5">最大熵模型</a>
-<ul>
-<li>
-<a href="#toc_6">最大熵原理</a>
-<ul>
-<li>
-<a href="#toc_7">最大熵模型的定义</a>
-</li>
-<li>
-<a href="#toc_8">最大熵模型的学习</a>
-</li>
-<li>
-<a href="#toc_9">极大似然估计</a>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>简介：逻辑斯谛回归（logistic regression)是统计学习中的经典分类方法.最大熵是 概率模型学习的一个准则，将其推广到分类问题得到最大熵模型(maximum entropy model).逻辑斯谛回归模型与最大熵模型都属于对数线性模型.</p>
-
-<h2 id="toc_0">逻辑斯蒂回归模型</h2>
-
-<h3 id="toc_1">逻辑斯蒂分布</h3>
-
-<p><img src="media/14917858710123/14918919297549.jpg" alt=""/></p>
-
-<h3 id="toc_2">二项逻辑斯蒂回归模型</h3>
-
-<p>二项逻辑斯诗回归模型（binomial logistic regression model)是一种分类模型，由条件概率分布\(P(Y|X)\)表示，形式为参数化的逻辑斯谛分布.这里，随机变量X取值为实数，随机变量Y取值为1或0.我们通过监督学习的方法来估计模型参数.</p>
-
-<p><img src="media/14917858710123/14918930389977.jpg" alt=""/><br/>
-现在考査逻辑斯谛回归模型的特点.一个事件的几率（odds)是指该事件发生的概率与该事件不发生的概率的比值.如果事件发生的概率是p,那么该亊件的几率是\(\frac{1}{1-p}\) ,该事件的对数几率(log odds)或logit函数是<br/>
-<img src="media/14917858710123/14918936472837.jpg" alt=""/><br/>
-<font color = red>这就是说，在逻辑斯谛回归模型中，输出y = l的对数几率是输入x的线性函数.或者说，输出Y=1的对数几率是由输入x的线性函数表示的模型，即逻辑斯谛回归模型.</font></p>
-
-<p>换一个角度看，考虑对输入x进行分类的线性函数\(w*x\),其值域为实数域.注意，这里\(x\in R^{n+1},w \in R^{n+1}\).通过逻辑斯谛回归模型定义式(6.5)可以将线性函数\(w*x\)转换为概率：<br/>
-<img src="media/14917858710123/14918951209571.jpg" alt=""/></p>
-
-<p><strong>这时，线性函数的值越接近正无穷，概率值就越接近1；线性函数的值越接近负无穷，概率值就越接近0(如图6.1所示).这样的模型就是逻辑斯谛回归模型.</strong></p>
-
-<h3 id="toc_3">模型参数估计</h3>
-
-<p>逻辑斯谛回归模型学习时，对于给定的训练数据集\(T=\{{(x_1,y_1),(x_2,y_2)...(x_N,y_N)\}}\),其中\(x_i\in R^n,y_i \in \{{0,1\}}\)，<strong>可以应用极大似然估计法估计模型参数，从而得到逻辑斯谛回归模型.</strong><br/>
-<img src="media/14917858710123/14918969386189.jpg" alt=""/></p>
-
-<h3 id="toc_4">多项了逻辑斯蒂回归</h3>
-
-<p>上面介绍的逻辑斯谛回归模型是二项分类模型，用于二类分类.可以将其推广为多项逻辑斯缔回归模型(multi-nominal logistic regression model)，用于多类分类.假设离散型随机变量Y的取值集合是{1,2...K}，那么多项逻辑斯谛回归模型是:<br/>
-<img src="media/14917858710123/14918973306162.jpg" alt=""/><br/>
-二项逻辑斯谛回归的参数估计法也可以推广到多项逻辑斯讳回归.</p>
-
-<h1 id="toc_5">最大熵模型</h1>
-
-<p>最大熵模型（maximum entropy model)由最大熵原理推导实现.这里首先叙述一般的最大熵原理，然后讲解最大熵模型的推导，最后给出最大熵模型学习的形式。</p>
-
-<h2 id="toc_6">最大熵原理</h2>
-
-<p>最大熵原理是概率模型学习的一个准则.<font color=red>最大熵原理认为，学习概率模型时，在所有可能的概率模型（分布）中，熵最大的模型是最好的模型.通常用约束条件来确定概率模型的集合，所以，最大熵原理也可以表述为在满足约束条件的模型集合中选取熵最大的模型.</font></p>
-
-<p>假设离散随机变量X的概率分布是p(X),则其熵是：<br/>
-<img src="media/14917858710123/14919006601164.jpg" alt=""/><br/>
-直观地，<font color=red>最大熵原理认为要选择的概率模型首先必须满足已有的事实，即约束条件.在没有更多信息的情况下，那些不确定的部分都是“等可能的”.最大熵原理通过熵的最大化来表示等可能性.</font>“等可能”不容易操作，而熵则是一个可优化的数值指标.</p>
-
-<p>首先，可以通过一个简单的例子来了解一下最大熵原理.<br/>
-<img src="media/14917858710123/14919019478267.jpg" alt=""/></p>
-
-<p>图6.2提供了用最大熵原理进行概率模型选择的几何解释.概率模型集合P可由欧氏空间中的单纯形(simplex)表示，如左图的三角形(2-单纯形).一个点代表一个模型，整个单纯形代表模型集合.右图上的一条直线对应于一个约束 条件，直线的交集对应于满足所有约束条件的模型集合.一般地，这样的模型仍有无穷多个.学习的目的是在可能的模型集合中选择最优模型，而最大熵原理则给出最优模型选择的一个准则.<br/>
-<img src="media/14917858710123/14919593499530.jpg" alt=""/></p>
-
-<h3 id="toc_7">最大熵模型的定义</h3>
-
-<p>最大熵原理是统计学习的一般原理，将它应用到分类得到最大熵模型. </p>
-
-<p>假设分类模型是一个条件概率分布\(P(Y|X),X \in \mathcal{X} \subseteq R^n\)表示输入，\(Y \in \mathcal{Y}\)表示输出，\(\mathcal{X}\)和\(\mathcal{Y}\)分别是输入和输出的集合.这个模型表示的是对于给定的输入\(\mathcal{X}\)，以条作概率\(P(Y|X)\)输出Y.<br/>
-给定一个训练数据集<br/>
-\(T= {\{(x_1,y_1),(x_2,y_2),...(x_N,y_N)}\}\)<br/>
-学习的目标是用最大熵原理选择最好的分类模型。</p>
-
-<p>首先考虑模型应该满足的条件，给定训练数据集，可以确定联合分布P(X,Y)的经验分布和边缘分布P(X)的经验分布，分别以\(\tilde{P}(X,Y)和\tilde{P}(X)\)表示。这里：<br/>
-<img src="media/14917858710123/14919609290680.jpg" alt=""/><br/>
- 用特征函数\(f(x,y)描述输入x和输出y之间的某一个事实\)。其定义是：<br/>
- <img src="media/14917858710123/14919611561526.jpg" alt=""/><br/>
-特征函数f(x,y)关于经验分布\(\tilde{P}(X,Y)\)的期望值，用\(E_\tilde{P}(f)\)表示：<br/>
-<img src="media/14917858710123/14919613926643.jpg" alt=""/><br/>
-特征函数f(x,y)关于模型P(Y|X)与经验分布\(\tilde{P}(X)\)的期望值，用\(E_{P}(f)\)表示：<br/>
-<img src="media/14917858710123/14919617357953.jpg" alt=""/></p>
-
-<p>最大熵模型的定义为：<br/>
-<img src="media/14917858710123/14919625972087.jpg" alt=""/></p>
-
-<h3 id="toc_8">最大熵模型的学习</h3>
-
-<p>最大熵模型的学习过程就是求解最大熵模型的过程.最大熵模型的学习可以形式化为约束最优化问题.<br/>
-对于给定的训练数据集\(T= {\{(x_1,y_1),(x_2,y_2),...(x_N,y_N)}\}\)以及特征函数\(f_i(x,y),i=1,2,...n\),最大熵模型的学习等价于约束最优化问题：<br/>
-<img src="media/14917858710123/14919630413332.jpg" alt=""/><br/>
-求解约束最优化问题(6.14)〜(6.16)，所得出的解，就是最大熵模型学习的解.下面给出具体推导.<br/>
-这里，将约束最优化的原始问题转换为无约束最优化的对偶问题.通过求解对偶问题求解原始问题.<br/>
-<img src="media/14917858710123/14919633775267.jpg" alt=""/><br/>
-<img src="media/14917858710123/14919633957280.jpg" alt=""/></p>
-
-<p>下面举例来说明最大熵模型的计算：</p>
-
-<p><strong>例：假设随机变量X有5个取值{A,B,C,D,E}，要估计各个值的概率P(A),P(B),P(C),P(D),P(E).</strong></p>
-
-<p><img src="media/14917858710123/14919642672585.jpg" alt=""/><br/>
-<img src="media/14917858710123/14919642856866.jpg" alt=""/><br/>
-<img src="media/14917858710123/14919643007948.jpg" alt=""/></p>
-
-<h3 id="toc_9">极大似然估计</h3>
-
-<p>从以上最大熵模型学习中可以看出，最大熵模型是由式(6.22)、式(6.23)表示的 条件概率分布.下面证明对偶函数的极大化等价于最大嫡模型的极大似然估计.</p>
-
-<p>己知训练数据的经验概率分布\(\tilde{P}(X,Y)\),条件概率分布\(P(Y|X)\)的对数似然 函数表示为:<br/>
-<img src="media/14917858710123/14919659054476.jpg" alt=""/><br/>
-当提哦啊煎概率分布P(y|x)是最大熵模型(6.22)和(6.23)时,对数似然函数\(L_ \tilde{p}(P_w)\)为：<br/>
-<img src="media/14917858710123/14919660761710.jpg" alt=""/><br/>
-比较算式(6.26)和式(6.27),可得：<br/>
-<img src="media/14917858710123/14920442862315.jpg" alt=""/></p>
-
-<p>既然对偶函数\(\psi(w)\)等价于对数似然函数\(L_{\tilde p}(P_w)\) ,于是证明了最大熵模型学习中的对偶函数极大化等价于最大熵模型的极大似然估计这一事实.<br/>
-这样，最大熵模型的学习问题就转换为具体求解对数似然函数极大化或对偶函数极大化的问题.</p>
-
-<p>可以将最大熵模型写成更一般的形式.<br/>
-<img src="media/14917858710123/14920444597468.jpg" alt=""/><br/>
-最大熵模型与逻辑斯谛回归模型有类似的形式，它们又称为对数线性模型(log linear model).模型学习就是在给定的训练数据条件下对模型进行极大似然估计或正则化的极大似然估计.</p>
 
 ]]></content>
   </entry>
