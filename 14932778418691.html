@@ -1,0 +1,420 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  操作文件和目录 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0.html">深度学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>操作文件和目录</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/4/27</span>
+
+          
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>如果我们要操作文件、目录，可以在命令行下面输入操作系统提供的各种命令来完成。比如<code>dir</code>、<code>cp</code>等命令</p>
+
+<p>Python内置的<code>os</code>模块也可以直接调用操作系统提供的接口函数。</p>
+
+<p>打开Python交互式命令行，我们来看看如何使用<code>os</code>模块的基本功能：</p>
+
+<p><img src="media/14932778418691/14932780434722.jpg" alt=""/></p>
+
+<p>注意<code>uname()</code>函数在Windows上不提供，也就是说，os模块的某些函数是跟操作系统相关的。</p>
+
+<h2 id="toc_0">环境变量</h2>
+
+<p>在操作系统中定义的环境变量，全部保存在<code>os.environ</code>这个<code>dict</code>中，可以直接查看：<br/>
+<img src="media/14932778418691/14932785335515.jpg" alt=""/></p>
+
+<p>要获取某个环境变量的值，可以调用<code>os.getenv()</code>函数：</p>
+
+<p><img src="media/14932778418691/14932786096064.jpg" alt=""/></p>
+
+<h2 id="toc_1">操作文件和目录</h2>
+
+<p>操作文件和目录的函数一部分放在os模块中，一部分放在<code>os.path</code>模块中，这一点要注意一下。查看、创建和删除目录可以这么调用：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+print os.path.abspath(&#39;.&#39;)
+print os.path.join(&#39;/Users/liangzhonghao/Desktop/&#39;,&#39;test&#39;)
+
+#os.mkdir(&#39;/Users/liangzhonghao/Desktop/python&#39;)
+os.rmdir(&#39;/Users/liangzhonghao/Desktop/python&#39;)
+</code></pre>
+
+<p><img src="media/14932778418691/14932791801381.jpg" alt=""/></p>
+
+<p><code>os.path.splitext()</code>可以直接让你得到文件扩展名，很多时候非常方便：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+print os.path.splitext(&#39;/Users/liangzhonghao/Desktop/text.txt&#39;)
+</code></pre>
+
+<p><img src="media/14932778418691/14932792804815.jpg" alt=""/></p>
+
+<p><strong>这些合并、拆分路径的函数并不要求目录和文件要真实存在，它们只对字符串进行操作。</strong></p>
+
+<p><code>os</code>模块有很多功能，例如重命名文件，删除文件。但是他没有复制文件的功能。因为复制文件并非是由操作系统提供的系统调用。</p>
+
+<p>幸运的是<code>shutil</code>模块提供了<code>copyfile()</code>的函数，你还可以在<code>shutil</code>模块中找到很多实用函数，它们可以看做是<code>os</code>模块的补充。</p>
+
+<p><strong>最后看看如何利用Python的特性来过滤文件</strong>。比如我们要列出当前目录下的所有目录，只需要一行代码：</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; [x for x in os.listdir(&#39;.&#39;) if os.path.isdir(x)]
+</code></pre>
+
+<p><img src="media/14932778418691/14932797710625.jpg" alt=""/></p>
+
+<p>要列出所有的.py文件，也只需一行代码：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+print [x for x in os.listdir(&#39;.&#39;) if os.path.isfile(x) and os.path.splitext(x)[1]==&#39;.py&#39;]
+</code></pre>
+
+<p><img src="media/14932778418691/14932798281538.jpg" alt=""/></p>
+
+<h2 id="toc_2">小结</h2>
+
+<p>Python的os模块封装了操作系统的目录和文件操作，要注意这些函数有的在os模块中，有的在<code>os.path</code>模块中</p>
+
+<h2 id="toc_3">练习：</h2>
+
+<p>编写一个<code>search(s)</code>的函数，能在当前目录以及当前目录的所有子目录下查找文件名包含指定字符串的文件，并打印出完整路径：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+
+def search(s ,dir=os.path.abspath(&#39;.&#39;)):
+    for x in os.listdir(dir):
+        path = os.path.join(dir,x)
+        if s in x:
+            print path
+        elif os.path.isdir(path):
+            search(s,path)
+
+search(&#39;pr&#39;)
+
+</code></pre>
+
+<p><img src="media/14932778418691/14932810251430.jpg" alt=""/></p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="14932734930436.html" 
+          title="Next Post: I/O编程">I/O编程 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0.html"><strong>深度学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="14932778418691.html">操作文件和目录</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14932734930436.html">I/O编程</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14932622908500.html">文档测试</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14932573311953.html">图像去雾相关论文总结</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14928484245894.html">文档测试</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

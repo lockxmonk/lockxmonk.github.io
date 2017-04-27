@@ -8,17 +8,23 @@
   单元测试 - LZH007
   
   </title>
- <meta name="description" content="LZH的技术杂事小博客~">
- <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
     <link rel="stylesheet" href="asset/css/foundation.min.css" />
     <link rel="stylesheet" href="asset/css/docs.css" />
-
     <script src="asset/js/vendor/modernizr.js"></script>
     <script src="asset/js/vendor/jquery.js"></script>
-    <script src="asset/highlightjs/highlight.pack.js"></script>
-    <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-    <script>hljs.initHighlightingOnLoad();</script>
-    
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
   </head>
   <body class="antialiased hide-extras">
     
@@ -28,11 +34,32 @@
 
 <nav class="top-bar docs-bar hide-for-small" data-topbar>
 
-<div id="header">
-    <h1><a href="index.html">LZH007</a></h1>
-</div>
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
 
 </nav>
+
         <nav class="tab-bar show-for-small">
   <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
     <span> &nbsp; LZH007</span>
@@ -41,220 +68,68 @@
 
 <aside class="left-off-canvas-menu">
       <ul class="off-canvas-list">
-      <li><a href="index.html">Home</a></li>
-      
-        <li class="divider"></li>
-        <li><label>Effective OC2.0</label></li>
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
 
-          
-            <li><a title="第5条：用枚举表示状态、选项、状态码" href="14843637552703.html">第5条：用枚举表示状态、选项、状态码</a></li>
-          
-            <li><a title="第4条：多用类型常量，少用#define预处理指令" href="14842935189837.html">第4条：多用类型常量，少用#define预处理指令</a></li>
-          
-            <li><a title="第一章 熟悉Objective-C" href="14842776114163.html">第一章 熟悉Objective-C</a></li>
-          
+    <li><label>Categories</label></li>
 
-      
-        <li class="divider"></li>
-        <li><label>English Study</label></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0.html">深度学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+         
 
-          
-            <li><a title="英语考试翻译总结" href="14839432188714.html">英语考试翻译总结</a></li>
-          
-            <li><a title="英语考试词汇部分总结" href="14837695242474.html">英语考试词汇部分总结</a></li>
-          
-
-      
-        <li class="divider"></li>
-        <li><label>深度学习</label></li>
-
-          
-            <li><a title="MNIST机器学习入门" href="14878150947508.html">MNIST机器学习入门</a></li>
-          
-
-      
-        <li class="divider"></li>
-        <li><label>统计学习方法</label></li>
-
-          
-            <li><a title="支持向量机" href="14921577512970.html">支持向量机</a></li>
-          
-            <li><a title="拟牛顿法（最大熵模型的学习）" href="14921570225186.html">拟牛顿法（最大熵模型的学习）</a></li>
-          
-            <li><a title="模型学习的最优化算法（接上一文）" href="14920445399813.html">模型学习的最优化算法（接上一文）</a></li>
-          
-            <li><a title="logistic regression(逻辑斯蒂回归)" href="14917858710123.html">logistic regression(逻辑斯蒂回归)</a></li>
-          
-            <li><a title="决策树生成--CART算法" href="14908575557810.html">决策树生成--CART算法</a></li>
-          
-            <li><a title="决策树的生成" href="14898241272608.html">决策树的生成</a></li>
-          
-            <li><a title="决策树" href="14897993109270.html">决策树</a></li>
-          
-            <li><a title="朴素贝叶斯法" href="14893694433396.html">朴素贝叶斯法</a></li>
-          
-            <li><a title="k近邻法" href="14891936534415.html">k近邻法</a></li>
-          
-            <li><a title="感知机算法的收敛性" href="14891071598954.html">感知机算法的收敛性</a></li>
-          
-            <li><a title="感知机" href="14890437581129.html">感知机</a></li>
-          
-
-      
-        <li class="divider"></li>
-        <li><label>Python练习</label></li>
-
-          
-            <li><a title="单元测试" href="14928429198094.html">单元测试</a></li>
-          
-            <li><a title="调试" href="14928307466218.html">调试</a></li>
-          
-            <li><a title="错误、调试和测试" href="14928231077736.html">错误、调试和测试</a></li>
-          
-            <li><a title="使用元类" href="14927355881897.html">使用元类</a></li>
-          
-            <li><a title="面向对象高级编程" href="14926766188460.html">面向对象高级编程</a></li>
-          
-            <li><a title="类和实例" href="14926712777578.html">类和实例</a></li>
-          
-            <li><a title="面向对象编程" href="14926690841704.html">面向对象编程</a></li>
-          
-            <li><a title="使用_future_" href="14926579397626.html">使用_future_</a></li>
-          
-            <li><a title="使用第三方模块" href="14925924499918.html">使用第三方模块</a></li>
-          
-            <li><a title="使用模块" href="14922429288489.html">使用模块</a></li>
-          
-            <li><a title="偏函数" href="14922391300067.html">偏函数</a></li>
-          
-            <li><a title="装饰器" href="14921324340299.html">装饰器</a></li>
-          
-            <li><a title="匿名函数" href="14921312042142.html">匿名函数</a></li>
-          
-            <li><a title="返回函数" href="14920643245223.html">返回函数</a></li>
-          
-            <li><a title="Sorted（排序）" href="14920539372230.html">Sorted（排序）</a></li>
-          
-            <li><a title="Filter" href="14920527647833.html">Filter</a></li>
-          
-            <li><a title="Map/Reduce" href="14920523812017.html">Map/Reduce</a></li>
-          
-
-      
       </ul>
     </aside>
 
 <a class="exit-off-canvas" href="#"></a>
 
+
         <section id="main-content" role="main" class="scroll-container">
+        
+       
 
-          <div class="row">
-            <div class="large-3 medium-3 columns">
-              <div class="hide-for-small">
-                <div class="sidebar">
-                <nav>
-                  <ul id="side-nav" class="side-nav">
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>单元测试</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/4/22</span>
 
-                    
-                      <li class="side-title"><span>Effective OC2.0</span></li>
-                        
-                          <li><a title="第5条：用枚举表示状态、选项、状态码" href="14843637552703.html">第5条：用枚举表示状态、选项、状态码</a></li>
-                        
-                          <li><a title="第4条：多用类型常量，少用#define预处理指令" href="14842935189837.html">第4条：多用类型常量，少用#define预处理指令</a></li>
-                        
-                          <li><a title="第一章 熟悉Objective-C" href="14842776114163.html">第一章 熟悉Objective-C</a></li>
-                        
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+           
+         
+          <span class="comments">
+            
 
-                    
-                      <li class="side-title"><span>English Study</span></li>
-                        
-                          <li><a title="英语考试翻译总结" href="14839432188714.html">英语考试翻译总结</a></li>
-                        
-                          <li><a title="英语考试词汇部分总结" href="14837695242474.html">英语考试词汇部分总结</a></li>
-                        
+            
+          </span>
 
-                    
-                      <li class="side-title"><span>深度学习</span></li>
-                        
-                          <li><a title="MNIST机器学习入门" href="14878150947508.html">MNIST机器学习入门</a></li>
-                        
+        </div>
+      </div><!-- article -->
 
-                    
-                      <li class="side-title"><span>统计学习方法</span></li>
-                        
-                          <li><a title="支持向量机" href="14921577512970.html">支持向量机</a></li>
-                        
-                          <li><a title="拟牛顿法（最大熵模型的学习）" href="14921570225186.html">拟牛顿法（最大熵模型的学习）</a></li>
-                        
-                          <li><a title="模型学习的最优化算法（接上一文）" href="14920445399813.html">模型学习的最优化算法（接上一文）</a></li>
-                        
-                          <li><a title="logistic regression(逻辑斯蒂回归)" href="14917858710123.html">logistic regression(逻辑斯蒂回归)</a></li>
-                        
-                          <li><a title="决策树生成--CART算法" href="14908575557810.html">决策树生成--CART算法</a></li>
-                        
-                          <li><a title="决策树的生成" href="14898241272608.html">决策树的生成</a></li>
-                        
-                          <li><a title="决策树" href="14897993109270.html">决策树</a></li>
-                        
-                          <li><a title="朴素贝叶斯法" href="14893694433396.html">朴素贝叶斯法</a></li>
-                        
-                          <li><a title="k近邻法" href="14891936534415.html">k近邻法</a></li>
-                        
-                          <li><a title="感知机算法的收敛性" href="14891071598954.html">感知机算法的收敛性</a></li>
-                        
-                          <li><a title="感知机" href="14890437581129.html">感知机</a></li>
-                        
-
-                    
-                      <li class="side-title"><span>Python练习</span></li>
-                        
-                          <li><a title="单元测试" href="14928429198094.html">单元测试</a></li>
-                        
-                          <li><a title="调试" href="14928307466218.html">调试</a></li>
-                        
-                          <li><a title="错误、调试和测试" href="14928231077736.html">错误、调试和测试</a></li>
-                        
-                          <li><a title="使用元类" href="14927355881897.html">使用元类</a></li>
-                        
-                          <li><a title="面向对象高级编程" href="14926766188460.html">面向对象高级编程</a></li>
-                        
-                          <li><a title="类和实例" href="14926712777578.html">类和实例</a></li>
-                        
-                          <li><a title="面向对象编程" href="14926690841704.html">面向对象编程</a></li>
-                        
-                          <li><a title="使用_future_" href="14926579397626.html">使用_future_</a></li>
-                        
-                          <li><a title="使用第三方模块" href="14925924499918.html">使用第三方模块</a></li>
-                        
-                          <li><a title="使用模块" href="14922429288489.html">使用模块</a></li>
-                        
-                          <li><a title="偏函数" href="14922391300067.html">偏函数</a></li>
-                        
-                          <li><a title="装饰器" href="14921324340299.html">装饰器</a></li>
-                        
-                          <li><a title="匿名函数" href="14921312042142.html">匿名函数</a></li>
-                        
-                          <li><a title="返回函数" href="14920643245223.html">返回函数</a></li>
-                        
-                          <li><a title="Sorted（排序）" href="14920539372230.html">Sorted（排序）</a></li>
-                        
-                          <li><a title="Filter" href="14920527647833.html">Filter</a></li>
-                        
-                          <li><a title="Map/Reduce" href="14920523812017.html">Map/Reduce</a></li>
-                        
-
-                    
-                  </ul>
-                </nav>
-                </div>
-              </div>
-            </div>
-            <div class="large-9 medium-9 columns">
-
- <div class="markdown-body">
-<h1>单元测试</h1>
-
-<p>我们来编写一个<code>Dict</code>类，这个类的行为和<code>dict</code>一致，但是可以通过属性来访问，用起来就像下面这样：</p>
+      <div class="article-content">
+      <p>我们来编写一个<code>Dict</code>类，这个类的行为和<code>dict</code>一致，但是可以通过属性来访问，用起来就像下面这样：</p>
 
 <pre><code>&gt;&gt;&gt; d = Dict(a=1, b=2)
 &gt;&gt;&gt; d[&#39;a&#39;]
@@ -423,76 +298,206 @@ if __name__ == &#39;__main__&#39;:
 </ol>
 
 
-</div>
+    
 
-<br /><br />
-<hr />
+      </div>
 
-<div class="row clearfix">
-  <div class="large-6 columns">
-	<div class="text-left" style="padding:15px 0px;">
-		
-	        <a href="14928484245894.html"  title="Previous Post: 文档测试">&laquo; 文档测试</a>
-	    
-	</div>
-  </div>
-  <div class="large-6 columns">
-	<div class="text-right" style="padding:15px 0px;">
-		
-	        <a href="14928307466218.html" 
-	        title="Next Post: 调试">调试 &raquo;</a>
-	    
-	</div>
-  </div>
-</div>
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="14928484245894.html" 
+          title="Previous Post: 文档测试">&laquo; 文档测试</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="14928307466218.html" 
+          title="Next Post: 调试">调试 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
 
-<div class="row">
-<div style="padding:0px 0.93em;" class="share-comments">
+          
 
-</div>
-</div>
-<script type="text/javascript">
-	$(function(){
-		var currentURL = '14928429198094.html';
-		$('#side-nav a').each(function(){
-			if($(this).attr('href') == currentURL){
-				$(this).parent().addClass('active');
-			}
-		});
-	});
-</script>  
-</div></div>
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
 
 
-<div class="page-bottom">
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0.html"><strong>深度学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="14932778418691.html">操作文件和目录</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14932734930436.html">I/O编程</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14932622908500.html">文档测试</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14932573311953.html">图像去雾相关论文总结</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14928484245894.html">文档测试</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
   <div class="row">
-  <hr />
-  <div class="small-9 columns">
-  <p class="copyright">Copyright &copy; 2015
+   <p class="copyright">Copyright &copy; 2015
 Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
 Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
-  </div>
-  <div class="small-3 columns">
-  <p class="copyright text-right"><a href="#header">TOP</a></p>
-  </div>
-   
   </div>
 </div>
 
         </section>
       </div>
     </div>
+
+  
     
-    
+
     <script src="asset/js/foundation.min.js"></script>
-    <script src="asset/js/foundation/foundation.offcanvas.js"></script>
     <script>
       $(document).foundation();
-
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
      
     </script>
+
     <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
 <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
 
   </body>
 </html>
