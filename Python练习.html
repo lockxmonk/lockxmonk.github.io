@@ -109,6 +109,378 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14933396433742.html">
+                
+                  <h1>序列化</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><strong>我们把变量从内存中变成可存储或传输的过程称之为序列化，在Python中叫pickling，在其他语言中也被称之为serialization，marshalling，flattening等等，都是一个意思。</strong></p>
+
+<p>序列化之后，就可以把序列化后的内容写入磁盘，或者通过网络传输到别的机器上。</p>
+
+<p>反过来，把变量内容从序列化的对象重新读到内存里称之为反序列化，即unpickling。</p>
+
+<p>Python提供两个模块来实现序列化：<code>cPickle</code>和<code>pickle</code>。这两个模块功能是一样的，区别在于<code>cPickle</code>是C语言写的，速度快，<code>pickle</code>是纯Python写的，速度慢，跟<code>cStringIO和StringIO</code>一个道理。用的时候，先尝试导入<code>cPickle</code>，如果失败，再导入<code>pickle</code>：</p>
+
+<pre><code class="language-py">try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+</code></pre>
+
+<p>我们尝试把一个对象序列化并写入文件：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+try:
+    import cPickle as pickle
+except ImportError: 
+    import pickle
+
+d = dict(name=&#39;LZH&#39;,age=20,score=88)
+print pickle.dumps(d)
+</code></pre>
+
+<p><img src="media/14933396433742/14933403797179.jpg" alt=""/></p>
+
+<p><code>pickle.dumps()</code>方法把任意对象序列化成一个<code>str</code>，然后，就可以把这个<code>str</code>写入文件。或者用另一个方法<code>pickle.dump()</code>直接把对象序列化后写入一个<code>file-like Object</code>：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+try:
+    import cPickle as pickle
+except ImportError: 
+    import pickle
+
+d = dict(name=&#39;梁中豪&#39;,age=20,score=88)
+f = open(&#39;test.txt&#39;,&#39;wb&#39;)  
+pickle.dump(d,f)
+f.close
+
+</code></pre>
+
+<p><img src="media/14933396433742/14933405542811.jpg" alt=""/></p>
+
+<p>我们可以读取文件中这些内容，并且将他们反序列化来显示原来的内容：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+try:
+    import cPickle as pickle
+except ImportError: 
+    import pickle
+
+#d = dict(name=&#39;梁中豪&#39;,age=20,score=88)
+f = open(&#39;test.txt&#39;,&#39;rb&#39;)  
+print pickle.load(f)
+f.close
+
+</code></pre>
+
+<p>可以先把内容读到一个<code>str</code>，然后用<code>pickle.loads()</code>方法反序列化出对象，也可以直接用<code>pickle.load()</code>方法从一个<code>file-like Object</code>中直接反序列化出对象</p>
+
+<p>Pickle的问题和所有其他编程语言特有的序列化问题一样，就是它只能用于Python，并且可能不同版本的Python彼此都不兼容，因此，只能用Pickle保存那些不重要的数据，不能成功地反序列化也没关系。</p>
+
+<p>下面我们用JSON来进行网络间的数据传递。</p>
+
+<h2 id="toc_0">JSON</h2>
+
+<p>如果我们要在不同的编程语言之间传递对象，<strong>就必须把对象序列化为标准格式，比如XML，但更好的方法是序列化为JSON，因为JSON表示出来就是一个字符串</strong>，可以被所有语言读取，也可以方便地存储到磁盘或者通过网络传输。JSON不仅是标准格式，并且比XML更快，而且可以直接在Web页面中读取，非常方便。</p>
+
+<p><strong><code>JSON</code>表示的对象就是标准的<code>JavaScript</code>语言的对象，<code>JSON</code>和Python内置的数据类型对应如下：</strong></p>
+
+<table>
+<thead>
+<tr>
+<th>Json类型</th>
+<th>Python类型</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>{}</td>
+<td>dict</td>
+</tr>
+<tr>
+<td>[]</td>
+<td>list</td>
+</tr>
+<tr>
+<td>string</td>
+<td>str或u&#39;unicode&#39;</td>
+</tr>
+<tr>
+<td>12345.56</td>
+<td>int或float</td>
+</tr>
+<tr>
+<td>true/false</td>
+<td>True/False</td>
+</tr>
+<tr>
+<td>null</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+
+<p>Python内置的<code>json</code>模块提供了非常完善的Python对象到JSON格式的转换。我们先看看如何把Python对象变成一个JSON：</p>
+
+<pre><code class="language-py">import json
+d = dict(name=&#39;Lichao&#39;, age=20, score=88)
+print json.dumps(d)
+
+</code></pre>
+
+<p><img src="media/14933396433742/14933496188910.jpg" alt=""/></p>
+
+<p><code>dumps()</code>方法返回一个<code>str</code>，内容就是标准的JSON。类似的，<code>dump()</code>方法可以直接把JSON写入一个<code>file-like Object</code>。</p>
+
+<p>要把JSON反序列化为Python对象，用<code>loads()</code>或者对应的<code>load()</code>方法，前者把JSON的字符串反序列化，后者从<code>file-like Object</code>中读取字符串并反序列化：</p>
+
+<pre><code class="language-py">import json
+json_str = &#39;{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Lichao&quot;}&#39;
+print json.loads(json_str)
+</code></pre>
+
+<p><img src="media/14933396433742/14933497889867.jpg" alt=""/></p>
+
+<p>有一点需要注意，就是反序列化得到的所有字符串对象默认都是<code>unicode</code>而不是<code>str</code>。由于JSON标准规定JSON编码是UTF-8，所以我们总是能正确地在Python的<code>str或unicode</code>与JSON的字符串之间转换。</p>
+
+<h2 id="toc_1">JSON进阶</h2>
+
+<p>Python的<code>dict</code>对象可以直接序列化为JSON的<code>{}</code>，不过，很多时候，我们更喜欢用<code>class</code>表示对象，比如定义<code>Student</code>类，然后序列化：</p>
+
+<pre><code class="language-py">import json
+
+
+class Student(object):
+
+    def __init__(self, name, age, score):
+        super(Student, self).__init__()
+        self.name = name
+        self.age = age
+        self.score = score
+
+s = Student(&#39;LiChao&#39;, 20, 88)
+print(json.dumps(s))
+</code></pre>
+
+<p><img src="media/14933396433742/14933605238135.jpg" alt=""/><br/>
+向上述那样调用，会报错，因为<code>Student</code>对象不是一个可序列化为JSON的对象。</p>
+
+<p>我们仔细看看<code>dumps()</code>方法的参数列表，可以发现，除了第一个必须的<code>obj</code>参数外，<code>dumps()</code>方法还提供了一大堆的可选参数。</p>
+
+<p>这些可选参数就是让我们来定制JSON序列化。前面的代码之所以无法把<code>Student</code>类实例序列化为JSON，是因为默认情况下，<code>dumps()</code>方法不知道如何将<code>Student</code>实例变为一个JSON的<code>{}</code>对象。</p>
+
+<p>可选参数<code>default</code>就是把任意一个对象变成一个可序列为JSON的对象，我们只需要为<code>Student</code>专门写一个转换函数，再把函数传进去即可：</p>
+
+<pre><code class="language-py">import json
+
+def student2dict(std):
+    return {
+    &#39;name&#39;:std.name,
+    &#39;age&#39;:std.age,
+    &#39;score&#39;:std.score
+    }
+
+class Student(object):
+
+    def __init__(self, name, age, score):
+        super(Student, self).__init__()
+        self.name = name
+        self.age = age
+        self.score = score
+
+s = Student(&#39;LiChao&#39;, 20, 88)
+print(json.dumps(s,default=student2dict))
+</code></pre>
+
+<p><img src="media/14933396433742/14933609788679.jpg" alt=""/></p>
+
+<p>这样，<code>Student</code>实例首先被<code>student2dict()</code>函数转换成<code>dict</code>，然后再被顺利序列化为<code>JSON</code>。</p>
+
+<p><strong>不过，下次如果遇到一个<code>Teacher</code>类的实例，照样无法序列化为<code>JSON</code>。我们可以偷个懒，把任意<code>class</code>的实例变为<code>dict</code>：</strong></p>
+
+<pre><code class="language-py">print(json.dumps(s, default=lambda obj: obj.__dict__))
+</code></pre>
+
+<p>因为通常<code>class</code>的实例都有一个<code>__dict__</code>属性，它就是一个dict，用来存储实例变量。也有少数例外，比如定义了<code>__slots__</code>的class。</p>
+
+<p>同样的道理，如果我们要把JSON反序列化为一个<code>Student</code>对象实例，<code>loads()</code>方法首先转换出一个dict对象，然后，我们传入的<code>object_hook</code>函数负责把<code>dict</code>转换为<code>Student</code>实例：</p>
+
+<pre><code class="language-py">import json
+
+def dict2students(d):
+    return Student(d[&#39;name&#39;],d[&#39;age&#39;],d[&#39;score&#39;])
+
+class Student(object):
+
+    def __init__(self, name, age, score):
+        super(Student, self).__init__()
+        self.name = name
+        self.age = age
+        self.score = score
+
+json_str = &#39;{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Bob&quot;}&#39;
+print(json.loads(json_str,object_hook=dict2students))
+</code></pre>
+
+<p><img src="media/14933396433742/14933619206509.jpg" alt=""/></p>
+
+<p>打印出的是反序列化的<code>Student</code>实例对象。</p>
+
+<h2 id="toc_2">小结</h2>
+
+<p>Python语言特定的序列化模块是<code>pickle</code>，但如果要把序列化搞得更通用、更符合Web标准，就可以使用<code>json</code>模块。</p>
+
+<p><code>json</code>模块的<code>dumps()和loads()</code>函数是定义得非常好的接口的典范。当我们使用时，只需要传入一个必须的参数。但是，当默认的序列化或反序列机制不满足我们的要求时，我们又可以传入更多的参数来定制序列化或反序列化的规则，既做到了接口简单易用，又做到了充分的扩展性和灵活性。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/28</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14932778418691.html">
+                
+                  <h1>操作文件和目录</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>如果我们要操作文件、目录，可以在命令行下面输入操作系统提供的各种命令来完成。比如<code>dir</code>、<code>cp</code>等命令</p>
+
+<p>Python内置的<code>os</code>模块也可以直接调用操作系统提供的接口函数。</p>
+
+<p>打开Python交互式命令行，我们来看看如何使用<code>os</code>模块的基本功能：</p>
+
+<p><img src="media/14932778418691/14932780434722.jpg" alt=""/></p>
+
+<p>注意<code>uname()</code>函数在Windows上不提供，也就是说，os模块的某些函数是跟操作系统相关的。</p>
+
+<h2 id="toc_0">环境变量</h2>
+
+<p>在操作系统中定义的环境变量，全部保存在<code>os.environ</code>这个<code>dict</code>中，可以直接查看：<br/>
+<img src="media/14932778418691/14932785335515.jpg" alt=""/></p>
+
+<p>要获取某个环境变量的值，可以调用<code>os.getenv()</code>函数：</p>
+
+<p><img src="media/14932778418691/14932786096064.jpg" alt=""/></p>
+
+<h2 id="toc_1">操作文件和目录</h2>
+
+<p>操作文件和目录的函数一部分放在os模块中，一部分放在<code>os.path</code>模块中，这一点要注意一下。查看、创建和删除目录可以这么调用：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+print os.path.abspath(&#39;.&#39;)
+print os.path.join(&#39;/Users/liangzhonghao/Desktop/&#39;,&#39;test&#39;)
+
+#os.mkdir(&#39;/Users/liangzhonghao/Desktop/python&#39;)
+os.rmdir(&#39;/Users/liangzhonghao/Desktop/python&#39;)
+</code></pre>
+
+<p><img src="media/14932778418691/14932791801381.jpg" alt=""/></p>
+
+<p><code>os.path.splitext()</code>可以直接让你得到文件扩展名，很多时候非常方便：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+print os.path.splitext(&#39;/Users/liangzhonghao/Desktop/text.txt&#39;)
+</code></pre>
+
+<p><img src="media/14932778418691/14932792804815.jpg" alt=""/></p>
+
+<p><strong>这些合并、拆分路径的函数并不要求目录和文件要真实存在，它们只对字符串进行操作。</strong></p>
+
+<p><code>os</code>模块有很多功能，例如重命名文件，删除文件。但是他没有复制文件的功能。因为复制文件并非是由操作系统提供的系统调用。</p>
+
+<p>幸运的是<code>shutil</code>模块提供了<code>copyfile()</code>的函数，你还可以在<code>shutil</code>模块中找到很多实用函数，它们可以看做是<code>os</code>模块的补充。</p>
+
+<p><strong>最后看看如何利用Python的特性来过滤文件</strong>。比如我们要列出当前目录下的所有目录，只需要一行代码：</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; [x for x in os.listdir(&#39;.&#39;) if os.path.isdir(x)]
+</code></pre>
+
+<p><img src="media/14932778418691/14932797710625.jpg" alt=""/></p>
+
+<p>要列出所有的.py文件，也只需一行代码：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+print [x for x in os.listdir(&#39;.&#39;) if os.path.isfile(x) and os.path.splitext(x)[1]==&#39;.py&#39;]
+</code></pre>
+
+<p><img src="media/14932778418691/14932798281538.jpg" alt=""/></p>
+
+<h2 id="toc_2">小结</h2>
+
+<p>Python的os模块封装了操作系统的目录和文件操作，要注意这些函数有的在os模块中，有的在<code>os.path</code>模块中</p>
+
+<h2 id="toc_3">练习：</h2>
+
+<p>编写一个<code>search(s)</code>的函数，能在当前目录以及当前目录的所有子目录下查找文件名包含指定字符串的文件，并打印出完整路径：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+
+def search(s ,dir=os.path.abspath(&#39;.&#39;)):
+    for x in os.listdir(dir):
+        path = os.path.join(dir,x)
+        if s in x:
+            print path
+        elif os.path.isdir(path):
+            search(s,path)
+
+search(&#39;pr&#39;)
+
+</code></pre>
+
+<p><img src="media/14932778418691/14932810251430.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/27</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14932734930436.html">
                 
                   <h1>I/O编程</h1>
@@ -718,410 +1090,6 @@ print 10 / n
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14928231077736.html">
-                
-                  <h1>错误、调试和测试</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">错误处理</a>
-<ul>
-<li>
-<a href="#toc_1">try</a>
-</li>
-<li>
-<a href="#toc_2">调用堆栈</a>
-</li>
-<li>
-<a href="#toc_3">记录错误</a>
-</li>
-<li>
-<a href="#toc_4">抛出错误</a>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Python内置了一套异常处理机制，来帮助我们进行错误处理。</p>
-
-<p>此外，我们也需要跟踪程序的执行，查看变量的值是否正确，这个过程称为调试。Python的<strong><em>pdb</em></strong>可以让我们以单步方式执行代码。</p>
-
-<p>最后，编写测试也很重要。有了良好的测试，就可以在程序修改后反复运行，确保程序输出符合我们编写的测试。</p>
-
-<h2 id="toc_0">错误处理</h2>
-
-<p>在程序运行的过程中，如果发生了错误，可以事先约定返回一个错误代码，这样，就可以知道是否有错，以及出错的原因。在操作系统提供的调用中，返回错误码非常常见。比如打开文件的函数<code>open()</code>，成功时返回文件描述符（就是一个整数），出错时返回<code>-1</code>。</p>
-
-<p>用错误码来表示是否出错十分不便，因为函数本身应该返回的正常结果和错误码混在一起，造成调用者必须用大量的代码来判断是否出错。</p>
-
-<p>所以高级语言通常都内置了一套<code>try...except...finally...</code>的错误处理机制，Python也不例外。</p>
-
-<h3 id="toc_1">try</h3>
-
-<p>当我们认为某些代码可能会出错时，就可以用<code>try</code>来运行这段代码，如果执行出错，则后续代码不会继续执行，而是直接跳转至错误处理代码，即<code>except</code>语句块，执行完<code>except</code>后，如果有<code>finally</code>语句块，则执行<code>finally</code>语句块，至此，执行完毕。</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-try:
-    print &#39;try...&#39;
-    r = 10 / 0
-    print &#39;result:&#39;, r
-except ZeroDivisionError, e:
-    print &#39;except:&#39;, e
-finally:
-    print &#39;finally...&#39;
-print &#39;END&#39;
-</code></pre>
-
-<p><img src="media/14928231077736/14928238871411.jpg" alt=""/><br/>
-从输出可以看到，当错误发生时，后续语句<code>print &#39;result:&#39;, r</code>不会被执行，<code>except</code>由于捕获到<code>ZeroDivisionError</code>，因此被执行。最后，<code>finally</code>语句被执行。然后，程序继续按照流程往下走。</p>
-
-<p>你还可以猜测，错误应该有很多种类，如果发生了不同类型的错误，应该由不同的<code>except</code>语句块处理。没错，可以有多个<code>except</code>来捕获不同类型的错误：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-try:
-    print &#39;try...&#39;
-    r = 10 / int(0)
-    print &#39;result:&#39;, r
-except ValueError as e:
-    print &#39;ValueError:&#39;,e
-except ZeroDivisionError as e:
-    print &#39;ZeroDivisionError:&#39;, e
-else:
-    print &#39;no error&#39;
-finally:
-    print &#39;finally...&#39;
-print &#39;END&#39;
-</code></pre>
-
-<p><img src="media/14928231077736/14928249482640.jpg" alt=""/></p>
-
-<p>Python的错误其实也是class，所有的错误类型都继承自<code>BaseException</code>，所以在使用<code>except</code>时需要注意的是，它不但捕获该类型的错误，还把其子类也“一网打尽”。比如：</p>
-
-<pre><code class="language-py">try:
-    foo()
-except StandardError, e:
-    print &#39;StandardError&#39;
-except ValueError, e:
-    print &#39;ValueError&#39;
-</code></pre>
-
-<p>第二个<code>except</code>永远也捕获不到<code>ValueError</code>，因为<code>ValueError是StandardError</code>的子类，如果有，也被第一个<code>except</code>给捕获了。</p>
-
-<p>Python所有的错误都是从<code>BaseException</code>类派生的，常见的错误类型和继承关系看这里：</p>
-
-<p><img src="media/14928231077736/14928254735561.jpg" alt=""/></p>
-
-<p>使用<code>try...except</code>捕获错误还有一个巨大的好处，就是可以跨越多层调用，比如函数<code>main()调用bar()，bar()调用foo()，结果foo()</code>出错了，这时，只要<code>main()</code>捕获到了，就可以处理：</p>
-
-<pre><code class="language-py">def foo(s):
-    return 10 / int(s)
-
-def bar(s):
-    return foo(s) * 2
-
-def main():
-    try:
-        bar(&#39;0&#39;)
-    except StandardError, e:
-        print &#39;Error!&#39;
-    finally:
-        print &#39;finally...&#39;
-
-print main()
-
-</code></pre>
-
-<p><img src="media/14928231077736/14928272805670.jpg" alt=""/></p>
-
-<p>也就是说，不需要在每个可能出错的地方去捕获错误，只要在合适的层次去捕获错误就可以了。这样一来，就大大减少了写<code>try...except...finally</code>的麻烦。</p>
-
-<h3 id="toc_2">调用堆栈</h3>
-
-<p>如果错误没有被捕获，它就会一直往上抛，最后被Python解释器捕获，打印一个错误信息，然后程序退出：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-def foo(s):
-    return 10 / int(s)
-
-def bar(s):
-    return foo(s) * 2
-
-def main():
-    bar(&#39;0&#39;)
-
-main()
-</code></pre>
-
-<p><img src="media/14928231077736/14928281628836.jpg" alt=""/><br/>
-出错并不可怕，可怕的是不知道哪里出错了。解读错误信息是定位错误的关键。我们从上往下可以看到整个错误的调用函数链。</p>
-
-<p>从上往下依次查看错误。</p>
-
-<h3 id="toc_3">记录错误</h3>
-
-<p>如果不捕获错误，自然可以让Python解释器来打印出错误堆栈，但程序也被结束了。既然我们能捕获错误，就可以把错误堆栈打印出来，然后分析错误原因，同时，让程序继续执行下去。</p>
-
-<p>Python内置的<code>logging</code>模块可以非常容易地记录错误信息：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-import logging
-
-def foo(s):
-    return 10 / int(s)
-
-def bar(s):
-    return foo(s) * 2
-
-def main():
-    try:
-        bar(&#39;0&#39;)
-    except StandardError as e:
-        logging.exception(e)
-    else:
-        pass
-    finally:
-        pass
-main()
-print &#39;END&#39;
-</code></pre>
-
-<p><strong>同样是出错，但程序打印完错误信息后会继续执行，并正常退出</strong>：<br/>
-<img src="media/14928231077736/14928284148150.jpg" alt=""/><br/>
-最后打印出了“END”</p>
-
-<p>通过配置，<code>logging</code>还可以把错误记录到日志文件里，方便事后排查。</p>
-
-<h3 id="toc_4">抛出错误</h3>
-
-<p>因为错误是class，捕获一个错误就是捕获到该class的一个实例。因此，错误并不是凭空产生的，而是有意创建并抛出的。Python的内置函数会抛出很多类型的错误，我们自己编写的函数也可以抛出错误。</p>
-
-<p>如果要抛出错误，首先根据需要，可以定义一个错误的<code>class</code>，选择好继承关系，然后，用<code>raise</code>语句抛出一个错误的实例</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class FooError(StandardError):
-    pass
-
-def foo(s):
-    n = int(s)
-    if n == 0:
-        raise FooError(&#39;invaild value: %s&#39; % s)
-    return 10/0
-foo(0)
-</code></pre>
-
-<p><img src="media/14928231077736/14928288600479.jpg" alt=""/></p>
-
-<p><strong>只有在必要的时候才定义我们自己的错误类型。如果可以选择Python已有的内置的错误类型（比如ValueError，TypeError），尽量使用Python内置的错误类型。</strong></p>
-
-<p>最后，我们来看另一种错误处理的方式：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-def foo(s):
-    n = int(s)
-    return 10 / n
-
-def bar(s):
-    try:
-        return foo(s) * 2
-    except StandardError, e:
-        print &#39;Error!&#39;
-        raise
-
-def main():
-    bar(&#39;0&#39;)
-
-main()
-</code></pre>
-
-<p><img src="media/14928231077736/14928306395157.jpg" alt=""/></p>
-
-<p>在bar()函数中，我们明明已经捕获了错误，但是，打印一个<code>Error</code>!后，又把错误通过<code>raise</code>语句抛出去了，这不有病么？</p>
-
-<p>其实这种错误处理方式不但没病，而且相当常见。捕获错误目的只是记录一下，便于后续追踪。但是，由于当前函数不知道应该怎么处理该错误，所以，最恰当的方式是继续往上抛，让顶层调用者去处理。</p>
-
-<p>raise语句如果不带参数，就会把当前错误原样抛出。此外，在except中raise一个Error，还可以把一种类型的错误转化成另一种类型：</p>
-
-<pre><code class="language-py">try:
-    10 / 0
-except ZeroDivisionError:
-    raise ValueError(&#39;input error!&#39;)
-</code></pre>
-
-<p>只要是合理的转换逻辑就可以，但是，决不应该把一个<code>IOError</code>转换成毫不相干的<code>ValueError</code></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/22</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14927355881897.html">
-                
-                  <h1>使用元类</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">metaclass</a>
-</li>
-</ul>
-
-
-<p>动态语言和静态语言最大的不同，就是函数和类的定义，不是编译时定义的，而是<strong>运行时动态创建的</strong>。</p>
-
-<p>比方说我们要定义一个<code>Hello</code>的class：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Hello(object):
-    def hello(self, name=&#39;world&#39;):
-        print(&#39;Hello, %s.&#39; % name)
-h = Hello()
-h.hello()
-print (type(Hello))
-print (type(h))
-</code></pre>
-
-<p><img src="media/14927355881897/14927620006235.jpg" alt=""/></p>
-
-<p><font color=red><strong><code>type()</code>函数可以查看一个类型或变量的类型，<code>Hello</code>是一个class，它的类型就是<code>type</code>，而<code>h</code>是一个实例，它的类型就是<code>class Hello</code>。</strong></font></p>
-
-<p>我们说class的定义是运行时动态创建的，而<strong>创建class的方法就是使用<code>type()</code>函数</strong>。</p>
-
-<p><code>type()</code>函数既可以返回一个对象的类型，又可以创建出新的类型，比如，<strong>我们可以通过<code>type()</code>函数创建出Hello类，而无需通过<code>class Hello(object)...</code>的定义</strong>：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def fn(self, name=&#39;world&#39;):   # 先定义函数
-    print(&#39;Hello, %s.&#39; % name)
-
-Hello = type(&#39;Hello&#39;, (object,), dict(hello=fn))  # 创建Hello class
-h = Hello()
-h.hello()
-print(type(Hello))
-print(type(h))
-
-</code></pre>
-
-<p><img src="media/14927355881897/14927623112362.jpg" alt=""/></p>
-
-<p><strong>要创建一个class对象，type()函数依次传入3个参数：</strong></p>
-
-<ol>
-<li>class的名称；</li>
-<li>继承的父类集合，注意Python支持多重继承，如果只有一个父类，别忘了tuple的单元素写法；</li>
-<li>class的方法名称与函数绑定，这里我们把函数<code>fn</code>绑定到方法名<code>hello</code>上。</li>
-</ol>
-
-<p>通过<code>type()</code>函数创建的类和直接写class是完全一样的，因为Python解释器遇到class定义时，仅仅是扫描一下class定义的语法，然后调用<code>type()</code>函数创建出class。</p>
-
-<blockquote>
-<p>正常情况下，我们都用<code>class Xxx...</code>来定义类，但是，<code>type()</code>函数也允许我们动态创建出类来，也就是说，动态语言本身支持运行期动态创建类，这和静态语言有非常大的不同，要在静态语言运行期创建类，必须构造源代码字符串再调用编译器，或者借助一些工具生成字节码实现，本质上都是动态编译，会非常复杂。</p>
-</blockquote>
-
-<h2 id="toc_0">metaclass</h2>
-
-<p>除了使用<code>type()</code>动态创建类以外，要控制类的创建行为，还可以使用metaclass。<br/>
-简单的解释就是：先定义metaclass，就可以创建类，最后创建实例。</p>
-
-<p>所以，metaclass允许你创建类或者修改类。换句话说，你可以把类看成是metaclass创建出来的“实例”。</p>
-
-<p><strong>metaclass是Python面向对象里最难理解，也是最难使用的魔术代码。正常情况下，你不会碰到需要使用metaclass的情况，所以，以下内容看不懂也没关系，因为基本上你不会用到。</strong></p>
-
-<p>我们先看一个简单的例子，这个metaclass可以给我们自定义的MyList增加一个add方法：</p>
-
-<p>定义<code>ListMetaclass</code>，按照默认习惯，metaclass的类名总是以Metaclass结尾，以便清楚地表示这是一个metaclass：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-# metaclass是创建类，所以必须从`type`类型派生：
-class ListMetaclass(type):
-
-    def __new__(cls, name, bases, attrs):
-        attrs[&#39;add&#39;] = lambda self, value: self.append(value)
-        return type.__new__(cls, name, bases, attrs)
-
-
-class MyList(list):
-    __metaclass__ = ListMetaclass  # 指示使用ListMetaclass来定制类
-</code></pre>
-
-<p>当我们写下<code>__metaclass__ = ListMetaclass</code>语句时，魔术就生效了，它指示Python解释器在创建<code>MyList</code>时，要通过<code>ListMetaclass.__new__()</code>来创建，在此，我们可以修改类的定义，比如，加上新的方法，然后，返回修改后的定义。</p>
-
-<p><code>__new__()</code><strong>方法接收到的参数依次是</strong>：</p>
-
-<ol>
-<li><p>当前准备创建的类的对象；</p></li>
-<li><p>类的名字；</p></li>
-<li><p>类继承的父类集合；</p></li>
-<li><p>类的方法集合。</p></li>
-</ol>
-
-<p>我们测试输出为：</p>
-
-<pre><code class="language-py">L = MyList()
-L.add(1)
-print L
-</code></pre>
-
-<p><img src="media/14927355881897/14927637008533.jpg" alt=""/></p>
-
-<p>动态修改有什么意义？直接在MyList定义中写上add()方法不是更简单吗？正常情况下，确实应该直接写，通过metaclass修改纯属变态。</p>
-
-<p>但是，总会遇到需要通过metaclass修改类定义的。ORM就是一个典型的例子。</p>
-
-<p>ORM全称“Object Relational Mapping”，即对象-关系映射，就是把关系数据库的一行映射为一个对象，也就是一个类对应一个表，这样，写代码更简单，不用直接操作SQL语句。</p>
-
-<p>要编写一个ORM框架，所有的类都只能动态定义，因为只有使用者才能根据表的结构定义出对应的类来。</p>
-
-<p>具体方法参见<a href="http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001386820064557c69858840b4c48d2b8411bc2ea9099ba000">廖老师的教学网站</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/21</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1201,6 +1169,12 @@ print L
 	      
 		      
 			      <li class="post">
+			        <a href="14933396433742.html">序列化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14932778418691.html">操作文件和目录</a>
 			      </li>
 		     
@@ -1220,12 +1194,6 @@ print L
 		      
 			      <li class="post">
 			        <a href="14932573311953.html">图像去雾相关论文总结</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14928484245894.html">文档测试</a>
 			      </li>
 		     
 		  

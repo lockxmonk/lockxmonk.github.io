@@ -109,6 +109,112 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14920539372230.html">
+                
+                  <h1>Sorted（排序）</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><strong>1.用sorted进行排序</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+num =[2,5,6,4,3,29,12]
+print sorted(num)
+
+</code></pre>
+
+<p><img src="media/14920539372230/14920542668861.jpg" alt=""/></p>
+
+<p><strong>2.默认情况下，对字符串排序，是按照ASCII的大小比较的，由于&#39;Z&#39; &lt; &#39;a&#39;，结果，大写字母Z会排在小写字母a的前面。<br/>
+现在，我们提出排序应该忽略大小写，按照字母序排序。</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def cmp_ignore_case(s1, s2):
+    u1 = s1.upper()
+    u2 = s2.upper()
+    if u1 &lt; u2:
+        return -1
+    if u1 &gt; u2:
+        return 1
+    return 0
+print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], cmp_ignore_case)
+</code></pre>
+
+<p><img src="media/14920539372230/14920543761031.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/13</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14920527647833.html">
+                
+                  <h1>Filter</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><strong>1.请尝试用filter()删除1~100的素数。</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+num = range(1, 101)
+
+def prime_num(s):
+    for x in range(2, s):
+        if (s % x) == 0:
+            return True
+        else:
+            return False
+print filter(prime_num, num)
+</code></pre>
+
+<p>结果：<br/>
+<img src="media/14920527647833/14920538585519.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/13</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14920523812017.html">
                 
                   <h1>Map/Reduce</h1>
@@ -239,6 +345,12 @@ print (reduce(prod,m))
 	      
 		      
 			      <li class="post">
+			        <a href="14933396433742.html">序列化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14932778418691.html">操作文件和目录</a>
 			      </li>
 		     
@@ -258,12 +370,6 @@ print (reduce(prod,m))
 		      
 			      <li class="post">
 			        <a href="14932573311953.html">图像去雾相关论文总结</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14928484245894.html">文档测试</a>
 			      </li>
 		     
 		  
