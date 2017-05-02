@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  决策树生成--CART算法 - LZH007
+  进程和线程 - LZH007
   
   </title>
   
@@ -109,14 +109,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>决策树生成--CART算法</h1>
+          <h1>进程和线程</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/3/30</span>
+          <span class="date">2017/5/2</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
+              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
            
          
           <span class="comments">
@@ -129,109 +129,175 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <ul>
-<li>
-<a href="#toc_0">CART算法</a>
+      <p>我们前面编写的所有的Python程序，都是执行单任务的进程，也就是只有一个线程。如果我们要同时执行多个任务怎么办</p>
+
+<p>一种是启动多个进程，每个进程虽然只有一个线程，但多个进程可以一块执行多个任务。</p>
+
+<p><strong>还有一种方法是启动一个进程，在一个进程内启动多个线程，这样，多个线程也可以一块执行多个任务。</strong></p>
+
+<p>当然还有第三种方法，就是启动多个进程，每个进程再启动多个线程，这样同时执行的任务就更多了，当然这种模型更复杂，实际很少采用。</p>
+
+<p>总结一下就是，多任务的实现有3种方式：</p>
+
 <ul>
-<li>
-<a href="#toc_1">CART生成</a>
-<ul>
-<li>
-<a href="#toc_2">1.回归树的生成</a>
-</li>
-<li>
-<a href="#toc_3">2.分类树的生成</a>
-</li>
-<li>
-<a href="#toc_4">CART剪枝</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
+<li>多进程模式；</li>
+<li>多线程模式；</li>
+<li>多进程+多线程模式。</li>
 </ul>
 
+<blockquote>
+<p>线程是最小的执行单元，而进程由至少一个线程组成。如何调度进程和线程，完全由操作系统决定，程序自己不能决定什么时候执行，执行多长时间。</p>
+</blockquote>
 
-<h2 id="toc_0">CART算法</h2>
+<h2 id="toc_0">多进程</h2>
 
-<p>分类与回归树(classification and regression tree, CART)模型由 Breiman等人在1984年提出，是应用广泛的决策树学习方法.CART同样由特征选择、树 的生成及剪枝组成，<mark>既可以用于分类也可以用于回归.</mark>以下将用于分类与回归的树统称为决策树.</p>
+<p>Unix/Linux操作系统提供了一个<code>fork()</code>系统调用，它非常特殊。普通的函数调用，调用一次，返回一次，但是<code>fork()</code><font color=red>调用一次，返回两次，因为操作系统自动把当前进程（称为父进程）复制了一份（称为子进程），然后，分别在父进程和子进程内返回</font>。</p>
 
-<p>CART是在给定输入随机变量X的条件下输出随机变量Y的条件概率分布的学习方法.CART假设决策树是二叉树，内部结点特征的取值为“是”和“否”，左分支是取值为“是”的分支，右分支是取值为“否”的分支.这样的决策树等价于递归地二分每个特征，将输入空间即特征空间划分为有限个单元，并在这些单元上确定预测的概率分布，也就是在输入给定的条件下输出的条件概率分布.</p>
+<p>子进程永远返回<code>0</code>，而父进程返回子进程的ID。这样做的理由是，一个父进程可以fork出很多子进程，所以，父进程要记下每个子进程的ID，而子进程只需要调用<code>getppid()</code>就可以拿到父进程的ID。</p>
 
-<p><strong>CART算法由以下两步组成：</strong></p>
+<p>Python的<code>os</code>模块封装了常见的系统调用，其中就包括<code>fork</code>，可以在Python程序中轻松创建子进程：</p>
 
-<p>1.决策树生成：基于训练数据集生成决策树，生成的决策树要尽量大：<br/>
-2.决策树剪枝：用验证数据集对己生成的树进行剪枝并选择最优子树，这时用损失函数最小作为剪枝的标准.</p>
+<pre><code class="language-py">import os
 
-<h3 id="toc_1">CART生成</h3>
+print &#39;Process (%s) start&#39; %os.getpid()
 
-<p>决策树的生成就是递归地构建二叉决策树的过程.对回归树用平方误差最小化准则，对分类树用基尼指数(Gini index)最小化准则，进行特征选择，生成二叉树.</p>
+pid = os.fork()
+if pid == 0:
+    print &#39;I am child process (%s) and my parent is %s.&#39; %(os.getpid(),os.getppid())
+else:
+    print &#39;I (%s) just created a child process (%s)&#39; %(os.getpid(),pid)
+</code></pre>
 
-<h4 id="toc_2">1.回归树的生成</h4>
+<p><img src="media/14936863062791/14936874189758.jpg" alt=""/></p>
 
-<p>假设X与Y分别为输入和输出变量，并且Y是连续变量，给定训练数据集:<br/>
-    \(D={(x_1,y_1),(x_2,y_2),...(x_N,y_N)}\)<br/>
-考虑如何生成回归树。</p>
+<p>第一次返回父进程，第二次返回子进程。所以分别打印出了不同的结果。</p>
 
-<p>一个回归树对应着输入空间（即特征空间）的一个划分以及在划分的单元上 的输出值.假设己将输入空间划分为M个单元\(R_1,R_2,R_3...R_M\),并且在每个单元\(R_M\)上 有一个固定的输出值\(c_m\)，于是回归树模型可表示为:<br/>
-<img src="media/14908575557810/14909500378632.jpg" alt=""/></p>
+<p>有了<code>fork</code>调用，一个进程在接到新任务时就可以复制出一个子进程来处理新任务，常见的Apache服务器就是由父进程监听端口，每当有新的http请求时，就fork出子进程来处理新的http请求。</p>
 
-<p>当输入空间的划分确定时，可以用平方误差\(\sum_{x_i\in R}(y_i-f(x_i))^2\)来表示回归树对于训练数据的预测误差，用平方误差最小的准则求解每个单元上的最优输出值.易知，单元\(R_m\)上的\(c_m\)的最优值\(\hat c_m\)是\(R_m\)上的所有输入实例\(x_i\)对应的输出\(y_i\)的均值，即:<br/>
-<img src="media/14908575557810/14909504677321.jpg" alt=""/></p>
+<h2 id="toc_1">multiprocessing</h2>
 
-<p>问题是怎样对输入空间进行划分,这里采用启发式的方法，选择第j个变量\(x^{(j)}\)和它取的值s，作为切分变量（splitting variable)和切分点（splitting point),并定义两个区域：<br/>
-<img src="media/14908575557810/14909505605933.jpg" alt=""/><br/>
-然后寻找最优切分变量j和最优切分点s，最优地，求解：<br/>
-<img src="media/14908575557810/14909506372664.jpg" alt=""/><br/>
-对固定输入变量j可以找到最优切分点s:<br/>
-<img src="media/14908575557810/14909506657025.jpg" alt=""/><br/>
-便利所有输入变量，找到最优的切分变量j，构成一个对\((j,s)\).依此将输入空间划分为两个区域。接着，对每个区域重复上述划分过程，直到满足停止条件为止.这样就生成一棵回归树。这样的回归树通常称为最小二乘回归树(least squares regression tree)，现将算法叙述如下：</p>
+<p>如果你打算编写多进程的服务程序，Unix/Linux无疑是正确的选择。由于Windows没有<code>fork</code>调用，难道在Windows上无法用Python编写多进程的程序？</p>
 
-<p>最小二乘回归树生成算法：<br/>
-<img src="media/14908575557810/14909510077124.jpg" alt=""/></p>
+<p>由于Python是跨平台的，自然也应该提供一个跨平台的多进程支持。<code>multiprocessing</code>模块就是跨平台版本的多进程模块。</p>
 
-<h4 id="toc_3">2.分类树的生成</h4>
+<p><code>multiprocessing</code>模块提供了一个<code>Process</code>类来代表一个进程对象，下面的例子演示了启动一个子进程并等待其结束：</p>
 
-<p>分类树用基尼指数选择最有特征，同时决定该特征的最优二值切分点。</p>
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+from multiprocessing import Process
 
-<p><strong>基尼指数：</strong><br/>
-<img src="media/14908575557810/14913540871077.jpg" alt=""/><br/>
-如果样本集合D根据特征A是否取某一可能值a被分割成\(D_1和D_2\)两部分，即：<br/>
-<img src="media/14908575557810/14913550101283.jpg" alt=""/></p>
+import os
 
-<p>基尼指数Gini(D)表示集合D的不确定性，基尼指数Gini(D,A)表示经A=a分割后集合D的不确定性。基尼指数值越大，样本集合的不确定性也就越大，这一点与熵相似。</p>
+# 子进程要执行的代码
 
-<p>图5.7显示二类分类问题中基尼指数Gini(p)、熵（单位比特）之半和分类误差率的关系.横坐标表示概率P，纵坐标表示损失.可以看出基尼指数和 熵之半的曲线很接近，都可以近似地代表分类误差率.<br/>
-<img src="media/14908575557810/14913559817897.jpg" alt=""/></p>
 
-<p><strong>CART生成算法：</strong><br/>
-<img src="media/14908575557810/14913560936133.jpg" alt=""/><br/>
-<img src="media/14908575557810/14913561059742.jpg" alt=""/></p>
+def run_proc(name):
+    print &#39;Run child process %s(%s)&#39; % (name, os.getpid())
 
-<p><strong>下面继续用例题来说明该算法：</strong><br/>
-<img src="media/14898241272608/14908402191601.jpg" alt=""/><br/>
-根据上表所给的训练数据集，应用CART算法生成决策树。</p>
+if __name__ == &#39;__main__&#39;:
+    print &#39;Parent process %s.&#39; % os.getpid()
+p = Process(target=run_proc, args=(&#39;test&#39;,))
+print &#39;Process will start.&#39;
+p.start()
+p.join()
+print &#39;Process end&#39;
+</code></pre>
 
-<p><img src="media/14908575557810/14913582940784.jpg" alt=""/></p>
+<p><img src="media/14936863062791/14936889041171.jpg" alt=""/></p>
 
-<h4 id="toc_4">CART剪枝</h4>
+<p>创建子进程时，只需要传入一个执行函数和函数的参数，创建一个<code>Process</code>实例，用<code>start()</code>方法启动，这样创建进程比<code>fork()</code>还要简单。</p>
 
-<p>CART剪枝算法从“完全生长”的决策树的底端剪去一些子树，使决策树变小(模型变简单)，从而能够对未知数据有更准确的预测.CART剪枝算法由两步组成：首先从生成算法产生的决策树\(T_0\)底端开始不断剪枝，直到\(T_0\)的根结点，形成一个子树序列\( {T_0,T_1,...,T_n}\);然后通过交叉验证法在独立的验证数据集上对子树序列进行测试，从中选择最优子树.</p>
+<p><code>join()</code>方法可以等待子进程结束后再继续往下运行，通常用于进程间的同步。</p>
 
-<p>1.<strong>剪枝</strong>，形成一个子树序列<br/>
-在剪枝过程中，计算子树的损失函数：<br/>
-<img src="media/14908575557810/14913604606599.jpg" alt=""/><br/>
-其中，T为任意子树，C(T)为对训练数据的预测误差(如基尼指数)，丨T丨为子树的叶结点个数，\(α \geq0\)为参数，\(C_{\alpha}(T)\)为参数是\(\alpha\)时的子树T的整体损失.参数\(\alpha\)权衡训练数据的拟合程度与模型的复杂度.</p>
+<h2 id="toc_2">Pool</h2>
 
-<p>对固定的\(\alpha\), —定存在使损失函数\(C_{\alpha}(T)\)最小的子树，将其表示为\(T_{\alpha}\)。\(T_{\alpha}\)在损失函数\(C_{\alpha}(T)\)最小的意义下是最优的.容易验证这样的最优子树是唯一的.当\(\alpha\)大的时候，最优子树\(T_{\alpha}\)偏小；当\(\alpha\)小的时候，最优子树\(T_{\alpha}\)偏大.极端情况，当\(\alpha\) = 0时，整体树是最优的.当\(\alpha \rightarrow \infty \)时，根结点组成的单结点树是最优的.</p>
+<p>如果要启动大量的子进程，可以用进程池的方式批量创建子进程：</p>
 
-<p>Breiman等人证明：可以用递归的方法对树进行剪枝.将\(\alpha\)从小增大，\(0=\alpha_0&lt;\alpha_1&lt;...&lt;\alpha_n&lt;\infty,\)，产生一系列的区间\([\alpha_i,\alpha_{i+1}),i=0,1,...n;\)，剪枝得到的子树 序列对应着区间\(\alpha \in [\alpha_i,\alpha_{i+1}),i=0,1,...n;\)的最优子树序列\( {T_0,T_1,...,T_n}\),序列中的子树是嵌套的.</p>
+<pre><code class="language-py">from multiprocessing import Pool
+import os
+import time
+import random
 
-<p><img src="media/14908575557810/14913621104324.jpg" alt=""/><br/>
-<img src="media/14908575557810/14913625337737.jpg" alt=""/></p>
 
-<p><strong>CART剪枝算法：</strong><br/>
-<img src="media/14908575557810/14913629643758.jpg" alt=""/></p>
+def long_time_task(name):
+    print &#39;Run task %s(%s)...&#39; % (name, os.getpid())
+    start = time.time()
+    time.sleep(random.random() * 3)
+    end = time.time()
+    print &#39;Task %s runs %0.2f seconds.&#39; % (name, (end - start))
+
+if __name__ == &#39;__main__&#39;:
+    print &#39;Parent process %s.&#39; % os.getpid()
+    p = Pool()
+    for i in range(9):
+        p.apply_async(long_time_task, args=(i,))
+    print &#39;Waiting for all subprocesses done...&#39;
+    p.close()
+    p.join()
+    print &#39;All subprocess done&#39;
+</code></pre>
+
+<p><img src="media/14936863062791/14936904615182.jpg" alt=""/></p>
+
+<p>代码解读：</p>
+
+<p>对<code>Pool</code>对象调用<code>join()</code>方法会等待所有子进程执行完毕，调用<code>join()</code>之前必须先调用<code>close()</code>，调用<code>close()</code>之后就不能继续添加新的<code>Process</code>了。</p>
+
+<p>请注意输出的结果，task 0~7是立刻执行的，而task 8要等待前面某个task完成后才执行，这是因为Pool的默认大小在我的电脑上是8，因此，最多同时执行8个进程。这是Pool有意设计的限制，并不是操作系统的限制。如果改成：<code>p = Pool(9)</code></p>
+
+<p>就可以同时跑9个进程。</p>
+
+<p>由于Pool的默认大小是CPU的核数，如果你不幸拥有8核CPU，你要提交至少9个子进程才能看到上面的等待效果。</p>
+
+<h2 id="toc_3">进程间通信</h2>
+
+<p><code>Process</code>之间肯定是需要通信的，操作系统提供了很多机制来实现进程间的通信。Python的<code>multiprocessing</code>模块包装了底层的机制，提供了<code>Queue</code>、<code>Pipes</code>等多种方式来交换数据。</p>
+
+<p>我们以<code>Queue</code>为例，在父进程中创建两个子进程，一个往<code>Queue</code>里写数据，一个从<code>Queue</code>里读数据：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from multiprocessing import Process,Queue
+import os,time,random
+
+#写数据进程执行的代码
+def write(q):
+    for value in [&#39;A&#39;,&#39;B&#39;,&#39;C&#39;]:
+        print &#39;Put %s to quene...&#39; % value
+        q.put(value)
+        time.sleep(random.random())
+#读数据进程执行的代码
+def read(q):
+    while True:
+        value = q.get(True)
+        print &#39;Get %s from quene.&#39; %value
+
+if __name__==&#39;__main__&#39;:
+    #父进程创建Quene,并传给各个子进程：
+    q = Queue()
+    pw = Process(target=write,args=(q,))
+    pr = Process(target=read,args=(q,))
+    #启动子进程pw，写入：
+    pw.start()
+    #启动子进程pr，读取：
+    pr.start()
+    #等待pw结束：
+    pw.join()
+    #pr进程里是死循环，无法等待其结束，只能强行终止：
+    pr.terminate()
+
+</code></pre>
+
+<p><img src="media/14936863062791/14936917220576.jpg" alt=""/></p>
+
+<p>在Unix/Linux下，<code>multiprocessing</code>模块封装了<code>fork()</code>调用，使我们不需要关注<code>fork()</code>的细节。由于Windows没有fork调用，因此，<code>multiprocessing</code>需要“模拟”出fork的效果，父进程所有Python对象都必须通过<code>pickle</code>序列化再传到子进程去，所有，如果<code>multiprocessing</code>在Windows下调用失败了，要先考虑是不是pickle失败了。</p>
+
+<h3 id="toc_4">小结</h3>
+
+<p>在Unix/Linux下，可以使用<code>fork()</code>调用实现多进程。</p>
+
+<p>要实现跨平台的多进程，可以使用<code>multiprocessing</code>模块。</p>
+
+<p>进程间通信是通过<code>Queue、Pipes</code>等实现的。</p>
 
 
     
@@ -242,16 +308,16 @@
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14917858710123.html" 
-          title="Previous Post: logistic regression(逻辑斯蒂回归)">&laquo; logistic regression(逻辑斯蒂回归)</a>
+          <a href="14936919183368.html" 
+          title="Previous Post: 多线程">&laquo; 多线程</a>
       
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14898241272608.html" 
-          title="Next Post: 决策树的生成">决策树的生成 &raquo;</a>
+          <a  href="14933396433742.html" 
+          title="Next Post: 序列化">序列化 &raquo;</a>
       
       </p>
         </div>

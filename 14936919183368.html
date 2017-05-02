@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  决策树生成--CART算法 - LZH007
+  多线程 - LZH007
   
   </title>
   
@@ -109,14 +109,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>决策树生成--CART算法</h1>
+          <h1>多线程</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/3/30</span>
+          <span class="date">2017/5/2</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
+              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
            
          
           <span class="comments">
@@ -129,109 +129,124 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <ul>
-<li>
-<a href="#toc_0">CART算法</a>
-<ul>
-<li>
-<a href="#toc_1">CART生成</a>
-<ul>
-<li>
-<a href="#toc_2">1.回归树的生成</a>
-</li>
-<li>
-<a href="#toc_3">2.分类树的生成</a>
-</li>
-<li>
-<a href="#toc_4">CART剪枝</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+      <p>多任务可以由多进程完成，也可以由一个进程内的多线程完成。</p>
 
+<p>我们前面提到了进程是由若干线程组成的，一个进程至少有一个线程。</p>
 
-<h2 id="toc_0">CART算法</h2>
+<p>由于线程是操作系统直接支持的执行单元，因此，高级语言通常都内置多线程的支持，Python也不例外，并且，Python的线程是真正的Posix Thread，而不是模拟出来的线程。</p>
 
-<p>分类与回归树(classification and regression tree, CART)模型由 Breiman等人在1984年提出，是应用广泛的决策树学习方法.CART同样由特征选择、树 的生成及剪枝组成，<mark>既可以用于分类也可以用于回归.</mark>以下将用于分类与回归的树统称为决策树.</p>
+<p>Python的标准库提供了两个模块：<code>thread</code>和<code>threading</code>，<code>thread</code>是低级模块，<code>threading</code>是高级模块，对<code>thread</code>进行了封装。绝大多数情况下，我们只需要使用<code>threading</code>这个高级模块。</p>
 
-<p>CART是在给定输入随机变量X的条件下输出随机变量Y的条件概率分布的学习方法.CART假设决策树是二叉树，内部结点特征的取值为“是”和“否”，左分支是取值为“是”的分支，右分支是取值为“否”的分支.这样的决策树等价于递归地二分每个特征，将输入空间即特征空间划分为有限个单元，并在这些单元上确定预测的概率分布，也就是在输入给定的条件下输出的条件概率分布.</p>
+<p>启动一个线程就是把一个函数传入并创建<code>Thread</code>实例，然后调用<code>start()</code>开始执行：</p>
 
-<p><strong>CART算法由以下两步组成：</strong></p>
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import time,threading
 
-<p>1.决策树生成：基于训练数据集生成决策树，生成的决策树要尽量大：<br/>
-2.决策树剪枝：用验证数据集对己生成的树进行剪枝并选择最优子树，这时用损失函数最小作为剪枝的标准.</p>
+#新线程执行的代码
+def loop():
+    print &#39;thread %s is running...&#39; % threading.current_thread().name
+    n = 0
+    while n&lt;5:
+        n = n+1
+        print &#39;thread %s &gt;&gt;&gt; %s&#39; %(threading.current_thread().name,n)
+        time.sleep(1)
+    print &#39;thread %s ended.&#39; %threading.current_thread().name
 
-<h3 id="toc_1">CART生成</h3>
+print &#39;thread %s is running...&#39; % threading.current_thread().name
+t= threading.Thread(target=loop,name=&#39;LoopThread&#39;)
+t.start()
+t.join()
+print &#39;thread %s ended.&#39; % threading.current_thread().name
+</code></pre>
 
-<p>决策树的生成就是递归地构建二叉决策树的过程.对回归树用平方误差最小化准则，对分类树用基尼指数(Gini index)最小化准则，进行特征选择，生成二叉树.</p>
+<p><img src="media/14936919183368/14936948712548.jpg" alt=""/></p>
 
-<h4 id="toc_2">1.回归树的生成</h4>
+<p>由于任何进程默认就会启动一个线程，我们把该线程称为主线程，主线程又可以启动新的线程，Python的<code>threading</code>模块有个<code>current_thread()</code>函数，它永远返回当前线程的实例。主线程实例的名字叫<code>MainThread</code>，子线程的名字在创建时指定，我们用<code>LoopThread</code>命名子线程。名字仅仅在打印时用来显示，完全没有其他意义，如果不起名字Python就自动给线程命名为<code>Thread-1，Thread-2……</code></p>
 
-<p>假设X与Y分别为输入和输出变量，并且Y是连续变量，给定训练数据集:<br/>
-    \(D={(x_1,y_1),(x_2,y_2),...(x_N,y_N)}\)<br/>
-考虑如何生成回归树。</p>
+<h2 id="toc_0">Lock</h2>
 
-<p>一个回归树对应着输入空间（即特征空间）的一个划分以及在划分的单元上 的输出值.假设己将输入空间划分为M个单元\(R_1,R_2,R_3...R_M\),并且在每个单元\(R_M\)上 有一个固定的输出值\(c_m\)，于是回归树模型可表示为:<br/>
-<img src="media/14908575557810/14909500378632.jpg" alt=""/></p>
+<p>多线程和多进程最大的不同在于，多进程中，同一个变量，各自有一份拷贝存在于每个进程中，互不影响，<strong>而多线程中，所有变量都由所有线程共享，所以，任何一个变量都可以被任何一个线程修改，因此，线程之间共享数据最大的危险在于多个线程同时改一个变量，把内容给改乱了。</strong></p>
 
-<p>当输入空间的划分确定时，可以用平方误差\(\sum_{x_i\in R}(y_i-f(x_i))^2\)来表示回归树对于训练数据的预测误差，用平方误差最小的准则求解每个单元上的最优输出值.易知，单元\(R_m\)上的\(c_m\)的最优值\(\hat c_m\)是\(R_m\)上的所有输入实例\(x_i\)对应的输出\(y_i\)的均值，即:<br/>
-<img src="media/14908575557810/14909504677321.jpg" alt=""/></p>
+<p>来看看多个线程同时操作一个变量怎么把内容给改乱了：</p>
 
-<p>问题是怎样对输入空间进行划分,这里采用启发式的方法，选择第j个变量\(x^{(j)}\)和它取的值s，作为切分变量（splitting variable)和切分点（splitting point),并定义两个区域：<br/>
-<img src="media/14908575557810/14909505605933.jpg" alt=""/><br/>
-然后寻找最优切分变量j和最优切分点s，最优地，求解：<br/>
-<img src="media/14908575557810/14909506372664.jpg" alt=""/><br/>
-对固定输入变量j可以找到最优切分点s:<br/>
-<img src="media/14908575557810/14909506657025.jpg" alt=""/><br/>
-便利所有输入变量，找到最优的切分变量j，构成一个对\((j,s)\).依此将输入空间划分为两个区域。接着，对每个区域重复上述划分过程，直到满足停止条件为止.这样就生成一棵回归树。这样的回归树通常称为最小二乘回归树(least squares regression tree)，现将算法叙述如下：</p>
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import time,threading
 
-<p>最小二乘回归树生成算法：<br/>
-<img src="media/14908575557810/14909510077124.jpg" alt=""/></p>
+# 假定这是你的银行存款:
+balance = 0
 
-<h4 id="toc_3">2.分类树的生成</h4>
+def change_it(n):
+    # 先存后取，结果应该为0:
+    global balance
+    balance = balance + n
+    balance = balance - n
 
-<p>分类树用基尼指数选择最有特征，同时决定该特征的最优二值切分点。</p>
+def run_thread(n):
+    for i in range(100000):
+        change_it(n)
 
-<p><strong>基尼指数：</strong><br/>
-<img src="media/14908575557810/14913540871077.jpg" alt=""/><br/>
-如果样本集合D根据特征A是否取某一可能值a被分割成\(D_1和D_2\)两部分，即：<br/>
-<img src="media/14908575557810/14913550101283.jpg" alt=""/></p>
+t1 = threading.Thread(target=run_thread, args=(5,))
+t2 = threading.Thread(target=run_thread, args=(8,))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+print balance
+</code></pre>
 
-<p>基尼指数Gini(D)表示集合D的不确定性，基尼指数Gini(D,A)表示经A=a分割后集合D的不确定性。基尼指数值越大，样本集合的不确定性也就越大，这一点与熵相似。</p>
+<p><img src="media/14936919183368/14936957737021.jpg" alt=""/><br/>
+结果为<code>14</code>而不是<code>0</code></p>
 
-<p>图5.7显示二类分类问题中基尼指数Gini(p)、熵（单位比特）之半和分类误差率的关系.横坐标表示概率P，纵坐标表示损失.可以看出基尼指数和 熵之半的曲线很接近，都可以近似地代表分类误差率.<br/>
-<img src="media/14908575557810/14913559817897.jpg" alt=""/></p>
+<p>我们定义了一个共享变量<code>balance</code>，初始值为0，并且启动两个线程，先存后取，理论上结果应该为0，但是，由于线程的调度是由操作系统决定的，当<code>t1、t2</code>交替执行时，只要循环次数足够多，<code>balance</code>的结果就不一定是0了。</p>
 
-<p><strong>CART生成算法：</strong><br/>
-<img src="media/14908575557810/14913560936133.jpg" alt=""/><br/>
-<img src="media/14908575557810/14913561059742.jpg" alt=""/></p>
+<p>我们为了得到准确的结果，在某个线程正在修改<code>balance</code>时就要为该线程上一把锁，直到锁释放，其它线程继续执行。创建一个锁就是通过<code>threading.Lock()</code>来实现：</p>
 
-<p><strong>下面继续用例题来说明该算法：</strong><br/>
-<img src="media/14898241272608/14908402191601.jpg" alt=""/><br/>
-根据上表所给的训练数据集，应用CART算法生成决策树。</p>
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import time,threading
 
-<p><img src="media/14908575557810/14913582940784.jpg" alt=""/></p>
+# 假定这是你的银行存款:
+balance = 0
+lock=threading.Lock()
 
-<h4 id="toc_4">CART剪枝</h4>
+def change_it(n):
+    # 先存后取，结果应该为0:
+    global balance
+    balance = balance + n
+    balance = balance - n
 
-<p>CART剪枝算法从“完全生长”的决策树的底端剪去一些子树，使决策树变小(模型变简单)，从而能够对未知数据有更准确的预测.CART剪枝算法由两步组成：首先从生成算法产生的决策树\(T_0\)底端开始不断剪枝，直到\(T_0\)的根结点，形成一个子树序列\( {T_0,T_1,...,T_n}\);然后通过交叉验证法在独立的验证数据集上对子树序列进行测试，从中选择最优子树.</p>
+def run_thread(n):
+    for i in range(100000):
+        #先获取锁
+        lock.acquire()
+        try:
+            change_it(n)
+        finally:
+            # 改完了一定要释放锁:
+            lock.release()
+        
+t1 = threading.Thread(target=run_thread, args=(5,))
+t2 = threading.Thread(target=run_thread, args=(8,))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+print balance
+</code></pre>
 
-<p>1.<strong>剪枝</strong>，形成一个子树序列<br/>
-在剪枝过程中，计算子树的损失函数：<br/>
-<img src="media/14908575557810/14913604606599.jpg" alt=""/><br/>
-其中，T为任意子树，C(T)为对训练数据的预测误差(如基尼指数)，丨T丨为子树的叶结点个数，\(α \geq0\)为参数，\(C_{\alpha}(T)\)为参数是\(\alpha\)时的子树T的整体损失.参数\(\alpha\)权衡训练数据的拟合程度与模型的复杂度.</p>
+<p><img src="media/14936919183368/14937055756329.jpg" alt=""/></p>
 
-<p>对固定的\(\alpha\), —定存在使损失函数\(C_{\alpha}(T)\)最小的子树，将其表示为\(T_{\alpha}\)。\(T_{\alpha}\)在损失函数\(C_{\alpha}(T)\)最小的意义下是最优的.容易验证这样的最优子树是唯一的.当\(\alpha\)大的时候，最优子树\(T_{\alpha}\)偏小；当\(\alpha\)小的时候，最优子树\(T_{\alpha}\)偏大.极端情况，当\(\alpha\) = 0时，整体树是最优的.当\(\alpha \rightarrow \infty \)时，根结点组成的单结点树是最优的.</p>
+<p>当多个线程同时执行lock.acquire()时，只有一个线程能成功地获取锁，然后继续执行代码，其他线程就继续等待直到获得锁为止。</p>
 
-<p>Breiman等人证明：可以用递归的方法对树进行剪枝.将\(\alpha\)从小增大，\(0=\alpha_0&lt;\alpha_1&lt;...&lt;\alpha_n&lt;\infty,\)，产生一系列的区间\([\alpha_i,\alpha_{i+1}),i=0,1,...n;\)，剪枝得到的子树 序列对应着区间\(\alpha \in [\alpha_i,\alpha_{i+1}),i=0,1,...n;\)的最优子树序列\( {T_0,T_1,...,T_n}\),序列中的子树是嵌套的.</p>
+<p>获得锁的线程用完后一定要释放锁，否则那些苦苦等待锁的线程将永远等待下去，成为死线程。所以我们用<code>try...finally</code>来确保锁一定会被释放。</p>
 
-<p><img src="media/14908575557810/14913621104324.jpg" alt=""/><br/>
-<img src="media/14908575557810/14913625337737.jpg" alt=""/></p>
+<h2 id="toc_1">小结</h2>
 
-<p><strong>CART剪枝算法：</strong><br/>
-<img src="media/14908575557810/14913629643758.jpg" alt=""/></p>
+<p>多线程编程，模型复杂，容易发生冲突，必须用锁加以隔离，同时，又要小心死锁的发生。</p>
+
+<p><strong>Python解释器由于设计时有GIL全局锁，导致了多线程无法利用多核。多线程的并发在Python中就是一个美丽的梦</strong></p>
+
+<p><font color=red>Python虽然不能利用多线程实现多核任务，但可以通过多进程实现多核任务。多个Python进程有各自独立的GIL锁，互不影响。<br/>
+</font></p>
 
 
     
@@ -242,16 +257,13 @@
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14917858710123.html" 
-          title="Previous Post: logistic regression(逻辑斯蒂回归)">&laquo; logistic regression(逻辑斯蒂回归)</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14898241272608.html" 
-          title="Next Post: 决策树的生成">决策树的生成 &raquo;</a>
+          <a  href="14936863062791.html" 
+          title="Next Post: 进程和线程">进程和线程 &raquo;</a>
       
       </p>
         </div>
