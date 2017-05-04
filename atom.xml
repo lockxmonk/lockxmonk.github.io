@@ -4,13 +4,30 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-05-04T10:08:44+08:00</updated>
+  <updated>2017-05-04T10:09:14+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[图像去雾相关基础]]></title>
+    <link href="https://lockxmonk.github.io/14938936328646.html"/>
+    <updated>2017-05-04T18:27:12+08:00</updated>
+    <id>https://lockxmonk.github.io/14938936328646.html</id>
+    <content type="html"><![CDATA[
+<h2 id="toc_0">暗原色</h2>
+
+<p>暗原色先验理论指出，在无雾图像的 非天空区域里，若把图像分为多个子块，则在每个子块中都会 有某些像素点的一个颜色通道的亮度接近于 0</p>
+
+<p><img src="media/14938936328646/14938938844517.jpg" alt=""/><br/>
+<img src="media/14938936328646/14938939404387.jpg" alt=""/><br/>
+<img src="media/14938936328646/14938939611430.jpg" alt=""/></p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[分布式进程]]></title>
@@ -2710,67 +2727,6 @@ print &#39;b\&#39;xxx\&#39; is str?&#39;, isinstance(b&#39;xxx&#39;, str)
 注意到上面的代码仍然在Python 2.7下运行，但结果显示去掉前缀u的<code>&#39;a string&#39;</code>仍是一个unicode，而加上前缀b的<code>b&#39;a string&#39;</code>才变成了str</p>
 
 <p>由于Python是由社区推动的开源并且免费的开发语言，不受商业公司控制，因此，<strong>Python的改进往往比较激进，不兼容的情况时有发生。Python为了确保你能顺利过渡到新版本，特别提供了__future__模块，让你在旧的版本中试验新版本的一些特性</strong>。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用第三方模块]]></title>
-    <link href="https://lockxmonk.github.io/14925924499918.html"/>
-    <updated>2017-04-19T17:00:49+08:00</updated>
-    <id>https://lockxmonk.github.io/14925924499918.html</id>
-    <content type="html"><![CDATA[
-<p>在Python中，安装第三方模块，是通过setuptools这个工具完成的。Python有两个封装了setuptools的包管理工具：<code>easy_install和pip</code>。<font color=red>目前官方推荐使用<code>pip</code>。</font></p>
-
-<p>Mac和linux本身自带pip，不用安装，在win下需要安装。这里不再过多叙述。</p>
-
-<p>这里试着安装一个第三方库：<strong>Python Imaging Library</strong>，这是Python下非常强大的处理图像的工具库。一般来说，第三方库都会在Python官方的<a href="http://pypi.python.org">http://pypi.python.org</a>网站注册，要安装一个第三方库，必须先知道该库的名称，可以在官网或者pypi上搜索，比如Python Imaging Library的名称叫PIL，因此，安装Python Imaging Library的命令就是：</p>
-
-<p><del>pip install PIL</del>（现在用pillow来代替PIL）</p>
-
-<pre><code>sudo pip install Pillow
-</code></pre>
-
-<p>处理图片的方法为：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-from PIL import Image
-
-im = Image.open(&#39;icon.png&#39;)
-print im.format, im.size, im.mode
-
-im.thumbnail((150,100))
-im.save(&#39;thumb.jpg&#39;,&#39;JPEG&#39;)
-</code></pre>
-
-<p><img src="media/14925924499918/14926575371706.jpg" alt=""/><br/>
-将原图<code>icon.png</code>:<br/>
-<img src="media/14925924499918/icon.png" alt="icon"/></p>
-
-<p>生成一个名为<code>thumb.jpg</code>的图片：<br/>
-<img src="media/14925924499918/thumb.jpg" alt="thumb"/></p>
-
-<blockquote>
-<p>这两张图暂时没有看出明显的区别，需要深入研究。</p>
-</blockquote>
-
-<p>默认情况下，Python解释器会搜索当前目录、所有已安装的内置模块和第三方模块，搜索路径存放在<code>sys</code>模块的<code>path</code>变量中：</p>
-
-<pre><code>&gt;&gt;&gt; import sys
-&gt;&gt;&gt; sys.path
-[&#39;&#39;, &#39;/Library/Python/2.7/site-packages/pip-8.1.1-py2.7.egg&#39;, 
-&#39;/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python27.zip&#39;,... ]
-</code></pre>
-
-<p>想要添加自己的搜索目录可以：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; import sys
-&gt;&gt;&gt; sys.path.append(&#39;/Users/michael/my_py_scripts&#39;)
-</code></pre>
-
-<p><font color=red>这种方法是在运行时修改，运行结束后失效。</font></p>
-
-<p>第二种方法是设置环境变量<code>PYTHONPATH</code>这里不做详述。</p>
 
 ]]></content>
   </entry>

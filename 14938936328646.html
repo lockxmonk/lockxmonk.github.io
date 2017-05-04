@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  使用第三方模块 - LZH007
+  图像去雾相关基础 - LZH007
   
   </title>
   
@@ -109,14 +109,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>使用第三方模块</h1>
+          <h1>图像去雾相关基础</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/4/19</span>
+          <span class="date">2017/5/4</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+              <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
            
          
           <span class="comments">
@@ -129,57 +129,13 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>在Python中，安装第三方模块，是通过setuptools这个工具完成的。Python有两个封装了setuptools的包管理工具：<code>easy_install和pip</code>。<font color=red>目前官方推荐使用<code>pip</code>。</font></p>
+      <h2 id="toc_0">暗原色</h2>
 
-<p>Mac和linux本身自带pip，不用安装，在win下需要安装。这里不再过多叙述。</p>
+<p>暗原色先验理论指出，在无雾图像的 非天空区域里，若把图像分为多个子块，则在每个子块中都会 有某些像素点的一个颜色通道的亮度接近于 0</p>
 
-<p>这里试着安装一个第三方库：<strong>Python Imaging Library</strong>，这是Python下非常强大的处理图像的工具库。一般来说，第三方库都会在Python官方的<a href="http://pypi.python.org">http://pypi.python.org</a>网站注册，要安装一个第三方库，必须先知道该库的名称，可以在官网或者pypi上搜索，比如Python Imaging Library的名称叫PIL，因此，安装Python Imaging Library的命令就是：</p>
-
-<p><del>pip install PIL</del>（现在用pillow来代替PIL）</p>
-
-<pre><code>sudo pip install Pillow
-</code></pre>
-
-<p>处理图片的方法为：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-from PIL import Image
-
-im = Image.open(&#39;icon.png&#39;)
-print im.format, im.size, im.mode
-
-im.thumbnail((150,100))
-im.save(&#39;thumb.jpg&#39;,&#39;JPEG&#39;)
-</code></pre>
-
-<p><img src="media/14925924499918/14926575371706.jpg" alt=""/><br/>
-将原图<code>icon.png</code>:<br/>
-<img src="media/14925924499918/icon.png" alt="icon"/></p>
-
-<p>生成一个名为<code>thumb.jpg</code>的图片：<br/>
-<img src="media/14925924499918/thumb.jpg" alt="thumb"/></p>
-
-<blockquote>
-<p>这两张图暂时没有看出明显的区别，需要深入研究。</p>
-</blockquote>
-
-<p>默认情况下，Python解释器会搜索当前目录、所有已安装的内置模块和第三方模块，搜索路径存放在<code>sys</code>模块的<code>path</code>变量中：</p>
-
-<pre><code>&gt;&gt;&gt; import sys
-&gt;&gt;&gt; sys.path
-[&#39;&#39;, &#39;/Library/Python/2.7/site-packages/pip-8.1.1-py2.7.egg&#39;, 
-&#39;/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python27.zip&#39;,... ]
-</code></pre>
-
-<p>想要添加自己的搜索目录可以：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; import sys
-&gt;&gt;&gt; sys.path.append(&#39;/Users/michael/my_py_scripts&#39;)
-</code></pre>
-
-<p><font color=red>这种方法是在运行时修改，运行结束后失效。</font></p>
-
-<p>第二种方法是设置环境变量<code>PYTHONPATH</code>这里不做详述。</p>
+<p><img src="media/14938936328646/14938938844517.jpg" alt=""/><br/>
+<img src="media/14938936328646/14938939404387.jpg" alt=""/><br/>
+<img src="media/14938936328646/14938939611430.jpg" alt=""/></p>
 
 
     
@@ -190,16 +146,13 @@ im.save(&#39;thumb.jpg&#39;,&#39;JPEG&#39;)
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14926579397626.html" 
-          title="Previous Post: 使用_future_">&laquo; 使用_future_</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14922429288489.html" 
-          title="Next Post: 使用模块">使用模块 &raquo;</a>
+          <a  href="14938608177246.html" 
+          title="Next Post: 分布式进程">分布式进程 &raquo;</a>
       
       </p>
         </div>
