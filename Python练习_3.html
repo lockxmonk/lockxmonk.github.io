@@ -109,6 +109,89 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14922391300067.html">
+                
+                  <h1>偏函数</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Python的<code>functools</code>模块提供了很多有用的功能，其中一个就是偏函数（Partial function）。要注意，这里的偏函数和数学意义上的偏函数不一样。</p>
+
+<p><code>int()</code>函数可以把字符串转换为整数<br/>
+例如：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+num = int(&#39;12345&#39;)
+num1 = int(&#39;12345&#39;, base=8)
+num2 = int(&#39;12345&#39;, 16)
+print num, num1, num2
+</code></pre>
+
+<p><img src="media/14922391300067/14922396420577.jpg" alt=""/></p>
+
+<p>其中<code>base</code>参数可以指定转换的进制</p>
+
+<p>假设要转换大量的二进制字符串，每次都传入<code>int(x, base=2)</code>非常麻烦，于是，我们想到，可以定义一个<code>int2()</code>的函数，默认把<code>base=2</code>传进去：</p>
+
+<pre><code class="language-py">def int2(x,base=2):
+    return int(x,base)
+
+</code></pre>
+
+<p>这样我们转换二进制就很方便，<code>functools.partial</code>就是帮助我们创建一个偏函数的，不需要我们自己定义<code>int2()</code>，可以直接使用下面的代码创建一个新的函数<code>int2</code>：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import functools
+int2 = functools.partial(int, base=8)
+num = int2(&#39;10000&#39;)
+num1 = int2(&#39;10000&#39;,base=2)
+print num,num1  
+</code></pre>
+
+<p><img src="media/14922391300067/14922410514665.jpg" alt=""/></p>
+
+<p>创建偏函数时，实际上可以接收函数对象、<code>*args和**kw</code>这3个参数:</p>
+
+<pre><code class="language-py">int2 = functools.partial(int, base=2)
+#相当于下面
+kw = { base: 2 }
+int(&#39;10010&#39;, **kw)
+
+max2 = functools.partial(max, 10)
+#相当于下面，实际上会把10作为*args的一部分自动加到左边
+args = (10, 5, 6, 7)
+max(*args)
+</code></pre>
+
+<blockquote>
+<p>总结：当函数的参数个数太多，需要简化时，使用<code>functools.partial</code>可以创建一个新的函数，这个新函数可以固定住原函数的部分参数，从而在调用时更简单。</p>
+</blockquote>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/15</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14921324340299.html">
                 
                   <h1>装饰器</h1>
@@ -478,58 +561,6 @@ print filter(prime_num, num)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14920523812017.html">
-                
-                  <h1>Map/Reduce</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>1.利用map()函数，把用户输入的不规范的英文名字，变为首字母大写，其他小写的规范名字。输入：[&#39;adam&#39;, &#39;LISA&#39;, &#39;barT&#39;]，输出：[&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]。</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def upper(s):
-    return s.capitalize()
-print(map(upper, [&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]) )
-</code></pre>
-
-<p><img src="media/14920523812017/14920538865556.jpg" alt=""/></p>
-
-<p>2.Python提供的sum()函数可以接受一个list并求和，请编写一个prod()函数，可以接受一个list并利用reduce()求积。</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def prod(x,y):
-    return x*y
-m = [1,2,3,4]
-print (reduce(prod,m))
-</code></pre>
-
-<p><img src="media/14920523812017/14920539075590.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -541,7 +572,7 @@ print (reduce(prod,m))
 			  </div>
 			  <div class="large-6 columns">
 			<p class="text-right" style="padding-top:25px;">
-			
+			 <a href="Python练习_4.html">&raquo; Next Page</a> 
 			</p>
 			  </div>
 			</div>
@@ -609,6 +640,18 @@ print (reduce(prod,m))
 	      
 		      
 			      <li class="post">
+			        <a href="14938608177246.html">分布式进程</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14938589289379.html">进程与线程</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14937814533169.html">ThreadLocal</a>
 			      </li>
 		     
@@ -622,18 +665,6 @@ print (reduce(prod,m))
 		      
 			      <li class="post">
 			        <a href="14936863062791.html">进程和线程</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14933396433742.html">序列化</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14932778418691.html">操作文件和目录</a>
 			      </li>
 		     
 		  

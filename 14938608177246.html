@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  操作文件和目录 - LZH007
+  分布式进程 - LZH007
   
   </title>
   
@@ -109,14 +109,12 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>操作文件和目录</h1>
+          <h1>分布式进程</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/4/27</span>
+          <span class="date">2017/5/4</span>
 
-          <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
            
          
           <span class="comments">
@@ -129,111 +127,135 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <ul>
-<li>
-<a href="#toc_0">环境变量</a>
-</li>
-<li>
-<a href="#toc_1">操作文件和目录</a>
-</li>
-<li>
-<a href="#toc_2">小结</a>
-</li>
-<li>
-<a href="#toc_3">练习：</a>
-</li>
-</ul>
+      <p>在Thread和Process中，应当优选Process，<font color=red><strong>因为Process更稳定，而且，Process可以分布到多台机器上，而Thread最多只能分布到同一台机器的多个CPU上。</strong></font></p>
 
+<p><strong>Python的<code>multiprocessing</code>模块不但支持多进程，其中<code>managers</code>子模块还支持把多进程分布到多台机器上。</strong><font color=red>一个服务进程可以作为调度者，将任务分布到其他多个进程中，依靠网络通信。由于<code>managers</code>模块封装很好，不必了解网络通信的细节，就可以很容易地编写分布式多进程程序。</font></p>
 
-<p>如果我们要操作文件、目录，可以在命令行下面输入操作系统提供的各种命令来完成。比如<code>dir</code>、<code>cp</code>等命令</p>
+<p>举个例子：如果我们<strong>已经有一个通过<code>Queue</code>通信的多进程程序在同一台机器上运行</strong>，现在，由于处理任务的进程任务繁重，希望把发送任务的进程和处理任务的进程分布到两台机器上。怎么用分布式进程实现？</p>
 
-<p>Python内置的<code>os</code>模块也可以直接调用操作系统提供的接口函数。</p>
+<p>原有的<code>Queue</code>可以继续使用，<font color=red>但是，通过<code>managers</code>模块把<code>Queue</code>通过网络暴露出去，就可以让其他机器的进程访问<code>Queue</code>了。</font></p>
 
-<p>打开Python交互式命令行，我们来看看如何使用<code>os</code>模块的基本功能：</p>
+<p>我们先看服务进程，服务进程负责启动<code>Queue</code>，把<code>Queue</code>注册到网络上，然后往<code>Queue</code>里面写入任务：</p>
 
-<p><img src="media/14932778418691/14932780434722.jpg" alt=""/></p>
+<pre><code class="language-py">#taskmanager.py
+#-*- coding: utf-8 -*-
 
-<p>注意<code>uname()</code>函数在Windows上不提供，也就是说，os模块的某些函数是跟操作系统相关的。</p>
+import random,time,Queue
+from multiprocessing.managers import BaseManager
 
-<h2 id="toc_0">环境变量</h2>
+#发送任务的队列
+task_queue = Queue.Queue()
+#接受结果的队列
+result_queue = Queue.Queue()
 
-<p>在操作系统中定义的环境变量，全部保存在<code>os.environ</code>这个<code>dict</code>中，可以直接查看：<br/>
-<img src="media/14932778418691/14932785335515.jpg" alt=""/></p>
+#从BaseManager继承的QueueManager:
+class QueueManager(BaseManager):
+    pass
 
-<p>要获取某个环境变量的值，可以调用<code>os.getenv()</code>函数：</p>
+#把两个Queue都注册到网络上, callable参数关联了Queue对象:
+QueueManager.register(&#39;get_task_queue&#39;,callable=lambda:task_queue)
+QueueManager.register(&#39;get_result_queue&#39;,callable=lambda:result_queue)
 
-<p><img src="media/14932778418691/14932786096064.jpg" alt=""/></p>
+#绑定端口5000，设置验证码‘abc’：
+manager = QueueManager(address=(&#39;&#39;,5000),authkey=&#39;abc&#39;)
+#启动Queue
+manager.start()
+# 获得通过网络访问的Queue对象:
+task = manager.get_task_queue()
+result = manager.get_result_queue()
+#放几个任务进去
+for i in range(10):
+    n = random.randint(0, 10000)
+    print(&#39;Put task %d...&#39; %n)
+    task.put(n)
 
-<h2 id="toc_1">操作文件和目录</h2>
-
-<p>操作文件和目录的函数一部分放在os模块中，一部分放在<code>os.path</code>模块中，这一点要注意一下。查看、创建和删除目录可以这么调用：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import os
-print os.path.abspath(&#39;.&#39;)
-print os.path.join(&#39;/Users/liangzhonghao/Desktop/&#39;,&#39;test&#39;)
-
-#os.mkdir(&#39;/Users/liangzhonghao/Desktop/python&#39;)
-os.rmdir(&#39;/Users/liangzhonghao/Desktop/python&#39;)
+#从result队列读取结果
+print(&#39;Try get results...&#39;)
+for i in range(10):
+    r = result.get(timeout=10)
+    print(&#39;Result:%s&#39;%r)
+#关闭
+manager.shutdown()
 </code></pre>
 
-<p><img src="media/14932778418691/14932791801381.jpg" alt=""/></p>
+<p>请注意，当我们在一台机器上写多进程程序时，创建的<code>Queue</code>可以直接拿来用，但是，在分布式多进程环境下，添加任务到<code>Queue</code>不可以直接对原始的<code>task_queue</code>进行操作，那样就绕过了<code>QueueManager</code>的封装，必须通过<code>manager.get_task_queue()</code>获得的<code>Queue</code>接口添加。</p>
 
-<p><code>os.path.splitext()</code>可以直接让你得到文件扩展名，很多时候非常方便：</p>
+<p>然后，在另一台机器上启动任务进程（本机上启动也可以）：</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import os
-print os.path.splitext(&#39;/Users/liangzhonghao/Desktop/text.txt&#39;)
+<pre><code class="language-py">#taskworker.py
+#-*- coding: utf-8 -*-
+
+import time
+import sys
+import Queue
+from multiprocessing.managers import BaseManager
+
+# 创建类似的QueueManager:
+
+
+class QueueManager(BaseManager):
+    pass
+
+# 由于这个QueueManager只从网络上获取Queue，所以注册时只提供名字:
+QueueManager.register(&#39;get_task_queue&#39;)
+QueueManager.register(&#39;get_result_queue&#39;)
+
+# 连接到服务器，也就是运行taskmanager.py的机器:
+server_addr = &#39;127.0.0.1&#39;
+print(&#39;Connect to server %s...&#39; % server_addr)
+
+# 端口和验证码注意保持与taskmanager.py设置的完全一致:
+m = QueueManager(address=(server_addr, 5000), authkey=&#39;abc&#39;)
+# 从网络连接:
+m.connect()
+# 获取Queue的对象:
+task = m.get_task_queue()
+result = m.get_result_queue()
+# 从task队列取任务,并把结果写入result队列:
+for i in range(10):
+    try:
+        n = task.get(timeout=1)
+        print(&#39;run task %d * %d...&#39; % (n, n))
+        r = &#39;%d * %d = %d&#39; % (n, n, n * n)
+        time.sleep(1)
+        result.put(r)
+    except Queue.Empty:
+        print(&#39;task queue is empty.&#39;)
+# 处理结束:
+print(&#39;worker exit.&#39;)
 </code></pre>
 
-<p><img src="media/14932778418691/14932792804815.jpg" alt=""/></p>
+<p>任务进程要通过网络连接到服务进程，所以要指定服务进程的IP。</p>
 
-<p><strong>这些合并、拆分路径的函数并不要求目录和文件要真实存在，它们只对字符串进行操作。</strong></p>
+<p>现在，可以试试分布式进程的工作效果了。先启动<code>taskmanager.py</code>服务进程：</p>
 
-<p><code>os</code>模块有很多功能，例如重命名文件，删除文件。但是他没有复制文件的功能。因为复制文件并非是由操作系统提供的系统调用。</p>
+<p>启动后：<br/>
+<img src="media/14938608177246/14938633989382.jpg" alt=""/><br/>
+等待result队列中的值。（目前为空)</p>
 
-<p>幸运的是<code>shutil</code>模块提供了<code>copyfile()</code>的函数，你还可以在<code>shutil</code>模块中找到很多实用函数，它们可以看做是<code>os</code>模块的补充。</p>
+<p><code>taskmanager</code>进程发送完任务后，开始等待<code>result</code>队列的结果。现在启动<code>taskworker.py</code>进程：</p>
 
-<p><strong>最后看看如何利用Python的特性来过滤文件</strong>。比如我们要列出当前目录下的所有目录，只需要一行代码：</p>
+<p><img src="media/14938608177246/14938634594880.jpg" alt=""/></p>
 
-<pre><code class="language-py">&gt;&gt;&gt; [x for x in os.listdir(&#39;.&#39;) if os.path.isdir(x)]
-</code></pre>
+<p><code>taskworker</code>进程结束，在<code>taskmanager</code>进程中会继续打印出结果：</p>
 
-<p><img src="media/14932778418691/14932797710625.jpg" alt=""/></p>
+<p><img src="media/14938608177246/14938634810692.jpg" alt=""/></p>
 
-<p>要列出所有的.py文件，也只需一行代码：</p>
+<p>这个简单的<code>Manager/Worker</code>模型有什么用？<font color=red><strong>其实这就是一个简单但真正的分布式计算</strong></font>，把代码稍加改造，启动多个worker，就可以把任务分布到几台甚至几十台机器上，比如把计算<code>n*n</code>的代码换成发送邮件，就实现了邮件队列的异步发送。</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import os
-print [x for x in os.listdir(&#39;.&#39;) if os.path.isfile(x) and os.path.splitext(x)[1]==&#39;.py&#39;]
-</code></pre>
+<p>Queue对象存储在哪？注意到<code>taskworker.py</code>中根本没有创建<code>Queue</code>的代码，所以，Queue对象存储在<code>taskmanager.py</code>进程中：</p>
 
-<p><img src="media/14932778418691/14932798281538.jpg" alt=""/></p>
+<p><img src="media/14938608177246/14938635737718.jpg" alt=""/></p>
 
-<h2 id="toc_2">小结</h2>
+<p>而<code>Queue</code>之所以能通过网络访问，就是通过<code>QueueManager</code>实现的。由于<code>QueueManager</code>管理的不止一个<code>Queue</code>，所以，要给每个<code>Queue</code>的网络调用接口起个名字，比如<code>get_task_queue</code>。</p>
 
-<p>Python的os模块封装了操作系统的目录和文件操作，要注意这些函数有的在os模块中，有的在<code>os.path</code>模块中</p>
+<p><code>authkey</code>有什么用？这是为了保证两台机器正常通信，不被其他机器恶意干扰。如果<code>taskworker.py</code>的<code>authkey</code>和<code>taskmanager.py</code>的<code>authkey</code>不一致，肯定连接不上。</p>
 
-<h2 id="toc_3">练习：</h2>
+<h2 id="toc_0">小结</h2>
 
-<p>编写一个<code>search(s)</code>的函数，能在当前目录以及当前目录的所有子目录下查找文件名包含指定字符串的文件，并打印出完整路径：</p>
+<p>Python的分布式进程接口简单，封装良好，适合需要把繁重任务分布到多台机器的环境下。</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import os
-
-def search(s ,dir=os.path.abspath(&#39;.&#39;)):
-    for x in os.listdir(dir):
-        path = os.path.join(dir,x)
-        if s in x:
-            print path
-        elif os.path.isdir(path):
-            search(s,path)
-
-search(&#39;pr&#39;)
-
-</code></pre>
-
-<p><img src="media/14932778418691/14932810251430.jpg" alt=""/></p>
+<p><font color=red>注意Queue的作用是用来传递任务和接收结果，每个任务的描述数据量要尽量小。比如发送一个处理日志文件的任务，就不要发送几百兆的日志文件本身，而是发送日志文件存放的完整路径，由Worker进程再去共享的磁盘上读取文件。</font></p>
 
 
     
@@ -244,16 +266,13 @@ search(&#39;pr&#39;)
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14933396433742.html" 
-          title="Previous Post: 序列化">&laquo; 序列化</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14932734930436.html" 
-          title="Next Post: I/O编程">I/O编程 &raquo;</a>
+          <a  href="14938589289379.html" 
+          title="Next Post: 进程与线程">进程与线程 &raquo;</a>
       
       </p>
         </div>
