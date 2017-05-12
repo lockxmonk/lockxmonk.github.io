@@ -80,7 +80,7 @@
         
             <li><a href="English%20Study.html">English Study</a></li>
         
-            <li><a href="%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0.html">深度学习</a></li>
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
         
             <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
         
@@ -108,6 +108,279 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="14937814533169.html">
+                
+                  <h1>ThreadLocal</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在多线程环境下，每个线程都有自己的数据。<strong>一个线程使用自己的局部变量比使用全局变量好，因为局部变量只有线程自己能看见，不会影响其他线程，而全局变量的修改必须加锁。</strong></p>
+
+<p>但是局部变量也有问题，就是在函数调用的时候，传递起来很麻烦：</p>
+
+<pre><code class="language-py">def process_student(name):
+    std = Student(name)
+    # std是局部变量，但是每个函数都要用它，因此必须传进去：
+    do_task_1(std)
+    do_task_2(std)
+
+def do_task_1(std):
+    do_subtask_1(std)
+    do_subtask_2(std)
+
+def do_task_2(std):
+    do_subtask_2(std)
+    do_subtask_2(std)
+</code></pre>
+
+<p>每个函数一层一层调用都这么传参数那还得了？用全局变量？也不行，因为每个线程处理不同的<code>Student</code>对象，不能共享。</p>
+
+<p>如果用一个全局<code>dict</code>存放所有的<code>Student</code>对象，然后以<code>thread</code>自身作为<code>key</code>获得线程对应的<code>Student</code>对象如何？</p>
+
+<pre><code class="language-py">global_dict = {}
+
+def std_thread(name):
+    std = Student(name)
+    # 把std放到全局变量global_dict中：
+    global_dict[threading.current_thread()] = std
+    do_task_1()
+    do_task_2()
+
+def do_task_1():
+    # 不传入std，而是根据当前线程查找：
+    std = global_dict[threading.current_thread()]
+    ...
+
+def do_task_2():
+    # 任何函数都可以查找出当前线程的std变量：
+    std = global_dict[threading.current_thread()]
+    ...
+</code></pre>
+
+<p>这种方式理论上是可行的，它最大的优点是消除了<code>std</code>对象在每层函数中的传递问题，但是，每个函数获取<code>std</code>的代码有点丑。</p>
+
+<p>有没有更简单的方式？</p>
+
+<p><code>ThreadLocal</code>应运而生，不用查找<code>dict</code>，<code>ThreadLocal</code>帮你自动做这件事：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import threading
+
+# 创建全局ThreadLocal对象
+local_school = threading.local()
+
+
+def process_student():
+    print &#39;Hello,%s(in %s)&#39; % (local_school.student, threading.current_thread().name)
+
+
+def process_thread(name):
+    # 绑定ThreadLocal的stutent：
+    local_school.student = name
+    process_student()
+
+t1 = threading.Thread(target=process_thread, args=(&#39;Alice&#39;,), name=&#39;Thread-A&#39;)
+t2 = threading.Thread(target=process_thread, args=(&#39;Bobs&#39;,), name=&#39;Thread-B&#39;)
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+</code></pre>
+
+<p><img src="media/14937814533169/14937825491356.jpg" alt=""/></p>
+
+<p>全局变量<code>local_school</code>就是一个<code>ThreadLocal</code>对象，每个<code>Thread</code>对它都可以读写<code>student</code>属性，但互不影响。你可以把<code>local_school</code>看成全局变量，但每个属性如<code>local_school.student</code>都是线程的局部变量，可以任意读写而互不干扰，也不用管理锁的问题，<code>ThreadLocal</code>内部会处理。</p>
+
+<p>可以理解为全局变量<code>local_school</code>是一个dict，不但可以用<code>local_school.student</code>，还可以绑定其他变量，如<code>local_school.teacher</code>等等。</p>
+
+<p><font color=red><strong><code>ThreadLocal</code>最常用的地方就是为每个线程绑定一个数据库连接，HTTP请求，用户身份信息等，这样一个线程的所有调用到的处理函数都可以非常方便地访问这些资源。</strong><br/>
+</font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/3</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14936919183368.html">
+                
+                  <h1>多线程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">Lock</a>
+</li>
+<li>
+<a href="#toc_1">小结</a>
+</li>
+</ul>
+
+
+<p>多任务可以由多进程完成，也可以由一个进程内的多线程完成。</p>
+
+<p>我们前面提到了进程是由若干线程组成的，一个进程至少有一个线程。</p>
+
+<p>由于线程是操作系统直接支持的执行单元，因此，高级语言通常都内置多线程的支持，Python也不例外，并且，Python的线程是真正的Posix Thread，而不是模拟出来的线程。</p>
+
+<p>Python的标准库提供了两个模块：<code>thread</code>和<code>threading</code>，<code>thread</code>是低级模块，<code>threading</code>是高级模块，对<code>thread</code>进行了封装。绝大多数情况下，我们只需要使用<code>threading</code>这个高级模块。</p>
+
+<p>启动一个线程就是把一个函数传入并创建<code>Thread</code>实例，然后调用<code>start()</code>开始执行：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import time,threading
+
+#新线程执行的代码
+def loop():
+    print &#39;thread %s is running...&#39; % threading.current_thread().name
+    n = 0
+    while n&lt;5:
+        n = n+1
+        print &#39;thread %s &gt;&gt;&gt; %s&#39; %(threading.current_thread().name,n)
+        time.sleep(1)
+    print &#39;thread %s ended.&#39; %threading.current_thread().name
+
+print &#39;thread %s is running...&#39; % threading.current_thread().name
+t= threading.Thread(target=loop,name=&#39;LoopThread&#39;)
+t.start()
+t.join()
+print &#39;thread %s ended.&#39; % threading.current_thread().name
+</code></pre>
+
+<p><img src="media/14936919183368/14936948712548.jpg" alt=""/></p>
+
+<p>由于任何进程默认就会启动一个线程，我们把该线程称为主线程，主线程又可以启动新的线程，Python的<code>threading</code>模块有个<code>current_thread()</code>函数，它永远返回当前线程的实例。主线程实例的名字叫<code>MainThread</code>，子线程的名字在创建时指定，我们用<code>LoopThread</code>命名子线程。名字仅仅在打印时用来显示，完全没有其他意义，如果不起名字Python就自动给线程命名为<code>Thread-1，Thread-2……</code></p>
+
+<h2 id="toc_0">Lock</h2>
+
+<p>多线程和多进程最大的不同在于，多进程中，同一个变量，各自有一份拷贝存在于每个进程中，互不影响，<strong>而多线程中，所有变量都由所有线程共享，所以，任何一个变量都可以被任何一个线程修改，因此，线程之间共享数据最大的危险在于多个线程同时改一个变量，把内容给改乱了。</strong></p>
+
+<p>来看看多个线程同时操作一个变量怎么把内容给改乱了：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import time,threading
+
+# 假定这是你的银行存款:
+balance = 0
+
+def change_it(n):
+    # 先存后取，结果应该为0:
+    global balance
+    balance = balance + n
+    balance = balance - n
+
+def run_thread(n):
+    for i in range(100000):
+        change_it(n)
+
+t1 = threading.Thread(target=run_thread, args=(5,))
+t2 = threading.Thread(target=run_thread, args=(8,))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+print balance
+</code></pre>
+
+<p><img src="media/14936919183368/14936957737021.jpg" alt=""/><br/>
+结果为<code>14</code>而不是<code>0</code></p>
+
+<p>我们定义了一个共享变量<code>balance</code>，初始值为0，并且启动两个线程，先存后取，理论上结果应该为0，但是，由于线程的调度是由操作系统决定的，当<code>t1、t2</code>交替执行时，只要循环次数足够多，<code>balance</code>的结果就不一定是0了。</p>
+
+<p>我们为了得到准确的结果，在某个线程正在修改<code>balance</code>时就要为该线程上一把锁，直到锁释放，其它线程继续执行。创建一个锁就是通过<code>threading.Lock()</code>来实现：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import time,threading
+
+# 假定这是你的银行存款:
+balance = 0
+lock=threading.Lock()
+
+def change_it(n):
+    # 先存后取，结果应该为0:
+    global balance
+    balance = balance + n
+    balance = balance - n
+
+def run_thread(n):
+    for i in range(100000):
+        #先获取锁
+        lock.acquire()
+        try:
+            change_it(n)
+        finally:
+            # 改完了一定要释放锁:
+            lock.release()
+        
+t1 = threading.Thread(target=run_thread, args=(5,))
+t2 = threading.Thread(target=run_thread, args=(8,))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+print balance
+</code></pre>
+
+<p><img src="media/14936919183368/14937055756329.jpg" alt=""/></p>
+
+<p>当多个线程同时执行lock.acquire()时，只有一个线程能成功地获取锁，然后继续执行代码，其他线程就继续等待直到获得锁为止。</p>
+
+<p>获得锁的线程用完后一定要释放锁，否则那些苦苦等待锁的线程将永远等待下去，成为死线程。所以我们用<code>try...finally</code>来确保锁一定会被释放。</p>
+
+<h2 id="toc_1">小结</h2>
+
+<p>多线程编程，模型复杂，容易发生冲突，必须用锁加以隔离，同时，又要小心死锁的发生。</p>
+
+<p><strong>Python解释器由于设计时有GIL全局锁，导致了多线程无法利用多核。多线程的并发在Python中就是一个美丽的梦</strong></p>
+
+<p><font color=red>Python虽然不能利用多线程实现多核任务，但可以通过多进程实现多核任务。多个Python进程有各自独立的GIL锁，互不影响。<br/>
+</font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="14936863062791.html">
                 
@@ -866,203 +1139,6 @@ with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;w&#3
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14932622908500.html">
-                
-                  <h1>文档测试</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><strong>在python中我们可以执行那些在注释中的代码，来进行测试。</strong></p>
-
-<p>当我们编写注释时，如果写上这样的注释：</p>
-
-<pre><code class="language-py">def abs(n):
-    &#39;&#39;&#39;
-    Function to get absolute value of number.
-
-    Example:
-
-    &gt;&gt;&gt; abs(1)
-    1
-    &gt;&gt;&gt; abs(-1)
-    1
-    &gt;&gt;&gt; abs(0)
-    0
-    &#39;&#39;&#39;
-    return n if n &gt;= 0 else (-n)
-</code></pre>
-
-<p>无疑更明确地告诉函数的调用者该函数的期望输入和输出。</p>
-
-<p><strong>并且，Python内置的“文档测试”（doctest）模块可以直接提取注释中的代码并执行测试。</strong></p>
-
-<p><font color=red>doctest严格按照Python交互式命令行的输入和输出来判断测试结果是否正确。只有测试异常的时候，可以用...表示中间一大段烦人的输出。</font></p>
-
-<p>让我们用doctest来测试上次编写的<code>Dict</code>类：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Dict(dict):
-    
-    &quot;&quot;&quot;
-    Simple dict but also support access as x.y style
-
-    &gt;&gt;&gt; d1 = Dict()
-    &gt;&gt;&gt; d1[&#39;x&#39;] = 100
-    &gt;&gt;&gt; d1.x
-    100
-    &gt;&gt;&gt; d1.y = 200
-    &gt;&gt;&gt; d1[&#39;y&#39;]
-    200
-    &gt;&gt;&gt; d2 = Dict(a=1, b=2, c=&#39;3&#39;)
-    &gt;&gt;&gt; d2.c
-    &#39;3&#39;
-    &gt;&gt;&gt; d2[&#39;empty&#39;]
-    Traceback (most recent call last):
-        ...
-    KeyError: &#39;empty&#39;
-    &gt;&gt;&gt; d2.empty
-    Traceback (most recent call last):
-        ...
-    AttributeError: &#39;Dict&#39; object has no attribute &#39;empty&#39;
-    
-    &quot;&quot;&quot;
-    def __init__(self, **kw):
-        super(Dict, self).__init__(**kw)
-    def __getattr__(self,key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r&quot;&#39;Dict&#39; object has no attribute &#39;%s&#39;&quot; % key)
-        else:
-            pass
-        finally:
-            pass
-    def __setattr__(self,key,value):
-        self[key] = value
-if __name__ == &#39;__main__&#39;:
-    import doctest
-    doctest.testmod()
-</code></pre>
-
-<p>如果什么输出都没有，说明我们编写的<code>doctest</code>运行都是正确的。<br/>
-<img src="media/14932622908500/14932639594028.jpg" alt=""/><br/>
-如果我们把</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; d2.c
-    &#39;4&#39; #3改成4
-</code></pre>
-
-<p>运行后就会显示：</p>
-
-<p><img src="media/14932622908500/14932640459265.jpg" alt=""/></p>
-
-<p><strong>注意到最后两行代码。当模块正常导入时，doctest不会被执行。只有在命令行运行时，才执行doctest。所以，不必担心doctest会在非测试环境下执行。</strong></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14932573311953.html">
-                
-                  <h1>图像去雾相关论文总结</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">1.特征学习的单幅图像去雾算法 2016年</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_1">2.尺度自适应暗通道先验去雾方法</a>
-
-
-<h2 id="toc_0">1.特征学习的单幅图像去雾算法 2016年</h2>
-
-<p><strong>目的：</strong>为提高图像去雾的普适性，提出一种特征学习的单幅图像去雾方法。</p>
-
-<p><strong>方法：</strong>通过稀疏自动编码机对有雾图像进行<strong>多尺度的纹理结构特征提取</strong>，同时抽取各种与雾相关的颜色特征。然后采用多层神经网络进行样本训练，得到雾天条件下纹理结构特征及颜色特征与场景深度间的映射关系，并估算出有雾图像的场景深度图。最后结合大气散射模型，根据场景深度图复原无雾图像。</p>
-
-<p><strong>结论：对实验结果的定性及定量分 析表明，本文算法能有效获取有雾图像的场景深度，复原出视觉效果理想的无雾图像，且具有很好的场景普适性。</strong></p>
-
-<p><strong>理解</strong>：<font color=red>本文认为图像去雾的问题可进一步转化为场景深度d的求解问题。</font>本文通过自动编码机获取到图片中物体的纹理特征，然后用多尺度的方法分别提取<strong>颜色特征、暗原色特征、颜色衰减特征、纹理结构</strong>特征。<strong>四者结合对场景深度进行估计</strong>。</p>
-
-<p><strong>可以改进的</strong>：</p>
-
-<ol>
-<li><p>算法实时性不够强，效率比较低，可以考虑缩小图片尺寸，降低数据量，从而运用到视频去雾。</p></li>
-<li><p>对雾气分布不均匀的图像，效果不理想，需要结合不同的气象模型来建立更为鲁棒的物理模型。</p></li>
-</ol>
-
-<h1 id="toc_1">2.尺度自适应暗通道先验去雾方法</h1>
-
-<p><strong>目的：</strong><br/>
-针对暗通道先验去雾方法的尺度选择问题 提出了一种尺度自适应方法， 根据图像的颜色和边 缘特征将暗通道求解的尺度自适应地调整到一个合适的范围。</p>
-
-<p><strong>方法：</strong></p>
-
-<ol>
-<li><p>由颜色特征求解初始尺度：<font color=red>对于图像的不同区域采用不同的尺度求解暗通道: 在亮度较低或饱和度较高的区域，采用较小尺度; 在亮度较高且饱和度较低的区域，采用较大尺度;在景深突变处，采用较小尺度;在平滑区域，采用较大尺度。</font></p></li>
-<li><p>由边缘特征对尺度进行修正:由于“光晕”现象发生在景深突变处，如果在边缘附近采用较小的尺度，可使透射率的求解窗口\(Ω_r(x)\)尽量不跨越景深边界，从而减小“光晕”现象; 在非边缘处采用较大的尺度，可以增大 \(J_{dark}(x)→0\)的概率，使复原图像的背景更平滑，噪声和失真更小。 由边缘特征对初始尺度\(r_0(x)\)进行修正.</p></li>
-</ol>
-
-<p><strong>结论：</strong><br/>
-整个去雾过程参数自动配置，无需人工干预，兼顾不同尺度复原图像的优点，复原图像色彩自然，对比度提升显著，并有效抑制了“光晕”现象。对多种雾化场景图像的处理结果表明: <strong>文中方法对场景的适应性强， 在任何情况下的处理结果均能达到 DG 方法的最优结果，甚至更好。</strong></p>
-
-<p><strong>理解：</strong><br/>
-该论文主要是针对HE的去雾方法，对暗通道尺寸进行自适应确定，减少了人工干预的复杂度。</p>
-
-<p><strong>可以改进：</strong><br/>
-<font color=red>该算法在运行时间上可以改进，也可以利用机器学习的方法来提取图片特征，避免Canny算子的局限性造成的边缘提取误差。<br/>
-可以与上篇论文进行结合来提高上文尺度特征提取的效率。</font></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1119,7 +1195,7 @@ if __name__ == &#39;__main__&#39;:
         
             <a href="English%20Study.html"><strong>English Study</strong></a>
         
-            <a href="%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0.html"><strong>深度学习</strong></a>
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
         
             <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
         
@@ -1142,6 +1218,18 @@ if __name__ == &#39;__main__&#39;:
 	      
 		      
 			      <li class="post">
+			        <a href="14945736764798.html">常用内建模块</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14940530686573.html">CNN卷积神经网络</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14939712159345.html">正则表达式</a>
 			      </li>
 		     
@@ -1155,18 +1243,6 @@ if __name__ == &#39;__main__&#39;:
 		      
 			      <li class="post">
 			        <a href="14938608177246.html">分布式进程</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14938589289379.html">进程与线程</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14937814533169.html">ThreadLocal</a>
 			      </li>
 		     
 		  

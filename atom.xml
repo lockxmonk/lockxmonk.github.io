@@ -4,13 +4,240 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-05-05T15:57:31+08:00</updated>
+  <updated>2017-05-06T10:24:52+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[常用内建模块]]></title>
+    <link href="https://lockxmonk.github.io/14945736764798.html"/>
+    <updated>2017-05-12T15:21:16+08:00</updated>
+    <id>https://lockxmonk.github.io/14945736764798.html</id>
+    <content type="html"><![CDATA[
+<p>Python中有很多內建模块可以直接使用，无需额外安装。</p>
+
+<h2 id="toc_0">collection</h2>
+
+<p>collections是Python内建的一个集合模块，提供了许多有用的集合类。</p>
+
+<h3 id="toc_1">namedtuple</h3>
+
+<p>我们知道<code>tuple</code>可以表示不变集合，例如，一个点的二维坐标就可以表示成：</p>
+
+<pre><code>p = (1,2)
+</code></pre>
+
+<p>但是，看到<code>(1, 2)</code>，很难看出这个<code>tuple</code>是用来表示一个坐标的。</p>
+
+<p>定义一个<code>class</code>又小题大做了，这时，<code>namedtuple</code>就派上了用场：</p>
+
+<pre><code class="language-py">from collections import namedtuple
+Point = namedtuple(&#39;Point&#39;,[&#39;x&#39;,&#39;y&#39;])
+p = Point(1,2)
+print p.x , p.y
+</code></pre>
+
+<p><img src="media/14945736764798/14945744048083.jpg" alt=""/><br/>
+<code>namedtuple</code>是一个函数，它用来创建一个自定义的<code>tuple</code>对象，并且规定了<code>tuple</code>元素的个数，并可以用属性而不是索引来引用<code>tuple</code>的某个元素。</p>
+
+<p>这样一来，我们用<code>namedtuple</code>可以很方便地定义一种数据类型，它具备<code>tuple</code>的不变性，又可以根据属性来引用，使用十分方便。</p>
+
+<p>可以验证创建的<code>Point</code>对象是<code>tuple</code>的一种子类：</p>
+
+<pre><code class="language-py">print p.x , p.y ,isinstance(p, tuple),isinstance(p, Point)
+</code></pre>
+
+<p><img src="media/14945736764798/14945746594923.jpg" alt=""/></p>
+
+<p>类似的，如果要用坐标和半径表示一个圆，也可以用<code>namedtuple</code>定义：</p>
+
+<pre><code class="language-py"># namedtuple(&#39;名称&#39;, [属性list]):
+Circle = namedtuple(&#39;Circle&#39;, [&#39;x&#39;, &#39;y&#39;, &#39;r&#39;])
+</code></pre>
+
+<h3 id="toc_2">deque</h3>
+
+<p>使用<code>list</code>存储数据时，按索引访问元素很快，但是插入和删除元素就很慢了，因为<code>list</code>是线性存储，数据量大的时候，插入和删除效率很低。</p>
+
+<p><code>deque</code>是为了高效实现插入和删除操作的双向列表，适合用于队列和栈：</p>
+
+<pre><code class="language-py">from collections import deque
+q = deque([&#39;a&#39;,&#39;b&#39;,&#39;c&#39;])
+q.append(&#39;x&#39;)
+q.appendleft(&#39;y&#39;)
+print q
+</code></pre>
+
+<p><img src="media/14945736764798/14945755049453.jpg" alt=""/></p>
+
+<p><code>deque</code>除了实现list的<code>append()</code>和<code>pop()</code>外，还支持<code>appendleft()</code>和<code>popleft()</code>，这样就可以非常高效地往头部添加或删除元素。</p>
+
+<h3 id="toc_3">defaultdict</h3>
+
+<p>使用<code>dict</code>时，如果引用的Key不存在，就会抛出<code>KeyError</code>。如果希望<code>key</code>不存在时，返回一个默认值，就可以用<code>defaultdict</code>：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from collections import defaultdict
+dd = defaultdict(lambda: &#39;N/A&#39;)
+dd[&#39;key1&#39;] = &#39;abc&#39;
+print dd[&#39;key1&#39;], dd[&#39;key2&#39;]    #key1存在，key2不存在
+
+</code></pre>
+
+<p><img src="media/14945736764798/14945759067274.jpg" alt=""/><br/>
+注意默认值是调用函数返回的，而函数在创建<code>defaultdict</code>对象时传入。</p>
+
+<p>除了在<code>Key</code>不存在时返回默认值，<code>defaultdict</code>的其他行为跟<code>dict</code>是完全一样的。</p>
+
+<h3 id="toc_4">OrderedDict</h3>
+
+<p>使用<code>dict</code>时，Key是无序的。在对<code>dict</code>做迭代时，我们无法确定<code>Key</code>的顺序。</p>
+
+<p>如果要保持Key的顺序，可以用<code>OrderedDict</code>：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from collections import OrderedDict
+d = dict([(&#39;a&#39;,1),(&#39;b&#39;,2),(&#39;c&#39;,3)])
+print d    # dict的Key是无序的
+od = OrderedDict([(&#39;a&#39;,1),(&#39;b&#39;,2),(&#39;c&#39;,3)])
+print od   #这个是有序的
+
+</code></pre>
+
+<p><img src="media/14945736764798/14945761816386.jpg" alt=""/></p>
+
+<p><font color=red>注意，OrderedDict的Key会按照插入的顺序排列，不是Key本身排序：</font></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from collections import OrderedDict
+od = OrderedDict()
+od[&#39;z&#39;] = 1
+od[&#39;y&#39;] = 2
+od[&#39;x&#39;] = 3
+
+print od
+</code></pre>
+
+<p><img src="media/14945736764798/14945763021698.jpg" alt=""/></p>
+
+<p><code>OrderedDict</code>可以实现一个FIFO（先进先出）的dict，当容量超出限制时，先删除最早添加的Key：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from collections import OrderedDict
+
+class LastUpdatedOrderedDict(OrderedDict):
+
+    def __init__(self, capacity):
+        super(LastUpdatedOrderedDict, self).__init__()
+        self._capacity = capacity
+
+    def __setitem__(self, key, value):
+        containsKey = 1 if key in self else 0
+        if len(self) - containsKey &gt;= self._capacity:
+            last = self.popitem(last=False)
+            print &#39;remove:&#39;, last
+        if containsKey:
+            del self[key]
+            print &#39;set:&#39;, (key, value)
+        else:
+            print &#39;add:&#39;, (key, value)
+        OrderedDict.__setitem__(self, key, value)
+od = LastUpdatedOrderedDict(3)
+od[&#39;z&#39;] = 1
+od[&#39;w&#39;] = 2
+od[&#39;a&#39;] = 3
+od[&#39;q&#39;] = 4
+print od  
+</code></pre>
+
+<p><img src="media/14945736764798/14945770697335.jpg" alt=""/></p>
+
+<h3 id="toc_5">Counter</h3>
+
+<p><code>Counter</code>是一个简单的计数器，例如，统计字符出现的个数：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+from collections import Counter
+
+c = Counter()
+for ch in &#39;Programming&#39;:
+    c[ch] = c[ch] + 1
+
+print c
+
+</code></pre>
+
+<p><img src="media/14945736764798/14945772600780.jpg" alt=""/></p>
+
+<h1 id="toc_6">小结</h1>
+
+<p><code>collections</code>模块提供了一些有用的集合类，可以根据需要选用。</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[CNN卷积神经网络]]></title>
+    <link href="https://lockxmonk.github.io/14940530686573.html"/>
+    <updated>2017-05-06T14:44:28+08:00</updated>
+    <id>https://lockxmonk.github.io/14940530686573.html</id>
+    <content type="html"><![CDATA[
+<h2 id="toc_0">简介</h2>
+
+<p>卷积神经网络是近年发展起来，并引起广泛重视的一种高效识别方法。20世纪60年代，Hubel和Wiesel在研究猫脑皮层中用于局部敏感和方向选择的神经元时发现其独特的网络结构可以有效地降低反馈神经网络的复杂性，继而提出了卷积神经网络（Convolutional Neural Networks-简称CNN）。现在，CNN已经成为众多科学领域的研究热点之一，特别是在模式分类领域，<mark>由于该网络避免了对图像的复杂前期预处理，可以直接输入原始图像，因而得到了更为广泛的应用</mark>。</p>
+
+<p>一般地，CNN的基本结构包括两层：</p>
+
+<ol>
+<li><p>其一为<strong>特征提取层</strong>：每个神经元的输入与前一层的局部接受域相连，并提取该局部的特征。一旦该局部特征被提取后，它与其它特征间的位置关系也随之确定下来；</p></li>
+<li><p>其二是<strong>特征映射层</strong>：网络的每个计算层由多个特征映射组成，每个特征映射是一个平面，平面上所有神经元的权值相等。特征映射结构采用影响函数核小的sigmoid函数作为卷积网络的激活函数，使得特征映射具有位移不变性。此外，由于一个映射面上的神经元共享权值，因而减少了网络自由参数的个数。卷积神经网络中的每一个卷积层都紧跟着一个用来求局部平均与二次提取的计算层，这种特有的两次特征提取结构减小了特征分辨率。</p></li>
+</ol>
+
+<p>CNN主要<strong>用来识别位移、缩放及其他形式扭曲不变性的二维图形</strong>。由于CNN的特征检测层通过训练数据进行学习，所以在使用CNN时，避免了显示的特征抽取，而隐式地从训练数据中进行学习；</p>
+
+<p>再者由于同一特征映射面上的神经元权值相同，所以网络可以并行学习，这也是卷积网络相对于神经元彼此相连网络的一大优势。<font color=red>卷积神经网络以其局部权值共享的特殊结构在语音识别和图像处理方面有着独特的优越性，</font><strong>其布局更接近于实际的生物神经网络，权值共享降低了网络的复杂性，特别是多维输入向量的图像可以直接输入网络这一特点避免了特征提取和分类过程中数据重建的复杂度</strong>。</p>
+
+<h2 id="toc_1">卷积神经网络</h2>
+
+<p>在图像处理中，往往把图像表示为像素的向量，比如一个1000×1000的图像，可以表示为一个1000000的向量。在上一节中提到的神经网络中，如果隐含层数目与输入层一样，即也是1000000时，那么输入层到隐含层的参数数据为：\(1000000×1000000=10^{12}\)，这样就太多了，基本没法训练。所以图像处理要想练成神经网络大法，必先减少参数加快速度。就跟辟邪剑谱似的，普通人练得很挫，一旦自宫后内力变强剑法变快，就变的很牛了。</p>
+
+<h3 id="toc_2">局部感知</h3>
+
+<p>卷积神经网络有<mark>两种神器</mark>可以降低参数数目，<mark>第一种神器叫做局部感知野</mark>。一般认为人对外界的认知是从局部到全局的，而图像的空间联系也是局部的像素联系较为紧密，而距离较远的像素相关性则较弱。<strong>因而，每个神经元其实没有必要对全局图像进行感知，只需要对局部进行感知</strong>，然后在更高层将局部的信息综合起来就得到了全局的信息。<strong>网络部分连通的思想，也是受启发于生物学里面的视觉系统结构。视觉皮层的神经元就是局部接受信息的（即这些神经元只响应某些特定区域的刺激）。</strong>如下图所示：左图为全连接，右图为局部连接。</p>
+
+<p><img src="media/14940530686573/14940535875953.jpg" alt=""/></p>
+
+<p>在上右图中，假如每个神经元只和10×10个像素值相连，那么权值数据为1000000×100个参数，减少为原来的千分之一。而那10×10个像素值对应的10×10个参数，其实就相当于卷积操作。</p>
+
+<h3 id="toc_3">参数共享</h3>
+
+<p>但其实这样的话参数仍然过多，那么就启动第二级神器，<mark>即权值共享</mark>。在上面的局部连接中，每个神经元都对应100个参数，一共1000000个神经元，如果这1000000个神经元的100个参数都是相等的，那么参数数目就变为100了。</p>
+
+<p>怎么理解权值共享呢？我们可以这100个参数（也就是卷积操作）看成是提取特征的方式，该方式与位置无关。<font color=red>这其中隐含的原理则是：图像的一部分的统计特性与其他部分是一样的。这也意味着我们在这一部分学习的特征也能用在另一部分上，所以对于这个图像上的所有位置，我们都能使用同样的学习特征</font>。</p>
+
+<p>更直观一些，当从一个大尺寸图像中随机选取一小块，比如说 8×8 作为样本，并且从这个小块样本中学习到了一些特征，这时我们可以把从这个 8×8 样本中学习到的特征作为探测器，应用到这个图像的任意地方中去。特别是，我们可以用从 8×8 样本中所学习到的特征跟原本的大尺寸图像作卷积，从而对这个大尺寸图像上的任一位置获得一个不同特征的激活值。</p>
+
+<p>如下图所示，展示了一个33的卷积核在55的图像上做卷积的过程。每个卷积都是一种特征提取方式，就像一个筛子，将图像中符合条件（激活值越大越符合条件）的部分筛选出来</p>
+
+<p><img src="media/14940530686573/14940539862222.gif" alt=""/></p>
+
+<h3 id="toc_4">多卷积核</h3>
+
+<p>上面所述只有100个参数时，表明只有1个100*100的卷积核，显然，特征提取是不充分的，我们可以添加多个卷积核，比如32个卷积核，可以学习32种特征。在有多个卷积核时，如下图所示：<br/>
+<img src="media/14940530686573/14940546422731.jpg" alt=""/></p>
+
+<p>上图右，不同颜色表明不同的卷积核。每个卷积核都会将图像生成为另一幅图像。比如两个卷积核就可以将生成两幅图像，这两幅图像可以看做是一张图像的不同的通道。如下图所示，下图有个小错误，即将w1改为w0，w2改为w1即可。下文中仍以w1和w2称呼它们</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[正则表达式]]></title>
@@ -148,6 +375,14 @@ else:
 <p><img src="media/14938936328646/14938938844517.jpg" alt=""/><br/>
 <img src="media/14938936328646/14938939404387.jpg" alt=""/><br/>
 <img src="media/14938936328646/14938939611430.jpg" alt=""/></p>
+
+<h2 id="toc_1">HSV</h2>
+
+<p>HSL 和 HSV（也叫做 HSB）是对RGB 色彩空间中点的两种有关系的表示，它们尝试描述比 RGB 更准确的感知颜色联系，并仍保持在计算上简单。<code>HSL 表示hue（色相）、saturation（饱和度）、lightness（亮度）</code>，<strong>HSV 表示</strong> <code>hue、 saturation、value(色调) 而 HSB 表示hue、saturation、brightness（明度）</code>。</p>
+
+<p>HSL 和 HSV 二者都把颜色描述在圆柱体内的点，这个圆柱的中心轴取值为<strong>自底部的黑色到顶部的白色而在它们中间是的灰色</strong>，绕这个轴的<strong>角度</strong>对应于“色相”，<strong>到这个轴的距离</strong>对应于“饱和度”，而<strong>沿着这个轴的距离</strong>对应于“亮度”，“色调”或“明度”。</p>
+
+<p>HSV（色相，饱和度，明度）在概念上可以被认为是颜色的倒圆锥体（黑点在下顶点，白色在上底面圆心）</p>
 
 ]]></content>
   </entry>
@@ -2535,288 +2770,6 @@ s()
 </code></pre>
 
 <p><img src="media/14926766188460/14927611817291.jpg" alt=""/></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[类和实例]]></title>
-    <link href="https://lockxmonk.github.io/14926712777578.html"/>
-    <updated>2017-04-20T14:54:37+08:00</updated>
-    <id>https://lockxmonk.github.io/14926712777578.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">数据封装</a>
-</li>
-<li>
-<a href="#toc_1">访问限制</a>
-</li>
-<li>
-<a href="#toc_2">继承和多态</a>
-</li>
-<li>
-<a href="#toc_3">获取对象信息</a>
-<ul>
-<li>
-<a href="#toc_4">使用type()</a>
-</li>
-<li>
-<a href="#toc_5">使用isinstance()</a>
-</li>
-<li>
-<a href="#toc_6">使用dir()</a>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>在Python中，定义类是通过<code>class</code>关键字：</p>
-
-<pre><code class="language-py">class Student(object):
-    pass
-</code></pre>
-
-<p><code>class</code>后面紧接着是类名，即<code>Student</code>，类名通常是大写开头的单词，紧接着是<code>(object)</code>，表示该类是从哪个类继承下来的，继承的概念我们后面再讲，通常，<strong>如果没有合适的继承类，就使用object类，这是所有类最终都会继承的类</strong>。</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.name = name
-        self.score = score
-</code></pre>
-
-<p>注意到<code>__init__</code>方法的第一个参数永远是self，表示创建的实例本身，因此，在<code>__init__</code>方法内部，就可以把各种属性绑定到<code>self</code>，因为<code>self</code>就指向创建的实例本身。</p>
-
-<p>和普通的函数相比，在类中定义的函数只有一点不同，<font color=red>就是第一个参数永远是实例变量self，并且，调用时，不用传递该参数。除此之外，类的方法和普通函数没有什么区别，所以，你仍然可以用默认参数、可变参数和关键字参数。</font></p>
-
-<h2 id="toc_0">数据封装</h2>
-
-<p>面向对象编程的一个重要特点就是数据封装，创建实例需要给出<code>name</code>和<code>score</code>，而如何打印，都是在Student类的内部定义的，这些数据和逻辑被“封装”起来了，调用很容易，但却不用知道内部实现的细节。</p>
-
-<p>例如下面增加一个成绩分类的方法：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.name = name
-        self.score = score
-
-    def print_score(self):
-        print &#39;%s:%s&#39; % (self.name, self.score)
-
-    def get_grade(self):
-        if self.score &gt;= 90:
-            print &#39;A&#39;
-        elif self.score &gt;= 60:
-            print &#39;B&#39;
-        else:
-            print &#39;C&#39;
-
-bart = Students(&#39;Bart&#39;, 59)
-lisa = Students(&#39;梁中豪&#39;, 100)
-bart.print_score()
-bart.get_grade()
-lisa.print_score()
-lisa.get_grade()
-</code></pre>
-
-<h2 id="toc_1">访问限制</h2>
-
-<p>在Class内部，可以有属性和方法，而外部代码可以通过直接调用实例变量的方法来操作数据，这样，就隐藏了内部的复杂逻辑。</p>
-
-<p>但是，从前面Student类的定义来看，外部代码还是可以自由地修改一个实例的<code>name</code>、<code>score</code>属性</p>
-
-<p>如果要让内部属性不被外部访问，可以把属性的名称前加上两个下划线<code>__</code>，<font color=red>在Python中，实例的变量名如果以<code>__</code>开头，就变成了一个私有变量（private），只有内部可以访问，外部不能访问，</font>所以，我们把Student类改一改：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.__name = name
-        self.__score = score
-
-    def print_score(self):
-        print &#39;%s:%s&#39; % (self.__name, self.__score)
-
-   
-bart = Students(&#39;Bart&#39;, 59)
-lisa = Students(&#39;梁中豪&#39;, 100)
-bart.print_score()
-lisa.__name
-</code></pre>
-
-<p>改完后，对于外部代码来说，没什么变动，但是已经无法从外部访问实例变量.<code>__name</code>和实例变量<code>.__score</code>了：<br/>
-<img src="media/14926712777578/14926727380387.jpg" alt=""/><br/>
-如果又要允许外部代码修改score,可以给Student类增加set_score方法.这里跟java很像。不在过多叙述。</p>
-
-<h2 id="toc_2">继承和多态</h2>
-
-<p>在OOP程序设计中，当我们定义一个class的时候，可以从某个现有的class继承，新的class称为子类（Subclass），而被继承的class称为基类、父类或超类（Base class、Super class）。</p>
-
-<p>继承最大的好处是子类获得了父类的全部功能。由于<code>Animial</code>实现了<code>run()</code>方法，因此，<code>Dog</code>和<code>Cat</code>作为它的子类，什么事也没干，就自动拥有了<code>run()</code>方法，当然也可以对父类方法进行重写。</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Animal(object):
-    &quot;&quot;&quot;docstring for Animal&quot;&quot;&quot;
-
-    def run(self):
-        print &#39;Animal is running..&#39;
-
-
-class Dog(Animal):
-    pass
-
-
-class Cat(Animal):
-    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
-
-    def run(self):
-        print &#39;Cat is running..&#39;
-
-dog = Dog()
-dog.run()
-
-cat = Cat()
-cat.run()
-
-</code></pre>
-
-<p><img src="media/14926712777578/14926743181176.jpg" alt=""/></p>
-
-<h2 id="toc_3">获取对象信息</h2>
-
-<p>当我们拿到一个对象的引用时，如何知道这个对象是什么类型？</p>
-
-<h3 id="toc_4">使用type()</h3>
-
-<p>基本类型都可以用<code>type()</code>判断：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-print type(123),type(&#39;str&#39;),type(None)
-</code></pre>
-
-<p><img src="media/14926712777578/14926750871663.jpg" alt=""/></p>
-
-<p>Python把每种type类型都定义好了常量，放在types模块里，使用之前，需要先导入：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import types
-print type(&#39;abc&#39;)==types.StringType
-print type(u&#39;abc&#39;)==types.UnicodeType
-print type([])==types.ListType
-print type(str) == types.TypeType
-</code></pre>
-
-<p><img src="media/14926712777578/14926752976543.jpg" alt=""/><br/>
-<strong>最后注意到有一种类型就叫TypeType，所有类型本身的类型就是TypeType.比如<code>int，str</code>等</strong></p>
-
-<h3 id="toc_5">使用isinstance()</h3>
-
-<p>我们使用<code>isinstance()</code>来判断class的类型，例如：</p>
-
-<pre><code class="language-py">class Animals(object):
-    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
-    pass
-class Cat(Animals):
-    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
-    pass
-class Dog(Animals):
-    &quot;&quot;&quot;docstring for Dog&quot;&quot;&quot;
-    pass
-a = Animals()
-d = Dog()
-h = Cat()
-print isinstance(h, Cat),isinstance(d, Dog),isinstance(a, Animals)
-</code></pre>
-
-<p><img src="media/14926712777578/14926756201012.jpg" alt=""/></p>
-
-<p>当然也可以用<code>isinstance()</code>来判断基本类型</p>
-
-<h3 id="toc_6">使用dir()</h3>
-
-<p>如果要获得一个对象的所有属性和方法，可以使用<code>dir()</code>函数，它返回一个包含字符串的<code>list</code>，比如，获得一个str对象的所有属性和方法：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; dir(&#39;abc&#39;)
-</code></pre>
-
-<p><img src="media/14926712777578/14926758082813.jpg" alt=""/></p>
-
-<p><strong>仅仅把属性和方法列出来是不够的，配合<code>getattr()、setattr()以及hasattr()</code>，我们可以直接操作一个对象的状态：</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-class Animals(object):
-    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
-
-    def __init__(self):
-        self.x = 9
-
-    def power(self):
-        print self.x * self.x
-obj = Animals()
-
-print hasattr(obj, &#39;x&#39;)  # 有属性&#39;x&#39;吗？
-print hasattr(obj, &#39;y&#39;)  # 有属性&#39;y&#39;吗？
-print setattr(obj, &#39;y&#39;, 19)  # 设置一个属性&#39;y&#39;
-print getattr(obj, &#39;y&#39;)  # 获取属性&#39;y&#39;
-print obj.y
-</code></pre>
-
-<p><img src="media/14926712777578/14926764199501.jpg" alt=""/></p>
-
-<p>也可以获得对象的方法：</p>
-
-<pre><code class="language-py">fn = getattr(obj, &#39;power&#39;)
-print fn,fn(),
-</code></pre>
-
-<p><img src="media/14926712777578/14926765852729.jpg" alt=""/></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[面向对象编程]]></title>
-    <link href="https://lockxmonk.github.io/14926690841704.html"/>
-    <updated>2017-04-20T14:18:04+08:00</updated>
-    <id>https://lockxmonk.github.io/14926690841704.html</id>
-    <content type="html"><![CDATA[
-<p>采用面向对象的程序设计思想来设计一个简单的学生成绩打印，我们首选思考的不是程序的执行流程，而是<code>Student</code>这种数据类型应该被视为一个对象，这个对象拥有<code>name</code>和<code>score</code>这两个属性（Property）。如果要打印一个学生的成绩，首先必须创建出这个学生对应的对象，然后，给对象发一个<code>print_score</code>消息，让对象自己把自己的数据打印出来</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.name = name
-        self.score = score
-
-    def print_score(self):
-        print &#39;%s:%s&#39; % (self.name, self.score)
-
-
-bart = Students(&#39;Bart&#39;, 59)
-lisa = Students(&#39;梁中豪&#39;, 100)
-bart.print_score()
-lisa.print_score()
-</code></pre>
-
-<p><img src="media/14926690841704/14926708025078.jpg" alt=""/></p>
-
-<p><strong>面向对象三大特点：封装、继承、多态。</strong></p>
 
 ]]></content>
   </entry>

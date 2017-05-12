@@ -80,7 +80,7 @@
         
             <li><a href="English%20Study.html">English Study</a></li>
         
-            <li><a href="%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0.html">深度学习</a></li>
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
         
             <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
         
@@ -108,6 +108,228 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="14936863062791.html">
+                
+                  <h1>进程和线程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">多进程</a>
+</li>
+<li>
+<a href="#toc_1">multiprocessing</a>
+</li>
+<li>
+<a href="#toc_2">Pool</a>
+</li>
+<li>
+<a href="#toc_3">进程间通信</a>
+<ul>
+<li>
+<a href="#toc_4">小结</a>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>我们前面编写的所有的Python程序，都是执行单任务的进程，也就是只有一个线程。如果我们要同时执行多个任务怎么办</p>
+
+<p>一种是启动多个进程，每个进程虽然只有一个线程，但多个进程可以一块执行多个任务。</p>
+
+<p><strong>还有一种方法是启动一个进程，在一个进程内启动多个线程，这样，多个线程也可以一块执行多个任务。</strong></p>
+
+<p>当然还有第三种方法，就是启动多个进程，每个进程再启动多个线程，这样同时执行的任务就更多了，当然这种模型更复杂，实际很少采用。</p>
+
+<p>总结一下就是，多任务的实现有3种方式：</p>
+
+<ul>
+<li>多进程模式；</li>
+<li>多线程模式；</li>
+<li>多进程+多线程模式。</li>
+</ul>
+
+<blockquote>
+<p>线程是最小的执行单元，而进程由至少一个线程组成。如何调度进程和线程，完全由操作系统决定，程序自己不能决定什么时候执行，执行多长时间。</p>
+</blockquote>
+
+<h2 id="toc_0">多进程</h2>
+
+<p>Unix/Linux操作系统提供了一个<code>fork()</code>系统调用，它非常特殊。普通的函数调用，调用一次，返回一次，但是<code>fork()</code><font color=red>调用一次，返回两次，因为操作系统自动把当前进程（称为父进程）复制了一份（称为子进程），然后，分别在父进程和子进程内返回</font>。</p>
+
+<p>子进程永远返回<code>0</code>，而父进程返回子进程的ID。这样做的理由是，一个父进程可以fork出很多子进程，所以，父进程要记下每个子进程的ID，而子进程只需要调用<code>getppid()</code>就可以拿到父进程的ID。</p>
+
+<p>Python的<code>os</code>模块封装了常见的系统调用，其中就包括<code>fork</code>，可以在Python程序中轻松创建子进程：</p>
+
+<pre><code class="language-py">import os
+
+print &#39;Process (%s) start&#39; %os.getpid()
+
+pid = os.fork()
+if pid == 0:
+    print &#39;I am child process (%s) and my parent is %s.&#39; %(os.getpid(),os.getppid())
+else:
+    print &#39;I (%s) just created a child process (%s)&#39; %(os.getpid(),pid)
+</code></pre>
+
+<p><img src="media/14936863062791/14936874189758.jpg" alt=""/></p>
+
+<p>第一次返回父进程，第二次返回子进程。所以分别打印出了不同的结果。</p>
+
+<p>有了<code>fork</code>调用，一个进程在接到新任务时就可以复制出一个子进程来处理新任务，常见的Apache服务器就是由父进程监听端口，每当有新的http请求时，就fork出子进程来处理新的http请求。</p>
+
+<h2 id="toc_1">multiprocessing</h2>
+
+<p>如果你打算编写多进程的服务程序，Unix/Linux无疑是正确的选择。由于Windows没有<code>fork</code>调用，难道在Windows上无法用Python编写多进程的程序？</p>
+
+<p>由于Python是跨平台的，自然也应该提供一个跨平台的多进程支持。<code>multiprocessing</code>模块就是跨平台版本的多进程模块。</p>
+
+<p><code>multiprocessing</code>模块提供了一个<code>Process</code>类来代表一个进程对象，下面的例子演示了启动一个子进程并等待其结束：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+from multiprocessing import Process
+
+import os
+
+# 子进程要执行的代码
+
+
+def run_proc(name):
+    print &#39;Run child process %s(%s)&#39; % (name, os.getpid())
+
+if __name__ == &#39;__main__&#39;:
+    print &#39;Parent process %s.&#39; % os.getpid()
+p = Process(target=run_proc, args=(&#39;test&#39;,))
+print &#39;Process will start.&#39;
+p.start()
+p.join()
+print &#39;Process end&#39;
+</code></pre>
+
+<p><img src="media/14936863062791/14936889041171.jpg" alt=""/></p>
+
+<p>创建子进程时，只需要传入一个执行函数和函数的参数，创建一个<code>Process</code>实例，用<code>start()</code>方法启动，这样创建进程比<code>fork()</code>还要简单。</p>
+
+<p><code>join()</code>方法可以等待子进程结束后再继续往下运行，通常用于进程间的同步。</p>
+
+<h2 id="toc_2">Pool</h2>
+
+<p>如果要启动大量的子进程，可以用进程池的方式批量创建子进程：</p>
+
+<pre><code class="language-py">from multiprocessing import Pool
+import os
+import time
+import random
+
+
+def long_time_task(name):
+    print &#39;Run task %s(%s)...&#39; % (name, os.getpid())
+    start = time.time()
+    time.sleep(random.random() * 3)
+    end = time.time()
+    print &#39;Task %s runs %0.2f seconds.&#39; % (name, (end - start))
+
+if __name__ == &#39;__main__&#39;:
+    print &#39;Parent process %s.&#39; % os.getpid()
+    p = Pool()
+    for i in range(9):
+        p.apply_async(long_time_task, args=(i,))
+    print &#39;Waiting for all subprocesses done...&#39;
+    p.close()
+    p.join()
+    print &#39;All subprocess done&#39;
+</code></pre>
+
+<p><img src="media/14936863062791/14936904615182.jpg" alt=""/></p>
+
+<p>代码解读：</p>
+
+<p>对<code>Pool</code>对象调用<code>join()</code>方法会等待所有子进程执行完毕，调用<code>join()</code>之前必须先调用<code>close()</code>，调用<code>close()</code>之后就不能继续添加新的<code>Process</code>了。</p>
+
+<p>请注意输出的结果，task 0~7是立刻执行的，而task 8要等待前面某个task完成后才执行，这是因为Pool的默认大小在我的电脑上是8，因此，最多同时执行8个进程。这是Pool有意设计的限制，并不是操作系统的限制。如果改成：<code>p = Pool(9)</code></p>
+
+<p>就可以同时跑9个进程。</p>
+
+<p>由于Pool的默认大小是CPU的核数，如果你不幸拥有8核CPU，你要提交至少9个子进程才能看到上面的等待效果。</p>
+
+<h2 id="toc_3">进程间通信</h2>
+
+<p><code>Process</code>之间肯定是需要通信的，操作系统提供了很多机制来实现进程间的通信。Python的<code>multiprocessing</code>模块包装了底层的机制，提供了<code>Queue</code>、<code>Pipes</code>等多种方式来交换数据。</p>
+
+<p>我们以<code>Queue</code>为例，在父进程中创建两个子进程，一个往<code>Queue</code>里写数据，一个从<code>Queue</code>里读数据：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from multiprocessing import Process,Queue
+import os,time,random
+
+#写数据进程执行的代码
+def write(q):
+    for value in [&#39;A&#39;,&#39;B&#39;,&#39;C&#39;]:
+        print &#39;Put %s to quene...&#39; % value
+        q.put(value)
+        time.sleep(random.random())
+#读数据进程执行的代码
+def read(q):
+    while True:
+        value = q.get(True)
+        print &#39;Get %s from quene.&#39; %value
+
+if __name__==&#39;__main__&#39;:
+    #父进程创建Quene,并传给各个子进程：
+    q = Queue()
+    pw = Process(target=write,args=(q,))
+    pr = Process(target=read,args=(q,))
+    #启动子进程pw，写入：
+    pw.start()
+    #启动子进程pr，读取：
+    pr.start()
+    #等待pw结束：
+    pw.join()
+    #pr进程里是死循环，无法等待其结束，只能强行终止：
+    pr.terminate()
+
+</code></pre>
+
+<p><img src="media/14936863062791/14936917220576.jpg" alt=""/></p>
+
+<p>在Unix/Linux下，<code>multiprocessing</code>模块封装了<code>fork()</code>调用，使我们不需要关注<code>fork()</code>的细节。由于Windows没有fork调用，因此，<code>multiprocessing</code>需要“模拟”出fork的效果，父进程所有Python对象都必须通过<code>pickle</code>序列化再传到子进程去，所有，如果<code>multiprocessing</code>在Windows下调用失败了，要先考虑是不是pickle失败了。</p>
+
+<h3 id="toc_4">小结</h3>
+
+<p>在Unix/Linux下，可以使用<code>fork()</code>调用实现多进程。</p>
+
+<p>要实现跨平台的多进程，可以使用<code>multiprocessing</code>模块。</p>
+
+<p>进程间通信是通过<code>Queue、Pipes</code>等实现的。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="14933396433742.html">
                 
@@ -960,165 +1182,6 @@ if __name__ == &#39;__main__&#39;:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14928307466218.html">
-                
-                  <h1>调试</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">断言</a>
-</li>
-<li>
-<a href="#toc_1">logging</a>
-</li>
-<li>
-<a href="#toc_2">pdb</a>
-</li>
-<li>
-<a href="#toc_3">pdb.set_trace()</a>
-</li>
-<li>
-<a href="#toc_4">IDE</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_5">总结</a>
-
-
-<p>程序能一次写完并正常运行的概率很小，基本不超过1%。总会有各种各样的bug需要修正。有的bug很简单，看看错误信息就知道，有的bug很复杂，我们需要知道出错时，哪些变量的值是正确的，哪些变量的值是错误的，因此，需要一整套调试程序的手段来修复bug。</p>
-
-<p>第一种方法简单直接粗暴有效，就是用<code>print</code>把可能有问题的变量打印出来看看.（这种方法不详细说明了，基本每个写代码的人都比较熟悉这种方法）</p>
-
-<h2 id="toc_0">断言</h2>
-
-<p>凡是用<code>print</code>来辅助查看的地方，都可以用断言<code>（assert）</code>来替代：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def foo(s):
-    n=int(s)
-    assert n!=0,&#39;n is zero&#39;
-    return 10/n
-def main():
-    foo(&#39;0&#39;)
-main()
-</code></pre>
-
-<p><code>assert</code>的意思是，表达式<code>n != 0</code>应该是<code>True</code>，否则，后面的代码就会出错。</p>
-
-<p>如果断言失败，<code>assert</code>语句本身就会抛出<code>AssertionError</code>：</p>
-
-<p><img src="media/14928307466218/14928311015673.jpg" alt=""/><br/>
-启动Python解释器时可以用<code>-O</code>参数来关闭<code>assert</code></p>
-
-<pre><code>$ python -O err.py
-Traceback (most recent call last):
-  ...
-ZeroDivisionError: integer division or modulo by zero
-</code></pre>
-
-<p>关闭后，你可以把所有的<code>assert</code>语句当成<code>pass</code>来看。</p>
-
-<h2 id="toc_1">logging</h2>
-
-<p>把<code>print</code>替换为<code>logging</code>是第3种方式，和<code>assert</code>比，<code>logging</code>不会抛出错误，而且可以输出到文件：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import logging
-
-s = &#39;0&#39;
-n = int(s)
-logging.info(&#39;n = %d&#39; % n)
-print 10 / n
-</code></pre>
-
-<p><code>logging.info()</code>就可以输出一段文本。运行，发现除了<code>ZeroDivisionError</code>，没有任何信息。<br/>
-<img src="media/14928307466218/14928313656997.jpg" alt=""/></p>
-
-<p>加上：</p>
-
-<pre><code class="language-py">import logging
-logging.basicConfig(level=logging.INFO)
-</code></pre>
-
-<p>之后显示：<br/>
-<img src="media/14928307466218/14928314465553.jpg" alt=""/><br/>
-这就是<code>logging</code>的好处，它允许你指定记录信息的级别，有<code>debug，info，warning，error</code>等几个级别，当我们指定<code>level=INFO</code>时，<code>logging.debug</code>就不起作用了。同理，指定<code>level=WARNING</code>后，<code>debug和info</code>就不起作用了。这样一来，你可以放心地输出不同级别的信息，也不用删除，最后统一控制输出哪个级别的信息。</p>
-
-<p><code>logging</code>的另一个好处是通过简单的配置，<strong>一条语句可以同时输出到不同的地方，比如console和文件</strong>。</p>
-
-<h2 id="toc_2">pdb</h2>
-
-<p>第4种方式是启动Python的调试器pdb，让程序以单步方式运行，可以随时查看运行状态。我们先准备好程序：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-s = &#39;0&#39;
-n = int(s)
-print 10 / n
-</code></pre>
-
-<p>然后启动：<br/>
-<img src="media/14928307466218/14928416845706.jpg" alt=""/></p>
-
-<p>输入命令<code>l</code>来查看代码,输入命令<code>n</code>可以单步执行代码,任何时候都可以输入命令<code>p</code> 变量名来查看变量,输入命令<code>q</code>结束调试，退出程序.</p>
-
-<h2 id="toc_3">pdb.set_trace()</h2>
-
-<p>这个方法也是用<code>pdb</code>，但是不需要单步执行，我们只需要<code>import pdb</code>，然后，在可能出错的地方放一个<code>pdb.set_trace()</code>，就可以设置一个断点：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import pdb
-
-s = &#39;0&#39;
-n = int(s)
-pdb.set_trace()  # 运行到这里会自动暂停
-print 10 / n
-
-</code></pre>
-
-<p><img src="media/14928307466218/14928418957951.jpg" alt=""/><br/>
-运行代码，程序会自动在<code>pdb.set_trace()</code>暂停并进入pdb调试环境，可以用命令<code>p</code>查看变量，或者用命令<code>c</code>继续运行</p>
-
-<p>这个方式比直接启动pdb单步调试效率要高很多，但也高不到哪去。</p>
-
-<h2 id="toc_4">IDE</h2>
-
-<p>如果想要有好的设置断点、单步执行体验，就需要一个支持调试功能的IDE。目前比较好的<strong>Python IDE有PyCharm</strong>：<br/>
-<a href="https://www.jetbrains.com/pycharm">https://www.jetbrains.com/pycharm</a></p>
-
-<p>写程序最痛苦的事情莫过于调试，程序往往会以你意想不到的流程来运行，你期待执行的语句其实根本没有执行，这时候，就需要调试了。</p>
-
-<h1 id="toc_5">总结</h1>
-
-<p><strong>虽然用IDE调试起来比较方便，但是最后你会发现，<code>logging</code>才是终极武器。</strong></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/22</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1175,7 +1238,7 @@ print 10 / n
         
             <a href="English%20Study.html"><strong>English Study</strong></a>
         
-            <a href="%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0.html"><strong>深度学习</strong></a>
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
         
             <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
         
@@ -1198,6 +1261,18 @@ print 10 / n
 	      
 		      
 			      <li class="post">
+			        <a href="14945736764798.html">常用内建模块</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14940530686573.html">CNN卷积神经网络</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14939712159345.html">正则表达式</a>
 			      </li>
 		     
@@ -1211,18 +1286,6 @@ print 10 / n
 		      
 			      <li class="post">
 			        <a href="14938608177246.html">分布式进程</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14938589289379.html">进程与线程</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14937814533169.html">ThreadLocal</a>
 			      </li>
 		     
 		  
