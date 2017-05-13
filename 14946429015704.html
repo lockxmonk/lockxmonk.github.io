@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  LZH007
+  caffe框架运行手写体数字识别例子（MNIST） - LZH007
   
   </title>
   
@@ -100,23 +100,36 @@
        
 
  <script type="text/javascript">
-	$(function(){
-		$('#menu_item_index').addClass('is_active');
-	});
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
 </script>
 <div class="row">
-	<div class="large-8 medium-8 columns">
-		<div class="markdown-body home-categories">
-		
-			<div class="article">
-                <a class="clearlink" href="14946429015704.html">
-                
-                  <h1>caffe框架运行手写体数字识别例子（MNIST）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>关于caffe环境的搭建暂时不做讨论，之后有时间整理一下（mac系统上cpu-only的caffe环境搭建）。</p>
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>caffe框架运行手写体数字识别例子（MNIST）</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/5/13</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>关于caffe环境的搭建暂时不做讨论，之后有时间整理一下（mac系统上cpu-only的caffe环境搭建）。</p>
 
 <h2 id="toc_0">LeNet-5模型描述</h2>
 
@@ -1241,670 +1254,40 @@ I0513 11:37:11.208425 3659862976 caffe.cpp:330] loss = 0.0304018 (* 1 = 0.030401
 
 <p>最后accuracy为0.991，loss为0.03</p>
 
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
 
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14945736764798.html">
-                
-                  <h1>常用内建模块</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Python中有很多內建模块可以直接使用，无需额外安装。</p>
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="14945736764798.html" 
+          title="Next Post: 常用内建模块">常用内建模块 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
 
-<h2 id="toc_0">collection</h2>
 
-<p>collections是Python内建的一个集合模块，提供了许多有用的集合类。</p>
 
-<h3 id="toc_1">namedtuple</h3>
-
-<p>我们知道<code>tuple</code>可以表示不变集合，例如，一个点的二维坐标就可以表示成：</p>
-
-<pre><code>p = (1,2)
-</code></pre>
-
-<p>但是，看到<code>(1, 2)</code>，很难看出这个<code>tuple</code>是用来表示一个坐标的。</p>
-
-<p>定义一个<code>class</code>又小题大做了，这时，<code>namedtuple</code>就派上了用场：</p>
-
-<pre><code class="language-py">from collections import namedtuple
-Point = namedtuple(&#39;Point&#39;,[&#39;x&#39;,&#39;y&#39;])
-p = Point(1,2)
-print p.x , p.y
-</code></pre>
-
-<p><img src="media/14945736764798/14945744048083.jpg" alt=""/><br/>
-<code>namedtuple</code>是一个函数，它用来创建一个自定义的<code>tuple</code>对象，并且规定了<code>tuple</code>元素的个数，并可以用属性而不是索引来引用<code>tuple</code>的某个元素。</p>
-
-<p>这样一来，我们用<code>namedtuple</code>可以很方便地定义一种数据类型，它具备<code>tuple</code>的不变性，又可以根据属性来引用，使用十分方便。</p>
-
-<p>可以验证创建的<code>Point</code>对象是<code>tuple</code>的一种子类：</p>
-
-<pre><code class="language-py">print p.x , p.y ,isinstance(p, tuple),isinstance(p, Point)
-</code></pre>
-
-<p><img src="media/14945736764798/14945746594923.jpg" alt=""/></p>
-
-<p>类似的，如果要用坐标和半径表示一个圆，也可以用<code>namedtuple</code>定义：</p>
-
-<pre><code class="language-py"># namedtuple(&#39;名称&#39;, [属性list]):
-Circle = namedtuple(&#39;Circle&#39;, [&#39;x&#39;, &#39;y&#39;, &#39;r&#39;])
-</code></pre>
-
-<h3 id="toc_2">deque</h3>
-
-<p>使用<code>list</code>存储数据时，按索引访问元素很快，但是插入和删除元素就很慢了，因为<code>list</code>是线性存储，数据量大的时候，插入和删除效率很低。</p>
-
-<p><code>deque</code>是为了高效实现插入和删除操作的双向列表，适合用于队列和栈：</p>
-
-<pre><code class="language-py">from collections import deque
-q = deque([&#39;a&#39;,&#39;b&#39;,&#39;c&#39;])
-q.append(&#39;x&#39;)
-q.appendleft(&#39;y&#39;)
-print q
-</code></pre>
-
-<p><img src="media/14945736764798/14945755049453.jpg" alt=""/></p>
-
-<p><code>deque</code>除了实现list的<code>append()</code>和<code>pop()</code>外，还支持<code>appendleft()</code>和<code>popleft()</code>，这样就可以非常高效地往头部添加或删除元素。</p>
-
-<h3 id="toc_3">defaultdict</h3>
-
-<p>使用<code>dict</code>时，如果引用的Key不存在，就会抛出<code>KeyError</code>。如果希望<code>key</code>不存在时，返回一个默认值，就可以用<code>defaultdict</code>：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-from collections import defaultdict
-dd = defaultdict(lambda: &#39;N/A&#39;)
-dd[&#39;key1&#39;] = &#39;abc&#39;
-print dd[&#39;key1&#39;], dd[&#39;key2&#39;]    #key1存在，key2不存在
-
-</code></pre>
-
-<p><img src="media/14945736764798/14945759067274.jpg" alt=""/><br/>
-注意默认值是调用函数返回的，而函数在创建<code>defaultdict</code>对象时传入。</p>
-
-<p>除了在<code>Key</code>不存在时返回默认值，<code>defaultdict</code>的其他行为跟<code>dict</code>是完全一样的。</p>
-
-<h3 id="toc_4">OrderedDict</h3>
-
-<p>使用<code>dict</code>时，Key是无序的。在对<code>dict</code>做迭代时，我们无法确定<code>Key</code>的顺序。</p>
-
-<p>如果要保持Key的顺序，可以用<code>OrderedDict</code>：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-from collections import OrderedDict
-d = dict([(&#39;a&#39;,1),(&#39;b&#39;,2),(&#39;c&#39;,3)])
-print d    # dict的Key是无序的
-od = OrderedDict([(&#39;a&#39;,1),(&#39;b&#39;,2),(&#39;c&#39;,3)])
-print od   #这个是有序的
-
-</code></pre>
-
-<p><img src="media/14945736764798/14945761816386.jpg" alt=""/></p>
-
-<p><font color=red>注意，OrderedDict的Key会按照插入的顺序排列，不是Key本身排序：</font></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-from collections import OrderedDict
-od = OrderedDict()
-od[&#39;z&#39;] = 1
-od[&#39;y&#39;] = 2
-od[&#39;x&#39;] = 3
-
-print od
-</code></pre>
-
-<p><img src="media/14945736764798/14945763021698.jpg" alt=""/></p>
-
-<p><code>OrderedDict</code>可以实现一个FIFO（先进先出）的dict，当容量超出限制时，先删除最早添加的Key：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-from collections import OrderedDict
-
-class LastUpdatedOrderedDict(OrderedDict):
-
-    def __init__(self, capacity):
-        super(LastUpdatedOrderedDict, self).__init__()
-        self._capacity = capacity
-
-    def __setitem__(self, key, value):
-        containsKey = 1 if key in self else 0
-        if len(self) - containsKey &gt;= self._capacity:
-            last = self.popitem(last=False)
-            print &#39;remove:&#39;, last
-        if containsKey:
-            del self[key]
-            print &#39;set:&#39;, (key, value)
-        else:
-            print &#39;add:&#39;, (key, value)
-        OrderedDict.__setitem__(self, key, value)
-od = LastUpdatedOrderedDict(3)
-od[&#39;z&#39;] = 1
-od[&#39;w&#39;] = 2
-od[&#39;a&#39;] = 3
-od[&#39;q&#39;] = 4
-print od  
-</code></pre>
-
-<p><img src="media/14945736764798/14945770697335.jpg" alt=""/></p>
-
-<h3 id="toc_5">Counter</h3>
-
-<p><code>Counter</code>是一个简单的计数器，例如，统计字符出现的个数：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-from collections import Counter
-
-c = Counter()
-for ch in &#39;Programming&#39;:
-    c[ch] = c[ch] + 1
-
-print c
-
-</code></pre>
-
-<p><img src="media/14945736764798/14945772600780.jpg" alt=""/></p>
-
-<h1 id="toc_6">小结</h1>
-
-<p><code>collections</code>模块提供了一些有用的集合类，可以根据需要选用。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/12</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14940530686573.html">
-                
-                  <h1>CNN卷积神经网络</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">简介</h2>
-
-<p>卷积神经网络是近年发展起来，并引起广泛重视的一种高效识别方法。20世纪60年代，Hubel和Wiesel在研究猫脑皮层中用于局部敏感和方向选择的神经元时发现其独特的网络结构可以有效地降低反馈神经网络的复杂性，继而提出了卷积神经网络（Convolutional Neural Networks-简称CNN）。现在，CNN已经成为众多科学领域的研究热点之一，特别是在模式分类领域，<mark>由于该网络避免了对图像的复杂前期预处理，可以直接输入原始图像，因而得到了更为广泛的应用</mark>。</p>
-
-<p>一般地，CNN的基本结构包括两层：</p>
-
-<ol>
-<li><p>其一为<strong>特征提取层</strong>：每个神经元的输入与前一层的局部接受域相连，并提取该局部的特征。一旦该局部特征被提取后，它与其它特征间的位置关系也随之确定下来；</p></li>
-<li><p>其二是<strong>特征映射层</strong>：网络的每个计算层由多个特征映射组成，每个特征映射是一个平面，平面上所有神经元的权值相等。特征映射结构采用影响函数核小的sigmoid函数作为卷积网络的激活函数，使得特征映射具有位移不变性。此外，由于一个映射面上的神经元共享权值，因而减少了网络自由参数的个数。卷积神经网络中的每一个卷积层都紧跟着一个用来求局部平均与二次提取的计算层，这种特有的两次特征提取结构减小了特征分辨率。</p></li>
-</ol>
-
-<p>CNN主要<strong>用来识别位移、缩放及其他形式扭曲不变性的二维图形</strong>。由于CNN的特征检测层通过训练数据进行学习，所以在使用CNN时，避免了显示的特征抽取，而隐式地从训练数据中进行学习；</p>
-
-<p>再者由于同一特征映射面上的神经元权值相同，所以网络可以并行学习，这也是卷积网络相对于神经元彼此相连网络的一大优势。<font color=red>卷积神经网络以其局部权值共享的特殊结构在语音识别和图像处理方面有着独特的优越性，</font><strong>其布局更接近于实际的生物神经网络，权值共享降低了网络的复杂性，特别是多维输入向量的图像可以直接输入网络这一特点避免了特征提取和分类过程中数据重建的复杂度</strong>。</p>
-
-<h2 id="toc_1">卷积神经网络</h2>
-
-<p>在图像处理中，往往把图像表示为像素的向量，比如一个1000×1000的图像，可以表示为一个1000000的向量。在上一节中提到的神经网络中，如果隐含层数目与输入层一样，即也是1000000时，那么输入层到隐含层的参数数据为：\(1000000×1000000=10^{12}\)，这样就太多了，基本没法训练。所以图像处理要想练成神经网络大法，必先减少参数加快速度。就跟辟邪剑谱似的，普通人练得很挫，一旦自宫后内力变强剑法变快，就变的很牛了。</p>
-
-<h3 id="toc_2">局部感知</h3>
-
-<p>卷积神经网络有<mark>两种神器</mark>可以降低参数数目，<mark>第一种神器叫做局部感知野</mark>。一般认为人对外界的认知是从局部到全局的，而图像的空间联系也是局部的像素联系较为紧密，而距离较远的像素相关性则较弱。<strong>因而，每个神经元其实没有必要对全局图像进行感知，只需要对局部进行感知</strong>，然后在更高层将局部的信息综合起来就得到了全局的信息。<strong>网络部分连通的思想，也是受启发于生物学里面的视觉系统结构。视觉皮层的神经元就是局部接受信息的（即这些神经元只响应某些特定区域的刺激）。</strong>如下图所示：左图为全连接，右图为局部连接。</p>
-
-<p><img src="media/14940530686573/14940535875953.jpg" alt=""/></p>
-
-<p>在上右图中，假如每个神经元只和10×10个像素值相连，那么权值数据为1000000×100个参数，减少为原来的千分之一。而那10×10个像素值对应的10×10个参数，其实就相当于卷积操作。</p>
-
-<h3 id="toc_3">参数共享</h3>
-
-<p>但其实这样的话参数仍然过多，那么就启动第二级神器，<mark>即权值共享</mark>。在上面的局部连接中，每个神经元都对应100个参数，一共1000000个神经元，如果这1000000个神经元的100个参数都是相等的，那么参数数目就变为100了。</p>
-
-<p>怎么理解权值共享呢？我们可以这100个参数（也就是卷积操作）看成是提取特征的方式，该方式与位置无关。<font color=red>这其中隐含的原理则是：图像的一部分的统计特性与其他部分是一样的。这也意味着我们在这一部分学习的特征也能用在另一部分上，所以对于这个图像上的所有位置，我们都能使用同样的学习特征</font>。</p>
-
-<p>更直观一些，当从一个大尺寸图像中随机选取一小块，比如说 8×8 作为样本，并且从这个小块样本中学习到了一些特征，这时我们可以把从这个 8×8 样本中学习到的特征作为探测器，应用到这个图像的任意地方中去。特别是，我们可以用从 8×8 样本中所学习到的特征跟原本的大尺寸图像作卷积，从而对这个大尺寸图像上的任一位置获得一个不同特征的激活值。</p>
-
-<p>如下图所示，展示了一个33的卷积核在55的图像上做卷积的过程。每个卷积都是一种特征提取方式，就像一个筛子，将图像中符合条件（激活值越大越符合条件）的部分筛选出来</p>
-
-<p><img src="media/14940530686573/14940539862222.gif" alt=""/></p>
-
-<h3 id="toc_4">多卷积核</h3>
-
-<p>上面所述只有100个参数时，表明只有1个100*100的卷积核，显然，特征提取是不充分的，我们可以添加多个卷积核，比如32个卷积核，可以学习32种特征。在有多个卷积核时，如下图所示：<br/>
-<img src="media/14940530686573/14940546422731.jpg" alt=""/></p>
-
-<p>上图右，不同颜色表明不同的卷积核。每个卷积核都会将图像生成为另一幅图像。比如两个卷积核就可以将生成两幅图像，这两幅图像可以看做是一张图像的不同的通道。如下图所示，下图有个小错误，即将w1改为w0，w2改为w1即可。下文中仍以w1和w2称呼它们</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/6</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html'>机器学习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14939712159345.html">
-                
-                  <h1>正则表达式</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>字符串是编程时涉及到的最多的一种数据结构，对字符串进行操作的需求几乎无处不在。比如判断一个字符串是否是合法的Email地址，虽然可以编程提取<code>@</code>前后的子串，再分别判断是否是单词和域名，但这样做不但麻烦，而且代码难以复用。</p>
-
-<p>正则表达式是一种用来匹配字符串的强有力的武器。它的设计思想是用一种描述性的语言来给字符串定义一个规则，凡是符合规则的字符串，我们就认为它“匹配”了，否则，该字符串就是不合法的。</p>
-
-<p>所以我们判断一个字符串是否是合法的Email的方法是：</p>
-
-<ol>
-<li><p>创建一个匹配Email的正则表达式；</p></li>
-<li><p>用该正则表达式去匹配用户的输入来判断是否合法。</p></li>
-</ol>
-
-<p>因为正则表达式也是用字符串表示的，所以，我们要首先了解如何用字符来描述字符。</p>
-
-<p>在正则表达式中，如果直接给出字符，就是精确匹配。用<code>\d</code>可以匹配一个数字，<code>\w</code>可以匹配一个字母或数字，所以：</p>
-
-<ul>
-<li><p><code>&#39;00\d&#39;</code>可以匹配<code>&#39;007&#39;</code>，但无法匹配<code>&#39;00A&#39;</code>；</p></li>
-<li><p><code>&#39;\d\d\d&#39;</code>可以匹配<code>&#39;010&#39;</code>；</p></li>
-<li><p><code>&#39;\w\w\d&#39;</code>可以匹配<code>&#39;py3&#39;</code>；</p></li>
-</ul>
-
-<p><code>.</code><strong>可以匹配任意字符</strong>，所以：</p>
-
-<ul>
-<li><code>&#39;py.&#39;</code>可以匹配<code>&#39;pyc&#39;</code>、<code>&#39;pyo&#39;</code>、<code>&#39;py!&#39;</code>等等。</li>
-</ul>
-
-<p>要匹配变长的字符，在正则表达式中，用<code>*</code>表示任意个字符（包括0个），用<code>+</code>表示至少一个字符，用<code>?</code>表示0个或1个字符，用<code>{n}</code>表示n个字符，用<code>{n,m}</code>表示n-m个字符：</p>
-
-<p>来看一个复杂的例子：<code>\d{3}\s+\d{3,8}</code>。</p>
-
-<p>我们来从左到右解读一下：</p>
-
-<ol>
-<li><p><code>\d{3}</code>表示匹配3个数字，例如<code>&#39;010&#39;</code>；</p></li>
-<li><p><code>\s</code>可以匹配一个空格（也包括Tab等空白符），所以<code>\s+</code>表示至少有一个空格，例如匹配<code>&#39; &#39;，&#39; &#39;</code>等；</p></li>
-<li><p><code>\d{3,8}</code>表示3-8个数字，例如<code>&#39;1234567&#39;</code>。</p></li>
-</ol>
-
-<p>综合起来，上面的正则表达式可以匹配以任意个空格隔开的带区号的电话号码。</p>
-
-<p>如果要匹配<code>&#39;010-12345&#39;</code>这样的号码呢？由于<code>&#39;-&#39;</code>是特殊字符，在正则表达式中，要用<code>&#39;\&#39;</code>转义，所以，上面的正则是<code>\d{3}\-\d{3,8}</code>。</p>
-
-<p>但是，仍然无法匹配<code>&#39;010 - 12345&#39;</code>，因为带有空格。所以我们需要更复杂的匹配方式。</p>
-
-<h2 id="toc_0">进阶</h2>
-
-<p>要做更精确地匹配，可以用<code>[]</code>表示范围，比如：</p>
-
-<ul>
-<li><p><code>[0-9a-zA-Z\_]</code>可以匹配一个数字、字母或者下划线；</p></li>
-<li><p><code>[0-9a-zA-Z\_]+</code>可以匹配至少由一个数字、字母或者下划线组成的字符串，比如<code>&#39;a100&#39;，&#39;0_Z&#39;，&#39;Py3000&#39;</code>等等；</p></li>
-<li><p><code>[a-zA-Z\_][0-9a-zA-Z\_]*</code>可以匹配由字母或下划线开头，后接任意个由一个数字、字母或者下划线组成的字符串，也就是Python合法的变量；</p></li>
-<li><p><code>[a-zA-Z\_][0-9a-zA-Z\_]{0, 19}</code>更精确地限制了变量的长度是1-20个字符（前面1个字符+后面最多19个字符）。</p></li>
-</ul>
-
-<p><code>A|B</code>可以匹配A或B，所以<code>(P|p)ython</code>可以匹配<code>&#39;Python&#39;</code>或者<code>&#39;python&#39;</code>。</p>
-
-<p><code>^</code>表示行的开头，<code>^\d</code>表示必须以数字开头。</p>
-
-<p><code>$</code>表示行的结束，<code>\d$</code>表示必须以数字结束。</p>
-
-<p>你可能注意到了，<code>py</code>也可以匹配&#39;python&#39;，但是加上<code>^py$</code>就变成了整行匹配，就只能匹配<code>&#39;py&#39;</code>了。</p>
-
-<h2 id="toc_1">re模块</h2>
-
-<p>有了准备知识，我们就可以在Python中使用正则表达式了。Python提供<code>re</code>模块，包含所有正则表达式的功能。由于Python的字符串本身也用<code>\</code>转义，所以要特别注意：</p>
-
-<pre><code class="language-py">s = &#39;ABC\\-001&#39; # Python的字符串
-# 对应的正则表达式字符串变成：
-# &#39;ABC\-001&#39;
-</code></pre>
-
-<p>因此我们强烈建议使用Python的<code>r</code>前缀，就不用考虑转义的问题了：</p>
-
-<pre><code class="language-py">s = r&#39;ABC\-001&#39; # Python的字符串
-# 对应的正则表达式字符串不变：
-# &#39;ABC\-001&#39;
-</code></pre>
-
-<p>先看看如何判断正则表达式是否匹配：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*
-import re
-
-print re.match(r&#39;^\d{3}\-\d{3,8}$&#39;, &#39;010-12345&#39;)
-print re.match(r&#39;^\d{3}\-\d{3,8}$&#39;, &#39;010 12345&#39;)
-
-</code></pre>
-
-<p><code>match()</code>方法判断是否匹配，如果匹配成功，返回一个<code>Match</code>对象，否则返回<code>None</code>。<br/>
-<img src="media/14939712159345/14939732218646.jpg" alt=""/></p>
-
-<p>常见的判断方法就是：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*
-import re
-
-Spattern = r&#39;^\d{3}\-\d{3,8}$&#39;  #用户定义的正则表达式
-test = &#39;010-12345&#39;  #用户输入的字符串
-test2 = &#39;012 12345&#39;
-if re.match(Spattern , test):
-    print &#39;OK&#39;
-else:
-    print &#39;failed&#39;
-
-if re.match(Spattern , test2):
-    print &#39;OK&#39;
-else:
-    print &#39;failed&#39;
-</code></pre>
-
-<p><img src="media/14939712159345/14939734520573.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/5</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14938936328646.html">
-                
-                  <h1>图像去雾相关基础</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">暗原色</h2>
-
-<p>暗原色先验理论指出，在无雾图像的 非天空区域里，若把图像分为多个子块，则在每个子块中都会 有某些像素点的一个颜色通道的亮度接近于 0</p>
-
-<p><img src="media/14938936328646/14938938844517.jpg" alt=""/><br/>
-<img src="media/14938936328646/14938939404387.jpg" alt=""/><br/>
-<img src="media/14938936328646/14938939611430.jpg" alt=""/></p>
-
-<h2 id="toc_1">HSV</h2>
-
-<p>HSL 和 HSV（也叫做 HSB）是对RGB 色彩空间中点的两种有关系的表示，它们尝试描述比 RGB 更准确的感知颜色联系，并仍保持在计算上简单。<code>HSL 表示hue（色相）、saturation（饱和度）、lightness（亮度）</code>，<strong>HSV 表示</strong> <code>hue、 saturation、value(色调) 而 HSB 表示hue、saturation、brightness（明度）</code>。</p>
-
-<p>HSL 和 HSV 二者都把颜色描述在圆柱体内的点，这个圆柱的中心轴取值为<strong>自底部的黑色到顶部的白色而在它们中间是的灰色</strong>，绕这个轴的<strong>角度</strong>对应于“色相”，<strong>到这个轴的距离</strong>对应于“饱和度”，而<strong>沿着这个轴的距离</strong>对应于“亮度”，“色调”或“明度”。</p>
-
-<p>HSV（色相，饱和度，明度）在概念上可以被认为是颜色的倒圆锥体（黑点在下顶点，白色在上底面圆心）</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14938608177246.html">
-                
-                  <h1>分布式进程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在Thread和Process中，应当优选Process，<font color=red><strong>因为Process更稳定，而且，Process可以分布到多台机器上，而Thread最多只能分布到同一台机器的多个CPU上。</strong></font></p>
-
-<p><strong>Python的<code>multiprocessing</code>模块不但支持多进程，其中<code>managers</code>子模块还支持把多进程分布到多台机器上。</strong><font color=red>一个服务进程可以作为调度者，将任务分布到其他多个进程中，依靠网络通信。由于<code>managers</code>模块封装很好，不必了解网络通信的细节，就可以很容易地编写分布式多进程程序。</font></p>
-
-<p>举个例子：如果我们<strong>已经有一个通过<code>Queue</code>通信的多进程程序在同一台机器上运行</strong>，现在，由于处理任务的进程任务繁重，希望把发送任务的进程和处理任务的进程分布到两台机器上。怎么用分布式进程实现？</p>
-
-<p>原有的<code>Queue</code>可以继续使用，<font color=red>但是，通过<code>managers</code>模块把<code>Queue</code>通过网络暴露出去，就可以让其他机器的进程访问<code>Queue</code>了。</font></p>
-
-<p>我们先看服务进程，服务进程负责启动<code>Queue</code>，把<code>Queue</code>注册到网络上，然后往<code>Queue</code>里面写入任务：</p>
-
-<pre><code class="language-py">#taskmanager.py
-#-*- coding: utf-8 -*-
-
-import random,time,Queue
-from multiprocessing.managers import BaseManager
-
-#发送任务的队列
-task_queue = Queue.Queue()
-#接受结果的队列
-result_queue = Queue.Queue()
-
-#从BaseManager继承的QueueManager:
-class QueueManager(BaseManager):
-    pass
-
-#把两个Queue都注册到网络上, callable参数关联了Queue对象:
-QueueManager.register(&#39;get_task_queue&#39;,callable=lambda:task_queue)
-QueueManager.register(&#39;get_result_queue&#39;,callable=lambda:result_queue)
-
-#绑定端口5000，设置验证码‘abc’：
-manager = QueueManager(address=(&#39;&#39;,5000),authkey=&#39;abc&#39;)
-#启动Queue
-manager.start()
-# 获得通过网络访问的Queue对象:
-task = manager.get_task_queue()
-result = manager.get_result_queue()
-#放几个任务进去
-for i in range(10):
-    n = random.randint(0, 10000)
-    print(&#39;Put task %d...&#39; %n)
-    task.put(n)
-
-#从result队列读取结果
-print(&#39;Try get results...&#39;)
-for i in range(10):
-    r = result.get(timeout=10)
-    print(&#39;Result:%s&#39;%r)
-#关闭
-manager.shutdown()
-</code></pre>
-
-<p>请注意，当我们在一台机器上写多进程程序时，创建的<code>Queue</code>可以直接拿来用，但是，在分布式多进程环境下，添加任务到<code>Queue</code>不可以直接对原始的<code>task_queue</code>进行操作，那样就绕过了<code>QueueManager</code>的封装，必须通过<code>manager.get_task_queue()</code>获得的<code>Queue</code>接口添加。</p>
-
-<p>然后，在另一台机器上启动任务进程（本机上启动也可以）：</p>
-
-<pre><code class="language-py">#taskworker.py
-#-*- coding: utf-8 -*-
-
-import time
-import sys
-import Queue
-from multiprocessing.managers import BaseManager
-
-# 创建类似的QueueManager:
-
-
-class QueueManager(BaseManager):
-    pass
-
-# 由于这个QueueManager只从网络上获取Queue，所以注册时只提供名字:
-QueueManager.register(&#39;get_task_queue&#39;)
-QueueManager.register(&#39;get_result_queue&#39;)
-
-# 连接到服务器，也就是运行taskmanager.py的机器:
-server_addr = &#39;127.0.0.1&#39;
-print(&#39;Connect to server %s...&#39; % server_addr)
-
-# 端口和验证码注意保持与taskmanager.py设置的完全一致:
-m = QueueManager(address=(server_addr, 5000), authkey=&#39;abc&#39;)
-# 从网络连接:
-m.connect()
-# 获取Queue的对象:
-task = m.get_task_queue()
-result = m.get_result_queue()
-# 从task队列取任务,并把结果写入result队列:
-for i in range(10):
-    try:
-        n = task.get(timeout=1)
-        print(&#39;run task %d * %d...&#39; % (n, n))
-        r = &#39;%d * %d = %d&#39; % (n, n, n * n)
-        time.sleep(1)
-        result.put(r)
-    except Queue.Empty:
-        print(&#39;task queue is empty.&#39;)
-# 处理结束:
-print(&#39;worker exit.&#39;)
-</code></pre>
-
-<p>任务进程要通过网络连接到服务进程，所以要指定服务进程的IP。</p>
-
-<p>现在，可以试试分布式进程的工作效果了。先启动<code>taskmanager.py</code>服务进程：</p>
-
-<p>启动后：<br/>
-<img src="media/14938608177246/14938633989382.jpg" alt=""/><br/>
-等待result队列中的值。（目前为空)</p>
-
-<p><code>taskmanager</code>进程发送完任务后，开始等待<code>result</code>队列的结果。现在启动<code>taskworker.py</code>进程：</p>
-
-<p><img src="media/14938608177246/14938634594880.jpg" alt=""/></p>
-
-<p><code>taskworker</code>进程结束，在<code>taskmanager</code>进程中会继续打印出结果：</p>
-
-<p><img src="media/14938608177246/14938634810692.jpg" alt=""/></p>
-
-<p>这个简单的<code>Manager/Worker</code>模型有什么用？<font color=red><strong>其实这就是一个简单但真正的分布式计算</strong></font>，把代码稍加改造，启动多个worker，就可以把任务分布到几台甚至几十台机器上，比如把计算<code>n*n</code>的代码换成发送邮件，就实现了邮件队列的异步发送。</p>
-
-<p>Queue对象存储在哪？注意到<code>taskworker.py</code>中根本没有创建<code>Queue</code>的代码，所以，Queue对象存储在<code>taskmanager.py</code>进程中：</p>
-
-<p><img src="media/14938608177246/14938635737718.jpg" alt=""/></p>
-
-<p>而<code>Queue</code>之所以能通过网络访问，就是通过<code>QueueManager</code>实现的。由于<code>QueueManager</code>管理的不止一个<code>Queue</code>，所以，要给每个<code>Queue</code>的网络调用接口起个名字，比如<code>get_task_queue</code>。</p>
-
-<p><code>authkey</code>有什么用？这是为了保证两台机器正常通信，不被其他机器恶意干扰。如果<code>taskworker.py</code>的<code>authkey</code>和<code>taskmanager.py</code>的<code>authkey</code>不一致，肯定连接不上。</p>
-
-<h2 id="toc_0">小结</h2>
-
-<p>Python的分布式进程接口简单，封装良好，适合需要把繁重任务分布到多台机器的环境下。</p>
-
-<p><font color=red>注意Queue的作用是用来传递任务和接收结果，每个任务的描述数据量要尽量小。比如发送一个处理日志文件的任务，就不要发送几百兆的日志文件本身，而是发送日志文件存放的完整路径，由Worker进程再去共享的磁盘上读取文件。</font></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-              
-
-
-			<div class="row">
-			  <div class="large-6 columns">
-			  <p class="text-left" style="padding-top:25px;">
-			   
-			  </p>
-			  </div>
-			  <div class="large-6 columns">
-			<p class="text-right" style="padding-top:25px;">
-			 <a href="all_1.html">&raquo; Next Page</a> 
-			</p>
-			  </div>
-			</div>
-		</div>
-	</div><!-- large 8 -->
 
  <div class="large-4 medium-4 columns">
   <div class="hide-for-small">
