@@ -87,6 +87,8 @@
             <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
         
             <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
          
 
       </ul>
@@ -108,6 +110,332 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="14926712777578.html">
+                
+                  <h1>类和实例</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">数据封装</a>
+</li>
+<li>
+<a href="#toc_1">访问限制</a>
+</li>
+<li>
+<a href="#toc_2">继承和多态</a>
+</li>
+<li>
+<a href="#toc_3">获取对象信息</a>
+<ul>
+<li>
+<a href="#toc_4">使用type()</a>
+</li>
+<li>
+<a href="#toc_5">使用isinstance()</a>
+</li>
+<li>
+<a href="#toc_6">使用dir()</a>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>在Python中，定义类是通过<code>class</code>关键字：</p>
+
+<pre><code class="language-py">class Student(object):
+    pass
+</code></pre>
+
+<p><code>class</code>后面紧接着是类名，即<code>Student</code>，类名通常是大写开头的单词，紧接着是<code>(object)</code>，表示该类是从哪个类继承下来的，继承的概念我们后面再讲，通常，<strong>如果没有合适的继承类，就使用object类，这是所有类最终都会继承的类</strong>。</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.name = name
+        self.score = score
+</code></pre>
+
+<p>注意到<code>__init__</code>方法的第一个参数永远是self，表示创建的实例本身，因此，在<code>__init__</code>方法内部，就可以把各种属性绑定到<code>self</code>，因为<code>self</code>就指向创建的实例本身。</p>
+
+<p>和普通的函数相比，在类中定义的函数只有一点不同，<font color=red>就是第一个参数永远是实例变量self，并且，调用时，不用传递该参数。除此之外，类的方法和普通函数没有什么区别，所以，你仍然可以用默认参数、可变参数和关键字参数。</font></p>
+
+<h2 id="toc_0">数据封装</h2>
+
+<p>面向对象编程的一个重要特点就是数据封装，创建实例需要给出<code>name</code>和<code>score</code>，而如何打印，都是在Student类的内部定义的，这些数据和逻辑被“封装”起来了，调用很容易，但却不用知道内部实现的细节。</p>
+
+<p>例如下面增加一个成绩分类的方法：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.name = name
+        self.score = score
+
+    def print_score(self):
+        print &#39;%s:%s&#39; % (self.name, self.score)
+
+    def get_grade(self):
+        if self.score &gt;= 90:
+            print &#39;A&#39;
+        elif self.score &gt;= 60:
+            print &#39;B&#39;
+        else:
+            print &#39;C&#39;
+
+bart = Students(&#39;Bart&#39;, 59)
+lisa = Students(&#39;梁中豪&#39;, 100)
+bart.print_score()
+bart.get_grade()
+lisa.print_score()
+lisa.get_grade()
+</code></pre>
+
+<h2 id="toc_1">访问限制</h2>
+
+<p>在Class内部，可以有属性和方法，而外部代码可以通过直接调用实例变量的方法来操作数据，这样，就隐藏了内部的复杂逻辑。</p>
+
+<p>但是，从前面Student类的定义来看，外部代码还是可以自由地修改一个实例的<code>name</code>、<code>score</code>属性</p>
+
+<p>如果要让内部属性不被外部访问，可以把属性的名称前加上两个下划线<code>__</code>，<font color=red>在Python中，实例的变量名如果以<code>__</code>开头，就变成了一个私有变量（private），只有内部可以访问，外部不能访问，</font>所以，我们把Student类改一改：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.__name = name
+        self.__score = score
+
+    def print_score(self):
+        print &#39;%s:%s&#39; % (self.__name, self.__score)
+
+   
+bart = Students(&#39;Bart&#39;, 59)
+lisa = Students(&#39;梁中豪&#39;, 100)
+bart.print_score()
+lisa.__name
+</code></pre>
+
+<p>改完后，对于外部代码来说，没什么变动，但是已经无法从外部访问实例变量.<code>__name</code>和实例变量<code>.__score</code>了：<br/>
+<img src="media/14926712777578/14926727380387.jpg" alt=""/><br/>
+如果又要允许外部代码修改score,可以给Student类增加set_score方法.这里跟java很像。不在过多叙述。</p>
+
+<h2 id="toc_2">继承和多态</h2>
+
+<p>在OOP程序设计中，当我们定义一个class的时候，可以从某个现有的class继承，新的class称为子类（Subclass），而被继承的class称为基类、父类或超类（Base class、Super class）。</p>
+
+<p>继承最大的好处是子类获得了父类的全部功能。由于<code>Animial</code>实现了<code>run()</code>方法，因此，<code>Dog</code>和<code>Cat</code>作为它的子类，什么事也没干，就自动拥有了<code>run()</code>方法，当然也可以对父类方法进行重写。</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Animal(object):
+    &quot;&quot;&quot;docstring for Animal&quot;&quot;&quot;
+
+    def run(self):
+        print &#39;Animal is running..&#39;
+
+
+class Dog(Animal):
+    pass
+
+
+class Cat(Animal):
+    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
+
+    def run(self):
+        print &#39;Cat is running..&#39;
+
+dog = Dog()
+dog.run()
+
+cat = Cat()
+cat.run()
+
+</code></pre>
+
+<p><img src="media/14926712777578/14926743181176.jpg" alt=""/></p>
+
+<h2 id="toc_3">获取对象信息</h2>
+
+<p>当我们拿到一个对象的引用时，如何知道这个对象是什么类型？</p>
+
+<h3 id="toc_4">使用type()</h3>
+
+<p>基本类型都可以用<code>type()</code>判断：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+print type(123),type(&#39;str&#39;),type(None)
+</code></pre>
+
+<p><img src="media/14926712777578/14926750871663.jpg" alt=""/></p>
+
+<p>Python把每种type类型都定义好了常量，放在types模块里，使用之前，需要先导入：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import types
+print type(&#39;abc&#39;)==types.StringType
+print type(u&#39;abc&#39;)==types.UnicodeType
+print type([])==types.ListType
+print type(str) == types.TypeType
+</code></pre>
+
+<p><img src="media/14926712777578/14926752976543.jpg" alt=""/><br/>
+<strong>最后注意到有一种类型就叫TypeType，所有类型本身的类型就是TypeType.比如<code>int，str</code>等</strong></p>
+
+<h3 id="toc_5">使用isinstance()</h3>
+
+<p>我们使用<code>isinstance()</code>来判断class的类型，例如：</p>
+
+<pre><code class="language-py">class Animals(object):
+    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
+    pass
+class Cat(Animals):
+    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
+    pass
+class Dog(Animals):
+    &quot;&quot;&quot;docstring for Dog&quot;&quot;&quot;
+    pass
+a = Animals()
+d = Dog()
+h = Cat()
+print isinstance(h, Cat),isinstance(d, Dog),isinstance(a, Animals)
+</code></pre>
+
+<p><img src="media/14926712777578/14926756201012.jpg" alt=""/></p>
+
+<p>当然也可以用<code>isinstance()</code>来判断基本类型</p>
+
+<h3 id="toc_6">使用dir()</h3>
+
+<p>如果要获得一个对象的所有属性和方法，可以使用<code>dir()</code>函数，它返回一个包含字符串的<code>list</code>，比如，获得一个str对象的所有属性和方法：</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; dir(&#39;abc&#39;)
+</code></pre>
+
+<p><img src="media/14926712777578/14926758082813.jpg" alt=""/></p>
+
+<p><strong>仅仅把属性和方法列出来是不够的，配合<code>getattr()、setattr()以及hasattr()</code>，我们可以直接操作一个对象的状态：</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+class Animals(object):
+    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
+
+    def __init__(self):
+        self.x = 9
+
+    def power(self):
+        print self.x * self.x
+obj = Animals()
+
+print hasattr(obj, &#39;x&#39;)  # 有属性&#39;x&#39;吗？
+print hasattr(obj, &#39;y&#39;)  # 有属性&#39;y&#39;吗？
+print setattr(obj, &#39;y&#39;, 19)  # 设置一个属性&#39;y&#39;
+print getattr(obj, &#39;y&#39;)  # 获取属性&#39;y&#39;
+print obj.y
+</code></pre>
+
+<p><img src="media/14926712777578/14926764199501.jpg" alt=""/></p>
+
+<p>也可以获得对象的方法：</p>
+
+<pre><code class="language-py">fn = getattr(obj, &#39;power&#39;)
+print fn,fn(),
+</code></pre>
+
+<p><img src="media/14926712777578/14926765852729.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14926690841704.html">
+                
+                  <h1>面向对象编程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>采用面向对象的程序设计思想来设计一个简单的学生成绩打印，我们首选思考的不是程序的执行流程，而是<code>Student</code>这种数据类型应该被视为一个对象，这个对象拥有<code>name</code>和<code>score</code>这两个属性（Property）。如果要打印一个学生的成绩，首先必须创建出这个学生对应的对象，然后，给对象发一个<code>print_score</code>消息，让对象自己把自己的数据打印出来</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.name = name
+        self.score = score
+
+    def print_score(self):
+        print &#39;%s:%s&#39; % (self.name, self.score)
+
+
+bart = Students(&#39;Bart&#39;, 59)
+lisa = Students(&#39;梁中豪&#39;, 100)
+bart.print_score()
+lisa.print_score()
+</code></pre>
+
+<p><img src="media/14926690841704/14926708025078.jpg" alt=""/></p>
+
+<p><strong>面向对象三大特点：封装、继承、多态。</strong></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="14926579397626.html">
                 
@@ -479,176 +807,6 @@ max(*args)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14921324340299.html">
-                
-                  <h1>装饰器</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>函数也是一个对象，而且函数对象可以被赋值给变量，所以，通过变量也能调用该函数。</p>
-
-<p>函数对象有一个<code>__name__</code>属性，可以拿到函数的名字：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def now():
-    print &#39;1992-12-14&#39;
-f = now
-f()
-print now.__name__,f.__name__
-
-</code></pre>
-
-<p><img src="media/14921324340299/14921328219891.jpg" alt=""/></p>
-
-<p><strong>现在，假设我们要增强<code>now()</code>函数的功能，比如，在函数调用前后自动打印日志，但又不希望修改<code>now()</code>函数的定义，这种在代码运行期间动态增加功能的方式，称之为“装饰器”<code>（Decorator）</code>。</strong></p>
-
-<p>本质上，<code>decorator</code>就是一个返回函数的高阶函数。所以，我们要定义一个能打印日志的<code>decorator</code>，可以定义如下：</p>
-
-<pre><code class="language-py">def log(func):
-    def wrapper(*args, **kw):
-        print &#39;call %s():&#39; % func.__name__
-        return func(*args, **kw)
-    return wrapper
-</code></pre>
-
-<p>观察上面的log，因为它是一个decorator，所以接受一个函数作为参数，并返回一个函数。我们要借助Python的@语法，把decorator置于函数的定义处：</p>
-
-<pre><code>@log
-def now():
-    print &#39;2013-12-25&#39;
-</code></pre>
-
-<p><img src="media/14921324340299/14921338711853.jpg" alt=""/></p>
-
-<p><strong>练习题：请编写一个decorator，能在函数调用的前后打印出&#39;begin call&#39;和&#39;end call&#39;的日志。</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def log(func):
-    def wrapper(*args, **kw):
-        print  &#39;begin call&#39;
-        res =  func(*args, **kw)
-        print &#39;end call2&#39;
-        return res
-    return wrapper
-@log
-def now():
-    print &#39;test&#39;
-now()
-</code></pre>
-
-<p><img src="media/14921324340299/14921348025676.jpg" alt=""/></p>
-
-<p><strong>练习题：再思考一下能否写出一个@log的decorator，使它既支持：</strong></p>
-
-<pre><code class="language-py">@log
-def f():
-    pass
-</code></pre>
-
-<p><strong>又支持</strong></p>
-
-<pre><code class="language-py">@log(&#39;execute&#39;)
-def f():
-    pass
-</code></pre>
-
-<p>解答：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import functools
-
-def log(text):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args ,**kw):
-            if len(text)&gt;0:
-                print &#39;%s %s()&#39; % (text, func.__name__)
-            else:
-                print &#39;%s()&#39; % func.__name__
-            return func(*args,**kw)
-        return wrapper
-    return decorator
-
-@log(&#39;sdfsf&#39;)
-def now():
-    print &#39;test&#39;
-now()
-</code></pre>
-
-<p><img src="media/14921324340299/14921357641252.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14921312042142.html">
-                
-                  <h1>匿名函数</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>当我们在传入函数时，有些时候，不需要显式地定义函数，直接传入匿名函数更方便。</p>
-
-<p>关键字<code>lambda</code>表示匿名函数</p>
-
-<p><strong>匿名函数有个限制，就是只能有一个表达式，不用写<code>return</code>，返回值就是该表达式的结果。</strong></p>
-
-<p>例如：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-print map(lambda x:x*x, [1,2,3,4,5,6])
-</code></pre>
-
-<p><img src="media/14921312042142/14921315287449.jpg" alt=""/></p>
-
-<p><font color=red>其中冒号前面的x表示函数参数。</font></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -712,6 +870,8 @@ print map(lambda x:x*x, [1,2,3,4,5,6])
             <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
         
             <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
          
         </p>
 
@@ -728,31 +888,31 @@ print map(lambda x:x*x, [1,2,3,4,5,6])
 	      
 		      
 			      <li class="post">
-			        <a href="14946429015704.html">caffe框架运行手写体数字识别例子（MNIST）</a>
+			        <a href="14955245049549.html">运行caffe框架中的cifar10样例</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14945736764798.html">常用内建模块</a>
+			        <a href="14955029237844.html">Struct</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14940530686573.html">CNN卷积神经网络</a>
+			        <a href="14955000885655.html">Base64</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14939712159345.html">正则表达式</a>
+			        <a href="14948310433460.html">下学期英语课后翻译总结</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14938936328646.html">图像去雾相关基础</a>
+			        <a href="14948283904445.html">在RN中利用原生Document Interaction Controller来预览和打开文档</a>
 			      </li>
 		     
 		  

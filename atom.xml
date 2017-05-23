@@ -4,13 +4,2412 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-05-12T16:21:27+08:00</updated>
+  <updated>2017-05-23T10:17:22+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[运行caffe框架中的cifar10样例]]></title>
+    <link href="https://lockxmonk.github.io/14955245049549.html"/>
+    <updated>2017-05-23T15:28:24+08:00</updated>
+    <id>https://lockxmonk.github.io/14955245049549.html</id>
+    <content type="html"><![CDATA[
+<p>1.先运行caffe目录下的data/get_cifar10.sh脚本.</p>
+
+<pre><code>#!/usr/bin/env sh
+# This scripts downloads the CIFAR10 (binary version) data and unzips it.
+
+DIR=&quot;$( cd &quot;$(dirname &quot;$0&quot;)&quot; ; pwd -P )&quot;
+cd &quot;$DIR&quot;
+
+echo &quot;Downloading...&quot;
+
+wget --no-check-certificate http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz
+
+echo &quot;Unzipping...&quot;
+
+tar -xf cifar-10-binary.tar.gz &amp;&amp; rm -f cifar-10-binary.tar.gz
+mv cifar-10-batches-bin/* . &amp;&amp; rm -rf cifar-10-batches-bin
+
+# Creation is split out because leveldb sometimes causes segfault
+# and needs to be re-created.
+
+echo &quot;Done.&quot;
+</code></pre>
+
+<p>获取数据集.</p>
+
+<p>之后运行example下的cifar10/create_cifar10.sh<br/>
+但是会遇到以下报错:<br/>
+<img src="media/14955245049549/14955247436003.jpg" alt=""/></p>
+
+<p>这里要运行下面这个命令:</p>
+
+<pre><code>install_name_tool -add_rpath &#39;/Users/liangzhonghao/anaconda2/lib&#39;  /usr/local/Cellar/caffe/build/examples/cifar10/convert_cifar_data.bin
+</code></pre>
+
+<p><img src="media/14955245049549/14955249112611.jpg" alt=""/></p>
+
+<p>再次运行./examples/cifar10/create_cifar10.sh后又会出现一个错误:<br/>
+<img src="media/14955245049549/14955249879358.jpg" alt=""/><br/>
+这里要再次执行以下命令:</p>
+
+<pre><code>install_name_tool -add_rpath &#39;/Users/liangzhonghao/anaconda2/lib&#39;  /usr/local/Cellar/caffe/build/tools/compute_image_mean
+</code></pre>
+
+<p><img src="media/14955245049549/14955250166086.jpg" alt=""/></p>
+
+<p>然后再次执行:</p>
+
+<pre><code>./examples/cifar10/create_cifar10.sh
+</code></pre>
+
+<p>结果成功了!如下图所示:<br/>
+<img src="media/14955245049549/14955251049094.jpg" alt=""/></p>
+
+<h1 id="toc_0">Training and Testing the &quot;Quick&quot; Model</h1>
+
+<p>因为例子中已经给出定义好的protobuf和solver protobuf文件,所以我们直接运行<code>train_quick.sh</code></p>
+
+<p>该文件内容为:</p>
+
+<pre><code class="language-sh">#!/usr/bin/env sh
+set -e
+
+TOOLS=./build/tools
+
+$TOOLS/caffe train \
+  --solver=examples/cifar10/cifar10_quick_solver.prototxt $@
+
+# reduce learning rate by factor of 10 after 8 epochs
+$TOOLS/caffe train \
+  --solver=examples/cifar10/cifar10_quick_solver_lr1.prototxt \
+  --snapshot=examples/cifar10/cifar10_quick_iter_4000.solverstate $@
+</code></pre>
+
+<p>执行如下命令:</p>
+
+<pre><code>➜ caffe git:(master) ✗ ./examples/cifar10/train_quick.sh
+</code></pre>
+
+<p>然后输出为:</p>
+
+<pre><code>I0523 15:43:36.608793 2712679360 caffe.cpp:211] Use CPU.
+I0523 15:43:36.609737 2712679360 solver.cpp:44] Initializing solver from parameters:
+test_iter: 100
+test_interval: 500
+base_lr: 0.001
+display: 100
+max_iter: 4000
+lr_policy: &quot;fixed&quot;
+momentum: 0.9
+weight_decay: 0.004
+snapshot: 4000
+snapshot_prefix: &quot;examples/cifar10/cifar10_quick&quot;
+solver_mode: CPU
+net: &quot;examples/cifar10/cifar10_quick_train_test.prototxt&quot;
+train_state {
+  level: 0
+  stage: &quot;&quot;
+}
+I0523 15:43:36.610075 2712679360 solver.cpp:87] Creating training net from net file: examples/cifar10/cifar10_quick_train_test.prototxt
+I0523 15:43:36.610931 2712679360 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer cifar
+I0523 15:43:36.610961 2712679360 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer accuracy
+I0523 15:43:36.610966 2712679360 net.cpp:51] Initializing net from parameters:
+name: &quot;CIFAR10_quick&quot;
+state {
+  phase: TRAIN
+  level: 0
+  stage: &quot;&quot;
+}
+layer {
+  name: &quot;cifar&quot;
+  type: &quot;Data&quot;
+  top: &quot;data&quot;
+  top: &quot;label&quot;
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mean_file: &quot;examples/cifar10/mean.binaryproto&quot;
+  }
+  data_param {
+    source: &quot;examples/cifar10/cifar10_train_lmdb&quot;
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: &quot;conv1&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;data&quot;
+  top: &quot;conv1&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.0001
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;pool1&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv1&quot;
+  top: &quot;pool1&quot;
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;relu1&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;pool1&quot;
+  top: &quot;pool1&quot;
+}
+layer {
+  name: &quot;conv2&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;pool1&quot;
+  top: &quot;conv2&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.01
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;relu2&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;conv2&quot;
+  top: &quot;conv2&quot;
+}
+layer {
+  name: &quot;pool2&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv2&quot;
+  top: &quot;pool2&quot;
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;conv3&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;pool2&quot;
+  top: &quot;conv3&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 64
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.01
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;relu3&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;conv3&quot;
+  top: &quot;conv3&quot;
+}
+layer {
+  name: &quot;pool3&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv3&quot;
+  top: &quot;pool3&quot;
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;ip1&quot;
+  type: &quot;InnerProduct&quot;
+  bottom: &quot;pool3&quot;
+  top: &quot;ip1&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 64
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.1
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;ip2&quot;
+  type: &quot;InnerProduct&quot;
+  bottom: &quot;ip1&quot;
+  top: &quot;ip2&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 10
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.1
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;loss&quot;
+  type: &quot;SoftmaxWithLoss&quot;
+  bottom: &quot;ip2&quot;
+  bottom: &quot;label&quot;
+  top: &quot;loss&quot;
+}
+I0523 15:43:36.611205 2712679360 layer_factory.hpp:77] Creating layer cifar
+I0523 15:43:36.611467 2712679360 db_lmdb.cpp:35] Opened lmdb examples/cifar10/cifar10_train_lmdb
+I0523 15:43:36.611524 2712679360 net.cpp:84] Creating Layer cifar
+I0523 15:43:36.611531 2712679360 net.cpp:380] cifar -&gt; data
+I0523 15:43:36.611549 2712679360 net.cpp:380] cifar -&gt; label
+I0523 15:43:36.611565 2712679360 data_transformer.cpp:25] Loading mean file from: examples/cifar10/mean.binaryproto
+I0523 15:43:36.611686 2712679360 data_layer.cpp:45] output data size: 100,3,32,32
+I0523 15:43:36.617992 2712679360 net.cpp:122] Setting up cifar
+I0523 15:43:36.618022 2712679360 net.cpp:129] Top shape: 100 3 32 32 (307200)
+I0523 15:43:36.618028 2712679360 net.cpp:129] Top shape: 100 (100)
+I0523 15:43:36.618032 2712679360 net.cpp:137] Memory required for data: 1229200
+I0523 15:43:36.618041 2712679360 layer_factory.hpp:77] Creating layer conv1
+I0523 15:43:36.618052 2712679360 net.cpp:84] Creating Layer conv1
+I0523 15:43:36.618057 2712679360 net.cpp:406] conv1 &lt;- data
+I0523 15:43:36.618063 2712679360 net.cpp:380] conv1 -&gt; conv1
+I0523 15:43:36.618175 2712679360 net.cpp:122] Setting up conv1
+I0523 15:43:36.618180 2712679360 net.cpp:129] Top shape: 100 32 32 32 (3276800)
+I0523 15:43:36.618185 2712679360 net.cpp:137] Memory required for data: 14336400
+I0523 15:43:36.618192 2712679360 layer_factory.hpp:77] Creating layer pool1
+I0523 15:43:36.618199 2712679360 net.cpp:84] Creating Layer pool1
+I0523 15:43:36.618202 2712679360 net.cpp:406] pool1 &lt;- conv1
+I0523 15:43:36.618206 2712679360 net.cpp:380] pool1 -&gt; pool1
+I0523 15:43:36.618216 2712679360 net.cpp:122] Setting up pool1
+I0523 15:43:36.618219 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 15:43:36.618224 2712679360 net.cpp:137] Memory required for data: 17613200
+I0523 15:43:36.618228 2712679360 layer_factory.hpp:77] Creating layer relu1
+I0523 15:43:36.618234 2712679360 net.cpp:84] Creating Layer relu1
+I0523 15:43:36.618238 2712679360 net.cpp:406] relu1 &lt;- pool1
+I0523 15:43:36.618242 2712679360 net.cpp:367] relu1 -&gt; pool1 (in-place)
+I0523 15:43:36.618247 2712679360 net.cpp:122] Setting up relu1
+I0523 15:43:36.618250 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 15:43:36.618255 2712679360 net.cpp:137] Memory required for data: 20890000
+I0523 15:43:36.618263 2712679360 layer_factory.hpp:77] Creating layer conv2
+I0523 15:43:36.618273 2712679360 net.cpp:84] Creating Layer conv2
+I0523 15:43:36.618276 2712679360 net.cpp:406] conv2 &lt;- pool1
+I0523 15:43:36.618281 2712679360 net.cpp:380] conv2 -&gt; conv2
+I0523 15:43:36.618585 2712679360 net.cpp:122] Setting up conv2
+I0523 15:43:36.618592 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 15:43:36.618597 2712679360 net.cpp:137] Memory required for data: 24166800
+I0523 15:43:36.618602 2712679360 layer_factory.hpp:77] Creating layer relu2
+I0523 15:43:36.618607 2712679360 net.cpp:84] Creating Layer relu2
+I0523 15:43:36.618609 2712679360 net.cpp:406] relu2 &lt;- conv2
+I0523 15:43:36.618614 2712679360 net.cpp:367] relu2 -&gt; conv2 (in-place)
+I0523 15:43:36.618619 2712679360 net.cpp:122] Setting up relu2
+I0523 15:43:36.618623 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 15:43:36.618628 2712679360 net.cpp:137] Memory required for data: 27443600
+I0523 15:43:36.618630 2712679360 layer_factory.hpp:77] Creating layer pool2
+I0523 15:43:36.618634 2712679360 net.cpp:84] Creating Layer pool2
+I0523 15:43:36.618638 2712679360 net.cpp:406] pool2 &lt;- conv2
+I0523 15:43:36.618643 2712679360 net.cpp:380] pool2 -&gt; pool2
+I0523 15:43:36.618647 2712679360 net.cpp:122] Setting up pool2
+I0523 15:43:36.618654 2712679360 net.cpp:129] Top shape: 100 32 8 8 (204800)
+I0523 15:43:36.618662 2712679360 net.cpp:137] Memory required for data: 28262800
+I0523 15:43:36.618669 2712679360 layer_factory.hpp:77] Creating layer conv3
+I0523 15:43:36.618680 2712679360 net.cpp:84] Creating Layer conv3
+I0523 15:43:36.618685 2712679360 net.cpp:406] conv3 &lt;- pool2
+I0523 15:43:36.618695 2712679360 net.cpp:380] conv3 -&gt; conv3
+I0523 15:43:36.619361 2712679360 net.cpp:122] Setting up conv3
+I0523 15:43:36.619372 2712679360 net.cpp:129] Top shape: 100 64 8 8 (409600)
+I0523 15:43:36.619379 2712679360 net.cpp:137] Memory required for data: 29901200
+I0523 15:43:36.619385 2712679360 layer_factory.hpp:77] Creating layer relu3
+I0523 15:43:36.619390 2712679360 net.cpp:84] Creating Layer relu3
+I0523 15:43:36.619393 2712679360 net.cpp:406] relu3 &lt;- conv3
+I0523 15:43:36.619398 2712679360 net.cpp:367] relu3 -&gt; conv3 (in-place)
+I0523 15:43:36.619403 2712679360 net.cpp:122] Setting up relu3
+I0523 15:43:36.619447 2712679360 net.cpp:129] Top shape: 100 64 8 8 (409600)
+I0523 15:43:36.619459 2712679360 net.cpp:137] Memory required for data: 31539600
+I0523 15:43:36.619467 2712679360 layer_factory.hpp:77] Creating layer pool3
+I0523 15:43:36.619477 2712679360 net.cpp:84] Creating Layer pool3
+I0523 15:43:36.619484 2712679360 net.cpp:406] pool3 &lt;- conv3
+I0523 15:43:36.619493 2712679360 net.cpp:380] pool3 -&gt; pool3
+I0523 15:43:36.619505 2712679360 net.cpp:122] Setting up pool3
+I0523 15:43:36.619513 2712679360 net.cpp:129] Top shape: 100 64 4 4 (102400)
+I0523 15:43:36.619523 2712679360 net.cpp:137] Memory required for data: 31949200
+I0523 15:43:36.619529 2712679360 layer_factory.hpp:77] Creating layer ip1
+I0523 15:43:36.619539 2712679360 net.cpp:84] Creating Layer ip1
+I0523 15:43:36.619546 2712679360 net.cpp:406] ip1 &lt;- pool3
+I0523 15:43:36.619555 2712679360 net.cpp:380] ip1 -&gt; ip1
+I0523 15:43:36.620586 2712679360 net.cpp:122] Setting up ip1
+I0523 15:43:36.620602 2712679360 net.cpp:129] Top shape: 100 64 (6400)
+I0523 15:43:36.620607 2712679360 net.cpp:137] Memory required for data: 31974800
+I0523 15:43:36.620613 2712679360 layer_factory.hpp:77] Creating layer ip2
+I0523 15:43:36.620620 2712679360 net.cpp:84] Creating Layer ip2
+I0523 15:43:36.620625 2712679360 net.cpp:406] ip2 &lt;- ip1
+I0523 15:43:36.620630 2712679360 net.cpp:380] ip2 -&gt; ip2
+I0523 15:43:36.620649 2712679360 net.cpp:122] Setting up ip2
+I0523 15:43:36.620656 2712679360 net.cpp:129] Top shape: 100 10 (1000)
+I0523 15:43:36.620662 2712679360 net.cpp:137] Memory required for data: 31978800
+I0523 15:43:36.620673 2712679360 layer_factory.hpp:77] Creating layer loss
+I0523 15:43:36.620682 2712679360 net.cpp:84] Creating Layer loss
+I0523 15:43:36.620689 2712679360 net.cpp:406] loss &lt;- ip2
+I0523 15:43:36.620697 2712679360 net.cpp:406] loss &lt;- label
+I0523 15:43:36.620703 2712679360 net.cpp:380] loss -&gt; loss
+I0523 15:43:36.620730 2712679360 layer_factory.hpp:77] Creating layer loss
+I0523 15:43:36.620749 2712679360 net.cpp:122] Setting up loss
+I0523 15:43:36.620756 2712679360 net.cpp:129] Top shape: (1)
+I0523 15:43:36.620764 2712679360 net.cpp:132]     with loss weight 1
+I0523 15:43:36.620787 2712679360 net.cpp:137] Memory required for data: 31978804
+I0523 15:43:36.620795 2712679360 net.cpp:198] loss needs backward computation.
+I0523 15:43:36.620800 2712679360 net.cpp:198] ip2 needs backward computation.
+I0523 15:43:36.620807 2712679360 net.cpp:198] ip1 needs backward computation.
+I0523 15:43:36.620813 2712679360 net.cpp:198] pool3 needs backward computation.
+I0523 15:43:36.620820 2712679360 net.cpp:198] relu3 needs backward computation.
+I0523 15:43:36.620832 2712679360 net.cpp:198] conv3 needs backward computation.
+I0523 15:43:36.620851 2712679360 net.cpp:198] pool2 needs backward computation.
+I0523 15:43:36.620859 2712679360 net.cpp:198] relu2 needs backward computation.
+I0523 15:43:36.620867 2712679360 net.cpp:198] conv2 needs backward computation.
+I0523 15:43:36.620875 2712679360 net.cpp:198] relu1 needs backward computation.
+I0523 15:43:36.620882 2712679360 net.cpp:198] pool1 needs backward computation.
+I0523 15:43:36.620889 2712679360 net.cpp:198] conv1 needs backward computation.
+I0523 15:43:36.620896 2712679360 net.cpp:200] cifar does not need backward computation.
+I0523 15:43:36.620904 2712679360 net.cpp:242] This network produces output loss
+I0523 15:43:36.620916 2712679360 net.cpp:255] Network initialization done.
+I0523 15:43:36.621170 2712679360 solver.cpp:172] Creating test net (#0) specified by net file: examples/cifar10/cifar10_quick_train_test.prototxt
+I0523 15:43:36.621199 2712679360 net.cpp:294] The NetState phase (1) differed from the phase (0) specified by a rule in layer cifar
+I0523 15:43:36.621210 2712679360 net.cpp:51] Initializing net from parameters:
+name: &quot;CIFAR10_quick&quot;
+state {
+  phase: TEST
+}
+layer {
+  name: &quot;cifar&quot;
+  type: &quot;Data&quot;
+  top: &quot;data&quot;
+  top: &quot;label&quot;
+  include {
+    phase: TEST
+  }
+  transform_param {
+    mean_file: &quot;examples/cifar10/mean.binaryproto&quot;
+  }
+  data_param {
+    source: &quot;examples/cifar10/cifar10_test_lmdb&quot;
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: &quot;conv1&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;data&quot;
+  top: &quot;conv1&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.0001
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;pool1&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv1&quot;
+  top: &quot;pool1&quot;
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;relu1&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;pool1&quot;
+  top: &quot;pool1&quot;
+}
+layer {
+  name: &quot;conv2&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;pool1&quot;
+  top: &quot;conv2&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.01
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;relu2&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;conv2&quot;
+  top: &quot;conv2&quot;
+}
+layer {
+  name: &quot;pool2&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv2&quot;
+  top: &quot;pool2&quot;
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;conv3&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;pool2&quot;
+  top: &quot;conv3&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 64
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.01
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;relu3&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;conv3&quot;
+  top: &quot;conv3&quot;
+}
+layer {
+  name: &quot;pool3&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv3&quot;
+  top: &quot;pool3&quot;
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;ip1&quot;
+  type: &quot;InnerProduct&quot;
+  bottom: &quot;pool3&quot;
+  top: &quot;ip1&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 64
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.1
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;ip2&quot;
+  type: &quot;InnerProduct&quot;
+  bottom: &quot;ip1&quot;
+  top: &quot;ip2&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 10
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.1
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;accuracy&quot;
+  type: &quot;Accuracy&quot;
+  bottom: &quot;ip2&quot;
+  bottom: &quot;label&quot;
+  top: &quot;accuracy&quot;
+  include {
+    phase: TEST
+  }
+}
+layer {
+  name: &quot;loss&quot;
+  type: &quot;SoftmaxWithLoss&quot;
+  bottom: &quot;ip2&quot;
+  bottom: &quot;label&quot;
+  top: &quot;loss&quot;
+}
+I0523 15:43:36.621821 2712679360 layer_factory.hpp:77] Creating layer cifar
+I0523 15:43:36.621913 2712679360 db_lmdb.cpp:35] Opened lmdb examples/cifar10/cifar10_test_lmdb
+I0523 15:43:36.621933 2712679360 net.cpp:84] Creating Layer cifar
+I0523 15:43:36.621943 2712679360 net.cpp:380] cifar -&gt; data
+I0523 15:43:36.621950 2712679360 net.cpp:380] cifar -&gt; label
+I0523 15:43:36.621958 2712679360 data_transformer.cpp:25] Loading mean file from: examples/cifar10/mean.binaryproto
+I0523 15:43:36.622017 2712679360 data_layer.cpp:45] output data size: 100,3,32,32
+I0523 15:43:36.624790 2712679360 net.cpp:122] Setting up cifar
+I0523 15:43:36.624822 2712679360 net.cpp:129] Top shape: 100 3 32 32 (307200)
+I0523 15:43:36.624830 2712679360 net.cpp:129] Top shape: 100 (100)
+I0523 15:43:36.624835 2712679360 net.cpp:137] Memory required for data: 1229200
+I0523 15:43:36.624840 2712679360 layer_factory.hpp:77] Creating layer label_cifar_1_split
+I0523 15:43:36.624851 2712679360 net.cpp:84] Creating Layer label_cifar_1_split
+I0523 15:43:36.624856 2712679360 net.cpp:406] label_cifar_1_split &lt;- label
+I0523 15:43:36.624862 2712679360 net.cpp:380] label_cifar_1_split -&gt; label_cifar_1_split_0
+I0523 15:43:36.624869 2712679360 net.cpp:380] label_cifar_1_split -&gt; label_cifar_1_split_1
+I0523 15:43:36.624876 2712679360 net.cpp:122] Setting up label_cifar_1_split
+I0523 15:43:36.624878 2712679360 net.cpp:129] Top shape: 100 (100)
+I0523 15:43:36.624882 2712679360 net.cpp:129] Top shape: 100 (100)
+I0523 15:43:36.624886 2712679360 net.cpp:137] Memory required for data: 1230000
+I0523 15:43:36.624917 2712679360 layer_factory.hpp:77] Creating layer conv1
+I0523 15:43:36.624927 2712679360 net.cpp:84] Creating Layer conv1
+I0523 15:43:36.624930 2712679360 net.cpp:406] conv1 &lt;- data
+I0523 15:43:36.624935 2712679360 net.cpp:380] conv1 -&gt; conv1
+I0523 15:43:36.624987 2712679360 net.cpp:122] Setting up conv1
+I0523 15:43:36.624991 2712679360 net.cpp:129] Top shape: 100 32 32 32 (3276800)
+I0523 15:43:36.624996 2712679360 net.cpp:137] Memory required for data: 14337200
+I0523 15:43:36.625002 2712679360 layer_factory.hpp:77] Creating layer pool1
+I0523 15:43:36.625008 2712679360 net.cpp:84] Creating Layer pool1
+I0523 15:43:36.625011 2712679360 net.cpp:406] pool1 &lt;- conv1
+I0523 15:43:36.625015 2712679360 net.cpp:380] pool1 -&gt; pool1
+I0523 15:43:36.625022 2712679360 net.cpp:122] Setting up pool1
+I0523 15:43:36.625026 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 15:43:36.625031 2712679360 net.cpp:137] Memory required for data: 17614000
+I0523 15:43:36.625036 2712679360 layer_factory.hpp:77] Creating layer relu1
+I0523 15:43:36.625041 2712679360 net.cpp:84] Creating Layer relu1
+I0523 15:43:36.625043 2712679360 net.cpp:406] relu1 &lt;- pool1
+I0523 15:43:36.625048 2712679360 net.cpp:367] relu1 -&gt; pool1 (in-place)
+I0523 15:43:36.625053 2712679360 net.cpp:122] Setting up relu1
+I0523 15:43:36.625056 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 15:43:36.625061 2712679360 net.cpp:137] Memory required for data: 20890800
+I0523 15:43:36.625064 2712679360 layer_factory.hpp:77] Creating layer conv2
+I0523 15:43:36.625071 2712679360 net.cpp:84] Creating Layer conv2
+I0523 15:43:36.625074 2712679360 net.cpp:406] conv2 &lt;- pool1
+I0523 15:43:36.625084 2712679360 net.cpp:380] conv2 -&gt; conv2
+I0523 15:43:36.625396 2712679360 net.cpp:122] Setting up conv2
+I0523 15:43:36.625402 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 15:43:36.625407 2712679360 net.cpp:137] Memory required for data: 24167600
+I0523 15:43:36.625412 2712679360 layer_factory.hpp:77] Creating layer relu2
+I0523 15:43:36.625417 2712679360 net.cpp:84] Creating Layer relu2
+I0523 15:43:36.625422 2712679360 net.cpp:406] relu2 &lt;- conv2
+I0523 15:43:36.625425 2712679360 net.cpp:367] relu2 -&gt; conv2 (in-place)
+I0523 15:43:36.625429 2712679360 net.cpp:122] Setting up relu2
+I0523 15:43:36.625433 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 15:43:36.625437 2712679360 net.cpp:137] Memory required for data: 27444400
+I0523 15:43:36.625440 2712679360 layer_factory.hpp:77] Creating layer pool2
+I0523 15:43:36.625445 2712679360 net.cpp:84] Creating Layer pool2
+I0523 15:43:36.625448 2712679360 net.cpp:406] pool2 &lt;- conv2
+I0523 15:43:36.625452 2712679360 net.cpp:380] pool2 -&gt; pool2
+I0523 15:43:36.625458 2712679360 net.cpp:122] Setting up pool2
+I0523 15:43:36.625460 2712679360 net.cpp:129] Top shape: 100 32 8 8 (204800)
+I0523 15:43:36.625464 2712679360 net.cpp:137] Memory required for data: 28263600
+I0523 15:43:36.625468 2712679360 layer_factory.hpp:77] Creating layer conv3
+I0523 15:43:36.625474 2712679360 net.cpp:84] Creating Layer conv3
+I0523 15:43:36.625479 2712679360 net.cpp:406] conv3 &lt;- pool2
+I0523 15:43:36.625483 2712679360 net.cpp:380] conv3 -&gt; conv3
+I0523 15:43:36.626077 2712679360 net.cpp:122] Setting up conv3
+I0523 15:43:36.626083 2712679360 net.cpp:129] Top shape: 100 64 8 8 (409600)
+I0523 15:43:36.626088 2712679360 net.cpp:137] Memory required for data: 29902000
+I0523 15:43:36.626093 2712679360 layer_factory.hpp:77] Creating layer relu3
+I0523 15:43:36.626098 2712679360 net.cpp:84] Creating Layer relu3
+I0523 15:43:36.626101 2712679360 net.cpp:406] relu3 &lt;- conv3
+I0523 15:43:36.626106 2712679360 net.cpp:367] relu3 -&gt; conv3 (in-place)
+I0523 15:43:36.626111 2712679360 net.cpp:122] Setting up relu3
+I0523 15:43:36.626113 2712679360 net.cpp:129] Top shape: 100 64 8 8 (409600)
+I0523 15:43:36.626117 2712679360 net.cpp:137] Memory required for data: 31540400
+I0523 15:43:36.626121 2712679360 layer_factory.hpp:77] Creating layer pool3
+I0523 15:43:36.626126 2712679360 net.cpp:84] Creating Layer pool3
+I0523 15:43:36.626129 2712679360 net.cpp:406] pool3 &lt;- conv3
+I0523 15:43:36.626145 2712679360 net.cpp:380] pool3 -&gt; pool3
+I0523 15:43:36.626152 2712679360 net.cpp:122] Setting up pool3
+I0523 15:43:36.626154 2712679360 net.cpp:129] Top shape: 100 64 4 4 (102400)
+I0523 15:43:36.626159 2712679360 net.cpp:137] Memory required for data: 31950000
+I0523 15:43:36.626163 2712679360 layer_factory.hpp:77] Creating layer ip1
+I0523 15:43:36.626168 2712679360 net.cpp:84] Creating Layer ip1
+I0523 15:43:36.626173 2712679360 net.cpp:406] ip1 &lt;- pool3
+I0523 15:43:36.626176 2712679360 net.cpp:380] ip1 -&gt; ip1
+I0523 15:43:36.626969 2712679360 net.cpp:122] Setting up ip1
+I0523 15:43:36.626981 2712679360 net.cpp:129] Top shape: 100 64 (6400)
+I0523 15:43:36.626986 2712679360 net.cpp:137] Memory required for data: 31975600
+I0523 15:43:36.626992 2712679360 layer_factory.hpp:77] Creating layer ip2
+I0523 15:43:36.626999 2712679360 net.cpp:84] Creating Layer ip2
+I0523 15:43:36.627003 2712679360 net.cpp:406] ip2 &lt;- ip1
+I0523 15:43:36.627008 2712679360 net.cpp:380] ip2 -&gt; ip2
+I0523 15:43:36.627024 2712679360 net.cpp:122] Setting up ip2
+I0523 15:43:36.627028 2712679360 net.cpp:129] Top shape: 100 10 (1000)
+I0523 15:43:36.627032 2712679360 net.cpp:137] Memory required for data: 31979600
+I0523 15:43:36.627039 2712679360 layer_factory.hpp:77] Creating layer ip2_ip2_0_split
+I0523 15:43:36.627046 2712679360 net.cpp:84] Creating Layer ip2_ip2_0_split
+I0523 15:43:36.627053 2712679360 net.cpp:406] ip2_ip2_0_split &lt;- ip2
+I0523 15:43:36.627059 2712679360 net.cpp:380] ip2_ip2_0_split -&gt; ip2_ip2_0_split_0
+I0523 15:43:36.627068 2712679360 net.cpp:380] ip2_ip2_0_split -&gt; ip2_ip2_0_split_1
+I0523 15:43:36.627076 2712679360 net.cpp:122] Setting up ip2_ip2_0_split
+I0523 15:43:36.627081 2712679360 net.cpp:129] Top shape: 100 10 (1000)
+I0523 15:43:36.627085 2712679360 net.cpp:129] Top shape: 100 10 (1000)
+I0523 15:43:36.627089 2712679360 net.cpp:137] Memory required for data: 31987600
+I0523 15:43:36.627094 2712679360 layer_factory.hpp:77] Creating layer accuracy
+I0523 15:43:36.627099 2712679360 net.cpp:84] Creating Layer accuracy
+I0523 15:43:36.627102 2712679360 net.cpp:406] accuracy &lt;- ip2_ip2_0_split_0
+I0523 15:43:36.627106 2712679360 net.cpp:406] accuracy &lt;- label_cifar_1_split_0
+I0523 15:43:36.627110 2712679360 net.cpp:380] accuracy -&gt; accuracy
+I0523 15:43:36.627116 2712679360 net.cpp:122] Setting up accuracy
+I0523 15:43:36.627120 2712679360 net.cpp:129] Top shape: (1)
+I0523 15:43:36.627123 2712679360 net.cpp:137] Memory required for data: 31987604
+I0523 15:43:36.627126 2712679360 layer_factory.hpp:77] Creating layer loss
+I0523 15:43:36.627133 2712679360 net.cpp:84] Creating Layer loss
+I0523 15:43:36.627169 2712679360 net.cpp:406] loss &lt;- ip2_ip2_0_split_1
+I0523 15:43:36.627178 2712679360 net.cpp:406] loss &lt;- label_cifar_1_split_1
+I0523 15:43:36.627183 2712679360 net.cpp:380] loss -&gt; loss
+I0523 15:43:36.627189 2712679360 layer_factory.hpp:77] Creating layer loss
+I0523 15:43:36.627198 2712679360 net.cpp:122] Setting up loss
+I0523 15:43:36.627202 2712679360 net.cpp:129] Top shape: (1)
+I0523 15:43:36.627207 2712679360 net.cpp:132]     with loss weight 1
+I0523 15:43:36.627213 2712679360 net.cpp:137] Memory required for data: 31987608
+I0523 15:43:36.627215 2712679360 net.cpp:198] loss needs backward computation.
+I0523 15:43:36.627219 2712679360 net.cpp:200] accuracy does not need backward computation.
+I0523 15:43:36.627223 2712679360 net.cpp:198] ip2_ip2_0_split needs backward computation.
+I0523 15:43:36.627228 2712679360 net.cpp:198] ip2 needs backward computation.
+I0523 15:43:36.627230 2712679360 net.cpp:198] ip1 needs backward computation.
+I0523 15:43:36.627234 2712679360 net.cpp:198] pool3 needs backward computation.
+I0523 15:43:36.627321 2712679360 net.cpp:198] relu3 needs backward computation.
+I0523 15:43:36.627334 2712679360 net.cpp:198] conv3 needs backward computation.
+I0523 15:43:36.627341 2712679360 net.cpp:198] pool2 needs backward computation.
+I0523 15:43:36.627348 2712679360 net.cpp:198] relu2 needs backward computation.
+I0523 15:43:36.627354 2712679360 net.cpp:198] conv2 needs backward computation.
+I0523 15:43:36.627387 2712679360 net.cpp:198] relu1 needs backward computation.
+I0523 15:43:36.627394 2712679360 net.cpp:198] pool1 needs backward computation.
+I0523 15:43:36.627400 2712679360 net.cpp:198] conv1 needs backward computation.
+I0523 15:43:36.627409 2712679360 net.cpp:200] label_cifar_1_split does not need backward computation.
+I0523 15:43:36.627418 2712679360 net.cpp:200] cifar does not need backward computation.
+I0523 15:43:36.627432 2712679360 net.cpp:242] This network produces output accuracy
+I0523 15:43:36.627454 2712679360 net.cpp:242] This network produces output loss
+I0523 15:43:36.627470 2712679360 net.cpp:255] Network initialization done.
+I0523 15:43:36.627553 2712679360 solver.cpp:56] Solver scaffolding done.
+I0523 15:43:36.627593 2712679360 caffe.cpp:248] Starting Optimization
+I0523 15:43:36.627602 2712679360 solver.cpp:272] Solving CIFAR10_quick
+I0523 15:43:36.627610 2712679360 solver.cpp:273] Learning Rate Policy: fixed
+I0523 15:43:36.627933 2712679360 solver.cpp:330] Iteration 0, Testing net (#0)
+I0523 15:43:46.157997 1515520 data_layer.cpp:73] Restarting data prefetching from start.
+I0523 15:43:46.542196 2712679360 solver.cpp:397]     Test net output #0: accuracy = 0.0865
+I0523 15:43:46.542232 2712679360 solver.cpp:397]     Test net output #1: loss = 2.3025 (* 1 = 2.3025 loss)
+I0523 15:43:46.784966 2712679360 solver.cpp:218] Iteration 0 (0 iter/s, 10.157s/100 iters), loss = 2.30202
+I0523 15:43:46.785002 2712679360 solver.cpp:237]     Train net output #0: loss = 2.30202 (* 1 = 2.30202 loss)
+I0523 15:43:46.785009 2712679360 sgd_solver.cpp:105] Iteration 0, lr = 0.001
+I0523 15:44:08.112608 2712679360 solver.cpp:218] Iteration 100 (4.68889 iter/s, 21.327s/100 iters), loss = 1.67773
+I0523 15:44:08.112664 2712679360 solver.cpp:237]     Train net output #0: loss = 1.67773 (* 1 = 1.67773 loss)
+I0523 15:44:08.112673 2712679360 sgd_solver.cpp:105] Iteration 100, lr = 0.001
+I0523 15:44:29.336644 2712679360 solver.cpp:218] Iteration 200 (4.71187 iter/s, 21.223s/100 iters), loss = 1.59886
+I0523 15:44:29.336683 2712679360 solver.cpp:237]     Train net output #0: loss = 1.59886 (* 1 = 1.59886 loss)
+I0523 15:44:29.336693 2712679360 sgd_solver.cpp:105] Iteration 200, lr = 0.001
+I0523 15:44:50.573981 2712679360 solver.cpp:218] Iteration 300 (4.70876 iter/s, 21.237s/100 iters), loss = 1.31839
+I0523 15:44:50.574038 2712679360 solver.cpp:237]     Train net output #0: loss = 1.31839 (* 1 = 1.31839 loss)
+I0523 15:44:50.574044 2712679360 sgd_solver.cpp:105] Iteration 300, lr = 0.001
+I0523 15:45:12.080576 2712679360 solver.cpp:218] Iteration 400 (4.64987 iter/s, 21.506s/100 iters), loss = 1.24876
+I0523 15:45:12.080610 2712679360 solver.cpp:237]     Train net output #0: loss = 1.24876 (* 1 = 1.24876 loss)
+I0523 15:45:12.080618 2712679360 sgd_solver.cpp:105] Iteration 400, lr = 0.001
+I0523 15:45:32.450579 978944 data_layer.cpp:73] Restarting data prefetching from start.
+I0523 15:45:33.342396 2712679360 solver.cpp:330] Iteration 500, Testing net (#0)
+I0523 15:45:42.732501 1515520 data_layer.cpp:73] Restarting data prefetching from start.
+I0523 15:45:43.134589 2712679360 solver.cpp:397]     Test net output #0: accuracy = 0.5366
+I0523 15:45:43.134620 2712679360 solver.cpp:397]     Test net output #1: loss = 1.31952 (* 1 = 1.31952 loss)
+I0523 15:45:43.360550 2712679360 solver.cpp:218] Iteration 500 (3.19703 iter/s, 31.279s/100 iters), loss = 1.22391
+I0523 15:45:43.360582 2712679360 solver.cpp:237]     Train net output #0: loss = 1.22391 (* 1 = 1.22391 loss)
+I0523 15:45:43.360589 2712679360 sgd_solver.cpp:105] Iteration 500, lr = 0.001
+I0523 15:46:06.734716 2712679360 solver.cpp:218] Iteration 600 (4.27826 iter/s, 23.374s/100 iters), loss = 1.23177
+I0523 15:46:06.734771 2712679360 solver.cpp:237]     Train net output #0: loss = 1.23177 (* 1 = 1.23177 loss)
+I0523 15:46:06.734779 2712679360 sgd_solver.cpp:105] Iteration 600, lr = 0.001
+.......数据形式基本相同 故省略...
+I0523 16:00:46.286926 2712679360 solver.cpp:218] Iteration 3900 (4.08731 iter/s, 24.466s/100 iters), loss = 0.557826
+I0523 16:00:46.286960 2712679360 solver.cpp:237]     Train net output #0: loss = 0.557826 (* 1 = 0.557826 loss)
+I0523 16:00:46.286967 2712679360 sgd_solver.cpp:105] Iteration 3900, lr = 0.001
+I0523 16:01:09.469552 978944 data_layer.cpp:73] Restarting data prefetching from start.
+I0523 16:01:10.472170 2712679360 solver.cpp:447] Snapshotting to binary proto file examples/cifar10/cifar10_quick_iter_4000.caffemodel
+I0523 16:01:10.475755 2712679360 sgd_solver.cpp:273] Snapshotting solver state to binary proto file examples/cifar10/cifar10_quick_iter_4000.solverstate
+I0523 16:01:10.590515 2712679360 solver.cpp:310] Iteration 4000, loss = 0.641508
+I0523 16:01:10.590548 2712679360 solver.cpp:330] Iteration 4000, Testing net (#0)
+I0523 16:01:21.619536 1515520 data_layer.cpp:73] Restarting data prefetching from start.
+I0523 16:01:22.054498 2712679360 solver.cpp:397]     Test net output #0: accuracy = 0.7119
+I0523 16:01:22.054538 2712679360 solver.cpp:397]     Test net output #1: loss = 0.848064 (* 1 = 0.848064 loss)
+I0523 16:01:22.054548 2712679360 solver.cpp:315] Optimization Done.
+I0523 16:01:22.054555 2712679360 caffe.cpp:259] Optimization Done.
+I0523 16:01:22.119184 2712679360 caffe.cpp:211] Use CPU.
+I0523 16:01:22.120214 2712679360 solver.cpp:44] Initializing solver from parameters:
+test_iter: 100
+test_interval: 500
+base_lr: 0.0001
+display: 100
+max_iter: 5000
+lr_policy: &quot;fixed&quot;
+momentum: 0.9
+weight_decay: 0.004
+snapshot: 5000
+snapshot_prefix: &quot;examples/cifar10/cifar10_quick&quot;
+solver_mode: CPU
+net: &quot;examples/cifar10/cifar10_quick_train_test.prototxt&quot;
+train_state {
+  level: 0
+  stage: &quot;&quot;
+}
+snapshot_format: HDF5
+I0523 16:01:22.120556 2712679360 solver.cpp:87] Creating training net from net file: examples/cifar10/cifar10_quick_train_test.prototxt
+I0523 16:01:22.120817 2712679360 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer cifar
+I0523 16:01:22.120833 2712679360 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer accuracy
+I0523 16:01:22.120841 2712679360 net.cpp:51] Initializing net from parameters:
+name: &quot;CIFAR10_quick&quot;
+state {
+  phase: TRAIN
+  level: 0
+  stage: &quot;&quot;
+}
+layer {
+  name: &quot;cifar&quot;
+  type: &quot;Data&quot;
+  top: &quot;data&quot;
+  top: &quot;label&quot;
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mean_file: &quot;examples/cifar10/mean.binaryproto&quot;
+  }
+  data_param {
+    source: &quot;examples/cifar10/cifar10_train_lmdb&quot;
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: &quot;conv1&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;data&quot;
+  top: &quot;conv1&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.0001
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;pool1&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv1&quot;
+  top: &quot;pool1&quot;
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;relu1&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;pool1&quot;
+  top: &quot;pool1&quot;
+}
+layer {
+  name: &quot;conv2&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;pool1&quot;
+  top: &quot;conv2&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.01
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;relu2&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;conv2&quot;
+  top: &quot;conv2&quot;
+}
+layer {
+  name: &quot;pool2&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv2&quot;
+  top: &quot;pool2&quot;
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;conv3&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;pool2&quot;
+  top: &quot;conv3&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 64
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.01
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;relu3&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;conv3&quot;
+  top: &quot;conv3&quot;
+}
+layer {
+  name: &quot;pool3&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv3&quot;
+  top: &quot;pool3&quot;
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;ip1&quot;
+  type: &quot;InnerProduct&quot;
+  bottom: &quot;pool3&quot;
+  top: &quot;ip1&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 64
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.1
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;ip2&quot;
+  type: &quot;InnerProduct&quot;
+  bottom: &quot;ip1&quot;
+  top: &quot;ip2&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 10
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.1
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;loss&quot;
+  type: &quot;SoftmaxWithLoss&quot;
+  bottom: &quot;ip2&quot;
+  bottom: &quot;label&quot;
+  top: &quot;loss&quot;
+}
+I0523 16:01:22.121104 2712679360 layer_factory.hpp:77] Creating layer cifar
+I0523 16:01:22.121320 2712679360 db_lmdb.cpp:35] Opened lmdb examples/cifar10/cifar10_train_lmdb
+I0523 16:01:22.121383 2712679360 net.cpp:84] Creating Layer cifar
+I0523 16:01:22.121393 2712679360 net.cpp:380] cifar -&gt; data
+I0523 16:01:22.121413 2712679360 net.cpp:380] cifar -&gt; label
+I0523 16:01:22.121431 2712679360 data_transformer.cpp:25] Loading mean file from: examples/cifar10/mean.binaryproto
+I0523 16:01:22.121585 2712679360 data_layer.cpp:45] output data size: 100,3,32,32
+I0523 16:01:22.128842 2712679360 net.cpp:122] Setting up cifar
+I0523 16:01:22.128867 2712679360 net.cpp:129] Top shape: 100 3 32 32 (307200)
+I0523 16:01:22.128875 2712679360 net.cpp:129] Top shape: 100 (100)
+I0523 16:01:22.128880 2712679360 net.cpp:137] Memory required for data: 1229200
+I0523 16:01:22.128890 2712679360 layer_factory.hpp:77] Creating layer conv1
+I0523 16:01:22.128902 2712679360 net.cpp:84] Creating Layer conv1
+I0523 16:01:22.128907 2712679360 net.cpp:406] conv1 &lt;- data
+I0523 16:01:22.128914 2712679360 net.cpp:380] conv1 -&gt; conv1
+I0523 16:01:22.129009 2712679360 net.cpp:122] Setting up conv1
+I0523 16:01:22.129017 2712679360 net.cpp:129] Top shape: 100 32 32 32 (3276800)
+I0523 16:01:22.129022 2712679360 net.cpp:137] Memory required for data: 14336400
+I0523 16:01:22.129030 2712679360 layer_factory.hpp:77] Creating layer pool1
+I0523 16:01:22.129039 2712679360 net.cpp:84] Creating Layer pool1
+I0523 16:01:22.129042 2712679360 net.cpp:406] pool1 &lt;- conv1
+I0523 16:01:22.129047 2712679360 net.cpp:380] pool1 -&gt; pool1
+I0523 16:01:22.129057 2712679360 net.cpp:122] Setting up pool1
+I0523 16:01:22.129062 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:01:22.129067 2712679360 net.cpp:137] Memory required for data: 17613200
+I0523 16:01:22.129071 2712679360 layer_factory.hpp:77] Creating layer relu1
+I0523 16:01:22.129078 2712679360 net.cpp:84] Creating Layer relu1
+I0523 16:01:22.129083 2712679360 net.cpp:406] relu1 &lt;- pool1
+I0523 16:01:22.129087 2712679360 net.cpp:367] relu1 -&gt; pool1 (in-place)
+I0523 16:01:22.129093 2712679360 net.cpp:122] Setting up relu1
+I0523 16:01:22.129097 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:01:22.129102 2712679360 net.cpp:137] Memory required for data: 20890000
+I0523 16:01:22.129106 2712679360 layer_factory.hpp:77] Creating layer conv2
+I0523 16:01:22.129117 2712679360 net.cpp:84] Creating Layer conv2
+I0523 16:01:22.129120 2712679360 net.cpp:406] conv2 &lt;- pool1
+I0523 16:01:22.129125 2712679360 net.cpp:380] conv2 -&gt; conv2
+I0523 16:01:22.129482 2712679360 net.cpp:122] Setting up conv2
+I0523 16:01:22.129487 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:01:22.129493 2712679360 net.cpp:137] Memory required for data: 24166800
+I0523 16:01:22.129500 2712679360 layer_factory.hpp:77] Creating layer relu2
+I0523 16:01:22.129505 2712679360 net.cpp:84] Creating Layer relu2
+I0523 16:01:22.129509 2712679360 net.cpp:406] relu2 &lt;- conv2
+I0523 16:01:22.129514 2712679360 net.cpp:367] relu2 -&gt; conv2 (in-place)
+I0523 16:01:22.129520 2712679360 net.cpp:122] Setting up relu2
+I0523 16:01:22.129524 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:01:22.129528 2712679360 net.cpp:137] Memory required for data: 27443600
+I0523 16:01:22.129534 2712679360 layer_factory.hpp:77] Creating layer pool2
+I0523 16:01:22.129537 2712679360 net.cpp:84] Creating Layer pool2
+I0523 16:01:22.129541 2712679360 net.cpp:406] pool2 &lt;- conv2
+I0523 16:01:22.129547 2712679360 net.cpp:380] pool2 -&gt; pool2
+I0523 16:01:22.129554 2712679360 net.cpp:122] Setting up pool2
+I0523 16:01:22.129557 2712679360 net.cpp:129] Top shape: 100 32 8 8 (204800)
+I0523 16:01:22.129562 2712679360 net.cpp:137] Memory required for data: 28262800
+I0523 16:01:22.129566 2712679360 layer_factory.hpp:77] Creating layer conv3
+I0523 16:01:22.129573 2712679360 net.cpp:84] Creating Layer conv3
+I0523 16:01:22.129577 2712679360 net.cpp:406] conv3 &lt;- pool2
+I0523 16:01:22.129585 2712679360 net.cpp:380] conv3 -&gt; conv3
+I0523 16:01:22.130280 2712679360 net.cpp:122] Setting up conv3
+I0523 16:01:22.130286 2712679360 net.cpp:129] Top shape: 100 64 8 8 (409600)
+I0523 16:01:22.130292 2712679360 net.cpp:137] Memory required for data: 29901200
+I0523 16:01:22.130298 2712679360 layer_factory.hpp:77] Creating layer relu3
+I0523 16:01:22.130304 2712679360 net.cpp:84] Creating Layer relu3
+I0523 16:01:22.130308 2712679360 net.cpp:406] relu3 &lt;- conv3
+I0523 16:01:22.130313 2712679360 net.cpp:367] relu3 -&gt; conv3 (in-place)
+I0523 16:01:22.130318 2712679360 net.cpp:122] Setting up relu3
+I0523 16:01:22.130353 2712679360 net.cpp:129] Top shape: 100 64 8 8 (409600)
+I0523 16:01:22.130360 2712679360 net.cpp:137] Memory required for data: 31539600
+I0523 16:01:22.130364 2712679360 layer_factory.hpp:77] Creating layer pool3
+I0523 16:01:22.130370 2712679360 net.cpp:84] Creating Layer pool3
+I0523 16:01:22.130374 2712679360 net.cpp:406] pool3 &lt;- conv3
+I0523 16:01:22.130379 2712679360 net.cpp:380] pool3 -&gt; pool3
+I0523 16:01:22.130385 2712679360 net.cpp:122] Setting up pool3
+I0523 16:01:22.130389 2712679360 net.cpp:129] Top shape: 100 64 4 4 (102400)
+I0523 16:01:22.130396 2712679360 net.cpp:137] Memory required for data: 31949200
+I0523 16:01:22.130400 2712679360 layer_factory.hpp:77] Creating layer ip1
+I0523 16:01:22.130409 2712679360 net.cpp:84] Creating Layer ip1
+I0523 16:01:22.130414 2712679360 net.cpp:406] ip1 &lt;- pool3
+I0523 16:01:22.130419 2712679360 net.cpp:380] ip1 -&gt; ip1
+I0523 16:01:22.131337 2712679360 net.cpp:122] Setting up ip1
+I0523 16:01:22.131347 2712679360 net.cpp:129] Top shape: 100 64 (6400)
+I0523 16:01:22.131352 2712679360 net.cpp:137] Memory required for data: 31974800
+I0523 16:01:22.131358 2712679360 layer_factory.hpp:77] Creating layer ip2
+I0523 16:01:22.131364 2712679360 net.cpp:84] Creating Layer ip2
+I0523 16:01:22.131369 2712679360 net.cpp:406] ip2 &lt;- ip1
+I0523 16:01:22.131374 2712679360 net.cpp:380] ip2 -&gt; ip2
+I0523 16:01:22.131392 2712679360 net.cpp:122] Setting up ip2
+I0523 16:01:22.131397 2712679360 net.cpp:129] Top shape: 100 10 (1000)
+I0523 16:01:22.131400 2712679360 net.cpp:137] Memory required for data: 31978800
+I0523 16:01:22.131407 2712679360 layer_factory.hpp:77] Creating layer loss
+I0523 16:01:22.131413 2712679360 net.cpp:84] Creating Layer loss
+I0523 16:01:22.131417 2712679360 net.cpp:406] loss &lt;- ip2
+I0523 16:01:22.131422 2712679360 net.cpp:406] loss &lt;- label
+I0523 16:01:22.131427 2712679360 net.cpp:380] loss -&gt; loss
+I0523 16:01:22.131435 2712679360 layer_factory.hpp:77] Creating layer loss
+I0523 16:01:22.131448 2712679360 net.cpp:122] Setting up loss
+I0523 16:01:22.131453 2712679360 net.cpp:129] Top shape: (1)
+I0523 16:01:22.131458 2712679360 net.cpp:132]     with loss weight 1
+I0523 16:01:22.131471 2712679360 net.cpp:137] Memory required for data: 31978804
+I0523 16:01:22.131476 2712679360 net.cpp:198] loss needs backward computation.
+I0523 16:01:22.131495 2712679360 net.cpp:198] ip2 needs backward computation.
+I0523 16:01:22.131505 2712679360 net.cpp:198] ip1 needs backward computation.
+I0523 16:01:22.131510 2712679360 net.cpp:198] pool3 needs backward computation.
+I0523 16:01:22.131515 2712679360 net.cpp:198] relu3 needs backward computation.
+I0523 16:01:22.131518 2712679360 net.cpp:198] conv3 needs backward computation.
+I0523 16:01:22.131522 2712679360 net.cpp:198] pool2 needs backward computation.
+I0523 16:01:22.131527 2712679360 net.cpp:198] relu2 needs backward computation.
+I0523 16:01:22.131531 2712679360 net.cpp:198] conv2 needs backward computation.
+I0523 16:01:22.131536 2712679360 net.cpp:198] relu1 needs backward computation.
+I0523 16:01:22.131541 2712679360 net.cpp:198] pool1 needs backward computation.
+I0523 16:01:22.131544 2712679360 net.cpp:198] conv1 needs backward computation.
+I0523 16:01:22.131548 2712679360 net.cpp:200] cifar does not need backward computation.
+I0523 16:01:22.131552 2712679360 net.cpp:242] This network produces output loss
+I0523 16:01:22.131561 2712679360 net.cpp:255] Network initialization done.
+I0523 16:01:22.131786 2712679360 solver.cpp:172] Creating test net (#0) specified by net file: examples/cifar10/cifar10_quick_train_test.prototxt
+I0523 16:01:22.131814 2712679360 net.cpp:294] The NetState phase (1) differed from the phase (0) specified by a rule in layer cifar
+I0523 16:01:22.131826 2712679360 net.cpp:51] Initializing net from parameters:
+name: &quot;CIFAR10_quick&quot;
+state {
+  phase: TEST
+}
+layer {
+  name: &quot;cifar&quot;
+  type: &quot;Data&quot;
+  top: &quot;data&quot;
+  top: &quot;label&quot;
+  include {
+    phase: TEST
+  }
+  transform_param {
+    mean_file: &quot;examples/cifar10/mean.binaryproto&quot;
+  }
+  data_param {
+    source: &quot;examples/cifar10/cifar10_test_lmdb&quot;
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: &quot;conv1&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;data&quot;
+  top: &quot;conv1&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.0001
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;pool1&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv1&quot;
+  top: &quot;pool1&quot;
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;relu1&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;pool1&quot;
+  top: &quot;pool1&quot;
+}
+layer {
+  name: &quot;conv2&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;pool1&quot;
+  top: &quot;conv2&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.01
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;relu2&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;conv2&quot;
+  top: &quot;conv2&quot;
+}
+layer {
+  name: &quot;pool2&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv2&quot;
+  top: &quot;pool2&quot;
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;conv3&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;pool2&quot;
+  top: &quot;conv3&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 64
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.01
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;relu3&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;conv3&quot;
+  top: &quot;conv3&quot;
+}
+layer {
+  name: &quot;pool3&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv3&quot;
+  top: &quot;pool3&quot;
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;ip1&quot;
+  type: &quot;InnerProduct&quot;
+  bottom: &quot;pool3&quot;
+  top: &quot;ip1&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 64
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.1
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;ip2&quot;
+  type: &quot;InnerProduct&quot;
+  bottom: &quot;ip1&quot;
+  top: &quot;ip2&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 10
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.1
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;accuracy&quot;
+  type: &quot;Accuracy&quot;
+  bottom: &quot;ip2&quot;
+  bottom: &quot;label&quot;
+  top: &quot;accuracy&quot;
+  include {
+    phase: TEST
+  }
+}
+layer {
+  name: &quot;loss&quot;
+  type: &quot;SoftmaxWithLoss&quot;
+  bottom: &quot;ip2&quot;
+  bottom: &quot;label&quot;
+  top: &quot;loss&quot;
+}
+I0523 16:01:22.132225 2712679360 layer_factory.hpp:77] Creating layer cifar
+I0523 16:01:22.132313 2712679360 db_lmdb.cpp:35] Opened lmdb examples/cifar10/cifar10_test_lmdb
+I0523 16:01:22.132342 2712679360 net.cpp:84] Creating Layer cifar
+I0523 16:01:22.132356 2712679360 net.cpp:380] cifar -&gt; data
+I0523 16:01:22.132364 2712679360 net.cpp:380] cifar -&gt; label
+I0523 16:01:22.132372 2712679360 data_transformer.cpp:25] Loading mean file from: examples/cifar10/mean.binaryproto
+I0523 16:01:22.132438 2712679360 data_layer.cpp:45] output data size: 100,3,32,32
+I0523 16:01:22.134943 2712679360 net.cpp:122] Setting up cifar
+I0523 16:01:22.134956 2712679360 net.cpp:129] Top shape: 100 3 32 32 (307200)
+I0523 16:01:22.134963 2712679360 net.cpp:129] Top shape: 100 (100)
+I0523 16:01:22.134968 2712679360 net.cpp:137] Memory required for data: 1229200
+I0523 16:01:22.134974 2712679360 layer_factory.hpp:77] Creating layer label_cifar_1_split
+I0523 16:01:22.134984 2712679360 net.cpp:84] Creating Layer label_cifar_1_split
+I0523 16:01:22.135015 2712679360 net.cpp:406] label_cifar_1_split &lt;- label
+I0523 16:01:22.135064 2712679360 net.cpp:380] label_cifar_1_split -&gt; label_cifar_1_split_0
+I0523 16:01:22.135078 2712679360 net.cpp:380] label_cifar_1_split -&gt; label_cifar_1_split_1
+I0523 16:01:22.135116 2712679360 net.cpp:122] Setting up label_cifar_1_split
+I0523 16:01:22.135167 2712679360 net.cpp:129] Top shape: 100 (100)
+I0523 16:01:22.135203 2712679360 net.cpp:129] Top shape: 100 (100)
+I0523 16:01:22.135241 2712679360 net.cpp:137] Memory required for data: 1230000
+I0523 16:01:22.135313 2712679360 layer_factory.hpp:77] Creating layer conv1
+I0523 16:01:22.135330 2712679360 net.cpp:84] Creating Layer conv1
+I0523 16:01:22.135335 2712679360 net.cpp:406] conv1 &lt;- data
+I0523 16:01:22.135342 2712679360 net.cpp:380] conv1 -&gt; conv1
+I0523 16:01:22.135398 2712679360 net.cpp:122] Setting up conv1
+I0523 16:01:22.135404 2712679360 net.cpp:129] Top shape: 100 32 32 32 (3276800)
+I0523 16:01:22.135411 2712679360 net.cpp:137] Memory required for data: 14337200
+I0523 16:01:22.135418 2712679360 layer_factory.hpp:77] Creating layer pool1
+I0523 16:01:22.135463 2712679360 net.cpp:84] Creating Layer pool1
+I0523 16:01:22.135473 2712679360 net.cpp:406] pool1 &lt;- conv1
+I0523 16:01:22.135514 2712679360 net.cpp:380] pool1 -&gt; pool1
+I0523 16:01:22.135565 2712679360 net.cpp:122] Setting up pool1
+I0523 16:01:22.135574 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:01:22.135581 2712679360 net.cpp:137] Memory required for data: 17614000
+I0523 16:01:22.135586 2712679360 layer_factory.hpp:77] Creating layer relu1
+I0523 16:01:22.135593 2712679360 net.cpp:84] Creating Layer relu1
+I0523 16:01:22.135598 2712679360 net.cpp:406] relu1 &lt;- pool1
+I0523 16:01:22.135603 2712679360 net.cpp:367] relu1 -&gt; pool1 (in-place)
+I0523 16:01:22.135609 2712679360 net.cpp:122] Setting up relu1
+I0523 16:01:22.135613 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:01:22.135666 2712679360 net.cpp:137] Memory required for data: 20890800
+I0523 16:01:22.135673 2712679360 layer_factory.hpp:77] Creating layer conv2
+I0523 16:01:22.135681 2712679360 net.cpp:84] Creating Layer conv2
+I0523 16:01:22.135686 2712679360 net.cpp:406] conv2 &lt;- pool1
+I0523 16:01:22.135700 2712679360 net.cpp:380] conv2 -&gt; conv2
+I0523 16:01:22.136068 2712679360 net.cpp:122] Setting up conv2
+I0523 16:01:22.136076 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:01:22.136081 2712679360 net.cpp:137] Memory required for data: 24167600
+I0523 16:01:22.136088 2712679360 layer_factory.hpp:77] Creating layer relu2
+I0523 16:01:22.136095 2712679360 net.cpp:84] Creating Layer relu2
+I0523 16:01:22.136098 2712679360 net.cpp:406] relu2 &lt;- conv2
+I0523 16:01:22.136103 2712679360 net.cpp:367] relu2 -&gt; conv2 (in-place)
+I0523 16:01:22.136108 2712679360 net.cpp:122] Setting up relu2
+I0523 16:01:22.136112 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:01:22.136117 2712679360 net.cpp:137] Memory required for data: 27444400
+I0523 16:01:22.136121 2712679360 layer_factory.hpp:77] Creating layer pool2
+I0523 16:01:22.136127 2712679360 net.cpp:84] Creating Layer pool2
+I0523 16:01:22.136132 2712679360 net.cpp:406] pool2 &lt;- conv2
+I0523 16:01:22.136135 2712679360 net.cpp:380] pool2 -&gt; pool2
+I0523 16:01:22.136142 2712679360 net.cpp:122] Setting up pool2
+I0523 16:01:22.136147 2712679360 net.cpp:129] Top shape: 100 32 8 8 (204800)
+I0523 16:01:22.136152 2712679360 net.cpp:137] Memory required for data: 28263600
+I0523 16:01:22.136157 2712679360 layer_factory.hpp:77] Creating layer conv3
+I0523 16:01:22.136163 2712679360 net.cpp:84] Creating Layer conv3
+I0523 16:01:22.136168 2712679360 net.cpp:406] conv3 &lt;- pool2
+I0523 16:01:22.136173 2712679360 net.cpp:380] conv3 -&gt; conv3
+I0523 16:01:22.136878 2712679360 net.cpp:122] Setting up conv3
+I0523 16:01:22.136888 2712679360 net.cpp:129] Top shape: 100 64 8 8 (409600)
+I0523 16:01:22.136893 2712679360 net.cpp:137] Memory required for data: 29902000
+I0523 16:01:22.136899 2712679360 layer_factory.hpp:77] Creating layer relu3
+I0523 16:01:22.136904 2712679360 net.cpp:84] Creating Layer relu3
+I0523 16:01:22.136909 2712679360 net.cpp:406] relu3 &lt;- conv3
+I0523 16:01:22.136914 2712679360 net.cpp:367] relu3 -&gt; conv3 (in-place)
+I0523 16:01:22.136919 2712679360 net.cpp:122] Setting up relu3
+I0523 16:01:22.136930 2712679360 net.cpp:129] Top shape: 100 64 8 8 (409600)
+I0523 16:01:22.136961 2712679360 net.cpp:137] Memory required for data: 31540400
+I0523 16:01:22.136968 2712679360 layer_factory.hpp:77] Creating layer pool3
+I0523 16:01:22.136976 2712679360 net.cpp:84] Creating Layer pool3
+I0523 16:01:22.137001 2712679360 net.cpp:406] pool3 &lt;- conv3
+I0523 16:01:22.137008 2712679360 net.cpp:380] pool3 -&gt; pool3
+I0523 16:01:22.137017 2712679360 net.cpp:122] Setting up pool3
+I0523 16:01:22.137022 2712679360 net.cpp:129] Top shape: 100 64 4 4 (102400)
+I0523 16:01:22.137027 2712679360 net.cpp:137] Memory required for data: 31950000
+I0523 16:01:22.137032 2712679360 layer_factory.hpp:77] Creating layer ip1
+I0523 16:01:22.137039 2712679360 net.cpp:84] Creating Layer ip1
+I0523 16:01:22.137044 2712679360 net.cpp:406] ip1 &lt;- pool3
+I0523 16:01:22.137050 2712679360 net.cpp:380] ip1 -&gt; ip1
+I0523 16:01:22.137981 2712679360 net.cpp:122] Setting up ip1
+I0523 16:01:22.137995 2712679360 net.cpp:129] Top shape: 100 64 (6400)
+I0523 16:01:22.138002 2712679360 net.cpp:137] Memory required for data: 31975600
+I0523 16:01:22.138008 2712679360 layer_factory.hpp:77] Creating layer ip2
+I0523 16:01:22.138016 2712679360 net.cpp:84] Creating Layer ip2
+I0523 16:01:22.138021 2712679360 net.cpp:406] ip2 &lt;- ip1
+I0523 16:01:22.138027 2712679360 net.cpp:380] ip2 -&gt; ip2
+I0523 16:01:22.138046 2712679360 net.cpp:122] Setting up ip2
+I0523 16:01:22.138051 2712679360 net.cpp:129] Top shape: 100 10 (1000)
+I0523 16:01:22.138056 2712679360 net.cpp:137] Memory required for data: 31979600
+I0523 16:01:22.138062 2712679360 layer_factory.hpp:77] Creating layer ip2_ip2_0_split
+I0523 16:01:22.138085 2712679360 net.cpp:84] Creating Layer ip2_ip2_0_split
+I0523 16:01:22.138103 2712679360 net.cpp:406] ip2_ip2_0_split &lt;- ip2
+I0523 16:01:22.138115 2712679360 net.cpp:380] ip2_ip2_0_split -&gt; ip2_ip2_0_split_0
+I0523 16:01:22.138129 2712679360 net.cpp:380] ip2_ip2_0_split -&gt; ip2_ip2_0_split_1
+I0523 16:01:22.138142 2712679360 net.cpp:122] Setting up ip2_ip2_0_split
+I0523 16:01:22.138150 2712679360 net.cpp:129] Top shape: 100 10 (1000)
+I0523 16:01:22.138160 2712679360 net.cpp:129] Top shape: 100 10 (1000)
+I0523 16:01:22.138170 2712679360 net.cpp:137] Memory required for data: 31987600
+I0523 16:01:22.138177 2712679360 layer_factory.hpp:77] Creating layer accuracy
+I0523 16:01:22.138187 2712679360 net.cpp:84] Creating Layer accuracy
+I0523 16:01:22.138219 2712679360 net.cpp:406] accuracy &lt;- ip2_ip2_0_split_0
+I0523 16:01:22.138231 2712679360 net.cpp:406] accuracy &lt;- label_cifar_1_split_0
+I0523 16:01:22.138242 2712679360 net.cpp:380] accuracy -&gt; accuracy
+I0523 16:01:22.138257 2712679360 net.cpp:122] Setting up accuracy
+I0523 16:01:22.138264 2712679360 net.cpp:129] Top shape: (1)
+I0523 16:01:22.138274 2712679360 net.cpp:137] Memory required for data: 31987604
+I0523 16:01:22.138279 2712679360 layer_factory.hpp:77] Creating layer loss
+I0523 16:01:22.138286 2712679360 net.cpp:84] Creating Layer loss
+I0523 16:01:22.138290 2712679360 net.cpp:406] loss &lt;- ip2_ip2_0_split_1
+I0523 16:01:22.138327 2712679360 net.cpp:406] loss &lt;- label_cifar_1_split_1
+I0523 16:01:22.138334 2712679360 net.cpp:380] loss -&gt; loss
+I0523 16:01:22.138342 2712679360 layer_factory.hpp:77] Creating layer loss
+I0523 16:01:22.138352 2712679360 net.cpp:122] Setting up loss
+I0523 16:01:22.138357 2712679360 net.cpp:129] Top shape: (1)
+I0523 16:01:22.138362 2712679360 net.cpp:132]     with loss weight 1
+I0523 16:01:22.138368 2712679360 net.cpp:137] Memory required for data: 31987608
+I0523 16:01:22.138372 2712679360 net.cpp:198] loss needs backward computation.
+I0523 16:01:22.138377 2712679360 net.cpp:200] accuracy does not need backward computation.
+I0523 16:01:22.138382 2712679360 net.cpp:198] ip2_ip2_0_split needs backward computation.
+I0523 16:01:22.138386 2712679360 net.cpp:198] ip2 needs backward computation.
+I0523 16:01:22.138391 2712679360 net.cpp:198] ip1 needs backward computation.
+I0523 16:01:22.138396 2712679360 net.cpp:198] pool3 needs backward computation.
+I0523 16:01:22.138401 2712679360 net.cpp:198] relu3 needs backward computation.
+I0523 16:01:22.138404 2712679360 net.cpp:198] conv3 needs backward computation.
+I0523 16:01:22.138408 2712679360 net.cpp:198] pool2 needs backward computation.
+I0523 16:01:22.138412 2712679360 net.cpp:198] relu2 needs backward computation.
+I0523 16:01:22.138417 2712679360 net.cpp:198] conv2 needs backward computation.
+I0523 16:01:22.138444 2712679360 net.cpp:198] relu1 needs backward computation.
+I0523 16:01:22.138449 2712679360 net.cpp:198] pool1 needs backward computation.
+I0523 16:01:22.138454 2712679360 net.cpp:198] conv1 needs backward computation.
+I0523 16:01:22.138463 2712679360 net.cpp:200] label_cifar_1_split does not need backward computation.
+I0523 16:01:22.138468 2712679360 net.cpp:200] cifar does not need backward computation.
+I0523 16:01:22.138470 2712679360 net.cpp:242] This network produces output accuracy
+I0523 16:01:22.138476 2712679360 net.cpp:242] This network produces output loss
+I0523 16:01:22.138485 2712679360 net.cpp:255] Network initialization done.
+I0523 16:01:22.138537 2712679360 solver.cpp:56] Solver scaffolding done.
+I0523 16:01:22.138566 2712679360 caffe.cpp:242] Resuming from examples/cifar10/cifar10_quick_iter_4000.solverstate
+I0523 16:01:22.139786 2712679360 sgd_solver.cpp:318] SGDSolver: restoring history
+I0523 16:01:22.140019 2712679360 caffe.cpp:248] Starting Optimization
+I0523 16:01:22.140027 2712679360 solver.cpp:272] Solving CIFAR10_quick
+I0523 16:01:22.140031 2712679360 solver.cpp:273] Learning Rate Policy: fixed
+I0523 16:01:22.140113 2712679360 solver.cpp:330] Iteration 4000, Testing net (#0)
+I0523 16:01:32.383680 215015424 data_layer.cpp:73] Restarting data prefetching from start.
+I0523 16:01:32.807214 2712679360 solver.cpp:397]     Test net output #0: accuracy = 0.7119
+I0523 16:01:32.807250 2712679360 solver.cpp:397]     Test net output #1: loss = 0.848064 (* 1 = 0.848064 loss)
+I0523 16:01:33.065510 2712679360 solver.cpp:218] Iteration 4000 (366.133 iter/s, 10.925s/100 iters), loss = 0.641508
+I0523 16:01:33.065546 2712679360 solver.cpp:237]     Train net output #0: loss = 0.641508 (* 1 = 0.641508 loss)
+I0523 16:01:33.065553 2712679360 sgd_solver.cpp:105] Iteration 4000, lr = 0.0001
+I0523 16:01:56.950950 2712679360 solver.cpp:218] Iteration 4100 (4.18673 iter/s, 23.885s/100 iters), loss = 0.603556
+I0523 16:01:56.951002 2712679360 solver.cpp:237]     Train net output #0: loss = 0.603556 (* 1 = 0.603556 loss)
+I0523 16:01:56.951010 2712679360 sgd_solver.cpp:105] Iteration 4100, lr = 0.0001
+I0523 16:02:21.127391 2712679360 solver.cpp:218] Iteration 4200 (4.13633 iter/s, 24.176s/100 iters), loss = 0.491505
+I0523 16:02:21.127429 2712679360 solver.cpp:237]     Train net output #0: loss = 0.491505 (* 1 = 0.491505 loss)
+I0523 16:02:21.127437 2712679360 sgd_solver.cpp:105] Iteration 4200, lr = 0.0001
+I0523 16:02:46.283135 2712679360 solver.cpp:218] Iteration 4300 (3.97535 iter/s, 25.155s/100 iters), loss = 0.495313
+I0523 16:02:46.283190 2712679360 solver.cpp:237]     Train net output #0: loss = 0.495313 (* 1 = 0.495313 loss)
+I0523 16:02:46.283198 2712679360 sgd_solver.cpp:105] Iteration 4300, lr = 0.0001
+I0523 16:03:10.841265 2712679360 solver.cpp:218] Iteration 4400 (4.07199 iter/s, 24.558s/100 iters), loss = 0.438567
+I0523 16:03:10.841303 2712679360 solver.cpp:237]     Train net output #0: loss = 0.438567 (* 1 = 0.438567 loss)
+I0523 16:03:10.841310 2712679360 sgd_solver.cpp:105] Iteration 4400, lr = 0.0001
+I0523 16:03:33.942627 214478848 data_layer.cpp:73] Restarting data prefetching from start.
+I0523 16:03:34.958622 2712679360 solver.cpp:330] Iteration 4500, Testing net (#0)
+I0523 16:03:45.910739 215015424 data_layer.cpp:73] Restarting data prefetching from start.
+I0523 16:03:46.349741 2712679360 solver.cpp:397]     Test net output #0: accuracy = 0.752
+I0523 16:03:46.349779 2712679360 solver.cpp:397]     Test net output #1: loss = 0.748076 (* 1 = 0.748076 loss)
+I0523 16:03:46.589071 2712679360 solver.cpp:218] Iteration 4500 (2.79744 iter/s, 35.747s/100 iters), loss = 0.503921
+I0523 16:03:46.589107 2712679360 solver.cpp:237]     Train net output #0: loss = 0.503921 (* 1 = 0.503921 loss)
+I0523 16:03:46.589113 2712679360 sgd_solver.cpp:105] Iteration 4500, lr = 0.0001
+I0523 16:04:10.851019 2712679360 solver.cpp:218] Iteration 4600 (4.12184 iter/s, 24.261s/100 iters), loss = 0.562534
+I0523 16:04:10.851088 2712679360 solver.cpp:237]     Train net output #0: loss = 0.562534 (* 1 = 0.562534 loss)
+I0523 16:04:10.851095 2712679360 sgd_solver.cpp:105] Iteration 4600, lr = 0.0001
+I0523 16:04:35.547813 2712679360 solver.cpp:218] Iteration 4700 (4.04924 iter/s, 24.696s/100 iters), loss = 0.464102
+I0523 16:04:35.547852 2712679360 solver.cpp:237]     Train net output #0: loss = 0.464102 (* 1 = 0.464102 loss)
+I0523 16:04:35.547860 2712679360 sgd_solver.cpp:105] Iteration 4700, lr = 0.0001
+I0523 16:05:00.517423 2712679360 solver.cpp:218] Iteration 4800 (4.00497 iter/s, 24.969s/100 iters), loss = 0.474584
+I0523 16:05:00.517478 2712679360 solver.cpp:237]     Train net output #0: loss = 0.474584 (* 1 = 0.474584 loss)
+I0523 16:05:00.517487 2712679360 sgd_solver.cpp:105] Iteration 4800, lr = 0.0001
+I0523 16:05:24.429520 2712679360 solver.cpp:218] Iteration 4900 (4.182 iter/s, 23.912s/100 iters), loss = 0.417258
+I0523 16:05:24.429554 2712679360 solver.cpp:237]     Train net output #0: loss = 0.417258 (* 1 = 0.417258 loss)
+I0523 16:05:24.429563 2712679360 sgd_solver.cpp:105] Iteration 4900, lr = 0.0001
+I0523 16:05:47.148733 214478848 data_layer.cpp:73] Restarting data prefetching from start.
+I0523 16:05:48.086921 2712679360 solver.cpp:457] Snapshotting to HDF5 file examples/cifar10/cifar10_quick_iter_5000.caffemodel.h5
+I0523 16:05:48.101351 2712679360 sgd_solver.cpp:283] Snapshotting solver state to HDF5 file examples/cifar10/cifar10_quick_iter_5000.solverstate.h5
+I0523 16:05:48.215885 2712679360 solver.cpp:310] Iteration 5000, loss = 0.487594
+I0523 16:05:48.215921 2712679360 solver.cpp:330] Iteration 5000, Testing net (#0)
+I0523 16:05:58.710295 215015424 data_layer.cpp:73] Restarting data prefetching from start.
+I0523 16:05:59.149840 2712679360 solver.cpp:397]     Test net output #0: accuracy = 0.754
+I0523 16:05:59.149875 2712679360 solver.cpp:397]     Test net output #1: loss = 0.742307 (* 1 = 0.742307 loss)
+I0523 16:05:59.149883 2712679360 solver.cpp:315] Optimization Done.
+I0523 16:05:59.149888 2712679360 caffe.cpp:259] Optimization Done.
+</code></pre>
+
+<p>训练完毕.并且在最后已经创建好了测试网络.</p>
+
+<p>下面我们用训练好的cifar10模型来对数据进行预测:</p>
+
+<p>运行如下命令:</p>
+
+<pre><code>➜  caffe git:(master) ✗ ./build/tools/caffe.bin test \
+-model examples/cifar10/cifar10_quick_train_test.prototxt \
+-weights examples/cifar10/cifar10_quick_iter_5000.caffemodel.h5 \
+-iterations 100
+</code></pre>
+
+<p>对测试数据集进行预测:</p>
+
+<pre><code>I0523 16:25:41.234220 2712679360 caffe.cpp:284] Use CPU.
+I0523 16:25:41.238044 2712679360 net.cpp:294] The NetState phase (1) differed from the phase (0) specified by a rule in layer cifar
+I0523 16:25:41.238080 2712679360 net.cpp:51] Initializing net from parameters:
+name: &quot;CIFAR10_quick&quot;
+state {
+  phase: TEST
+  level: 0
+  stage: &quot;&quot;
+}
+layer {
+  name: &quot;cifar&quot;
+  type: &quot;Data&quot;
+  top: &quot;data&quot;
+  top: &quot;label&quot;
+  include {
+    phase: TEST
+  }
+  transform_param {
+    mean_file: &quot;examples/cifar10/mean.binaryproto&quot;
+  }
+  data_param {
+    source: &quot;examples/cifar10/cifar10_test_lmdb&quot;
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: &quot;conv1&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;data&quot;
+  top: &quot;conv1&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.0001
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;pool1&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv1&quot;
+  top: &quot;pool1&quot;
+  pooling_param {
+    pool: MAX
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;relu1&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;pool1&quot;
+  top: &quot;pool1&quot;
+}
+layer {
+  name: &quot;conv2&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;pool1&quot;
+  top: &quot;conv2&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 32
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.01
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;relu2&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;conv2&quot;
+  top: &quot;conv2&quot;
+}
+layer {
+  name: &quot;pool2&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv2&quot;
+  top: &quot;pool2&quot;
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;conv3&quot;
+  type: &quot;Convolution&quot;
+  bottom: &quot;pool2&quot;
+  top: &quot;conv3&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  convolution_param {
+    num_output: 64
+    pad: 2
+    kernel_size: 5
+    stride: 1
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.01
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;relu3&quot;
+  type: &quot;ReLU&quot;
+  bottom: &quot;conv3&quot;
+  top: &quot;conv3&quot;
+}
+layer {
+  name: &quot;pool3&quot;
+  type: &quot;Pooling&quot;
+  bottom: &quot;conv3&quot;
+  top: &quot;pool3&quot;
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: &quot;ip1&quot;
+  type: &quot;InnerProduct&quot;
+  bottom: &quot;pool3&quot;
+  top: &quot;ip1&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 64
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.1
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;ip2&quot;
+  type: &quot;InnerProduct&quot;
+  bottom: &quot;ip1&quot;
+  top: &quot;ip2&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 10
+    weight_filler {
+      type: &quot;gaussian&quot;
+      std: 0.1
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;accuracy&quot;
+  type: &quot;Accuracy&quot;
+  bottom: &quot;ip2&quot;
+  bottom: &quot;label&quot;
+  top: &quot;accuracy&quot;
+  include {
+    phase: TEST
+  }
+}
+layer {
+  name: &quot;loss&quot;
+  type: &quot;SoftmaxWithLoss&quot;
+  bottom: &quot;ip2&quot;
+  bottom: &quot;label&quot;
+  top: &quot;loss&quot;
+}
+I0523 16:25:41.238523 2712679360 layer_factory.hpp:77] Creating layer cifar
+I0523 16:25:41.238731 2712679360 db_lmdb.cpp:35] Opened lmdb examples/cifar10/cifar10_test_lmdb
+I0523 16:25:41.238788 2712679360 net.cpp:84] Creating Layer cifar
+I0523 16:25:41.238796 2712679360 net.cpp:380] cifar -&gt; data
+I0523 16:25:41.238816 2712679360 net.cpp:380] cifar -&gt; label
+I0523 16:25:41.238834 2712679360 data_transformer.cpp:25] Loading mean file from: examples/cifar10/mean.binaryproto
+I0523 16:25:41.238957 2712679360 data_layer.cpp:45] output data size: 100,3,32,32
+I0523 16:25:41.246219 2712679360 net.cpp:122] Setting up cifar
+I0523 16:25:41.246245 2712679360 net.cpp:129] Top shape: 100 3 32 32 (307200)
+I0523 16:25:41.246253 2712679360 net.cpp:129] Top shape: 100 (100)
+I0523 16:25:41.246258 2712679360 net.cpp:137] Memory required for data: 1229200
+I0523 16:25:41.246266 2712679360 layer_factory.hpp:77] Creating layer label_cifar_1_split
+I0523 16:25:41.246278 2712679360 net.cpp:84] Creating Layer label_cifar_1_split
+I0523 16:25:41.246282 2712679360 net.cpp:406] label_cifar_1_split &lt;- label
+I0523 16:25:41.246343 2712679360 net.cpp:380] label_cifar_1_split -&gt; label_cifar_1_split_0
+I0523 16:25:41.246367 2712679360 net.cpp:380] label_cifar_1_split -&gt; label_cifar_1_split_1
+I0523 16:25:41.246381 2712679360 net.cpp:122] Setting up label_cifar_1_split
+I0523 16:25:41.246390 2712679360 net.cpp:129] Top shape: 100 (100)
+I0523 16:25:41.246400 2712679360 net.cpp:129] Top shape: 100 (100)
+I0523 16:25:41.246409 2712679360 net.cpp:137] Memory required for data: 1230000
+I0523 16:25:41.246417 2712679360 layer_factory.hpp:77] Creating layer conv1
+I0523 16:25:41.246438 2712679360 net.cpp:84] Creating Layer conv1
+I0523 16:25:41.246448 2712679360 net.cpp:406] conv1 &lt;- data
+I0523 16:25:41.246457 2712679360 net.cpp:380] conv1 -&gt; conv1
+I0523 16:25:41.246606 2712679360 net.cpp:122] Setting up conv1
+I0523 16:25:41.246637 2712679360 net.cpp:129] Top shape: 100 32 32 32 (3276800)
+I0523 16:25:41.246680 2712679360 net.cpp:137] Memory required for data: 14337200
+I0523 16:25:41.246693 2712679360 layer_factory.hpp:77] Creating layer pool1
+I0523 16:25:41.246708 2712679360 net.cpp:84] Creating Layer pool1
+I0523 16:25:41.246721 2712679360 net.cpp:406] pool1 &lt;- conv1
+I0523 16:25:41.246731 2712679360 net.cpp:380] pool1 -&gt; pool1
+I0523 16:25:41.246752 2712679360 net.cpp:122] Setting up pool1
+I0523 16:25:41.246781 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:25:41.246788 2712679360 net.cpp:137] Memory required for data: 17614000
+I0523 16:25:41.246793 2712679360 layer_factory.hpp:77] Creating layer relu1
+I0523 16:25:41.246804 2712679360 net.cpp:84] Creating Layer relu1
+I0523 16:25:41.246809 2712679360 net.cpp:406] relu1 &lt;- pool1
+I0523 16:25:41.246814 2712679360 net.cpp:367] relu1 -&gt; pool1 (in-place)
+I0523 16:25:41.246821 2712679360 net.cpp:122] Setting up relu1
+I0523 16:25:41.246825 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:25:41.246830 2712679360 net.cpp:137] Memory required for data: 20890800
+I0523 16:25:41.246834 2712679360 layer_factory.hpp:77] Creating layer conv2
+I0523 16:25:41.246841 2712679360 net.cpp:84] Creating Layer conv2
+I0523 16:25:41.246846 2712679360 net.cpp:406] conv2 &lt;- pool1
+I0523 16:25:41.246851 2712679360 net.cpp:380] conv2 -&gt; conv2
+I0523 16:25:41.247228 2712679360 net.cpp:122] Setting up conv2
+I0523 16:25:41.247236 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:25:41.247242 2712679360 net.cpp:137] Memory required for data: 24167600
+I0523 16:25:41.247249 2712679360 layer_factory.hpp:77] Creating layer relu2
+I0523 16:25:41.247259 2712679360 net.cpp:84] Creating Layer relu2
+I0523 16:25:41.247264 2712679360 net.cpp:406] relu2 &lt;- conv2
+I0523 16:25:41.247269 2712679360 net.cpp:367] relu2 -&gt; conv2 (in-place)
+I0523 16:25:41.247274 2712679360 net.cpp:122] Setting up relu2
+I0523 16:25:41.247278 2712679360 net.cpp:129] Top shape: 100 32 16 16 (819200)
+I0523 16:25:41.247283 2712679360 net.cpp:137] Memory required for data: 27444400
+I0523 16:25:41.247287 2712679360 layer_factory.hpp:77] Creating layer pool2
+I0523 16:25:41.247293 2712679360 net.cpp:84] Creating Layer pool2
+I0523 16:25:41.247298 2712679360 net.cpp:406] pool2 &lt;- conv2
+I0523 16:25:41.247301 2712679360 net.cpp:380] pool2 -&gt; pool2
+I0523 16:25:41.247308 2712679360 net.cpp:122] Setting up pool2
+I0523 16:25:41.247313 2712679360 net.cpp:129] Top shape: 100 32 8 8 (204800)
+I0523 16:25:41.247318 2712679360 net.cpp:137] Memory required for data: 28263600
+I0523 16:25:41.247321 2712679360 layer_factory.hpp:77] Creating layer conv3
+I0523 16:25:41.247329 2712679360 net.cpp:84] Creating Layer conv3
+I0523 16:25:41.247334 2712679360 net.cpp:406] conv3 &lt;- pool2
+I0523 16:25:41.247339 2712679360 net.cpp:380] conv3 -&gt; conv3
+I0523 16:25:41.248001 2712679360 net.cpp:122] Setting up conv3
+I0523 16:25:41.248008 2712679360 net.cpp:129] Top shape: 100 64 8 8 (409600)
+I0523 16:25:41.248013 2712679360 net.cpp:137] Memory required for data: 29902000
+I0523 16:25:41.248020 2712679360 layer_factory.hpp:77] Creating layer relu3
+I0523 16:25:41.248025 2712679360 net.cpp:84] Creating Layer relu3
+I0523 16:25:41.248051 2712679360 net.cpp:406] relu3 &lt;- conv3
+I0523 16:25:41.248057 2712679360 net.cpp:367] relu3 -&gt; conv3 (in-place)
+I0523 16:25:41.248067 2712679360 net.cpp:122] Setting up relu3
+I0523 16:25:41.248072 2712679360 net.cpp:129] Top shape: 100 64 8 8 (409600)
+I0523 16:25:41.248077 2712679360 net.cpp:137] Memory required for data: 31540400
+I0523 16:25:41.248081 2712679360 layer_factory.hpp:77] Creating layer pool3
+I0523 16:25:41.248085 2712679360 net.cpp:84] Creating Layer pool3
+I0523 16:25:41.248090 2712679360 net.cpp:406] pool3 &lt;- conv3
+I0523 16:25:41.248095 2712679360 net.cpp:380] pool3 -&gt; pool3
+I0523 16:25:41.248102 2712679360 net.cpp:122] Setting up pool3
+I0523 16:25:41.248109 2712679360 net.cpp:129] Top shape: 100 64 4 4 (102400)
+I0523 16:25:41.248114 2712679360 net.cpp:137] Memory required for data: 31950000
+I0523 16:25:41.248117 2712679360 layer_factory.hpp:77] Creating layer ip1
+I0523 16:25:41.248124 2712679360 net.cpp:84] Creating Layer ip1
+I0523 16:25:41.248152 2712679360 net.cpp:406] ip1 &lt;- pool3
+I0523 16:25:41.248162 2712679360 net.cpp:380] ip1 -&gt; ip1
+I0523 16:25:41.248950 2712679360 net.cpp:122] Setting up ip1
+I0523 16:25:41.248993 2712679360 net.cpp:129] Top shape: 100 64 (6400)
+I0523 16:25:41.249008 2712679360 net.cpp:137] Memory required for data: 31975600
+I0523 16:25:41.249014 2712679360 layer_factory.hpp:77] Creating layer ip2
+I0523 16:25:41.249020 2712679360 net.cpp:84] Creating Layer ip2
+I0523 16:25:41.249024 2712679360 net.cpp:406] ip2 &lt;- ip1
+I0523 16:25:41.249038 2712679360 net.cpp:380] ip2 -&gt; ip2
+I0523 16:25:41.249080 2712679360 net.cpp:122] Setting up ip2
+I0523 16:25:41.249097 2712679360 net.cpp:129] Top shape: 100 10 (1000)
+I0523 16:25:41.249102 2712679360 net.cpp:137] Memory required for data: 31979600
+I0523 16:25:41.249115 2712679360 layer_factory.hpp:77] Creating layer ip2_ip2_0_split
+I0523 16:25:41.249120 2712679360 net.cpp:84] Creating Layer ip2_ip2_0_split
+I0523 16:25:41.249125 2712679360 net.cpp:406] ip2_ip2_0_split &lt;- ip2
+I0523 16:25:41.249130 2712679360 net.cpp:380] ip2_ip2_0_split -&gt; ip2_ip2_0_split_0
+I0523 16:25:41.249143 2712679360 net.cpp:380] ip2_ip2_0_split -&gt; ip2_ip2_0_split_1
+I0523 16:25:41.249150 2712679360 net.cpp:122] Setting up ip2_ip2_0_split
+I0523 16:25:41.249155 2712679360 net.cpp:129] Top shape: 100 10 (1000)
+I0523 16:25:41.249164 2712679360 net.cpp:129] Top shape: 100 10 (1000)
+I0523 16:25:41.249171 2712679360 net.cpp:137] Memory required for data: 31987600
+I0523 16:25:41.249174 2712679360 layer_factory.hpp:77] Creating layer accuracy
+I0523 16:25:41.249183 2712679360 net.cpp:84] Creating Layer accuracy
+I0523 16:25:41.249187 2712679360 net.cpp:406] accuracy &lt;- ip2_ip2_0_split_0
+I0523 16:25:41.249191 2712679360 net.cpp:406] accuracy &lt;- label_cifar_1_split_0
+I0523 16:25:41.249195 2712679360 net.cpp:380] accuracy -&gt; accuracy
+I0523 16:25:41.249202 2712679360 net.cpp:122] Setting up accuracy
+I0523 16:25:41.249205 2712679360 net.cpp:129] Top shape: (1)
+I0523 16:25:41.249209 2712679360 net.cpp:137] Memory required for data: 31987604
+I0523 16:25:41.249214 2712679360 layer_factory.hpp:77] Creating layer loss
+I0523 16:25:41.249219 2712679360 net.cpp:84] Creating Layer loss
+I0523 16:25:41.249223 2712679360 net.cpp:406] loss &lt;- ip2_ip2_0_split_1
+I0523 16:25:41.249236 2712679360 net.cpp:406] loss &lt;- label_cifar_1_split_1
+I0523 16:25:41.249241 2712679360 net.cpp:380] loss -&gt; loss
+I0523 16:25:41.249249 2712679360 layer_factory.hpp:77] Creating layer loss
+I0523 16:25:41.249266 2712679360 net.cpp:122] Setting up loss
+I0523 16:25:41.249274 2712679360 net.cpp:129] Top shape: (1)
+I0523 16:25:41.249279 2712679360 net.cpp:132]     with loss weight 1
+I0523 16:25:41.249300 2712679360 net.cpp:137] Memory required for data: 31987608
+I0523 16:25:41.249305 2712679360 net.cpp:198] loss needs backward computation.
+I0523 16:25:41.249310 2712679360 net.cpp:200] accuracy does not need backward computation.
+I0523 16:25:41.249320 2712679360 net.cpp:198] ip2_ip2_0_split needs backward computation.
+I0523 16:25:41.249325 2712679360 net.cpp:198] ip2 needs backward computation.
+I0523 16:25:41.249330 2712679360 net.cpp:198] ip1 needs backward computation.
+I0523 16:25:41.249366 2712679360 net.cpp:198] pool3 needs backward computation.
+I0523 16:25:41.249388 2712679360 net.cpp:198] relu3 needs backward computation.
+I0523 16:25:41.249392 2712679360 net.cpp:198] conv3 needs backward computation.
+I0523 16:25:41.249408 2712679360 net.cpp:198] pool2 needs backward computation.
+I0523 16:25:41.249413 2712679360 net.cpp:198] relu2 needs backward computation.
+I0523 16:25:41.249416 2712679360 net.cpp:198] conv2 needs backward computation.
+I0523 16:25:41.249420 2712679360 net.cpp:198] relu1 needs backward computation.
+I0523 16:25:41.249424 2712679360 net.cpp:198] pool1 needs backward computation.
+I0523 16:25:41.249428 2712679360 net.cpp:198] conv1 needs backward computation.
+I0523 16:25:41.249431 2712679360 net.cpp:200] label_cifar_1_split does not need backward computation.
+I0523 16:25:41.249436 2712679360 net.cpp:200] cifar does not need backward computation.
+I0523 16:25:41.249439 2712679360 net.cpp:242] This network produces output accuracy
+I0523 16:25:41.249444 2712679360 net.cpp:242] This network produces output loss
+I0523 16:25:41.249451 2712679360 net.cpp:255] Network initialization done.
+I0523 16:25:41.251152 2712679360 hdf5.cpp:32] Datatype class: H5T_FLOAT
+I0523 16:25:41.252013 2712679360 caffe.cpp:290] Running for 100 iterations.
+I0523 16:25:41.367466 2712679360 caffe.cpp:313] Batch 0, accuracy = 0.81
+I0523 16:25:41.367501 2712679360 caffe.cpp:313] Batch 0, loss = 0.650321
+I0523 16:25:41.465518 2712679360 caffe.cpp:313] Batch 1, accuracy = 0.75
+I0523 16:25:41.465550 2712679360 caffe.cpp:313] Batch 1, loss = 0.767328
+I0523 16:25:41.560680 2712679360 caffe.cpp:313] Batch 2, accuracy = 0.71
+I0523 16:25:41.560712 2712679360 caffe.cpp:313] Batch 2, loss = 0.810281
+I0523 16:25:41.656878 2712679360 caffe.cpp:313] Batch 3, accuracy = 0.7
+I0523 16:25:41.656913 2712679360 caffe.cpp:313] Batch 3, loss = 0.807916
+I0523 16:25:41.757275 2712679360 caffe.cpp:313] Batch 4, accuracy = 0.71
+I0523 16:25:41.757313 2712679360 caffe.cpp:313] Batch 4, loss = 0.797028
+I0523 16:25:41.855583 2712679360 caffe.cpp:313] Batch 5, accuracy = 0.84
+I0523 16:25:41.855613 2712679360 caffe.cpp:313] Batch 5, loss = 0.422262
+I0523 16:25:41.953912 2712679360 caffe.cpp:313] Batch 6, accuracy = 0.73
+I0523 16:25:41.953946 2712679360 caffe.cpp:313] Batch 6, loss = 0.696204
+I0523 16:25:42.052671 2712679360 caffe.cpp:313] Batch 7, accuracy = 0.72
+I0523 16:25:42.052705 2712679360 caffe.cpp:313] Batch 7, loss = 0.896313
+I0523 16:25:42.155107 2712679360 caffe.cpp:313] Batch 8, accuracy = 0.73
+I0523 16:25:42.155153 2712679360 caffe.cpp:313] Batch 8, loss = 0.862504
+I0523 16:25:42.258592 2712679360 caffe.cpp:313] Batch 9, accuracy = 0.78
+I0523 16:25:42.258627 2712679360 caffe.cpp:313] Batch 9, loss = 0.642714
+I0523 16:25:42.362510 2712679360 caffe.cpp:313] Batch 10, accuracy = 0.75
+I0523 16:25:42.362543 2712679360 caffe.cpp:313] Batch 10, loss = 0.827924
+I0523 16:25:42.463922 2712679360 caffe.cpp:313] Batch 11, accuracy = 0.76
+I0523 16:25:42.463953 2712679360 caffe.cpp:313] Batch 11, loss = 0.674977
+I0523 16:25:42.567791 2712679360 caffe.cpp:313] Batch 12, accuracy = 0.7
+I0523 16:25:42.567822 2712679360 caffe.cpp:313] Batch 12, loss = 0.717463
+I0523 16:25:42.664435 2712679360 caffe.cpp:313] Batch 13, accuracy = 0.75
+I0523 16:25:42.664469 2712679360 caffe.cpp:313] Batch 13, loss = 0.640668
+I0523 16:25:42.759980 2712679360 caffe.cpp:313] Batch 14, accuracy = 0.78
+I0523 16:25:42.760013 2712679360 caffe.cpp:313] Batch 14, loss = 0.62553
+I0523 16:25:42.856386 2712679360 caffe.cpp:313] Batch 15, accuracy = 0.76
+I0523 16:25:42.856417 2712679360 caffe.cpp:313] Batch 15, loss = 0.721462
+I0523 16:25:42.954746 2712679360 caffe.cpp:313] Batch 16, accuracy = 0.73
+I0523 16:25:42.954777 2712679360 caffe.cpp:313] Batch 16, loss = 0.858499
+I0523 16:25:43.053562 2712679360 caffe.cpp:313] Batch 17, accuracy = 0.75
+I0523 16:25:43.053593 2712679360 caffe.cpp:313] Batch 17, loss = 0.746772
+I0523 16:25:43.155479 2712679360 caffe.cpp:313] Batch 18, accuracy = 0.74
+I0523 16:25:43.155508 2712679360 caffe.cpp:313] Batch 18, loss = 0.893995
+I0523 16:25:43.254688 2712679360 caffe.cpp:313] Batch 19, accuracy = 0.68
+I0523 16:25:43.254716 2712679360 caffe.cpp:313] Batch 19, loss = 0.943102
+I0523 16:25:43.364045 2712679360 caffe.cpp:313] Batch 20, accuracy = 0.7
+I0523 16:25:43.364076 2712679360 caffe.cpp:313] Batch 20, loss = 0.786499
+I0523 16:25:43.465351 2712679360 caffe.cpp:313] Batch 21, accuracy = 0.76
+I0523 16:25:43.465384 2712679360 caffe.cpp:313] Batch 21, loss = 0.742349
+I0523 16:25:43.560330 2712679360 caffe.cpp:313] Batch 22, accuracy = 0.8
+I0523 16:25:43.560362 2712679360 caffe.cpp:313] Batch 22, loss = 0.707087
+I0523 16:25:43.662050 2712679360 caffe.cpp:313] Batch 23, accuracy = 0.69
+I0523 16:25:43.662077 2712679360 caffe.cpp:313] Batch 23, loss = 0.854361
+I0523 16:25:43.760444 2712679360 caffe.cpp:313] Batch 24, accuracy = 0.74
+I0523 16:25:43.760473 2712679360 caffe.cpp:313] Batch 24, loss = 0.844035
+I0523 16:25:43.858397 2712679360 caffe.cpp:313] Batch 25, accuracy = 0.68
+I0523 16:25:43.858425 2712679360 caffe.cpp:313] Batch 25, loss = 1.02302
+I0523 16:25:43.959595 2712679360 caffe.cpp:313] Batch 26, accuracy = 0.82
+I0523 16:25:43.959627 2712679360 caffe.cpp:313] Batch 26, loss = 0.493385
+I0523 16:25:44.057914 2712679360 caffe.cpp:313] Batch 27, accuracy = 0.76
+I0523 16:25:44.057942 2712679360 caffe.cpp:313] Batch 27, loss = 0.78877
+I0523 16:25:44.157359 2712679360 caffe.cpp:313] Batch 28, accuracy = 0.78
+I0523 16:25:44.157388 2712679360 caffe.cpp:313] Batch 28, loss = 0.709657
+I0523 16:25:44.285976 2712679360 caffe.cpp:313] Batch 29, accuracy = 0.78
+I0523 16:25:44.286007 2712679360 caffe.cpp:313] Batch 29, loss = 0.674438
+I0523 16:25:44.390980 2712679360 caffe.cpp:313] Batch 30, accuracy = 0.79
+I0523 16:25:44.391010 2712679360 caffe.cpp:313] Batch 30, loss = 0.65947
+I0523 16:25:44.491211 2712679360 caffe.cpp:313] Batch 31, accuracy = 0.77
+I0523 16:25:44.491241 2712679360 caffe.cpp:313] Batch 31, loss = 0.716022
+I0523 16:25:44.593423 2712679360 caffe.cpp:313] Batch 32, accuracy = 0.73
+I0523 16:25:44.593457 2712679360 caffe.cpp:313] Batch 32, loss = 0.805526
+I0523 16:25:44.692994 2712679360 caffe.cpp:313] Batch 33, accuracy = 0.68
+I0523 16:25:44.693023 2712679360 caffe.cpp:313] Batch 33, loss = 0.903316
+I0523 16:25:44.795087 2712679360 caffe.cpp:313] Batch 34, accuracy = 0.72
+I0523 16:25:44.795116 2712679360 caffe.cpp:313] Batch 34, loss = 0.834438
+I0523 16:25:44.897828 2712679360 caffe.cpp:313] Batch 35, accuracy = 0.73
+I0523 16:25:44.897874 2712679360 caffe.cpp:313] Batch 35, loss = 0.908751
+I0523 16:25:44.996119 2712679360 caffe.cpp:313] Batch 36, accuracy = 0.74
+I0523 16:25:44.996150 2712679360 caffe.cpp:313] Batch 36, loss = 0.981981
+I0523 16:25:45.093991 2712679360 caffe.cpp:313] Batch 37, accuracy = 0.76
+I0523 16:25:45.094023 2712679360 caffe.cpp:313] Batch 37, loss = 0.725703
+I0523 16:25:45.195551 2712679360 caffe.cpp:313] Batch 38, accuracy = 0.78
+I0523 16:25:45.195585 2712679360 caffe.cpp:313] Batch 38, loss = 0.686703
+I0523 16:25:45.292881 2712679360 caffe.cpp:313] Batch 39, accuracy = 0.8
+I0523 16:25:45.292912 2712679360 caffe.cpp:313] Batch 39, loss = 0.650689
+I0523 16:25:45.397084 2712679360 caffe.cpp:313] Batch 40, accuracy = 0.79
+I0523 16:25:45.397115 2712679360 caffe.cpp:313] Batch 40, loss = 0.755663
+I0523 16:25:45.495128 2712679360 caffe.cpp:313] Batch 41, accuracy = 0.82
+I0523 16:25:45.495160 2712679360 caffe.cpp:313] Batch 41, loss = 0.855221
+I0523 16:25:45.597597 2712679360 caffe.cpp:313] Batch 42, accuracy = 0.81
+I0523 16:25:45.597626 2712679360 caffe.cpp:313] Batch 42, loss = 0.552907
+I0523 16:25:45.695441 2712679360 caffe.cpp:313] Batch 43, accuracy = 0.8
+I0523 16:25:45.695472 2712679360 caffe.cpp:313] Batch 43, loss = 0.688889
+I0523 16:25:45.796842 2712679360 caffe.cpp:313] Batch 44, accuracy = 0.8
+I0523 16:25:45.796875 2712679360 caffe.cpp:313] Batch 44, loss = 0.713613
+I0523 16:25:45.899427 2712679360 caffe.cpp:313] Batch 45, accuracy = 0.76
+I0523 16:25:45.899462 2712679360 caffe.cpp:313] Batch 45, loss = 0.819739
+I0523 16:25:46.003129 2712679360 caffe.cpp:313] Batch 46, accuracy = 0.77
+I0523 16:25:46.003190 2712679360 caffe.cpp:313] Batch 46, loss = 0.79499
+I0523 16:25:46.101080 2712679360 caffe.cpp:313] Batch 47, accuracy = 0.73
+I0523 16:25:46.101112 2712679360 caffe.cpp:313] Batch 47, loss = 0.784097
+I0523 16:25:46.199532 2712679360 caffe.cpp:313] Batch 48, accuracy = 0.82
+I0523 16:25:46.199563 2712679360 caffe.cpp:313] Batch 48, loss = 0.509592
+I0523 16:25:46.296840 2712679360 caffe.cpp:313] Batch 49, accuracy = 0.76
+I0523 16:25:46.296872 2712679360 caffe.cpp:313] Batch 49, loss = 0.775396
+I0523 16:25:46.399880 2712679360 caffe.cpp:313] Batch 50, accuracy = 0.77
+I0523 16:25:46.399914 2712679360 caffe.cpp:313] Batch 50, loss = 0.61452
+I0523 16:25:46.500458 2712679360 caffe.cpp:313] Batch 51, accuracy = 0.79
+I0523 16:25:46.500488 2712679360 caffe.cpp:313] Batch 51, loss = 0.631971
+I0523 16:25:46.599107 2712679360 caffe.cpp:313] Batch 52, accuracy = 0.78
+I0523 16:25:46.599139 2712679360 caffe.cpp:313] Batch 52, loss = 0.613152
+I0523 16:25:46.699442 2712679360 caffe.cpp:313] Batch 53, accuracy = 0.74
+I0523 16:25:46.699475 2712679360 caffe.cpp:313] Batch 53, loss = 0.813763
+I0523 16:25:46.802717 2712679360 caffe.cpp:313] Batch 54, accuracy = 0.69
+I0523 16:25:46.802749 2712679360 caffe.cpp:313] Batch 54, loss = 0.79753
+I0523 16:25:46.903400 2712679360 caffe.cpp:313] Batch 55, accuracy = 0.81
+I0523 16:25:46.903430 2712679360 caffe.cpp:313] Batch 55, loss = 0.683275
+I0523 16:25:47.007345 2712679360 caffe.cpp:313] Batch 56, accuracy = 0.78
+I0523 16:25:47.007377 2712679360 caffe.cpp:313] Batch 56, loss = 0.785579
+I0523 16:25:47.107044 2712679360 caffe.cpp:313] Batch 57, accuracy = 0.84
+I0523 16:25:47.107076 2712679360 caffe.cpp:313] Batch 57, loss = 0.455638
+I0523 16:25:47.204998 2712679360 caffe.cpp:313] Batch 58, accuracy = 0.7
+I0523 16:25:47.205029 2712679360 caffe.cpp:313] Batch 58, loss = 0.685973
+I0523 16:25:47.307816 2712679360 caffe.cpp:313] Batch 59, accuracy = 0.74
+I0523 16:25:47.307848 2712679360 caffe.cpp:313] Batch 59, loss = 0.815847
+I0523 16:25:47.409512 2712679360 caffe.cpp:313] Batch 60, accuracy = 0.79
+I0523 16:25:47.409544 2712679360 caffe.cpp:313] Batch 60, loss = 0.694609
+I0523 16:25:47.509786 2712679360 caffe.cpp:313] Batch 61, accuracy = 0.72
+I0523 16:25:47.509819 2712679360 caffe.cpp:313] Batch 61, loss = 0.721049
+I0523 16:25:47.608265 2712679360 caffe.cpp:313] Batch 62, accuracy = 0.76
+I0523 16:25:47.608304 2712679360 caffe.cpp:313] Batch 62, loss = 0.649006
+I0523 16:25:47.711271 2712679360 caffe.cpp:313] Batch 63, accuracy = 0.77
+I0523 16:25:47.711302 2712679360 caffe.cpp:313] Batch 63, loss = 0.620039
+I0523 16:25:47.812440 2712679360 caffe.cpp:313] Batch 64, accuracy = 0.71
+I0523 16:25:47.812471 2712679360 caffe.cpp:313] Batch 64, loss = 0.706689
+I0523 16:25:47.911661 2712679360 caffe.cpp:313] Batch 65, accuracy = 0.77
+I0523 16:25:47.911694 2712679360 caffe.cpp:313] Batch 65, loss = 0.824431
+I0523 16:25:48.011318 2712679360 caffe.cpp:313] Batch 66, accuracy = 0.73
+I0523 16:25:48.011351 2712679360 caffe.cpp:313] Batch 66, loss = 0.739382
+I0523 16:25:48.117573 2712679360 caffe.cpp:313] Batch 67, accuracy = 0.7
+I0523 16:25:48.117606 2712679360 caffe.cpp:313] Batch 67, loss = 0.800725
+I0523 16:25:48.214515 2712679360 caffe.cpp:313] Batch 68, accuracy = 0.68
+I0523 16:25:48.214545 2712679360 caffe.cpp:313] Batch 68, loss = 0.807705
+I0523 16:25:48.314254 2712679360 caffe.cpp:313] Batch 69, accuracy = 0.7
+I0523 16:25:48.314283 2712679360 caffe.cpp:313] Batch 69, loss = 0.952385
+I0523 16:25:48.412657 2712679360 caffe.cpp:313] Batch 70, accuracy = 0.74
+I0523 16:25:48.412686 2712679360 caffe.cpp:313] Batch 70, loss = 0.781932
+I0523 16:25:48.512931 2712679360 caffe.cpp:313] Batch 71, accuracy = 0.73
+I0523 16:25:48.512964 2712679360 caffe.cpp:313] Batch 71, loss = 0.895561
+I0523 16:25:48.608669 2712679360 caffe.cpp:313] Batch 72, accuracy = 0.8
+I0523 16:25:48.608700 2712679360 caffe.cpp:313] Batch 72, loss = 0.615967
+I0523 16:25:48.705847 2712679360 caffe.cpp:313] Batch 73, accuracy = 0.78
+I0523 16:25:48.705878 2712679360 caffe.cpp:313] Batch 73, loss = 0.588951
+I0523 16:25:48.803540 2712679360 caffe.cpp:313] Batch 74, accuracy = 0.72
+I0523 16:25:48.803591 2712679360 caffe.cpp:313] Batch 74, loss = 0.784208
+I0523 16:25:48.906528 2712679360 caffe.cpp:313] Batch 75, accuracy = 0.77
+I0523 16:25:48.906565 2712679360 caffe.cpp:313] Batch 75, loss = 0.529825
+I0523 16:25:49.007186 2712679360 caffe.cpp:313] Batch 76, accuracy = 0.77
+I0523 16:25:49.007216 2712679360 caffe.cpp:313] Batch 76, loss = 0.794115
+I0523 16:25:49.107000 2712679360 caffe.cpp:313] Batch 77, accuracy = 0.76
+I0523 16:25:49.107033 2712679360 caffe.cpp:313] Batch 77, loss = 0.726804
+I0523 16:25:49.205263 2712679360 caffe.cpp:313] Batch 78, accuracy = 0.77
+I0523 16:25:49.205294 2712679360 caffe.cpp:313] Batch 78, loss = 0.919712
+I0523 16:25:49.304277 2712679360 caffe.cpp:313] Batch 79, accuracy = 0.69
+I0523 16:25:49.304309 2712679360 caffe.cpp:313] Batch 79, loss = 0.87618
+I0523 16:25:49.404642 2712679360 caffe.cpp:313] Batch 80, accuracy = 0.77
+I0523 16:25:49.404672 2712679360 caffe.cpp:313] Batch 80, loss = 0.704637
+I0523 16:25:49.501708 2712679360 caffe.cpp:313] Batch 81, accuracy = 0.75
+I0523 16:25:49.501739 2712679360 caffe.cpp:313] Batch 81, loss = 0.71787
+I0523 16:25:49.599267 2712679360 caffe.cpp:313] Batch 82, accuracy = 0.76
+I0523 16:25:49.599304 2712679360 caffe.cpp:313] Batch 82, loss = 0.613339
+I0523 16:25:49.698971 2712679360 caffe.cpp:313] Batch 83, accuracy = 0.78
+I0523 16:25:49.699002 2712679360 caffe.cpp:313] Batch 83, loss = 0.689216
+I0523 16:25:49.803320 2712679360 caffe.cpp:313] Batch 84, accuracy = 0.72
+I0523 16:25:49.803352 2712679360 caffe.cpp:313] Batch 84, loss = 0.817351
+I0523 16:25:49.904433 2712679360 caffe.cpp:313] Batch 85, accuracy = 0.78
+I0523 16:25:49.904467 2712679360 caffe.cpp:313] Batch 85, loss = 0.62069
+I0523 16:25:50.005846 2712679360 caffe.cpp:313] Batch 86, accuracy = 0.75
+I0523 16:25:50.005878 2712679360 caffe.cpp:313] Batch 86, loss = 0.680651
+I0523 16:25:50.103121 2712679360 caffe.cpp:313] Batch 87, accuracy = 0.78
+I0523 16:25:50.103153 2712679360 caffe.cpp:313] Batch 87, loss = 0.788875
+I0523 16:25:50.200103 2712679360 caffe.cpp:313] Batch 88, accuracy = 0.8
+I0523 16:25:50.200134 2712679360 caffe.cpp:313] Batch 88, loss = 0.620548
+I0523 16:25:50.299957 2712679360 caffe.cpp:313] Batch 89, accuracy = 0.74
+I0523 16:25:50.299989 2712679360 caffe.cpp:313] Batch 89, loss = 0.779962
+I0523 16:25:50.399699 2712679360 caffe.cpp:313] Batch 90, accuracy = 0.75
+I0523 16:25:50.399731 2712679360 caffe.cpp:313] Batch 90, loss = 0.70084
+I0523 16:25:50.502117 2712679360 caffe.cpp:313] Batch 91, accuracy = 0.79
+I0523 16:25:50.502148 2712679360 caffe.cpp:313] Batch 91, loss = 0.576651
+I0523 16:25:50.599150 2712679360 caffe.cpp:313] Batch 92, accuracy = 0.71
+I0523 16:25:50.599181 2712679360 caffe.cpp:313] Batch 92, loss = 0.9778
+I0523 16:25:50.699782 2712679360 caffe.cpp:313] Batch 93, accuracy = 0.78
+I0523 16:25:50.699813 2712679360 caffe.cpp:313] Batch 93, loss = 0.795732
+I0523 16:25:50.802847 2712679360 caffe.cpp:313] Batch 94, accuracy = 0.77
+I0523 16:25:50.802877 2712679360 caffe.cpp:313] Batch 94, loss = 0.803904
+I0523 16:25:50.900668 2712679360 caffe.cpp:313] Batch 95, accuracy = 0.77
+I0523 16:25:50.900702 2712679360 caffe.cpp:313] Batch 95, loss = 0.664654
+I0523 16:25:50.902439 102174720 data_layer.cpp:73] Restarting data prefetching from start.
+I0523 16:25:50.999625 2712679360 caffe.cpp:313] Batch 96, accuracy = 0.74
+I0523 16:25:50.999656 2712679360 caffe.cpp:313] Batch 96, loss = 0.700099
+I0523 16:25:51.100697 2712679360 caffe.cpp:313] Batch 97, accuracy = 0.66
+I0523 16:25:51.100728 2712679360 caffe.cpp:313] Batch 97, loss = 0.937044
+I0523 16:25:51.201591 2712679360 caffe.cpp:313] Batch 98, accuracy = 0.79
+I0523 16:25:51.201622 2712679360 caffe.cpp:313] Batch 98, loss = 0.677679
+I0523 16:25:51.299702 2712679360 caffe.cpp:313] Batch 99, accuracy = 0.76
+I0523 16:25:51.299736 2712679360 caffe.cpp:313] Batch 99, loss = 0.687144
+I0523 16:25:51.299741 2712679360 caffe.cpp:318] Loss: 0.742307
+I0523 16:25:51.299762 2712679360 caffe.cpp:330] accuracy = 0.754
+I0523 16:25:51.299773 2712679360 caffe.cpp:330] loss = 0.742307 (* 1 = 0.742307 loss)
+</code></pre>
+
+<p>得到最终的测试集准确率可以到达<code>accuracy = 0.754</code></p>
+
+<p>到这里我们对于练习 cifar10模型<br/>
+就结束了.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Struct]]></title>
+    <link href="https://lockxmonk.github.io/14955029237844.html"/>
+    <updated>2017-05-23T09:28:43+08:00</updated>
+    <id>https://lockxmonk.github.io/14955029237844.html</id>
+    <content type="html"><![CDATA[
+<p>准确地讲，Python没有专门处理字节的数据类型。但由于<code>str</code>既是字符串，又可以表示字节，所以，字节数组＝str。而在C语言中，我们可以很方便地用struct、union来处理字节，以及字节和int，float的转换。</p>
+
+<p>在Python中，比方说要把一个32位无符号整数变成字节，也就是4个长度的str，你得配合位运算符来完成.非常麻烦不利于效率开发.</p>
+
+<p>好在Python提供了一个<code>struct</code>模块来解决str和其他二进制数据类型的转换。</p>
+
+<p><code>struct的pack</code>函数把任意数据类型变成字符串：</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; import struct
+&gt;&gt;&gt; struct.pack(&#39;&gt;I&#39;,10240099)
+&#39;\x00\x9c@c&#39;
+&gt;&gt;&gt;
+</code></pre>
+
+<p><code>pack</code>的第一个参数是处理指令，<code>&#39;&gt;I&#39;</code>的意思是：</p>
+
+<p><strong><code>&gt;</code>表示字节顺序是<code>big-endian</code>，也就是网络序，<code>I</code>表示4字节无符号整数。</strong></p>
+
+<p>后面的参数个数要和处理指令一致。</p>
+
+<p><code>unpack</code>把<code>str</code>变成相应的数据类型：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+import struct
+print struct.unpack(&#39;&gt;IH&#39;,&#39;\xf0\xf0\xf0\xf0\x80\x80&#39;)
+</code></pre>
+
+<p><img src="media/14955029237844/14955050577583.jpg" alt=""/></p>
+
+<p>根据&gt;IH的说明，后面的str依次变为I：4字节无符号整数和H：2字节无符号整数。</p>
+
+<p>所以，尽管Python不适合编写底层操作字节流的代码，但在对性能要求不高的地方，利用<code>struct</code>就方便多了。</p>
+
+<p><code>struct</code>模块定义的数据类型可以参考Python官方文档：<a href="https://docs.python.org/2/library/struct.html#format-characters">https://docs.python.org/2/library/struct.html#format-characters</a></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Base64]]></title>
+    <link href="https://lockxmonk.github.io/14955000885655.html"/>
+    <updated>2017-05-23T08:41:28+08:00</updated>
+    <id>https://lockxmonk.github.io/14955000885655.html</id>
+    <content type="html"><![CDATA[
+<p>Base64是一种用64个字符来表示任意二进制数据的方法。</p>
+
+<p>用记事本打开<code>exe、jpg、pdf</code>这些文件时，我们都会看到一大堆乱码，因为二进制文件包含很多无法显示和打印的字符，所以，如果要让记事本这样的文本处理软件能处理二进制数据，就需要一个二进制到字符串的转换方法。Base64是一种最常见的二进制编码方法。</p>
+
+<p>Base64的原理很简单，首先，准备一个包含64个字符的数组：</p>
+
+<pre><code>[&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, ... &#39;a&#39;, &#39;b&#39;, &#39;c&#39;, ... &#39;0&#39;, &#39;1&#39;, ... &#39;+&#39;, &#39;/&#39;]
+</code></pre>
+
+<p>然后，对二进制数据进行处理，每3个字节一组，一共是<code>3x8=24bit</code>，划为4组，每组正好6个bit：<img src="media/14955000885655/14955010424104.jpg" alt=""/></p>
+
+<p>这样我们得到4个数字作为索引，然后查表，获得相应的4个字符，就是编码后的字符串。</p>
+
+<p>所以，Base64编码会把3字节的二进制数据编码为4字节的文本数据，长度增加33%，好处是编码后的文本数据可以在邮件正文、网页等直接显示。</p>
+
+<p>如果要编码的二进制数据不是3的倍数，最后会剩下1个或2个字节怎么办？Base64用<code>\x00</code>字节在末尾补足后，再在编码的末尾加上1个或2个<code>=</code>号，表示补了多少字节，解码的时候，会自动去掉。</p>
+
+<p>Python内置的<code>base64</code>可以直接进行base64的编解码：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+import base64
+print base64.b64encode(&#39;binary\x00string&#39;)
+print base64.b64decode(&#39;YmluYXJ5AHN0cmluZw==&#39;)
+</code></pre>
+
+<p><img src="media/14955000885655/14955014556004.jpg" alt=""/></p>
+
+<p>由于标准的Base64编码后可能出现字符<code>+</code>和<code>/</code>，在URL中就不能直接作为参数，所以又有一种&quot;url safe&quot;的base64编码，其实就是把字符<code>+</code>和<code>/</code>分别变成<code>-</code>和<code>_</code>：<br/>
+<img src="media/14955000885655/14955018446875.jpg" alt=""/><br/>
+还可以自己定义64个字符的排列顺序，这样就可以自定义Base64编码，不过，通常情况下完全没有必要。</p>
+
+<p>Base64是一种通过查表的编码方法，不能用于加密，即使使用自定义的编码表也不行。</p>
+
+<p>Base64适用于小段内容的编码，比如数字证书签名、Cookie的内容等。</p>
+
+<p>由于<code>=</code>字符也可能出现在Base64编码中，但<code>=</code>用在URL、Cookie里面会造成歧义，所以，很多Base64编码后会把<code>=</code>去掉：</p>
+
+<pre><code># 标准Base64:
+&#39;abcd&#39; -&gt; &#39;YWJjZA==&#39;
+# 自动去掉=:
+&#39;abcd&#39; -&gt; &#39;YWJjZA&#39;
+</code></pre>
+
+<p>去掉=后怎么解码呢？因为Base64是把3个字节变为4个字节，所以，Base64编码的长度永远是4的倍数，因此，需要加上=把Base64字符串的长度变为4的倍数，就可以正常解码了。</p>
+
+<h2 id="toc_0">练习:</h2>
+
+<p>请写一个能去掉<code>=</code>的base64解码函数:</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+import base64
+def safe_b64decode(str):
+    num = len(str)%4
+    if num==0:
+        return base64.b64decode(str)
+    else :
+        for x in range(num):
+             str = str + &#39;=&#39;
+        return str 
+print base64.b64decode(&#39;YWJjZA==&#39;)
+#print base64.b64decode(&#39;YWJjZA&#39;)
+print safe_b64decode(&#39;YWJjZA&#39;)
+</code></pre>
+
+<p><img src="media/14955000885655/14955026953083.jpg" alt=""/></p>
+
+<h2 id="toc_1">小结</h2>
+
+<p>Base64是一种任意二进制到文本字符串的编码方法，常用于在URL、Cookie、网页中传输少量二进制数据。</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[下学期英语课后翻译总结]]></title>
+    <link href="https://lockxmonk.github.io/14948310433460.html"/>
+    <updated>2017-05-15T14:50:43+08:00</updated>
+    <id>https://lockxmonk.github.io/14948310433460.html</id>
+    <content type="html"><![CDATA[
+<p>据说这些已经被收集的纸条大约有两百万份，粗略分类后捆绑到一起，这些纸条无疑布满灰尘(并且起线头)，有的甚至已经卷曲发黄，还有的因为年久儿破碎。</p>
+
+<p>问题之一是：志愿阅读者对于所谓“普通词语”的热情关注向来就不高；他们总是受到某种诱惑力的吸引，寄来一些令人感兴趣的词汇的引语，而不是日常词汇的引语。</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[在RN中利用原生Document Interaction Controller来预览和打开文档]]></title>
+    <link href="https://lockxmonk.github.io/14948283904445.html"/>
+    <updated>2017-05-15T14:06:30+08:00</updated>
+    <id>https://lockxmonk.github.io/14948283904445.html</id>
+    <content type="html"><![CDATA[
+<p>在react-native开发中有一个功能需求为，打开之前已经下载到Documents中的文件。一开始本想用webview来加载文件。后来发现有<code>UIDocumentInteractionController</code>这个api来更好的完成这个功能。</p>
+
+<p>首先在RN引用的类中加入<code>UIDocumentInteractionControllerDelegate</code>我们要用到这个来呈现预览视图：</p>
+
+<p>NativeUtil.h<br/>
+```oc</p>
+
+<h1 id="toc_0">import <Foundation/Foundation.h></h1>
+
+<h1 id="toc_1">import &quot;RCTBridgeModule.h&quot;</h1>
+
+<h1 id="toc_2">import &quot;UIView+React.h&quot;       //要引入这个头文件，在rn中创建和加载原声视图</h1>
+
+<p>@interface NativeUtil : NSObject <RCTBridgeModule,UIDocumentInteractionControllerDelegate></p>
+
+<p>@end<br/>
+```</p>
+
+<p>在NativeUtil.m中实现该委托。定义一个暴露给RN的方法，在js中调用：</p>
+
+<pre><code class="language-oc">RCT_EXPORT_METHOD(ShowFileChooser: (RCTResponseSenderBlock)callback){
+  
+    NSString *filePath = @&quot;ceshi007&quot;;           callback(@[[NSNull null],filePath]);    //测试callback，从native向rn传值。
+
+
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);           //获取应用本沙盒内的目录。
+    NSString *documentpath = paths[0];      //获取document的路径
+    NSString *fileName = [documentpath stringByAppendingPathComponent:@&quot;Screenshot_2016-12-15-21-29-07-50.png&quot;];            //指定上述图片的路径。
+  NSURL *fileURL = [NSURL fileURLWithPath:fileName];
+  dispatch_async(dispatch_get_main_queue(), ^{              //运行主线程来加载界面，并初始化UIDocumentInteractionController
+    UIDocumentInteractionController *documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:fileURL];
+    documentInteractionController.delegate =self ;
+    [documentInteractionController presentPreviewAnimated:YES];             //present出来文件的预览界面。
+  });
+  
+}
+</code></pre>
+
+<p>之后定义<code>(UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller</code>方法，要加载出来预览的界面，上述方法必须实现，且返回一个当前的页面的ViewController。用于作为预览视图的父ViewController来弹出modal。</p>
+
+<pre><code class="language-oc">- (UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller{
+  UIViewController *newVC =[self getPresentedViewController];  //获取当前屏幕中present出来的viewcontroller。
+   return newVC;
+};
+</code></pre>
+
+<p>这里我们是在一个非视图类创建并在加载一个视图，所以我们要先获取到当前界面的<code>ViewController</code>，将被展示的<code>view</code>加到当前<code>view</code>的子视图，或用当前view <code>presentViewController</code>，或<code>pushViewContrller</code>。这里我从网上找到了两个方法：</p>
+
+<pre><code class="language-oc">//获取当前屏幕显示的viewcontroller
+- (UIViewController *)getCurrentVC  
+{  
+    UIViewController *result = nil;  
+      
+    UIWindow * window = [[UIApplication sharedApplication] keyWindow];  
+    if (window.windowLevel != UIWindowLevelNormal)  
+    {  
+        NSArray *windows = [[UIApplication sharedApplication] windows];  
+        for(UIWindow * tmpWin in windows)  
+        {  
+            if (tmpWin.windowLevel == UIWindowLevelNormal)  
+            {  
+                window = tmpWin;  
+                break;  
+            }  
+        }  
+    }  
+      
+    UIView *frontView = [[window subviews] objectAtIndex:0];  
+    id nextResponder = [frontView nextResponder];  
+      
+    if ([nextResponder isKindOfClass:[UIViewController class]])  
+        result = nextResponder;  
+    else  
+        result = window.rootViewController;  
+      
+    return result;  
+} 
+</code></pre>
+
+<pre><code class="language-oc">//获取当前屏幕中present出来的viewcontroller
+- (UIViewController *)getPresentedViewController  
+{  
+    UIViewController *appRootVC = [UIApplication sharedApplication].keyWindow.rootViewController;  
+    UIViewController *topVC = appRootVC;  
+    if (topVC.presentedViewController) {  
+        topVC = topVC.presentedViewController;  
+    }  
+      
+    return topVC;  
+}
+</code></pre>
+
+<blockquote>
+<p>在RN中，使用modal组件之后，弹出的modal视图的viewcontroller相当于present出来的viewcontroller.</p>
+</blockquote>
+
+<p>之后使用<code>[self getPresentedViewController]</code>就可以获得<code>viewcontroller</code>来加载视图。</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[caffe框架运行手写体数字识别例子（MNIST）]]></title>
@@ -1142,6 +3541,12 @@ I0513 11:37:11.208425 3659862976 caffe.cpp:330] loss = 0.0304018 (* 1 = 0.030401
 </code></pre>
 
 <p>最后accuracy为0.991，loss为0.03</p>
+
+<h2 id="toc_4">总结</h2>
+
+<p>通过上述内容,我们可以初步了解一个完整的深度学习系统最核心的两个方面:<strong>数据和模型</strong>.数据是带标签的图片集,分训练集和测试集;模型是描述CNN结构的有向无环图(DAG),表示对原始数据的处理方式.</p>
+
+<p><font color=red>Caffe并不直接处理原始数据,由预处理程序将原始数据存储为<code>LMDB</code>格式,来保持较高的IO效率.模型通常用ProtoBuffer文本格式表述,训练结果保存为ProtoBuffer二进制文件或HDF5格式文件.</font><strong>深度学习的过程就是利用训练数据对模型进行训练,将数据中蕴藏的大量信息通过机器学习算法不断收集到模型中,利用训练好的模型对现实世界中相似数据进行特定处理(如分类,识别,检测,定位).</strong></p>
 
 ]]></content>
   </entry>
@@ -2765,708 +5170,6 @@ if __name__ == &#39;__main__&#39;:
 <p><strong>可以改进：</strong><br/>
 <font color=red>该算法在运行时间上可以改进，也可以利用机器学习的方法来提取图片特征，避免Canny算子的局限性造成的边缘提取误差。<br/>
 可以与上篇论文进行结合来提高上文尺度特征提取的效率。</font></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[文档测试]]></title>
-    <link href="https://lockxmonk.github.io/14928484245894.html"/>
-    <updated>2017-04-22T16:07:04+08:00</updated>
-    <id>https://lockxmonk.github.io/14928484245894.html</id>
-    <content type="html"><![CDATA[
-<p>如果你经常阅读Python的官方文档，可以看到很多文档都有示例代码。比如<a href="https://docs.python.org/2/library/re.html">re</a>模块就带了很多示例代码：</p>
-
-<pre><code>&gt;&gt;&gt; import re
-&gt;&gt;&gt; m = re.search(&#39;(?&lt;=abc)def&#39;, &#39;abcdef&#39;)
-&gt;&gt;&gt; m.group(0)
-&#39;def&#39;
-</code></pre>
-
-<p>可以把这些示例代码在Python的交互式环境下输入并执行，结果与文档中的示例代码显示的一致。</p>
-
-<p>这些代码与其他说明可以写在注释中，然后，由一些工具来自动生成文档。既然这些代码本身就可以粘贴出来直接运行，那么，可不可以自动执行写在注释中的这些代码呢？</p>
-
-<p>答案是肯定的。</p>
-
-<p>当我们编写注释时，如果写上这样的注释：</p>
-
-<pre><code class="language-py">
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[单元测试]]></title>
-    <link href="https://lockxmonk.github.io/14928429198094.html"/>
-    <updated>2017-04-22T14:35:19+08:00</updated>
-    <id>https://lockxmonk.github.io/14928429198094.html</id>
-    <content type="html"><![CDATA[
-<p>我们来编写一个<code>Dict</code>类，这个类的行为和<code>dict</code>一致，但是可以通过属性来访问，用起来就像下面这样：</p>
-
-<pre><code>&gt;&gt;&gt; d = Dict(a=1, b=2)
-&gt;&gt;&gt; d[&#39;a&#39;]
-1
-&gt;&gt;&gt; d.a
-1
-</code></pre>
-
-<p>mydict.py代码为：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Dict(dict):
-
-    def __init__(self, **kw):
-        super(Dict, self).__init__(**kw)
-
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r &quot; &#39;Dict&#39; object has no atr &#39;%s&#39; &quot; % key)
-        else:
-            pass
-        finally:
-            pass
-
-    def __setattr__(self, key, value):
-        self[key] = value
-
-</code></pre>
-
-<p>为了编写单元测试，我们需要引入Python自带的<code>unittest</code>模块，编写<code>mydict_test.py</code>如下：</p>
-
-<pre><code class="language-py">import unittest
-
-from mydict import Dict
-
-
-class TestDict(unittest.TestCase):
-
-    def test_init(self):
-        d = Dict(a=1, b=&#39;test&#39;)
-        self.assertEquals(d.a, 1)
-        self.assertEquals(d.b, &#39;test&#39;)
-        self.assertTrue(isinstance(d, dict))
-
-    def test_key(self):
-        d = Dict()
-        d[&#39;key&#39;] = &#39;value&#39;
-        self.assertEquals(d.key, &#39;value&#39;)
-
-    def test_attr(self):
-        d = Dict()
-        d.key = &#39;value&#39;
-        self.assertTrue(&#39;key&#39; in d)
-        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
-
-    def test_keyerror(self):
-        d = Dict()
-        with self.assertRaises(KeyError):
-            value = d[&#39;empty&#39;]
-
-    def test_attrerror(self):
-        d = Dict()
-        with self.assertRaises(AttributeError)
-            value = d.empty
-
-</code></pre>
-
-<p>编写单元测试时，我们需要编写一个测试类，从<code>unittest.TestCase</code>继承。</p>
-
-<p>以<code>test</code>开头的方法就是测试方法，不以<code>test</code>开头的方法不被认为是测试方法，测试的时候不会被执行。</p>
-
-<p>对每一类测试都需要编写一个<code>test_xxx()</code>方法。由于<code>unittest.TestCase</code>提供了很多内置的条件判断，我们只需要调用这些方法就可以断言输出是否是我们所期望的。最常用的断言就是<code>assertEquals()：</code></p>
-
-<pre><code class="language-py">self.assertEquals(abs(-1), 1) # 断言函数返回的结果与1相等
-</code></pre>
-
-<p>另一种重要的断言就是期待抛出指定类型的<code>Error</code>，比如通过<code>d[&#39;empty&#39;]</code>访问不存在的key时，断言会抛出<code>KeyError</code>：</p>
-
-<pre><code class="language-py">with self.assertRaises(KeyError):
-    value = d[&#39;empty&#39;]
-</code></pre>
-
-<p>而通过<code>d.empty</code>访问不存在的<code>key</code>时，我们期待抛出<code>AttributeError</code>：</p>
-
-<pre><code class="language-py">with self.assertRaises(AttributeError):
-    value = d.empty
-</code></pre>
-
-<h2 id="toc_0">运行单元测试</h2>
-
-<p>一旦编写好单元测试，我们就可以运行单元测试。最简单的运行方式是在<code>mydict_test.py</code>的最后加上两行代码：</p>
-
-<pre><code class="language-py">if __name__ == &#39;__main__&#39;:
-    unittest.main()
-</code></pre>
-
-<p>这样就可以把<code>mydict_test.py</code>当做正常的python脚本运行：</p>
-
-<p><img src="media/14928429198094/14928450280463.jpg" alt=""/></p>
-
-<p>另一种更常见的方法是在命令行通过参数<code>-m unittest</code>直接运行单元测试:<br/>
-<img src="media/14928429198094/14928451217135.jpg" alt=""/></p>
-
-<p>这是推荐的做法，因为这样可以一次批量运行很多单元测试，并且，有很多工具可以自动来运行这些单元测试。</p>
-
-<h2 id="toc_1">setUp与tearDown</h2>
-
-<p>可以在单元测试中编写两个特殊的<code>setUp()</code>和<code>tearDown()</code>方法。这两个方法会分别在每<strong>调用一个测试方法的前后分别被执行</strong>。</p>
-
-<p><code>setUp()和tearDown()</code>方法有什么用呢？设想你的测试需要启动一个数据库，这时，就可以在<code>setUp()</code>方法中连接数据库，在<code>tearDown()</code>方法中关闭数据库，这样，不必在每个测试方法中重复相同的代码：</p>
-
-<pre><code class="language-py">import unittest
-
-from mydict import Dict
-
-class TestDict(unittest.TestCase):
-
-    def setUp(self):    
-        print &#39;setUp...&#39;
-
-    def tearDown(self):
-        print &#39;tearDown...&#39;
-    
-    def test_init(self):    
-        d = Dict(a=1, b=&#39;test&#39;)
-        self.assertEquals(d.a, 1)   
-        self.assertEquals(d.b, &#39;test&#39;)
-        self.assertTrue(isinstance(d, dict))
-
-    def test_key(self):
-        d = Dict()
-        d[&#39;key&#39;] = &#39;value&#39;
-        self.assertEquals(d.key, &#39;value&#39;)
-
-    def test_attr(self):
-        d = Dict()
-        d.key = &#39;value&#39;
-        self.assertTrue(&#39;key&#39; in d)
-        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
-
-    def test_keyerror(self):
-        d = Dict()
-        with self.assertRaises(KeyError):
-            value = d[&#39;empty&#39;]
-
-    def test_attrerror(self):
-        d = Dict()
-        with self.assertRaises(AttributeError):
-            value = d.empty
-
-if __name__ == &#39;__main__&#39;:
-     unittest.main()
-</code></pre>
-
-<p><img src="media/14928429198094/14928470586520.jpg" alt=""/></p>
-
-<h2 id="toc_2">总结</h2>
-
-<ol>
-<li><p>单元测试可以有效地测试某个程序模块的行为，是未来重构代码的信心保证。</p></li>
-<li><p>单元测试的测试用例要覆盖常用的输入组合、边界条件和异常。</p></li>
-<li><p>单元测试代码要非常简单，如果测试代码太复杂，那么测试代码本身就可能有bug。</p></li>
-<li><p>单元测试通过了并不意味着程序就没有bug了，但是不通过程序肯定有bug。</p></li>
-</ol>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[调试]]></title>
-    <link href="https://lockxmonk.github.io/14928307466218.html"/>
-    <updated>2017-04-22T11:12:26+08:00</updated>
-    <id>https://lockxmonk.github.io/14928307466218.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">断言</a>
-</li>
-<li>
-<a href="#toc_1">logging</a>
-</li>
-<li>
-<a href="#toc_2">pdb</a>
-</li>
-<li>
-<a href="#toc_3">pdb.set_trace()</a>
-</li>
-<li>
-<a href="#toc_4">IDE</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_5">总结</a>
-
-
-<p>程序能一次写完并正常运行的概率很小，基本不超过1%。总会有各种各样的bug需要修正。有的bug很简单，看看错误信息就知道，有的bug很复杂，我们需要知道出错时，哪些变量的值是正确的，哪些变量的值是错误的，因此，需要一整套调试程序的手段来修复bug。</p>
-
-<p>第一种方法简单直接粗暴有效，就是用<code>print</code>把可能有问题的变量打印出来看看.（这种方法不详细说明了，基本每个写代码的人都比较熟悉这种方法）</p>
-
-<h2 id="toc_0">断言</h2>
-
-<p>凡是用<code>print</code>来辅助查看的地方，都可以用断言<code>（assert）</code>来替代：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def foo(s):
-    n=int(s)
-    assert n!=0,&#39;n is zero&#39;
-    return 10/n
-def main():
-    foo(&#39;0&#39;)
-main()
-</code></pre>
-
-<p><code>assert</code>的意思是，表达式<code>n != 0</code>应该是<code>True</code>，否则，后面的代码就会出错。</p>
-
-<p>如果断言失败，<code>assert</code>语句本身就会抛出<code>AssertionError</code>：</p>
-
-<p><img src="media/14928307466218/14928311015673.jpg" alt=""/><br/>
-启动Python解释器时可以用<code>-O</code>参数来关闭<code>assert</code></p>
-
-<pre><code>$ python -O err.py
-Traceback (most recent call last):
-  ...
-ZeroDivisionError: integer division or modulo by zero
-</code></pre>
-
-<p>关闭后，你可以把所有的<code>assert</code>语句当成<code>pass</code>来看。</p>
-
-<h2 id="toc_1">logging</h2>
-
-<p>把<code>print</code>替换为<code>logging</code>是第3种方式，和<code>assert</code>比，<code>logging</code>不会抛出错误，而且可以输出到文件：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import logging
-
-s = &#39;0&#39;
-n = int(s)
-logging.info(&#39;n = %d&#39; % n)
-print 10 / n
-</code></pre>
-
-<p><code>logging.info()</code>就可以输出一段文本。运行，发现除了<code>ZeroDivisionError</code>，没有任何信息。<br/>
-<img src="media/14928307466218/14928313656997.jpg" alt=""/></p>
-
-<p>加上：</p>
-
-<pre><code class="language-py">import logging
-logging.basicConfig(level=logging.INFO)
-</code></pre>
-
-<p>之后显示：<br/>
-<img src="media/14928307466218/14928314465553.jpg" alt=""/><br/>
-这就是<code>logging</code>的好处，它允许你指定记录信息的级别，有<code>debug，info，warning，error</code>等几个级别，当我们指定<code>level=INFO</code>时，<code>logging.debug</code>就不起作用了。同理，指定<code>level=WARNING</code>后，<code>debug和info</code>就不起作用了。这样一来，你可以放心地输出不同级别的信息，也不用删除，最后统一控制输出哪个级别的信息。</p>
-
-<p><code>logging</code>的另一个好处是通过简单的配置，<strong>一条语句可以同时输出到不同的地方，比如console和文件</strong>。</p>
-
-<h2 id="toc_2">pdb</h2>
-
-<p>第4种方式是启动Python的调试器pdb，让程序以单步方式运行，可以随时查看运行状态。我们先准备好程序：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-s = &#39;0&#39;
-n = int(s)
-print 10 / n
-</code></pre>
-
-<p>然后启动：<br/>
-<img src="media/14928307466218/14928416845706.jpg" alt=""/></p>
-
-<p>输入命令<code>l</code>来查看代码,输入命令<code>n</code>可以单步执行代码,任何时候都可以输入命令<code>p</code> 变量名来查看变量,输入命令<code>q</code>结束调试，退出程序.</p>
-
-<h2 id="toc_3">pdb.set_trace()</h2>
-
-<p>这个方法也是用<code>pdb</code>，但是不需要单步执行，我们只需要<code>import pdb</code>，然后，在可能出错的地方放一个<code>pdb.set_trace()</code>，就可以设置一个断点：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import pdb
-
-s = &#39;0&#39;
-n = int(s)
-pdb.set_trace()  # 运行到这里会自动暂停
-print 10 / n
-
-</code></pre>
-
-<p><img src="media/14928307466218/14928418957951.jpg" alt=""/><br/>
-运行代码，程序会自动在<code>pdb.set_trace()</code>暂停并进入pdb调试环境，可以用命令<code>p</code>查看变量，或者用命令<code>c</code>继续运行</p>
-
-<p>这个方式比直接启动pdb单步调试效率要高很多，但也高不到哪去。</p>
-
-<h2 id="toc_4">IDE</h2>
-
-<p>如果想要有好的设置断点、单步执行体验，就需要一个支持调试功能的IDE。目前比较好的<strong>Python IDE有PyCharm</strong>：<br/>
-<a href="https://www.jetbrains.com/pycharm">https://www.jetbrains.com/pycharm</a></p>
-
-<p>写程序最痛苦的事情莫过于调试，程序往往会以你意想不到的流程来运行，你期待执行的语句其实根本没有执行，这时候，就需要调试了。</p>
-
-<h1 id="toc_5">总结</h1>
-
-<p><strong>虽然用IDE调试起来比较方便，但是最后你会发现，<code>logging</code>才是终极武器。</strong></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[错误、调试和测试]]></title>
-    <link href="https://lockxmonk.github.io/14928231077736.html"/>
-    <updated>2017-04-22T09:05:07+08:00</updated>
-    <id>https://lockxmonk.github.io/14928231077736.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">错误处理</a>
-<ul>
-<li>
-<a href="#toc_1">try</a>
-</li>
-<li>
-<a href="#toc_2">调用堆栈</a>
-</li>
-<li>
-<a href="#toc_3">记录错误</a>
-</li>
-<li>
-<a href="#toc_4">抛出错误</a>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>Python内置了一套异常处理机制，来帮助我们进行错误处理。</p>
-
-<p>此外，我们也需要跟踪程序的执行，查看变量的值是否正确，这个过程称为调试。Python的<strong><em>pdb</em></strong>可以让我们以单步方式执行代码。</p>
-
-<p>最后，编写测试也很重要。有了良好的测试，就可以在程序修改后反复运行，确保程序输出符合我们编写的测试。</p>
-
-<h2 id="toc_0">错误处理</h2>
-
-<p>在程序运行的过程中，如果发生了错误，可以事先约定返回一个错误代码，这样，就可以知道是否有错，以及出错的原因。在操作系统提供的调用中，返回错误码非常常见。比如打开文件的函数<code>open()</code>，成功时返回文件描述符（就是一个整数），出错时返回<code>-1</code>。</p>
-
-<p>用错误码来表示是否出错十分不便，因为函数本身应该返回的正常结果和错误码混在一起，造成调用者必须用大量的代码来判断是否出错。</p>
-
-<p>所以高级语言通常都内置了一套<code>try...except...finally...</code>的错误处理机制，Python也不例外。</p>
-
-<h3 id="toc_1">try</h3>
-
-<p>当我们认为某些代码可能会出错时，就可以用<code>try</code>来运行这段代码，如果执行出错，则后续代码不会继续执行，而是直接跳转至错误处理代码，即<code>except</code>语句块，执行完<code>except</code>后，如果有<code>finally</code>语句块，则执行<code>finally</code>语句块，至此，执行完毕。</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-try:
-    print &#39;try...&#39;
-    r = 10 / 0
-    print &#39;result:&#39;, r
-except ZeroDivisionError, e:
-    print &#39;except:&#39;, e
-finally:
-    print &#39;finally...&#39;
-print &#39;END&#39;
-</code></pre>
-
-<p><img src="media/14928231077736/14928238871411.jpg" alt=""/><br/>
-从输出可以看到，当错误发生时，后续语句<code>print &#39;result:&#39;, r</code>不会被执行，<code>except</code>由于捕获到<code>ZeroDivisionError</code>，因此被执行。最后，<code>finally</code>语句被执行。然后，程序继续按照流程往下走。</p>
-
-<p>你还可以猜测，错误应该有很多种类，如果发生了不同类型的错误，应该由不同的<code>except</code>语句块处理。没错，可以有多个<code>except</code>来捕获不同类型的错误：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-try:
-    print &#39;try...&#39;
-    r = 10 / int(0)
-    print &#39;result:&#39;, r
-except ValueError as e:
-    print &#39;ValueError:&#39;,e
-except ZeroDivisionError as e:
-    print &#39;ZeroDivisionError:&#39;, e
-else:
-    print &#39;no error&#39;
-finally:
-    print &#39;finally...&#39;
-print &#39;END&#39;
-</code></pre>
-
-<p><img src="media/14928231077736/14928249482640.jpg" alt=""/></p>
-
-<p>Python的错误其实也是class，所有的错误类型都继承自<code>BaseException</code>，所以在使用<code>except</code>时需要注意的是，它不但捕获该类型的错误，还把其子类也“一网打尽”。比如：</p>
-
-<pre><code class="language-py">try:
-    foo()
-except StandardError, e:
-    print &#39;StandardError&#39;
-except ValueError, e:
-    print &#39;ValueError&#39;
-</code></pre>
-
-<p>第二个<code>except</code>永远也捕获不到<code>ValueError</code>，因为<code>ValueError是StandardError</code>的子类，如果有，也被第一个<code>except</code>给捕获了。</p>
-
-<p>Python所有的错误都是从<code>BaseException</code>类派生的，常见的错误类型和继承关系看这里：</p>
-
-<p><img src="media/14928231077736/14928254735561.jpg" alt=""/></p>
-
-<p>使用<code>try...except</code>捕获错误还有一个巨大的好处，就是可以跨越多层调用，比如函数<code>main()调用bar()，bar()调用foo()，结果foo()</code>出错了，这时，只要<code>main()</code>捕获到了，就可以处理：</p>
-
-<pre><code class="language-py">def foo(s):
-    return 10 / int(s)
-
-def bar(s):
-    return foo(s) * 2
-
-def main():
-    try:
-        bar(&#39;0&#39;)
-    except StandardError, e:
-        print &#39;Error!&#39;
-    finally:
-        print &#39;finally...&#39;
-
-print main()
-
-</code></pre>
-
-<p><img src="media/14928231077736/14928272805670.jpg" alt=""/></p>
-
-<p>也就是说，不需要在每个可能出错的地方去捕获错误，只要在合适的层次去捕获错误就可以了。这样一来，就大大减少了写<code>try...except...finally</code>的麻烦。</p>
-
-<h3 id="toc_2">调用堆栈</h3>
-
-<p>如果错误没有被捕获，它就会一直往上抛，最后被Python解释器捕获，打印一个错误信息，然后程序退出：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-def foo(s):
-    return 10 / int(s)
-
-def bar(s):
-    return foo(s) * 2
-
-def main():
-    bar(&#39;0&#39;)
-
-main()
-</code></pre>
-
-<p><img src="media/14928231077736/14928281628836.jpg" alt=""/><br/>
-出错并不可怕，可怕的是不知道哪里出错了。解读错误信息是定位错误的关键。我们从上往下可以看到整个错误的调用函数链。</p>
-
-<p>从上往下依次查看错误。</p>
-
-<h3 id="toc_3">记录错误</h3>
-
-<p>如果不捕获错误，自然可以让Python解释器来打印出错误堆栈，但程序也被结束了。既然我们能捕获错误，就可以把错误堆栈打印出来，然后分析错误原因，同时，让程序继续执行下去。</p>
-
-<p>Python内置的<code>logging</code>模块可以非常容易地记录错误信息：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-import logging
-
-def foo(s):
-    return 10 / int(s)
-
-def bar(s):
-    return foo(s) * 2
-
-def main():
-    try:
-        bar(&#39;0&#39;)
-    except StandardError as e:
-        logging.exception(e)
-    else:
-        pass
-    finally:
-        pass
-main()
-print &#39;END&#39;
-</code></pre>
-
-<p><strong>同样是出错，但程序打印完错误信息后会继续执行，并正常退出</strong>：<br/>
-<img src="media/14928231077736/14928284148150.jpg" alt=""/><br/>
-最后打印出了“END”</p>
-
-<p>通过配置，<code>logging</code>还可以把错误记录到日志文件里，方便事后排查。</p>
-
-<h3 id="toc_4">抛出错误</h3>
-
-<p>因为错误是class，捕获一个错误就是捕获到该class的一个实例。因此，错误并不是凭空产生的，而是有意创建并抛出的。Python的内置函数会抛出很多类型的错误，我们自己编写的函数也可以抛出错误。</p>
-
-<p>如果要抛出错误，首先根据需要，可以定义一个错误的<code>class</code>，选择好继承关系，然后，用<code>raise</code>语句抛出一个错误的实例</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class FooError(StandardError):
-    pass
-
-def foo(s):
-    n = int(s)
-    if n == 0:
-        raise FooError(&#39;invaild value: %s&#39; % s)
-    return 10/0
-foo(0)
-</code></pre>
-
-<p><img src="media/14928231077736/14928288600479.jpg" alt=""/></p>
-
-<p><strong>只有在必要的时候才定义我们自己的错误类型。如果可以选择Python已有的内置的错误类型（比如ValueError，TypeError），尽量使用Python内置的错误类型。</strong></p>
-
-<p>最后，我们来看另一种错误处理的方式：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-def foo(s):
-    n = int(s)
-    return 10 / n
-
-def bar(s):
-    try:
-        return foo(s) * 2
-    except StandardError, e:
-        print &#39;Error!&#39;
-        raise
-
-def main():
-    bar(&#39;0&#39;)
-
-main()
-</code></pre>
-
-<p><img src="media/14928231077736/14928306395157.jpg" alt=""/></p>
-
-<p>在bar()函数中，我们明明已经捕获了错误，但是，打印一个<code>Error</code>!后，又把错误通过<code>raise</code>语句抛出去了，这不有病么？</p>
-
-<p>其实这种错误处理方式不但没病，而且相当常见。捕获错误目的只是记录一下，便于后续追踪。但是，由于当前函数不知道应该怎么处理该错误，所以，最恰当的方式是继续往上抛，让顶层调用者去处理。</p>
-
-<p>raise语句如果不带参数，就会把当前错误原样抛出。此外，在except中raise一个Error，还可以把一种类型的错误转化成另一种类型：</p>
-
-<pre><code class="language-py">try:
-    10 / 0
-except ZeroDivisionError:
-    raise ValueError(&#39;input error!&#39;)
-</code></pre>
-
-<p>只要是合理的转换逻辑就可以，但是，决不应该把一个<code>IOError</code>转换成毫不相干的<code>ValueError</code></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用元类]]></title>
-    <link href="https://lockxmonk.github.io/14927355881897.html"/>
-    <updated>2017-04-21T08:46:28+08:00</updated>
-    <id>https://lockxmonk.github.io/14927355881897.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">metaclass</a>
-</li>
-</ul>
-
-
-<p>动态语言和静态语言最大的不同，就是函数和类的定义，不是编译时定义的，而是<strong>运行时动态创建的</strong>。</p>
-
-<p>比方说我们要定义一个<code>Hello</code>的class：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Hello(object):
-    def hello(self, name=&#39;world&#39;):
-        print(&#39;Hello, %s.&#39; % name)
-h = Hello()
-h.hello()
-print (type(Hello))
-print (type(h))
-</code></pre>
-
-<p><img src="media/14927355881897/14927620006235.jpg" alt=""/></p>
-
-<p><font color=red><strong><code>type()</code>函数可以查看一个类型或变量的类型，<code>Hello</code>是一个class，它的类型就是<code>type</code>，而<code>h</code>是一个实例，它的类型就是<code>class Hello</code>。</strong></font></p>
-
-<p>我们说class的定义是运行时动态创建的，而<strong>创建class的方法就是使用<code>type()</code>函数</strong>。</p>
-
-<p><code>type()</code>函数既可以返回一个对象的类型，又可以创建出新的类型，比如，<strong>我们可以通过<code>type()</code>函数创建出Hello类，而无需通过<code>class Hello(object)...</code>的定义</strong>：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def fn(self, name=&#39;world&#39;):   # 先定义函数
-    print(&#39;Hello, %s.&#39; % name)
-
-Hello = type(&#39;Hello&#39;, (object,), dict(hello=fn))  # 创建Hello class
-h = Hello()
-h.hello()
-print(type(Hello))
-print(type(h))
-
-</code></pre>
-
-<p><img src="media/14927355881897/14927623112362.jpg" alt=""/></p>
-
-<p><strong>要创建一个class对象，type()函数依次传入3个参数：</strong></p>
-
-<ol>
-<li>class的名称；</li>
-<li>继承的父类集合，注意Python支持多重继承，如果只有一个父类，别忘了tuple的单元素写法；</li>
-<li>class的方法名称与函数绑定，这里我们把函数<code>fn</code>绑定到方法名<code>hello</code>上。</li>
-</ol>
-
-<p>通过<code>type()</code>函数创建的类和直接写class是完全一样的，因为Python解释器遇到class定义时，仅仅是扫描一下class定义的语法，然后调用<code>type()</code>函数创建出class。</p>
-
-<blockquote>
-<p>正常情况下，我们都用<code>class Xxx...</code>来定义类，但是，<code>type()</code>函数也允许我们动态创建出类来，也就是说，动态语言本身支持运行期动态创建类，这和静态语言有非常大的不同，要在静态语言运行期创建类，必须构造源代码字符串再调用编译器，或者借助一些工具生成字节码实现，本质上都是动态编译，会非常复杂。</p>
-</blockquote>
-
-<h2 id="toc_0">metaclass</h2>
-
-<p>除了使用<code>type()</code>动态创建类以外，要控制类的创建行为，还可以使用metaclass。<br/>
-简单的解释就是：先定义metaclass，就可以创建类，最后创建实例。</p>
-
-<p>所以，metaclass允许你创建类或者修改类。换句话说，你可以把类看成是metaclass创建出来的“实例”。</p>
-
-<p><strong>metaclass是Python面向对象里最难理解，也是最难使用的魔术代码。正常情况下，你不会碰到需要使用metaclass的情况，所以，以下内容看不懂也没关系，因为基本上你不会用到。</strong></p>
-
-<p>我们先看一个简单的例子，这个metaclass可以给我们自定义的MyList增加一个add方法：</p>
-
-<p>定义<code>ListMetaclass</code>，按照默认习惯，metaclass的类名总是以Metaclass结尾，以便清楚地表示这是一个metaclass：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-# metaclass是创建类，所以必须从`type`类型派生：
-class ListMetaclass(type):
-
-    def __new__(cls, name, bases, attrs):
-        attrs[&#39;add&#39;] = lambda self, value: self.append(value)
-        return type.__new__(cls, name, bases, attrs)
-
-
-class MyList(list):
-    __metaclass__ = ListMetaclass  # 指示使用ListMetaclass来定制类
-</code></pre>
-
-<p>当我们写下<code>__metaclass__ = ListMetaclass</code>语句时，魔术就生效了，它指示Python解释器在创建<code>MyList</code>时，要通过<code>ListMetaclass.__new__()</code>来创建，在此，我们可以修改类的定义，比如，加上新的方法，然后，返回修改后的定义。</p>
-
-<p><code>__new__()</code><strong>方法接收到的参数依次是</strong>：</p>
-
-<ol>
-<li><p>当前准备创建的类的对象；</p></li>
-<li><p>类的名字；</p></li>
-<li><p>类继承的父类集合；</p></li>
-<li><p>类的方法集合。</p></li>
-</ol>
-
-<p>我们测试输出为：</p>
-
-<pre><code class="language-py">L = MyList()
-L.add(1)
-print L
-</code></pre>
-
-<p><img src="media/14927355881897/14927637008533.jpg" alt=""/></p>
-
-<p>动态修改有什么意义？直接在MyList定义中写上add()方法不是更简单吗？正常情况下，确实应该直接写，通过metaclass修改纯属变态。</p>
-
-<p>但是，总会遇到需要通过metaclass修改类定义的。ORM就是一个典型的例子。</p>
-
-<p>ORM全称“Object Relational Mapping”，即对象-关系映射，就是把关系数据库的一行映射为一个对象，也就是一个类对应一个表，这样，写代码更简单，不用直接操作SQL语句。</p>
-
-<p>要编写一个ORM框架，所有的类都只能动态定义，因为只有使用者才能根据表的结构定义出对应的类来。</p>
-
-<p>具体方法参见<a href="http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001386820064557c69858840b4c48d2b8411bc2ea9099ba000">廖老师的教学网站</a></p>
 
 ]]></content>
   </entry>
