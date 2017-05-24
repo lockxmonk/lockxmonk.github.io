@@ -4,13 +4,220 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-05-23T10:17:22+08:00</updated>
+  <updated>2017-05-24T16:24:52+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[hashlib]]></title>
+    <link href="https://lockxmonk.github.io/14956154840973.html"/>
+    <updated>2017-05-24T16:44:44+08:00</updated>
+    <id>https://lockxmonk.github.io/14956154840973.html</id>
+    <content type="html"><![CDATA[
+<ul>
+<li>
+<a href="#toc_0">摘要算法简介</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_1">==MD5是最常见的摘要算法，速度很快，生成结果是固定的128 bit字节，通常用一个32位的16进制字符串表示。</a>
+<ul>
+<li>
+<a href="#toc_2">摘要算法应用</a>
+<ul>
+<li>
+<a href="#toc_3">练习:根据用户输入的口令，计算出存储在数据库中的MD5口令：</a>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2 id="toc_0">摘要算法简介</h2>
+
+<p>Python的hashlib提供了常见的摘要算法，如MD5，SHA1等等。</p>
+
+<p>什么是摘要算法呢？摘要算法又称哈希算法、散列算法。它通过一个函数，把任意长度的数据转换为一个长度固定的数据串（通常用16进制的字符串表示）。</p>
+
+<p>举个例子，你写了一篇文章，内容是一个字符串<code>&#39;how to use python hashlib - by Michael&#39;</code>，并附上这篇文章的摘要是<code>&#39;2d73d4f15c0db7f5ecb321b6a65e5d6d&#39;</code>。如果有人篡改了你的文章，并发表为<code>&#39;how to use python hashlib - by Bob&#39;</code>，你可以一下子指出Bob篡改了你的文章，因为根据<code>&#39;how to use python hashlib - by Bob&#39;</code>计算出的摘要不同于原始文章的摘要。</p>
+
+<p>可见，摘要算法就是通过摘要函数<code>f()</code>对任意长度的数据<code>data</code>计算出固定长度的摘要<code>digest</code>，目的是为了发现原始数据是否被人篡改过。</p>
+
+<p><font color=red><strong>摘要算法之所以能指出数据是否被篡改过，就是因为摘要函数是一个单向函数，计算f(data)很容易，但通过digest反推data却非常困难。而且，对原始数据做一个bit的修改，都会导致计算出的摘要完全不同。</strong></font></p>
+
+<p>我们以常见的摘要算法MD5为例，计算出一个字符串的MD5值：</p>
+
+<pre><code class="language-py">import hashlib
+
+md5 = hashlib.md5()
+md5.update(&#39;how to use md5 in python hashlib?&#39;)
+
+print md5.hexdigest()
+</code></pre>
+
+<p>结果为:<br/>
+<img src="media/14956154840973/14956157660396.jpg" alt=""/></p>
+
+<p>如果数据量很大，可以分块多次调用<code>update()</code>，最后计算的结果是一样的：</p>
+
+<pre><code class="language-py">import hashlib
+
+md5 = hashlib.md5()
+md5.update(&#39;how to use md5 in &#39;)
+md5.update(&#39;python hashlib?&#39;)
+print md5.hexdigest()
+
+</code></pre>
+
+<p>结果仍然为:<br/>
+<img src="media/14956154840973/14956158401991.jpg" alt=""/></p>
+
+<p>当改动一个字母之后,结果会完全不同.</p>
+
+<h1 id="toc_1">==MD5是最常见的摘要算法，速度很快，生成结果是固定的128 bit字节，通常用一个32位的16进制字符串表示。</h1>
+
+<p>另一种常见的摘要算法是<code>SHA1</code>，调用<code>SHA1</code>和调用<code>MD5</code>完全类似：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+import hashlib
+
+sha1 = hashlib.sha1()
+sha1.update(&#39;how to use md5 in &#39;)
+sha1.update(&#39;python hashlib?&#39;)
+print sha1.hexdigest()
+</code></pre>
+
+<p><img src="media/14956154840973/14956161682665.jpg" alt=""/></p>
+
+<p>SHA1的结果是160 bit字节，通常用一个40位的16进制字符串表示。</p>
+
+<p>比SHA1更安全的算法是SHA256和SHA512，不过越安全的算法越慢，而且摘要长度更长。</p>
+
+<blockquote>
+<p>有没有可能两个不同的数据通过某个摘要算法得到了相同的摘要？完全有可能，因为任何摘要算法都是把无限多的数据集合映射到一个有限的集合中。这种情况称为碰撞，比如Bob试图根据你的摘要反推出一篇文章&#39;how to learn hashlib in python - by Bob&#39;，并且这篇文章的摘要恰好和你的文章完全一致，这种情况也并非不可能出现，但是非常非常困难。</p>
+</blockquote>
+
+<h2 id="toc_2">摘要算法应用</h2>
+
+<p>一个正确的应用是在存储的数据库表中,将用户登录用的密码进行转换,防止数据泄露导致黑客或者内部人员获取.</p>
+
+<p>正确的保存口令的方式是不存储用户的明文口令，而是存储用户口令的摘要，比如MD5：</p>
+
+<table>
+<thead>
+<tr>
+<th>username</th>
+<th>password</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>michael</td>
+<td>e10adc3949ba59abbe56e057f20f883e</td>
+</tr>
+<tr>
+<td>bob</td>
+<td>878ef96e86145580c38c87f0410ad153</td>
+</tr>
+<tr>
+<td>alice</td>
+<td>99b1c2188db85afee403b1536010c2c9</td>
+</tr>
+</tbody>
+</table>
+
+<p>当用户登录时，首先计算用户输入的明文口令的MD5，然后和数据库存储的MD5对比，如果一致，说明口令输入正确，如果不一致，口令肯定错误。</p>
+
+<h3 id="toc_3">练习:根据用户输入的口令，计算出存储在数据库中的MD5口令：</h3>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+import hashlib
+
+def calc_md5(password):
+    md5 = hashlib.md5()
+    md5.update(password)
+    return md5.hexdigest()
+password_text = raw_input(&#39;输入密码:&#39;)
+print calc_md5(password_text)
+</code></pre>
+
+<p><img src="media/14956154840973/14956172486330.jpg" alt=""/></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[在ios中判断一个viewcontroller是都已经正常present]]></title>
+    <link href="https://lockxmonk.github.io/14956131169957.html"/>
+    <updated>2017-05-24T16:05:16+08:00</updated>
+    <id>https://lockxmonk.github.io/14956131169957.html</id>
+    <content type="html"><![CDATA[
+<p>之前present一个视图的时候,从来没有研究过如何判断一个视图是都已经正常弹出.比如下面这个方法是否正常执行:</p>
+
+<pre><code class="language-oc">[documentInteractionController presentPreviewAnimated:YES]
+</code></pre>
+
+<p>然而今天有一个需求需要知道上述方法是否正常执行,并弹出视图.</p>
+
+<p>之后通过阅读该方法的源码后发现:</p>
+
+<pre><code class="language-oc">// Bypasses the menu and opens the full screen preview window for the item at URL.  Returns NO if the item could not be previewed.
+// Note that you must implement the delegate method documentInteractionControllerViewControllerForPreview: to preview the document.
+- (BOOL)presentPreviewAnimated:(BOOL)animated;
+</code></pre>
+
+<p>该方法返回一个BOOL类型的值:当没有正常执行该方法时,会返回NO.正常返回YES.</p>
+
+<p>类似的还有如下方法:</p>
+
+<pre><code class="language-oc">- (BOOL)isBeingPresented NS_AVAILABLE_IOS(5_0);
+- (BOOL)isBeingDismissed NS_AVAILABLE_IOS(5_0);
+
+- (BOOL)isMovingToParentViewController NS_AVAILABLE_IOS(5_0);
+- (BOOL)isMovingFromParentViewController NS_AVAILABLE_IOS(5_0);
+</code></pre>
+
+<p>来判断viewController是消失还是出现在当前页面中.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Caffe代码梳理]]></title>
+    <link href="https://lockxmonk.github.io/14955929300450.html"/>
+    <updated>2017-05-24T10:28:50+08:00</updated>
+    <id>https://lockxmonk.github.io/14955929300450.html</id>
+    <content type="html"><![CDATA[
+<p>在阅读代码时,如何快速追踪某个关键词?传统的方法是打开某个文件,之后用查找命令来查找关键词.<br/>
+这了我们介绍另一种方法,利用<code>grep</code>命令:</p>
+
+<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;REGISTER_LAYER_CREATOR&quot; *
+</code></pre>
+
+<p><img src="media/14955929300450/14955931415464.jpg" alt=""/><br/>
+我们可以看到,日志输出了很多文件.这种方法无需分别打开每个文件,也能直观的显示了所有包含这个宏的文件名和行号.</p>
+
+<p>这里我们用<code>grep</code>命令来搜索一个宏调用:<code>REGISTER_LAYER_CREATOR</code>,<br/>
+命令行参数解释为:</p>
+
+<blockquote>
+<p>-n  ---显示行号,便于定位<br/>
+-H  ---显示文件名,便与定位<br/>
+-R  ---递归查找每个子目录,适合工程较大,分多个目录存放的场景</p>
+</blockquote>
+
+<p>利用这种方法可以很容易的在caffe源码中定位很多内容.</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[运行caffe框架中的cifar10样例]]></title>
@@ -2218,6 +2425,16 @@ print struct.unpack(&#39;&gt;IH&#39;,&#39;\xf0\xf0\xf0\xf0\x80\x80&#39;)
     <updated>2017-05-23T08:41:28+08:00</updated>
     <id>https://lockxmonk.github.io/14955000885655.html</id>
     <content type="html"><![CDATA[
+<ul>
+<li>
+<a href="#toc_0">练习:</a>
+</li>
+<li>
+<a href="#toc_1">小结</a>
+</li>
+</ul>
+
+
 <p>Base64是一种用64个字符来表示任意二进制数据的方法。</p>
 
 <p>用记事本打开<code>exe、jpg、pdf</code>这些文件时，我们都会看到一大堆乱码，因为二进制文件包含很多无法显示和打印的字符，所以，如果要让记事本这样的文本处理软件能处理二进制数据，就需要一个二进制到字符串的转换方法。Base64是一种最常见的二进制编码方法。</p>
@@ -3773,7 +3990,7 @@ print c
 <p>上面所述只有100个参数时，表明只有1个100*100的卷积核，显然，特征提取是不充分的，我们可以添加多个卷积核，比如32个卷积核，可以学习32种特征。在有多个卷积核时，如下图所示：<br/>
 <img src="media/14940530686573/14940546422731.jpg" alt=""/></p>
 
-<p>上图右，不同颜色表明不同的卷积核。每个卷积核都会将图像生成为另一幅图像。比如两个卷积核就可以将生成两幅图像，这两幅图像可以看做是一张图像的不同的通道。如下图所示，下图有个小错误，即将w1改为w0，w2改为w1即可。下文中仍以w1和w2称呼它们</p>
+<p>上图右，不同颜色表明不同的卷积核。每个卷积核都会将图像生成为另一幅图像。比如两个卷积核就可以将生成两幅图像，这两幅图像可以看做是一张图像的不同的通道。如下图所示，下图有个小错误，即将w1改为w0，w2改为w1即可。下文中仍以w1和w2称呼它们.</p>
 
 ]]></content>
   </entry>
@@ -4904,272 +5121,6 @@ search(&#39;pr&#39;)
 </code></pre>
 
 <p><img src="media/14932778418691/14932810251430.jpg" alt=""/></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[I/O编程]]></title>
-    <link href="https://lockxmonk.github.io/14932734930436.html"/>
-    <updated>2017-04-27T14:11:33+08:00</updated>
-    <id>https://lockxmonk.github.io/14932734930436.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">文件读写</a>
-<ul>
-<li>
-<a href="#toc_1">读文件</a>
-</li>
-<li>
-<a href="#toc_2">file-like Object</a>
-</li>
-<li>
-<a href="#toc_3">二进制文件</a>
-</li>
-<li>
-<a href="#toc_4">写文件</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_5">小结</a>
-</li>
-</ul>
-
-
-<h2 id="toc_0">文件读写</h2>
-
-<h3 id="toc_1">读文件</h3>
-
-<p>要以读文件的模式来打开一个文件对象，使用Python内置的<code>open（）</code>函数，传入文件名和标识符：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; f = open(&#39;/Users/michael/test.txt&#39;, &#39;r&#39;)
-</code></pre>
-
-<p>标示符&#39;r&#39;表示读，这样，我们就成功地打开了一个文件。</p>
-
-<p>如果文件不存在，open()函数就会抛出一个IOError的错误，并且给出错误码和详细的信息告诉你文件不存在：<br/>
-<img src="media/14932734930436/14932737513488.jpg" alt=""/></p>
-
-<p>如果文件打开成功，接下来，调用<code>read()</code>方法可以一次读取文件的全部内容，Python把内容读到内存，用一个<code>str</code>对象表示：<br/>
-<img src="media/14932734930436/14932741526772.jpg" alt=""/></p>
-
-<p>由于文件读写时都有可能产生<code>IOError</code>，一旦出错，后面的<code>f.close()</code>就不会调用。所以，为了保证无论是否出错都能正确地关闭文件，我们可以使用<code>try ... finally</code>来实现。这种方法太麻烦。我们这里使用python所提供的方法：</p>
-
-<p>Python引入了with语句来自动帮我们调用<code>close()</code>方法：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;r&#39;) as f:
-    print f.read()
-</code></pre>
-
-<p><img src="media/14932734930436/14932743740546.jpg" alt=""/></p>
-
-<p>这和前面的<code>try ... finally</code>是一样的，但是代码更佳简洁，并且不必调用<code>f.close()</code>方法。</p>
-
-<p>调用<code>read()</code>会一次性读取文件的全部内容，如果文件有10G，内存就爆了，所以，要保险起见，可以反复调用<code>read(size)</code>方法，每次最多读取<code>size</code>个字节的内容。另外，调用<code>readline()</code>可以每次读取一行内容，调用<code>readlines()</code>一次读取所有内容并按行返回<code>list</code>。因此，要根据需要决定怎么调用。</p>
-
-<p>如果文件很小，<code>read()</code>一次性读取最方便；如果不能确定文件大小，反复调用<code>read(size)</code>比较保险；如果是配置文件，调用<code>readlines()</code>最方便：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;r&#39;) as f:
-    for line in f.readlines():
-        print(line.strip())  #把末尾的&#39;\n&#39;删掉
-</code></pre>
-
-<p><img src="media/14932734930436/14932746986776.jpg" alt=""/></p>
-
-<h3 id="toc_2">file-like Object</h3>
-
-<p>像<code>open()</code>函数返回的这种有个<code>read()</code>方法的对象，在Python中统称为file-like Object。除了file外，还可以是内存的字节流，网络流，自定义流等等。file-like Object不要求从特定类继承，只要写个<code>read()</code>方法就行。</p>
-
-<p><code>StringIO</code>就是在内存中创建的file-like Object，常用作临时缓冲。</p>
-
-<h3 id="toc_3">二进制文件</h3>
-
-<p>前面讲的默认都是读取文本文件，并且是ASCII编码的文本文件。要读取二进制文件，比如图片、视频等等，用<code>rb</code>模式打开文件即可：<br/>
-<img src="media/14932734930436/14932760233490.jpg" alt=""/></p>
-
-<h3 id="toc_4">写文件</h3>
-
-<p>写文件和读文件是一样的，唯一区别是调用<code>open()</code>函数时，传入标识符<code>&#39;w&#39;</code>或者<code>&#39;wb&#39;</code>表示写文本文件或写二进制文件：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; f = open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;, &#39;w&#39;)
-&gt;&gt;&gt; f.write(&#39;Hello, world!Again！&#39;)
-&gt;&gt;&gt; f.close()
-</code></pre>
-
-<p>这里推荐直接调用with方法：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;w&#39;) as f:
-    f.write(&#39;Hello, world!Again!&#39;)
-</code></pre>
-
-<p><img src="media/14932734930436/14932763793296.jpg" alt=""/></p>
-
-<p><font color=red><strong>要注意的是一旦写入文件，原来文件中的内容会被删除！</strong></font></p>
-
-<h2 id="toc_5">小结</h2>
-
-<p>在Python中，文件读写是通过<code>open()</code>函数打开的文件对象完成的。使用<code>with</code>语句操作文件IO是个好习惯。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[文档测试]]></title>
-    <link href="https://lockxmonk.github.io/14932622908500.html"/>
-    <updated>2017-04-27T11:04:50+08:00</updated>
-    <id>https://lockxmonk.github.io/14932622908500.html</id>
-    <content type="html"><![CDATA[
-<p><strong>在python中我们可以执行那些在注释中的代码，来进行测试。</strong></p>
-
-<p>当我们编写注释时，如果写上这样的注释：</p>
-
-<pre><code class="language-py">def abs(n):
-    &#39;&#39;&#39;
-    Function to get absolute value of number.
-
-    Example:
-
-    &gt;&gt;&gt; abs(1)
-    1
-    &gt;&gt;&gt; abs(-1)
-    1
-    &gt;&gt;&gt; abs(0)
-    0
-    &#39;&#39;&#39;
-    return n if n &gt;= 0 else (-n)
-</code></pre>
-
-<p>无疑更明确地告诉函数的调用者该函数的期望输入和输出。</p>
-
-<p><strong>并且，Python内置的“文档测试”（doctest）模块可以直接提取注释中的代码并执行测试。</strong></p>
-
-<p><font color=red>doctest严格按照Python交互式命令行的输入和输出来判断测试结果是否正确。只有测试异常的时候，可以用...表示中间一大段烦人的输出。</font></p>
-
-<p>让我们用doctest来测试上次编写的<code>Dict</code>类：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Dict(dict):
-    
-    &quot;&quot;&quot;
-    Simple dict but also support access as x.y style
-
-    &gt;&gt;&gt; d1 = Dict()
-    &gt;&gt;&gt; d1[&#39;x&#39;] = 100
-    &gt;&gt;&gt; d1.x
-    100
-    &gt;&gt;&gt; d1.y = 200
-    &gt;&gt;&gt; d1[&#39;y&#39;]
-    200
-    &gt;&gt;&gt; d2 = Dict(a=1, b=2, c=&#39;3&#39;)
-    &gt;&gt;&gt; d2.c
-    &#39;3&#39;
-    &gt;&gt;&gt; d2[&#39;empty&#39;]
-    Traceback (most recent call last):
-        ...
-    KeyError: &#39;empty&#39;
-    &gt;&gt;&gt; d2.empty
-    Traceback (most recent call last):
-        ...
-    AttributeError: &#39;Dict&#39; object has no attribute &#39;empty&#39;
-    
-    &quot;&quot;&quot;
-    def __init__(self, **kw):
-        super(Dict, self).__init__(**kw)
-    def __getattr__(self,key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r&quot;&#39;Dict&#39; object has no attribute &#39;%s&#39;&quot; % key)
-        else:
-            pass
-        finally:
-            pass
-    def __setattr__(self,key,value):
-        self[key] = value
-if __name__ == &#39;__main__&#39;:
-    import doctest
-    doctest.testmod()
-</code></pre>
-
-<p>如果什么输出都没有，说明我们编写的<code>doctest</code>运行都是正确的。<br/>
-<img src="media/14932622908500/14932639594028.jpg" alt=""/><br/>
-如果我们把</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; d2.c
-    &#39;4&#39; #3改成4
-</code></pre>
-
-<p>运行后就会显示：</p>
-
-<p><img src="media/14932622908500/14932640459265.jpg" alt=""/></p>
-
-<p><strong>注意到最后两行代码。当模块正常导入时，doctest不会被执行。只有在命令行运行时，才执行doctest。所以，不必担心doctest会在非测试环境下执行。</strong></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[图像去雾相关论文总结]]></title>
-    <link href="https://lockxmonk.github.io/14932573311953.html"/>
-    <updated>2017-04-27T09:42:11+08:00</updated>
-    <id>https://lockxmonk.github.io/14932573311953.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">1.特征学习的单幅图像去雾算法 2016年</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_1">2.尺度自适应暗通道先验去雾方法</a>
-
-
-<h2 id="toc_0">1.特征学习的单幅图像去雾算法 2016年</h2>
-
-<p><strong>目的：</strong>为提高图像去雾的普适性，提出一种特征学习的单幅图像去雾方法。</p>
-
-<p><strong>方法：</strong>通过稀疏自动编码机对有雾图像进行<strong>多尺度的纹理结构特征提取</strong>，同时抽取各种与雾相关的颜色特征。然后采用多层神经网络进行样本训练，得到雾天条件下纹理结构特征及颜色特征与场景深度间的映射关系，并估算出有雾图像的场景深度图。最后结合大气散射模型，根据场景深度图复原无雾图像。</p>
-
-<p><strong>结论：对实验结果的定性及定量分 析表明，本文算法能有效获取有雾图像的场景深度，复原出视觉效果理想的无雾图像，且具有很好的场景普适性。</strong></p>
-
-<p><strong>理解</strong>：<font color=red>本文认为图像去雾的问题可进一步转化为场景深度d的求解问题。</font>本文通过自动编码机获取到图片中物体的纹理特征，然后用多尺度的方法分别提取<strong>颜色特征、暗原色特征、颜色衰减特征、纹理结构</strong>特征。<strong>四者结合对场景深度进行估计</strong>。</p>
-
-<p><strong>可以改进的</strong>：</p>
-
-<ol>
-<li><p>算法实时性不够强，效率比较低，可以考虑缩小图片尺寸，降低数据量，从而运用到视频去雾。</p></li>
-<li><p>对雾气分布不均匀的图像，效果不理想，需要结合不同的气象模型来建立更为鲁棒的物理模型。</p></li>
-</ol>
-
-<h1 id="toc_1">2.尺度自适应暗通道先验去雾方法</h1>
-
-<p><strong>目的：</strong><br/>
-针对暗通道先验去雾方法的尺度选择问题 提出了一种尺度自适应方法， 根据图像的颜色和边 缘特征将暗通道求解的尺度自适应地调整到一个合适的范围。</p>
-
-<p><strong>方法：</strong></p>
-
-<ol>
-<li><p>由颜色特征求解初始尺度：<font color=red>对于图像的不同区域采用不同的尺度求解暗通道: 在亮度较低或饱和度较高的区域，采用较小尺度; 在亮度较高且饱和度较低的区域，采用较大尺度;在景深突变处，采用较小尺度;在平滑区域，采用较大尺度。</font></p></li>
-<li><p>由边缘特征对尺度进行修正:由于“光晕”现象发生在景深突变处，如果在边缘附近采用较小的尺度，可使透射率的求解窗口\(Ω_r(x)\)尽量不跨越景深边界，从而减小“光晕”现象; 在非边缘处采用较大的尺度，可以增大 \(J_{dark}(x)→0\)的概率，使复原图像的背景更平滑，噪声和失真更小。 由边缘特征对初始尺度\(r_0(x)\)进行修正.</p></li>
-</ol>
-
-<p><strong>结论：</strong><br/>
-整个去雾过程参数自动配置，无需人工干预，兼顾不同尺度复原图像的优点，复原图像色彩自然，对比度提升显著，并有效抑制了“光晕”现象。对多种雾化场景图像的处理结果表明: <strong>文中方法对场景的适应性强， 在任何情况下的处理结果均能达到 DG 方法的最优结果，甚至更好。</strong></p>
-
-<p><strong>理解：</strong><br/>
-该论文主要是针对HE的去雾方法，对暗通道尺寸进行自适应确定，减少了人工干预的复杂度。</p>
-
-<p><strong>可以改进：</strong><br/>
-<font color=red>该算法在运行时间上可以改进，也可以利用机器学习的方法来提取图片特征，避免Canny算子的局限性造成的边缘提取误差。<br/>
-可以与上篇论文进行结合来提高上文尺度特征提取的效率。</font></p>
 
 ]]></content>
   </entry>

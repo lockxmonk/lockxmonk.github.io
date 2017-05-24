@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Filter - LZH007
+  Caffe代码梳理 - LZH007
   
   </title>
   
@@ -111,14 +111,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>Filter</h1>
+          <h1>Caffe代码梳理</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/4/13</span>
+          <span class="date">2017/5/24</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+              <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
            
          
           <span class="comments">
@@ -131,22 +131,25 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p><strong>1.请尝试用filter()删除1~100的素数。</strong></p>
+      <p>在阅读代码时,如何快速追踪某个关键词?传统的方法是打开某个文件,之后用查找命令来查找关键词.<br/>
+这了我们介绍另一种方法,利用<code>grep</code>命令:</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-num = range(1, 101)
-
-def prime_num(s):
-    for x in range(2, s):
-        if (s % x) == 0:
-            return True
-        else:
-            return False
-print filter(prime_num, num)
+<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;REGISTER_LAYER_CREATOR&quot; *
 </code></pre>
 
-<p>结果：<br/>
-<img src="media/14920527647833/14920538585519.jpg" alt=""/></p>
+<p><img src="media/14955929300450/14955931415464.jpg" alt=""/><br/>
+我们可以看到,日志输出了很多文件.这种方法无需分别打开每个文件,也能直观的显示了所有包含这个宏的文件名和行号.</p>
+
+<p>这里我们用<code>grep</code>命令来搜索一个宏调用:<code>REGISTER_LAYER_CREATOR</code>,<br/>
+命令行参数解释为:</p>
+
+<blockquote>
+<p>-n  ---显示行号,便于定位<br/>
+-H  ---显示文件名,便与定位<br/>
+-R  ---递归查找每个子目录,适合工程较大,分多个目录存放的场景</p>
+</blockquote>
+
+<p>利用这种方法可以很容易的在caffe源码中定位很多内容.</p>
 
 
     
@@ -157,16 +160,16 @@ print filter(prime_num, num)
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14920539372230.html" 
-          title="Previous Post: Sorted（排序）">&laquo; Sorted（排序）</a>
+          <a href="14956131169957.html" 
+          title="Previous Post: 在ios中判断一个viewcontroller是都已经正常present">&laquo; 在ios中判断一个viewcontroller是都已经正常present</a>
       
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14920523812017.html" 
-          title="Next Post: Map/Reduce">Map/Reduce &raquo;</a>
+          <a  href="14955245049549.html" 
+          title="Next Post: 运行caffe框架中的cifar10样例">运行caffe框架中的cifar10样例 &raquo;</a>
       
       </p>
         </div>

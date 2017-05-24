@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Filter - LZH007
+  hashlib - LZH007
   
   </title>
   
@@ -111,10 +111,10 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>Filter</h1>
+          <h1>hashlib</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/4/13</span>
+          <span class="date">2017/5/24</span>
 
           <span>posted in&nbsp;</span> 
           
@@ -131,22 +131,138 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p><strong>1.请尝试用filter()删除1~100的素数。</strong></p>
+      <ul>
+<li>
+<a href="#toc_0">摘要算法简介</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_1">==MD5是最常见的摘要算法，速度很快，生成结果是固定的128 bit字节，通常用一个32位的16进制字符串表示。</a>
+<ul>
+<li>
+<a href="#toc_2">摘要算法应用</a>
+<ul>
+<li>
+<a href="#toc_3">练习:根据用户输入的口令，计算出存储在数据库中的MD5口令：</a>
+</li>
+</ul>
+</li>
+</ul>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-num = range(1, 101)
 
-def prime_num(s):
-    for x in range(2, s):
-        if (s % x) == 0:
-            return True
-        else:
-            return False
-print filter(prime_num, num)
+<h2 id="toc_0">摘要算法简介</h2>
+
+<p>Python的hashlib提供了常见的摘要算法，如MD5，SHA1等等。</p>
+
+<p>什么是摘要算法呢？摘要算法又称哈希算法、散列算法。它通过一个函数，把任意长度的数据转换为一个长度固定的数据串（通常用16进制的字符串表示）。</p>
+
+<p>举个例子，你写了一篇文章，内容是一个字符串<code>&#39;how to use python hashlib - by Michael&#39;</code>，并附上这篇文章的摘要是<code>&#39;2d73d4f15c0db7f5ecb321b6a65e5d6d&#39;</code>。如果有人篡改了你的文章，并发表为<code>&#39;how to use python hashlib - by Bob&#39;</code>，你可以一下子指出Bob篡改了你的文章，因为根据<code>&#39;how to use python hashlib - by Bob&#39;</code>计算出的摘要不同于原始文章的摘要。</p>
+
+<p>可见，摘要算法就是通过摘要函数<code>f()</code>对任意长度的数据<code>data</code>计算出固定长度的摘要<code>digest</code>，目的是为了发现原始数据是否被人篡改过。</p>
+
+<p><font color=red><strong>摘要算法之所以能指出数据是否被篡改过，就是因为摘要函数是一个单向函数，计算f(data)很容易，但通过digest反推data却非常困难。而且，对原始数据做一个bit的修改，都会导致计算出的摘要完全不同。</strong></font></p>
+
+<p>我们以常见的摘要算法MD5为例，计算出一个字符串的MD5值：</p>
+
+<pre><code class="language-py">import hashlib
+
+md5 = hashlib.md5()
+md5.update(&#39;how to use md5 in python hashlib?&#39;)
+
+print md5.hexdigest()
 </code></pre>
 
-<p>结果：<br/>
-<img src="media/14920527647833/14920538585519.jpg" alt=""/></p>
+<p>结果为:<br/>
+<img src="media/14956154840973/14956157660396.jpg" alt=""/></p>
+
+<p>如果数据量很大，可以分块多次调用<code>update()</code>，最后计算的结果是一样的：</p>
+
+<pre><code class="language-py">import hashlib
+
+md5 = hashlib.md5()
+md5.update(&#39;how to use md5 in &#39;)
+md5.update(&#39;python hashlib?&#39;)
+print md5.hexdigest()
+
+</code></pre>
+
+<p>结果仍然为:<br/>
+<img src="media/14956154840973/14956158401991.jpg" alt=""/></p>
+
+<p>当改动一个字母之后,结果会完全不同.</p>
+
+<h1 id="toc_1">==MD5是最常见的摘要算法，速度很快，生成结果是固定的128 bit字节，通常用一个32位的16进制字符串表示。</h1>
+
+<p>另一种常见的摘要算法是<code>SHA1</code>，调用<code>SHA1</code>和调用<code>MD5</code>完全类似：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+import hashlib
+
+sha1 = hashlib.sha1()
+sha1.update(&#39;how to use md5 in &#39;)
+sha1.update(&#39;python hashlib?&#39;)
+print sha1.hexdigest()
+</code></pre>
+
+<p><img src="media/14956154840973/14956161682665.jpg" alt=""/></p>
+
+<p>SHA1的结果是160 bit字节，通常用一个40位的16进制字符串表示。</p>
+
+<p>比SHA1更安全的算法是SHA256和SHA512，不过越安全的算法越慢，而且摘要长度更长。</p>
+
+<blockquote>
+<p>有没有可能两个不同的数据通过某个摘要算法得到了相同的摘要？完全有可能，因为任何摘要算法都是把无限多的数据集合映射到一个有限的集合中。这种情况称为碰撞，比如Bob试图根据你的摘要反推出一篇文章&#39;how to learn hashlib in python - by Bob&#39;，并且这篇文章的摘要恰好和你的文章完全一致，这种情况也并非不可能出现，但是非常非常困难。</p>
+</blockquote>
+
+<h2 id="toc_2">摘要算法应用</h2>
+
+<p>一个正确的应用是在存储的数据库表中,将用户登录用的密码进行转换,防止数据泄露导致黑客或者内部人员获取.</p>
+
+<p>正确的保存口令的方式是不存储用户的明文口令，而是存储用户口令的摘要，比如MD5：</p>
+
+<table>
+<thead>
+<tr>
+<th>username</th>
+<th>password</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>michael</td>
+<td>e10adc3949ba59abbe56e057f20f883e</td>
+</tr>
+<tr>
+<td>bob</td>
+<td>878ef96e86145580c38c87f0410ad153</td>
+</tr>
+<tr>
+<td>alice</td>
+<td>99b1c2188db85afee403b1536010c2c9</td>
+</tr>
+</tbody>
+</table>
+
+<p>当用户登录时，首先计算用户输入的明文口令的MD5，然后和数据库存储的MD5对比，如果一致，说明口令输入正确，如果不一致，口令肯定错误。</p>
+
+<h3 id="toc_3">练习:根据用户输入的口令，计算出存储在数据库中的MD5口令：</h3>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+import hashlib
+
+def calc_md5(password):
+    md5 = hashlib.md5()
+    md5.update(password)
+    return md5.hexdigest()
+password_text = raw_input(&#39;输入密码:&#39;)
+print calc_md5(password_text)
+</code></pre>
+
+<p><img src="media/14956154840973/14956172486330.jpg" alt=""/></p>
 
 
     
@@ -157,16 +273,13 @@ print filter(prime_num, num)
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14920539372230.html" 
-          title="Previous Post: Sorted（排序）">&laquo; Sorted（排序）</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14920523812017.html" 
-          title="Next Post: Map/Reduce">Map/Reduce &raquo;</a>
+          <a  href="14956131169957.html" 
+          title="Next Post: 在ios中判断一个viewcontroller是都已经正常present">在ios中判断一个viewcontroller是都已经正常present &raquo;</a>
       
       </p>
         </div>

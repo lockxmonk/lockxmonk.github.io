@@ -111,6 +111,64 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14956131169957.html">
+                
+                  <h1>在ios中判断一个viewcontroller是都已经正常present</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>之前present一个视图的时候,从来没有研究过如何判断一个视图是都已经正常弹出.比如下面这个方法是否正常执行:</p>
+
+<pre><code class="language-oc">[documentInteractionController presentPreviewAnimated:YES]
+</code></pre>
+
+<p>然而今天有一个需求需要知道上述方法是否正常执行,并弹出视图.</p>
+
+<p>之后通过阅读该方法的源码后发现:</p>
+
+<pre><code class="language-oc">// Bypasses the menu and opens the full screen preview window for the item at URL.  Returns NO if the item could not be previewed.
+// Note that you must implement the delegate method documentInteractionControllerViewControllerForPreview: to preview the document.
+- (BOOL)presentPreviewAnimated:(BOOL)animated;
+</code></pre>
+
+<p>该方法返回一个BOOL类型的值:当没有正常执行该方法时,会返回NO.正常返回YES.</p>
+
+<p>类似的还有如下方法:</p>
+
+<pre><code class="language-oc">- (BOOL)isBeingPresented NS_AVAILABLE_IOS(5_0);
+- (BOOL)isBeingDismissed NS_AVAILABLE_IOS(5_0);
+
+- (BOOL)isMovingToParentViewController NS_AVAILABLE_IOS(5_0);
+- (BOOL)isMovingFromParentViewController NS_AVAILABLE_IOS(5_0);
+</code></pre>
+
+<p>来判断viewController是消失还是出现在当前页面中.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/24</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14948283904445.html">
                 
                   <h1>在RN中利用原生Document Interaction Controller来预览和打开文档</h1>
@@ -320,6 +378,24 @@
 	      
 		      
 			      <li class="post">
+			        <a href="14956154840973.html">hashlib</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14956131169957.html">在ios中判断一个viewcontroller是都已经正常present</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14955929300450.html">Caffe代码梳理</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14955245049549.html">运行caffe框架中的cifar10样例</a>
 			      </li>
 		     
@@ -327,24 +403,6 @@
 		      
 			      <li class="post">
 			        <a href="14955029237844.html">Struct</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14955000885655.html">Base64</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14948310433460.html">下学期英语课后翻译总结</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14948283904445.html">在RN中利用原生Document Interaction Controller来预览和打开文档</a>
 			      </li>
 		     
 		  
