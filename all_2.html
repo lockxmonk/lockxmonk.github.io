@@ -111,6 +111,200 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14945736764798.html">
+                
+                  <h1>常用内建模块</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Python中有很多內建模块可以直接使用，无需额外安装。</p>
+
+<h2 id="toc_0">collection</h2>
+
+<p>collections是Python内建的一个集合模块，提供了许多有用的集合类。</p>
+
+<h3 id="toc_1">namedtuple</h3>
+
+<p>我们知道<code>tuple</code>可以表示不变集合，例如，一个点的二维坐标就可以表示成：</p>
+
+<pre><code>p = (1,2)
+</code></pre>
+
+<p>但是，看到<code>(1, 2)</code>，很难看出这个<code>tuple</code>是用来表示一个坐标的。</p>
+
+<p>定义一个<code>class</code>又小题大做了，这时，<code>namedtuple</code>就派上了用场：</p>
+
+<pre><code class="language-py">from collections import namedtuple
+Point = namedtuple(&#39;Point&#39;,[&#39;x&#39;,&#39;y&#39;])
+p = Point(1,2)
+print p.x , p.y
+</code></pre>
+
+<p><img src="media/14945736764798/14945744048083.jpg" alt=""/><br/>
+<code>namedtuple</code>是一个函数，它用来创建一个自定义的<code>tuple</code>对象，并且规定了<code>tuple</code>元素的个数，并可以用属性而不是索引来引用<code>tuple</code>的某个元素。</p>
+
+<p>这样一来，我们用<code>namedtuple</code>可以很方便地定义一种数据类型，它具备<code>tuple</code>的不变性，又可以根据属性来引用，使用十分方便。</p>
+
+<p>可以验证创建的<code>Point</code>对象是<code>tuple</code>的一种子类：</p>
+
+<pre><code class="language-py">print p.x , p.y ,isinstance(p, tuple),isinstance(p, Point)
+</code></pre>
+
+<p><img src="media/14945736764798/14945746594923.jpg" alt=""/></p>
+
+<p>类似的，如果要用坐标和半径表示一个圆，也可以用<code>namedtuple</code>定义：</p>
+
+<pre><code class="language-py"># namedtuple(&#39;名称&#39;, [属性list]):
+Circle = namedtuple(&#39;Circle&#39;, [&#39;x&#39;, &#39;y&#39;, &#39;r&#39;])
+</code></pre>
+
+<h3 id="toc_2">deque</h3>
+
+<p>使用<code>list</code>存储数据时，按索引访问元素很快，但是插入和删除元素就很慢了，因为<code>list</code>是线性存储，数据量大的时候，插入和删除效率很低。</p>
+
+<p><code>deque</code>是为了高效实现插入和删除操作的双向列表，适合用于队列和栈：</p>
+
+<pre><code class="language-py">from collections import deque
+q = deque([&#39;a&#39;,&#39;b&#39;,&#39;c&#39;])
+q.append(&#39;x&#39;)
+q.appendleft(&#39;y&#39;)
+print q
+</code></pre>
+
+<p><img src="media/14945736764798/14945755049453.jpg" alt=""/></p>
+
+<p><code>deque</code>除了实现list的<code>append()</code>和<code>pop()</code>外，还支持<code>appendleft()</code>和<code>popleft()</code>，这样就可以非常高效地往头部添加或删除元素。</p>
+
+<h3 id="toc_3">defaultdict</h3>
+
+<p>使用<code>dict</code>时，如果引用的Key不存在，就会抛出<code>KeyError</code>。如果希望<code>key</code>不存在时，返回一个默认值，就可以用<code>defaultdict</code>：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from collections import defaultdict
+dd = defaultdict(lambda: &#39;N/A&#39;)
+dd[&#39;key1&#39;] = &#39;abc&#39;
+print dd[&#39;key1&#39;], dd[&#39;key2&#39;]    #key1存在，key2不存在
+
+</code></pre>
+
+<p><img src="media/14945736764798/14945759067274.jpg" alt=""/><br/>
+注意默认值是调用函数返回的，而函数在创建<code>defaultdict</code>对象时传入。</p>
+
+<p>除了在<code>Key</code>不存在时返回默认值，<code>defaultdict</code>的其他行为跟<code>dict</code>是完全一样的。</p>
+
+<h3 id="toc_4">OrderedDict</h3>
+
+<p>使用<code>dict</code>时，Key是无序的。在对<code>dict</code>做迭代时，我们无法确定<code>Key</code>的顺序。</p>
+
+<p>如果要保持Key的顺序，可以用<code>OrderedDict</code>：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from collections import OrderedDict
+d = dict([(&#39;a&#39;,1),(&#39;b&#39;,2),(&#39;c&#39;,3)])
+print d    # dict的Key是无序的
+od = OrderedDict([(&#39;a&#39;,1),(&#39;b&#39;,2),(&#39;c&#39;,3)])
+print od   #这个是有序的
+
+</code></pre>
+
+<p><img src="media/14945736764798/14945761816386.jpg" alt=""/></p>
+
+<p><font color=red>注意，OrderedDict的Key会按照插入的顺序排列，不是Key本身排序：</font></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from collections import OrderedDict
+od = OrderedDict()
+od[&#39;z&#39;] = 1
+od[&#39;y&#39;] = 2
+od[&#39;x&#39;] = 3
+
+print od
+</code></pre>
+
+<p><img src="media/14945736764798/14945763021698.jpg" alt=""/></p>
+
+<p><code>OrderedDict</code>可以实现一个FIFO（先进先出）的dict，当容量超出限制时，先删除最早添加的Key：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from collections import OrderedDict
+
+class LastUpdatedOrderedDict(OrderedDict):
+
+    def __init__(self, capacity):
+        super(LastUpdatedOrderedDict, self).__init__()
+        self._capacity = capacity
+
+    def __setitem__(self, key, value):
+        containsKey = 1 if key in self else 0
+        if len(self) - containsKey &gt;= self._capacity:
+            last = self.popitem(last=False)
+            print &#39;remove:&#39;, last
+        if containsKey:
+            del self[key]
+            print &#39;set:&#39;, (key, value)
+        else:
+            print &#39;add:&#39;, (key, value)
+        OrderedDict.__setitem__(self, key, value)
+od = LastUpdatedOrderedDict(3)
+od[&#39;z&#39;] = 1
+od[&#39;w&#39;] = 2
+od[&#39;a&#39;] = 3
+od[&#39;q&#39;] = 4
+print od  
+</code></pre>
+
+<p><img src="media/14945736764798/14945770697335.jpg" alt=""/></p>
+
+<h3 id="toc_5">Counter</h3>
+
+<p><code>Counter</code>是一个简单的计数器，例如，统计字符出现的个数：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+from collections import Counter
+
+c = Counter()
+for ch in &#39;Programming&#39;:
+    c[ch] = c[ch] + 1
+
+print c
+
+</code></pre>
+
+<p><img src="media/14945736764798/14945772600780.jpg" alt=""/></p>
+
+<h1 id="toc_6">小结</h1>
+
+<p><code>collections</code>模块提供了一些有用的集合类，可以根据需要选用。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/12</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14940530686573.html">
                 
                   <h1>CNN卷积神经网络</h1>
@@ -619,119 +813,6 @@ print(&#39;worker exit.&#39;)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14937814533169.html">
-                
-                  <h1>ThreadLocal</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在多线程环境下，每个线程都有自己的数据。<strong>一个线程使用自己的局部变量比使用全局变量好，因为局部变量只有线程自己能看见，不会影响其他线程，而全局变量的修改必须加锁。</strong></p>
-
-<p>但是局部变量也有问题，就是在函数调用的时候，传递起来很麻烦：</p>
-
-<pre><code class="language-py">def process_student(name):
-    std = Student(name)
-    # std是局部变量，但是每个函数都要用它，因此必须传进去：
-    do_task_1(std)
-    do_task_2(std)
-
-def do_task_1(std):
-    do_subtask_1(std)
-    do_subtask_2(std)
-
-def do_task_2(std):
-    do_subtask_2(std)
-    do_subtask_2(std)
-</code></pre>
-
-<p>每个函数一层一层调用都这么传参数那还得了？用全局变量？也不行，因为每个线程处理不同的<code>Student</code>对象，不能共享。</p>
-
-<p>如果用一个全局<code>dict</code>存放所有的<code>Student</code>对象，然后以<code>thread</code>自身作为<code>key</code>获得线程对应的<code>Student</code>对象如何？</p>
-
-<pre><code class="language-py">global_dict = {}
-
-def std_thread(name):
-    std = Student(name)
-    # 把std放到全局变量global_dict中：
-    global_dict[threading.current_thread()] = std
-    do_task_1()
-    do_task_2()
-
-def do_task_1():
-    # 不传入std，而是根据当前线程查找：
-    std = global_dict[threading.current_thread()]
-    ...
-
-def do_task_2():
-    # 任何函数都可以查找出当前线程的std变量：
-    std = global_dict[threading.current_thread()]
-    ...
-</code></pre>
-
-<p>这种方式理论上是可行的，它最大的优点是消除了<code>std</code>对象在每层函数中的传递问题，但是，每个函数获取<code>std</code>的代码有点丑。</p>
-
-<p>有没有更简单的方式？</p>
-
-<p><code>ThreadLocal</code>应运而生，不用查找<code>dict</code>，<code>ThreadLocal</code>帮你自动做这件事：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import threading
-
-# 创建全局ThreadLocal对象
-local_school = threading.local()
-
-
-def process_student():
-    print &#39;Hello,%s(in %s)&#39; % (local_school.student, threading.current_thread().name)
-
-
-def process_thread(name):
-    # 绑定ThreadLocal的stutent：
-    local_school.student = name
-    process_student()
-
-t1 = threading.Thread(target=process_thread, args=(&#39;Alice&#39;,), name=&#39;Thread-A&#39;)
-t2 = threading.Thread(target=process_thread, args=(&#39;Bobs&#39;,), name=&#39;Thread-B&#39;)
-t1.start()
-t2.start()
-t1.join()
-t2.join()
-</code></pre>
-
-<p><img src="media/14937814533169/14937825491356.jpg" alt=""/></p>
-
-<p>全局变量<code>local_school</code>就是一个<code>ThreadLocal</code>对象，每个<code>Thread</code>对它都可以读写<code>student</code>属性，但互不影响。你可以把<code>local_school</code>看成全局变量，但每个属性如<code>local_school.student</code>都是线程的局部变量，可以任意读写而互不干扰，也不用管理锁的问题，<code>ThreadLocal</code>内部会处理。</p>
-
-<p>可以理解为全局变量<code>local_school</code>是一个dict，不但可以用<code>local_school.student</code>，还可以绑定其他变量，如<code>local_school.teacher</code>等等。</p>
-
-<p><font color=red><strong><code>ThreadLocal</code>最常用的地方就是为每个线程绑定一个数据库连接，HTTP请求，用户身份信息等，这样一个线程的所有调用到的处理函数都可以非常方便地访问这些资源。</strong><br/>
-</font></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/3</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -813,6 +894,12 @@ t2.join()
 	      
 		      
 			      <li class="post">
+			        <a href="14957005904776.html">图形界面</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14956930097908.html">HTMLParser</a>
 			      </li>
 		     
@@ -832,12 +919,6 @@ t2.join()
 		      
 			      <li class="post">
 			        <a href="14956131169957.html">在ios中判断一个viewcontroller是都已经正常present</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14955929300450.html">Caffe代码梳理</a>
 			      </li>
 		     
 		  

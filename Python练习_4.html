@@ -111,6 +111,89 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14925924499918.html">
+                
+                  <h1>使用第三方模块</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在Python中，安装第三方模块，是通过setuptools这个工具完成的。Python有两个封装了setuptools的包管理工具：<code>easy_install和pip</code>。<font color=red>目前官方推荐使用<code>pip</code>。</font></p>
+
+<p>Mac和linux本身自带pip，不用安装，在win下需要安装。这里不再过多叙述。</p>
+
+<p>这里试着安装一个第三方库：<strong>Python Imaging Library</strong>，这是Python下非常强大的处理图像的工具库。一般来说，第三方库都会在Python官方的<a href="http://pypi.python.org">http://pypi.python.org</a>网站注册，要安装一个第三方库，必须先知道该库的名称，可以在官网或者pypi上搜索，比如Python Imaging Library的名称叫PIL，因此，安装Python Imaging Library的命令就是：</p>
+
+<p><del>pip install PIL</del>（现在用pillow来代替PIL）</p>
+
+<pre><code>sudo pip install Pillow
+</code></pre>
+
+<p>处理图片的方法为：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+from PIL import Image
+
+im = Image.open(&#39;icon.png&#39;)
+print im.format, im.size, im.mode
+
+im.thumbnail((150,100))
+im.save(&#39;thumb.jpg&#39;,&#39;JPEG&#39;)
+</code></pre>
+
+<p><img src="media/14925924499918/14926575371706.jpg" alt=""/><br/>
+将原图<code>icon.png</code>:<br/>
+<img src="media/14925924499918/icon.png" alt="icon"/></p>
+
+<p>生成一个名为<code>thumb.jpg</code>的图片：<br/>
+<img src="media/14925924499918/thumb.jpg" alt="thumb"/></p>
+
+<blockquote>
+<p>这两张图暂时没有看出明显的区别，需要深入研究。</p>
+</blockquote>
+
+<p>默认情况下，Python解释器会搜索当前目录、所有已安装的内置模块和第三方模块，搜索路径存放在<code>sys</code>模块的<code>path</code>变量中：</p>
+
+<pre><code>&gt;&gt;&gt; import sys
+&gt;&gt;&gt; sys.path
+[&#39;&#39;, &#39;/Library/Python/2.7/site-packages/pip-8.1.1-py2.7.egg&#39;, 
+&#39;/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python27.zip&#39;,... ]
+</code></pre>
+
+<p>想要添加自己的搜索目录可以：</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; import sys
+&gt;&gt;&gt; sys.path.append(&#39;/Users/michael/my_py_scripts&#39;)
+</code></pre>
+
+<p><font color=red>这种方法是在运行时修改，运行结束后失效。</font></p>
+
+<p>第二种方法是设置环境变量<code>PYTHONPATH</code>这里不做详述。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14922429288489.html">
                 
                   <h1>使用模块</h1>
@@ -607,64 +690,6 @@ print f1(),f2(),f3()
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14920539372230.html">
-                
-                  <h1>Sorted（排序）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><strong>1.用sorted进行排序</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-num =[2,5,6,4,3,29,12]
-print sorted(num)
-
-</code></pre>
-
-<p><img src="media/14920539372230/14920542668861.jpg" alt=""/></p>
-
-<p><strong>2.默认情况下，对字符串排序，是按照ASCII的大小比较的，由于&#39;Z&#39; &lt; &#39;a&#39;，结果，大写字母Z会排在小写字母a的前面。<br/>
-现在，我们提出排序应该忽略大小写，按照字母序排序。</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def cmp_ignore_case(s1, s2):
-    u1 = s1.upper()
-    u2 = s2.upper()
-    if u1 &lt; u2:
-        return -1
-    if u1 &gt; u2:
-        return 1
-    return 0
-print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], cmp_ignore_case)
-</code></pre>
-
-<p><img src="media/14920539372230/14920543761031.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -746,6 +771,12 @@ print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], 
 	      
 		      
 			      <li class="post">
+			        <a href="14957005904776.html">图形界面</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14956930097908.html">HTMLParser</a>
 			      </li>
 		     
@@ -765,12 +796,6 @@ print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], 
 		      
 			      <li class="post">
 			        <a href="14956131169957.html">在ios中判断一个viewcontroller是都已经正常present</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14955929300450.html">Caffe代码梳理</a>
 			      </li>
 		     
 		  

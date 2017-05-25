@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Struct - LZH007
+  图形界面 - LZH007
   
   </title>
   
@@ -111,10 +111,10 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>Struct</h1>
+          <h1>图形界面</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/5/23</span>
+          <span class="date">2017/5/25</span>
 
           <span>posted in&nbsp;</span> 
           
@@ -131,40 +131,114 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>准确地讲，Python没有专门处理字节的数据类型。但由于<code>str</code>既是字符串，又可以表示字节，所以，字节数组＝str。而在C语言中，我们可以很方便地用struct、union来处理字节，以及字节和int，float的转换。</p>
+      <p>Python支持多种图形界面的第三方库，包括：<br/>
+* Tk<br/>
+* wxWidgets<br/>
+* Qt<br/>
+* GTK<br/>
+等等.</p>
 
-<p>在Python中，比方说要把一个32位无符号整数变成字节，也就是4个长度的str，你得配合位运算符来完成.非常麻烦不利于效率开发.</p>
+<p>但是Python自带的库是支持Tk的Tkinter，使用Tkinter，无需安装任何包，就可以直接使用。本章简单介绍如何使用Tkinter进行GUI编程。</p>
 
-<p>好在Python提供了一个<code>struct</code>模块来解决str和其他二进制数据类型的转换。</p>
+<h2 id="toc_0">Tkinter</h2>
 
-<p><code>struct的pack</code>函数把任意数据类型变成字符串：</p>
+<p>我们来梳理一下概念：</p>
 
-<pre><code class="language-py">&gt;&gt;&gt; import struct
-&gt;&gt;&gt; struct.pack(&#39;&gt;I&#39;,10240099)
-&#39;\x00\x9c@c&#39;
-&gt;&gt;&gt;
+<p>我们编写的Python代码会调用内置的Tkinter，Tkinter封装了访问Tk的接口；</p>
+
+<p>Tk是一个图形库，支持多个操作系统，使用Tcl语言开发；</p>
+
+<p>Tk会调用操作系统提供的本地GUI接口，完成最终的GUI。</p>
+
+<p>所以，我们的代码只需要调用Tkinter提供的接口就可以了。</p>
+
+<h2 id="toc_1">第一个GUI程序</h2>
+
+<p>使用Tkinter十分简单，我们来编写一个GUI版本的“Hello, world!”。</p>
+
+<p>第一步是导入Tkinter包的所有内容：</p>
+
+<pre><code class="language-py">from Tkinter import *
 </code></pre>
 
-<p><code>pack</code>的第一个参数是处理指令，<code>&#39;&gt;I&#39;</code>的意思是：</p>
+<p>第二步是从<code>Frame</code>派生一个<code>Application</code>类，这是所有Widget的父容器：</p>
 
-<p><strong><code>&gt;</code>表示字节顺序是<code>big-endian</code>，也就是网络序，<code>I</code>表示4字节无符号整数。</strong></p>
+<pre><code class="language-py">
+class Applicition(Frame):
+    def __init__(self, master=None):
+        Frame.__init__(self,master)
+        self.pack()
+        self.creatWidgets()
 
-<p>后面的参数个数要和处理指令一致。</p>
+    def creatWidgets(self):
+        self.helloLabel = Label(self,text = &#39;Hello,world&#39;)
+        self.helloLabel.pack()
+        self.quitButton = Button(self, text = &#39;Quit&#39;,command = self.quit)
+        self.quitButton.pack()
 
-<p><code>unpack</code>把<code>str</code>变成相应的数据类型：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-import struct
-print struct.unpack(&#39;&gt;IH&#39;,&#39;\xf0\xf0\xf0\xf0\x80\x80&#39;)
 </code></pre>
 
-<p><img src="media/14955029237844/14955050577583.jpg" alt=""/></p>
+<p>在GUI中，每个Button、Label、输入框等，都是一个Widget。Frame则是可以容纳其他Widget的Widget，所有的Widget组合起来就是一棵树。</p>
 
-<p>根据&gt;IH的说明，后面的str依次变为I：4字节无符号整数和H：2字节无符号整数。</p>
+<p><code>pack()</code>方法把Widget加入到父容器中，并实现布局。<code>pack()</code>是最简单的布局，<code>grid()</code>可以实现更复杂的布局。</p>
 
-<p>所以，尽管Python不适合编写底层操作字节流的代码，但在对性能要求不高的地方，利用<code>struct</code>就方便多了。</p>
+<p>在<code>createWidgets()</code>方法中，我们创建一个<code>Label</code>和一个<code>Button</code>，当Button被点击时，触发<code>self.quit()</code>使程序退出。</p>
 
-<p><code>struct</code>模块定义的数据类型可以参考Python官方文档：<a href="https://docs.python.org/2/library/struct.html#format-characters">https://docs.python.org/2/library/struct.html#format-characters</a></p>
+<p>第三步，实例化<code>Application</code>，并启动消息循环：</p>
+
+<pre><code class="language-py">app = Application()
+# 设置窗口标题:
+app.master.title(&#39;Hello World&#39;)
+# 主消息循环:
+app.mainloop()
+</code></pre>
+
+<p>GUI程序的主线程负责监听来自操作系统的消息，并依次处理每一条消息。因此，如果消息处理非常耗时，就需要在新线程中处理。</p>
+
+<p>运行这个GUI程序，可以看到下面的窗口：<br/>
+<img src="media/14957005904776/14957017137688.jpg" alt=""/><br/>
+点击“Quit”按钮或者窗口的“x”结束程序。</p>
+
+<h2 id="toc_2">输入文本</h2>
+
+<p>我们再对这个GUI程序改进一下，加入一个文本框，让用户可以输入文本，然后点按钮后，弹出消息对话框。</p>
+
+<pre><code class="language-py">from Tkinter import *
+import tkMessageBox
+
+
+class Applicition(Frame):
+
+    def __init__(self, master=None):
+        Frame.__init__(self, master)
+        self.pack()
+        self.creatWidgets()
+
+    def creatWidgets(self):
+        self.nameInput = Entry(self)
+        self.nameInput.pack()
+        self.alertButton = Button(self, text=&#39;Hello&#39;, command=self.hello)
+        self.alertButton.pack()
+
+    def hello(self):
+        name = self.nameInput.get() or &#39;world&#39;
+        tkMessageBox.showinfo(&#39;Message&#39;, &#39;Hello,%s&#39; % name)
+
+app = Applicition()
+app.master.title(&#39;Hello World&#39;)
+app.mainloop()
+
+</code></pre>
+
+<p><img src="media/14957005904776/14957022189285.jpg" alt=""/></p>
+
+<p>当用户点击按钮时，触发<code>hello()</code>，通过<code>self.nameInput.get()</code>获得用户输入的文本后，使用<code>tkMessageBox.showinfo()</code>可以弹出消息对话框。</p>
+
+<h2 id="toc_3">小结</h2>
+
+<p>Python内置的Tkinter可以满足基本的GUI程序的要求，如果是非常复杂的GUI程序，建议用操作系统原生支持的语言和库来编写。</p>
+
+<p>源码参考：<a href="https://github.com/michaelliao/learn-python/tree/master/gui">https://github.com/michaelliao/learn-python/tree/master/gui</a></p>
 
 
     
@@ -175,16 +249,13 @@ print struct.unpack(&#39;&gt;IH&#39;,&#39;\xf0\xf0\xf0\xf0\x80\x80&#39;)
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14955245049549.html" 
-          title="Previous Post: 运行caffe框架中的cifar10样例">&laquo; 运行caffe框架中的cifar10样例</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14955000885655.html" 
-          title="Next Post: Base64">Base64 &raquo;</a>
+          <a  href="14956930097908.html" 
+          title="Next Post: HTMLParser">HTMLParser &raquo;</a>
       
       </p>
         </div>
