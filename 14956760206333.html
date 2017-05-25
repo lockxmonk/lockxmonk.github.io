@@ -1,0 +1,508 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  itertools - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>itertools</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/5/25</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <ul>
+<li>
+<a href="#toc_0">chain()</a>
+</li>
+<li>
+<a href="#toc_1">groupby()</a>
+</li>
+<li>
+<a href="#toc_2">imap()</a>
+</li>
+<li>
+<a href="#toc_3">ifilter()</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_4">小结</a>
+
+
+<p>Python的内建模块<code>itertools</code>提供了非常有用的用于操作迭代对象的函数。</p>
+
+<p>首先，我们看看<code>itertools</code>提供的几个“无限”迭代器：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+natuals = itertools.count(1)
+for n in natuals:
+    print n
+</code></pre>
+
+<p><img src="media/14956760206333/14956780529492.jpg" alt=""/></p>
+
+<p>因为<code>count()</code>会创建一个无限的迭代器，所以上述代码会打印出自然数序列，根本停不下来，只能按<code>Ctrl+C</code>退出。(有假死的风险)</p>
+
+<p><code>cycle()</code>会把传入的一个序列无限重复下去：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+cs = itertools.cycle(&#39;ABC&#39;)
+for n in cs:
+    print n
+</code></pre>
+
+<p><img src="media/14956760206333/14956783779668.jpg" alt=""/><br/>
+同样停不下来。(很容易程序假死....)</p>
+
+<p><code>repeat()</code>负责把一个元素无限重复下去，不过如果提供第二个参数就可以限定重复次数：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+ns = itertools.repeat(&#39;A&#39;,10)
+for n in ns:
+    print n
+</code></pre>
+
+<p><img src="media/14956760206333/14956789222152.jpg" alt=""/></p>
+
+<p><strong>无限序列只有在<code>for</code>迭代时才会无限地迭代下去，如果只是创建了一个迭代对象，它不会事先把无限个元素生成出来，事实上也不可能在内存中创建无限多个元素。</strong></p>
+
+<p>无限序列虽然可以无限迭代下去，但是通常我们会通过<code>takewhile()</code>等函数根据条件判断来截取出一个有限的序列：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+natuals = itertools.count(1)
+ns = itertools.takewhile(lambda x:x&lt;=10, natuals)
+for n in ns:
+    print n
+</code></pre>
+
+<p><img src="media/14956760206333/14956791893037.jpg" alt=""/></p>
+
+<p><code>itertools</code>提供的几个迭代器操作函数更加有用：</p>
+
+<h2 id="toc_0">chain()</h2>
+
+<p><code>chain()</code>可以把一组迭代对象串联起来，形成一个更大的迭代器：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+for c in itertools.chain(&#39;ABC&#39;, &#39;XYZ&#39;):
+    print c
+</code></pre>
+
+<p><img src="media/14956760206333/14956795463378.jpg" alt=""/></p>
+
+<h2 id="toc_1">groupby()</h2>
+
+<p><code>groupby()</code>把迭代器中相邻的重复元素挑出来放在一起：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+for key,group  in itertools.groupby(&#39;AAAABBBBBCCCAAA&#39;):
+    print key ,list(group)
+</code></pre>
+
+<p><img src="media/14956760206333/14956799374968.jpg" alt=""/><br/>
+<strong>这里注意到打印group的时候用的是list(group),这是因为gruupby返回仍然是一个迭代器!!,迭代器中的元素可以用list(迭代器)来将元素显示出来,但是要注意不要用list来显示那些无限循环的迭代器(会死机....).</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+cs = itertools.repeat(&#39;A&#39;, 10) # 注意字符串也是序列的一种
+print list(cs)
+</code></pre>
+
+<p><img src="media/14956760206333/14956833066876.jpg" alt=""/></p>
+
+<h2 id="toc_2">imap()</h2>
+
+<p><code>imap()</code>和<code>map()</code>的区别在于，<code>imap()</code>可以作用于无穷序列，并且，如果两个序列的长度不一致，以短的那个为准。</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+for x in itertools.imap(lambda x, y: x * y, [10, 20, 30], itertools.count(1)):
+         print x
+</code></pre>
+
+<p><img src="media/14956760206333/14956801958879.jpg" alt=""/></p>
+
+<p>注意<code>imap()</code>返回一个迭代对象，而<code>map()</code>返回<code>list</code>。当你调用<code>map()</code>时，已经计算完毕,当你调用<code>imap()</code>时，并没有进行任何计算：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+r = map(lambda x: x*x, [1, 2, 3])
+print r     # r已经计算出来了
+n = itertools.imap(lambda x: x*x, [1, 2, 3])
+print n     # n只是一个迭代对象
+
+for x in n:
+    print x
+</code></pre>
+
+<p><img src="media/14956760206333/14956804009136.jpg" alt=""/></p>
+
+<p>必须用for循环对r进行迭代，才会在每次循环过程中计算出下一个元素.</p>
+
+<p>这说明<code>imap()</code>实现了“惰性计算”，也就是在需要获得结果的时候才计算。类似<code>imap()</code>这样能够实现惰性计算的函数就可以处理无限序列：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+r = itertools.imap(lambda x: x*x, itertools.count(1)) 
+for n in itertools.takewhile(lambda x: x&lt;100, r):
+      print n
+</code></pre>
+
+<p><img src="media/14956760206333/14956809524908.jpg" alt=""/></p>
+
+<p>如果把imap()换成map()去处理无限序列:</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+r = map(lambda x: x * x, itertools.count(1))
+print r
+# for n in itertools.takewhile(lambda x: x&lt;100, r):
+# print n
+</code></pre>
+
+<p>会造成电脑死机,由于<code>map()</code>返回的是一个list，所以当用它去处理无限序列的时候，它会尝试计算完之后才返回，但是序列是无限的，所以它会一直计算下去，致使其占用的系统的内存越来越高。(很坑爹....)</p>
+
+<h2 id="toc_3">ifilter()</h2>
+
+<p>不用多说了，<code>ifilter()</code>就是<code>filter()</code>的惰性实现。</p>
+
+<h1 id="toc_4">小结</h1>
+
+<p><code>itertools</code>模块提供的全部是处理迭代功能的函数，它们的返回值不是<code>list</code>，而是迭代对象，只有用<code>for</code>循环迭代的时候才真正计算。</p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="14956154840973.html" 
+          title="Next Post: hashlib">hashlib &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="14956760206333.html">itertools</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14956154840973.html">hashlib</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14956131169957.html">在ios中判断一个viewcontroller是都已经正常present</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14955929300450.html">Caffe代码梳理</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14955245049549.html">运行caffe框架中的cifar10样例</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

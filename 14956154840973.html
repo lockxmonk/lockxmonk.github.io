@@ -146,7 +146,16 @@
 <li>
 <a href="#toc_3">练习:根据用户输入的口令，计算出存储在数据库中的MD5口令：</a>
 </li>
+<li>
+<a href="#toc_4">练习：设计一个验证用户登录的函数，根据用户输入的口令是否正确，返回True或False：</a>
+</li>
+<li>
+<a href="#toc_5">练习：根据用户输入的登录名和口令模拟用户注册，计算更安全的MD5：</a>
+</li>
 </ul>
+</li>
+<li>
+<a href="#toc_6">小结</a>
 </li>
 </ul>
 
@@ -264,6 +273,121 @@ print calc_md5(password_text)
 
 <p><img src="media/14956154840973/14956172486330.jpg" alt=""/></p>
 
+<p>存储MD5的好处是即使运维人员能访问数据库，也无法获知用户的明文口令。</p>
+
+<h3 id="toc_4">练习：设计一个验证用户登录的函数，根据用户输入的口令是否正确，返回True或False：</h3>
+
+<pre><code class="language-py">db = {
+    &#39;michael&#39;: &#39;e10adc3949ba59abbe56e057f20f883e&#39;,
+    &#39;bob&#39;: &#39;878ef96e86145580c38c87f0410ad153&#39;,
+    &#39;alice&#39;: &#39;99b1c2188db85afee403b1536010c2c9&#39;
+}
+
+def login(user, password):
+    pass
+</code></pre>
+
+<p>实现代码为:</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+import hashlib
+db = {
+    &#39;michael&#39;: &#39;e10adc3949ba59abbe56e057f20f883e&#39;,
+    &#39;bob&#39;: &#39;878ef96e86145580c38c87f0410ad153&#39;,
+    &#39;hao&#39;: &#39;e10adc3949ba59abbe56e057f20f883e&#39;
+}
+
+def calc_md5(password):
+    md5 = hashlib.md5()
+    md5.update(password)
+    return md5.hexdigest()
+def login(user,password):
+    md5 = hashlib.md5()
+    md5.update(password)
+    if user in db:
+        if db[user]==md5.hexdigest():
+            print &#39;登陆成功&#39;
+        else :
+            print &#39;失败&#39;
+    else:
+        print&#39;该用户不存在&#39;
+user_text = raw_input(&#39;请输入用户名: &#39;)    
+password_text = raw_input(&#39;输入密码: &#39;)
+
+print calc_md5(password_text)
+login(user_text, password_text)
+</code></pre>
+
+<p><img src="media/14956154840973/14956740702158.jpg" alt=""/></p>
+
+<p>对于用户来讲，当然不要使用过于简单的口令。但是，我们能否在程序设计上对简单口令加强保护呢？</p>
+
+<p>由于常用口令的MD5值很容易被计算出来，所以，要确保存储的用户口令不是那些已经被计算出来的常用口令的MD5，这一方法通过对原始口令加一个复杂字符串来实现，俗称“加盐”：</p>
+
+<pre><code class="language-py">def calc_md5(password):
+    return get_md5(password + &#39;the-Salt&#39;)
+</code></pre>
+
+<p>经过Salt处理的MD5口令，只要Salt不被黑客知道，即使用户输入简单口令，也很难通过MD5反推明文口令。</p>
+
+<p><mark>但是如果有两个用户都使用了相同的简单口令比如123456，在数据库中，将存储两条相同的MD5值，这说明这两个用户的口令是一样的。有没有办法让使用相同口令的用户存储不同的MD5呢？</mark></p>
+
+<p><strong>如果假定用户无法修改登录名，就可以通过把登录名作为Salt的一部分来计算MD5，从而实现相同口令的用户也存储不同的MD5。</strong></p>
+
+<h3 id="toc_5">练习：根据用户输入的登录名和口令模拟用户注册，计算更安全的MD5：</h3>
+
+<pre><code class="language-py">db = {}
+
+def register(username, password):
+    db[username] = get_md5(password + username + &#39;the-Salt&#39;)
+</code></pre>
+
+<p>然后，根据修改后的MD5算法实现用户登录的验证：</p>
+
+<pre><code class="language-py">def login(username, password):
+    pass
+</code></pre>
+
+<p>实现代码:</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+import hashlib
+db = {}
+def register(username,password):
+    if username in db:
+        print &#39;用户已存在&#39;
+    else:
+        db[username] = get_md5(password + username + &#39;the-Slat&#39;) 
+def get_md5(text):
+    md5 = hashlib.md5()
+    md5.update(text)
+    return md5.hexdigest()
+def login(user,password):
+    md5 = hashlib.md5()
+    md5.update(password + user + &#39;the-Slat&#39;)
+    if user in db:
+        if db[user]==md5.hexdigest():
+            print &#39;登陆成功&#39;
+        else :
+            print &#39;失败&#39;
+    else:
+        print&#39;该用户不存在或者密码错误&#39;
+register(&#39;hao&#39;, &#39;123456&#39;)
+register(&#39;hao&#39;, &#39;12212&#39;)    #重复注册会显示失败
+user_text = raw_input(&#39;请输入用户名: &#39;)    
+password_text = raw_input(&#39;输入密码: &#39;)
+
+login(user_text, password_text)
+</code></pre>
+
+<p><img src="media/14956154840973/14956751273389.jpg" alt=""/></p>
+
+<h2 id="toc_6">小结</h2>
+
+<p>摘要算法在很多地方都有广泛的应用。<strong>要注意摘要算法不是加密算法，不能用于加密（因为无法通过摘要反推明文）</strong>，只能用于防篡改，但是它的单向计算特性决定了可以在不存储明文口令的情况下验证用户口令。</p>
+
 
     
 
@@ -272,6 +396,9 @@ print calc_md5(password_text)
       <div class="row">
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="14956760206333.html" 
+          title="Previous Post: itertools">&laquo; itertools</a>
       
         </p>
         </div>
@@ -362,6 +489,12 @@ print calc_md5(password_text)
 	      
 		      
 			      <li class="post">
+			        <a href="14956760206333.html">itertools</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14956154840973.html">hashlib</a>
 			      </li>
 		     
@@ -381,12 +514,6 @@ print calc_md5(password_text)
 		      
 			      <li class="post">
 			        <a href="14955245049549.html">运行caffe框架中的cifar10样例</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14955029237844.html">Struct</a>
 			      </li>
 		     
 		  
