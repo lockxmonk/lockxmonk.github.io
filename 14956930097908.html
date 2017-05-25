@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  单元测试 - LZH007
+  HTMLParser - LZH007
   
   </title>
   
@@ -111,14 +111,12 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>单元测试</h1>
+          <h1>HTMLParser</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/4/22</span>
+          <span class="date">2017/5/25</span>
 
-          <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
            
          
           <span class="comments">
@@ -131,173 +129,112 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>我们来编写一个<code>Dict</code>类，这个类的行为和<code>dict</code>一致，但是可以通过属性来访问，用起来就像下面这样：</p>
+      <p>在Pythonz中我们有可能需要去解析一个爬下来的HTML,我们在Python中应该如何去解析呢?</p>
 
-<pre><code>&gt;&gt;&gt; d = Dict(a=1, b=2)
-&gt;&gt;&gt; d[&#39;a&#39;]
-1
-&gt;&gt;&gt; d.a
-1
-</code></pre>
-
-<p>mydict.py代码为：</p>
+<p>好在Python提供了<code>HTMLParser</code>来非常方便地解析HTML，只需简单几行代码：</p>
 
 <pre><code class="language-py"># -*- coding: utf-8 -*-
-class Dict(dict):
+from HTMLParser import HTMLParser
+from htmlentitydefs import name2codepoint
 
-    def __init__(self, **kw):
-        super(Dict, self).__init__(**kw)
+class MyHTMLParser(HTMLParser):
+    def handle_starttag(self,tag,attrs):
+        print (&#39;&lt;%s&gt;&#39; % tag)
 
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r &quot; &#39;Dict&#39; object has no atr &#39;%s&#39; &quot; % key)
-        else:
-            pass
-        finally:
-            pass
-
-    def __setattr__(self, key, value):
-        self[key] = value
-
-</code></pre>
-
-<p>为了编写单元测试，我们需要引入Python自带的<code>unittest</code>模块，编写<code>mydict_test.py</code>如下：</p>
-
-<pre><code class="language-py">import unittest
-
-from mydict import Dict
-
-
-class TestDict(unittest.TestCase):
-
-    def test_init(self):
-        d = Dict(a=1, b=&#39;test&#39;)
-        self.assertEquals(d.a, 1)
-        self.assertEquals(d.b, &#39;test&#39;)
-        self.assertTrue(isinstance(d, dict))
-
-    def test_key(self):
-        d = Dict()
-        d[&#39;key&#39;] = &#39;value&#39;
-        self.assertEquals(d.key, &#39;value&#39;)
-
-    def test_attr(self):
-        d = Dict()
-        d.key = &#39;value&#39;
-        self.assertTrue(&#39;key&#39; in d)
-        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
-
-    def test_keyerror(self):
-        d = Dict()
-        with self.assertRaises(KeyError):
-            value = d[&#39;empty&#39;]
-
-    def test_attrerror(self):
-        d = Dict()
-        with self.assertRaises(AttributeError)
-            value = d.empty
-
-</code></pre>
-
-<p>编写单元测试时，我们需要编写一个测试类，从<code>unittest.TestCase</code>继承。</p>
-
-<p>以<code>test</code>开头的方法就是测试方法，不以<code>test</code>开头的方法不被认为是测试方法，测试的时候不会被执行。</p>
-
-<p>对每一类测试都需要编写一个<code>test_xxx()</code>方法。由于<code>unittest.TestCase</code>提供了很多内置的条件判断，我们只需要调用这些方法就可以断言输出是否是我们所期望的。最常用的断言就是<code>assertEquals()：</code></p>
-
-<pre><code class="language-py">self.assertEquals(abs(-1), 1) # 断言函数返回的结果与1相等
-</code></pre>
-
-<p>另一种重要的断言就是期待抛出指定类型的<code>Error</code>，比如通过<code>d[&#39;empty&#39;]</code>访问不存在的key时，断言会抛出<code>KeyError</code>：</p>
-
-<pre><code class="language-py">with self.assertRaises(KeyError):
-    value = d[&#39;empty&#39;]
-</code></pre>
-
-<p>而通过<code>d.empty</code>访问不存在的<code>key</code>时，我们期待抛出<code>AttributeError</code>：</p>
-
-<pre><code class="language-py">with self.assertRaises(AttributeError):
-    value = d.empty
-</code></pre>
-
-<h2 id="toc_0">运行单元测试</h2>
-
-<p>一旦编写好单元测试，我们就可以运行单元测试。最简单的运行方式是在<code>mydict_test.py</code>的最后加上两行代码：</p>
-
-<pre><code class="language-py">if __name__ == &#39;__main__&#39;:
-    unittest.main()
-</code></pre>
-
-<p>这样就可以把<code>mydict_test.py</code>当做正常的python脚本运行：</p>
-
-<p><img src="media/14928429198094/14928450280463.jpg" alt=""/></p>
-
-<p>另一种更常见的方法是在命令行通过参数<code>-m unittest</code>直接运行单元测试:<br/>
-<img src="media/14928429198094/14928451217135.jpg" alt=""/></p>
-
-<p>这是推荐的做法，因为这样可以一次批量运行很多单元测试，并且，有很多工具可以自动来运行这些单元测试。</p>
-
-<h2 id="toc_1">setUp与tearDown</h2>
-
-<p>可以在单元测试中编写两个特殊的<code>setUp()</code>和<code>tearDown()</code>方法。这两个方法会分别在每<strong>调用一个测试方法的前后分别被执行</strong>。</p>
-
-<p><code>setUp()和tearDown()</code>方法有什么用呢？设想你的测试需要启动一个数据库，这时，就可以在<code>setUp()</code>方法中连接数据库，在<code>tearDown()</code>方法中关闭数据库，这样，不必在每个测试方法中重复相同的代码：</p>
-
-<pre><code class="language-py">import unittest
-
-from mydict import Dict
-
-class TestDict(unittest.TestCase):
-
-    def setUp(self):    
-        print &#39;setUp...&#39;
-
-    def tearDown(self):
-        print &#39;tearDown...&#39;
+    def handle_endtag(self,tag):
+        print (&#39;&lt;/%s&gt;&#39; % tag)
     
-    def test_init(self):    
-        d = Dict(a=1, b=&#39;test&#39;)
-        self.assertEquals(d.a, 1)   
-        self.assertEquals(d.b, &#39;test&#39;)
-        self.assertTrue(isinstance(d, dict))
+    def handle_startendtag(self, tag, attrs):
+        print(&#39;&lt;%s/&gt;&#39; % tag)
 
-    def test_key(self):
-        d = Dict()
-        d[&#39;key&#39;] = &#39;value&#39;
-        self.assertEquals(d.key, &#39;value&#39;)
+    def handle_data(self, data):
+        print(&#39;data&#39;)
 
-    def test_attr(self):
-        d = Dict()
-        d.key = &#39;value&#39;
-        self.assertTrue(&#39;key&#39; in d)
-        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
+    def handle_comment(self, data):
+        print(&#39;&lt;!-- --&gt;&#39;)
 
-    def test_keyerror(self):
-        d = Dict()
-        with self.assertRaises(KeyError):
-            value = d[&#39;empty&#39;]
+    def handle_entityref(self, name):
+        print(&#39;&amp;%s;&#39; % name)
 
-    def test_attrerror(self):
-        d = Dict()
-        with self.assertRaises(AttributeError):
-            value = d.empty
+    def handle_charref(self, name):
+        print(&#39;&amp;#%s;&#39; % name)
+parser = MyHTMLParser()
+parser.feed(&#39;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&lt;p&gt;Some &lt;a href=\&quot;#\&quot;&gt;html&lt;/a&gt; tutorial...&lt;br&gt;END&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;&#39;)
 
-if __name__ == &#39;__main__&#39;:
-     unittest.main()
 </code></pre>
 
-<p><img src="media/14928429198094/14928470586520.jpg" alt=""/></p>
+<p><code>feed()</code>方法可以多次调用，也就是不一定一次把整个HTML字符串都塞进去，可以一部分一部分塞进去。</p>
 
-<h2 id="toc_2">总结</h2>
+<p>特殊字符有两种，一种是英文表示的<code>&amp;nbsp;</code>，一种是数字表示的<code>&amp;#1234;</code>，这两种字符都可以通过Parser解析出来。</p>
 
-<ol>
-<li><p>单元测试可以有效地测试某个程序模块的行为，是未来重构代码的信心保证。</p></li>
-<li><p>单元测试的测试用例要覆盖常用的输入组合、边界条件和异常。</p></li>
-<li><p>单元测试代码要非常简单，如果测试代码太复杂，那么测试代码本身就可能有bug。</p></li>
-<li><p>单元测试通过了并不意味着程序就没有bug了，但是不通过程序肯定有bug。</p></li>
-</ol>
+<h2 id="toc_0">练习</h2>
+
+<p>找一个网页，例如<a href="https://www.python.org/events/python-events/">https://www.python.org/events/python-events/</a>，用浏览器查看源码并复制，然后尝试解析一下HTML，输出Python官网发布的会议时间、名称和地点。</p>
+
+<p>这里我们要解析HTML之前,肯定要先获取该页面元素的代码.我们这里用到了<code>urllib</code>这个库,具体用法为:</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import urllib
+
+PythonPage = urllib.urlopen(&#39;https://www.python.org/events/python-events/&#39;)
+pyhtml = PythonPage.read()  #读取该页面代码.
+print pyhtml
+</code></pre>
+
+<p><img src="media/14956930097908/14956951701372.jpg" alt=""/><br/>
+上面为结果,这里只是部分截图.</p>
+
+<p>下面我们来继续研究上面的问题:</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+from HTMLParser import HTMLParser
+from htmlentitydefs import name2codepoint
+import urllib
+
+
+class PyHTMLParser(HTMLParser):
+
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self._count = 0
+        self._events = dict()
+        self._flag = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == &#39;h3&#39; and attrs.__contains__((&#39;class&#39;, &#39;event-title&#39;)):
+            self._count += 1
+            self._events[self._count] = dict()
+            self._flag = &#39;event-title&#39;
+        if tag == &#39;time&#39;:
+            self._flag = &#39;time&#39;
+        if tag == &#39;span&#39; and attrs.__contains__((&#39;class&#39;, &#39;event-location&#39;)):
+            self._flag = &#39;event-location&#39;
+
+    def handle_data(self, data):
+        if self._flag == &#39;event-title&#39;:
+            self._events[self._count][self._flag] = data
+        if self._flag == &#39;time&#39;:
+            self._events[self._count][self._flag] = data
+        if self._flag == &#39;event-location&#39;:
+            self._events[self._count][self._flag] = data
+        self._flag = None   #一定要设置为None,防止其它data误入
+
+    def event_list(self):
+        print self._events
+        print &#39;近期关于Python的会议有：&#39;, self._count, &#39;个，具体如下：&#39;
+        for event in self._events.values():
+            print event[&#39;event-title&#39;], &#39;\t&#39;, event[&#39;time&#39;], &#39;\t&#39;, event[&#39;event-location&#39;]
+
+PythonPage = urllib.urlopen(&#39;https://www.python.org/events/python-events/&#39;)
+pyhtml = PythonPage.read()
+parser = PyHTMLParser()
+parser.feed(pyhtml)
+parser.event_list()
+</code></pre>
+
+<p>这里我们将所遇到的属性,进行人为分类,将包含<code>&#39;event-title&#39;</code>,<code>&#39;time&#39;</code>,<code>&#39;event-location&#39;</code>关键字的属性聚类到一起,</p>
+
+<p><img src="media/14956930097908/14956975668058.jpg" alt=""/></p>
 
 
     
@@ -308,16 +245,13 @@ if __name__ == &#39;__main__&#39;:
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14928484245894.html" 
-          title="Previous Post: 文档测试">&laquo; 文档测试</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14928307466218.html" 
-          title="Next Post: 调试">调试 &raquo;</a>
+          <a  href="14956760206333.html" 
+          title="Next Post: itertools">itertools &raquo;</a>
       
       </p>
         </div>
