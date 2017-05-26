@@ -111,6 +111,147 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14921312042142.html">
+                
+                  <h1>匿名函数</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>当我们在传入函数时，有些时候，不需要显式地定义函数，直接传入匿名函数更方便。</p>
+
+<p>关键字<code>lambda</code>表示匿名函数</p>
+
+<p><strong>匿名函数有个限制，就是只能有一个表达式，不用写<code>return</code>，返回值就是该表达式的结果。</strong></p>
+
+<p>例如：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+print map(lambda x:x*x, [1,2,3,4,5,6])
+</code></pre>
+
+<p><img src="media/14921312042142/14921315287449.jpg" alt=""/></p>
+
+<p><font color=red>其中冒号前面的x表示函数参数。</font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/14</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14920643245223.html">
+                
+                  <h1>返回函数</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">函数作为返回值</h2>
+
+<p>在求和函数中，如果不需要立刻求和，而是在后面的代码中，根据需要再计算怎么办？可以不返回求和的结果，而是返回求和的函数！</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def lazy_sum(*args):
+    def sum():
+        ax = 0
+        for n in args:
+            ax = ax + n
+        return ax
+    return sum
+f = lazy_sum(1,3,4,5,5)
+#这里是f()不是f
+print f()
+</code></pre>
+
+<h2 id="toc_1">闭包</h2>
+
+<p>注意到返回的函数在其定义内部引用了局部变量args，所以，当一个函数返回了一个函数后，其内部的局部变量还被新函数引用，所以，闭包用起来简单，实现起来可不容易。</p>
+
+<p><strong>返回的函数并没有立刻执行，而是直到调用了<code>f()</code>才执行</strong><br/>
+例如：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def count():
+    fs = []
+    for i in range(1, 4):
+        def f():
+             return i*i
+        fs.append(f)
+    return fs
+
+f1, f2, f3 = count()
+print f1(),f2(),f3()
+</code></pre>
+
+<p>可能认为结果为<code>1，4，9</code>但是结果为：<br/>
+<img src="media/14920643245223/14920656661011.jpg" alt=""/><br/>
+<font color=red>原因就在于返回的函数引用了变量i，但它并非立刻执行。等到3个函数都返回时，它们所引用的变量i已经变成了3，因此最终结果为9。</font></p>
+
+<blockquote>
+<p>所以：返回闭包时牢记的一点就是：返回函数不要引用任何循环变量，或者后续会发生变化的变量。</p>
+</blockquote>
+
+<p>要引用的话，方法是再创建一个函数，用该函数的参数绑定循环变量当前的值，无论该循环变量后续如何更改，已绑定到函数参数的值不变：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def count():
+    fs=[]
+    for i in range(1,4):
+        def f(j):
+            def g():
+                return j*j
+            return g
+        fs.append(f(i))
+    return fs
+f1, f2, f3 = count()
+print f1(),f2(),f3()
+</code></pre>
+
+<p><img src="media/14920643245223/14920669289447.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/13</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14920539372230.html">
                 
                   <h1>Sorted（排序）</h1>
@@ -349,6 +490,18 @@ print (reduce(prod,m))
 	      
 		      
 			      <li class="post">
+			        <a href="14957648679184.html">UDP编程</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14957594179111.html">网络编程</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14957005904776.html">图形界面</a>
 			      </li>
 		     
@@ -362,18 +515,6 @@ print (reduce(prod,m))
 		      
 			      <li class="post">
 			        <a href="14956760206333.html">itertools</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14956154840973.html">hashlib</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14956131169957.html">在ios中判断一个viewcontroller是都已经正常present</a>
 			      </li>
 		     
 		  
