@@ -111,46 +111,6 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="14921570225186.html">
-                
-                  <h1>拟牛顿法（最大熵模型的学习）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	
-
-<p>最大熵模型学习还可以应用牛顿法或者拟牛顿法。<br/>
-对于最大熵模型而言，<br/>
-<img src="media/14921570225186/14921574471740.jpg" alt=""/><br/>
-<img src="media/14921570225186/14921574611293.jpg" alt=""/><br/>
-相应的拟牛顿法BFGS算法如下。<br/>
-<img src="media/14921570225186/14921576945600.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
                 <a class="clearlink" href="14921324340299.html">
                 
                   <h1>装饰器</h1>
@@ -520,6 +480,58 @@ print filter(prime_num, num)
                 </div>
               </div><!-- article -->
         
+			<div class="article">
+                <a class="clearlink" href="14920523812017.html">
+                
+                  <h1>Map/Reduce</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>1.利用map()函数，把用户输入的不规范的英文名字，变为首字母大写，其他小写的规范名字。输入：[&#39;adam&#39;, &#39;LISA&#39;, &#39;barT&#39;]，输出：[&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]。</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def upper(s):
+    return s.capitalize()
+print(map(upper, [&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]) )
+</code></pre>
+
+<p><img src="media/14920523812017/14920538865556.jpg" alt=""/></p>
+
+<p>2.Python提供的sum()函数可以接受一个list并求和，请编写一个prod()函数，可以接受一个list并利用reduce()求积。</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def prod(x,y):
+    return x*y
+m = [1,2,3,4]
+print (reduce(prod,m))
+</code></pre>
+
+<p><img src="media/14920523812017/14920539075590.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/13</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
               
 
 
@@ -601,12 +613,6 @@ print filter(prime_num, num)
 	      
 		      
 			      <li class="post">
-			        <a href="14963894105351.html">提交测试</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
 			        <a href="14957648679184.html">UDP编程</a>
 			      </li>
 		     
@@ -626,6 +632,12 @@ print filter(prime_num, num)
 		      
 			      <li class="post">
 			        <a href="14956930097908.html">HTMLParser</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14956760206333.html">itertools</a>
 			      </li>
 		     
 		  

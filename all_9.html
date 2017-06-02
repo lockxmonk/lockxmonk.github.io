@@ -111,138 +111,6 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="14893694433396.html">
-                
-                  <h1>朴素贝叶斯法</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">朴素贝叶斯的学习与分类</a>
-<ul>
-<li>
-<a href="#toc_1">基本方法</a>
-</li>
-<li>
-<a href="#toc_2">后验概率最大化的含义</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_3">朴素贝叶斯发的参数估计</a>
-<ul>
-<li>
-<a href="#toc_4">极大似然估计</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_5">学习与分类算法</a>
-</li>
-<li>
-<a href="#toc_6">贝叶斯估计</a>
-</li>
-</ul>
-
-
-<p>朴素贝叶斯（naive Bayes)法是基于贝叶斯定理与特征条件独立假设的分类方。对于给定的训练数据集，首先基于特征条件独立假设学习输入/输出的联合概率分布：然后基于此模型，对给定的输入:x，利用贝叶斯定理求出后验概率最大的输出:y。朴素贝叶斯法实现简单，学习与预测的效率都很髙，是一种常用的方法.</p>
-
-<h2 id="toc_0">朴素贝叶斯的学习与分类</h2>
-
-<h3 id="toc_1">基本方法</h3>
-
-<p>设输入空间\(\chi \subseteq R^n\)为n维向量的集合，输出空间为类标记集合\(\mathcal{Y}={c_1,c_2,...c_k}\)。输入为特征向量\(x\in \chi\),输出为类标记\(y\in mathcal{Y}\)。X是定义在输入空间\(\chi\)上的随机向量，Y是定义在输出空间\(\mathcal{Y}\)上的随机变量。P(X,Y)是X和Y的联合概率分布。训练数据集：<br/>
-\(T = {(x_1,y_1),(x_2,y_2),...,(x_N,y_N)}\)<br/>
-由P(X,Y)独立同分布产生。</p>
-
-<p>朴素贝叶斯法通过训练数据集学习联合概率分布P(X,Y)。具体的，学习以下先验概率分布及条件概率分布。先验概率分布：<br/>
-\(P(Y = c_k), k=1,2,3...K\)</p>
-
-<p>条件概率分布：<br/>
-\(P(X=x|Y=c_k)=P(X^{(1)}=x^{(1)},...,X^{(n)}=x^{(n)}|Y=c_k), k=1,2,...K\)<br/>
-于是学习到联合概率分布P(X,Y)。</p>
-
-<p>条件概率分布P(X=x|Y=\(c_k\))有指数级数量的参数，其估计实际是不可行的，事实上，假设\(x^{(j)}可取值有S_j个，j=1,2,3...n,Y可取值为K个，那么参数个数为K\prod_{j=1}^n{S_j}\)</p>
-
-<p>朴素贝叶斯法对条件概率分布作了条件独立性的假设。由于这是一个较强的假设，朴素贝叶斯法也由此得名。具体地，条件独立性假设是：<br/>
-<img src="media/14893694433396/14897352338918.jpg" alt=""/></p>
-
-<p>朴素贝叶斯法实际上学习到生成数据的机制，所以属于生成模型。条件独立假设等于是说用于分类的特征在类确定的条件下都是条件独立的。这一假设使朴 素贝叶斯法变得简单，但有时会牺牲一定的分类准确率。<br/>
-朴素贝叶斯法分类时，对给定的输入x,通过学习到的模型计算后验概率分布\(P(Y=C_k|X=x)\),将后验概率最大的类作为x的类输出。后验概率计算根据贝 叶斯定理进行：<br/>
-<img src="media/14893694433396/14897352467770.jpg" alt=""/></p>
-
-<h3 id="toc_2">后验概率最大化的含义</h3>
-
-<p>朴素贝叶斯法将实例分到后验概率最大的类中。这等价于期望风险最小化。假设选择0-1损失函数：<br/>
-<img src="media/14893694433396/14897368963380.jpg" alt=""/><br/>
-式中f(X)是分类决策函数。这时，期望风险函数为：<br/>
-<img src="media/14893694433396/14897369463646.jpg" alt=""/><br/>
-期望是对联合分布P(X,Y)取的，由此取条件期望：<br/>
-<img src="media/14893694433396/14897370507779.jpg" alt=""/><br/>
-为了是期望风险最小化，只需要对\(X=x\)逐个极小化，由此得到：<br/>
-<img src="media/14893694433396/14897371045644.jpg" alt=""/><br/>
-这样一来，根据期望风险最小化准则就得到了后验概率最大化准则：<br/>
-<img src="media/14893694433396/14897380067414.jpg" alt=""/><br/>
-即朴素贝叶斯法所采用的原理。</p>
-
-<h2 id="toc_3">朴素贝叶斯发的参数估计</h2>
-
-<h3 id="toc_4">极大似然估计</h3>
-
-<p>在朴素贝叶斯法中，学习意味着估计\(P(Y=c_k)\)和\(P(X^{(j)}=x^{(j)} |Y=c_k)\)。可以应用极大似然估计法估计相应的概率。先验概率\(P(Y=c_k)\)的极大似然估计是:<br/>
-<img src="media/14893694433396/14897383598198.jpg" alt=""/><br/>
-设第j个特征\(x^{(j)}\)可能取值的几何为{\(a_{j1},a_{j2}....a_{jS_j}\)},条件概率\(P(X^{j}=a_{jl}|Y=c_k)\)的极大似然估计是：<br/>
-<img src="media/14893694433396/14897397226736.jpg" alt=""/></p>
-
-<h2 id="toc_5">学习与分类算法</h2>
-
-<p>下面给出朴素贝叶斯的学习与分类方法。</p>
-
-<p>算法(朴素贝叶斯算法)：<br/>
-<img src="media/14893694433396/14897403452985.jpg" alt=""/></p>
-
-<p>下面用一个例题来解释说明上述算法：<br/>
-<img src="media/14893694433396/14897405687808.jpg" alt=""/><br/>
-<img src="media/14893694433396/14897405876725.jpg" alt=""/></p>
-
-<h2 id="toc_6">贝叶斯估计</h2>
-
-<p>用极大似然估计可能会出现所要估计的概率值为0的情况。这时会影响到后验概率的计算结果，使分类产生偏差，解决这一问题的方法是采用贝叶斯估计。具 体地，条件概率的贝叶斯估计是：<br/>
-<img src="media/14893694433396/14897409238342.jpg" alt=""/></p>
-
-<p>这次再用上述例题来举例，如下所示：<br/>
-<img src="media/14893694433396/14897415528528.jpg" alt=""/></p>
-
-<blockquote>
-<p><strong>总结：朴素贝叶斯法的学习与预测大为简化。因而朴素贝叶斯法高效，且易于实现。其缺点是分类的性能不一定很高。</strong></p>
-</blockquote>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/3/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
                 <a class="clearlink" href="14891936534415.html">
                 
                   <h1>k近邻法</h1>
@@ -982,6 +850,99 @@ switch (currentState) {
                 </div>
               </div><!-- article -->
         
+			<div class="article">
+                <a class="clearlink" href="14842935189837.html">
+                
+                  <h1>第4条：多用类型常量，少用#define预处理指令</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>对于一般掌握了Objective-C和C语言的人，也许会用这种方法来定义一个类似动画的时间常量：</p>
+
+<pre><code>#define ANIMATION_DURATION = 0.3
+</code></pre>
+
+<p>上述预处理指令会吧源代码中的ANIMATION_DURATION字符串替换为0.3。<br/>
+在OC中我们常常用更好的方法来定义，比方说，下面这行代码定义了一个类型为NSTimeInterval的常量：</p>
+
+<pre><code>static const NSTimeInterval KAnimationDuration = 0.3；
+</code></pre>
+
+<p>要注意的是此方式定义的常量包含类型信息，其好处就是清楚的描述了常量的含义，有助于编写开发文档。</p>
+
+<p>还要注意常量的名称。常用的命名法是：若常量局限于某“编译单元（也就是实现文件之内，implementation）”,一般在前面加上字母k；若长亮在类之外课件，则通常以类名为前缀。之后将会更加详细的说命名问题。</p>
+
+<p>定义常量的位置很重要。我们总是很喜欢在头文件里声明预处理命令，这样是很糟糕的。例如，ANIMATION_DURATION这个常量名就不应该在头文件中，因为所有引入了这份头文件的其他文件中都会出现这个名字。static const定义的常量也不应该出现在头文件中。因为OC没有命名空间这一概念，所以那样做就等于声明了一个名字叫kANIMATIONDURATION的全局变量。此名称应该加上前缀，以表明其所属的类，例如可以改为EOCViewClassAnimationDuration。</p>
+
+<p>如果不打算去公开某个常量，则应该将其定义为在使用该常量的实现文件中，比如说，要开发一个使用UIKit框架的iOS应用程序，其中UIView子类中含有表示动画播放时间的常量，那么可以这样写：</p>
+
+<pre><code>//EOCAnimatedView.h
+#import &lt;UIKit/UIKit.h&gt;
+@interface EOCAnimatedView:UIView
+-(void)animate;
+@end
+
+//EOCAnimatedView.m
+#import EOCAnimatedView.h
+
+static const NSTimeInterval kAnimationDuration  = 0.3;
+
+@implemention EOCAnimatedView
+
+-(void)animate{
+  [UIViewanimateWithDuration:KAnimationDuration 
+                    animate:^(){
+                        //Perform animations
+                    }]
+}
+</code></pre>
+
+<p>变量一定要同时用static和const来声明。如果试图修改const所声明的变量，编译器会报错。static修饰符意味着该变量仅仅在定义此变量的便一单元中可见。编译器每收到一个编译单元，就会输出一份目标文件。在OC中“编译单元”一词 通常指每个类的实现文件（以.m为后缀名）其作用域仅限于由EOCAnimatedView.m所生成的目标文件中。假如声明此变量时不加static,则编译器会为它创建一个“外部符号”(external symbol)。此时,若是另一个编译单元中也声 明了同名变量，那么编译器就拋出一条错误消息。</p>
+
+<p>有时候需要对外公开某个常量，想要接受常值变量的注册者不需要知道实际的字符串值，只需要以常值变量来注册自己想要接受的通知就可以</p>
+
+<p>此类常量应该放在“全局变量表”中，以便可以在定义该常量的编译单元之外使用。因此可以这样的来定义：</p>
+
+<pre><code>// in the header file
+extern NSString *const EOCStringConstant;
+
+//in the implementation
+NSString *const EOCStringConstant = @&quot;value&quot;;
+</code></pre>
+
+<p>这个常量在头文件中声明，在实现文件里面定义。这类常量只能定义一次。</p>
+
+<p>这样定义常量要优于#define，一旦在.m文件中定义好全局常量后，可以随处使用。</p>
+
+<p><strong>要点</strong><br/>
+* 不要用预处理指令定义常量，这样定义出来的常量不包含类型信息，编译器只是会在编译之前执行查找与替换操作。即使有人重新定义了常量值，编译器也不会产生警告信息。<br/>
+* 在实现文件中使用static const来定义“只在编译单元内可见的常量”。由于此类常量不在全局符号表中，所以无需为其名称添加前缀。<br/>
+* 再投问价那种使用extern来声明全局变量，并且在相关的实现文件中定义其值。这种常量要出现在全局符号表中，所以其名称应该加以区隔，通常用与之有关的类名做前缀。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/1/13</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
               
 
 
@@ -1063,12 +1024,6 @@ switch (currentState) {
 	      
 		      
 			      <li class="post">
-			        <a href="14963894105351.html">提交测试</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
 			        <a href="14957648679184.html">UDP编程</a>
 			      </li>
 		     
@@ -1088,6 +1043,12 @@ switch (currentState) {
 		      
 			      <li class="post">
 			        <a href="14956930097908.html">HTMLParser</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14956760206333.html">itertools</a>
 			      </li>
 		     
 		  
