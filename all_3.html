@@ -111,6 +111,53 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14938936328646.html">
+                
+                  <h1>图像去雾相关基础</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">暗原色</h2>
+
+<p>暗原色先验理论指出，在无雾图像的 非天空区域里，若把图像分为多个子块，则在每个子块中都会 有某些像素点的一个颜色通道的亮度接近于 0</p>
+
+<p><img src="media/14938936328646/14938938844517.jpg" alt=""/><br/>
+<img src="media/14938936328646/14938939404387.jpg" alt=""/><br/>
+<img src="media/14938936328646/14938939611430.jpg" alt=""/></p>
+
+<h2 id="toc_1">HSV</h2>
+
+<p>HSL 和 HSV（也叫做 HSB）是对RGB 色彩空间中点的两种有关系的表示，它们尝试描述比 RGB 更准确的感知颜色联系，并仍保持在计算上简单。<code>HSL 表示hue（色相）、saturation（饱和度）、lightness（亮度）</code>，<strong>HSV 表示</strong> <code>hue、 saturation、value(色调) 而 HSB 表示hue、saturation、brightness（明度）</code>。</p>
+
+<p>HSL 和 HSV 二者都把颜色描述在圆柱体内的点，这个圆柱的中心轴取值为<strong>自底部的黑色到顶部的白色而在它们中间是的灰色</strong>，绕这个轴的<strong>角度</strong>对应于“色相”，<strong>到这个轴的距离</strong>对应于“饱和度”，而<strong>沿着这个轴的距离</strong>对应于“亮度”，“色调”或“明度”。</p>
+
+<p>HSV（色相，饱和度，明度）在概念上可以被认为是颜色的倒圆锥体（黑点在下顶点，白色在上底面圆心）</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14938608177246.html">
                 
                   <h1>分布式进程</h1>
@@ -845,270 +892,6 @@ if __name__==&#39;__main__&#39;:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14933396433742.html">
-                
-                  <h1>序列化</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">JSON</a>
-</li>
-<li>
-<a href="#toc_1">JSON进阶</a>
-</li>
-<li>
-<a href="#toc_2">小结</a>
-</li>
-</ul>
-
-
-<p><strong>我们把变量从内存中变成可存储或传输的过程称之为序列化，在Python中叫pickling，在其他语言中也被称之为serialization，marshalling，flattening等等，都是一个意思。</strong></p>
-
-<p>序列化之后，就可以把序列化后的内容写入磁盘，或者通过网络传输到别的机器上。</p>
-
-<p>反过来，把变量内容从序列化的对象重新读到内存里称之为反序列化，即unpickling。</p>
-
-<p>Python提供两个模块来实现序列化：<code>cPickle</code>和<code>pickle</code>。这两个模块功能是一样的，区别在于<code>cPickle</code>是C语言写的，速度快，<code>pickle</code>是纯Python写的，速度慢，跟<code>cStringIO和StringIO</code>一个道理。用的时候，先尝试导入<code>cPickle</code>，如果失败，再导入<code>pickle</code>：</p>
-
-<pre><code class="language-py">try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-</code></pre>
-
-<p>我们尝试把一个对象序列化并写入文件：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-try:
-    import cPickle as pickle
-except ImportError: 
-    import pickle
-
-d = dict(name=&#39;LZH&#39;,age=20,score=88)
-print pickle.dumps(d)
-</code></pre>
-
-<p><img src="media/14933396433742/14933403797179.jpg" alt=""/></p>
-
-<p><code>pickle.dumps()</code>方法把任意对象序列化成一个<code>str</code>，然后，就可以把这个<code>str</code>写入文件。或者用另一个方法<code>pickle.dump()</code>直接把对象序列化后写入一个<code>file-like Object</code>：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-try:
-    import cPickle as pickle
-except ImportError: 
-    import pickle
-
-d = dict(name=&#39;梁中豪&#39;,age=20,score=88)
-f = open(&#39;test.txt&#39;,&#39;wb&#39;)  
-pickle.dump(d,f)
-f.close
-
-</code></pre>
-
-<p><img src="media/14933396433742/14933405542811.jpg" alt=""/></p>
-
-<p>我们可以读取文件中这些内容，并且将他们反序列化来显示原来的内容：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-try:
-    import cPickle as pickle
-except ImportError: 
-    import pickle
-
-#d = dict(name=&#39;梁中豪&#39;,age=20,score=88)
-f = open(&#39;test.txt&#39;,&#39;rb&#39;)  
-print pickle.load(f)
-f.close
-
-</code></pre>
-
-<p>可以先把内容读到一个<code>str</code>，然后用<code>pickle.loads()</code>方法反序列化出对象，也可以直接用<code>pickle.load()</code>方法从一个<code>file-like Object</code>中直接反序列化出对象</p>
-
-<p>Pickle的问题和所有其他编程语言特有的序列化问题一样，就是它只能用于Python，并且可能不同版本的Python彼此都不兼容，因此，只能用Pickle保存那些不重要的数据，不能成功地反序列化也没关系。</p>
-
-<p>下面我们用JSON来进行网络间的数据传递。</p>
-
-<h2 id="toc_0">JSON</h2>
-
-<p>如果我们要在不同的编程语言之间传递对象，<strong>就必须把对象序列化为标准格式，比如XML，但更好的方法是序列化为JSON，因为JSON表示出来就是一个字符串</strong>，可以被所有语言读取，也可以方便地存储到磁盘或者通过网络传输。JSON不仅是标准格式，并且比XML更快，而且可以直接在Web页面中读取，非常方便。</p>
-
-<p><strong><code>JSON</code>表示的对象就是标准的<code>JavaScript</code>语言的对象，<code>JSON</code>和Python内置的数据类型对应如下：</strong></p>
-
-<table>
-<thead>
-<tr>
-<th>Json类型</th>
-<th>Python类型</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>{}</td>
-<td>dict</td>
-</tr>
-<tr>
-<td>[]</td>
-<td>list</td>
-</tr>
-<tr>
-<td>string</td>
-<td>str或u&#39;unicode&#39;</td>
-</tr>
-<tr>
-<td>12345.56</td>
-<td>int或float</td>
-</tr>
-<tr>
-<td>true/false</td>
-<td>True/False</td>
-</tr>
-<tr>
-<td>null</td>
-<td>None</td>
-</tr>
-</tbody>
-</table>
-
-<p>Python内置的<code>json</code>模块提供了非常完善的Python对象到JSON格式的转换。我们先看看如何把Python对象变成一个JSON：</p>
-
-<pre><code class="language-py">import json
-d = dict(name=&#39;Lichao&#39;, age=20, score=88)
-print json.dumps(d)
-
-</code></pre>
-
-<p><img src="media/14933396433742/14933496188910.jpg" alt=""/></p>
-
-<p><code>dumps()</code>方法返回一个<code>str</code>，内容就是标准的JSON。类似的，<code>dump()</code>方法可以直接把JSON写入一个<code>file-like Object</code>。</p>
-
-<p>要把JSON反序列化为Python对象，用<code>loads()</code>或者对应的<code>load()</code>方法，前者把JSON的字符串反序列化，后者从<code>file-like Object</code>中读取字符串并反序列化：</p>
-
-<pre><code class="language-py">import json
-json_str = &#39;{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Lichao&quot;}&#39;
-print json.loads(json_str)
-</code></pre>
-
-<p><img src="media/14933396433742/14933497889867.jpg" alt=""/></p>
-
-<p>有一点需要注意，就是反序列化得到的所有字符串对象默认都是<code>unicode</code>而不是<code>str</code>。由于JSON标准规定JSON编码是UTF-8，所以我们总是能正确地在Python的<code>str或unicode</code>与JSON的字符串之间转换。</p>
-
-<h2 id="toc_1">JSON进阶</h2>
-
-<p>Python的<code>dict</code>对象可以直接序列化为JSON的<code>{}</code>，不过，很多时候，我们更喜欢用<code>class</code>表示对象，比如定义<code>Student</code>类，然后序列化：</p>
-
-<pre><code class="language-py">import json
-
-
-class Student(object):
-
-    def __init__(self, name, age, score):
-        super(Student, self).__init__()
-        self.name = name
-        self.age = age
-        self.score = score
-
-s = Student(&#39;LiChao&#39;, 20, 88)
-print(json.dumps(s))
-</code></pre>
-
-<p><img src="media/14933396433742/14933605238135.jpg" alt=""/><br/>
-向上述那样调用，会报错，因为<code>Student</code>对象不是一个可序列化为JSON的对象。</p>
-
-<p>我们仔细看看<code>dumps()</code>方法的参数列表，可以发现，除了第一个必须的<code>obj</code>参数外，<code>dumps()</code>方法还提供了一大堆的可选参数。</p>
-
-<p>这些可选参数就是让我们来定制JSON序列化。前面的代码之所以无法把<code>Student</code>类实例序列化为JSON，是因为默认情况下，<code>dumps()</code>方法不知道如何将<code>Student</code>实例变为一个JSON的<code>{}</code>对象。</p>
-
-<p>可选参数<code>default</code>就是把任意一个对象变成一个可序列为JSON的对象，我们只需要为<code>Student</code>专门写一个转换函数，再把函数传进去即可：</p>
-
-<pre><code class="language-py">import json
-
-def student2dict(std):
-    return {
-    &#39;name&#39;:std.name,
-    &#39;age&#39;:std.age,
-    &#39;score&#39;:std.score
-    }
-
-class Student(object):
-
-    def __init__(self, name, age, score):
-        super(Student, self).__init__()
-        self.name = name
-        self.age = age
-        self.score = score
-
-s = Student(&#39;LiChao&#39;, 20, 88)
-print(json.dumps(s,default=student2dict))
-</code></pre>
-
-<p><img src="media/14933396433742/14933609788679.jpg" alt=""/></p>
-
-<p>这样，<code>Student</code>实例首先被<code>student2dict()</code>函数转换成<code>dict</code>，然后再被顺利序列化为<code>JSON</code>。</p>
-
-<p><strong>不过，下次如果遇到一个<code>Teacher</code>类的实例，照样无法序列化为<code>JSON</code>。我们可以偷个懒，把任意<code>class</code>的实例变为<code>dict</code>：</strong></p>
-
-<pre><code class="language-py">print(json.dumps(s, default=lambda obj: obj.__dict__))
-</code></pre>
-
-<p>因为通常<code>class</code>的实例都有一个<code>__dict__</code>属性，它就是一个dict，用来存储实例变量。也有少数例外，比如定义了<code>__slots__</code>的class。</p>
-
-<p>同样的道理，如果我们要把JSON反序列化为一个<code>Student</code>对象实例，<code>loads()</code>方法首先转换出一个dict对象，然后，我们传入的<code>object_hook</code>函数负责把<code>dict</code>转换为<code>Student</code>实例：</p>
-
-<pre><code class="language-py">import json
-
-def dict2students(d):
-    return Student(d[&#39;name&#39;],d[&#39;age&#39;],d[&#39;score&#39;])
-
-class Student(object):
-
-    def __init__(self, name, age, score):
-        super(Student, self).__init__()
-        self.name = name
-        self.age = age
-        self.score = score
-
-json_str = &#39;{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Bob&quot;}&#39;
-print(json.loads(json_str,object_hook=dict2students))
-</code></pre>
-
-<p><img src="media/14933396433742/14933619206509.jpg" alt=""/></p>
-
-<p>打印出的是反序列化的<code>Student</code>实例对象。</p>
-
-<h2 id="toc_2">小结</h2>
-
-<p>Python语言特定的序列化模块是<code>pickle</code>，但如果要把序列化搞得更通用、更符合Web标准，就可以使用<code>json</code>模块。</p>
-
-<p><code>json</code>模块的<code>dumps()和loads()</code>函数是定义得非常好的接口的典范。当我们使用时，只需要传入一个必须的参数。但是，当默认的序列化或反序列机制不满足我们的要求时，我们又可以传入更多的参数来定制序列化或反序列化的规则，既做到了接口简单易用，又做到了充分的扩展性和灵活性。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1190,6 +973,12 @@ print(json.loads(json_str,object_hook=dict2students))
 	      
 		      
 			      <li class="post">
+			        <a href="14963894105351.html">提交测试</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14957648679184.html">UDP编程</a>
 			      </li>
 		     
@@ -1209,12 +998,6 @@ print(json.loads(json_str,object_hook=dict2students))
 		      
 			      <li class="post">
 			        <a href="14956930097908.html">HTMLParser</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14956760206333.html">itertools</a>
 			      </li>
 		     
 		  
