@@ -111,6 +111,159 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14966518170972.html">
+                
+                  <h1>caffe数据结构</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>一个CNN网络是由多个Layer堆叠而成的.如图所示:<br/>
+<img src="media/14966518170972/14966520513325.jpg" alt=""/></p>
+
+<p>caffe按照我们设计的图纸(prototxt),用Blob这些砖块建成一层层(Layer)楼房,最后通过方法SGD方法(Solver)进行简装修(Train),精装修(Finetune)实现的.我们这里就是学习这些基本概念.</p>
+
+<h2 id="toc_0">Blob</h2>
+
+<p>Caffe使用称为Blob的4维数组用于存储和交换数据.Blob提供了统一的存储器接口,持有一批图像或其它数据,权值,权值更新值. 其它机器学习框架也有类似的数据结构.</p>
+
+<p><strong>Blob在内存中为4维数组,分别为<code>(width_,height_,channels_,num_)</code>,width_和height_表示图像的宽和高,channel_表示颜色通道RGB,num_表示第几帧,用于存储数据或权值(data)和权值增量(diff),在进行网路计算时,每层的输入,输出都需要Blob对象缓冲.Blob是Caffe的基本存储单元.</strong></p>
+
+<h2 id="toc_1">Blob的基本用法</h2>
+
+<p>Blob是一个模板类,所以创建对象时需要制定模板参数.我们这里写一个简单的测试程序<code>blob_demo.cpp</code>将它放在<code>caffe</code>的安装目录下:</p>
+
+<pre><code class="language-c++">#include&lt;vector&gt;
+#include&lt;iostream&gt;
+#include&lt;caffe/blob.hpp&gt;
+using namespace caffe;
+using namespace std;
+int main(void)
+{
+    Blob&lt;float&gt; a;
+    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
+    a.Reshape(1,2,3,4);
+    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
+    return 0;
+}
+</code></pre>
+
+<p>上面代码首先创建了整型Blob对象a,打印其维度信息,然后调用其<code>Reshape()</code>方法,再次打印其维度信息.</p>
+
+<p>使用如下命令来编译上面的文件.</p>
+
+<pre><code>g++ -o app blob_demo.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe
+</code></pre>
+
+<p>生成了可执行程序<code>app</code></p>
+
+<p>这个时候运行<code>app</code>的话可能会遇到下面这个错误:<br/>
+<img src="media/14966518170972/14968048615065.jpg" alt=""/><br/>
+这个因为<code>app</code>没有链接到这个动态库文件,执行下边这个命令链接:</p>
+
+<pre><code>install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/./app
+</code></pre>
+
+<p><code>/usr/local/Cellar/caffe/build/lib/</code>为<code>@rpath/libcaffe.so.1.0.0</code>动态库的路径.</p>
+
+<p>执行后,再次运行会遇到错误:<br/>
+<img src="media/14966518170972/14968049981988.jpg" alt=""/></p>
+
+<p>与上面类似,这是因为没有链接到<code>@rpath/libhdf5_hl.10.dylib</code><br/>
+执行下面这个命令:</p>
+
+<pre><code>install_name_tool -add_rpath &#39;/Users/liangzhonghao/anaconda2/lib&#39;  /usr/local/Cellar/caffe/build/lib/libcaffe.so.1.0.0
+</code></pre>
+
+<p>其中<code>/Users/liangzhonghao/anaconda2/lib</code>包含这个库文件.</p>
+
+<p>再次执行app,终于成功了!<br/>
+<img src="media/14966518170972/14968051024802.jpg" alt=""/></p>
+
+<p>创建了Blob对象之后,我们可以通过<code>mutable_cpu[gpu]_data[diff]</code>函数来修改其内部数值:</p>
+
+<p>代码为:<br/>
+```c++</p>
+
+<h1 id="toc_2">include<vector></h1>
+
+<h1 id="toc_3">include<iostream></h1>
+
+<h1 id="toc_4">include<caffe/blob.hpp></h1>
+
+<p>using namespace caffe;<br/>
+using namespace std;<br/>
+int main(void)<br/>
+{<br/>
+    Blob<float> a;<br/>
+    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;<br/>
+    a.Reshape(1,2,3,4);<br/>
+    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;</p>
+
+<pre><code>float *p=a.mutable_cpu_data();
+for(int i=0;i&lt;a.count();i++){
+    p[i]=i;
+}
+for(int u=0;u&lt;a.num();u++){
+    for(int v=0;v&lt;a.channels();v++){
+        for(int w=0;w&lt;a.height();w++){
+            for(int x=0;x&lt;a.width();x++){
+                cout&lt;&lt;&quot;a[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;a.data_at(u,v,w,x)&lt;&lt;endl;
+            }
+        }
+    }
+}
+return 0;
+</code></pre>
+
+<p>}</p>
+
+<pre><code>跟上面一样继续编译和执行,这里按照上面的命令继续来编译的话,遇到了一个错误:
+![](media/14966518170972/14968061663863.jpg)
+
+之后换成下边的命令执行后成功:
+
+</code></pre>
+
+<p>g++ -o app2 blob_demo.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe -lglog -lboost_system -lprotobuf<br/>
+``<code><br/>
+差别在于,后边加上了</code>-lglog -lboost_system -lprotobuf`命令,具体作用后续将研究(暂时不理解),继续运行后,又出现了错误:<br/>
+<img src="media/14966518170972/14968063024883.jpg" alt=""/></p>
+
+<p>同样是动态库的连接问题:<br/>
+运行命令:<br/>
+<code><br/>
+install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/./app2<br/>
+</code><br/>
+执行命令,然后运行<code>app2</code>.得到输出:<br/>
+<img src="media/14966518170972/14968063915684.jpg" alt=""/></p>
+
+<p><code>可见,Blob下标的访问与c/c++高维数组几乎一致,而Blob好处在于可以直接同步CPU/GPU上的数据.</code></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/5</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14964511552671.html">
                 
                   <h1>激活函数</h1>
@@ -1109,209 +1262,6 @@ parser.event_list()
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14956760206333.html">
-                
-                  <h1>itertools</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">chain()</a>
-</li>
-<li>
-<a href="#toc_1">groupby()</a>
-</li>
-<li>
-<a href="#toc_2">imap()</a>
-</li>
-<li>
-<a href="#toc_3">ifilter()</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_4">小结</a>
-
-
-<p>Python的内建模块<code>itertools</code>提供了非常有用的用于操作迭代对象的函数。</p>
-
-<p>首先，我们看看<code>itertools</code>提供的几个“无限”迭代器：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-natuals = itertools.count(1)
-for n in natuals:
-    print n
-</code></pre>
-
-<p><img src="media/14956760206333/14956780529492.jpg" alt=""/></p>
-
-<p>因为<code>count()</code>会创建一个无限的迭代器，所以上述代码会打印出自然数序列，根本停不下来，只能按<code>Ctrl+C</code>退出。(有假死的风险)</p>
-
-<p><code>cycle()</code>会把传入的一个序列无限重复下去：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-cs = itertools.cycle(&#39;ABC&#39;)
-for n in cs:
-    print n
-</code></pre>
-
-<p><img src="media/14956760206333/14956783779668.jpg" alt=""/><br/>
-同样停不下来。(很容易程序假死....)</p>
-
-<p><code>repeat()</code>负责把一个元素无限重复下去，不过如果提供第二个参数就可以限定重复次数：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-ns = itertools.repeat(&#39;A&#39;,10)
-for n in ns:
-    print n
-</code></pre>
-
-<p><img src="media/14956760206333/14956789222152.jpg" alt=""/></p>
-
-<p><strong>无限序列只有在<code>for</code>迭代时才会无限地迭代下去，如果只是创建了一个迭代对象，它不会事先把无限个元素生成出来，事实上也不可能在内存中创建无限多个元素。</strong></p>
-
-<p>无限序列虽然可以无限迭代下去，但是通常我们会通过<code>takewhile()</code>等函数根据条件判断来截取出一个有限的序列：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-natuals = itertools.count(1)
-ns = itertools.takewhile(lambda x:x&lt;=10, natuals)
-for n in ns:
-    print n
-</code></pre>
-
-<p><img src="media/14956760206333/14956791893037.jpg" alt=""/></p>
-
-<p><code>itertools</code>提供的几个迭代器操作函数更加有用：</p>
-
-<h2 id="toc_0">chain()</h2>
-
-<p><code>chain()</code>可以把一组迭代对象串联起来，形成一个更大的迭代器：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-for c in itertools.chain(&#39;ABC&#39;, &#39;XYZ&#39;):
-    print c
-</code></pre>
-
-<p><img src="media/14956760206333/14956795463378.jpg" alt=""/></p>
-
-<h2 id="toc_1">groupby()</h2>
-
-<p><code>groupby()</code>把迭代器中相邻的重复元素挑出来放在一起：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-for key,group  in itertools.groupby(&#39;AAAABBBBBCCCAAA&#39;):
-    print key ,list(group)
-</code></pre>
-
-<p><img src="media/14956760206333/14956799374968.jpg" alt=""/><br/>
-<strong>这里注意到打印group的时候用的是list(group),这是因为gruupby返回仍然是一个迭代器!!,迭代器中的元素可以用list(迭代器)来将元素显示出来,但是要注意不要用list来显示那些无限循环的迭代器(会死机....).</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-cs = itertools.repeat(&#39;A&#39;, 10) # 注意字符串也是序列的一种
-print list(cs)
-</code></pre>
-
-<p><img src="media/14956760206333/14956833066876.jpg" alt=""/></p>
-
-<h2 id="toc_2">imap()</h2>
-
-<p><code>imap()</code>和<code>map()</code>的区别在于，<code>imap()</code>可以作用于无穷序列，并且，如果两个序列的长度不一致，以短的那个为准。</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-for x in itertools.imap(lambda x, y: x * y, [10, 20, 30], itertools.count(1)):
-         print x
-</code></pre>
-
-<p><img src="media/14956760206333/14956801958879.jpg" alt=""/></p>
-
-<p>注意<code>imap()</code>返回一个迭代对象，而<code>map()</code>返回<code>list</code>。当你调用<code>map()</code>时，已经计算完毕,当你调用<code>imap()</code>时，并没有进行任何计算：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-r = map(lambda x: x*x, [1, 2, 3])
-print r     # r已经计算出来了
-n = itertools.imap(lambda x: x*x, [1, 2, 3])
-print n     # n只是一个迭代对象
-
-for x in n:
-    print x
-</code></pre>
-
-<p><img src="media/14956760206333/14956804009136.jpg" alt=""/></p>
-
-<p>必须用for循环对r进行迭代，才会在每次循环过程中计算出下一个元素.</p>
-
-<p>这说明<code>imap()</code>实现了“惰性计算”，也就是在需要获得结果的时候才计算。类似<code>imap()</code>这样能够实现惰性计算的函数就可以处理无限序列：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-r = itertools.imap(lambda x: x*x, itertools.count(1)) 
-for n in itertools.takewhile(lambda x: x&lt;100, r):
-      print n
-</code></pre>
-
-<p><img src="media/14956760206333/14956809524908.jpg" alt=""/></p>
-
-<p>如果把imap()换成map()去处理无限序列:</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-r = map(lambda x: x * x, itertools.count(1))
-print r
-# for n in itertools.takewhile(lambda x: x&lt;100, r):
-# print n
-</code></pre>
-
-<p>会造成电脑死机,由于<code>map()</code>返回的是一个list，所以当用它去处理无限序列的时候，它会尝试计算完之后才返回，但是序列是无限的，所以它会一直计算下去，致使其占用的系统的内存越来越高。(很坑爹....)</p>
-
-<h2 id="toc_3">ifilter()</h2>
-
-<p>不用多说了，<code>ifilter()</code>就是<code>filter()</code>的惰性实现。</p>
-
-<h1 id="toc_4">小结</h1>
-
-<p><code>itertools</code>模块提供的全部是处理迭代功能的函数，它们的返回值不是<code>list</code>，而是迭代对象，只有用<code>for</code>循环迭代的时候才真正计算。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/25</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1393,6 +1343,12 @@ print r
 	      
 		      
 			      <li class="post">
+			        <a href="14966518170972.html">caffe数据结构</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14964511552671.html">激活函数</a>
 			      </li>
 		     
@@ -1412,12 +1368,6 @@ print r
 		      
 			      <li class="post">
 			        <a href="14957005904776.html">图形界面</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14956930097908.html">HTMLParser</a>
 			      </li>
 		     
 		  
