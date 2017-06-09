@@ -111,6 +111,54 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14928484245894.html">
+                
+                  <h1>文档测试</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>如果你经常阅读Python的官方文档，可以看到很多文档都有示例代码。比如<a href="https://docs.python.org/2/library/re.html">re</a>模块就带了很多示例代码：</p>
+
+<pre><code>&gt;&gt;&gt; import re
+&gt;&gt;&gt; m = re.search(&#39;(?&lt;=abc)def&#39;, &#39;abcdef&#39;)
+&gt;&gt;&gt; m.group(0)
+&#39;def&#39;
+</code></pre>
+
+<p>可以把这些示例代码在Python的交互式环境下输入并执行，结果与文档中的示例代码显示的一致。</p>
+
+<p>这些代码与其他说明可以写在注释中，然后，由一些工具来自动生成文档。既然这些代码本身就可以粘贴出来直接运行，那么，可不可以自动执行写在注释中的这些代码呢？</p>
+
+<p>答案是肯定的。</p>
+
+<p>当我们编写注释时，如果写上这样的注释：</p>
+
+<pre><code class="language-py">
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/22</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14928429198094.html">
                 
                   <h1>单元测试</h1>
@@ -1331,276 +1379,6 @@ s()
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14926712777578.html">
-                
-                  <h1>类和实例</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">数据封装</a>
-</li>
-<li>
-<a href="#toc_1">访问限制</a>
-</li>
-<li>
-<a href="#toc_2">继承和多态</a>
-</li>
-<li>
-<a href="#toc_3">获取对象信息</a>
-<ul>
-<li>
-<a href="#toc_4">使用type()</a>
-</li>
-<li>
-<a href="#toc_5">使用isinstance()</a>
-</li>
-<li>
-<a href="#toc_6">使用dir()</a>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>在Python中，定义类是通过<code>class</code>关键字：</p>
-
-<pre><code class="language-py">class Student(object):
-    pass
-</code></pre>
-
-<p><code>class</code>后面紧接着是类名，即<code>Student</code>，类名通常是大写开头的单词，紧接着是<code>(object)</code>，表示该类是从哪个类继承下来的，继承的概念我们后面再讲，通常，<strong>如果没有合适的继承类，就使用object类，这是所有类最终都会继承的类</strong>。</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.name = name
-        self.score = score
-</code></pre>
-
-<p>注意到<code>__init__</code>方法的第一个参数永远是self，表示创建的实例本身，因此，在<code>__init__</code>方法内部，就可以把各种属性绑定到<code>self</code>，因为<code>self</code>就指向创建的实例本身。</p>
-
-<p>和普通的函数相比，在类中定义的函数只有一点不同，<font color=red>就是第一个参数永远是实例变量self，并且，调用时，不用传递该参数。除此之外，类的方法和普通函数没有什么区别，所以，你仍然可以用默认参数、可变参数和关键字参数。</font></p>
-
-<h2 id="toc_0">数据封装</h2>
-
-<p>面向对象编程的一个重要特点就是数据封装，创建实例需要给出<code>name</code>和<code>score</code>，而如何打印，都是在Student类的内部定义的，这些数据和逻辑被“封装”起来了，调用很容易，但却不用知道内部实现的细节。</p>
-
-<p>例如下面增加一个成绩分类的方法：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.name = name
-        self.score = score
-
-    def print_score(self):
-        print &#39;%s:%s&#39; % (self.name, self.score)
-
-    def get_grade(self):
-        if self.score &gt;= 90:
-            print &#39;A&#39;
-        elif self.score &gt;= 60:
-            print &#39;B&#39;
-        else:
-            print &#39;C&#39;
-
-bart = Students(&#39;Bart&#39;, 59)
-lisa = Students(&#39;梁中豪&#39;, 100)
-bart.print_score()
-bart.get_grade()
-lisa.print_score()
-lisa.get_grade()
-</code></pre>
-
-<h2 id="toc_1">访问限制</h2>
-
-<p>在Class内部，可以有属性和方法，而外部代码可以通过直接调用实例变量的方法来操作数据，这样，就隐藏了内部的复杂逻辑。</p>
-
-<p>但是，从前面Student类的定义来看，外部代码还是可以自由地修改一个实例的<code>name</code>、<code>score</code>属性</p>
-
-<p>如果要让内部属性不被外部访问，可以把属性的名称前加上两个下划线<code>__</code>，<font color=red>在Python中，实例的变量名如果以<code>__</code>开头，就变成了一个私有变量（private），只有内部可以访问，外部不能访问，</font>所以，我们把Student类改一改：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.__name = name
-        self.__score = score
-
-    def print_score(self):
-        print &#39;%s:%s&#39; % (self.__name, self.__score)
-
-   
-bart = Students(&#39;Bart&#39;, 59)
-lisa = Students(&#39;梁中豪&#39;, 100)
-bart.print_score()
-lisa.__name
-</code></pre>
-
-<p>改完后，对于外部代码来说，没什么变动，但是已经无法从外部访问实例变量.<code>__name</code>和实例变量<code>.__score</code>了：<br/>
-<img src="media/14926712777578/14926727380387.jpg" alt=""/><br/>
-如果又要允许外部代码修改score,可以给Student类增加set_score方法.这里跟java很像。不在过多叙述。</p>
-
-<h2 id="toc_2">继承和多态</h2>
-
-<p>在OOP程序设计中，当我们定义一个class的时候，可以从某个现有的class继承，新的class称为子类（Subclass），而被继承的class称为基类、父类或超类（Base class、Super class）。</p>
-
-<p>继承最大的好处是子类获得了父类的全部功能。由于<code>Animial</code>实现了<code>run()</code>方法，因此，<code>Dog</code>和<code>Cat</code>作为它的子类，什么事也没干，就自动拥有了<code>run()</code>方法，当然也可以对父类方法进行重写。</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Animal(object):
-    &quot;&quot;&quot;docstring for Animal&quot;&quot;&quot;
-
-    def run(self):
-        print &#39;Animal is running..&#39;
-
-
-class Dog(Animal):
-    pass
-
-
-class Cat(Animal):
-    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
-
-    def run(self):
-        print &#39;Cat is running..&#39;
-
-dog = Dog()
-dog.run()
-
-cat = Cat()
-cat.run()
-
-</code></pre>
-
-<p><img src="media/14926712777578/14926743181176.jpg" alt=""/></p>
-
-<h2 id="toc_3">获取对象信息</h2>
-
-<p>当我们拿到一个对象的引用时，如何知道这个对象是什么类型？</p>
-
-<h3 id="toc_4">使用type()</h3>
-
-<p>基本类型都可以用<code>type()</code>判断：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-print type(123),type(&#39;str&#39;),type(None)
-</code></pre>
-
-<p><img src="media/14926712777578/14926750871663.jpg" alt=""/></p>
-
-<p>Python把每种type类型都定义好了常量，放在types模块里，使用之前，需要先导入：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import types
-print type(&#39;abc&#39;)==types.StringType
-print type(u&#39;abc&#39;)==types.UnicodeType
-print type([])==types.ListType
-print type(str) == types.TypeType
-</code></pre>
-
-<p><img src="media/14926712777578/14926752976543.jpg" alt=""/><br/>
-<strong>最后注意到有一种类型就叫TypeType，所有类型本身的类型就是TypeType.比如<code>int，str</code>等</strong></p>
-
-<h3 id="toc_5">使用isinstance()</h3>
-
-<p>我们使用<code>isinstance()</code>来判断class的类型，例如：</p>
-
-<pre><code class="language-py">class Animals(object):
-    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
-    pass
-class Cat(Animals):
-    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
-    pass
-class Dog(Animals):
-    &quot;&quot;&quot;docstring for Dog&quot;&quot;&quot;
-    pass
-a = Animals()
-d = Dog()
-h = Cat()
-print isinstance(h, Cat),isinstance(d, Dog),isinstance(a, Animals)
-</code></pre>
-
-<p><img src="media/14926712777578/14926756201012.jpg" alt=""/></p>
-
-<p>当然也可以用<code>isinstance()</code>来判断基本类型</p>
-
-<h3 id="toc_6">使用dir()</h3>
-
-<p>如果要获得一个对象的所有属性和方法，可以使用<code>dir()</code>函数，它返回一个包含字符串的<code>list</code>，比如，获得一个str对象的所有属性和方法：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; dir(&#39;abc&#39;)
-</code></pre>
-
-<p><img src="media/14926712777578/14926758082813.jpg" alt=""/></p>
-
-<p><strong>仅仅把属性和方法列出来是不够的，配合<code>getattr()、setattr()以及hasattr()</code>，我们可以直接操作一个对象的状态：</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-class Animals(object):
-    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
-
-    def __init__(self):
-        self.x = 9
-
-    def power(self):
-        print self.x * self.x
-obj = Animals()
-
-print hasattr(obj, &#39;x&#39;)  # 有属性&#39;x&#39;吗？
-print hasattr(obj, &#39;y&#39;)  # 有属性&#39;y&#39;吗？
-print setattr(obj, &#39;y&#39;, 19)  # 设置一个属性&#39;y&#39;
-print getattr(obj, &#39;y&#39;)  # 获取属性&#39;y&#39;
-print obj.y
-</code></pre>
-
-<p><img src="media/14926712777578/14926764199501.jpg" alt=""/></p>
-
-<p>也可以获得对象的方法：</p>
-
-<pre><code class="language-py">fn = getattr(obj, &#39;power&#39;)
-print fn,fn(),
-</code></pre>
-
-<p><img src="media/14926712777578/14926765852729.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/20</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1682,6 +1460,12 @@ print fn,fn(),
 	      
 		      
 			      <li class="post">
+			        <a href="14966518170972.html">caffe数据结构</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14964511552671.html">激活函数</a>
 			      </li>
 		     
@@ -1701,12 +1485,6 @@ print fn,fn(),
 		      
 			      <li class="post">
 			        <a href="14957005904776.html">图形界面</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14956930097908.html">HTMLParser</a>
 			      </li>
 		     
 		  
