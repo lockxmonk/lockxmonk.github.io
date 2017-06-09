@@ -4,7 +4,7 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-06-07T11:37:08+08:00</updated>
+  <updated>2017-06-09T10:41:27+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
@@ -111,7 +111,6 @@ int main(void)
     }
     return 0;
 }
-
 </code></pre>
 
 <p>跟上面一样继续编译和执行,这里按照上面的命令继续来编译的话,遇到了一个错误:<br/>
