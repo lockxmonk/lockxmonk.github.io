@@ -82,63 +82,61 @@ int main(void)
 
 <p>创建了Blob对象之后,我们可以通过<code>mutable_cpu[gpu]_data[diff]</code>函数来修改其内部数值:</p>
 
-<p>代码为:<br/>
-```c++</p>
+<p>代码为:</p>
 
-<h1 id="toc_2">include<vector></h1>
-
-<h1 id="toc_3">include<iostream></h1>
-
-<h1 id="toc_4">include<caffe/blob.hpp></h1>
-
-<p>using namespace caffe;<br/>
-using namespace std;<br/>
-int main(void)<br/>
-{<br/>
-    Blob<float> a;<br/>
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;<br/>
-    a.Reshape(1,2,3,4);<br/>
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;</p>
-
-<pre><code>float *p=a.mutable_cpu_data();
-for(int i=0;i&lt;a.count();i++){
-    p[i]=i;
-}
-for(int u=0;u&lt;a.num();u++){
-    for(int v=0;v&lt;a.channels();v++){
-        for(int w=0;w&lt;a.height();w++){
-            for(int x=0;x&lt;a.width();x++){
-                cout&lt;&lt;&quot;a[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;a.data_at(u,v,w,x)&lt;&lt;endl;
+<pre><code class="language-c++">#include&lt;vector&gt;
+#include&lt;iostream&gt;
+#include&lt;caffe/blob.hpp&gt;
+using namespace caffe;
+using namespace std;
+int main(void)
+{
+    Blob&lt;float&gt; a;
+    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
+    a.Reshape(1,2,3,4);
+    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
+    
+    float *p=a.mutable_cpu_data();
+    for(int i=0;i&lt;a.count();i++){
+        p[i]=i;
+    }
+    for(int u=0;u&lt;a.num();u++){
+        for(int v=0;v&lt;a.channels();v++){
+            for(int w=0;w&lt;a.height();w++){
+                for(int x=0;x&lt;a.width();x++){
+                    cout&lt;&lt;&quot;a[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;a.data_at(u,v,w,x)&lt;&lt;endl;
+                }
             }
         }
     }
+    return 0;
 }
-return 0;
-</code></pre>
-
-<p>}</p>
-
-<pre><code>跟上面一样继续编译和执行,这里按照上面的命令继续来编译的话,遇到了一个错误:
-![](media/14966518170972/14968061663863.jpg)
-
-之后换成下边的命令执行后成功:
 
 </code></pre>
 
-<p>g++ -o app2 blob_demo.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe -lglog -lboost_system -lprotobuf<br/>
-``<code><br/>
-差别在于,后边加上了</code>-lglog -lboost_system -lprotobuf`命令,具体作用后续将研究(暂时不理解),继续运行后,又出现了错误:<br/>
+<p>跟上面一样继续编译和执行,这里按照上面的命令继续来编译的话,遇到了一个错误:<br/>
+<img src="media/14966518170972/14968061663863.jpg" alt=""/></p>
+
+<p>之后换成下边的命令执行后成功:</p>
+
+<pre><code>g++ -o app2 blob_demo.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe -lglog -lboost_system -lprotobuf
+</code></pre>
+
+<p>差别在于,后边加上了<code>-lglog -lboost_system -lprotobuf</code>命令,具体作用后续将研究(暂时不理解),继续运行后,又出现了错误:<br/>
 <img src="media/14966518170972/14968063024883.jpg" alt=""/></p>
 
 <p>同样是动态库的连接问题:<br/>
-运行命令:<br/>
-<code><br/>
-install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/./app2<br/>
-</code><br/>
-执行命令,然后运行<code>app2</code>.得到输出:<br/>
+运行命令:</p>
+
+<pre><code>install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/./app2
+</code></pre>
+
+<p>执行命令,然后运行<code>app2</code>.得到输出:<br/>
 <img src="media/14966518170972/14968063915684.jpg" alt=""/></p>
 
 <p><code>可见,Blob下标的访问与c/c++高维数组几乎一致,而Blob好处在于可以直接同步CPU/GPU上的数据.</code></p>
+
+<p>更改测试</p>
 
 ]]></content>
   </entry>
