@@ -4,141 +4,13 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-06-09T10:41:27+08:00</updated>
+  <updated>2017-06-09T10:47:44+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
-  
-  <entry>
-    <title type="html"><![CDATA[caffe数据结构]]></title>
-    <link href="https://lockxmonk.github.io/14966518170972.html"/>
-    <updated>2017-06-05T16:36:57+08:00</updated>
-    <id>https://lockxmonk.github.io/14966518170972.html</id>
-    <content type="html"><![CDATA[
-<p>一个CNN网络是由多个Layer堆叠而成的.如图所示:<br/>
-<img src="media/14966518170972/14966520513325.jpg" alt=""/></p>
-
-<p>caffe按照我们设计的图纸(prototxt),用Blob这些砖块建成一层层(Layer)楼房,最后通过方法SGD方法(Solver)进行简装修(Train),精装修(Finetune)实现的.我们这里就是学习这些基本概念.</p>
-
-<h2 id="toc_0">Blob</h2>
-
-<p>Caffe使用称为Blob的4维数组用于存储和交换数据.Blob提供了统一的存储器接口,持有一批图像或其它数据,权值,权值更新值. 其它机器学习框架也有类似的数据结构.</p>
-
-<p><strong>Blob在内存中为4维数组,分别为<code>(width_,height_,channels_,num_)</code>,width_和height_表示图像的宽和高,channel_表示颜色通道RGB,num_表示第几帧,用于存储数据或权值(data)和权值增量(diff),在进行网路计算时,每层的输入,输出都需要Blob对象缓冲.Blob是Caffe的基本存储单元.</strong></p>
-
-<h2 id="toc_1">Blob的基本用法</h2>
-
-<p>Blob是一个模板类,所以创建对象时需要制定模板参数.我们这里写一个简单的测试程序<code>blob_demo.cpp</code>将它放在<code>caffe</code>的安装目录下:</p>
-
-<pre><code class="language-c++">#include&lt;vector&gt;
-#include&lt;iostream&gt;
-#include&lt;caffe/blob.hpp&gt;
-using namespace caffe;
-using namespace std;
-int main(void)
-{
-    Blob&lt;float&gt; a;
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    a.Reshape(1,2,3,4);
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    return 0;
-}
-</code></pre>
-
-<p>上面代码首先创建了整型Blob对象a,打印其维度信息,然后调用其<code>Reshape()</code>方法,再次打印其维度信息.</p>
-
-<p>使用如下命令来编译上面的文件.</p>
-
-<pre><code>g++ -o app blob_demo.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe
-</code></pre>
-
-<p>生成了可执行程序<code>app</code></p>
-
-<p>这个时候运行<code>app</code>的话可能会遇到下面这个错误:<br/>
-<img src="media/14966518170972/14968048615065.jpg" alt=""/><br/>
-这个因为<code>app</code>没有链接到这个动态库文件,执行下边这个命令链接:</p>
-
-<pre><code>install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/./app
-</code></pre>
-
-<p><code>/usr/local/Cellar/caffe/build/lib/</code>为<code>@rpath/libcaffe.so.1.0.0</code>动态库的路径.</p>
-
-<p>执行后,再次运行会遇到错误:<br/>
-<img src="media/14966518170972/14968049981988.jpg" alt=""/></p>
-
-<p>与上面类似,这是因为没有链接到<code>@rpath/libhdf5_hl.10.dylib</code><br/>
-执行下面这个命令:</p>
-
-<pre><code>install_name_tool -add_rpath &#39;/Users/liangzhonghao/anaconda2/lib&#39;  /usr/local/Cellar/caffe/build/lib/libcaffe.so.1.0.0
-</code></pre>
-
-<p>其中<code>/Users/liangzhonghao/anaconda2/lib</code>包含这个库文件.</p>
-
-<p>再次执行app,终于成功了!<br/>
-<img src="media/14966518170972/14968051024802.jpg" alt=""/></p>
-
-<p>创建了Blob对象之后,我们可以通过<code>mutable_cpu[gpu]_data[diff]</code>函数来修改其内部数值:</p>
-
-<p>代码为:</p>
-
-<pre><code class="language-c++">#include&lt;vector&gt;
-#include&lt;iostream&gt;
-#include&lt;caffe/blob.hpp&gt;
-using namespace caffe;
-using namespace std;
-int main(void)
-{
-    Blob&lt;float&gt; a;
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    a.Reshape(1,2,3,4);
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    
-    float *p=a.mutable_cpu_data();
-    for(int i=0;i&lt;a.count();i++){
-        p[i]=i;
-    }
-    for(int u=0;u&lt;a.num();u++){
-        for(int v=0;v&lt;a.channels();v++){
-            for(int w=0;w&lt;a.height();w++){
-                for(int x=0;x&lt;a.width();x++){
-                    cout&lt;&lt;&quot;a[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;a.data_at(u,v,w,x)&lt;&lt;endl;
-                }
-            }
-        }
-    }
-    return 0;
-}
-</code></pre>
-
-<p>跟上面一样继续编译和执行,这里按照上面的命令继续来编译的话,遇到了一个错误:<br/>
-<img src="media/14966518170972/14968061663863.jpg" alt=""/></p>
-
-<p>之后换成下边的命令执行后成功:</p>
-
-<pre><code>g++ -o app2 blob_demo.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe -lglog -lboost_system -lprotobuf
-</code></pre>
-
-<p>差别在于,后边加上了<code>-lglog -lboost_system -lprotobuf</code>命令,具体作用后续将研究(暂时不理解),继续运行后,又出现了错误:<br/>
-<img src="media/14966518170972/14968063024883.jpg" alt=""/></p>
-
-<p>同样是动态库的连接问题:<br/>
-运行命令:</p>
-
-<pre><code>install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/./app2
-</code></pre>
-
-<p>执行命令,然后运行<code>app2</code>.得到输出:<br/>
-<img src="media/14966518170972/14968063915684.jpg" alt=""/></p>
-
-<p><code>可见,Blob下标的访问与c/c++高维数组几乎一致,而Blob好处在于可以直接同步CPU/GPU上的数据.</code></p>
-
-<p>更改测试</p>
-
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[激活函数]]></title>
@@ -5520,6 +5392,145 @@ else:
 <p>HSL 和 HSV 二者都把颜色描述在圆柱体内的点，这个圆柱的中心轴取值为<strong>自底部的黑色到顶部的白色而在它们中间是的灰色</strong>，绕这个轴的<strong>角度</strong>对应于“色相”，<strong>到这个轴的距离</strong>对应于“饱和度”，而<strong>沿着这个轴的距离</strong>对应于“亮度”，“色调”或“明度”。</p>
 
 <p>HSV（色相，饱和度，明度）在概念上可以被认为是颜色的倒圆锥体（黑点在下顶点，白色在上底面圆心）</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[分布式进程]]></title>
+    <link href="https://lockxmonk.github.io/14938608177246.html"/>
+    <updated>2017-05-04T09:20:17+08:00</updated>
+    <id>https://lockxmonk.github.io/14938608177246.html</id>
+    <content type="html"><![CDATA[
+<p>在Thread和Process中，应当优选Process，<font color=red><strong>因为Process更稳定，而且，Process可以分布到多台机器上，而Thread最多只能分布到同一台机器的多个CPU上。</strong></font></p>
+
+<p><strong>Python的<code>multiprocessing</code>模块不但支持多进程，其中<code>managers</code>子模块还支持把多进程分布到多台机器上。</strong><font color=red>一个服务进程可以作为调度者，将任务分布到其他多个进程中，依靠网络通信。由于<code>managers</code>模块封装很好，不必了解网络通信的细节，就可以很容易地编写分布式多进程程序。</font></p>
+
+<p>举个例子：如果我们<strong>已经有一个通过<code>Queue</code>通信的多进程程序在同一台机器上运行</strong>，现在，由于处理任务的进程任务繁重，希望把发送任务的进程和处理任务的进程分布到两台机器上。怎么用分布式进程实现？</p>
+
+<p>原有的<code>Queue</code>可以继续使用，<font color=red>但是，通过<code>managers</code>模块把<code>Queue</code>通过网络暴露出去，就可以让其他机器的进程访问<code>Queue</code>了。</font></p>
+
+<p>我们先看服务进程，服务进程负责启动<code>Queue</code>，把<code>Queue</code>注册到网络上，然后往<code>Queue</code>里面写入任务：</p>
+
+<pre><code class="language-py">#taskmanager.py
+#-*- coding: utf-8 -*-
+
+import random,time,Queue
+from multiprocessing.managers import BaseManager
+
+#发送任务的队列
+task_queue = Queue.Queue()
+#接受结果的队列
+result_queue = Queue.Queue()
+
+#从BaseManager继承的QueueManager:
+class QueueManager(BaseManager):
+    pass
+
+#把两个Queue都注册到网络上, callable参数关联了Queue对象:
+QueueManager.register(&#39;get_task_queue&#39;,callable=lambda:task_queue)
+QueueManager.register(&#39;get_result_queue&#39;,callable=lambda:result_queue)
+
+#绑定端口5000，设置验证码‘abc’：
+manager = QueueManager(address=(&#39;&#39;,5000),authkey=&#39;abc&#39;)
+#启动Queue
+manager.start()
+# 获得通过网络访问的Queue对象:
+task = manager.get_task_queue()
+result = manager.get_result_queue()
+#放几个任务进去
+for i in range(10):
+    n = random.randint(0, 10000)
+    print(&#39;Put task %d...&#39; %n)
+    task.put(n)
+
+#从result队列读取结果
+print(&#39;Try get results...&#39;)
+for i in range(10):
+    r = result.get(timeout=10)
+    print(&#39;Result:%s&#39;%r)
+#关闭
+manager.shutdown()
+</code></pre>
+
+<p>请注意，当我们在一台机器上写多进程程序时，创建的<code>Queue</code>可以直接拿来用，但是，在分布式多进程环境下，添加任务到<code>Queue</code>不可以直接对原始的<code>task_queue</code>进行操作，那样就绕过了<code>QueueManager</code>的封装，必须通过<code>manager.get_task_queue()</code>获得的<code>Queue</code>接口添加。</p>
+
+<p>然后，在另一台机器上启动任务进程（本机上启动也可以）：</p>
+
+<pre><code class="language-py">#taskworker.py
+#-*- coding: utf-8 -*-
+
+import time
+import sys
+import Queue
+from multiprocessing.managers import BaseManager
+
+# 创建类似的QueueManager:
+
+
+class QueueManager(BaseManager):
+    pass
+
+# 由于这个QueueManager只从网络上获取Queue，所以注册时只提供名字:
+QueueManager.register(&#39;get_task_queue&#39;)
+QueueManager.register(&#39;get_result_queue&#39;)
+
+# 连接到服务器，也就是运行taskmanager.py的机器:
+server_addr = &#39;127.0.0.1&#39;
+print(&#39;Connect to server %s...&#39; % server_addr)
+
+# 端口和验证码注意保持与taskmanager.py设置的完全一致:
+m = QueueManager(address=(server_addr, 5000), authkey=&#39;abc&#39;)
+# 从网络连接:
+m.connect()
+# 获取Queue的对象:
+task = m.get_task_queue()
+result = m.get_result_queue()
+# 从task队列取任务,并把结果写入result队列:
+for i in range(10):
+    try:
+        n = task.get(timeout=1)
+        print(&#39;run task %d * %d...&#39; % (n, n))
+        r = &#39;%d * %d = %d&#39; % (n, n, n * n)
+        time.sleep(1)
+        result.put(r)
+    except Queue.Empty:
+        print(&#39;task queue is empty.&#39;)
+# 处理结束:
+print(&#39;worker exit.&#39;)
+</code></pre>
+
+<p>任务进程要通过网络连接到服务进程，所以要指定服务进程的IP。</p>
+
+<p>现在，可以试试分布式进程的工作效果了。先启动<code>taskmanager.py</code>服务进程：</p>
+
+<p>启动后：<br/>
+<img src="media/14938608177246/14938633989382.jpg" alt=""/><br/>
+等待result队列中的值。（目前为空)</p>
+
+<p><code>taskmanager</code>进程发送完任务后，开始等待<code>result</code>队列的结果。现在启动<code>taskworker.py</code>进程：</p>
+
+<p><img src="media/14938608177246/14938634594880.jpg" alt=""/></p>
+
+<p><code>taskworker</code>进程结束，在<code>taskmanager</code>进程中会继续打印出结果：</p>
+
+<p><img src="media/14938608177246/14938634810692.jpg" alt=""/></p>
+
+<p>这个简单的<code>Manager/Worker</code>模型有什么用？<font color=red><strong>其实这就是一个简单但真正的分布式计算</strong></font>，把代码稍加改造，启动多个worker，就可以把任务分布到几台甚至几十台机器上，比如把计算<code>n*n</code>的代码换成发送邮件，就实现了邮件队列的异步发送。</p>
+
+<p>Queue对象存储在哪？注意到<code>taskworker.py</code>中根本没有创建<code>Queue</code>的代码，所以，Queue对象存储在<code>taskmanager.py</code>进程中：</p>
+
+<p><img src="media/14938608177246/14938635737718.jpg" alt=""/></p>
+
+<p>而<code>Queue</code>之所以能通过网络访问，就是通过<code>QueueManager</code>实现的。由于<code>QueueManager</code>管理的不止一个<code>Queue</code>，所以，要给每个<code>Queue</code>的网络调用接口起个名字，比如<code>get_task_queue</code>。</p>
+
+<p><code>authkey</code>有什么用？这是为了保证两台机器正常通信，不被其他机器恶意干扰。如果<code>taskworker.py</code>的<code>authkey</code>和<code>taskmanager.py</code>的<code>authkey</code>不一致，肯定连接不上。</p>
+
+<h2 id="toc_0">小结</h2>
+
+<p>Python的分布式进程接口简单，封装良好，适合需要把繁重任务分布到多台机器的环境下。</p>
+
+<p><font color=red>注意Queue的作用是用来传递任务和接收结果，每个任务的描述数据量要尽量小。比如发送一个处理日志文件的任务，就不要发送几百兆的日志文件本身，而是发送日志文件存放的完整路径，由Worker进程再去共享的磁盘上读取文件。</font></p>
 
 ]]></content>
   </entry>
