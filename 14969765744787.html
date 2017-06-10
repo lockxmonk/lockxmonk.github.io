@@ -131,7 +131,17 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>一个CNN网络是由多个Layer堆叠而成的.如图所示:<br/>
+      <ul>
+<li>
+<a href="#toc_0">Blob</a>
+</li>
+<li>
+<a href="#toc_1">Blob的基本用法</a>
+</li>
+</ul>
+
+
+<p>一个CNN网络是由多个Layer堆叠而成的.如图所示:<br/>
 <img src="media/14966518170972/14966520513325.jpg" alt=""/></p>
 
 <p>caffe按照我们设计的图纸(prototxt),用Blob这些砖块建成一层层(Layer)楼房,最后通过方法SGD方法(Solver)进行简装修(Train),精装修(Finetune)实现的.我们这里就是学习这些基本概念.</p>
@@ -246,9 +256,135 @@ int main(void)
 <p>执行命令,然后运行<code>app2</code>.得到输出:<br/>
 <img src="media/14966518170972/14968063915684.jpg" alt=""/></p>
 
-<p><code>可见,Blob下标的访问与c/c++高维数组几乎一致,而Blob好处在于可以直接同步CPU/GPU上的数据.</code></p>
+<p><strong>可见,Blob下标的访问与c/c++高维数组几乎一致,而Blob好处在于可以直接同步CPU/GPU上的数据.</strong></p>
 
-<p>更改测试</p>
+<p>Blob还支持计算所有元素的绝对值之和(L1-范数),平方和(L2-范数):</p>
+
+<pre><code>cout&lt;&lt;&quot;ASUM = &quot;&lt;&lt;a.asum_data()&lt;&lt;endl;
+cout&lt;&lt;&quot;SUMSQ = &quot;&lt;&lt;a.sumsq_data()&lt;&lt;endl;
+</code></pre>
+
+<p>输出结果为:</p>
+
+<pre><code>ASUM = 276
+SUMSQ = 4324
+
+</code></pre>
+
+<p>除了data,我们还可以改diff部分,与data的操作基本一致:</p>
+
+<pre><code class="language-c++">#include&lt;vector&gt;
+#include&lt;iostream&gt;
+#include&lt;caffe/blob.hpp&gt;
+using namespace caffe;
+using namespace std;
+int main(void)
+{
+    Blob&lt;float&gt; a;
+    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
+    a.Reshape(1,2,3,4);
+    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
+    
+    float *p=a.mutable_cpu_data();
+    float *q=a.mutable_cpu_diff();
+    
+    for(int i=0;i&lt;a.count();i++){
+        p[i]= i;     //将data初始化为1,2,3....
+        q[i]= a.count()-1-i;   //将diff初始化为23,22,21,...
+    }
+    
+    a.Update();         //执行update操作,将diff与data融合,这也是CNN权值更新步骤的最终实施者
+   
+    for(int u=0;u&lt;a.num();u++){
+        for(int v=0;v&lt;a.channels();v++){
+            for(int w=0;w&lt;a.height();w++){
+                for(int x=0;x&lt;a.width();x++){
+                    cout&lt;&lt;&quot;a[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;a.data_at(u,v,w,x)&lt;&lt;endl;
+                }
+            }
+        }
+    }
+    
+    cout&lt;&lt;&quot;ASUM = &quot;&lt;&lt;a.asum_data()&lt;&lt;endl;
+    cout&lt;&lt;&quot;SUMSQ = &quot;&lt;&lt;a.sumsq_data()&lt;&lt;endl;
+    
+    return 0;
+}
+
+</code></pre>
+
+<p>然后执行以下命令编译,链接库文件:</p>
+
+<pre><code>g++ -o app blob_demo_diff.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe  -lglog -lboost_system -lprotobuf
+
+install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/LZHcaffe/./app
+</code></pre>
+
+<p><img src="media/14969765744787/14969953318311.jpg" alt=""/></p>
+
+<p>运行.app,结果为:<br/>
+<img src="media/14969765744787/14969953744774.jpg" alt=""/></p>
+
+<p>上面表明,在<code>Update()</code>函数中,实现了<code>data = data -diff</code>操作,这个主要是在CNN权值更新时会用到,后面继续学习.</p>
+
+<p>将Blob内部值保存到硬盘,或者冲硬盘载入到内存,可以分别通过<code>ToProto(),FromProto()</code>实现:</p>
+
+<pre><code class="language-c++">
+#include&lt;vector&gt;
+#include&lt;iostream&gt;
+#include&lt;caffe/blob.hpp&gt;
+#include&lt;caffe/util/io.hpp&gt;   //需要包含这个头文件
+using namespace caffe;
+using namespace std;
+int main(void)
+{
+    Blob&lt;float&gt; a;
+    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
+    a.Reshape(1,2,3,4);
+    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
+    
+    float *p=a.mutable_cpu_data();
+    float *q=a.mutable_cpu_diff();
+    
+    for(int i=0;i&lt;a.count();i++){
+        p[i]= i;     //将data初始化为1,2,3....
+        q[i]= a.count()-1-i;   //将diff初始化为23,22,21,...
+    }
+    
+    a.Update();         //执行update操作,将diff与data融合,这也是CNN权值更新步骤的最终实施者
+   
+    BlobProto bp;          //构造一个BlobProto对象
+    a.ToProto(&amp;bp,true);    //将a序列化,连同diff(默认不带)
+    WriteProtoToBinaryFile(bp,&quot;a.blob&quot;);     //写入磁盘文件&quot;a.blob&quot;
+    BlobProto bp2;           //构造一个新的BlobProto对象
+    ReadProtoFromBinaryFileOrDie(&quot;a.blob&quot;,&amp;bp2);    //读取磁盘文件
+    Blob&lt;float&gt; b;          //新建一个Blob对象b
+    b.FromProto(bp2,true);  //从序列化对象bp2中克隆b(连同形状)
+    
+    for(int u=0;u&lt;b.num();u++){
+        for(int v=0;v&lt;b.channels();v++){
+            for(int w=0;w&lt;b.height();w++){
+                for(int x=0;x&lt;b.width();x++){
+                    cout&lt;&lt;&quot;b[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;b.data_at(u,v,w,x)&lt;&lt;endl;
+                }
+            }
+        }
+    }
+    
+    cout&lt;&lt;&quot;ASUM = &quot;&lt;&lt;b.asum_data()&lt;&lt;endl;
+    cout&lt;&lt;&quot;SUMSQ = &quot;&lt;&lt;b.sumsq_data()&lt;&lt;endl;
+    
+    
+    return 0;
+}
+
+</code></pre>
+
+<p>编译,连接库文件后(注意编译时末尾加入<code>&quot;-lglog -lboost_system -lprotobuf&quot;</code>选项),输出如下:</p>
+
+<p><img src="media/14969765744787/14969964533804.jpg" alt=""/></p>
+
+<p>可以发现与上面没有差别,只是在文件夹中多了一个<code>Blob.a</code>文件,<strong>所以<code>BlobProto</code>对象实现了硬盘与内存之间的数据通信.可以帮助保存中间权值和数据</strong></p>
 
 
     
@@ -258,6 +394,9 @@ int main(void)
       <div class="row">
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="14970763342670.html" 
+          title="Previous Post: caffe数据结构描述">&laquo; caffe数据结构描述</a>
       
         </p>
         </div>
@@ -348,6 +487,12 @@ int main(void)
 	      
 		      
 			      <li class="post">
+			        <a href="14970763342670.html">caffe数据结构描述</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14969765744787.html">caffe数据结构</a>
 			      </li>
 		     
@@ -367,12 +512,6 @@ int main(void)
 		      
 			      <li class="post">
 			        <a href="14957594179111.html">网络编程</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14957005904776.html">图形界面</a>
 			      </li>
 		     
 		  
