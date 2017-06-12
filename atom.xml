@@ -4,7 +4,7 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-06-09T16:23:08+08:00</updated>
+  <updated>2017-06-10T16:36:30+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
@@ -413,7 +413,505 @@ void Blob&lt;Dtype&gt;::Reshape(const vector&lt;int&gt;&amp; shape) {
   }
 }
 
+//void Blob&lt;Dtype&gt;::Reshape(const BlobShape&amp; shape) 和void Blob&lt;Dtype&gt;::ReshapeLike(const Blob&lt;Dtype&gt;&amp; other)与上面类似. 
+
+//构造函数
+template &lt;typename Dtype&gt;
+Blob&lt;Dtype&gt;::Blob(const int num, const int channels, const int height,
+    const int width)
+  // 调用Reshape之前必须初始化capacity_，否则会导致不可预期结果
+  : capacity_(0) {
+  Reshape(num, channels, height, width);
+}
+
+template &lt;typename Dtype&gt;
+Blob&lt;Dtype&gt;::Blob(const vector&lt;int&gt;&amp; shape)
+  // capacity_ must be initialized before calling Reshape
+  : capacity_(0) {
+  Reshape(shape);
+}
+
+template &lt;typename Dtype&gt;
+const int* Blob&lt;Dtype&gt;::gpu_shape() const {
+  CHECK(shape_data_);
+  return (const int*)shape_data_-&gt;gpu_data();
+}
+//只读获取cpu date指针
+template &lt;typename Dtype&gt;
+const Dtype* Blob&lt;Dtype&gt;::cpu_data() const {
+  CHECK(data_);     //保证data_不为 NULL
+  return (const Dtype*)data_-&gt;cpu_data();
+}
+//修改cpu data指针
+template &lt;typename Dtype&gt;
+void Blob&lt;Dtype&gt;::set_cpu_data(Dtype* data) {
+  CHECK(data);
+  // Make sure CPU and GPU sizes remain equal
+  size_t size = count_ * sizeof(Dtype);
+  if (data_-&gt;size() != size) {
+    data_.reset(new SyncedMemory(size));
+    diff_.reset(new SyncedMemory(size));
+  }
+  data_-&gt;set_cpu_data(data);
+}
+
+template &lt;typename Dtype&gt;
+const Dtype* Blob&lt;Dtype&gt;::gpu_data() const {
+  CHECK(data_);
+  return (const Dtype*)data_-&gt;gpu_data();
+}
+
+template &lt;typename Dtype&gt;
+void Blob&lt;Dtype&gt;::set_gpu_data(Dtype* data) {
+  CHECK(data);
+  // Make sure CPU and GPU sizes remain equal
+  size_t size = count_ * sizeof(Dtype);
+  if (data_-&gt;size() != size) {
+    data_.reset(new SyncedMemory(size));
+    diff_.reset(new SyncedMemory(size));
+  }
+  data_-&gt;set_gpu_data(data);
+}
+//只读获取cpu_diff指针
+template &lt;typename Dtype&gt;
+const Dtype* Blob&lt;Dtype&gt;::cpu_diff() const {
+  CHECK(diff_);
+  return (const Dtype*)diff_-&gt;cpu_data();
+}
+//只读获取gpu_diff指针
+template &lt;typename Dtype&gt;
+const Dtype* Blob&lt;Dtype&gt;::gpu_diff() const {
+  CHECK(diff_);
+  return (const Dtype*)diff_-&gt;gpu_data();
+}
+//读写访问cpu data指针
+template &lt;typename Dtype&gt;
+Dtype* Blob&lt;Dtype&gt;::mutable_cpu_data() {
+  CHECK(data_);
+  return static_cast&lt;Dtype*&gt;(data_-&gt;mutable_cpu_data());
+}
+//读写访问gpu data指针
+template &lt;typename Dtype&gt;
+Dtype* Blob&lt;Dtype&gt;::mutable_gpu_data() {
+  CHECK(data_);
+  return static_cast&lt;Dtype*&gt;(data_-&gt;mutable_gpu_data());
+}
+//与上面相同
+template &lt;typename Dtype&gt;
+Dtype* Blob&lt;Dtype&gt;::mutable_cpu_diff() {
+  CHECK(diff_);
+  return static_cast&lt;Dtype*&gt;(diff_-&gt;mutable_cpu_data());
+}
+
+template &lt;typename Dtype&gt;
+Dtype* Blob&lt;Dtype&gt;::mutable_gpu_diff() {
+  CHECK(diff_);
+  return static_cast&lt;Dtype*&gt;(diff_-&gt;mutable_gpu_data());
+}
+//共享另一个Blob的data指针
+template &lt;typename Dtype&gt;
+void Blob&lt;Dtype&gt;::ShareData(const Blob&amp; other) {
+  CHECK_EQ(count_, other.count());
+  data_ = other.data();
+}
+//共享另一个Blob的diff指针
+template &lt;typename Dtype&gt;
+void Blob&lt;Dtype&gt;::ShareDiff(const Blob&amp; other) {
+  CHECK_EQ(count_, other.count());
+  diff_ = other.diff();
+}
+//Update()函数用于网络参数Blob的更新。其中int和unsigned int类型处理并未实现
+template &lt;&gt; void Blob&lt;unsigned int&gt;::Update() { NOT_IMPLEMENTED; }
+template &lt;&gt; void Blob&lt;int&gt;::Update() { NOT_IMPLEMENTED; }
+template &lt;typename Dtype&gt;
+void Blob&lt;Dtype&gt;::Update() {
+  // We will perform update based on where the data is located.data在哪里我们就在那里更新
+  switch (data_-&gt;head()) {
+  case SyncedMemory::HEAD_AT_CPU:       //data位于cpu端
+    // 执行CPU计算
+        caffe_axpy&lt;Dtype&gt;(count_, Dtype(-1),
+        static_cast&lt;const Dtype*&gt;(diff_-&gt;cpu_data()),
+        static_cast&lt;Dtype*&gt;(data_-&gt;mutable_cpu_data()));
+    break;
+  case SyncedMemory::HEAD_AT_GPU:   //data位于GPU端,或者CPU/GPU已经同步
+  case SyncedMemory::SYNCED:
+#ifndef CPU_ONLY
+    // 执行 CPU 上的计算，data_[i】=data_[i] - diff_[i], i = 0,1,2,…，count_-1
+    caffe_gpu_axpy&lt;Dtype&gt;(count_, Dtype(-1),
+        static_cast&lt;const Dtype*&gt;(diff_-&gt;gpu_data()),
+        static_cast&lt;Dtype*&gt;(data_-&gt;mutable_gpu_data()));
+#else
+    NO_GPU;     //编泽时打开了CPU_ONLY选项，那么GPU模式禁用
+#endif
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Syncedmem not initialized.&quot;;
+  }
+}
+//计算data_的L1-范数,其中int和unsigned int类型处理并未实现
+template &lt;&gt; unsigned int Blob&lt;unsigned int&gt;::asum_data() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+template &lt;&gt; int Blob&lt;int&gt;::asum_data() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+
+template &lt;typename Dtype&gt;
+Dtype Blob&lt;Dtype&gt;::asum_data() const {
+  if (!data_) { return 0; }
+  switch (data_-&gt;head()) {
+  case SyncedMemory::HEAD_AT_CPU:
+    return caffe_cpu_asum(count_, cpu_data());  //执行CPU上的asum计算
+  case SyncedMemory::HEAD_AT_GPU:
+  case SyncedMemory::SYNCED:
+#ifndef CPU_ONLY
+  {
+    Dtype asum;
+    caffe_gpu_asum(count_, gpu_data(), &amp;asum);
+    return asum;
+  }
+#else
+    NO_GPU;
+#endif
+  case SyncedMemory::UNINITIALIZED:
+    return 0;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; data_-&gt;head();
+  }
+  return 0;
+}
+
+template &lt;&gt; unsigned int Blob&lt;unsigned int&gt;::asum_diff() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+
+template &lt;&gt; int Blob&lt;int&gt;::asum_diff() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+//同上,计算diff_的L1范数
+template &lt;typename Dtype&gt;
+Dtype Blob&lt;Dtype&gt;::asum_diff() const {
+  if (!diff_) { return 0; }
+  switch (diff_-&gt;head()) {
+  case SyncedMemory::HEAD_AT_CPU:
+    return caffe_cpu_asum(count_, cpu_diff());
+  case SyncedMemory::HEAD_AT_GPU:
+  case SyncedMemory::SYNCED:
+#ifndef CPU_ONLY
+  {
+    Dtype asum;
+    caffe_gpu_asum(count_, gpu_diff(), &amp;asum);
+    return asum;
+  }
+#else
+    NO_GPU;
+#endif
+  case SyncedMemory::UNINITIALIZED:
+    return 0;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; diff_-&gt;head();
+  }
+  return 0;
+}
+//计算data_的L2-范数
+template &lt;&gt; unsigned int Blob&lt;unsigned int&gt;::sumsq_data() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+template &lt;&gt; int Blob&lt;int&gt;::sumsq_data() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+
+template &lt;typename Dtype&gt;
+Dtype Blob&lt;Dtype&gt;::sumsq_data() const {
+  Dtype sumsq;
+  const Dtype* data;
+  if (!data_) { return 0; }
+  switch (data_-&gt;head()) {
+  case SyncedMemory::HEAD_AT_CPU:
+    data = cpu_data();
+    sumsq = caffe_cpu_dot(count_, data, data);  //执行 CPU上的dot计算
+    break;
+  case SyncedMemory::HEAD_AT_GPU:
+  case SyncedMemory::SYNCED:
+#ifndef CPU_ONLY
+    data = gpu_data();
+    caffe_gpu_dot(count_, data, data, &amp;sumsq);
+#else
+    NO_GPU;
+#endif
+    break;
+  case SyncedMemory::UNINITIALIZED:
+    return 0;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; data_-&gt;head();
+  }
+  return sumsq;
+}
+//同上,计算diff_的L2-范数
+template &lt;&gt; unsigned int Blob&lt;unsigned int&gt;::sumsq_diff() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+template &lt;&gt; int Blob&lt;int&gt;::sumsq_diff() const {
+  NOT_IMPLEMENTED;
+  return 0;
+}
+template &lt;typename Dtype&gt;
+Dtype Blob&lt;Dtype&gt;::sumsq_diff() const {
+  Dtype sumsq;
+  const Dtype* diff;
+  if (!diff_) { return 0; }
+  switch (diff_-&gt;head()) {
+  case SyncedMemory::HEAD_AT_CPU:
+    diff = cpu_diff();
+    sumsq = caffe_cpu_dot(count_, diff, diff);
+    break;
+  case SyncedMemory::HEAD_AT_GPU:
+  case SyncedMemory::SYNCED:
+#ifndef CPU_ONLY
+    diff = gpu_diff();
+    caffe_gpu_dot(count_, diff, diff, &amp;sumsq);
+    break;
+#else
+    NO_GPU;
+#endif
+  case SyncedMemory::UNINITIALIZED:
+    return 0;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; data_-&gt;head();
+  }
+  return sumsq;
+}
+//对data_进行幅度缩放
+template &lt;&gt; void Blob&lt;unsigned int&gt;::scale_data(unsigned int scale_factor) {
+  NOT_IMPLEMENTED;
+}
+
+template &lt;&gt; void Blob&lt;int&gt;::scale_data(int scale_factor) {
+  NOT_IMPLEMENTED;
+}
+
+template &lt;typename Dtype&gt;
+void Blob&lt;Dtype&gt;::scale_data(Dtype scale_factor) {
+  Dtype* data;
+  if (!data_) { return; }
+  switch (data_-&gt;head()) {
+  case SyncedMemory::HEAD_AT_CPU:   //执行CPU上的计算
+    data = mutable_cpu_data();
+    caffe_scal(count_, scale_factor, data);
+    return;
+  case SyncedMemory::HEAD_AT_GPU:
+  case SyncedMemory::SYNCED:
+#ifndef CPU_ONLY
+    data = mutable_gpu_data();
+    caffe_gpu_scal(count_, scale_factor, data);
+    return;
+#else
+    NO_GPU;
+#endif
+  case SyncedMemory::UNINITIALIZED:
+    return;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; data_-&gt;head();
+  }
+}
+
+template &lt;&gt; void Blob&lt;unsigned int&gt;::scale_diff(unsigned int scale_factor) {
+  NOT_IMPLEMENTED;
+}
+
+template &lt;&gt; void Blob&lt;int&gt;::scale_diff(int scale_factor) {
+  NOT_IMPLEMENTED;
+}
+//对diff_进行缩放,同理
+template &lt;typename Dtype&gt;
+void Blob&lt;Dtype&gt;::scale_diff(Dtype scale_factor) {
+  Dtype* diff;
+  if (!diff_) { return; }
+  switch (diff_-&gt;head()) {
+  case SyncedMemory::HEAD_AT_CPU:
+    diff = mutable_cpu_diff();
+    caffe_scal(count_, scale_factor, diff);
+    return;
+  case SyncedMemory::HEAD_AT_GPU:
+  case SyncedMemory::SYNCED:
+#ifndef CPU_ONLY
+    diff = mutable_gpu_diff();
+    caffe_gpu_scal(count_, scale_factor, diff);
+    return;
+#else
+    NO_GPU;
+#endif
+  case SyncedMemory::UNINITIALIZED:
+    return;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; diff_-&gt;head();
+  }
+}
+//判断形状是否相同
+template &lt;typename Dtype&gt;
+bool Blob&lt;Dtype&gt;::ShapeEquals(const BlobProto&amp; other) {
+  if (other.has_num() || other.has_channels() ||
+      other.has_height() || other.has_width()) {
+    // Using deprecated 4D Blob dimensions --
+    // shape is (num, channels, height, width).
+    // Note: we do not use the normal Blob::num(), Blob::channels(), etc.
+    // methods as these index from the beginning of the blob shape, where legacy parameter blobs were indexed from the end of the blob shape (e.g., bias Blob shape (1 x 1 x 1 x N), IP layer weight Blob shape (1 x 1 x M x N)).
+    //输入的维度若使用过时的维度信息（num, channels,height, width)，则需要转换为新的vector参数,代码使用了C++中的“懒”逻辑
+    return shape_.size() &lt;= 4 &amp;&amp;
+           LegacyShape(-4) == other.num() &amp;&amp;
+           LegacyShape(-3) == other.channels() &amp;&amp;
+           LegacyShape(-2) == other.height() &amp;&amp;
+           LegacyShape(-1) == other.width();
+  }
+  //直接对比
+  vector&lt;int&gt; other_shape(other.shape().dim_size());
+  for (int i = 0; i &lt; other.shape().dim_size(); ++i) {
+    other_shape[i] = other.shape().dim(i);
+  }
+  return shape_ == other_shape;
+}
+//从另一个Blob对象拷贝data (可选diff),必要时进行变维
+template &lt;typename Dtype&gt;
+void Blob&lt;Dtype&gt;::CopyFrom(const Blob&amp; source, bool copy_diff, bool reshape) {
+  if (source.count() != count_ || source.shape() != shape_) {
+    if (reshape) {
+      ReshapeLike(source);      //如果要变维,则执行这个
+    } else {    //两个blob形状不同,则报错
+      LOG(FATAL) &lt;&lt; &quot;Trying to copy blobs of different sizes.&quot;;
+    }
+  }
+  switch (Caffe::mode()) {
+  case Caffe::GPU:      //GPU模式
+    if (copy_diff) {
+      caffe_copy(count_, source.gpu_diff(),
+          static_cast&lt;Dtype*&gt;(diff_-&gt;mutable_gpu_data()));
+    } else {
+      caffe_copy(count_, source.gpu_data(),
+          static_cast&lt;Dtype*&gt;(data_-&gt;mutable_gpu_data()));
+    }
+    break;
+  case Caffe::CPU:      //CPU模式
+    if (copy_diff) {
+      caffe_copy(count_, source.cpu_diff(),
+          static_cast&lt;Dtype*&gt;(diff_-&gt;mutable_cpu_data()));
+    } else {
+      caffe_copy(count_, source.cpu_data(),
+          static_cast&lt;Dtype*&gt;(data_-&gt;mutable_cpu_data()));
+    }
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
+  }
+}
+
+//从BlobProto中加载一个Blob,适用于从磁盘载入之前导出的Blob
+template &lt;typename Dtype&gt;
+void Blob&lt;Dtype&gt;::FromProto(const BlobProto&amp; proto, bool reshape) {
+  if (reshape) {        //从BlobProto对象中获得所需各个维度信息
+    vector&lt;int&gt; shape;
+    if (proto.has_num() || proto.has_channels() ||
+        proto.has_height() || proto.has_width()) {
+      // Using deprecated 4D Blob dimensions --
+      // shape is (num, channels, height, width).
+      shape.resize(4);
+      shape[0] = proto.num();
+      shape[1] = proto.channels();
+      shape[2] = proto.height();
+      shape[3] = proto.width();
+    } else {
+      shape.resize(proto.shape().dim_size());
+      for (int i = 0; i &lt; proto.shape().dim_size(); ++i) {
+        shape[i] = proto.shape().dim(i);
+      }
+    }
+    Reshape(shape);     //Blob按照维度信息进行变维
+  } else {
+    CHECK(ShapeEquals(proto)) &lt;&lt; &quot;shape mismatch (reshape not set)&quot;;
+  }
+  // copy data 加载数据
+  Dtype* data_vec = mutable_cpu_data();
+  if (proto.double_data_size() &gt; 0) {   // 如果之前保存的是double类型 data
+    CHECK_EQ(count_, proto.double_data_size());
+    for (int i = 0; i &lt; count_; ++i) {
+      data_vec[i] = proto.double_data(i);   //加载double date
+    }
+  } else {
+    CHECK_EQ(count_, proto.data_size());
+    for (int i = 0; i &lt; count_; ++i) {
+      data_vec[i] = proto.data(i);  //否则加载float data
+    }
+  }
+  if (proto.double_diff_size() &gt; 0) {   // 如果之前保存的是 double 类型 diff
+    CHECK_EQ(count_, proto.double_diff_size());
+    Dtype* diff_vec = mutable_cpu_diff();
+    for (int i = 0; i &lt; count_; ++i) {
+      diff_vec[i] = proto.double_diff(i);
+    }
+  } else if (proto.diff_size() &gt; 0) {
+    CHECK_EQ(count_, proto.diff_size());
+    Dtype* diff_vec = mutable_cpu_diff();
+    for (int i = 0; i &lt; count_; ++i) {
+      diff_vec[i] = proto.diff(i);
+    }
+  }
+}
+//将Blob中的data(可选diff)导出到BlobProto结构体.便于存储到磁盘文件中
+template &lt;&gt;
+void Blob&lt;double&gt;::ToProto(BlobProto* proto, bool write_diff) const {
+  proto-&gt;clear_shape();     //重置proto的维度,保证与blob相同
+  for (int i = 0; i &lt; shape_.size(); ++i) {
+    proto-&gt;mutable_shape()-&gt;add_dim(shape_[i]);
+  }
+  proto-&gt;clear_double_data();   //清除data
+  proto-&gt;clear_double_diff();   //清除diff
+  const double* data_vec = cpu_data();  //将data导出到proto
+  for (int i = 0; i &lt; count_; ++i) {
+    proto-&gt;add_double_data(data_vec[i]);
+  }
+  if (write_diff) {         //  若有write_diff的需求
+    const double* diff_vec = cpu_diff();    //将diff导出到proto
+    for (int i = 0; i &lt; count_; ++i) {
+      proto-&gt;add_double_diff(diff_vec[i]);
+    }
+  }
+}
+//同上,只不过类型为float
+template &lt;&gt;
+void Blob&lt;float&gt;::ToProto(BlobProto* proto, bool write_diff) const {
+  proto-&gt;clear_shape();
+  for (int i = 0; i &lt; shape_.size(); ++i) {
+    proto-&gt;mutable_shape()-&gt;add_dim(shape_[i]);
+  }
+  proto-&gt;clear_data();
+  proto-&gt;clear_diff();
+  const float* data_vec = cpu_data();
+  for (int i = 0; i &lt; count_; ++i) {
+    proto-&gt;add_data(data_vec[i]);
+  }
+  if (write_diff) {
+    const float* diff_vec = cpu_diff();
+    for (int i = 0; i &lt; count_; ++i) {
+      proto-&gt;add_diff(diff_vec[i]);
+    }
+  }
+}
+//实例化Blob   类模板（float, double)
+INSTANTIATE_CLASS(Blob);
+template class Blob&lt;int&gt;;
+template class Blob&lt;unsigned int&gt;;
+
+}  // namespace caffe
+
 </code></pre>
+
+<p><strong>到此,我们就了解了Caffe一些基本的数据结构.后面就应该学习Layer层中对数据的一些处理.</strong></p>
 
 ]]></content>
   </entry>
