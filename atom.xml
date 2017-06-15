@@ -4,13 +4,676 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-06-10T16:36:30+08:00</updated>
+  <updated>2017-06-15T11:34:21+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Caffe中Layer的学习]]></title>
+    <link href="https://lockxmonk.github.io/14974936829967.html"/>
+    <updated>2017-06-15T10:28:02+08:00</updated>
+    <id>https://lockxmonk.github.io/14974936829967.html</id>
+    <content type="html"><![CDATA[
+<p>Layer是Caffe的基本计算单元，至少有一个输入Blob (Bottom Blob)和一个输出Blob (Top Blob),部分Layer带有权值(Weight)和偏置项（Bias),<strong>有两个运算方向</strong>：前向传播（Forward)和反向传播（Backward)，其中前向传播计算会对输入Blob进行某种处理（存权值和偏置项的Layer会利用这些对输入进行处理）,得到输出Blob;而反向传播计算则对输出Blob的diff进行某种处理，得到输入Blob的diff(有权值和偏置项的Layer可能也会计算权值Blob、偏置项Blob的diff)。</p>
+
+<h2 id="toc_0">layer中的数据结构描述</h2>
+
+<p>我们可以搜索caffe中关于<code>message LayerParameter</code>的类,来了解.<br/>
+如果你一开始找不到这个类在那个文件描述,可以用下面这个命令去搜索:</p>
+
+<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;message LayerParameter&quot; *
+</code></pre>
+
+<p><img src="media/14974936829967/14974948024735.jpg" alt=""/><br/>
+得到它的路径.</p>
+
+<p>我们发现是在<code>src/caffe/proto/caffe.proto</code>这个路径中.因为caffe使用<code>google_protobuf</code>数据类型来声明layer.关于<code>google_protobuf</code>的相关内容,之后可以研究一下.</p>
+
+<p>这里我们看一下源码:</p>
+
+<pre><code class="language-protobuf">//注意：如果你增加了1个新的LayerParameter域，一定记得更新一个可用ID
+// LayerParameter 下一个layer-specific ID: 147 (last added: recurrent_param)
+message LayerParameter {
+  optional string name = 1; // the layer name
+  optional string type = 2; // the layer type
+  repeated string bottom = 3; // 输入Blob(bottom Blob)的名称
+  repeated string top = 4; // 输出Blob(Top Blob)的名称
+
+  // 当前计算阶段（TRAIN 或 TEST)
+    optional Phase phase = 10;
+
+  // 为每个Top Blob分配对损失函数的权重，毎个Layer都有默认值，要么为0,表示不参与目标函数计算：要么为1，表示参与损失函数计算
+  repeated float loss_weight = 5;
+
+  // 指定训练参数（例如相对全局学习常数的缩放因子，以及用于权值共享 的名称或其他设置)
+  repeated ParamSpec param = 6;
+
+  // 承载了该层数值参数的Blob
+  repeated BlobProto blobs = 7;
+  //是否对Bottom Blob进行反向传播过程。该字段的维度应与 Bottom Blob个数一致
+  // Specifies whether to backpropagate to each bottom. If unspecified,
+  // Caffe will automatically infer whether each input needs backpropagation
+  // to compute parameter gradients. If set to true for some inputs,
+  // backpropagation to those inputs is forced; if set false for some inputs,
+  // backpropagation to those inputs is skipped.
+  //
+  // The size must be either 0 or equal to the number of bottoms.
+  repeated bool propagate_down = 11;
+
+ //控制某个层在某个时刻是否包含在网络中，基于当前NetState。你可以为include或exclude(不要同时）指定非零值。如果没有任何规则，那么该层一直包含在网络中：如果当前NetState满足了任何1个指定规则，耶么该层会被包含或排斥
+  // Rules controlling whether and when a layer is included in the network,
+  // based on the current NetState.  You may specify a non-zero number of rules
+  // to include OR exclude, but not both.  If no include or exclude rules are
+  // specified, the layer is always included.  If the current NetState meets
+  // ANY (i.e., one or more) of the specified rules, the layer is
+  // included/excluded.
+  repeated NetStateRule include = 8;
+  repeated NetStateRule exclude = 9;
+
+  // Parameters for data pre-processing.数据预处理参数
+  optional TransformationParameter transform_param = 100;
+
+  // Parameters shared by loss layers.所有损失层共享的参数
+  optional LossParameter loss_param = 101;
+  
+  
+  //特定类型层的参数。注意一些层实现时可能有多于一种的计算引擎，这些层包括一个引擎类型和引擎参数来选择实现.默认引擎是在编译阶段由引擎开关设置的
+  // Layer type-specific parameters.
+  //
+  // Note: certain layers may have more than one computational engine
+  // for their implementation. These layers include an Engine type and
+  // engine parameter for selecting the implementation.
+  // The default for the engine is set by the ENGINE switch at compile-time.
+  optional AccuracyParameter accuracy_param = 102;
+  optional ArgMaxParameter argmax_param = 103;
+  optional BatchNormParameter batch_norm_param = 139;
+  optional BiasParameter bias_param = 141;
+  optional ConcatParameter concat_param = 104;
+  optional ContrastiveLossParameter contrastive_loss_param = 105;
+  optional ConvolutionParameter convolution_param = 106;
+  optional CropParameter crop_param = 144;
+  optional DataParameter data_param = 107;
+  optional DropoutParameter dropout_param = 108;
+  optional DummyDataParameter dummy_data_param = 109;
+  optional EltwiseParameter eltwise_param = 110;
+  optional ELUParameter elu_param = 140;
+  optional EmbedParameter embed_param = 137;
+  optional ExpParameter exp_param = 111;
+  optional FlattenParameter flatten_param = 135;
+  optional HDF5DataParameter hdf5_data_param = 112;
+  optional HDF5OutputParameter hdf5_output_param = 113;
+  optional HingeLossParameter hinge_loss_param = 114;
+  optional ImageDataParameter image_data_param = 115;
+  optional InfogainLossParameter infogain_loss_param = 116;
+  optional InnerProductParameter inner_product_param = 117;
+  optional InputParameter input_param = 143;
+  optional LogParameter log_param = 134;
+  optional LRNParameter lrn_param = 118;
+  optional MemoryDataParameter memory_data_param = 119;
+  optional MVNParameter mvn_param = 120;
+  optional ParameterParameter parameter_param = 145;
+  optional PoolingParameter pooling_param = 121;
+  optional PowerParameter power_param = 122;
+  optional PReLUParameter prelu_param = 131;
+  optional PythonParameter python_param = 130;
+  optional RecurrentParameter recurrent_param = 146;
+  optional ReductionParameter reduction_param = 136;
+  optional ReLUParameter relu_param = 123;
+  optional ReshapeParameter reshape_param = 133;
+  optional ScaleParameter scale_param = 142;
+  optional SigmoidParameter sigmoid_param = 124;
+  optional SoftmaxParameter softmax_param = 125;
+  optional SPPParameter spp_param = 132;
+  optional SliceParameter slice_param = 126;
+  optional TanHParameter tanh_param = 127;
+  optional ThresholdParameter threshold_param = 128;
+  optional TileParameter tile_param = 138;
+  optional WindowDataParameter window_data_param = 129;
+}
+
+</code></pre>
+
+<h2 id="toc_1">Layer是怎么炼成的</h2>
+
+<p>Layer头文件位于<code>include/caffe/layer.hpp</code>中，我们来解析一下: </p>
+
+<pre><code class="language-c++">#ifndef CAFFE_LAYER_H_
+#define CAFFE_LAYER_H_
+
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+#include &quot;caffe/blob.hpp&quot;
+#include &quot;caffe/common.hpp&quot;
+#include &quot;caffe/layer_factory.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
+#include &quot;caffe/util/math_functions.hpp&quot;
+
+/**
+ Forward declare boost::thread instead of including boost/thread.hpp
+ to avoid a boost/NVCC issues (#1009, #1010) on OSX.
+ */
+namespace boost { class mutex; }
+
+namespace caffe {
+
+/**
+ * @brief An interface for the units of computation which can be composed into a
+ *        Net.
+ *
+ * Layer%s must implement a Forward function, in which they take their input
+ * (bottom) Blob%s (if any) and compute their output Blob%s (if any).
+ * They may also implement a Backward function, in which they compute the error
+ * gradients with respect to their input Blob%s, given the error gradients with
+ * their output Blob%s.
+ */
+template &lt;typename Dtype&gt;
+class Layer {
+ public:
+  /**
+   * You should not implement your own constructor. Any set up code should go
+   * to SetUp(), where the dimensions of the bottom blobs are provided to the
+   * layer.
+   */
+   //显式构造函数，从LayerParameter对象中加载配置
+  explicit Layer(const LayerParameter&amp; param)
+    : layer_param_(param) {
+      // Set phase(训练/预测) and copy blobs (if there are any).
+      phase_ = param.phase();
+      if (layer_param_.blobs_size() &gt; 0) {
+        //按 layer_param_设置本身Blob对象个数，并依次将每个Blob对象尺寸调整为与layer_param_中的Blob尺寸一致
+        blobs_.resize(layer_param_.blobs_size());
+        for (int i = 0; i &lt; layer_param_.blobs_size(); ++i) {
+          blobs_[i].reset(new Blob&lt;Dtype&gt;());
+          blobs_[i]-&gt;FromProto(layer_param_.blobs(i));
+        }
+      }
+    }
+    //析构函数
+  virtual ~Layer() {}
+
+  /**
+   * @brief Implements common layer setup functionality.
+   *
+   * @param bottom the preshaped input blobs
+   * @param top
+   *     the allocated but unshaped output blobs, to be shaped by Reshape
+   *
+   * Checks that the number of bottom and top blobs is correct.
+   * Calls LayerSetUp to do special layer setup for individual layer types,
+   * followed by Reshape to set up sizes of top blobs and internal buffers.
+   * Sets up the loss weight multiplier blobs for any non-zero loss weights.
+   * This method may not be overridden.
+   */
+   
+   //配置函数,实现常用层配置接口，不可被覆盖
+  void SetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    CheckBlobCounts(bottom, top);   //检查Blob
+    LayerSetUp(bottom, top);        //  与层类型相关的配置过程
+    Reshape(bottom, top);       //对Top Blob变形
+    SetLossWeights(top);        //设置损失权值因子Blob
+  }
+
+  /**
+   * @brief Does layer-specific setup: your layer should implement this function
+   *        as well as Reshape.
+   *
+   * @param bottom
+   *     the preshaped input blobs, whose data fields store the input data for
+   *     this layer
+   * @param top
+   *     the allocated but unshaped output blobs
+   *
+   * This method should do one-time layer specific setup. This includes reading
+   * and processing relevent parameters from the &lt;code&gt;layer_param_&lt;/code&gt;.
+   * Setting up the shapes of top blobs and internal buffers should be done in
+   * &lt;code&gt;Reshape&lt;/code&gt;, which will be called before the forward pass to
+   * adjust the top blob sizes.
+   */
+   
+   //层配置（虚）函数，做特定类型层相关的配置，由该类型层自己实现
+  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {}
+
+  /**
+   * @brief Adjust the shapes of top blobs and internal buffers to accommodate
+   *        the shapes of the bottom blobs.
+   *
+   * @param bottom the input blobs, with the requested input shapes
+   * @param top the top blobs, which should be reshaped as needed
+   *
+   * This method should reshape top blobs as needed according to the shapes
+   * of the bottom (input) blobs, as well as reshaping any internal buffers
+   * and making any other necessary adjustments so that the layer can
+   * accommodate the bottom blobs.
+   */
+  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) = 0;
+
+  /**
+   * @brief Given the bottom blobs, compute the top blobs and the loss.
+   *
+   * @param bottom
+   *     the input blobs, whose data fields store the input data for this layer
+   * @param top
+   *     the preshaped output blobs, whose data fields will store this layers&#39;
+   *     outputs
+   * \return The total loss from the layer.
+   *
+   * The Forward wrapper calls the relevant device wrapper function
+   * (Forward_cpu or Forward_gpu) to compute the top blob values given the
+   * bottom blobs.  If the layer has any non-zero loss_weights, the wrapper
+   * then computes and returns the loss.
+   *
+   * Your layer should implement Forward_cpu and (optionally) Forward_gpu.
+   */
+  inline Dtype Forward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+
+  /**
+   * @brief Given the top blob error gradients, compute the bottom blob error
+   *        gradients.
+   *
+   * @param top
+   *     the output blobs, whose diff fields store the gradient of the error
+   *     with respect to themselves
+   * @param propagate_down
+   *     a vector with equal length to bottom, with each index indicating
+   *     whether to propagate the error gradients down to the bottom blob at
+   *     the corresponding index
+   * @param bottom
+   *     the input blobs, whose diff fields will store the gradient of the error
+   *     with respect to themselves after Backward is run
+   *
+   * The Backward wrapper calls the relevant device wrapper function
+   * (Backward_cpu or Backward_gpu) to compute the bottom blob diffs given the
+   * top blob diffs.
+   *
+   * Your layer should implement Backward_cpu and (optionally) Backward_gpu.
+   */
+  inline void Backward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
+
+  /**
+   * @brief Returns the vector of learnable parameter blobs.
+   */
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt;&amp; blobs() {
+    return blobs_;
+  }
+
+  /**
+   * @brief Returns the layer parameter.
+   */
+  const LayerParameter&amp; layer_param() const { return layer_param_; }
+
+  /**
+   * @brief Writes the layer parameter to a protocol buffer
+   */
+  virtual void ToProto(LayerParameter* param, bool write_diff = false);
+
+  /**
+   * @brief Returns the scalar loss associated with a top blob at a given index.
+   */
+  inline Dtype loss(const int top_index) const {
+    return (loss_.size() &gt; top_index) ? loss_[top_index] : Dtype(0);
+  }
+
+  /**
+   * @brief Sets the loss associated with a top blob at a given index.
+   */
+  inline void set_loss(const int top_index, const Dtype value) {
+    if (loss_.size() &lt;= top_index) {
+      loss_.resize(top_index + 1, Dtype(0));
+    }
+    loss_[top_index] = value;
+  }
+
+  /**
+   * @brief Returns the layer type.
+   */
+  virtual inline const char* type() const { return &quot;&quot;; }
+
+  /**
+   * @brief Returns the exact number of bottom blobs required by the layer,
+   *        or -1 if no exact number is required.
+   *
+   * This method should be overridden to return a non-negative value if your
+   * layer expects some exact number of bottom blobs.
+   */
+  virtual inline int ExactNumBottomBlobs() const { return -1; }
+  /**
+   * @brief Returns the minimum number of bottom blobs required by the layer,
+   *        or -1 if no minimum number is required.
+   *
+   * This method should be overridden to return a non-negative value if your
+   * layer expects some minimum number of bottom blobs.
+   */
+  virtual inline int MinBottomBlobs() const { return -1; }
+  /**
+   * @brief Returns the maximum number of bottom blobs required by the layer,
+   *        or -1 if no maximum number is required.
+   *
+   * This method should be overridden to return a non-negative value if your
+   * layer expects some maximum number of bottom blobs.
+   */
+  virtual inline int MaxBottomBlobs() const { return -1; }
+  /**
+   * @brief Returns the exact number of top blobs required by the layer,
+   *        or -1 if no exact number is required.
+   *
+   * This method should be overridden to return a non-negative value if your
+   * layer expects some exact number of top blobs.
+   */
+  virtual inline int ExactNumTopBlobs() const { return -1; }
+  /**
+   * @brief Returns the minimum number of top blobs required by the layer,
+   *        or -1 if no minimum number is required.
+   *
+   * This method should be overridden to return a non-negative value if your
+   * layer expects some minimum number of top blobs.
+   */
+  virtual inline int MinTopBlobs() const { return -1; }
+  /**
+   * @brief Returns the maximum number of top blobs required by the layer,
+   *        or -1 if no maximum number is required.
+   *
+   * This method should be overridden to return a non-negative value if your
+   * layer expects some maximum number of top blobs.
+   */
+  virtual inline int MaxTopBlobs() const { return -1; }
+  /**
+   * @brief Returns true if the layer requires an equal number of bottom and
+   *        top blobs.
+   *
+   * This method should be overridden to return true if your layer expects an
+   * equal number of bottom and top blobs.
+   */
+  virtual inline bool EqualNumBottomTopBlobs() const { return false; }
+
+  /**
+   * @brief Return whether &quot;anonymous&quot; top blobs are created automatically
+   *        by the layer.
+   *
+   * If this method returns true, Net::Init will create enough &quot;anonymous&quot; top
+   * blobs to fulfill the requirement specified by ExactNumTopBlobs() or
+   * MinTopBlobs().
+   */
+  virtual inline bool AutoTopBlobs() const { return false; }
+
+  /**
+   * @brief Return whether to allow force_backward for a given bottom blob
+   *        index.
+   *
+   * If AllowForceBackward(i) == false, we will ignore the force_backward
+   * setting and backpropagate to blob i only if it needs gradient information
+   * (as is done when force_backward == false).
+   */
+  virtual inline bool AllowForceBackward(const int bottom_index) const {
+    return true;
+  }
+
+  /**
+   * @brief Specifies whether the layer should compute gradients w.r.t. a
+   *        parameter at a particular index given by param_id.
+   *
+   * You can safely ignore false values and always compute gradients
+   * for all parameters, but possibly with wasteful computation.
+   */
+  inline bool param_propagate_down(const int param_id) {
+    return (param_propagate_down_.size() &gt; param_id) ?
+        param_propagate_down_[param_id] : false;
+  }
+  /**
+   * @brief Sets whether the layer should compute gradients w.r.t. a
+   *        parameter at a particular index given by param_id.
+   */
+  inline void set_param_propagate_down(const int param_id, const bool value) {
+    if (param_propagate_down_.size() &lt;= param_id) {
+      param_propagate_down_.resize(param_id + 1, true);
+    }
+    param_propagate_down_[param_id] = value;
+  }
+
+
+ protected:
+  /** The protobuf that stores the layer parameters */
+  LayerParameter layer_param_;
+  /** The phase: TRAIN or TEST */
+  Phase phase_;
+  /** The vector that stores the learnable parameters as a set of blobs. */
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt; blobs_;
+  /** Vector indicating whether to compute the diff of each param blob. */
+  vector&lt;bool&gt; param_propagate_down_;
+
+  /** The vector that indicates whether each top blob has a non-zero weight in
+   *  the objective function. */
+  vector&lt;Dtype&gt; loss_;
+
+  /** @brief Using the CPU device, compute the layer output. */
+  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) = 0;
+  /**
+   * @brief Using the GPU device, compute the layer output.
+   *        Fall back to Forward_cpu() if unavailable.
+   */
+  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    // LOG(WARNING) &lt;&lt; &quot;Using CPU code as backup.&quot;;
+    return Forward_cpu(bottom, top);
+  }
+
+  /**
+   * @brief Using the CPU device, compute the gradients for any parameters and
+   *        for the bottom blobs if propagate_down is true.
+   */
+  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) = 0;
+  /**
+   * @brief Using the GPU device, compute the gradients for any parameters and
+   *        for the bottom blobs if propagate_down is true.
+   *        Fall back to Backward_cpu() if unavailable.
+   */
+  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+    // LOG(WARNING) &lt;&lt; &quot;Using CPU code as backup.&quot;;
+    Backward_cpu(top, propagate_down, bottom);
+  }
+
+  /**
+   * Called by the parent Layer&#39;s SetUp to check that the number of bottom
+   * and top Blobs provided as input match the expected numbers specified by
+   * the {ExactNum,Min,Max}{Bottom,Top}Blobs() functions.
+   */
+  virtual void CheckBlobCounts(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+                               const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    if (ExactNumBottomBlobs() &gt;= 0) {
+      CHECK_EQ(ExactNumBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes &quot; &lt;&lt; ExactNumBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (MinBottomBlobs() &gt;= 0) {
+      CHECK_LE(MinBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes at least &quot; &lt;&lt; MinBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (MaxBottomBlobs() &gt;= 0) {
+      CHECK_GE(MaxBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes at most &quot; &lt;&lt; MaxBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (ExactNumTopBlobs() &gt;= 0) {
+      CHECK_EQ(ExactNumTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces &quot; &lt;&lt; ExactNumTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (MinTopBlobs() &gt;= 0) {
+      CHECK_LE(MinTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces at least &quot; &lt;&lt; MinTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (MaxTopBlobs() &gt;= 0) {
+      CHECK_GE(MaxTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces at most &quot; &lt;&lt; MaxTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (EqualNumBottomTopBlobs()) {
+      CHECK_EQ(bottom.size(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces one top blob as output for each &quot;
+          &lt;&lt; &quot;bottom blob input.&quot;;
+    }
+  }
+
+  /**
+   * Called by SetUp to initialize the weights associated with any top blobs in
+   * the loss function. Store non-zero loss weights in the diff blob.
+   */
+  inline void SetLossWeights(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    const int num_loss_weights = layer_param_.loss_weight_size();
+    if (num_loss_weights) {
+      CHECK_EQ(top.size(), num_loss_weights) &lt;&lt; &quot;loss_weight must be &quot;
+          &quot;unspecified or specified once per top blob.&quot;;
+      for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+        const Dtype loss_weight = layer_param_.loss_weight(top_id);
+        if (loss_weight == Dtype(0)) { continue; }
+        this-&gt;set_loss(top_id, loss_weight);
+        const int count = top[top_id]-&gt;count();
+        Dtype* loss_multiplier = top[top_id]-&gt;mutable_cpu_diff();
+        caffe_set(count, loss_weight, loss_multiplier);
+      }
+    }
+  }
+
+ private:
+  DISABLE_COPY_AND_ASSIGN(Layer);
+};  // class Layer
+
+// Forward and backward wrappers. You should implement the cpu and
+// gpu specific implementations instead, and should not change these
+// functions.
+template &lt;typename Dtype&gt;
+inline Dtype Layer&lt;Dtype&gt;::Forward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  Dtype loss = 0;
+  Reshape(bottom, top);
+  switch (Caffe::mode()) {
+  case Caffe::CPU:
+    Forward_cpu(bottom, top);
+    for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      if (!this-&gt;loss(top_id)) { continue; }
+      const int count = top[top_id]-&gt;count();
+      const Dtype* data = top[top_id]-&gt;cpu_data();
+      const Dtype* loss_weights = top[top_id]-&gt;cpu_diff();
+      loss += caffe_cpu_dot(count, data, loss_weights);
+    }
+    break;
+  case Caffe::GPU:
+    Forward_gpu(bottom, top);
+#ifndef CPU_ONLY
+    for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      if (!this-&gt;loss(top_id)) { continue; }
+      const int count = top[top_id]-&gt;count();
+      const Dtype* data = top[top_id]-&gt;gpu_data();
+      const Dtype* loss_weights = top[top_id]-&gt;gpu_diff();
+      Dtype blob_loss = 0;
+      caffe_gpu_dot(count, data, loss_weights, &amp;blob_loss);
+      loss += blob_loss;
+    }
+#endif
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
+  }
+  return loss;
+}
+
+template &lt;typename Dtype&gt;
+inline void Layer&lt;Dtype&gt;::Backward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+    const vector&lt;bool&gt;&amp; propagate_down,
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+  switch (Caffe::mode()) {
+  case Caffe::CPU:
+    Backward_cpu(top, propagate_down, bottom);
+    break;
+  case Caffe::GPU:
+    Backward_gpu(top, propagate_down, bottom);
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
+  }
+}
+
+// Serialize LayerParameter to protocol buffer
+template &lt;typename Dtype&gt;
+void Layer&lt;Dtype&gt;::ToProto(LayerParameter* param, bool write_diff) {
+  param-&gt;Clear();
+  param-&gt;CopyFrom(layer_param_);
+  param-&gt;clear_blobs();
+  for (int i = 0; i &lt; blobs_.size(); ++i) {
+    blobs_[i]-&gt;ToProto(param-&gt;add_blobs(), write_diff);
+  }
+}
+
+}  // namespace caffe
+
+#endif  // CAFFE_LAYER_H_
+
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[怎样移除OSXRESERVED分区(如果BootCamp Assistant在安装之后没有成功删除这个分区)]]></title>
+    <link href="https://lockxmonk.github.io/14974281629389.html"/>
+    <updated>2017-06-14T16:16:02+08:00</updated>
+    <id>https://lockxmonk.github.io/14974281629389.html</id>
+    <content type="html"><![CDATA[
+<ol>
+<li>打开磁盘工具</li>
+<li>点击主物理磁盘(不是下边的分区)</li>
+<li>点击分区按钮</li>
+<li>When you see the pie chart, click on the OSXRESERVED partition in the pie chart</li>
+<li>点击<code>-</code>标志</li>
+<li>click apply</li>
+</ol>
+
+<p>Thats it! </p>
+
+<p><strong>DON&#39;T use the ERASE Button in Disk Utility! That will cause problems and it won&#39;t reallocate space back.</strong></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[重新利用boot camp安装win10]]></title>
+    <link href="https://lockxmonk.github.io/14974276192148.html"/>
+    <updated>2017-06-14T16:06:59+08:00</updated>
+    <id>https://lockxmonk.github.io/14974276192148.html</id>
+    <content type="html"><![CDATA[
+<p>由于原来给win10分的磁盘容量太小,而mac又不能在后续动态给win分区增加磁盘容量,所以只能重新安装分区了.</p>
+
+<ol>
+<li>打开mac系统工具中的磁盘<code>磁盘工具</code>选择总的磁盘,点击上方的<code>分区</code>按钮,将系统中其它分区删掉(通过点击饼图中的对应区域,点击下方的<code>-</code>号),就可以将分区删掉,合并到mac系统磁盘.其他分区比如之前安装win产生的<code>OSXRESERVED Partition</code> </li>
+<li>打开bootcamp,点击恢复按钮,将之前的win系统抹掉,之后就会发现,你的mac系统磁盘变回来了.</li>
+<li>重启一下,之后打开bootcamp,点击下方的<code>继续</code>按钮,选择系统iso镜像,为win系统选择分区大小(这回分多些😓).</li>
+<li>点击确定,等待下载Windows支持软件.
+<img src="media/14974276192148/14974281373736.jpg" alt=""/></li>
+<li>安装之后,在OSRESEVER分区中,的bootcamp文件夹中打开安装驱动的程序.</li>
+</ol>
+
+<p>到此win10 应该就安装好了~</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[caffe数据结构描述]]></title>
@@ -6185,356 +6848,6 @@ I0513 11:37:11.208425 3659862976 caffe.cpp:330] loss = 0.0304018 (* 1 = 0.030401
 <p>通过上述内容,我们可以初步了解一个完整的深度学习系统最核心的两个方面:<strong>数据和模型</strong>.数据是带标签的图片集,分训练集和测试集;模型是描述CNN结构的有向无环图(DAG),表示对原始数据的处理方式.</p>
 
 <p><font color=red>Caffe并不直接处理原始数据,由预处理程序将原始数据存储为<code>LMDB</code>格式,来保持较高的IO效率.模型通常用ProtoBuffer文本格式表述,训练结果保存为ProtoBuffer二进制文件或HDF5格式文件.</font><strong>深度学习的过程就是利用训练数据对模型进行训练,将数据中蕴藏的大量信息通过机器学习算法不断收集到模型中,利用训练好的模型对现实世界中相似数据进行特定处理(如分类,识别,检测,定位).</strong></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[常用内建模块]]></title>
-    <link href="https://lockxmonk.github.io/14945736764798.html"/>
-    <updated>2017-05-12T15:21:16+08:00</updated>
-    <id>https://lockxmonk.github.io/14945736764798.html</id>
-    <content type="html"><![CDATA[
-<p>Python中有很多內建模块可以直接使用，无需额外安装。</p>
-
-<h2 id="toc_0">collection</h2>
-
-<p>collections是Python内建的一个集合模块，提供了许多有用的集合类。</p>
-
-<h3 id="toc_1">namedtuple</h3>
-
-<p>我们知道<code>tuple</code>可以表示不变集合，例如，一个点的二维坐标就可以表示成：</p>
-
-<pre><code>p = (1,2)
-</code></pre>
-
-<p>但是，看到<code>(1, 2)</code>，很难看出这个<code>tuple</code>是用来表示一个坐标的。</p>
-
-<p>定义一个<code>class</code>又小题大做了，这时，<code>namedtuple</code>就派上了用场：</p>
-
-<pre><code class="language-py">from collections import namedtuple
-Point = namedtuple(&#39;Point&#39;,[&#39;x&#39;,&#39;y&#39;])
-p = Point(1,2)
-print p.x , p.y
-</code></pre>
-
-<p><img src="media/14945736764798/14945744048083.jpg" alt=""/><br/>
-<code>namedtuple</code>是一个函数，它用来创建一个自定义的<code>tuple</code>对象，并且规定了<code>tuple</code>元素的个数，并可以用属性而不是索引来引用<code>tuple</code>的某个元素。</p>
-
-<p>这样一来，我们用<code>namedtuple</code>可以很方便地定义一种数据类型，它具备<code>tuple</code>的不变性，又可以根据属性来引用，使用十分方便。</p>
-
-<p>可以验证创建的<code>Point</code>对象是<code>tuple</code>的一种子类：</p>
-
-<pre><code class="language-py">print p.x , p.y ,isinstance(p, tuple),isinstance(p, Point)
-</code></pre>
-
-<p><img src="media/14945736764798/14945746594923.jpg" alt=""/></p>
-
-<p>类似的，如果要用坐标和半径表示一个圆，也可以用<code>namedtuple</code>定义：</p>
-
-<pre><code class="language-py"># namedtuple(&#39;名称&#39;, [属性list]):
-Circle = namedtuple(&#39;Circle&#39;, [&#39;x&#39;, &#39;y&#39;, &#39;r&#39;])
-</code></pre>
-
-<h3 id="toc_2">deque</h3>
-
-<p>使用<code>list</code>存储数据时，按索引访问元素很快，但是插入和删除元素就很慢了，因为<code>list</code>是线性存储，数据量大的时候，插入和删除效率很低。</p>
-
-<p><code>deque</code>是为了高效实现插入和删除操作的双向列表，适合用于队列和栈：</p>
-
-<pre><code class="language-py">from collections import deque
-q = deque([&#39;a&#39;,&#39;b&#39;,&#39;c&#39;])
-q.append(&#39;x&#39;)
-q.appendleft(&#39;y&#39;)
-print q
-</code></pre>
-
-<p><img src="media/14945736764798/14945755049453.jpg" alt=""/></p>
-
-<p><code>deque</code>除了实现list的<code>append()</code>和<code>pop()</code>外，还支持<code>appendleft()</code>和<code>popleft()</code>，这样就可以非常高效地往头部添加或删除元素。</p>
-
-<h3 id="toc_3">defaultdict</h3>
-
-<p>使用<code>dict</code>时，如果引用的Key不存在，就会抛出<code>KeyError</code>。如果希望<code>key</code>不存在时，返回一个默认值，就可以用<code>defaultdict</code>：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-from collections import defaultdict
-dd = defaultdict(lambda: &#39;N/A&#39;)
-dd[&#39;key1&#39;] = &#39;abc&#39;
-print dd[&#39;key1&#39;], dd[&#39;key2&#39;]    #key1存在，key2不存在
-
-</code></pre>
-
-<p><img src="media/14945736764798/14945759067274.jpg" alt=""/><br/>
-注意默认值是调用函数返回的，而函数在创建<code>defaultdict</code>对象时传入。</p>
-
-<p>除了在<code>Key</code>不存在时返回默认值，<code>defaultdict</code>的其他行为跟<code>dict</code>是完全一样的。</p>
-
-<h3 id="toc_4">OrderedDict</h3>
-
-<p>使用<code>dict</code>时，Key是无序的。在对<code>dict</code>做迭代时，我们无法确定<code>Key</code>的顺序。</p>
-
-<p>如果要保持Key的顺序，可以用<code>OrderedDict</code>：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-from collections import OrderedDict
-d = dict([(&#39;a&#39;,1),(&#39;b&#39;,2),(&#39;c&#39;,3)])
-print d    # dict的Key是无序的
-od = OrderedDict([(&#39;a&#39;,1),(&#39;b&#39;,2),(&#39;c&#39;,3)])
-print od   #这个是有序的
-
-</code></pre>
-
-<p><img src="media/14945736764798/14945761816386.jpg" alt=""/></p>
-
-<p><font color=red>注意，OrderedDict的Key会按照插入的顺序排列，不是Key本身排序：</font></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-from collections import OrderedDict
-od = OrderedDict()
-od[&#39;z&#39;] = 1
-od[&#39;y&#39;] = 2
-od[&#39;x&#39;] = 3
-
-print od
-</code></pre>
-
-<p><img src="media/14945736764798/14945763021698.jpg" alt=""/></p>
-
-<p><code>OrderedDict</code>可以实现一个FIFO（先进先出）的dict，当容量超出限制时，先删除最早添加的Key：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-from collections import OrderedDict
-
-class LastUpdatedOrderedDict(OrderedDict):
-
-    def __init__(self, capacity):
-        super(LastUpdatedOrderedDict, self).__init__()
-        self._capacity = capacity
-
-    def __setitem__(self, key, value):
-        containsKey = 1 if key in self else 0
-        if len(self) - containsKey &gt;= self._capacity:
-            last = self.popitem(last=False)
-            print &#39;remove:&#39;, last
-        if containsKey:
-            del self[key]
-            print &#39;set:&#39;, (key, value)
-        else:
-            print &#39;add:&#39;, (key, value)
-        OrderedDict.__setitem__(self, key, value)
-od = LastUpdatedOrderedDict(3)
-od[&#39;z&#39;] = 1
-od[&#39;w&#39;] = 2
-od[&#39;a&#39;] = 3
-od[&#39;q&#39;] = 4
-print od  
-</code></pre>
-
-<p><img src="media/14945736764798/14945770697335.jpg" alt=""/></p>
-
-<h3 id="toc_5">Counter</h3>
-
-<p><code>Counter</code>是一个简单的计数器，例如，统计字符出现的个数：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-from collections import Counter
-
-c = Counter()
-for ch in &#39;Programming&#39;:
-    c[ch] = c[ch] + 1
-
-print c
-
-</code></pre>
-
-<p><img src="media/14945736764798/14945772600780.jpg" alt=""/></p>
-
-<h1 id="toc_6">小结</h1>
-
-<p><code>collections</code>模块提供了一些有用的集合类，可以根据需要选用。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[CNN卷积神经网络]]></title>
-    <link href="https://lockxmonk.github.io/14940530686573.html"/>
-    <updated>2017-05-06T14:44:28+08:00</updated>
-    <id>https://lockxmonk.github.io/14940530686573.html</id>
-    <content type="html"><![CDATA[
-<h2 id="toc_0">简介</h2>
-
-<p>卷积神经网络是近年发展起来，并引起广泛重视的一种高效识别方法。20世纪60年代，Hubel和Wiesel在研究猫脑皮层中用于局部敏感和方向选择的神经元时发现其独特的网络结构可以有效地降低反馈神经网络的复杂性，继而提出了卷积神经网络（Convolutional Neural Networks-简称CNN）。现在，CNN已经成为众多科学领域的研究热点之一，特别是在模式分类领域，<mark>由于该网络避免了对图像的复杂前期预处理，可以直接输入原始图像，因而得到了更为广泛的应用</mark>。</p>
-
-<p>一般地，CNN的基本结构包括两层：</p>
-
-<ol>
-<li><p>其一为<strong>特征提取层</strong>：每个神经元的输入与前一层的局部接受域相连，并提取该局部的特征。一旦该局部特征被提取后，它与其它特征间的位置关系也随之确定下来；</p></li>
-<li><p>其二是<strong>特征映射层</strong>：网络的每个计算层由多个特征映射组成，每个特征映射是一个平面，平面上所有神经元的权值相等。特征映射结构采用影响函数核小的sigmoid函数作为卷积网络的激活函数，使得特征映射具有位移不变性。此外，由于一个映射面上的神经元共享权值，因而减少了网络自由参数的个数。卷积神经网络中的每一个卷积层都紧跟着一个用来求局部平均与二次提取的计算层，这种特有的两次特征提取结构减小了特征分辨率。</p></li>
-</ol>
-
-<p>CNN主要<strong>用来识别位移、缩放及其他形式扭曲不变性的二维图形</strong>。由于CNN的特征检测层通过训练数据进行学习，所以在使用CNN时，避免了显示的特征抽取，而隐式地从训练数据中进行学习；</p>
-
-<p>再者由于同一特征映射面上的神经元权值相同，所以网络可以并行学习，这也是卷积网络相对于神经元彼此相连网络的一大优势。<font color=red>卷积神经网络以其局部权值共享的特殊结构在语音识别和图像处理方面有着独特的优越性，</font><strong>其布局更接近于实际的生物神经网络，权值共享降低了网络的复杂性，特别是多维输入向量的图像可以直接输入网络这一特点避免了特征提取和分类过程中数据重建的复杂度</strong>。</p>
-
-<h2 id="toc_1">卷积神经网络</h2>
-
-<p>在图像处理中，往往把图像表示为像素的向量，比如一个1000×1000的图像，可以表示为一个1000000的向量。在上一节中提到的神经网络中，如果隐含层数目与输入层一样，即也是1000000时，那么输入层到隐含层的参数数据为：\(1000000×1000000=10^{12}\)，这样就太多了，基本没法训练。所以图像处理要想练成神经网络大法，必先减少参数加快速度。就跟辟邪剑谱似的，普通人练得很挫，一旦自宫后内力变强剑法变快，就变的很牛了。</p>
-
-<h3 id="toc_2">局部感知</h3>
-
-<p>卷积神经网络有<mark>两种神器</mark>可以降低参数数目，<mark>第一种神器叫做局部感知野</mark>。一般认为人对外界的认知是从局部到全局的，而图像的空间联系也是局部的像素联系较为紧密，而距离较远的像素相关性则较弱。<strong>因而，每个神经元其实没有必要对全局图像进行感知，只需要对局部进行感知</strong>，然后在更高层将局部的信息综合起来就得到了全局的信息。<strong>网络部分连通的思想，也是受启发于生物学里面的视觉系统结构。视觉皮层的神经元就是局部接受信息的（即这些神经元只响应某些特定区域的刺激）。</strong>如下图所示：左图为全连接，右图为局部连接。</p>
-
-<p><img src="media/14940530686573/14940535875953.jpg" alt=""/></p>
-
-<p>在上右图中，假如每个神经元只和10×10个像素值相连，那么权值数据为1000000×100个参数，减少为原来的千分之一。而那10×10个像素值对应的10×10个参数，其实就相当于卷积操作。</p>
-
-<h3 id="toc_3">参数共享</h3>
-
-<p>但其实这样的话参数仍然过多，那么就启动第二级神器，<mark>即权值共享</mark>。在上面的局部连接中，每个神经元都对应100个参数，一共1000000个神经元，如果这1000000个神经元的100个参数都是相等的，那么参数数目就变为100了。</p>
-
-<p>怎么理解权值共享呢？我们可以这100个参数（也就是卷积操作）看成是提取特征的方式，该方式与位置无关。<font color=red>这其中隐含的原理则是：图像的一部分的统计特性与其他部分是一样的。这也意味着我们在这一部分学习的特征也能用在另一部分上，所以对于这个图像上的所有位置，我们都能使用同样的学习特征</font>。</p>
-
-<p>更直观一些，当从一个大尺寸图像中随机选取一小块，比如说 8×8 作为样本，并且从这个小块样本中学习到了一些特征，这时我们可以把从这个 8×8 样本中学习到的特征作为探测器，应用到这个图像的任意地方中去。特别是，我们可以用从 8×8 样本中所学习到的特征跟原本的大尺寸图像作卷积，从而对这个大尺寸图像上的任一位置获得一个不同特征的激活值。</p>
-
-<p>如下图所示，展示了一个33的卷积核在55的图像上做卷积的过程。每个卷积都是一种特征提取方式，就像一个筛子，将图像中符合条件（激活值越大越符合条件）的部分筛选出来</p>
-
-<p><img src="media/14940530686573/14940539862222.gif" alt=""/></p>
-
-<h3 id="toc_4">多卷积核</h3>
-
-<p>上面所述只有100个参数时，表明只有1个100*100的卷积核，显然，特征提取是不充分的，我们可以添加多个卷积核，比如32个卷积核，可以学习32种特征。在有多个卷积核时，如下图所示：<br/>
-<img src="media/14940530686573/14940546422731.jpg" alt=""/></p>
-
-<p>上图右，不同颜色表明不同的卷积核。每个卷积核都会将图像生成为另一幅图像。比如两个卷积核就可以将生成两幅图像，这两幅图像可以看做是一张图像的不同的通道。如下图所示，下图有个小错误，即将w1改为w0，w2改为w1即可。下文中仍以w1和w2称呼它们.</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[正则表达式]]></title>
-    <link href="https://lockxmonk.github.io/14939712159345.html"/>
-    <updated>2017-05-05T16:00:15+08:00</updated>
-    <id>https://lockxmonk.github.io/14939712159345.html</id>
-    <content type="html"><![CDATA[
-<p>字符串是编程时涉及到的最多的一种数据结构，对字符串进行操作的需求几乎无处不在。比如判断一个字符串是否是合法的Email地址，虽然可以编程提取<code>@</code>前后的子串，再分别判断是否是单词和域名，但这样做不但麻烦，而且代码难以复用。</p>
-
-<p>正则表达式是一种用来匹配字符串的强有力的武器。它的设计思想是用一种描述性的语言来给字符串定义一个规则，凡是符合规则的字符串，我们就认为它“匹配”了，否则，该字符串就是不合法的。</p>
-
-<p>所以我们判断一个字符串是否是合法的Email的方法是：</p>
-
-<ol>
-<li><p>创建一个匹配Email的正则表达式；</p></li>
-<li><p>用该正则表达式去匹配用户的输入来判断是否合法。</p></li>
-</ol>
-
-<p>因为正则表达式也是用字符串表示的，所以，我们要首先了解如何用字符来描述字符。</p>
-
-<p>在正则表达式中，如果直接给出字符，就是精确匹配。用<code>\d</code>可以匹配一个数字，<code>\w</code>可以匹配一个字母或数字，所以：</p>
-
-<ul>
-<li><p><code>&#39;00\d&#39;</code>可以匹配<code>&#39;007&#39;</code>，但无法匹配<code>&#39;00A&#39;</code>；</p></li>
-<li><p><code>&#39;\d\d\d&#39;</code>可以匹配<code>&#39;010&#39;</code>；</p></li>
-<li><p><code>&#39;\w\w\d&#39;</code>可以匹配<code>&#39;py3&#39;</code>；</p></li>
-</ul>
-
-<p><code>.</code><strong>可以匹配任意字符</strong>，所以：</p>
-
-<ul>
-<li><code>&#39;py.&#39;</code>可以匹配<code>&#39;pyc&#39;</code>、<code>&#39;pyo&#39;</code>、<code>&#39;py!&#39;</code>等等。</li>
-</ul>
-
-<p>要匹配变长的字符，在正则表达式中，用<code>*</code>表示任意个字符（包括0个），用<code>+</code>表示至少一个字符，用<code>?</code>表示0个或1个字符，用<code>{n}</code>表示n个字符，用<code>{n,m}</code>表示n-m个字符：</p>
-
-<p>来看一个复杂的例子：<code>\d{3}\s+\d{3,8}</code>。</p>
-
-<p>我们来从左到右解读一下：</p>
-
-<ol>
-<li><p><code>\d{3}</code>表示匹配3个数字，例如<code>&#39;010&#39;</code>；</p></li>
-<li><p><code>\s</code>可以匹配一个空格（也包括Tab等空白符），所以<code>\s+</code>表示至少有一个空格，例如匹配<code>&#39; &#39;，&#39; &#39;</code>等；</p></li>
-<li><p><code>\d{3,8}</code>表示3-8个数字，例如<code>&#39;1234567&#39;</code>。</p></li>
-</ol>
-
-<p>综合起来，上面的正则表达式可以匹配以任意个空格隔开的带区号的电话号码。</p>
-
-<p>如果要匹配<code>&#39;010-12345&#39;</code>这样的号码呢？由于<code>&#39;-&#39;</code>是特殊字符，在正则表达式中，要用<code>&#39;\&#39;</code>转义，所以，上面的正则是<code>\d{3}\-\d{3,8}</code>。</p>
-
-<p>但是，仍然无法匹配<code>&#39;010 - 12345&#39;</code>，因为带有空格。所以我们需要更复杂的匹配方式。</p>
-
-<h2 id="toc_0">进阶</h2>
-
-<p>要做更精确地匹配，可以用<code>[]</code>表示范围，比如：</p>
-
-<ul>
-<li><p><code>[0-9a-zA-Z\_]</code>可以匹配一个数字、字母或者下划线；</p></li>
-<li><p><code>[0-9a-zA-Z\_]+</code>可以匹配至少由一个数字、字母或者下划线组成的字符串，比如<code>&#39;a100&#39;，&#39;0_Z&#39;，&#39;Py3000&#39;</code>等等；</p></li>
-<li><p><code>[a-zA-Z\_][0-9a-zA-Z\_]*</code>可以匹配由字母或下划线开头，后接任意个由一个数字、字母或者下划线组成的字符串，也就是Python合法的变量；</p></li>
-<li><p><code>[a-zA-Z\_][0-9a-zA-Z\_]{0, 19}</code>更精确地限制了变量的长度是1-20个字符（前面1个字符+后面最多19个字符）。</p></li>
-</ul>
-
-<p><code>A|B</code>可以匹配A或B，所以<code>(P|p)ython</code>可以匹配<code>&#39;Python&#39;</code>或者<code>&#39;python&#39;</code>。</p>
-
-<p><code>^</code>表示行的开头，<code>^\d</code>表示必须以数字开头。</p>
-
-<p><code>$</code>表示行的结束，<code>\d$</code>表示必须以数字结束。</p>
-
-<p>你可能注意到了，<code>py</code>也可以匹配&#39;python&#39;，但是加上<code>^py$</code>就变成了整行匹配，就只能匹配<code>&#39;py&#39;</code>了。</p>
-
-<h2 id="toc_1">re模块</h2>
-
-<p>有了准备知识，我们就可以在Python中使用正则表达式了。Python提供<code>re</code>模块，包含所有正则表达式的功能。由于Python的字符串本身也用<code>\</code>转义，所以要特别注意：</p>
-
-<pre><code class="language-py">s = &#39;ABC\\-001&#39; # Python的字符串
-# 对应的正则表达式字符串变成：
-# &#39;ABC\-001&#39;
-</code></pre>
-
-<p>因此我们强烈建议使用Python的<code>r</code>前缀，就不用考虑转义的问题了：</p>
-
-<pre><code class="language-py">s = r&#39;ABC\-001&#39; # Python的字符串
-# 对应的正则表达式字符串不变：
-# &#39;ABC\-001&#39;
-</code></pre>
-
-<p>先看看如何判断正则表达式是否匹配：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*
-import re
-
-print re.match(r&#39;^\d{3}\-\d{3,8}$&#39;, &#39;010-12345&#39;)
-print re.match(r&#39;^\d{3}\-\d{3,8}$&#39;, &#39;010 12345&#39;)
-
-</code></pre>
-
-<p><code>match()</code>方法判断是否匹配，如果匹配成功，返回一个<code>Match</code>对象，否则返回<code>None</code>。<br/>
-<img src="media/14939712159345/14939732218646.jpg" alt=""/></p>
-
-<p>常见的判断方法就是：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*
-import re
-
-Spattern = r&#39;^\d{3}\-\d{3,8}$&#39;  #用户定义的正则表达式
-test = &#39;010-12345&#39;  #用户输入的字符串
-test2 = &#39;012 12345&#39;
-if re.match(Spattern , test):
-    print &#39;OK&#39;
-else:
-    print &#39;failed&#39;
-
-if re.match(Spattern , test2):
-    print &#39;OK&#39;
-else:
-    print &#39;failed&#39;
-</code></pre>
-
-<p><img src="media/14939712159345/14939734520573.jpg" alt=""/></p>
 
 ]]></content>
   </entry>
