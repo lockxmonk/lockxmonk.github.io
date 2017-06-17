@@ -1,0 +1,716 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+	$(function(){
+		$('#menu_item_index').addClass('is_active');
+	});
+</script>
+<div class="row">
+	<div class="large-8 medium-8 columns">
+		<div class="markdown-body home-categories">
+		
+			<div class="article">
+                <a class="clearlink" href="14842776114163.html">
+                
+                  <h1>第一章 熟悉Objective-C</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">第1条：了解Objective—C语言的起源</h2>
+
+<p>OC语言使用“消息结构”（messageing structure）而不是函数调用。OC是由Smalltalk演化而来。主要区别为：</p>
+
+<pre><code>//Messaging(OC)  
+
+Object *obj = [Object new];  
+[obj performWith:par1 and:par2];
+   
+//Function(C++)  
+
+Object *obj = new Object;    
+obj-&gt;perform(par1,par2);   
+</code></pre>
+
+<p>关键区别在于：使用消息结构的语言，其运行时所应执行的代码由运行环境所决定；而使用函数调用的语言，则由编译器决定。</p>
+
+<p>所有的OC语言的对象都应该如下声明：</p>
+
+<pre><code>NSString *str = @“The string”；
+</code></pre>
+
+<p>因为所有的对象所占内存总是分配在“堆空间”中，而绝不会分配在“栈”（stack）上。一般变量分配在栈上。<img src="media/14841901813337/QQ20170112-0@2x.png" alt="QQ20170112-0@2x"/></p>
+
+<p>要点：<br/>
+* OC为C语言添加了面向对象的特性，是它的超集。OC使用动态绑定的消息结构，也就是说，在运行时才会检查对象类型。接收一条消息之后，究竟应该执行何种代码，由运行时环境决定而不是编译器。<br/>
+* 理解C语言的核心概念有助于写好OC程序。尤其是要掌握内存模型和指针。</p>
+
+<h2 id="toc_1">第2条：在类的头文件中尽量少引入其它头文件</h2>
+
+<p>例如：<br/>
+创建一个EOCPerson的类，其中属性中包含有EOCEmployer的类。</p>
+
+<pre><code>//EOCPerson.h
+#import&lt;Foundation/Foundation.h&gt;
+@interface EOCPerson:NSObject
+@property (nonatomic,copy) NSString *firstname;
+@property (nonatomic,copy) NSString *lastname;
+@property (nonatomic,strong) EOCEmployer *employer;
+@end
+</code></pre>
+
+<p>这样做常见的方法是在头部引入：</p>
+
+<pre><code>#import “EOCEmployer.h”
+</code></pre>
+
+<p>但是我们在这里不需要知道EOCEmployer这个类的全部细节，只需要知道这里有一个类就好。所以有一个方法为：</p>
+
+<pre><code>@class EOCEmployer；
+</code></pre>
+
+<p>这叫做前向声明。现在EOCPerson的头文件变为：</p>
+
+<pre><code>//EOCPerson.h
+#import&lt;Foundation/Foundation.h&gt;
+
+@class EOCEmployer；
+
+@interface EOCPerson:NSObject
+@property (nonatomic,copy) NSString *firstname;
+@property (nonatomic,copy) NSString *lastname;
+@property (nonatomic,strong) EOCEmployer *employer;
+@end
+</code></pre>
+
+<p>但是EOCPerson类的实现文件则需要引入EOCEmployer类的头文件，因为知道其中所有的接口细节。于是，实现文件就是：</p>
+
+<pre><code>//EOCPerson.m
+#import &quot;EOCPerson.h&quot;;
+#import &quot;EOCEmployer.h&quot;
+
+@implementation EOCPerson
+//.....
+@end
+</code></pre>
+
+<p>要点：<br/>
+* 除非的确有必要，否则不要引入头文件。一般来说，应该在某个类的头文件中使用向前声明来提及别的类，并在实现文件中引入那些类的头文件。这样做可以尽量降低类之间的耦合。<br/>
+* 有时无法使用向前声明，比如要声明某各类所遵循的一项协议，这种情况下，尽量吧“该类所遵循的协议“的这条声明移至”class-continuation分类“中。如果不行的话，就把协议单独放在一个头文件中，然后将其引入。</p>
+
+<h2 id="toc_2">第3条：多用字面量语法，少用与之等价的方法</h2>
+
+<p>从OC1.0开始，有一种非常简单的方式创建NSString对象。这就是”字符串字面量（string literal）“，其语法如下所示：</p>
+
+<pre><code>NSString *string = @”effective OC 2.0“；
+</code></pre>
+
+<p>如果不用这种语法的话，就要以常见的alloc以及init方法来分配和初始化对象了。</p>
+
+<h3 id="toc_3">字面数值</h3>
+
+<p>有时候需要把整数、浮点数、布尔值封入OC对象中。这种情况下可以使用NSNumber类，该类可以处理多种类型的数值。最原始的创建方法为：</p>
+
+<pre><code>NSNumber *someNumber = [NSNumber numberWithInt:1];
+</code></pre>
+
+<p>上面这行代码创建了一个数字，将它的值设为了1.然而使用字面量能令代码更为整洁：</p>
+
+<pre><code>NSNumber *someNumber = @1；
+</code></pre>
+
+<h3 id="toc_4">字面量数组</h3>
+
+<p>创建方法为：</p>
+
+<pre><code>NSArray *animals =@[@&quot;cat&quot;,@&quot;dog&quot;,@&quot;mouse&quot;,@&quot;badger&quot;];
+</code></pre>
+
+<p>使用字面量获取则为：</p>
+
+<pre><code>NSString *dog = animals[1];
+</code></pre>
+
+<h3 id="toc_5">字面量字典</h3>
+
+<p>”字典“（dictionary）是一种映射性数据结构，可以向其中添加键值对。与数组一样字面量编写方式为：</p>
+
+<pre><code>NSDictionary *personData = @{@&quot;firstName&quot;:@&quot;Matt&quot;,
+                            @&quot;lastName&quot;:@&quot;Galloway&quot;,
+                            @&quot;age&quot;:@28}
+
+</code></pre>
+
+<h3 id="toc_6">可变数组与字典</h3>
+
+<p>通过取下标操作，可以访问数组中某个下标或者字典中某个键所对应的元素。如果数组与字典对象试课变得（mutable），那么也能通过下标修改其中的元素值。例如：</p>
+
+<pre><code>mutableArray[1] = @&quot;dog&quot;;
+mutableDictionary[@&quot;lastName&quot;] = @&quot;Galloway&quot;; 
+</code></pre>
+
+<h2 id="toc_7">要点</h2>
+
+<ul>
+<li>应该使用字面量语法来创建字符串、数值、数组、字典。与创建此类对象的常规方法相比，这么做更加简明扼要。</li>
+<li>应该通过下标来操作和访问数组小标或者字典中的键所对应的元素。</li>
+<li>用字面量语法创建数组或者字典时，若值中有nil，则会抛出异常。因此，务必保证值中不包含有nil。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/1/13</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14839432188714.html">
+                
+                  <h1>英语考试翻译总结</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">第一章</h2>
+
+<ol>
+<li>我曾经有一个老师当他的学生们搞砸了一些事情的时候叫他们傻瓜。这个老师是我们的管弦乐指挥，他是一个暴躁的乌克兰移民者，名字叫Jerry Kupchynsky，并且当某人走音时他将会停下整个组的人去怒吼。</li>
+<li>传统的智慧认为老师应该帮助学生去梳理知识，而不是将知识灌输进他们的脑袋中。作业和合作学习是备受欢迎的；像讲课和背诵这些传统的方法被认为是“钻杀”被人反对，被贬为是一种一定正确的方法去吸干年轻人的创造力和积极性。</li>
+<li>长期受人怀疑的死记硬背现在被认为是那些来自印度的家庭的孩子在全国拼字比赛中大胜同龄人的一个原因。</li>
+<li>当然，令人担心的是失败会使孩子们的心灵受到损伤，削弱他们的自尊。</li>
+<li>研究人员认为最有效的老师通常带领学生们通过合作学习和讨论来获取知识。</li>
+</ol>
+
+<h2 id="toc_1">第二章</h2>
+
+<ol>
+<li>一个新的研究消除了某些美国人所珍视的观点，即音乐可以提升孩子的智商。</li>
+<li>对于这一点，只有几十个研究曾经测试过传闻中的学习音乐给智力带来的好处，并且只有五个使用了随机控制研究，即研究被设计去分离那些因果效应。</li>
+<li>尽管只持续了15分钟，但是这种效应被吹嘘成为可持续促进孩子的智商提高，乔治亚州州长 Zell Mille 曾经在1988年保证每年有超过100万美元资金去为州里的每一个孩子提供一张古典音乐唱片。</li>
+<li>我们教孩子们莎士比亚不是因为我们认为它将帮助孩子们在SAT中做的更好，我们做这些是因为我们相信莎士比亚是重要的。</li>
+<li>总管人类历史和古代，音乐已经成为了人类动物的一种不可或缺的品质，世界上每一种文化的一个共性——包括儿童音乐。</li>
+</ol>
+
+<h2 id="toc_2">第三章</h2>
+
+<ol>
+<li>据估计有大约3亿中国人在使用英语读和写，但是没有受到足够的练习，因此加剧了这种经常被嘲笑的中式英语的使用。</li>
+<li>正如罗马将他们的语言在所占领的地域内传播作为一种统治的标记，如今与之等价的是将一种语言作为通用语的标签。</li>
+<li>随着众多有着不同语音和语法结构语言的交互，英语改变成其他语言将产生一些混合语言，这些语言不一定有着“正确”的英语语法，并且会强调本地语言所特有的不同的语音和语调，这些都是不足为奇的。</li>
+<li>中式英语从其他语言中的浮现，并且努力去摆脱中式英语是短期的调整，但是从长远来看，看到混合语言的规范化将不足为奇。</li>
+<li>语言对于文化和历史背景来说是独一无二的，并且保留剩下的世界语言遗产和见证一个新语言的出现，都在扩大语言熔炉的过程中至关重要。</li>
+</ol>
+
+<h2 id="toc_3">第四章</h2>
+
+<ol>
+<li>一部分原因来自于他对于风险与回报的独特视角，这种观点违背了投资人对于短期利益的观点。</li>
+<li>迪士尼的个性中混合了美国小镇居民怀旧的价值观，这种价值观伴随着现代科学和技术将会改变我们生活的信心。</li>
+<li>电影的成功帮助迪士尼促进了建立高端企业文化的原则，这种原则对公司未来的成功起到了重要的作用。</li>
+<li>如果缺少了才华，劳动和员工的奉献，任何一个迪士尼项目都无法落地。</li>
+<li>他知道要令直觉有意义必须要让他被实现，并且需要一系列的严密的分析和实打实的辛勤工作，同时需要围绕在他身边的那些艺术家的真正才华作为支撑。</li>
+</ol>
+
+<h2 id="toc_4">第五章</h2>
+
+<ol>
+<li>3D打印的兴起——通过互联网下载设计模型并且小规模的生产——可能预示着新一代生产者的出现，他们将“为发达国家带来空前多样化的产品”。</li>
+<li>在未来，新的技术和信息系统将简化日常杂务，每天的任务：想象一下一个可以自动摆放食物的冰箱，一个可以清洁，甩干，和折叠的洗衣机，在这之前可以根据一周的天气，运用算法推荐最合适的着装。</li>
+<li>对于全球来说，互联网的出现所带来的最大的影响是权利从政府和机构到个人的权利再分配。</li>
+<li>不像传统的媒体，他们的记者和编辑将精确性背景放到首位，基于互联网的媒体允许任何上网的人去发布不准确的消息，诽谤，或者是大范围的宣传——通常作者没有承担什么后果。</li>
+<li>因为技术渗透到了所有的这些领域，下一代的专家，记者和政策制定者将需要去掌握每一个领域，从而去理解技术作为一个当今世界改变的催化剂，是怎样快速的改变着工业，政府还有处于政治学核心的古老动态关系，即国家与个人的关系。</li>
+</ol>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/1/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='English%20Study.html'>English Study</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14837695242474.html">
+                
+                  <h1>英语考试词汇部分总结</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">第一章</h2>
+
+<pre><code> striking——显著地，突出的
+ slender ——苗条的，瘦的
+ impeccable——无瑕疵的，没有缺点的
+ discernible——可辨别的，可识别的
+ sloppy——草率的，粗心的
+ sagaciousness——睿智，聪颖
+ arrogance——自大，傲慢
+ vow——誓言
+ homonym——同音异议词
+ glisten——晶莹剔透
+ fix the blame on——归罪与。。 
+</code></pre>
+
+<pre><code>mess up——screwed up——搞砸
+poking——stab——戳
+toting——drag——拖，手提
+called my kid name——insult kids——责怪孩子
+predictor——indicator——指示，预示
+manifesto——presentation——展示，告示
+anagram——word play——文字游戏
+traumatize——hurt——使。。。收到创伤
+collaborative——cooperative——合作
+disciplinarians——authoritarian——权利主义者
+</code></pre>
+
+<h2 id="toc_1">第二章</h2>
+
+<pre><code>molecular——分子
+hyperactive——过度活跃的
+integrated——整合，合并
+retention——保留
+condense——浓缩
+clerical——文书方面的
+alert——警告
+aesthetically——美学上的
+compelling——令人瞩目的
+undeniably——不能否认的
+</code></pre>
+
+<pre><code>dispel——eliminate——驱散，消除
+overwhelming——tough——艰难，压倒性的
+extrinsic——exterior——外在的
+infamous——notorious——声名狼藉的
+recruit——select——雇佣，选择
+aptitude——talent——天赋
+enrichment——abundance——丰富，充裕
+outperformed——outdone——胜过，优于
+replicate——repeat——重复，复制
+integral——entire——完整的，全部的
+</code></pre>
+
+<h2 id="toc_2">第三章</h2>
+
+<pre><code>in theory——在理论上
+deficiency——缺陷，缺少
+reveling in——得意于，纵情于
+influx——流入
+for the sake of——为了，原因是
+preoccupation——全神贯注
+deviation——偏差
+facilitate——方便，便于
+elaborate——详细描述
+boggle at——吃惊，害怕
+</code></pre>
+
+<pre><code>fused——merged——混合，合并
+encompass——comprise——由。。。组成
+fortified——strengthened——加强
+segregation——separation——分离
+mounting——increasing——日益增长
+ethnically——racially——种族的，民族的
+muffle——repress——消除，安抚
+wiping——clearing out——擦除
+touched upon——触及到
+counter——contrary to——相反
+</code></pre>
+
+<h2 id="toc_3">第四章</h2>
+
+<pre><code>villain——混蛋，恶棍
+with regard to——关于，涉及到
+eclipse——日蚀
+condemn——谴责
+immense——巨大的，极大的
+treacherous——骗人的，奸诈的
+wield——使用
+depict——描绘
+mediate——调解，解决
+alternative——非正常的，独特的
+</code></pre>
+
+<pre><code>in conflict with——in opposition to——和。。冲突
+visionary——foreseer——有先见之明的人
+brink——edge——边缘
+reckless——bold——不仔细的，鲁莽的
+integrate——put together——整合
+initiate——lead——开始，带领
+be consistent with——be the same as——与。。一致
+setback——discouragement——挫折
+dazzle——impress——使人印象深刻
+strive for——try hard for——努力追求
+</code></pre>
+
+<h2 id="toc_4">第五章</h2>
+
+<pre><code>magnitude——extent——量级，大小
+boost——raised——促进，提升
+access——opportunity to use——可以使用
+exponential leap——rapid increase——指数级增长
+demise——death——死亡
+sagacity——insight——洞察力
+conducive——beneficial——有助于
+defy——refute——反驳
+available——obtainable——可获得的
+supersede——replace——取代
+</code></pre>
+
+<pre><code>permeate——渗透
+unprecedented——空前的
+dissemination——传播
+notorious——声名狼藉
+herald——预示，标志
+authoritarian——独裁主义
+premium——高端，优质
+underscore——强调
+downside——缺点，负面
+authoritative——权威性 
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/1/7</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='English%20Study.html'>English Study</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+              
+
+
+			<div class="row">
+			  <div class="large-6 columns">
+			  <p class="text-left" style="padding-top:25px;">
+			   <a href="all_10.html">&laquo; Prev Page</a>  
+			  </p>
+			  </div>
+			  <div class="large-6 columns">
+			<p class="text-right" style="padding-top:25px;">
+			
+			</p>
+			  </div>
+			</div>
+		</div>
+	</div><!-- large 8 -->
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="14974936829967.html">Caffe中Layer的学习</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14974281629389.html">怎样移除OSXRESERVED分区(如果BootCamp Assistant在安装之后没有成功删除这个分区)</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14974276192148.html">重新利用boot camp安装win10</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14970763342670.html">caffe数据结构描述</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14969765744787.html">caffe数据结构</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>
