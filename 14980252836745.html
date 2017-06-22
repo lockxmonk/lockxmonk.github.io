@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  图像去雾相关论文总结 - LZH007
+  MAC下openBlas的安装 - LZH007
   
   </title>
   
@@ -113,14 +113,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>图像去雾相关论文总结</h1>
+          <h1>MAC下openBlas的安装</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/4/27</span>
+          <span class="date">2017/6/21</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
+              <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
            
          
           <span class="comments">
@@ -133,54 +133,84 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <ul>
-<li>
-<a href="#toc_0">1.特征学习的单幅图像去雾算法 2016年</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_1">2.尺度自适应暗通道先验去雾方法</a>
-
-
-<h2 id="toc_0">1.特征学习的单幅图像去雾算法 2016年</h2>
-
-<p><strong>目的：</strong>为提高图像去雾的普适性，提出一种特征学习的单幅图像去雾方法。</p>
-
-<p><strong>方法：</strong>通过稀疏自动编码机对有雾图像进行<strong>多尺度的纹理结构特征提取</strong>，同时抽取各种与雾相关的颜色特征。然后采用多层神经网络进行样本训练，得到雾天条件下纹理结构特征及颜色特征与场景深度间的映射关系，并估算出有雾图像的场景深度图。最后结合大气散射模型，根据场景深度图复原无雾图像。</p>
-
-<p><strong>结论：对实验结果的定性及定量分 析表明，本文算法能有效获取有雾图像的场景深度，复原出视觉效果理想的无雾图像，且具有很好的场景普适性。</strong></p>
-
-<p><strong>理解</strong>：<font color=red>本文认为图像去雾的问题可进一步转化为场景深度d的求解问题。</font>本文通过自动编码机获取到图片中物体的纹理特征，然后用多尺度的方法分别提取<strong>颜色特征、暗原色特征、颜色衰减特征、纹理结构</strong>特征。<strong>四者结合对场景深度进行估计</strong>。</p>
-
-<p><strong>可以改进的</strong>：</p>
+      <p>这里我们安装openblas主要有两种方法:</p>
 
 <ol>
-<li><p>算法实时性不够强，效率比较低，可以考虑缩小图片尺寸，降低数据量，从而运用到视频去雾。</p></li>
-<li><p>对雾气分布不均匀的图像，效果不理想，需要结合不同的气象模型来建立更为鲁棒的物理模型。</p></li>
+<li>通过git代码到本地并安装</li>
+<li>通过brew来安装</li>
 </ol>
 
-<h1 id="toc_1">2.尺度自适应暗通道先验去雾方法</h1>
-
-<p><strong>目的：</strong><br/>
-针对暗通道先验去雾方法的尺度选择问题 提出了一种尺度自适应方法， 根据图像的颜色和边 缘特征将暗通道求解的尺度自适应地调整到一个合适的范围。</p>
-
-<p><strong>方法：</strong></p>
+<h2 id="toc_0">git到本地编译安装.</h2>
 
 <ol>
-<li><p>由颜色特征求解初始尺度：<font color=red>对于图像的不同区域采用不同的尺度求解暗通道: 在亮度较低或饱和度较高的区域，采用较小尺度; 在亮度较高且饱和度较低的区域，采用较大尺度;在景深突变处，采用较小尺度;在平滑区域，采用较大尺度。</font></p></li>
-<li><p>由边缘特征对尺度进行修正:由于“光晕”现象发生在景深突变处，如果在边缘附近采用较小的尺度，可使透射率的求解窗口\(Ω_r(x)\)尽量不跨越景深边界，从而减小“光晕”现象; 在非边缘处采用较大的尺度，可以增大 \(J_{dark}(x)→0\)的概率，使复原图像的背景更平滑，噪声和失真更小。 由边缘特征对初始尺度\(r_0(x)\)进行修正.</p></li>
+<li>git代码到本地并安装</li>
 </ol>
 
-<p><strong>结论：</strong><br/>
-整个去雾过程参数自动配置，无需人工干预，兼顾不同尺度复原图像的优点，复原图像色彩自然，对比度提升显著，并有效抑制了“光晕”现象。对多种雾化场景图像的处理结果表明: <strong>文中方法对场景的适应性强， 在任何情况下的处理结果均能达到 DG 方法的最优结果，甚至更好。</strong></p>
+<pre><code>git clone https://github.com/xianyi/OpenBLAS.git
+cd OpenBLAS
+make -j4
+make install
 
-<p><strong>理解：</strong><br/>
-该论文主要是针对HE的去雾方法，对暗通道尺寸进行自适应确定，减少了人工干预的复杂度。</p>
+</code></pre>
 
-<p><strong>可以改进：</strong><br/>
-<font color=red>该算法在运行时间上可以改进，也可以利用机器学习的方法来提取图片特征，避免Canny算子的局限性造成的边缘提取误差。<br/>
-可以与上篇论文进行结合来提高上文尺度特征提取的效率。</font></p>
+<ol>
+<li>修改Caffe的<code>Makefile.config</code></li>
+</ol>
+
+<pre><code>BLAS := open
+BLAS_INCLUDE :=  /opt/OpenBLAS/include
+BLAS_LIB := /opt/OpenBLAS/lib
+</code></pre>
+
+<ol>
+<li>caffe重新make</li>
+</ol>
+
+<pre><code>make clean
+make pycaffe
+make all -j4
+make test &amp;&amp; runtest
+</code></pre>
+
+<h2 id="toc_1">使用brew进行安装</h2>
+
+<ol>
+<li><code>brew uninstall openblas; brew install --fresh -vd openblas.</code>运行上面命令安装openblas</li>
+<li>更改<code>Makefile.config</code></li>
+</ol>
+
+<pre><code>
+# Homebrew puts openblas in a directory that is not on the standard search path
+BLAS_INCLUDE := $(shell brew --prefix openblas)/include
+BLAS_LIB := $(shell brew --prefix openblas)/lib
+
+</code></pre>
+
+<ol>
+<li>重新编译</li>
+</ol>
+
+<p><strong>如果有些人遇到了这种错误</strong><br/>
+```<br/>
+In file included from src/caffe/util/blocking_queue.cpp:5:<br/>
+In file included from ./include/caffe/layers/base_data_layer.hpp:9:<br/>
+In file included from ./include/caffe/layer.hpp:12:<br/>
+In file included from ./include/caffe/util/math_functions.hpp:11:<br/>
+./include/caffe/util/mkl_alternate.hpp:14:10: fatal error: &#39;cblas.h&#39; file not found</p>
+
+<h1 id="toc_2">include <cblas.h></h1>
+
+<pre><code>     ^
+</code></pre>
+
+<p>1 error generated.<br/>
+make: *** [.build_release/src/caffe/util/blocking_queue.o] Error 1<br/>
+```</p>
+
+<p>可以试试这个命令:<br/>
+<code><br/>
+cmake -DCMAKE_CXX_FLAGS=-I/usr/local/opt/openblas/include ..<br/>
+</code></p>
 
 
     
@@ -191,16 +221,13 @@
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14932622908500.html" 
-          title="Previous Post: 文档测试">&laquo; 文档测试</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14928484245894.html" 
-          title="Next Post: 文档测试">文档测试 &raquo;</a>
+          <a  href="14980135145677.html" 
+          title="Next Post: Caffe中的Net">Caffe中的Net &raquo;</a>
       
       </p>
         </div>

@@ -113,6 +113,261 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14980252836745.html">
+                
+                  <h1>MAC下openBlas的安装</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>这里我们安装openblas主要有两种方法:</p>
+
+<ol>
+<li>通过git代码到本地并安装</li>
+<li>通过brew来安装</li>
+</ol>
+
+<h2 id="toc_0">git到本地编译安装.</h2>
+
+<ol>
+<li>git代码到本地并安装</li>
+</ol>
+
+<pre><code>git clone https://github.com/xianyi/OpenBLAS.git
+cd OpenBLAS
+make -j4
+make install
+
+</code></pre>
+
+<ol>
+<li>修改Caffe的<code>Makefile.config</code></li>
+</ol>
+
+<pre><code>BLAS := open
+BLAS_INCLUDE :=  /opt/OpenBLAS/include
+BLAS_LIB := /opt/OpenBLAS/lib
+</code></pre>
+
+<ol>
+<li>caffe重新make</li>
+</ol>
+
+<pre><code>make clean
+make pycaffe
+make all -j4
+make test &amp;&amp; runtest
+</code></pre>
+
+<h2 id="toc_1">使用brew进行安装</h2>
+
+<ol>
+<li><code>brew uninstall openblas; brew install --fresh -vd openblas.</code>运行上面命令安装openblas</li>
+<li>更改<code>Makefile.config</code></li>
+</ol>
+
+<pre><code>
+# Homebrew puts openblas in a directory that is not on the standard search path
+BLAS_INCLUDE := $(shell brew --prefix openblas)/include
+BLAS_LIB := $(shell brew --prefix openblas)/lib
+
+</code></pre>
+
+<ol>
+<li>重新编译</li>
+</ol>
+
+<p><strong>如果有些人遇到了这种错误</strong><br/>
+```<br/>
+In file included from src/caffe/util/blocking_queue.cpp:5:<br/>
+In file included from ./include/caffe/layers/base_data_layer.hpp:9:<br/>
+In file included from ./include/caffe/layer.hpp:12:<br/>
+In file included from ./include/caffe/util/math_functions.hpp:11:<br/>
+./include/caffe/util/mkl_alternate.hpp:14:10: fatal error: &#39;cblas.h&#39; file not found</p>
+
+<h1 id="toc_2">include <cblas.h></h1>
+
+<pre><code>     ^
+</code></pre>
+
+<p>1 error generated.<br/>
+make: *** [.build_release/src/caffe/util/blocking_queue.o] Error 1<br/>
+```</p>
+
+<p>可以试试这个命令:<br/>
+<code><br/>
+cmake -DCMAKE_CXX_FLAGS=-I/usr/local/opt/openblas/include ..<br/>
+</code></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/21</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14980135145677.html">
+                
+                  <h1>Caffe中的Net</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">Net的基本用法</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_1">include <vector></a>
+<ul>
+<li>
+<a href="#toc_2">include <iostream></a>
+</li>
+<li>
+<a href="#toc_3">include <caffe/net.hpp></a>
+</li>
+</ul>
+
+
+<p>Net在Caffe中代表一个完整的CNN模型，它包含若干Layer实例。前面我们已经在第5天内容中看到用ProtoBuffer文本文件（prototxt)描述的经典网络结构如LeNet、AlexNet,这些结构反映在Caffe代码实现上就是一个Net对象。<strong>Net其实是相对Blob、 Layer更为复杂的设计，需要沉住气</strong>。</p>
+
+<h2 id="toc_0">Net的基本用法</h2>
+
+<p>Net是一张图纸，对应的描述文件为<code>*.prototxt</code>,我们选择Caffe自带的CaffeNet模型描述文件,位于<code>models/bvlc_reference_caffenet/deploy.prototxt</code>。将该文件拷贝到当前工作目录下。</p>
+
+<p>编写测试代码为:<br/>
+```c++</p>
+
+<h1 id="toc_1">include <vector></h1>
+
+<h1 id="toc_2">include <iostream></h1>
+
+<h1 id="toc_3">include <caffe/net.hpp></h1>
+
+<p>using namespace caffe;<br/>
+using namespace std;</p>
+
+<p>int main(void)<br/>
+{<br/>
+    std::string proto(&quot;deploy.prototxt&quot;);<br/>
+    Net<float> nn(proto,caffe::TEST);<br/>
+    vector<string> bn = nn.blob_names();    // 获取 Net 中所有 Blob 对象名<br/>
+    vector<string> ln = nn.layer_names();   // 获取 Net 中所有 Layer 对象名<br/>
+    for (int i = 0; i &lt; bn.size(); i++)<br/>
+    {<br/>
+        cout&lt;&lt;&quot;Blob #&quot;&lt;&lt;i&lt;&lt;&quot; : &quot;&lt;&lt;bn[i]&lt;&lt;endl;<br/>
+    }<br/>
+    for (int i = 0; i &lt; ln.size(); i++)<br/>
+    {<br/>
+        cout&lt;&lt;&quot;layer #&quot;&lt;&lt;i&lt;&lt;&quot; : &quot;&lt;&lt;ln[i]&lt;&lt;endl;<br/>
+    }<br/>
+    return 0;<br/>
+}<br/>
+```</p>
+
+<p>编译(<strong>注意这里我们需要安装openblas,具体过程不再这里讲述</strong>):</p>
+
+<pre><code>g++ -o netapp net_demo.cpp -I /usr/local/Cellar/caffe/include -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/build/lib -I /usr/local/Cellar/openblas/0.2.19_1/include  -lcaffe -lglog -lboost_system -lprotobuf
+</code></pre>
+
+<p><strong>注意到这里有一段<code>-I /usr/local/Cellar/openblas/0.2.19_1/include</code>这是为了连接到本地的<code>blas</code>库</strong></p>
+
+<p>运行 ./netapp :</p>
+
+<p>发现又报错了:<br/>
+<img src="media/14980135145677/14981000832074.jpg" alt=""/><br/>
+运行<code>install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/LZHcaffe/./netapp</code>命令,连接库文件.</p>
+
+<p>运行成功后,输出为:</p>
+
+<pre><code>...省略上面部分,之前已经见过了
+I0622 11:03:24.688719 3012948928 net.cpp:255] Network initialization done.
+Blob #0 : data
+Blob #1 : conv1
+Blob #2 : pool1
+Blob #3 : norm1
+Blob #4 : conv2
+Blob #5 : pool2
+Blob #6 : norm2
+Blob #7 : conv3
+Blob #8 : conv4
+Blob #9 : conv5
+Blob #10 : pool5
+Blob #11 : fc6
+Blob #12 : fc7
+Blob #13 : fc8
+Blob #14 : prob
+layer #0 : data
+layer #1 : conv1
+layer #2 : relu1
+layer #3 : pool1
+layer #4 : norm1
+layer #5 : conv2
+layer #6 : relu2
+layer #7 : pool2
+layer #8 : norm2
+layer #9 : conv3
+layer #10 : relu3
+layer #11 : conv4
+layer #12 : relu4
+layer #13 : conv5
+layer #14 : relu5
+layer #15 : pool5
+layer #16 : fc6
+layer #17 : relu6
+layer #18 : drop6
+layer #19 : fc7
+layer #20 : relu7
+layer #21 : drop7
+layer #22 : fc8
+layer #23 : prob
+</code></pre>
+
+<p>通过上面的简单例子,我们发现Net中既包括Layer对象,有包括Blob对象.其中Blob对象用于存放每个Layer输入/输出中间结果.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/21</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14974936829967.html">
                 
                   <h1>Caffe中Layer的学习</h1>
@@ -653,7 +908,7 @@ INSTANTIATE_CLASS(Layer);
 
 <p><code>error: cannot declare variable &#39;a^ to be of abstract type &#39;caffe：:Layer&lt;float&gt;</code></p>
 
-<p>这是因为Layer类是一个虚基类，不能直接创建对象。</p>
+<p>这是因为Layer类是一个虚基类，不能直接创建对象。关于虚基类,这里不再过多说明.</p>
 
                         
                       </div>
@@ -1692,706 +1947,6 @@ template class Blob&lt;unsigned int&gt;;
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14969765744787.html">
-                
-                  <h1>caffe数据结构</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">Blob</a>
-</li>
-<li>
-<a href="#toc_1">Blob的基本用法</a>
-</li>
-</ul>
-
-
-<p>一个CNN网络是由多个Layer堆叠而成的.如图所示:<br/>
-<img src="media/14966518170972/14966520513325.jpg" alt=""/></p>
-
-<p>caffe按照我们设计的图纸(prototxt),用Blob这些砖块建成一层层(Layer)楼房,最后通过方法SGD方法(Solver)进行简装修(Train),精装修(Finetune)实现的.我们这里就是学习这些基本概念.</p>
-
-<h2 id="toc_0">Blob</h2>
-
-<p>Caffe使用称为Blob的4维数组用于存储和交换数据.Blob提供了统一的存储器接口,持有一批图像或其它数据,权值,权值更新值. 其它机器学习框架也有类似的数据结构.</p>
-
-<p><strong>Blob在内存中为4维数组,分别为<code>(width_,height_,channels_,num_)</code>,width_和height_表示图像的宽和高,channel_表示颜色通道RGB,num_表示第几帧,用于存储数据或权值(data)和权值增量(diff),在进行网路计算时,每层的输入,输出都需要Blob对象缓冲.Blob是Caffe的基本存储单元.</strong></p>
-
-<h2 id="toc_1">Blob的基本用法</h2>
-
-<p>Blob是一个模板类,所以创建对象时需要制定模板参数.我们这里写一个简单的测试程序<code>blob_demo.cpp</code>将它放在<code>caffe</code>的安装目录下:</p>
-
-<pre><code class="language-c++">#include&lt;vector&gt;
-#include&lt;iostream&gt;
-#include&lt;caffe/blob.hpp&gt;
-using namespace caffe;
-using namespace std;
-int main(void)
-{
-    Blob&lt;float&gt; a;
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    a.Reshape(1,2,3,4);
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    return 0;
-}
-</code></pre>
-
-<p>上面代码首先创建了整型Blob对象a,打印其维度信息,然后调用其<code>Reshape()</code>方法,再次打印其维度信息.</p>
-
-<p>使用如下命令来编译上面的文件.</p>
-
-<pre><code>g++ -o app blob_demo.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe
-</code></pre>
-
-<p>生成了可执行程序<code>app</code></p>
-
-<p>这个时候运行<code>app</code>的话可能会遇到下面这个错误:<br/>
-<img src="media/14966518170972/14968048615065.jpg" alt=""/><br/>
-这个因为<code>app</code>没有链接到这个动态库文件,执行下边这个命令链接:</p>
-
-<pre><code>install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/./app
-</code></pre>
-
-<p><code>/usr/local/Cellar/caffe/build/lib/</code>为<code>@rpath/libcaffe.so.1.0.0</code>动态库的路径.</p>
-
-<p>执行后,再次运行会遇到错误:<br/>
-<img src="media/14966518170972/14968049981988.jpg" alt=""/></p>
-
-<p>与上面类似,这是因为没有链接到<code>@rpath/libhdf5_hl.10.dylib</code><br/>
-执行下面这个命令:</p>
-
-<pre><code>install_name_tool -add_rpath &#39;/Users/liangzhonghao/anaconda2/lib&#39;  /usr/local/Cellar/caffe/build/lib/libcaffe.so.1.0.0
-</code></pre>
-
-<p>其中<code>/Users/liangzhonghao/anaconda2/lib</code>包含这个库文件.</p>
-
-<p>再次执行app,终于成功了!<br/>
-<img src="media/14966518170972/14968051024802.jpg" alt=""/></p>
-
-<p>创建了Blob对象之后,我们可以通过<code>mutable_cpu[gpu]_data[diff]</code>函数来修改其内部数值:</p>
-
-<p>代码为:</p>
-
-<pre><code class="language-c++">#include&lt;vector&gt;
-#include&lt;iostream&gt;
-#include&lt;caffe/blob.hpp&gt;
-using namespace caffe;
-using namespace std;
-int main(void)
-{
-    Blob&lt;float&gt; a;
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    a.Reshape(1,2,3,4);
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    
-    float *p=a.mutable_cpu_data();
-    for(int i=0;i&lt;a.count();i++){
-        p[i]=i;
-    }
-    for(int u=0;u&lt;a.num();u++){
-        for(int v=0;v&lt;a.channels();v++){
-            for(int w=0;w&lt;a.height();w++){
-                for(int x=0;x&lt;a.width();x++){
-                    cout&lt;&lt;&quot;a[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;a.data_at(u,v,w,x)&lt;&lt;endl;
-                }
-            }
-        }
-    }
-    return 0;
-}
-</code></pre>
-
-<p>跟上面一样继续编译和执行,这里按照上面的命令继续来编译的话,遇到了一个错误:<br/>
-<img src="media/14966518170972/14968061663863.jpg" alt=""/></p>
-
-<p>之后换成下边的命令执行后成功:</p>
-
-<pre><code>g++ -o app2 blob_demo.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe -lglog -lboost_system -lprotobuf
-</code></pre>
-
-<p>差别在于,后边加上了<code>-lglog -lboost_system -lprotobuf</code>命令,具体作用后续将研究(暂时不理解),继续运行后,又出现了错误:<br/>
-<img src="media/14966518170972/14968063024883.jpg" alt=""/></p>
-
-<p>同样是动态库的连接问题:<br/>
-运行命令:</p>
-
-<pre><code>install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/./app2
-</code></pre>
-
-<p>执行命令,然后运行<code>app2</code>.得到输出:<br/>
-<img src="media/14966518170972/14968063915684.jpg" alt=""/></p>
-
-<p><strong>可见,Blob下标的访问与c/c++高维数组几乎一致,而Blob好处在于可以直接同步CPU/GPU上的数据.</strong></p>
-
-<p>Blob还支持计算所有元素的绝对值之和(L1-范数),平方和(L2-范数):</p>
-
-<pre><code>cout&lt;&lt;&quot;ASUM = &quot;&lt;&lt;a.asum_data()&lt;&lt;endl;
-cout&lt;&lt;&quot;SUMSQ = &quot;&lt;&lt;a.sumsq_data()&lt;&lt;endl;
-</code></pre>
-
-<p>输出结果为:</p>
-
-<pre><code>ASUM = 276
-SUMSQ = 4324
-
-</code></pre>
-
-<p>除了data,我们还可以改diff部分,与data的操作基本一致:</p>
-
-<pre><code class="language-c++">#include&lt;vector&gt;
-#include&lt;iostream&gt;
-#include&lt;caffe/blob.hpp&gt;
-using namespace caffe;
-using namespace std;
-int main(void)
-{
-    Blob&lt;float&gt; a;
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    a.Reshape(1,2,3,4);
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    
-    float *p=a.mutable_cpu_data();
-    float *q=a.mutable_cpu_diff();
-    
-    for(int i=0;i&lt;a.count();i++){
-        p[i]= i;     //将data初始化为1,2,3....
-        q[i]= a.count()-1-i;   //将diff初始化为23,22,21,...
-    }
-    
-    a.Update();         //执行update操作,将diff与data融合,这也是CNN权值更新步骤的最终实施者
-   
-    for(int u=0;u&lt;a.num();u++){
-        for(int v=0;v&lt;a.channels();v++){
-            for(int w=0;w&lt;a.height();w++){
-                for(int x=0;x&lt;a.width();x++){
-                    cout&lt;&lt;&quot;a[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;a.data_at(u,v,w,x)&lt;&lt;endl;
-                }
-            }
-        }
-    }
-    
-    cout&lt;&lt;&quot;ASUM = &quot;&lt;&lt;a.asum_data()&lt;&lt;endl;
-    cout&lt;&lt;&quot;SUMSQ = &quot;&lt;&lt;a.sumsq_data()&lt;&lt;endl;
-    
-    return 0;
-}
-
-</code></pre>
-
-<p>然后执行以下命令编译,链接库文件:</p>
-
-<pre><code>g++ -o app blob_demo_diff.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe  -lglog -lboost_system -lprotobuf
-
-install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/LZHcaffe/./app
-</code></pre>
-
-<p><img src="media/14969765744787/14969953318311.jpg" alt=""/></p>
-
-<p>运行.app,结果为:<br/>
-<img src="media/14969765744787/14969953744774.jpg" alt=""/></p>
-
-<p>上面表明,在<code>Update()</code>函数中,实现了<code>data = data -diff</code>操作,这个主要是在CNN权值更新时会用到,后面继续学习.</p>
-
-<p>将Blob内部值保存到硬盘,或者冲硬盘载入到内存,可以分别通过<code>ToProto(),FromProto()</code>实现:</p>
-
-<pre><code class="language-c++">
-#include&lt;vector&gt;
-#include&lt;iostream&gt;
-#include&lt;caffe/blob.hpp&gt;
-#include&lt;caffe/util/io.hpp&gt;   //需要包含这个头文件
-using namespace caffe;
-using namespace std;
-int main(void)
-{
-    Blob&lt;float&gt; a;
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    a.Reshape(1,2,3,4);
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    
-    float *p=a.mutable_cpu_data();
-    float *q=a.mutable_cpu_diff();
-    
-    for(int i=0;i&lt;a.count();i++){
-        p[i]= i;     //将data初始化为1,2,3....
-        q[i]= a.count()-1-i;   //将diff初始化为23,22,21,...
-    }
-    
-    a.Update();         //执行update操作,将diff与data融合,这也是CNN权值更新步骤的最终实施者
-   
-    BlobProto bp;          //构造一个BlobProto对象
-    a.ToProto(&amp;bp,true);    //将a序列化,连同diff(默认不带)
-    WriteProtoToBinaryFile(bp,&quot;a.blob&quot;);     //写入磁盘文件&quot;a.blob&quot;
-    BlobProto bp2;           //构造一个新的BlobProto对象
-    ReadProtoFromBinaryFileOrDie(&quot;a.blob&quot;,&amp;bp2);    //读取磁盘文件
-    Blob&lt;float&gt; b;          //新建一个Blob对象b
-    b.FromProto(bp2,true);  //从序列化对象bp2中克隆b(连同形状)
-    
-    for(int u=0;u&lt;b.num();u++){
-        for(int v=0;v&lt;b.channels();v++){
-            for(int w=0;w&lt;b.height();w++){
-                for(int x=0;x&lt;b.width();x++){
-                    cout&lt;&lt;&quot;b[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;b.data_at(u,v,w,x)&lt;&lt;endl;
-                }
-            }
-        }
-    }
-    
-    cout&lt;&lt;&quot;ASUM = &quot;&lt;&lt;b.asum_data()&lt;&lt;endl;
-    cout&lt;&lt;&quot;SUMSQ = &quot;&lt;&lt;b.sumsq_data()&lt;&lt;endl;
-    
-    
-    return 0;
-}
-
-</code></pre>
-
-<p>编译,连接库文件后(注意编译时末尾加入<code>&quot;-lglog -lboost_system -lprotobuf&quot;</code>选项),输出如下:</p>
-
-<p><img src="media/14969765744787/14969964533804.jpg" alt=""/></p>
-
-<p>可以发现与上面没有差别,只是在文件夹中多了一个<code>Blob.a</code>文件,<strong>所以<code>BlobProto</code>对象实现了硬盘与内存之间的数据通信.可以帮助保存中间权值和数据</strong></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14964511552671.html">
-                
-                  <h1>激活函数</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>深度神经网络之所以具有丰富的表达能力，除了有深层次的网络之外，还有一个重要因素即非线性处理单元,称为激活函数（Activation Function)或挤压函数（Squashing Function).<strong>所以我们必须要关注怎么在caffe中实现这些函数.</strong></p>
-
-<p>下图是一个神经元模型.\(\varphi(.)\)为激活函数.主要作用是将上一层的输入线性组合结果\(u_k\)动态范围压缩到特定值域(例如[-1,1]).一般来说具备非线性处理单元的深度神经网络(大于等于3层),理论上可以逼近任意函数.<br/>
-<img src="media/14964511552671/14964521741597.jpg" alt=""/></p>
-
-<p>其中几个常用的激活函数如下:<br/>
-1.Sigmoid函数,值域为(0,1)<br/>
-\[<br/>
-\varphi(x) = \frac{1}{1+e^{-ax}}<br/>
-\]<br/>
-<img src="media/14964511552671/14964523348860.jpg" alt=""/></p>
-
-<p>2.tanh函数,值域为(-1,1):<br/>
-\[<br/>
-\varphi(x) = \frac{1-e^{-2x}}{1+e^{-2x}}<br/>
-\]<br/>
-<img src="media/14964511552671/14964526906602.jpg" alt=""/></p>
-
-<p>3.ReLu(Rectified Linear Unit，规整化线性单元)函数,值域为\([0,+ \infty)\),是一种非饱和激活函数.<br/>
-\[<br/>
-\varphi(x) = max(0,x)<br/>
-\]<br/>
-<img src="media/14964511552671/14964530576767.jpg" alt=""/></p>
-
-<p>远不止上面这些激活函数,随着发展,陆续又出现了很多激活函数.这里不多介绍.后面还要自学很多这类相关知识.</p>
-
-<p>神经网络中最大的问题是梯度消失问题（Gradient Vanishing Problem),这在使用 <code>Sigmoid、tanh</code>等饱和激活函数情况下尤为严重(神经网络进行误差反向传播时，各层都要乘以激活函数的一阶导数\(G=e\cdot \varphi&#39;(x) \cdot x\)),梯度每传递一层都会衰减一次,网络层数较多时,梯度G就会不停的衰减至消失),使得训练网络时收敛极慢,而ReLU这类非饱和激活函数收敛速度就快很多.所以学习网络模型中一般都会选用类似ReLu这种死活函数.</p>
-
-<p>接下来我们学习在caffe用代码实现对应层的计算,包括前向传播计算和反向传播计算.Caffe的所有与激活函数相关的Layer类声明在<code>include/caffe/layers</code>文件夹中分别为<code>sigmoid_layer.hpp,relu_layer.hpp,tanh_layer.hpp</code>,我们将它们统称为<strong>非线性层</strong>,我们重点关注<code>ReLULayer,SigmoidLayer和TanHLayer</code>这三类.</p>
-
-<p>在前面我们测试的LeNet-5模型中使用了ReLu层,我们在<code>example/mnist/lenet_train_test.prototxt</code>中找到描述:</p>
-
-<pre><code>layer {
-  name: &quot;relu1&quot;
-  type: &quot;ReLU&quot;
-  bottom: &quot;ip1&quot;
-  top: &quot;ip1&quot;
-}
-</code></pre>
-
-<p>与卷积层、全连接层最大的不同,就是没有权值相关的参数，描述相对简单。另外两种层没有实际样例，怎么办呢？这时按照我们的Caffe源码阅读方法论.从<code>src/caffe/proto/caffe.proto</code>中获得灵感。</p>
-
-<pre><code class="language-c++">// ReLU层参数
-message ReLUParameter {
-  // Allow non-zero slope for negative inputs to speed up optimization
-  // Described in:
-  // Maas, A. L., Hannun, A. Y., &amp; Ng, A. Y. (2013). Rectifier nonlinearities
-  // improve neural network acoustic models. In ICML Workshop on Deep Learning
-  // for Audio, Speech, and Language Processing.
-  // Leaky ReLU参数，我们暂不关心
-  optional float negative_slope = 1 [default = 0];
-  enum Engine {     //计算引擎选择
-    DEFAULT = 0;
-    CAFFE = 1;      // Caffe 实现
-    CUDNN = 2;      // CUDNN 实现
-  }
-  optional Engine engine = 2 [default = DEFAULT];
-}
-</code></pre>
-
-<pre><code class="language-c++">// Sigmoid层参数
-message SigmoidParameter {
-  enum Engine {
-    DEFAULT = 0;
-    CAFFE = 1;
-    CUDNN = 2;
-  }
-  optional Engine engine = 1 [default = DEFAULT];
-}
-
-</code></pre>
-
-<pre><code class="language-c++">//  tanh 层参数
-message TanHParameter {
-  enum Engine {
-    DEFAULT = 0;
-    CAFFE = 1;
-    CUDNN = 2;
-  }
-  optional Engine engine = 1 [default = DEFAULT];
-}
-</code></pre>
-
-<p>非线性层的共同特点就是对前一层blob中的数值逐一进行非线性变换，并放回原blob中。激活函数的类声明如下:</p>
-
-<pre><code class="language-c++">namespace caffe {
-//非线性层的鼻祖NeuronLayer，派生于Layer类，特点是输出blob(y)与输入blob(x)尺寸相同
-
-/**
- * @brief An interface for layers that take one blob as input (@f$ x @f$)
- *        and produce one equally-sized blob as output (@f$ y @f$), where
- *        each element of the output depends only on the corresponding input
- *        element.
- */
-template &lt;typename Dtype&gt;
-class NeuronLayer : public Layer&lt;Dtype&gt; {
- public:
-  explicit NeuronLayer(const LayerParameter&amp; param)
-     : Layer&lt;Dtype&gt;(param) {}
-  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-
-  virtual inline int ExactNumBottomBlobs() const { return 1; }
-  virtual inline int ExactNumTopBlobs() const { return 1; }
-};
-
-}  // namespace caffe
-
-#endif  // CAFFE_NEURON_LAYER_HPP_
-</code></pre>
-
-<pre><code class="language-c++">namespace caffe {
-// ReLULayer，派生于NeuronLayer，实现了ReLu激活函数计算
-
-/**
- * @brief Rectified Linear Unit non-linearity @f$ y = \max(0, x) @f$.
- *        The simple max is fast to compute, and the function does not saturate.
- */
-template &lt;typename Dtype&gt;
-class ReLULayer : public NeuronLayer&lt;Dtype&gt; {
- public:
- //显式构造函数
- 
-  /**
-   * @param param provides ReLUParameter relu_param,
-   *     with ReLULayer options:
-   *   - negative_slope (\b optional, default 0).
-   *     the value @f$ \nu @f$ by which negative values are multiplied.
-   */
-  explicit ReLULayer(const LayerParameter&amp; param)
-      : NeuronLayer&lt;Dtype&gt;(param) {}
-//返回类名字符串
-  virtual inline const char* type() const { return &quot;ReLU&quot;; }
-
- protected:
-  /**
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$
-   * @param top output Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the computed outputs @f$
-   *        y = \max(0, x)
-   *      @f$ by default.  If a non-zero negative_slope @f$ \nu @f$ is provided,
-   *      the computed outputs are @f$ y = \max(0, x) + \nu \min(0, x) @f$.
-   */
-   //前向传波函数
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-
-  /**
-   * @brief Computes the error gradient w.r.t. the ReLU inputs.
-   *
-   * @param top output Blob vector (length 1), providing the error gradient with
-   *      respect to the outputs
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      containing error gradients @f$ \frac{\partial E}{\partial y} @f$
-   *      with respect to computed outputs @f$ y @f$
-   * @param propagate_down see Layer::Backward.
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$; Backward fills their diff with
-   *      gradients @f$
-   *        \frac{\partial E}{\partial x} = \left\{
-   *        \begin{array}{lr}
-   *            0 &amp; \mathrm{if} \; x \le 0 \\
-   *            \frac{\partial E}{\partial y} &amp; \mathrm{if} \; x &gt; 0
-   *        \end{array} \right.
-   *      @f$ if propagate_down[0], by default.
-   *      If a non-zero negative_slope @f$ \nu @f$ is provided,
-   *      the computed gradients are @f$
-   *        \frac{\partial E}{\partial x} = \left\{
-   *        \begin{array}{lr}
-   *            \nu \frac{\partial E}{\partial y} &amp; \mathrm{if} \; x \le 0 \\
-   *            \frac{\partial E}{\partial y} &amp; \mathrm{if} \; x &gt; 0
-   *        \end{array} \right.
-   *      @f$.
-   */
-   
-   //反向传波函数
-  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-};
-
-}  // namespace caffe
-
-#endif  // CAFFE_RELU_LAYER_HPP_
-</code></pre>
-
-<pre><code class="language-c++">namespace caffe {
-// SigmoidLayer,派生于NeuronLayer，实现了Sigmoid激活函数的计算
-/**
- * @brief Sigmoid function non-linearity @f$
- *         y = (1 + \exp(-x))^{-1}
- *     @f$, a classic choice in neural networks.
- *
- * Note that the gradient vanishes as the values move away from 0.
- * The ReLULayer is often a better choice for this reason.
- */
-template &lt;typename Dtype&gt;
-class SigmoidLayer : public NeuronLayer&lt;Dtype&gt; {
- public:
- //显式构造函数
-  explicit SigmoidLayer(const LayerParameter&amp; param)
-      : NeuronLayer&lt;Dtype&gt;(param) {}
-//返回类名字符串
-  virtual inline const char* type() const { return &quot;Sigmoid&quot;; }
-
- protected:
-  /**
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$
-   * @param top output Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the computed outputs @f$
-   *        y = (1 + \exp(-x))^{-1}
-   *      @f$
-   */
-   
-   //前向传播函数
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-
-  /**
-   * @brief Computes the error gradient w.r.t. the sigmoid inputs.
-   *
-   * @param top output Blob vector (length 1), providing the error gradient with
-   *      respect to the outputs
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      containing error gradients @f$ \frac{\partial E}{\partial y} @f$
-   *      with respect to computed outputs @f$ y @f$
-   * @param propagate_down see Layer::Backward.
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$; Backward fills their diff with
-   *      gradients @f$
-   *        \frac{\partial E}{\partial x}
-   *            = \frac{\partial E}{\partial y} y (1 - y)
-   *      @f$ if propagate_down[0]
-   */
-   
-   //反向传播函数
-  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-};
-
-}  // namespace caffe
-
-#endif  // CAFFE_SIGMOID_LAYER_HPP_
-</code></pre>
-
-<pre><code class="language-c++">namespace caffe {
-// TanHLayer，派生于NeuronLayer，实现了tanh激活函数计算
-/**
- * @brief TanH hyperbolic tangent non-linearity @f$
- *         y = \frac{\exp(2x) - 1}{\exp(2x) + 1}
- *     @f$, popular in auto-encoders.
- *
- * Note that the gradient vanishes as the values move away from 0.
- * The ReLULayer is often a better choice for this reason.
- */
-template &lt;typename Dtype&gt;
-class TanHLayer : public NeuronLayer&lt;Dtype&gt; {
- public:
- //显式构造函数
-  explicit TanHLayer(const LayerParameter&amp; param)
-      : NeuronLayer&lt;Dtype&gt;(param) {}
-//返回类名字符串
-  virtual inline const char* type() const { return &quot;TanH&quot;; }
-
- protected:
-  /**
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$
-   * @param top output Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the computed outputs @f$
-   *        y = \frac{\exp(2x) - 1}{\exp(2x) + 1}
-   *      @f$
-   */
-   
-   //前向传播函数
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-
-  /**
-   * @brief Computes the error gradient w.r.t. the sigmoid inputs.
-   *
-   * @param top output Blob vector (length 1), providing the error gradient with
-   *      respect to the outputs
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      containing error gradients @f$ \frac{\partial E}{\partial y} @f$
-   *      with respect to computed outputs @f$ y @f$
-   * @param propagate_down see Layer::Backward.
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$; Backward fills their diff with
-   *      gradients @f$
-   *        \frac{\partial E}{\partial x}
-   *            = \frac{\partial E}{\partial y}
-   *              \left(1 - \left[\frac{\exp(2x) - 1}{exp(2x) + 1} \right]^2 \right)
-   *            = \frac{\partial E}{\partial y} (1 - y^2)
-   *      @f$ if propagate_down[0]
-   */
-   
-   //反向传播函数
-  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-};
-
-}  // namespace caffe
-
-#endif  // CAFFE_TANH_LAYER_HPP_
-</code></pre>
-
-<p>上面类的声明比较简单,各自声明了Forward和Backward函数.下面对这些函数的实现进行解析.我们首先看下<code>src/caffe/layers/relu_layer.cpp</code>中前向传播函数的实现代码。</p>
-
-<pre><code class="language-c++">template &lt;typename Dtype&gt;
-void ReLULayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-    // (只读) 获得输人blob的data指针
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  // (读写）获得输出blob的data指针
-  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
-  //获得输入blob元素个数
-  const int count = bottom[0]-&gt;count();
-  // Leaky ReLU参数，从layer_param中获得，默认为0，即普通ReLU
-  Dtype negative_slope = this-&gt;layer_param_.relu_param().negative_slope();
-  //执行ReLU操作我们姑且认为negative_slop值为0,不考虑Leaky ReLU
-  for (int i = 0; i &lt; count; ++i) {
-    top_data[i] = std::max(bottom_data[i], Dtype(0))
-        + negative_slope * std::min(bottom_data[i], Dtype(0));
-  }
-}
-</code></pre>
-
-<p>不出所料，用一层for循环就搞定了,下面我们来看<strong>反向传播函数</strong>的实现代码.</p>
-
-<pre><code class="language-c++">template &lt;typename Dtype&gt;
-void ReLULayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-    const vector&lt;bool&gt;&amp; propagate_down,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
-    // 如果需要做反向传播计算
-  if (propagate_down[0]) {
-    //(只读）获得前一层的data指针
-    const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-    //(只读) 获得后一层的diff指针
-    const Dtype* top_diff = top[0]-&gt;cpu_diff();
-    //(读写) 获得前一层的diff指针
-    Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
-    //获得要参计算的元素总数
-    const int count = bottom[0]-&gt;count();
-    // Leaky ReLU参数，姑且认为是0
-    Dtype negative_slope = this-&gt;layer_param_.relu_param().negative_slope();
-    for (int i = 0; i &lt; count; ++i) {
-    // ReLU的导函数就是（bottom_data[i] &gt; 0)，根据求导链式法则，后一层的误差乘以导函数得到前一层的误差
-      bottom_diff[i] = top_diff[i] * ((bottom_data[i] &gt; 0)
-          + negative_slope * (bottom_data[i] &lt;= 0));
-    }
-  }
-}
-</code></pre>
-
-<p>到这里可以看到ReLu计算非常简单(目前如此)</p>
-
-<p>其它激活函数源码,之后也许用的比较少,这里不做多的介绍.</p>
-
-<p>所以,非线性层虽然公式表示较为复杂,但代码实现都非常简洁、直观，只要掌握了基本求导技巧，同样可以推导出非线性层其他类的反向传播公式.</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/3</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -2475,6 +2030,18 @@ void ReLULayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;
 	      
 		      
 			      <li class="post">
+			        <a href="14980252836745.html">MAC下openBlas的安装</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14980135145677.html">Caffe中的Net</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14974936829967.html">Caffe中Layer的学习</a>
 			      </li>
 		     
@@ -2488,18 +2055,6 @@ void ReLULayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;
 		      
 			      <li class="post">
 			        <a href="14974276192148.html">重新利用boot camp安装win10</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14970763342670.html">caffe数据结构描述</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14969765744787.html">caffe数据结构</a>
 			      </li>
 		     
 		  

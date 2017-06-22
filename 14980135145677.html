@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  图像去雾相关论文总结 - LZH007
+  Caffe中的Net - LZH007
   
   </title>
   
@@ -113,14 +113,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>图像去雾相关论文总结</h1>
+          <h1>Caffe中的Net</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/4/27</span>
+          <span class="date">2017/6/21</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
+              <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
            
          
           <span class="comments">
@@ -135,52 +135,117 @@
       <div class="article-content">
       <ul>
 <li>
-<a href="#toc_0">1.特征学习的单幅图像去雾算法 2016年</a>
+<a href="#toc_0">Net的基本用法</a>
 </li>
 </ul>
 </li>
 <li>
-<a href="#toc_1">2.尺度自适应暗通道先验去雾方法</a>
+<a href="#toc_1">include <vector></a>
+<ul>
+<li>
+<a href="#toc_2">include <iostream></a>
+</li>
+<li>
+<a href="#toc_3">include <caffe/net.hpp></a>
+</li>
+</ul>
 
 
-<h2 id="toc_0">1.特征学习的单幅图像去雾算法 2016年</h2>
+<p>Net在Caffe中代表一个完整的CNN模型，它包含若干Layer实例。前面我们已经在第5天内容中看到用ProtoBuffer文本文件（prototxt)描述的经典网络结构如LeNet、AlexNet,这些结构反映在Caffe代码实现上就是一个Net对象。<strong>Net其实是相对Blob、 Layer更为复杂的设计，需要沉住气</strong>。</p>
 
-<p><strong>目的：</strong>为提高图像去雾的普适性，提出一种特征学习的单幅图像去雾方法。</p>
+<h2 id="toc_0">Net的基本用法</h2>
 
-<p><strong>方法：</strong>通过稀疏自动编码机对有雾图像进行<strong>多尺度的纹理结构特征提取</strong>，同时抽取各种与雾相关的颜色特征。然后采用多层神经网络进行样本训练，得到雾天条件下纹理结构特征及颜色特征与场景深度间的映射关系，并估算出有雾图像的场景深度图。最后结合大气散射模型，根据场景深度图复原无雾图像。</p>
+<p>Net是一张图纸，对应的描述文件为<code>*.prototxt</code>,我们选择Caffe自带的CaffeNet模型描述文件,位于<code>models/bvlc_reference_caffenet/deploy.prototxt</code>。将该文件拷贝到当前工作目录下。</p>
 
-<p><strong>结论：对实验结果的定性及定量分 析表明，本文算法能有效获取有雾图像的场景深度，复原出视觉效果理想的无雾图像，且具有很好的场景普适性。</strong></p>
+<p>编写测试代码为:<br/>
+```c++</p>
 
-<p><strong>理解</strong>：<font color=red>本文认为图像去雾的问题可进一步转化为场景深度d的求解问题。</font>本文通过自动编码机获取到图片中物体的纹理特征，然后用多尺度的方法分别提取<strong>颜色特征、暗原色特征、颜色衰减特征、纹理结构</strong>特征。<strong>四者结合对场景深度进行估计</strong>。</p>
+<h1 id="toc_1">include <vector></h1>
 
-<p><strong>可以改进的</strong>：</p>
+<h1 id="toc_2">include <iostream></h1>
 
-<ol>
-<li><p>算法实时性不够强，效率比较低，可以考虑缩小图片尺寸，降低数据量，从而运用到视频去雾。</p></li>
-<li><p>对雾气分布不均匀的图像，效果不理想，需要结合不同的气象模型来建立更为鲁棒的物理模型。</p></li>
-</ol>
+<h1 id="toc_3">include <caffe/net.hpp></h1>
 
-<h1 id="toc_1">2.尺度自适应暗通道先验去雾方法</h1>
+<p>using namespace caffe;<br/>
+using namespace std;</p>
 
-<p><strong>目的：</strong><br/>
-针对暗通道先验去雾方法的尺度选择问题 提出了一种尺度自适应方法， 根据图像的颜色和边 缘特征将暗通道求解的尺度自适应地调整到一个合适的范围。</p>
+<p>int main(void)<br/>
+{<br/>
+    std::string proto(&quot;deploy.prototxt&quot;);<br/>
+    Net<float> nn(proto,caffe::TEST);<br/>
+    vector<string> bn = nn.blob_names();    // 获取 Net 中所有 Blob 对象名<br/>
+    vector<string> ln = nn.layer_names();   // 获取 Net 中所有 Layer 对象名<br/>
+    for (int i = 0; i &lt; bn.size(); i++)<br/>
+    {<br/>
+        cout&lt;&lt;&quot;Blob #&quot;&lt;&lt;i&lt;&lt;&quot; : &quot;&lt;&lt;bn[i]&lt;&lt;endl;<br/>
+    }<br/>
+    for (int i = 0; i &lt; ln.size(); i++)<br/>
+    {<br/>
+        cout&lt;&lt;&quot;layer #&quot;&lt;&lt;i&lt;&lt;&quot; : &quot;&lt;&lt;ln[i]&lt;&lt;endl;<br/>
+    }<br/>
+    return 0;<br/>
+}<br/>
+```</p>
 
-<p><strong>方法：</strong></p>
+<p>编译(<strong>注意这里我们需要安装openblas,具体过程不再这里讲述</strong>):</p>
 
-<ol>
-<li><p>由颜色特征求解初始尺度：<font color=red>对于图像的不同区域采用不同的尺度求解暗通道: 在亮度较低或饱和度较高的区域，采用较小尺度; 在亮度较高且饱和度较低的区域，采用较大尺度;在景深突变处，采用较小尺度;在平滑区域，采用较大尺度。</font></p></li>
-<li><p>由边缘特征对尺度进行修正:由于“光晕”现象发生在景深突变处，如果在边缘附近采用较小的尺度，可使透射率的求解窗口\(Ω_r(x)\)尽量不跨越景深边界，从而减小“光晕”现象; 在非边缘处采用较大的尺度，可以增大 \(J_{dark}(x)→0\)的概率，使复原图像的背景更平滑，噪声和失真更小。 由边缘特征对初始尺度\(r_0(x)\)进行修正.</p></li>
-</ol>
+<pre><code>g++ -o netapp net_demo.cpp -I /usr/local/Cellar/caffe/include -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/build/lib -I /usr/local/Cellar/openblas/0.2.19_1/include  -lcaffe -lglog -lboost_system -lprotobuf
+</code></pre>
 
-<p><strong>结论：</strong><br/>
-整个去雾过程参数自动配置，无需人工干预，兼顾不同尺度复原图像的优点，复原图像色彩自然，对比度提升显著，并有效抑制了“光晕”现象。对多种雾化场景图像的处理结果表明: <strong>文中方法对场景的适应性强， 在任何情况下的处理结果均能达到 DG 方法的最优结果，甚至更好。</strong></p>
+<p><strong>注意到这里有一段<code>-I /usr/local/Cellar/openblas/0.2.19_1/include</code>这是为了连接到本地的<code>blas</code>库</strong></p>
 
-<p><strong>理解：</strong><br/>
-该论文主要是针对HE的去雾方法，对暗通道尺寸进行自适应确定，减少了人工干预的复杂度。</p>
+<p>运行 ./netapp :</p>
 
-<p><strong>可以改进：</strong><br/>
-<font color=red>该算法在运行时间上可以改进，也可以利用机器学习的方法来提取图片特征，避免Canny算子的局限性造成的边缘提取误差。<br/>
-可以与上篇论文进行结合来提高上文尺度特征提取的效率。</font></p>
+<p>发现又报错了:<br/>
+<img src="media/14980135145677/14981000832074.jpg" alt=""/><br/>
+运行<code>install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/LZHcaffe/./netapp</code>命令,连接库文件.</p>
+
+<p>运行成功后,输出为:</p>
+
+<pre><code>...省略上面部分,之前已经见过了
+I0622 11:03:24.688719 3012948928 net.cpp:255] Network initialization done.
+Blob #0 : data
+Blob #1 : conv1
+Blob #2 : pool1
+Blob #3 : norm1
+Blob #4 : conv2
+Blob #5 : pool2
+Blob #6 : norm2
+Blob #7 : conv3
+Blob #8 : conv4
+Blob #9 : conv5
+Blob #10 : pool5
+Blob #11 : fc6
+Blob #12 : fc7
+Blob #13 : fc8
+Blob #14 : prob
+layer #0 : data
+layer #1 : conv1
+layer #2 : relu1
+layer #3 : pool1
+layer #4 : norm1
+layer #5 : conv2
+layer #6 : relu2
+layer #7 : pool2
+layer #8 : norm2
+layer #9 : conv3
+layer #10 : relu3
+layer #11 : conv4
+layer #12 : relu4
+layer #13 : conv5
+layer #14 : relu5
+layer #15 : pool5
+layer #16 : fc6
+layer #17 : relu6
+layer #18 : drop6
+layer #19 : fc7
+layer #20 : relu7
+layer #21 : drop7
+layer #22 : fc8
+layer #23 : prob
+</code></pre>
+
+<p>通过上面的简单例子,我们发现Net中既包括Layer对象,有包括Blob对象.其中Blob对象用于存放每个Layer输入/输出中间结果.</p>
 
 
     
@@ -191,16 +256,16 @@
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14932622908500.html" 
-          title="Previous Post: 文档测试">&laquo; 文档测试</a>
+          <a href="14980252836745.html" 
+          title="Previous Post: MAC下openBlas的安装">&laquo; MAC下openBlas的安装</a>
       
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14928484245894.html" 
-          title="Next Post: 文档测试">文档测试 &raquo;</a>
+          <a  href="14974936829967.html" 
+          title="Next Post: Caffe中Layer的学习">Caffe中Layer的学习 &raquo;</a>
       
       </p>
         </div>

@@ -113,6 +113,291 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14897993109270.html">
+                
+                  <h1>决策树</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">决策树模型与学习</a>
+</li>
+<li>
+<a href="#toc_1">决策树与if-then规则</a>
+</li>
+<li>
+<a href="#toc_2">决策树与条件概率分布</a>
+</li>
+<li>
+<a href="#toc_3">特征选择</a>
+<ul>
+<li>
+<a href="#toc_4">特征选择问题</a>
+</li>
+<li>
+<a href="#toc_5">信息增益</a>
+</li>
+<li>
+<a href="#toc_6">信息增益比</a>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<blockquote>
+<p>决策树（decision tree)是一种基本的分类与回归方法。本章主要讨论用于分类的决策树。决策树模型呈树形结构，在分类问题中，表示基于特征对实例进行分类的过程。它可以认为是if-then规则的集合，也可以认为是定义在特征空间与类空间上的条件概率分布。其主要优点是模型具有可读性，分类速度快。学习时，利用训练数据，根据损失函数最小化的原则建立决策树模型。预测时，对新的数据，利用决策树模型进行分类。决策树学习通常包括3个步骤：特征选择、决策树的生成和决策树的修剪。这些决策树学习的思想主要来源于由Quinlan在1986年提出的ID3算法和1993年提出的C4。5算法,以及由Breiman等人在1984年提出的CART算法。</p>
+</blockquote>
+
+<h2 id="toc_0">决策树模型与学习</h2>
+
+<p>定义（决策树）：分类决策树模型是一种描述对实例进行分类的树形结 构。决策树由结点（node)和有向边（directed edge)组成。结点有两种类型：内部结点（internal node)和叶结点（leafnode)。内部结点表示一个特征或属性，叶结点表示一个类。</p>
+
+<p>用决策树分类，从根结点开始，对实例的某一特征进行测试，根据测试结果，将实例分配到其子结点；这时，每一个子结点对应着该特征的一个取值。如此递归地对实例进行测试并分配，直至达到叶结点。最后将实例分到叶结点的类中。</p>
+
+<p>图5.1是一个决策树的示意图。图中圆和方框分别表示内部结点和叶结点。<br/>
+<img src="media/14897993109270/14897996064452.jpg" alt=""/></p>
+
+<h2 id="toc_1">决策树与if-then规则</h2>
+
+<p>可以将决策树看成一个if-then规则的集合。将决策树转换成if-then规则的过程是这样的：由决策树的根结点到叶结点的每一条路径构建一条规则；路径上内部结点的特征对应着规则的条件，而叶结点的类对应着规则的结论。决策树的路径或其对应的if-then规则集合具有一个重要的性质:互斥并且完备。这就是说，每一个实例都被一条路径或一条规则所覆盖，而且只被一条路径或一条规则所覆盖。这里所谓覆盖是指实例的特征与路径上的特征一致或实例满足规则的条件。</p>
+
+<h2 id="toc_2">决策树与条件概率分布</h2>
+
+<p>决策树还表示给定特征条件下类的条件概率分布。这一条件概率分布定义在特征空间的一个划分（partition)上。将特征空间划分为互不相交的单元（cell)或区域（region),并在每个单元定义一个类的概率分布就构成了一个条件概率分布。决策树的一条路径对应于划分中的一个单元。决策树所表示的条件概率分布由各个单元给定条件下类的条件概率分布组成。假设X为表示特征的随机变量， Y为表示类的随机变量，那么这个条件概率分布可以表示为P(Y|X)。X取值于给定划分下单元的集合，Y取值于类的集合。各叶结点（单元）上的条件概率往往偏向某一个类，即属于某一类的概率较大。决策树分类时将该结点的实例强行分到条件概率大的那一类去。</p>
+
+<p>图5.2 (a)示意地表示了特征空间的一个划分。图中的大正方形表示特征空间。这个大正方形被若干个小矩形分割，每个小矩形表示一个单元。特征空间划分上的单元构成了一个集合，X取值为单元的集合。为简单起见，假设只有两类:正类和负类，即Y取值为+1和-1。小矩形中的数字表示单元的类。图5.2(b)示意地表示特征空间划分确定时，特征（单元）给定条件下类的条件概率分布。 图5.2 (b)中条件概率分布对应于图5.2 (a)的划分。当某个单元c的条件概率满足\(P(Y=+1|X= C)&gt;0.5\)时，则认为这个单元属于正类，即落在这个单元的实例都被视为正例。图5.2(c)为对应于图5.2 (b)中条件概率分布的决策树。<br/>
+<img src="media/14897993109270/14898004011784.jpg" alt=""/></p>
+
+<p>决策树学习本质上是从训练数据集中归纳出一组分类规则。与训练数据集不相矛盾的决策树（即能对训练数据进行正确分类的决策树）可能有多个，也可能一个也没有。我们需要的是一个与训练数据矛盾较小的决策树，同时具有很好的泛化能力。从另一个角度看，决策树学习是由训练数据集估计条件概率模型。基于特征空间划分的类的条件概率模型有无穷多个。我们选择的条件概率模型应该 不仅对训练数据有很好的拟合，而且对未知数据有很好的预测。</p>
+
+<p>决策树学习用损失函数表示这一目标。如下所述，决策树学习的损失函数通常是正则化的极大似然函数。决策树学习的策略是以损失函数为目标函数的最小化。<br/>
+当损失函数确定以后，学习问题就变为在损失函数意义下选择最优决策树的问题。因为从所有可能的决策树中选取最优决策树是NP完全问题，所以现实中决策树学习算法通常采用启发式方法，近似求解这一最优化问题。这样得到的决策树是次最优（sub-optimal)的.<br/>
+决策树学习的算法通常是一个递归地选择最优特征，并根据该特征对训练数据进行分割，使得对各个子数据集有一个最好的分类的过程。这一过程对应着对特征空间的划分，也对应着决策树的构建。<mark>开始，构建根结点，将所有训练数据都放在根结点。选择一个最优特征，按照这一特征将训练数据集分割成子集，使得各个子集有一个在当前条件下最好的分类。如果这些子集已经能够被基本正确分类，那么构建叶结点，并将这些子集分到所对应的叶结点中去：如果还有子集 不能被基本正确分类，那么就对这些子集选择新的最优特征，继续对其进行分割，构建相应的结点。如此递归地进行下去，直至所有训练数据子集被基本正确分类，或者没有合适的特征为止。最后每个子集都被分到叶结点上，即都有了明确的类。这就生成了一棵决策树。</mark></p>
+
+<p>以上方法生成的决策树可能对训练数据有很好的分类能力，但对未知的测试数据却未必有很好的分类能力，即<mark>可能发生过拟合现象</mark>。我们需要对己生成的树自下而上进行剪枝，将树变得更简单，从而使它具有更好的泛化能力。<mark>具体地，就是去掉过于细分的叶结点，使其回退到父结点，甚至更高的结点，然后将父结点或更高的结点改为新的叶结点</mark>。</p>
+
+<p>如果特征数童很多，也可以在决策树学习开始的时候，对特征进行选择，只留下对训练数据有足够分类能力的特征。</p>
+
+<p>可以看出，决策树学习算法包含特征选择、决策树的生成与决策树的剪枝过程。由于决策树表示一个条件概率分布，所以深浅不同的决策树对应着不同复杂度的概率模型。决策树的生成对应于模型的局部选择，决策树的剪枝对应于模型的全局选择。决策树的生成只考虑局部最优，相对地，决策树的剪枝则考虑全局最优。</p>
+
+<p>决策树学习常用的算法有ID3、C4.5与CART,下面结合这些算法分别叙述决策树学习的特征选择、决策树的生成和剪枝过程。</p>
+
+<h2 id="toc_3">特征选择</h2>
+
+<h3 id="toc_4">特征选择问题</h3>
+
+<p>特征选择在于选取对训练数据具有分类能力的特征。这样可以提高决策树学习的效率。如果利用一个特征进行分类的结果与随机分类的结果没有很大差别，则称这个特征是没有分类能力的。经验上扔掉这样的特征对决策树学习的精度影响不大。通常特征选择的准则是信息增益或信息增益比。</p>
+
+<p>首先通过一个例子来说明特征选择问题：</p>
+
+<p><strong>例5.1：表5.1是一个由15个样本组成的贷款申请训练数据。数据包括贷款申请人的4个特征（属性)：第1个特征是年龄，有3个可能值：青年，中年，老年；第2个特征是有工作，有2个可能值：是，否；第3个特征是有自己的房子，有2个可能值：是，否；第4个特征是信贷情况，有3个可能值：非常好，好，一 般。表的最后一列是类别，是否同意贷款，取2个值：是，否.</strong></p>
+
+<p><img src="media/14897993109270/14898020066279.jpg" alt=""/></p>
+
+<p>希望通过所给的训练数据学习一个贷款申请的决策树，用以对未来的贷款申请进行分类，即当新的客户提出贷款申请时，根据申请人的特征利用决策树决定是否批准贷款申请。</p>
+
+<p>特征选择是决定用哪个特征来划分特征空间。</p>
+
+<p>图5.3表示从表5.1数据学习到的两个可能的决策树，分别由两个不同特征的根结点构成。图5.3(a)所示的根结点的特征是年龄，有3个取值，对应于不同的取值有不同的子结点。图5.3(b)所示的根结点的特征是有工作，有2个取值，对应于不同的取值有不同的子结点。两个决策树都可以从此延续下去。问题是：究竟选择哪个特征更好些？这就要求确定选择特征的准则。直观上，如果一个特 征具有更好的分类能力，或者说，按照这一特征将训练数据集分割成子集，使得各个子集在当前条件下有最好的分类，那么就更应该选择这个特征。信息增益 (information gain〉就能够很好地表示这一直观的准则.</p>
+
+<h3 id="toc_5">信息增益</h3>
+
+<p>为了便于说明，先给出熵与条件熵的定义。<br/>
+在信息论与概率统计中，熵(entropy)是表示随机变量不确定性的度量，设X是一个取有限个值的离散随机变量，其概率分布为：<br/>
+\(P(X=x_i) = P_i  , i=1,2,3...n\)<br/>
+则随机变量X的熵定义为：<br/>
+\(H(X) = -\sum^{n}_{i=1}{p_ilogp_i}\)<br/>
+在上式中，若\(p_i=0\),则定义\(olog0=0\)。通常，上式中的对数以2为底或者以e为底（自然对数），这时熵的单位分别称作比特(bit)或纳特(nat).由定义可 知，熵只依赖于X的分布，而与X的取值无关，所以也可将X的熵记作开\(H_{(p)}\),即<br/>
+<img src="media/14897993109270/14898028331151.jpg" alt=""/><br/>
+熵越大，随机变量的不确定性就越大。从定义可验证：<br/>
+<img src="media/14897993109270/14898033210936.jpg" alt=""/></p>
+
+<p>设有随机变量(X,Y),其联合概率为：<br/>
+<img src="media/14897993109270/14898040283563.jpg" alt=""/><br/>
+条件熵H(Y|X)表示在已知随机变量X的条件下随机变量Y的不确定性。随机变量X给定的条件下随机变量Y的条件熵（conditional entropy) H(Y|X)，定义为X给定条件下Y的条件概率分布的熵对X的数学期望<br/>
+<img src="media/14897993109270/14898042638745.jpg" alt=""/><br/>
+当熵和条件熵中的概率由数据估计（特别是极大似然估计）得到时，所对应的熵与条件熵分别称为经验熵 (empirical entropy)和经验条件熵（empirical conditional entropy )。此时，如果有0概率，令0log0=0。<br/>
+信息增益（information gain)表示得知特征X的信息而使得类Y的信息的不确定性减少的程度。</p>
+
+<p>信息增益的定义如下所示：<br/>
+<img src="media/14897993109270/14898059454405.jpg" alt=""/></p>
+
+<p>决策树学习应用信息增益准则选择特征。<mark>给定训练数据集D和特征A,经验 熵H(D)表示对数据集D进行分类的不确定性。而经验条件熵H(D|A)表示在特征A给定的条件下对数据集D进行分类的不确定性。那么它们的差，即信息增益</mark>，就表示由于特征A而使得对数据集D的分类的不确定性减少的程度。显然，对于数据集D而言，信息增益依赖于特征，不同的特征往往具有不同的信息增益。信息增益大的特征具有更强的分类能力。<br/>
+根据信息增益准则的特征选择方法是：对训练数据集（或子集）D,计算其每个特征的信息增益，并比较它们的大小，选择信息增益最大的特征。</p>
+
+<p>下面讲述信息增益的算法：<br/>
+<img src="media/14897993109270/14898066826354.jpg" alt=""/><br/>
+<img src="media/14897993109270/14898066953482.jpg" alt=""/></p>
+
+<p>下面举例：<br/>
+<img src="media/14897993109270/14898226986668.jpg" alt=""/><br/>
+<img src="media/14897993109270/14898227425071.jpg" alt=""/></p>
+
+<h3 id="toc_6">信息增益比</h3>
+
+<p>信息增益值的大小是相对于训练数据集而言的，并没有绝对意义。在分类问題困难时，也就是说在训练数据集的经验熵大的时候，信息增益值会偏大。反之，信息增益值会偏小。使用信息增益比（information gain ratio)可以对这一问题进行校正。这是特征选择的另一准则。<br/>
+定义（信息增益比）：特征A对训练数据集D的信息增益比\(g_R(D,A)\)定义为其信息增益\(g(D,A)\)与训练数据集D的经验熵H(D)之比：<br/>
+<img src="media/14897993109270/14898241117010.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/3/18</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14893694433396.html">
+                
+                  <h1>朴素贝叶斯法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">朴素贝叶斯的学习与分类</a>
+<ul>
+<li>
+<a href="#toc_1">基本方法</a>
+</li>
+<li>
+<a href="#toc_2">后验概率最大化的含义</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_3">朴素贝叶斯发的参数估计</a>
+<ul>
+<li>
+<a href="#toc_4">极大似然估计</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_5">学习与分类算法</a>
+</li>
+<li>
+<a href="#toc_6">贝叶斯估计</a>
+</li>
+</ul>
+
+
+<p>朴素贝叶斯（naive Bayes)法是基于贝叶斯定理与特征条件独立假设的分类方。对于给定的训练数据集，首先基于特征条件独立假设学习输入/输出的联合概率分布：然后基于此模型，对给定的输入:x，利用贝叶斯定理求出后验概率最大的输出:y。朴素贝叶斯法实现简单，学习与预测的效率都很髙，是一种常用的方法.</p>
+
+<h2 id="toc_0">朴素贝叶斯的学习与分类</h2>
+
+<h3 id="toc_1">基本方法</h3>
+
+<p>设输入空间\(\chi \subseteq R^n\)为n维向量的集合，输出空间为类标记集合\(\mathcal{Y}={c_1,c_2,...c_k}\)。输入为特征向量\(x\in \chi\),输出为类标记\(y\in mathcal{Y}\)。X是定义在输入空间\(\chi\)上的随机向量，Y是定义在输出空间\(\mathcal{Y}\)上的随机变量。P(X,Y)是X和Y的联合概率分布。训练数据集：<br/>
+\(T = {(x_1,y_1),(x_2,y_2),...,(x_N,y_N)}\)<br/>
+由P(X,Y)独立同分布产生。</p>
+
+<p>朴素贝叶斯法通过训练数据集学习联合概率分布P(X,Y)。具体的，学习以下先验概率分布及条件概率分布。先验概率分布：<br/>
+\(P(Y = c_k), k=1,2,3...K\)</p>
+
+<p>条件概率分布：<br/>
+\(P(X=x|Y=c_k)=P(X^{(1)}=x^{(1)},...,X^{(n)}=x^{(n)}|Y=c_k), k=1,2,...K\)<br/>
+于是学习到联合概率分布P(X,Y)。</p>
+
+<p>条件概率分布P(X=x|Y=\(c_k\))有指数级数量的参数，其估计实际是不可行的，事实上，假设\(x^{(j)}可取值有S_j个，j=1,2,3...n,Y可取值为K个，那么参数个数为K\prod_{j=1}^n{S_j}\)</p>
+
+<p>朴素贝叶斯法对条件概率分布作了条件独立性的假设。由于这是一个较强的假设，朴素贝叶斯法也由此得名。具体地，条件独立性假设是：<br/>
+<img src="media/14893694433396/14897352338918.jpg" alt=""/></p>
+
+<p>朴素贝叶斯法实际上学习到生成数据的机制，所以属于生成模型。条件独立假设等于是说用于分类的特征在类确定的条件下都是条件独立的。这一假设使朴 素贝叶斯法变得简单，但有时会牺牲一定的分类准确率。<br/>
+朴素贝叶斯法分类时，对给定的输入x,通过学习到的模型计算后验概率分布\(P(Y=C_k|X=x)\),将后验概率最大的类作为x的类输出。后验概率计算根据贝 叶斯定理进行：<br/>
+<img src="media/14893694433396/14897352467770.jpg" alt=""/></p>
+
+<h3 id="toc_2">后验概率最大化的含义</h3>
+
+<p>朴素贝叶斯法将实例分到后验概率最大的类中。这等价于期望风险最小化。假设选择0-1损失函数：<br/>
+<img src="media/14893694433396/14897368963380.jpg" alt=""/><br/>
+式中f(X)是分类决策函数。这时，期望风险函数为：<br/>
+<img src="media/14893694433396/14897369463646.jpg" alt=""/><br/>
+期望是对联合分布P(X,Y)取的，由此取条件期望：<br/>
+<img src="media/14893694433396/14897370507779.jpg" alt=""/><br/>
+为了是期望风险最小化，只需要对\(X=x\)逐个极小化，由此得到：<br/>
+<img src="media/14893694433396/14897371045644.jpg" alt=""/><br/>
+这样一来，根据期望风险最小化准则就得到了后验概率最大化准则：<br/>
+<img src="media/14893694433396/14897380067414.jpg" alt=""/><br/>
+即朴素贝叶斯法所采用的原理。</p>
+
+<h2 id="toc_3">朴素贝叶斯发的参数估计</h2>
+
+<h3 id="toc_4">极大似然估计</h3>
+
+<p>在朴素贝叶斯法中，学习意味着估计\(P(Y=c_k)\)和\(P(X^{(j)}=x^{(j)} |Y=c_k)\)。可以应用极大似然估计法估计相应的概率。先验概率\(P(Y=c_k)\)的极大似然估计是:<br/>
+<img src="media/14893694433396/14897383598198.jpg" alt=""/><br/>
+设第j个特征\(x^{(j)}\)可能取值的几何为{\(a_{j1},a_{j2}....a_{jS_j}\)},条件概率\(P(X^{j}=a_{jl}|Y=c_k)\)的极大似然估计是：<br/>
+<img src="media/14893694433396/14897397226736.jpg" alt=""/></p>
+
+<h2 id="toc_5">学习与分类算法</h2>
+
+<p>下面给出朴素贝叶斯的学习与分类方法。</p>
+
+<p>算法(朴素贝叶斯算法)：<br/>
+<img src="media/14893694433396/14897403452985.jpg" alt=""/></p>
+
+<p>下面用一个例题来解释说明上述算法：<br/>
+<img src="media/14893694433396/14897405687808.jpg" alt=""/><br/>
+<img src="media/14893694433396/14897405876725.jpg" alt=""/></p>
+
+<h2 id="toc_6">贝叶斯估计</h2>
+
+<p>用极大似然估计可能会出现所要估计的概率值为0的情况。这时会影响到后验概率的计算结果，使分类产生偏差，解决这一问题的方法是采用贝叶斯估计。具 体地，条件概率的贝叶斯估计是：<br/>
+<img src="media/14893694433396/14897409238342.jpg" alt=""/></p>
+
+<p>这次再用上述例题来举例，如下所示：<br/>
+<img src="media/14893694433396/14897415528528.jpg" alt=""/></p>
+
+<blockquote>
+<p><strong>总结：朴素贝叶斯法的学习与预测大为简化。因而朴素贝叶斯法高效，且易于实现。其缺点是分类的性能不一定很高。</strong></p>
+</blockquote>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/3/13</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14891936534415.html">
                 
                   <h1>k近邻法</h1>
@@ -696,255 +981,6 @@ sess.run(init)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14843637552703.html">
-                
-                  <h1>第5条：用枚举表示状态、选项、状态码</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>枚举只是一种常量命名的方式。某个对象所经历的各种状态就可以定义为一个简单的枚举集。比如说，用枚举表示socket connection的状态：</p>
-
-<pre><code>enum  EOCConnectionState{
-    EOCConnectionStateDisconnected，
-    EOCConnectionStateConnecting，
-    EOCConnectionStateConnected，
-}
-</code></pre>
-
-<p>这样便于理解，其中编译器会自动为每一个枚举分配一个独有的编号，从0开始，实现枚举所用的数据类型取决于编译器，不过其二进制位（bit)的个数必须能完全表示下枚举编号才行。在前例中，由于最大编号是2,所以使用1个字节的char类型即可。</p>
-
-<p>然而定义枚举变量的方式却不太简洁，要依如下语法编写：</p>
-
-<pre><code>enum EOCConnectionState state = EOCConnectionStateDisconnected;
-</code></pre>
-
-<p>若是每次不用敲入enum而只需写EOCConnectionState就好了。要想这样做，则需使用typedef关键字重新定义枚举类型：</p>
-
-<pre><code>enum EOCConnectionState {
-EOCConnectionStateDisconnected,
-EOCConnectionStateConnecting,
-EOCConnectionStateConnected,
-)；
-typedef enum EOCConnectionState EOCConnectionState;
-</code></pre>
-
-<p>现在可以用简写的EOCConnectionState来代替完整的enum EOCConnectionState 了：</p>
-
-<pre><code>EOCConnectionState state = EOCConnectionStateDisconnected;
-
-</code></pre>
-
-<p>在C++之后可以指定用何种“底层数据类型”来保存枚举类型的变量。这样做的好处是可以向前声明枚举变量了。若不指定底层数据类型，则无法向前声明枚举类型，因为编译器不清楚底层数据类型的大小,所以在用到此枚举类型时，也就不知道究竞该给变量分配多少空间。</p>
-
-<p>指定底层数据类型所用的语法是：</p>
-
-<pre><code>enum EOCConnectionStateConnectionState : NSInteger { /*...*/ };
-
-</code></pre>
-
-<p>还可以不使用编译器所分配的序号，而是手工指定某个枚举成员所对应的值。语法如下：</p>
-
-<pre><code>enum EOCConnectionStateConnectionState {
-EOCConnectionStateDisconnected = 1,
-EOCConnectionStateConnectingf
-EOCConnectionStateConnected
-}；
-</code></pre>
-
-<p>上述代码把EOCConnectionStateDisconnected的值设为1,而不使用编译器所分配的0，如前所述，接下来几个枚举的值都会在上一个的基础上递增1。比如说，EOCConnectionState-Connected的值就是3。</p>
-
-<p>还有一种情况应该使用枚举类型，那就是定义选项的时候。若这些选项可以彼此组合，则更应如此。只要枚举定义得对，各选项之间就可通过“按位或操作符”（bitwise OR operator)来组合。例如，iOSUI框架中有如下枚举类型，用来表示某个视图应该如何在水平或垂直方向上调整大小：</p>
-
-<pre><code>enum UIViewAutoresizing {
-   UIViewAutoresizingNone                  =0，
-   UIViewAutoresizingFlexibleLeftMargin    =1&lt;&lt;0,
-   UIViewAutoresizingFlexibleWidth         =1&lt;&lt;1,
-   UIViewAutoresizingFlexibleRightMargin   =1&lt;&lt;2,
-   □IViewAutoresizingFlexibleTopMargin     =1&lt;&lt;3,
-   UIViewAutoresizingFlexibleHeight        =1&lt;&lt;4,
-   UIViewAutoresizingFlexibleBottomMargin  =1&lt;&lt;5,
-}
-</code></pre>
-
-<p>每个选项均可以启用或者禁用，，使用上述方式来定义枚举值即可保证这一点，因为在每个枚举值所对应的二进制表示中，只有1个二进制位的值是1。用“按位或操作符”可组合多个选项，例如：<br/>
-<code>UIViewAutoResizingFlexibleWidth|UIViewAutoresizingFlexibleHeight<br/>
-</code><br/>
-下图列出了每个枚举成员的二进制值，并演示了刚才那两个枚举组合之后的值。用“按位或操作符”(bitwise OR operator)即可判断出是否已启用某个选项：</p>
-
-<pre><code>enum UIViewAutoresizing resizing =
-UIViewAutoresizingFlexiblGWidth | UIViewAutoresizingFlexibleHeight;
-
-if (resizing &amp; UIViewAutoresizingFlexibleWidth) {
-// UIViewAutoresizingFlexibleWidth is set
-}
-</code></pre>
-
-<p><img src="media/14843637552703/14845291672791.jpg" alt=""/><br/>
-　　上图中每个枚举值的二进制表示，以及对其中两个枚举值执行按位或操作之后的二进制值。</p>
-
-<p>　　在Foundation框架中也定义了一些辅助的宏，用这些宏来定义枚举类型时，也可以指定用于保存枚举值的底层数据类型。这些宏具备向后兼容（backward compatibility)能力，<font color=red><strong>如果目标平台的编译器支持新标准，那就使用新式语法，</strong></font>否则改用旧式语法。这些宏是用#define预处理指令来定义的，其中一个用于定义像EOCConnectionState这种普通的枚举类型，另一个用于定义像UIViewAutoresizing这种包含一系列选项的枚举类型，其用法如下：</p>
-
-<pre><code>typedef NS^ENUM(NSUInteger, EOCConnectionState) {
-    EOCConnectionStateDisconnected,
-    EOCConnectionStateConnecting,
-    EOCConnectionStateConnected,
-}；
-typedef NS_OPTIONS(NSUInteger, EOCPermittedDirection) {
-    EOCPermittedDirectionUp =   1   &lt;&lt;  0,
-    EOCPermittedDirectionDown   =   1   &lt;&lt;  1,
-    EOCPermittedDirectionLeft   =   1   &lt;&lt;  2,
-    EOCPermittedDirectionRight  =   1   &lt;&lt;  3,
-</code></pre>
-
-<p>最后还有一种枚举的用法，就是在switch语句里，有时可以这样定义：</p>
-
-<pre><code>typedef NS_ENUM(NSUInteger, EOCConnectionState) {
-    EOCConnectionStateDisconnected,
-    EOCConnectionStateConnecting,
-    EOCConnectionStateConnected,
-}；
-switch (currentState) {
-    EOCConnectionStateDisconnected:
-        // Handle disconnected state
-        break;
-    EOCConnectionStateConnecting:
-        // Handle connecting state
-        break;
-    EOCConnectionStateConnected:
-        // Handle connected state
-        break;
-}
-</code></pre>
-
-<p>我们总习惯在switch语句中加上default分支。然而，若是用枚举来定义状态机（state machine),则最好不要有default分支,因为不加default的话，如果稍后又加了一种状态，那么编译器就会发出警告信息，提示新加入的状态并未在switch分支中处理。假如写上了 default分支，那么它就会处理这个新状态，从而导致编译器不发瞀告信息，不利于程序的编写。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>应该用枚举来表示状态机的状态、传递给方法的选项以及状态码等值，给这些值起个易懂的名字。</li>
-<li>如果把传递给某个方法的选项表示为枚举类型，而多个选项又可同时使用，那么就将各选项值定义为2的幂，以便通过按位或操作将其组合起来。</li>
-<li>用NS_ENUM与NS_OPTIONS宏来定义枚举类型，并指明其底层数据类型。这样做可以确保枚举是用开发者所选的底层数据类型实现出来的，而不会采用编泽器所选的类型。</li>
-<li>在处理枚举类型的switch语句中不要实现default分支。这样的话，加入新枚举之后，编译器就会提示开发者：switch语句并未处理所有枚举，有利于定位TODO方位。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/1/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14842935189837.html">
-                
-                  <h1>第4条：多用类型常量，少用#define预处理指令</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>对于一般掌握了Objective-C和C语言的人，也许会用这种方法来定义一个类似动画的时间常量：</p>
-
-<pre><code>#define ANIMATION_DURATION = 0.3
-</code></pre>
-
-<p>上述预处理指令会吧源代码中的ANIMATION_DURATION字符串替换为0.3。<br/>
-在OC中我们常常用更好的方法来定义，比方说，下面这行代码定义了一个类型为NSTimeInterval的常量：</p>
-
-<pre><code>static const NSTimeInterval KAnimationDuration = 0.3；
-</code></pre>
-
-<p>要注意的是此方式定义的常量包含类型信息，其好处就是清楚的描述了常量的含义，有助于编写开发文档。</p>
-
-<p>还要注意常量的名称。常用的命名法是：若常量局限于某“编译单元（也就是实现文件之内，implementation）”,一般在前面加上字母k；若长亮在类之外课件，则通常以类名为前缀。之后将会更加详细的说命名问题。</p>
-
-<p>定义常量的位置很重要。我们总是很喜欢在头文件里声明预处理命令，这样是很糟糕的。例如，ANIMATION_DURATION这个常量名就不应该在头文件中，因为所有引入了这份头文件的其他文件中都会出现这个名字。static const定义的常量也不应该出现在头文件中。因为OC没有命名空间这一概念，所以那样做就等于声明了一个名字叫kANIMATIONDURATION的全局变量。此名称应该加上前缀，以表明其所属的类，例如可以改为EOCViewClassAnimationDuration。</p>
-
-<p>如果不打算去公开某个常量，则应该将其定义为在使用该常量的实现文件中，比如说，要开发一个使用UIKit框架的iOS应用程序，其中UIView子类中含有表示动画播放时间的常量，那么可以这样写：</p>
-
-<pre><code>//EOCAnimatedView.h
-#import &lt;UIKit/UIKit.h&gt;
-@interface EOCAnimatedView:UIView
--(void)animate;
-@end
-
-//EOCAnimatedView.m
-#import EOCAnimatedView.h
-
-static const NSTimeInterval kAnimationDuration  = 0.3;
-
-@implemention EOCAnimatedView
-
--(void)animate{
-  [UIViewanimateWithDuration:KAnimationDuration 
-                    animate:^(){
-                        //Perform animations
-                    }]
-}
-</code></pre>
-
-<p>变量一定要同时用static和const来声明。如果试图修改const所声明的变量，编译器会报错。static修饰符意味着该变量仅仅在定义此变量的便一单元中可见。编译器每收到一个编译单元，就会输出一份目标文件。在OC中“编译单元”一词 通常指每个类的实现文件（以.m为后缀名）其作用域仅限于由EOCAnimatedView.m所生成的目标文件中。假如声明此变量时不加static,则编译器会为它创建一个“外部符号”(external symbol)。此时,若是另一个编译单元中也声 明了同名变量，那么编译器就拋出一条错误消息。</p>
-
-<p>有时候需要对外公开某个常量，想要接受常值变量的注册者不需要知道实际的字符串值，只需要以常值变量来注册自己想要接受的通知就可以</p>
-
-<p>此类常量应该放在“全局变量表”中，以便可以在定义该常量的编译单元之外使用。因此可以这样的来定义：</p>
-
-<pre><code>// in the header file
-extern NSString *const EOCStringConstant;
-
-//in the implementation
-NSString *const EOCStringConstant = @&quot;value&quot;;
-</code></pre>
-
-<p>这个常量在头文件中声明，在实现文件里面定义。这类常量只能定义一次。</p>
-
-<p>这样定义常量要优于#define，一旦在.m文件中定义好全局常量后，可以随处使用。</p>
-
-<p><strong>要点</strong><br/>
-* 不要用预处理指令定义常量，这样定义出来的常量不包含类型信息，编译器只是会在编译之前执行查找与替换操作。即使有人重新定义了常量值，编译器也不会产生警告信息。<br/>
-* 在实现文件中使用static const来定义“只在编译单元内可见的常量”。由于此类常量不在全局符号表中，所以无需为其名称添加前缀。<br/>
-* 再投问价那种使用extern来声明全局变量，并且在相关的实现文件中定义其值。这种常量要出现在全局符号表中，所以其名称应该加以区隔，通常用与之有关的类名做前缀。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/1/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1028,6 +1064,18 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
 	      
 		      
 			      <li class="post">
+			        <a href="14980252836745.html">MAC下openBlas的安装</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14980135145677.html">Caffe中的Net</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14974936829967.html">Caffe中Layer的学习</a>
 			      </li>
 		     
@@ -1041,18 +1089,6 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
 		      
 			      <li class="post">
 			        <a href="14974276192148.html">重新利用boot camp安装win10</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14970763342670.html">caffe数据结构描述</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14969765744787.html">caffe数据结构</a>
 			      </li>
 		     
 		  

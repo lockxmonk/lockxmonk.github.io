@@ -113,6 +113,198 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14939712159345.html">
+                
+                  <h1>正则表达式</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>字符串是编程时涉及到的最多的一种数据结构，对字符串进行操作的需求几乎无处不在。比如判断一个字符串是否是合法的Email地址，虽然可以编程提取<code>@</code>前后的子串，再分别判断是否是单词和域名，但这样做不但麻烦，而且代码难以复用。</p>
+
+<p>正则表达式是一种用来匹配字符串的强有力的武器。它的设计思想是用一种描述性的语言来给字符串定义一个规则，凡是符合规则的字符串，我们就认为它“匹配”了，否则，该字符串就是不合法的。</p>
+
+<p>所以我们判断一个字符串是否是合法的Email的方法是：</p>
+
+<ol>
+<li><p>创建一个匹配Email的正则表达式；</p></li>
+<li><p>用该正则表达式去匹配用户的输入来判断是否合法。</p></li>
+</ol>
+
+<p>因为正则表达式也是用字符串表示的，所以，我们要首先了解如何用字符来描述字符。</p>
+
+<p>在正则表达式中，如果直接给出字符，就是精确匹配。用<code>\d</code>可以匹配一个数字，<code>\w</code>可以匹配一个字母或数字，所以：</p>
+
+<ul>
+<li><p><code>&#39;00\d&#39;</code>可以匹配<code>&#39;007&#39;</code>，但无法匹配<code>&#39;00A&#39;</code>；</p></li>
+<li><p><code>&#39;\d\d\d&#39;</code>可以匹配<code>&#39;010&#39;</code>；</p></li>
+<li><p><code>&#39;\w\w\d&#39;</code>可以匹配<code>&#39;py3&#39;</code>；</p></li>
+</ul>
+
+<p><code>.</code><strong>可以匹配任意字符</strong>，所以：</p>
+
+<ul>
+<li><code>&#39;py.&#39;</code>可以匹配<code>&#39;pyc&#39;</code>、<code>&#39;pyo&#39;</code>、<code>&#39;py!&#39;</code>等等。</li>
+</ul>
+
+<p>要匹配变长的字符，在正则表达式中，用<code>*</code>表示任意个字符（包括0个），用<code>+</code>表示至少一个字符，用<code>?</code>表示0个或1个字符，用<code>{n}</code>表示n个字符，用<code>{n,m}</code>表示n-m个字符：</p>
+
+<p>来看一个复杂的例子：<code>\d{3}\s+\d{3,8}</code>。</p>
+
+<p>我们来从左到右解读一下：</p>
+
+<ol>
+<li><p><code>\d{3}</code>表示匹配3个数字，例如<code>&#39;010&#39;</code>；</p></li>
+<li><p><code>\s</code>可以匹配一个空格（也包括Tab等空白符），所以<code>\s+</code>表示至少有一个空格，例如匹配<code>&#39; &#39;，&#39; &#39;</code>等；</p></li>
+<li><p><code>\d{3,8}</code>表示3-8个数字，例如<code>&#39;1234567&#39;</code>。</p></li>
+</ol>
+
+<p>综合起来，上面的正则表达式可以匹配以任意个空格隔开的带区号的电话号码。</p>
+
+<p>如果要匹配<code>&#39;010-12345&#39;</code>这样的号码呢？由于<code>&#39;-&#39;</code>是特殊字符，在正则表达式中，要用<code>&#39;\&#39;</code>转义，所以，上面的正则是<code>\d{3}\-\d{3,8}</code>。</p>
+
+<p>但是，仍然无法匹配<code>&#39;010 - 12345&#39;</code>，因为带有空格。所以我们需要更复杂的匹配方式。</p>
+
+<h2 id="toc_0">进阶</h2>
+
+<p>要做更精确地匹配，可以用<code>[]</code>表示范围，比如：</p>
+
+<ul>
+<li><p><code>[0-9a-zA-Z\_]</code>可以匹配一个数字、字母或者下划线；</p></li>
+<li><p><code>[0-9a-zA-Z\_]+</code>可以匹配至少由一个数字、字母或者下划线组成的字符串，比如<code>&#39;a100&#39;，&#39;0_Z&#39;，&#39;Py3000&#39;</code>等等；</p></li>
+<li><p><code>[a-zA-Z\_][0-9a-zA-Z\_]*</code>可以匹配由字母或下划线开头，后接任意个由一个数字、字母或者下划线组成的字符串，也就是Python合法的变量；</p></li>
+<li><p><code>[a-zA-Z\_][0-9a-zA-Z\_]{0, 19}</code>更精确地限制了变量的长度是1-20个字符（前面1个字符+后面最多19个字符）。</p></li>
+</ul>
+
+<p><code>A|B</code>可以匹配A或B，所以<code>(P|p)ython</code>可以匹配<code>&#39;Python&#39;</code>或者<code>&#39;python&#39;</code>。</p>
+
+<p><code>^</code>表示行的开头，<code>^\d</code>表示必须以数字开头。</p>
+
+<p><code>$</code>表示行的结束，<code>\d$</code>表示必须以数字结束。</p>
+
+<p>你可能注意到了，<code>py</code>也可以匹配&#39;python&#39;，但是加上<code>^py$</code>就变成了整行匹配，就只能匹配<code>&#39;py&#39;</code>了。</p>
+
+<h2 id="toc_1">re模块</h2>
+
+<p>有了准备知识，我们就可以在Python中使用正则表达式了。Python提供<code>re</code>模块，包含所有正则表达式的功能。由于Python的字符串本身也用<code>\</code>转义，所以要特别注意：</p>
+
+<pre><code class="language-py">s = &#39;ABC\\-001&#39; # Python的字符串
+# 对应的正则表达式字符串变成：
+# &#39;ABC\-001&#39;
+</code></pre>
+
+<p>因此我们强烈建议使用Python的<code>r</code>前缀，就不用考虑转义的问题了：</p>
+
+<pre><code class="language-py">s = r&#39;ABC\-001&#39; # Python的字符串
+# 对应的正则表达式字符串不变：
+# &#39;ABC\-001&#39;
+</code></pre>
+
+<p>先看看如何判断正则表达式是否匹配：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*
+import re
+
+print re.match(r&#39;^\d{3}\-\d{3,8}$&#39;, &#39;010-12345&#39;)
+print re.match(r&#39;^\d{3}\-\d{3,8}$&#39;, &#39;010 12345&#39;)
+
+</code></pre>
+
+<p><code>match()</code>方法判断是否匹配，如果匹配成功，返回一个<code>Match</code>对象，否则返回<code>None</code>。<br/>
+<img src="media/14939712159345/14939732218646.jpg" alt=""/></p>
+
+<p>常见的判断方法就是：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*
+import re
+
+Spattern = r&#39;^\d{3}\-\d{3,8}$&#39;  #用户定义的正则表达式
+test = &#39;010-12345&#39;  #用户输入的字符串
+test2 = &#39;012 12345&#39;
+if re.match(Spattern , test):
+    print &#39;OK&#39;
+else:
+    print &#39;failed&#39;
+
+if re.match(Spattern , test2):
+    print &#39;OK&#39;
+else:
+    print &#39;failed&#39;
+</code></pre>
+
+<p><img src="media/14939712159345/14939734520573.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/5</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14938936328646.html">
+                
+                  <h1>图像去雾相关基础</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">暗原色</h2>
+
+<p>暗原色先验理论指出，在无雾图像的 非天空区域里，若把图像分为多个子块，则在每个子块中都会 有某些像素点的一个颜色通道的亮度接近于 0</p>
+
+<p><img src="media/14938936328646/14938938844517.jpg" alt=""/><br/>
+<img src="media/14938936328646/14938939404387.jpg" alt=""/><br/>
+<img src="media/14938936328646/14938939611430.jpg" alt=""/></p>
+
+<h2 id="toc_1">HSV</h2>
+
+<p>HSL 和 HSV（也叫做 HSB）是对RGB 色彩空间中点的两种有关系的表示，它们尝试描述比 RGB 更准确的感知颜色联系，并仍保持在计算上简单。<code>HSL 表示hue（色相）、saturation（饱和度）、lightness（亮度）</code>，<strong>HSV 表示</strong> <code>hue、 saturation、value(色调) 而 HSB 表示hue、saturation、brightness（明度）</code>。</p>
+
+<p>HSL 和 HSV 二者都把颜色描述在圆柱体内的点，这个圆柱的中心轴取值为<strong>自底部的黑色到顶部的白色而在它们中间是的灰色</strong>，绕这个轴的<strong>角度</strong>对应于“色相”，<strong>到这个轴的距离</strong>对应于“饱和度”，而<strong>沿着这个轴的距离</strong>对应于“亮度”，“色调”或“明度”。</p>
+
+<p>HSV（色相，饱和度，明度）在概念上可以被认为是颜色的倒圆锥体（黑点在下顶点，白色在上底面圆心）</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14938608177246.html">
                 
                   <h1>分布式进程</h1>
@@ -625,492 +817,6 @@ print balance
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14936863062791.html">
-                
-                  <h1>进程和线程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">多进程</a>
-</li>
-<li>
-<a href="#toc_1">multiprocessing</a>
-</li>
-<li>
-<a href="#toc_2">Pool</a>
-</li>
-<li>
-<a href="#toc_3">进程间通信</a>
-<ul>
-<li>
-<a href="#toc_4">小结</a>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>我们前面编写的所有的Python程序，都是执行单任务的进程，也就是只有一个线程。如果我们要同时执行多个任务怎么办</p>
-
-<p>一种是启动多个进程，每个进程虽然只有一个线程，但多个进程可以一块执行多个任务。</p>
-
-<p><strong>还有一种方法是启动一个进程，在一个进程内启动多个线程，这样，多个线程也可以一块执行多个任务。</strong></p>
-
-<p>当然还有第三种方法，就是启动多个进程，每个进程再启动多个线程，这样同时执行的任务就更多了，当然这种模型更复杂，实际很少采用。</p>
-
-<p>总结一下就是，多任务的实现有3种方式：</p>
-
-<ul>
-<li>多进程模式；</li>
-<li>多线程模式；</li>
-<li>多进程+多线程模式。</li>
-</ul>
-
-<blockquote>
-<p>线程是最小的执行单元，而进程由至少一个线程组成。如何调度进程和线程，完全由操作系统决定，程序自己不能决定什么时候执行，执行多长时间。</p>
-</blockquote>
-
-<h2 id="toc_0">多进程</h2>
-
-<p>Unix/Linux操作系统提供了一个<code>fork()</code>系统调用，它非常特殊。普通的函数调用，调用一次，返回一次，但是<code>fork()</code><font color=red>调用一次，返回两次，因为操作系统自动把当前进程（称为父进程）复制了一份（称为子进程），然后，分别在父进程和子进程内返回</font>。</p>
-
-<p>子进程永远返回<code>0</code>，而父进程返回子进程的ID。这样做的理由是，一个父进程可以fork出很多子进程，所以，父进程要记下每个子进程的ID，而子进程只需要调用<code>getppid()</code>就可以拿到父进程的ID。</p>
-
-<p>Python的<code>os</code>模块封装了常见的系统调用，其中就包括<code>fork</code>，可以在Python程序中轻松创建子进程：</p>
-
-<pre><code class="language-py">import os
-
-print &#39;Process (%s) start&#39; %os.getpid()
-
-pid = os.fork()
-if pid == 0:
-    print &#39;I am child process (%s) and my parent is %s.&#39; %(os.getpid(),os.getppid())
-else:
-    print &#39;I (%s) just created a child process (%s)&#39; %(os.getpid(),pid)
-</code></pre>
-
-<p><img src="media/14936863062791/14936874189758.jpg" alt=""/></p>
-
-<p>第一次返回父进程，第二次返回子进程。所以分别打印出了不同的结果。</p>
-
-<p>有了<code>fork</code>调用，一个进程在接到新任务时就可以复制出一个子进程来处理新任务，常见的Apache服务器就是由父进程监听端口，每当有新的http请求时，就fork出子进程来处理新的http请求。</p>
-
-<h2 id="toc_1">multiprocessing</h2>
-
-<p>如果你打算编写多进程的服务程序，Unix/Linux无疑是正确的选择。由于Windows没有<code>fork</code>调用，难道在Windows上无法用Python编写多进程的程序？</p>
-
-<p>由于Python是跨平台的，自然也应该提供一个跨平台的多进程支持。<code>multiprocessing</code>模块就是跨平台版本的多进程模块。</p>
-
-<p><code>multiprocessing</code>模块提供了一个<code>Process</code>类来代表一个进程对象，下面的例子演示了启动一个子进程并等待其结束：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-from multiprocessing import Process
-
-import os
-
-# 子进程要执行的代码
-
-
-def run_proc(name):
-    print &#39;Run child process %s(%s)&#39; % (name, os.getpid())
-
-if __name__ == &#39;__main__&#39;:
-    print &#39;Parent process %s.&#39; % os.getpid()
-p = Process(target=run_proc, args=(&#39;test&#39;,))
-print &#39;Process will start.&#39;
-p.start()
-p.join()
-print &#39;Process end&#39;
-</code></pre>
-
-<p><img src="media/14936863062791/14936889041171.jpg" alt=""/></p>
-
-<p>创建子进程时，只需要传入一个执行函数和函数的参数，创建一个<code>Process</code>实例，用<code>start()</code>方法启动，这样创建进程比<code>fork()</code>还要简单。</p>
-
-<p><code>join()</code>方法可以等待子进程结束后再继续往下运行，通常用于进程间的同步。</p>
-
-<h2 id="toc_2">Pool</h2>
-
-<p>如果要启动大量的子进程，可以用进程池的方式批量创建子进程：</p>
-
-<pre><code class="language-py">from multiprocessing import Pool
-import os
-import time
-import random
-
-
-def long_time_task(name):
-    print &#39;Run task %s(%s)...&#39; % (name, os.getpid())
-    start = time.time()
-    time.sleep(random.random() * 3)
-    end = time.time()
-    print &#39;Task %s runs %0.2f seconds.&#39; % (name, (end - start))
-
-if __name__ == &#39;__main__&#39;:
-    print &#39;Parent process %s.&#39; % os.getpid()
-    p = Pool()
-    for i in range(9):
-        p.apply_async(long_time_task, args=(i,))
-    print &#39;Waiting for all subprocesses done...&#39;
-    p.close()
-    p.join()
-    print &#39;All subprocess done&#39;
-</code></pre>
-
-<p><img src="media/14936863062791/14936904615182.jpg" alt=""/></p>
-
-<p>代码解读：</p>
-
-<p>对<code>Pool</code>对象调用<code>join()</code>方法会等待所有子进程执行完毕，调用<code>join()</code>之前必须先调用<code>close()</code>，调用<code>close()</code>之后就不能继续添加新的<code>Process</code>了。</p>
-
-<p>请注意输出的结果，task 0~7是立刻执行的，而task 8要等待前面某个task完成后才执行，这是因为Pool的默认大小在我的电脑上是8，因此，最多同时执行8个进程。这是Pool有意设计的限制，并不是操作系统的限制。如果改成：<code>p = Pool(9)</code></p>
-
-<p>就可以同时跑9个进程。</p>
-
-<p>由于Pool的默认大小是CPU的核数，如果你不幸拥有8核CPU，你要提交至少9个子进程才能看到上面的等待效果。</p>
-
-<h2 id="toc_3">进程间通信</h2>
-
-<p><code>Process</code>之间肯定是需要通信的，操作系统提供了很多机制来实现进程间的通信。Python的<code>multiprocessing</code>模块包装了底层的机制，提供了<code>Queue</code>、<code>Pipes</code>等多种方式来交换数据。</p>
-
-<p>我们以<code>Queue</code>为例，在父进程中创建两个子进程，一个往<code>Queue</code>里写数据，一个从<code>Queue</code>里读数据：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-from multiprocessing import Process,Queue
-import os,time,random
-
-#写数据进程执行的代码
-def write(q):
-    for value in [&#39;A&#39;,&#39;B&#39;,&#39;C&#39;]:
-        print &#39;Put %s to quene...&#39; % value
-        q.put(value)
-        time.sleep(random.random())
-#读数据进程执行的代码
-def read(q):
-    while True:
-        value = q.get(True)
-        print &#39;Get %s from quene.&#39; %value
-
-if __name__==&#39;__main__&#39;:
-    #父进程创建Quene,并传给各个子进程：
-    q = Queue()
-    pw = Process(target=write,args=(q,))
-    pr = Process(target=read,args=(q,))
-    #启动子进程pw，写入：
-    pw.start()
-    #启动子进程pr，读取：
-    pr.start()
-    #等待pw结束：
-    pw.join()
-    #pr进程里是死循环，无法等待其结束，只能强行终止：
-    pr.terminate()
-
-</code></pre>
-
-<p><img src="media/14936863062791/14936917220576.jpg" alt=""/></p>
-
-<p>在Unix/Linux下，<code>multiprocessing</code>模块封装了<code>fork()</code>调用，使我们不需要关注<code>fork()</code>的细节。由于Windows没有fork调用，因此，<code>multiprocessing</code>需要“模拟”出fork的效果，父进程所有Python对象都必须通过<code>pickle</code>序列化再传到子进程去，所有，如果<code>multiprocessing</code>在Windows下调用失败了，要先考虑是不是pickle失败了。</p>
-
-<h3 id="toc_4">小结</h3>
-
-<p>在Unix/Linux下，可以使用<code>fork()</code>调用实现多进程。</p>
-
-<p>要实现跨平台的多进程，可以使用<code>multiprocessing</code>模块。</p>
-
-<p>进程间通信是通过<code>Queue、Pipes</code>等实现的。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/2</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14933396433742.html">
-                
-                  <h1>序列化</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">JSON</a>
-</li>
-<li>
-<a href="#toc_1">JSON进阶</a>
-</li>
-<li>
-<a href="#toc_2">小结</a>
-</li>
-</ul>
-
-
-<p><strong>我们把变量从内存中变成可存储或传输的过程称之为序列化，在Python中叫pickling，在其他语言中也被称之为serialization，marshalling，flattening等等，都是一个意思。</strong></p>
-
-<p>序列化之后，就可以把序列化后的内容写入磁盘，或者通过网络传输到别的机器上。</p>
-
-<p>反过来，把变量内容从序列化的对象重新读到内存里称之为反序列化，即unpickling。</p>
-
-<p>Python提供两个模块来实现序列化：<code>cPickle</code>和<code>pickle</code>。这两个模块功能是一样的，区别在于<code>cPickle</code>是C语言写的，速度快，<code>pickle</code>是纯Python写的，速度慢，跟<code>cStringIO和StringIO</code>一个道理。用的时候，先尝试导入<code>cPickle</code>，如果失败，再导入<code>pickle</code>：</p>
-
-<pre><code class="language-py">try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-</code></pre>
-
-<p>我们尝试把一个对象序列化并写入文件：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-try:
-    import cPickle as pickle
-except ImportError: 
-    import pickle
-
-d = dict(name=&#39;LZH&#39;,age=20,score=88)
-print pickle.dumps(d)
-</code></pre>
-
-<p><img src="media/14933396433742/14933403797179.jpg" alt=""/></p>
-
-<p><code>pickle.dumps()</code>方法把任意对象序列化成一个<code>str</code>，然后，就可以把这个<code>str</code>写入文件。或者用另一个方法<code>pickle.dump()</code>直接把对象序列化后写入一个<code>file-like Object</code>：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-try:
-    import cPickle as pickle
-except ImportError: 
-    import pickle
-
-d = dict(name=&#39;梁中豪&#39;,age=20,score=88)
-f = open(&#39;test.txt&#39;,&#39;wb&#39;)  
-pickle.dump(d,f)
-f.close
-
-</code></pre>
-
-<p><img src="media/14933396433742/14933405542811.jpg" alt=""/></p>
-
-<p>我们可以读取文件中这些内容，并且将他们反序列化来显示原来的内容：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-try:
-    import cPickle as pickle
-except ImportError: 
-    import pickle
-
-#d = dict(name=&#39;梁中豪&#39;,age=20,score=88)
-f = open(&#39;test.txt&#39;,&#39;rb&#39;)  
-print pickle.load(f)
-f.close
-
-</code></pre>
-
-<p>可以先把内容读到一个<code>str</code>，然后用<code>pickle.loads()</code>方法反序列化出对象，也可以直接用<code>pickle.load()</code>方法从一个<code>file-like Object</code>中直接反序列化出对象</p>
-
-<p>Pickle的问题和所有其他编程语言特有的序列化问题一样，就是它只能用于Python，并且可能不同版本的Python彼此都不兼容，因此，只能用Pickle保存那些不重要的数据，不能成功地反序列化也没关系。</p>
-
-<p>下面我们用JSON来进行网络间的数据传递。</p>
-
-<h2 id="toc_0">JSON</h2>
-
-<p>如果我们要在不同的编程语言之间传递对象，<strong>就必须把对象序列化为标准格式，比如XML，但更好的方法是序列化为JSON，因为JSON表示出来就是一个字符串</strong>，可以被所有语言读取，也可以方便地存储到磁盘或者通过网络传输。JSON不仅是标准格式，并且比XML更快，而且可以直接在Web页面中读取，非常方便。</p>
-
-<p><strong><code>JSON</code>表示的对象就是标准的<code>JavaScript</code>语言的对象，<code>JSON</code>和Python内置的数据类型对应如下：</strong></p>
-
-<table>
-<thead>
-<tr>
-<th>Json类型</th>
-<th>Python类型</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>{}</td>
-<td>dict</td>
-</tr>
-<tr>
-<td>[]</td>
-<td>list</td>
-</tr>
-<tr>
-<td>string</td>
-<td>str或u&#39;unicode&#39;</td>
-</tr>
-<tr>
-<td>12345.56</td>
-<td>int或float</td>
-</tr>
-<tr>
-<td>true/false</td>
-<td>True/False</td>
-</tr>
-<tr>
-<td>null</td>
-<td>None</td>
-</tr>
-</tbody>
-</table>
-
-<p>Python内置的<code>json</code>模块提供了非常完善的Python对象到JSON格式的转换。我们先看看如何把Python对象变成一个JSON：</p>
-
-<pre><code class="language-py">import json
-d = dict(name=&#39;Lichao&#39;, age=20, score=88)
-print json.dumps(d)
-
-</code></pre>
-
-<p><img src="media/14933396433742/14933496188910.jpg" alt=""/></p>
-
-<p><code>dumps()</code>方法返回一个<code>str</code>，内容就是标准的JSON。类似的，<code>dump()</code>方法可以直接把JSON写入一个<code>file-like Object</code>。</p>
-
-<p>要把JSON反序列化为Python对象，用<code>loads()</code>或者对应的<code>load()</code>方法，前者把JSON的字符串反序列化，后者从<code>file-like Object</code>中读取字符串并反序列化：</p>
-
-<pre><code class="language-py">import json
-json_str = &#39;{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Lichao&quot;}&#39;
-print json.loads(json_str)
-</code></pre>
-
-<p><img src="media/14933396433742/14933497889867.jpg" alt=""/></p>
-
-<p>有一点需要注意，就是反序列化得到的所有字符串对象默认都是<code>unicode</code>而不是<code>str</code>。由于JSON标准规定JSON编码是UTF-8，所以我们总是能正确地在Python的<code>str或unicode</code>与JSON的字符串之间转换。</p>
-
-<h2 id="toc_1">JSON进阶</h2>
-
-<p>Python的<code>dict</code>对象可以直接序列化为JSON的<code>{}</code>，不过，很多时候，我们更喜欢用<code>class</code>表示对象，比如定义<code>Student</code>类，然后序列化：</p>
-
-<pre><code class="language-py">import json
-
-
-class Student(object):
-
-    def __init__(self, name, age, score):
-        super(Student, self).__init__()
-        self.name = name
-        self.age = age
-        self.score = score
-
-s = Student(&#39;LiChao&#39;, 20, 88)
-print(json.dumps(s))
-</code></pre>
-
-<p><img src="media/14933396433742/14933605238135.jpg" alt=""/><br/>
-向上述那样调用，会报错，因为<code>Student</code>对象不是一个可序列化为JSON的对象。</p>
-
-<p>我们仔细看看<code>dumps()</code>方法的参数列表，可以发现，除了第一个必须的<code>obj</code>参数外，<code>dumps()</code>方法还提供了一大堆的可选参数。</p>
-
-<p>这些可选参数就是让我们来定制JSON序列化。前面的代码之所以无法把<code>Student</code>类实例序列化为JSON，是因为默认情况下，<code>dumps()</code>方法不知道如何将<code>Student</code>实例变为一个JSON的<code>{}</code>对象。</p>
-
-<p>可选参数<code>default</code>就是把任意一个对象变成一个可序列为JSON的对象，我们只需要为<code>Student</code>专门写一个转换函数，再把函数传进去即可：</p>
-
-<pre><code class="language-py">import json
-
-def student2dict(std):
-    return {
-    &#39;name&#39;:std.name,
-    &#39;age&#39;:std.age,
-    &#39;score&#39;:std.score
-    }
-
-class Student(object):
-
-    def __init__(self, name, age, score):
-        super(Student, self).__init__()
-        self.name = name
-        self.age = age
-        self.score = score
-
-s = Student(&#39;LiChao&#39;, 20, 88)
-print(json.dumps(s,default=student2dict))
-</code></pre>
-
-<p><img src="media/14933396433742/14933609788679.jpg" alt=""/></p>
-
-<p>这样，<code>Student</code>实例首先被<code>student2dict()</code>函数转换成<code>dict</code>，然后再被顺利序列化为<code>JSON</code>。</p>
-
-<p><strong>不过，下次如果遇到一个<code>Teacher</code>类的实例，照样无法序列化为<code>JSON</code>。我们可以偷个懒，把任意<code>class</code>的实例变为<code>dict</code>：</strong></p>
-
-<pre><code class="language-py">print(json.dumps(s, default=lambda obj: obj.__dict__))
-</code></pre>
-
-<p>因为通常<code>class</code>的实例都有一个<code>__dict__</code>属性，它就是一个dict，用来存储实例变量。也有少数例外，比如定义了<code>__slots__</code>的class。</p>
-
-<p>同样的道理，如果我们要把JSON反序列化为一个<code>Student</code>对象实例，<code>loads()</code>方法首先转换出一个dict对象，然后，我们传入的<code>object_hook</code>函数负责把<code>dict</code>转换为<code>Student</code>实例：</p>
-
-<pre><code class="language-py">import json
-
-def dict2students(d):
-    return Student(d[&#39;name&#39;],d[&#39;age&#39;],d[&#39;score&#39;])
-
-class Student(object):
-
-    def __init__(self, name, age, score):
-        super(Student, self).__init__()
-        self.name = name
-        self.age = age
-        self.score = score
-
-json_str = &#39;{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Bob&quot;}&#39;
-print(json.loads(json_str,object_hook=dict2students))
-</code></pre>
-
-<p><img src="media/14933396433742/14933619206509.jpg" alt=""/></p>
-
-<p>打印出的是反序列化的<code>Student</code>实例对象。</p>
-
-<h2 id="toc_2">小结</h2>
-
-<p>Python语言特定的序列化模块是<code>pickle</code>，但如果要把序列化搞得更通用、更符合Web标准，就可以使用<code>json</code>模块。</p>
-
-<p><code>json</code>模块的<code>dumps()和loads()</code>函数是定义得非常好的接口的典范。当我们使用时，只需要传入一个必须的参数。但是，当默认的序列化或反序列机制不满足我们的要求时，我们又可以传入更多的参数来定制序列化或反序列化的规则，既做到了接口简单易用，又做到了充分的扩展性和灵活性。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1194,6 +900,18 @@ print(json.loads(json_str,object_hook=dict2students))
 	      
 		      
 			      <li class="post">
+			        <a href="14980252836745.html">MAC下openBlas的安装</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14980135145677.html">Caffe中的Net</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14974936829967.html">Caffe中Layer的学习</a>
 			      </li>
 		     
@@ -1207,18 +925,6 @@ print(json.loads(json_str,object_hook=dict2students))
 		      
 			      <li class="post">
 			        <a href="14974276192148.html">重新利用boot camp安装win10</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14970763342670.html">caffe数据结构描述</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14969765744787.html">caffe数据结构</a>
 			      </li>
 		     
 		  
