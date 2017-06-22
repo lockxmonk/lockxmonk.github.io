@@ -4,7 +4,7 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-06-19T11:36:09+08:00</updated>
+  <updated>2017-06-22T11:16:26+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
@@ -75,27 +75,23 @@ BLAS_LIB := $(shell brew --prefix openblas)/lib
 <li>重新编译</li>
 </ol>
 
-<p><strong>如果有些人遇到了这种错误</strong><br/>
-```<br/>
-In file included from src/caffe/util/blocking_queue.cpp:5:<br/>
-In file included from ./include/caffe/layers/base_data_layer.hpp:9:<br/>
-In file included from ./include/caffe/layer.hpp:12:<br/>
-In file included from ./include/caffe/util/math_functions.hpp:11:<br/>
-./include/caffe/util/mkl_alternate.hpp:14:10: fatal error: &#39;cblas.h&#39; file not found</p>
+<p><strong>如果有些人遇到了这种错误</strong></p>
 
-<h1 id="toc_2">include <cblas.h></h1>
-
-<pre><code>     ^
+<pre><code>In file included from src/caffe/util/blocking_queue.cpp:5:
+In file included from ./include/caffe/layers/base_data_layer.hpp:9:
+In file included from ./include/caffe/layer.hpp:12:
+In file included from ./include/caffe/util/math_functions.hpp:11:
+./include/caffe/util/mkl_alternate.hpp:14:10: fatal error: &#39;cblas.h&#39; file not found
+#include &lt;cblas.h&gt;
+         ^
+1 error generated.
+make: *** [.build_release/src/caffe/util/blocking_queue.o] Error 1
 </code></pre>
 
-<p>1 error generated.<br/>
-make: *** [.build_release/src/caffe/util/blocking_queue.o] Error 1<br/>
-```</p>
+<p>可以试试这个命令:</p>
 
-<p>可以试试这个命令:<br/>
-<code><br/>
-cmake -DCMAKE_CXX_FLAGS=-I/usr/local/opt/openblas/include ..<br/>
-</code></p>
+<pre><code>cmake -DCMAKE_CXX_FLAGS=-I/usr/local/opt/openblas/include ..
+</code></pre>
 
 ]]></content>
   </entry>
@@ -111,17 +107,6 @@ cmake -DCMAKE_CXX_FLAGS=-I/usr/local/opt/openblas/include ..<br/>
 <a href="#toc_0">Net的基本用法</a>
 </li>
 </ul>
-</li>
-<li>
-<a href="#toc_1">include <vector></a>
-<ul>
-<li>
-<a href="#toc_2">include <iostream></a>
-</li>
-<li>
-<a href="#toc_3">include <caffe/net.hpp></a>
-</li>
-</ul>
 
 
 <p>Net在Caffe中代表一个完整的CNN模型，它包含若干Layer实例。前面我们已经在第5天内容中看到用ProtoBuffer文本文件（prototxt)描述的经典网络结构如LeNet、AlexNet,这些结构反映在Caffe代码实现上就是一个Net对象。<strong>Net其实是相对Blob、 Layer更为复杂的设计，需要沉住气</strong>。</p>
@@ -130,35 +115,31 @@ cmake -DCMAKE_CXX_FLAGS=-I/usr/local/opt/openblas/include ..<br/>
 
 <p>Net是一张图纸，对应的描述文件为<code>*.prototxt</code>,我们选择Caffe自带的CaffeNet模型描述文件,位于<code>models/bvlc_reference_caffenet/deploy.prototxt</code>。将该文件拷贝到当前工作目录下。</p>
 
-<p>编写测试代码为:<br/>
-```c++</p>
+<p>编写测试代码为:</p>
 
-<h1 id="toc_1">include <vector></h1>
+<pre><code class="language-c++">#include &lt;vector&gt;
+#include &lt;iostream&gt;
+#include &lt;caffe/net.hpp&gt;
+using namespace caffe;
+using namespace std;
 
-<h1 id="toc_2">include <iostream></h1>
-
-<h1 id="toc_3">include <caffe/net.hpp></h1>
-
-<p>using namespace caffe;<br/>
-using namespace std;</p>
-
-<p>int main(void)<br/>
-{<br/>
-    std::string proto(&quot;deploy.prototxt&quot;);<br/>
-    Net<float> nn(proto,caffe::TEST);<br/>
-    vector<string> bn = nn.blob_names();    // 获取 Net 中所有 Blob 对象名<br/>
-    vector<string> ln = nn.layer_names();   // 获取 Net 中所有 Layer 对象名<br/>
-    for (int i = 0; i &lt; bn.size(); i++)<br/>
-    {<br/>
-        cout&lt;&lt;&quot;Blob #&quot;&lt;&lt;i&lt;&lt;&quot; : &quot;&lt;&lt;bn[i]&lt;&lt;endl;<br/>
-    }<br/>
-    for (int i = 0; i &lt; ln.size(); i++)<br/>
-    {<br/>
-        cout&lt;&lt;&quot;layer #&quot;&lt;&lt;i&lt;&lt;&quot; : &quot;&lt;&lt;ln[i]&lt;&lt;endl;<br/>
-    }<br/>
-    return 0;<br/>
-}<br/>
-```</p>
+int main(void)
+{
+    std::string proto(&quot;deploy.prototxt&quot;);
+    Net&lt;float&gt; nn(proto,caffe::TEST);
+    vector&lt;string&gt; bn = nn.blob_names();    // 获取 Net 中所有 Blob 对象名
+    vector&lt;string&gt; ln = nn.layer_names();   // 获取 Net 中所有 Layer 对象名
+    for (int i = 0; i &lt; bn.size(); i++)
+    {
+        cout&lt;&lt;&quot;Blob #&quot;&lt;&lt;i&lt;&lt;&quot; : &quot;&lt;&lt;bn[i]&lt;&lt;endl;
+    }
+    for (int i = 0; i &lt; ln.size(); i++)
+    {
+        cout&lt;&lt;&quot;layer #&quot;&lt;&lt;i&lt;&lt;&quot; : &quot;&lt;&lt;ln[i]&lt;&lt;endl;
+    }
+    return 0;
+}
+</code></pre>
 
 <p>编译(<strong>注意这里我们需要安装openblas,具体过程不再这里讲述</strong>):</p>
 
@@ -216,6 +197,7 @@ layer #20 : relu7
 layer #21 : drop7
 layer #22 : fc8
 layer #23 : prob
+
 </code></pre>
 
 <p>通过上面的简单例子,我们发现Net中既包括Layer对象,有包括Blob对象.其中Blob对象用于存放每个Layer输入/输出中间结果.</p>

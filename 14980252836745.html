@@ -190,27 +190,23 @@ BLAS_LIB := $(shell brew --prefix openblas)/lib
 <li>重新编译</li>
 </ol>
 
-<p><strong>如果有些人遇到了这种错误</strong><br/>
-```<br/>
-In file included from src/caffe/util/blocking_queue.cpp:5:<br/>
-In file included from ./include/caffe/layers/base_data_layer.hpp:9:<br/>
-In file included from ./include/caffe/layer.hpp:12:<br/>
-In file included from ./include/caffe/util/math_functions.hpp:11:<br/>
-./include/caffe/util/mkl_alternate.hpp:14:10: fatal error: &#39;cblas.h&#39; file not found</p>
+<p><strong>如果有些人遇到了这种错误</strong></p>
 
-<h1 id="toc_2">include <cblas.h></h1>
-
-<pre><code>     ^
+<pre><code>In file included from src/caffe/util/blocking_queue.cpp:5:
+In file included from ./include/caffe/layers/base_data_layer.hpp:9:
+In file included from ./include/caffe/layer.hpp:12:
+In file included from ./include/caffe/util/math_functions.hpp:11:
+./include/caffe/util/mkl_alternate.hpp:14:10: fatal error: &#39;cblas.h&#39; file not found
+#include &lt;cblas.h&gt;
+         ^
+1 error generated.
+make: *** [.build_release/src/caffe/util/blocking_queue.o] Error 1
 </code></pre>
 
-<p>1 error generated.<br/>
-make: *** [.build_release/src/caffe/util/blocking_queue.o] Error 1<br/>
-```</p>
+<p>可以试试这个命令:</p>
 
-<p>可以试试这个命令:<br/>
-<code><br/>
-cmake -DCMAKE_CXX_FLAGS=-I/usr/local/opt/openblas/include ..<br/>
-</code></p>
+<pre><code>cmake -DCMAKE_CXX_FLAGS=-I/usr/local/opt/openblas/include ..
+</code></pre>
 
 
     
