@@ -137,6 +137,15 @@
 <li>
 <a href="#toc_0">Net的基本用法</a>
 </li>
+<li>
+<a href="#toc_1">数据结构描述</a>
+</li>
+<li>
+<a href="#toc_2">Net的形成</a>
+</li>
+<li>
+<a href="#toc_3">机制和策略</a>
+</li>
 </ul>
 
 
@@ -231,7 +240,531 @@ layer #23 : prob
 
 </code></pre>
 
-<p>通过上面的简单例子,我们发现Net中既包括Layer对象,有包括Blob对象.其中Blob对象用于存放每个Layer输入/输出中间结果.</p>
+<p>通过上面的简单例子,我们发现Net中既包括Layer对象,有包括Blob对象.其中Blob对象用于存放每个Layer输入/输出中间结果.Layer则根据Net描述对指定的输入Blob进行某些计算处理（卷积、下采样、全连接、非线性变换、计算代价函数等)，输出结果放到指定的输出Blob中。输入Blob和输出Blob可能为同一个。所有的Layer和Blob对象都用名字区分，同名的Blob表示同一个Blob对象，同名的Layer表示同一个Layer对象。<strong>而Blob和Layer同名则不代表它们有任何直接关系</strong>。</p>
+
+<p><font color=red>我们可以通过<code>has_blob()、has_layer()</code>函数来査询当前Net对象是否包含指定名字的Blob或Layer对象，如果返回值为真，则可以进-步调用<code>blob_by_name()、layer_by_name()</code>函数直接获取相应的Blob或Layer指针，进行些操作（如提取某层计算输出特征或某个Blob中的权值)。</font></p>
+
+<h2 id="toc_1">数据结构描述</h2>
+
+<p>我们这里先了解下<code>caffe.proto</code>:</p>
+
+<pre><code class="language-protobuf">
+message NetParameter {
+  optional string name = 1; // consider giving the network a name
+  // DEPRECATED. See InputParameter. The input blobs to the network.
+  repeated string input = 3;
+  // DEPRECATED. See InputParameter. The shape of the input blobs.(网络的输入Blob名称,可以多个Blob)
+  repeated BlobShape input_shape = 8;
+
+  // 4D input dimensions -- deprecated.  Use &quot;input_shape&quot; instead.
+  // If specified, for each input blob there should be four
+  // values specifying the num, channels, height and width of the input blob.
+  // Thus, there should be a total of (4 * #input) numbers.
+  //(旧版的维度信息)
+  repeated int32 input_dim = 4;
+
+  // Whether the network will force every layer to carry out backward operation.
+  // If set False, then whether to carry out backward is determined
+  // automatically according to the net structure and learning rates.
+  optional bool force_backward = 5 [default = false];
+  // The current &quot;state&quot; of the network, including the phase, level, and stage.
+  // Some layers may be included/excluded depending on this state and the states
+  // specified in the layers&#39; include and exclude fields.
+  optional NetState state = 6;
+
+  // Print debugging information about results while running Net::Forward,
+  // Net::Backward, and Net::Update.
+  optional bool debug_info = 7 [default = false];
+
+  // The layers that make up the net.  Each of their configurations, including
+  // connectivity and behavior, is specified as a LayerParameter.
+  repeated LayerParameter layer = 100;  // ID 100 so layers are printed last.
+
+  // DEPRECATED: use &#39;layer&#39; instead.
+  repeated V1LayerParameter layers = 2;
+}
+
+</code></pre>
+
+<blockquote>
+<p>看似很短的proto描述，实际上对应的真实网络prototxt可以很长很长，关键在于可重复多次出现的<code>LayerParameterlayer</code>这个字段。其他字段的功能基本都是辅助网络运行的，在代码中会看到更多的细节。</p>
+</blockquote>
+
+<h2 id="toc_2">Net的形成</h2>
+
+<p>我们将Blob比作Caffe砖石，Layer比作Caffe的墙面，那么Net更像是工匠手中的图纸,描述了每个墙面应当出现的位置,这样设计的房屋才足够牢固、抗震。为了达到这个目的,<strong>Net实现时必然有一套用于记录Layer、Blob的数据结构</strong>。在下表中公布一下这些数据结构的名字,错过与它们打交道的机会。</p>
+
+<table>
+<thead>
+<tr>
+<th>类对象</th>
+<th>含义</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>layers_</td>
+<td>记录Net prototxt中出现的每个Layer</td>
+</tr>
+<tr>
+<td>layer_names_</td>
+<td>记录Net prototxt中出现的每个Layer的名称</td>
+</tr>
+<tr>
+<td>layer_names_index_</td>
+<td>记录Net prototxt中每个Layer名称与顺序索引的对应关系</td>
+</tr>
+<tr>
+<td>layer_need_backward_</td>
+<td>记录Layer是否需要反向传播过程</td>
+</tr>
+<tr>
+<td>blobs_</td>
+<td>记录Net中所有Blob</td>
+</tr>
+<tr>
+<td>blob_names_</td>
+<td>记录每个Blob名称</td>
+</tr>
+<tr>
+<td>blob_names_index_</td>
+<td>记录每个Blob名称与顺序索引的对应关系</td>
+</tr>
+<tr>
+<td>blob_need_backward_</td>
+<td>记录每个Blob是否需要反向传播过程</td>
+</tr>
+<tr>
+<td>bottom_vecs_</td>
+<td>blobs_的影子,记录每个Layer的输入Blob</td>
+</tr>
+<tr>
+<td>bottom_id_vecs_</td>
+<td>与bottom_vecs_关联,用于在blobs_中定位每个Layer的每个输入Blob</td>
+</tr>
+<tr>
+<td>bottom_need_backward_</td>
+<td>与bottom_vecs_关联,标志每个Blob是否需要反向传播过程</td>
+</tr>
+<tr>
+<td>top_vecs_</td>
+<td>blobs_的影子,记录每个Layer的输出Blob</td>
+</tr>
+<tr>
+<td>top_id_vecs_</td>
+<td>与top_vecs_关联,用于在blobs_中定位每个Layer的每个输出Blob</td>
+</tr>
+<tr>
+<td>blob_loss_weights_</td>
+<td>Net中每个Blob对损失函数的投票因子,一般损失层为1，其他层为0</td>
+</tr>
+<tr>
+<td>net_input_blob_indices_</td>
+<td>Net输入Blob在blobs_中的索引</td>
+</tr>
+<tr>
+<td>net_output_blob_indices_</td>
+<td>Net输出Blob在blobs_中的索引</td>
+</tr>
+<tr>
+<td>net_input_blobs_</td>
+<td>Net 输入 Blob</td>
+</tr>
+<tr>
+<td>net_output_blobs_</td>
+<td>Net 输出 Blob</td>
+</tr>
+<tr>
+<td>params_</td>
+<td>Net权值Blob,用于存储网络权值</td>
+</tr>
+<tr>
+<td>param_display_names_</td>
+<td>Net中权值Blob的名称</td>
+</tr>
+<tr>
+<td>learnable_params_</td>
+<td>Net中可训练的权值Blob</td>
+</tr>
+<tr>
+<td>params_lr_</td>
+<td>learnable_params_中每个元素是否有学习速率倍乘因子</td>
+</tr>
+<tr>
+<td>has_params_lr_</td>
+<td>标志learnable_params_中每个元素是否有学习速率倍乘因子</td>
+</tr>
+<tr>
+<td>params_weight_decay_</td>
+<td>learnable_params_中每个元素的权值衰减倍乘因子</td>
+</tr>
+<tr>
+<td>has_params_decay_</td>
+<td>标志learnable_params_中每个元素是否有权值衰减倍乘因子</td>
+</tr>
+</tbody>
+</table>
+
+<p>看到上面有两类Blob:<strong>以param开头的权值Blob</strong>和<strong>以blob开头的Layer输入/输出Blob</strong>。<font color=red>它们虽然都是Blob类型，但在网络中的地位截然不同。权值Blob会随着学习过程而更新，归属于“模型”:Layer输入/输出Blob则只会随网络输入变化,归属于“数据”。深度学习的目的就是不断从“数据”中获取知识,存储到“模型”中,应用于后来的“数据”。</font></p>
+
+<p>Net声明位于<code>include/caffe/net.hpp</code>中，内容如下：</p>
+
+<pre><code class="language-c++">
+template &lt;typename Dtype&gt;
+class Net {
+ public:
+ //显示构造函数
+  explicit Net(const NetParameter&amp; param);
+  explicit Net(const string&amp; param_file, Phase phase,
+&gt;       const int level = 0, const vector&lt;string&gt;* stages = NULL);
+//析构函数
+  virtual ~Net() {}
+
+  /// @brief Initialize a network with a NetParameter.
+  void Init(const NetParameter&amp; param);
+
+  //运行前向传播,输入Blob已经领先填充
+  const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Forward(Dtype* loss = NULL);
+  /// @brief DEPRECATED; use Forward() instead.
+  const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; ForwardPrefilled(Dtype* loss = NULL) {
+    LOG_EVERY_N(WARNING, 1000) &lt;&lt; &quot;DEPRECATED: ForwardPrefilled() &quot;
+        &lt;&lt; &quot;will be removed in a future version. Use Forward().&quot;;
+    return Forward(loss);
+  }
+  
+   /**
+   * The From and To variants of Forward and Backward operate on the
+   * (topological) ordering by which the net is specified. For general DAG
+   * networks, note that (1) computing from one layer to another might entail
+   * extra computation on unrelated branches, and (2) computation starting in
+   * the middle may be incorrect if all of the layers of a fan-in are not
+   * included.
+   */
+   //前向传播的几种形式
+  Dtype ForwardFromTo(int start, int end);
+  Dtype ForwardFrom(int start);
+  Dtype ForwardTo(int end);
+  /// @brief DEPRECATED; set input blobs then use Forward() instead.
+  const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Forward(const vector&lt;Blob&lt;Dtype&gt;* &gt; &amp; bottom,
+      Dtype* loss = NULL);
+    //清零所有权值的diff域,应在反向传播之前运行
+    void ClearParamDiffs();
+    //几种不同形式的Net反向传播,无须指定输入/输出Blob,因为在前向传播过程中已经建立连接
+  void Backward();
+  void BackwardFromTo(int start, int end);
+  void BackwardFrom(int start);
+  void BackwardTo(int end);
+  //对Net中所有Layer自底向上进行变形，无须运行一次前向传播就可以计算各层所需的Blob尺寸
+  void Reshape();
+  //前向传播+反向传播，输入为Bottom Blob，输出为loss
+  Dtype ForwardBackward() {
+    Dtype loss;
+    Forward(&amp;loss);
+    Backward();
+    return loss;
+  }
+  //根据已经(由Solver)准备好的diff值更新网络权值
+   void Update();
+  /**
+   * @brief Shares weight data of owner blobs with shared blobs.
+   *
+   * Note: this is called by Net::Init, and thus should normally not be
+   * called manually.
+   */
+  void ShareWeights();
+
+  /**
+   * @brief For an already initialized net, implicitly copies (i.e., using no
+   *        additional memory) the pre-trained layers from another Net.
+   */
+   //从1个已训练好的Net获取共享权值
+  void ShareTrainedLayersWith(const Net* other);
+  // For an already initialized net, CopyTrainedLayersFrom() copies the already
+  // trained layers from another net parameter instance.
+  /**
+   * @brief For an already initialized net, copies the pre-trained layers from
+   *        another Net.
+   */
+  void CopyTrainedLayersFrom(const NetParameter&amp; param);
+  void CopyTrainedLayersFrom(const string trained_filename);
+  void CopyTrainedLayersFromBinaryProto(const string trained_filename);
+  void CopyTrainedLayersFromHDF5(const string trained_filename);
+  /// @brief Writes the net to a proto.
+  // 序列化一个 Net 到 ProtoBuffer
+  void ToProto(NetParameter* param, bool write_diff = false) const;
+  /// @brief Writes the net to an HDF5 file.
+  //序列化一个Net到HDF5
+  void ToHDF5(const string&amp; filename, bool write_diff = false) const;
+  
+  /// @brief returns the network name.
+  inline const string&amp; name() const { return name_; }
+  /// @brief returns the layer names
+  inline const vector&lt;string&gt;&amp; layer_names() const { return layer_names_; }
+  /// @brief returns the blob names
+  inline const vector&lt;string&gt;&amp; blob_names() const { return blob_names_; }
+  /// @brief returns the blobs
+  inline const vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt;&amp; blobs() const {
+    return blobs_;
+  }
+  /// @brief returns the layers
+  inline const vector&lt;shared_ptr&lt;Layer&lt;Dtype&gt; &gt; &gt;&amp; layers() const {
+    return layers_;
+  }
+  /// @brief returns the phase: TRAIN or TEST
+  inline Phase phase() const { return phase_; }
+  /**
+   * @brief returns the bottom vecs for each layer -- usually you won&#39;t
+   *        need this unless you do per-layer checks such as gradients.
+   */
+   //返回每个Layer的Bottom Blob
+  inline const vector&lt;vector&lt;Blob&lt;Dtype&gt;*&gt; &gt;&amp; bottom_vecs() const {
+    return bottom_vecs_;
+  }
+  /**
+   * @brief returns the top vecs for each layer -- usually you won&#39;t
+   *        need this unless you do per-layer checks such as gradients.
+   */
+   //返回每个Layer的Top Blob
+  inline const vector&lt;vector&lt;Blob&lt;Dtype&gt;*&gt; &gt;&amp; top_vecs() const {
+    return top_vecs_;
+  }
+  /// @brief returns the ids of the top blobs of layer i
+  inline const vector&lt;int&gt; &amp; top_ids(int i) const {
+    CHECK_GE(i, 0) &lt;&lt; &quot;Invalid layer id&quot;;
+    CHECK_LT(i, top_id_vecs_.size()) &lt;&lt; &quot;Invalid layer id&quot;;
+    return top_id_vecs_[i];
+  }
+  /// @brief returns the ids of the bottom blobs of layer i
+  inline const vector&lt;int&gt; &amp; bottom_ids(int i) const {
+    CHECK_GE(i, 0) &lt;&lt; &quot;Invalid layer id&quot;;
+    CHECK_LT(i, bottom_id_vecs_.size()) &lt;&lt; &quot;Invalid layer id&quot;;
+    return bottom_id_vecs_[i];
+  }
+  
+  inline const vector&lt;vector&lt;bool&gt; &gt;&amp; bottom_need_backward() const {
+    return bottom_need_backward_;
+  }
+  inline const vector&lt;Dtype&gt;&amp; blob_loss_weights() const {
+    return blob_loss_weights_;
+  }
+  //返回每个Layer是否需要反向传播计算
+  inline const vector&lt;bool&gt;&amp; layer_need_backward() const {
+    return layer_need_backward_;
+  }
+  /// @brief returns the parameters
+  inline const vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt;&amp; params() const {
+    return params_;
+  }
+  //返回所有可训练权值
+  inline const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; learnable_params() const {
+    return learnable_params_;
+  }
+  /// @brief returns the learnable parameter learning rate multipliers(倍乘因子)
+  inline const vector&lt;float&gt;&amp; params_lr() const { return params_lr_; }
+  inline const vector&lt;bool&gt;&amp; has_params_lr() const { return has_params_lr_; }
+  /// @brief returns the learnable parameter decay multipliers(返回可训练权值的衰减因子)
+  inline const vector&lt;float&gt;&amp; params_weight_decay() const {
+    return params_weight_decay_;
+  }
+  inline const vector&lt;bool&gt;&amp; has_params_decay() const {
+    return has_params_decay_;
+  }
+  //返回Layer名称与向量下标映射对
+  const map&lt;string, int&gt;&amp; param_names_index() const {
+    return param_names_index_;
+  }
+  //返回权值所有者
+  inline const vector&lt;int&gt;&amp; param_owners() const { return param_owners_; }
+  inline const vector&lt;string&gt;&amp; param_display_names() const {
+    return param_display_names_;
+  }
+  /// @brief Input and output blob numbers
+  inline int num_inputs() const { return net_input_blobs_.size(); }
+  inline int num_outputs() const { return net_output_blobs_.size(); }
+  //返回输入Blob
+  inline const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; input_blobs() const {
+    return net_input_blobs_;
+  }
+  //返回输出Blob
+  inline const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; output_blobs() const {
+    return net_output_blobs_;
+  }
+  //返回输入Blob下标
+  inline const vector&lt;int&gt;&amp; input_blob_indices() const {
+    return net_input_blob_indices_;
+  }
+  //返回输出Blob下标
+  inline const vector&lt;int&gt;&amp; output_blob_indices() const {
+    return net_output_blob_indices_;
+  }
+  //查找当前网络是否包含某一名称Blob
+  bool has_blob(const string&amp; blob_name) const;
+  //如果包含,那么就把它找出来
+  const shared_ptr&lt;Blob&lt;Dtype&gt; &gt; blob_by_name(const string&amp; blob_name) const;
+  //查找当前网络是都包含某一名称Layer
+  bool has_layer(const string&amp; layer_name) const;
+  //如果包含,那么就把它找出来
+  const shared_ptr&lt;Layer&lt;Dtype&gt; &gt; layer_by_name(const string&amp; layer_name) const;
+ //设置debug_info_
+  void set_debug_info(const bool value) { debug_info_ = value; }
+
+// Helpers for Init.(下面这些函数是Init的帮手)
+  /**
+   * @brief Remove layers that the user specified should be excluded given the current
+   *        phase, level, and stage.
+   */
+   //过滤掉用户指定的在某个阶段、级别、状态下不应包含的Layer
+  static void FilterNet(const NetParameter&amp; param,
+      NetParameter* param_filtered);
+  /// @brief return whether NetState state meets NetStateRule rule
+  //判断网络状态是否满足网络规则
+  static bool StateMeetsRule(const NetState&amp; state, const NetStateRule&amp; rule,
+      const string&amp; layer_name);
+
+  // Invoked at specific points during an iteration
+  class Callback {
+   protected:
+    virtual void run(int layer) = 0;
+
+    template &lt;typename T&gt;
+    friend class Net;
+  };
+  const vector&lt;Callback*&gt;&amp; before_forward() const { return before_forward_; }
+  void add_before_forward(Callback* value) {
+    before_forward_.push_back(value);
+  }
+  const vector&lt;Callback*&gt;&amp; after_forward() const { return after_forward_; }
+  void add_after_forward(Callback* value) {
+    after_forward_.push_back(value);
+  }
+  const vector&lt;Callback*&gt;&amp; before_backward() const { return before_backward_; }
+  void add_before_backward(Callback* value) {
+    before_backward_.push_back(value);
+  }
+  const vector&lt;Callback*&gt;&amp; after_backward() const { return after_backward_; }
+  void add_after_backward(Callback* value) {
+    after_backward_.push_back(value);
+  }
+  
+  protected:
+  // Helpers for Init.
+  /// @brief Append a new top blob to the net.
+  //为网络追加一个Top Blob
+  void AppendTop(const NetParameter&amp; param, const int layer_id,
+                 const int top_id, set&lt;string&gt;* available_blobs,
+                 map&lt;string, int&gt;* blob_name_to_idx);
+  /// @brief Append a new bottom blob to the net.
+  //为网络追加一个Bottom Blob
+  int AppendBottom(const NetParameter&amp; param, const int layer_id,
+                   const int bottom_id, set&lt;string&gt;* available_blobs,
+                   map&lt;string, int&gt;* blob_name_to_idx);
+  /// @brief Append a new parameter blob to the net.
+  //为网络追加一个权值Blob
+  void AppendParam(const NetParameter&amp; param, const int layer_id,
+                   const int param_id);
+
+  /// @brief Helper for displaying debug info in Forward.
+  void ForwardDebugInfo(const int layer_id);
+  /// @brief Helper for displaying debug info in Backward.
+  void BackwardDebugInfo(const int layer_id);
+  /// @brief Helper for displaying debug info in Update.
+  //显示权值更新调试信息
+  void UpdateDebugInfo(const int param_id);
+  
+  /// @brief The network name
+  string name_;
+  /// @brief The phase: TRAIN or TEST
+  Phase phase_;
+  /// @brief Individual layers in the net(网络中的独立层)
+  vector&lt;shared_ptr&lt;Layer&lt;Dtype&gt; &gt; &gt; layers_;
+  vector&lt;string&gt; layer_names_; //层名称
+  map&lt;string, int&gt; layer_names_index_;  //层名称与索引映射表
+  vector&lt;bool&gt; layer_need_backward_;    //标记某个层是否需要BP
+  /// @brief the blobs storing intermediate results between the layer.
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt; blobs_; //层与层中间传递数据的管道
+  vector&lt;string&gt; blob_names_;   //Blob名称
+  map&lt;string, int&gt; blob_names_index_;   //Blob名称与索引映射表
+  vector&lt;bool&gt; blob_need_backward_; //标记某个Blob是否需要BP
+  /// bottom_vecs stores the vectors containing the input for each layer.
+  /// They don&#39;t actually host the blobs (blobs_ does), so we simply store
+  /// pointers.
+  //bottom_vecs_存放每个层的输入Blob，实际上它并不是这些Blob的所有者(所有者为blobs_),只是存放了指针.
+  vector&lt;vector&lt;Blob&lt;Dtype&gt;*&gt; &gt; bottom_vecs_;
+  vector&lt;vector&lt;int&gt; &gt; bottom_id_vecs_;
+  vector&lt;vector&lt;bool&gt; &gt; bottom_need_backward_;
+  /// top_vecs stores the vectors containing the output for each layer
+  //top_vecs_存放每个层的输入Blob，实际上它并不是这些Blob的所有者(所有者为blobs_),只是存放了指针.
+  vector&lt;vector&lt;Blob&lt;Dtype&gt;*&gt; &gt; top_vecs_;
+  vector&lt;vector&lt;int&gt; &gt; top_id_vecs_;
+  /// Vector of weight in the loss (or objective) function of each net blob,
+  /// indexed by blob_id.
+  //每个Blob队全局损失函数的贡献权重
+  vector&lt;Dtype&gt; blob_loss_weights_;
+  vector&lt;vector&lt;int&gt; &gt; param_id_vecs_;
+  vector&lt;int&gt; param_owners_;
+  vector&lt;string&gt; param_display_names_;
+  vector&lt;pair&lt;int, int&gt; &gt; param_layer_indices_;
+  map&lt;string, int&gt; param_names_index_;
+  /// blob indices for the input and the output of the net
+  //网络输入/输出Blob的索引
+  vector&lt;int&gt; net_input_blob_indices_;
+  vector&lt;int&gt; net_output_blob_indices_;
+  vector&lt;Blob&lt;Dtype&gt;*&gt; net_input_blobs_;
+  vector&lt;Blob&lt;Dtype&gt;*&gt; net_output_blobs_;
+  /// The parameters in the network.(网络权值)
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt; params_;
+  //可训练的网络权值
+  vector&lt;Blob&lt;Dtype&gt;*&gt; learnable_params_;
+  /**
+   * The mapping from params_ -&gt; learnable_params_: we have
+   * learnable_param_ids_.size() == params_.size(),
+   * and learnable_params_[learnable_param_ids_[i]] == params_[i].get()
+   * if and only if params_[i] is an &quot;owner&quot;; otherwise, params_[i] is a sharer
+   * and learnable_params_[learnable_param_ids_[i]] gives its owner.
+   */
+   //从params到learnable_params_的映射
+   //当且仅当params_[i]为所有者时，learnable_param_ids_.size() == params__.size()以及 learnable_params_[learnable_parara_ids_[i]] == params_[i].get()成立
+   //否则,params_[i]只是1个共享者，learnable_params_[learnable_param_ids_[i]]给出了它的所有者
+  vector&lt;int&gt; learnable_param_ids_;
+  /// the learning rate multipliers for learnable_params_
+  vector&lt;float&gt; params_lr_;
+  vector&lt;bool&gt; has_params_lr_;
+  /// the weight decay multipliers for learnable_params_(权值衰减因子)
+  vector&lt;float&gt; params_weight_decay_;
+  vector&lt;bool&gt; has_params_decay_;
+  /// The bytes of memory used by this net(记录网络占用的内存大小)
+  size_t memory_used_;
+  /// Whether to compute and display debug info for the net.(是否显示调试信息)
+  bool debug_info_;
+  // Callbacks
+  vector&lt;Callback*&gt; before_forward_;
+  vector&lt;Callback*&gt; after_forward_;
+  vector&lt;Callback*&gt; before_backward_;
+  vector&lt;Callback*&gt; after_backward_;
+//禁用拷贝构造函数,赋值运算函数
+DISABLE_COPY_AND_ASSIGN(Net);
+};
+
+
+}  // namespace caffe
+
+#endif  // CAFFE_NET_HPP_
+</code></pre>
+
+<p>这里关于Net的头文件学习就到这里,后续学习相关的实现代码(cpp文件)</p>
+
+<h2 id="toc_3">机制和策略</h2>
+
+<p>首先caffe中的Net/Layer/Blob是一种分层设计模式</p>
+
+<p>在我们生活中普遍存在但又最容易被忽视的两个概念是：<font color=red>机制和策略</font>.</p>
+
+<p><strong>一般来说，对于某客观事物.机制回答了“它能干啥”这个问题，策略则回答了“它怎么用”这个问题。</strong></p>
+
+<p>回到Caffe源码上，我们发现Blob提供了数据容器的机制；而Layer则通过不同的策略使用该数据容器，实现多元化的计算处理过程，同时又提供了深度学习各种基本算法（卷积、下采样、损失函数计算等）的机制；Net则利用Layer这些机制，组合为完整的深度学习模型，提供了更加丰富的学习策略。后面我们还会看到，Net也是一种机制。</p>
+
+<p>在阅读源码时，时刻记得目标是希望看到高层策略，还是底层机制？</p>
 
 
     
@@ -336,6 +869,12 @@ layer #23 : prob
 	      
 		      
 			      <li class="post">
+			        <a href="14982657549571.html">Caffe I/O模块</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14980252836745.html">MAC下openBlas的安装</a>
 			      </li>
 		     
@@ -355,12 +894,6 @@ layer #23 : prob
 		      
 			      <li class="post">
 			        <a href="14974281629389.html">怎样移除OSXRESERVED分区(如果BootCamp Assistant在安装之后没有成功删除这个分区)</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14974276192148.html">重新利用boot camp安装win10</a>
 			      </li>
 		     
 		  

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  图形界面 - LZH007
+  Caffe I/O模块 - LZH007
   
   </title>
   
@@ -113,14 +113,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>图形界面</h1>
+          <h1>Caffe I/O模块</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/5/25</span>
+          <span class="date">2017/6/24</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+              <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
            
          
           <span class="comments">
@@ -133,114 +133,141 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>Python支持多种图形界面的第三方库，包括：<br/>
-* Tk<br/>
-* wxWidgets<br/>
-* Qt<br/>
-* GTK<br/>
-等等.</p>
+      <p>这里我们讨论学习Caffe的I/O模块，即与<strong>数据</strong>打交道的模块。</p>
 
-<p>但是Python自带的库是支持Tk的Tkinter，使用Tkinter，无需安装任何包，就可以直接使用。本章简单介绍如何使用Tkinter进行GUI编程。</p>
+<p>我们在运行Caffe例程前，首先需要将原始数据转换为<strong>LMDB</strong>格式，训练网络时则需要由数据读取层(DataLayer)不断地从LMDB读取数据，送入后续卷积、下采样 等计算层。作为基础,Caffe I/O模块的效率直接影响到处理效果。</p>
 
-<h2 id="toc_0">Tkinter</h2>
+<h2 id="toc_0">数据读取层</h2>
 
-<p>我们来梳理一下概念：</p>
+<p>Caffe数据读取层(DataLayer)是Layer的派生类。除了读取LMDB、LEVELDB之外，也可以从原始图像直接读取(ImageDataLayer)。</p>
 
-<p>我们编写的Python代码会调用内置的Tkinter，Tkinter封装了访问Tk的接口；</p>
+<h3 id="toc_1">数据结构描述</h3>
 
-<p>Tk是一个图形库，支持多个操作系统，使用Tcl语言开发；</p>
+<p>我们在<code>caffe.proto</code>中可以找到,关于数据结构的描述</p>
 
-<p>Tk会调用操作系统提供的本地GUI接口，完成最终的GUI。</p>
-
-<p>所以，我们的代码只需要调用Tkinter提供的接口就可以了。</p>
-
-<h2 id="toc_1">第一个GUI程序</h2>
-
-<p>使用Tkinter十分简单，我们来编写一个GUI版本的“Hello, world!”。</p>
-
-<p>第一步是导入Tkinter包的所有内容：</p>
-
-<pre><code class="language-py">from Tkinter import *
-</code></pre>
-
-<p>第二步是从<code>Frame</code>派生一个<code>Application</code>类，这是所有Widget的父容器：</p>
-
-<pre><code class="language-py">
-class Applicition(Frame):
-    def __init__(self, master=None):
-        Frame.__init__(self,master)
-        self.pack()
-        self.creatWidgets()
-
-    def creatWidgets(self):
-        self.helloLabel = Label(self,text = &#39;Hello,world&#39;)
-        self.helloLabel.pack()
-        self.quitButton = Button(self, text = &#39;Quit&#39;,command = self.quit)
-        self.quitButton.pack()
-
-</code></pre>
-
-<p>在GUI中，每个Button、Label、输入框等，都是一个Widget。Frame则是可以容纳其他Widget的Widget，所有的Widget组合起来就是一棵树。</p>
-
-<p><code>pack()</code>方法把Widget加入到父容器中，并实现布局。<code>pack()</code>是最简单的布局，<code>grid()</code>可以实现更复杂的布局。</p>
-
-<p>在<code>createWidgets()</code>方法中，我们创建一个<code>Label</code>和一个<code>Button</code>，当Button被点击时，触发<code>self.quit()</code>使程序退出。</p>
-
-<p>第三步，实例化<code>Application</code>，并启动消息循环：</p>
-
-<pre><code class="language-py">app = Application()
-# 设置窗口标题:
-app.master.title(&#39;Hello World&#39;)
-# 主消息循环:
-app.mainloop()
-</code></pre>
-
-<p>GUI程序的主线程负责监听来自操作系统的消息，并依次处理每一条消息。因此，如果消息处理非常耗时，就需要在新线程中处理。</p>
-
-<p>运行这个GUI程序，可以看到下面的窗口：<br/>
-<img src="media/14957005904776/14957017137688.jpg" alt=""/><br/>
-点击“Quit”按钮或者窗口的“x”结束程序。</p>
-
-<h2 id="toc_2">输入文本</h2>
-
-<p>我们再对这个GUI程序改进一下，加入一个文本框，让用户可以输入文本，然后点按钮后，弹出消息对话框。</p>
-
-<pre><code class="language-py">from Tkinter import *
-import tkMessageBox
-
-
-class Applicition(Frame):
-
-    def __init__(self, master=None):
-        Frame.__init__(self, master)
-        self.pack()
-        self.creatWidgets()
-
-    def creatWidgets(self):
-        self.nameInput = Entry(self)
-        self.nameInput.pack()
-        self.alertButton = Button(self, text=&#39;Hello&#39;, command=self.hello)
-        self.alertButton.pack()
-
-    def hello(self):
-        name = self.nameInput.get() or &#39;world&#39;
-        tkMessageBox.showinfo(&#39;Message&#39;, &#39;Hello,%s&#39; % name)
-
-app = Applicition()
-app.master.title(&#39;Hello World&#39;)
-app.mainloop()
+<pre><code class="language-protobuf">message DataParameter {
+//输入数据使用的DB类型
+  enum DB {
+    LEVELDB = 0;    //使用 LEVELDB
+    LMDB = 1;       //使用 LMDB
+  }
+  // Specify the data source.(源数据的路径)
+  optional string source = 1;
+  // Specify the batch size.( 一个批量数据包含的图片数)
+  optional uint32 batch_size = 4;
+  // The rand_skip variable is for the data layer to skip a few data points
+  // to avoid all asynchronous sgd clients to start at the same point. The skip
+  // point would be set as rand_skip * rand(0,1). Note that rand_skip should not
+  // be larger than the number of keys in the database.
+  // DEPRECATED. Each solver accesses a different subset of the database.
+  //随机跳过若干图片，跳跃数为rand_skip * rand(0, 1)
+  optional uint32 rand_skip = 7 [default = 0];
+  //默认输入数据使用DB类型，默认为LEVELDB
+  optional DB backend = 8 [default = LEVELDB];
+  // DEPRECATED. See TransformationParameter. For data pre-processing, we can do
+  // simple scaling and subtracting the data mean, if provided. Note that the
+  // mean subtraction is always carried out before scaling.
+  //scale、mean_file、crop_size、mirror 均为旧版参数，现已转移到 TransformationParameter
+  optional float scale = 2 [default = 1];
+  optional string mean_file = 3;
+  // DEPRECATED. See TransformationParameter. Specify if we would like to randomly
+  // crop an image.
+  optional uint32 crop_size = 5 [default = 0];
+  // DEPRECATED. See TransformationParameter. Specify if we want to randomly mirror
+  // data.
+  optional bool mirror = 6 [default = false];
+  //强制编码图像为三通道彩色图像
+  optional bool force_encoded_color = 9 [default = false];
+  // Prefetch queue (Increase if data feeding bandwidth varies, within the
+  // limit of device memory for GPU training)
+  //预取队列(预先放到主机内存中的批量数.默认为4个Batch)
+  optional uint32 prefetch = 10 [default = 4];
+}
 
 </code></pre>
 
-<p><img src="media/14957005904776/14957022189285.jpg" alt=""/></p>
+<h3 id="toc_2">数据读取层的实现</h3>
 
-<p>当用户点击按钮时，触发<code>hello()</code>，通过<code>self.nameInput.get()</code>获得用户输入的文本后，使用<code>tkMessageBox.showinfo()</code>可以弹出消息对话框。</p>
+<p>数据读取层声明位于<code>include/caffe/layers/base_data_layers.hpp</code>中，如果需要单独使用该层，则应包含这个头文件.</p>
 
-<h2 id="toc_3">小结</h2>
+<pre><code class="language-c++">namespace caffe {
 
-<p>Python内置的Tkinter可以满足基本的GUI程序的要求，如果是非常复杂的GUI程序，建议用操作系统原生支持的语言和库来编写。</p>
+/**
+ * @brief Provides base for data layers that feed blobs to the Net.
+ *
+ * TODO(dox): thorough documentation for Forward and proto params.
+ */
+template &lt;typename Dtype&gt;
+class BaseDataLayer : public Layer&lt;Dtype&gt; {
+ public:
+ //显式构造函数
+  explicit BaseDataLayer(const LayerParameter&amp; param);
+  // LayerSetUp: implements common data layer setup functionality, and calls
+  // DataLayerSetUp to do special data layer setup for individual layer types.
+  // This method may not be overridden except by the BasePrefetchingDataLayer.
+  //层配置，实现通用层配置功能，之后调用DataLayerSetUp进行数据读取层的特别配置 
+  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  virtual void DataLayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {}
+  // Data layers have no bottoms, so reshaping is trivial.(数据读取没有Bottom Blob,变形操作很简单 )
+  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {}
+//反向传播函数不需要做任何操作
+  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {}
+  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {}
 
-<p>源码参考：<a href="https://github.com/michaelliao/learn-python/tree/master/gui">https://github.com/michaelliao/learn-python/tree/master/gui</a></p>
+ protected:
+ //数据预处理变换器参数
+  TransformationParameter transform_param_;
+  //数据预处理变换器
+  shared_ptr&lt;DataTransformer&lt;Dtype&gt; &gt; data_transformer_;
+  //是否输出标签数据
+  bool output_labels_;
+};
+//批量数据，用于存放数据读取层输出
+template &lt;typename Dtype&gt;
+class Batch {
+ public:
+ //包含两个Blob: data_用于存放图片数据，label_用于存放标签
+  Blob&lt;Dtype&gt; data_, label_;
+};
+
+//带预取功能的数据读取派生于BaseDataLayer和InternalThread
+template &lt;typename Dtype&gt;
+class BasePrefetchingDataLayer :
+    public BaseDataLayer&lt;Dtype&gt;, public InternalThread {
+ public:
+ //显式构造函数
+  explicit BasePrefetchingDataLayer(const LayerParameter&amp; param);
+  // LayerSetUp: implements common data layer setup functionality, and calls
+  // DataLayerSetUp to do special data layer setup for individual layer types.
+  // This method may not be overridden.
+  //层设置函数
+  void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+//前向传播
+  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+
+ protected:
+  virtual void InternalThreadEntry();   //内部线程入口
+  virtual void load_batch(Batch&lt;Dtype&gt;* batch) = 0; //载入批量数据,纯虚函数
+
+  vector&lt;shared_ptr&lt;Batch&lt;Dtype&gt; &gt; &gt; prefetch_; //预取Buffer
+  BlockingQueue&lt;Batch&lt;Dtype&gt;*&gt; prefetch_free_;  //空闲Batch队列
+  BlockingQueue&lt;Batch&lt;Dtype&gt;*&gt; prefetch_full_;  //已加载Batch队列
+  Batch&lt;Dtype&gt;* prefetch_current_;  //当前Batch(猜的)
+
+  Blob&lt;Dtype&gt; transformed_data_;    //变换后的数据
+};
+
+
+</code></pre>
 
 
     
@@ -251,16 +278,13 @@ app.mainloop()
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14957594179111.html" 
-          title="Previous Post: 网络编程">&laquo; 网络编程</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14956930097908.html" 
-          title="Next Post: HTMLParser">HTMLParser &raquo;</a>
+          <a  href="14980252836745.html" 
+          title="Next Post: MAC下openBlas的安装">MAC下openBlas的安装 &raquo;</a>
       
       </p>
         </div>
