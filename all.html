@@ -113,6 +113,242 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14984437069936.html">
+                
+                  <h1>数据转换器</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Caffe的数据变换器（DataTransformer)主要提供了对原始输入图像的预处理方法，包括随机切块、随机镜像、幅度缩放、去均值、灰度/色度变换等。相信熟悉图像处理、OpenCV的读者对上述操作并不陌生。</p>
+
+<h2 id="toc_0">数据结构描述</h2>
+
+<pre><code class="language-protobuf">message TransformationParameter {
+  // For data pre-processing, we can do simple scaling and subtracting the
+  // data mean, if provided. Note that the mean subtraction is always carried
+  // out before scaling.
+  //像素幅度缩放参数，默认为1，即不缩放
+  optional float scale = 1 [default = 1];
+  // Specify if we want to randomly mirror data.
+  //图像随机镜像开关，默认为false,即不进行镜像操作
+  optional bool mirror = 2 [default = false];
+  // Specify if we would like to randomly crop an image.
+  //图像随机切块的大小，默认为0,即不进行切块操作
+  optional uint32 crop_size = 3 [default = 0];
+  // mean_file and mean_value cannot be specified at the same time(存储图像均值的文件)
+  optional string mean_file = 4;
+  // if specified can be repeated once (would subtract it from all the channels)
+  // or can be repeated the same number of times as channels
+  // (would subtract them from the corresponding channel)
+  //均值数值，无须读取文件。若数目与图像通道数相等，则每个图像通道分别减去对应的均值；如果只给出一个值.则毎个图像通道都减去同一个均值
+  repeated float mean_value = 5;
+  // Force the decoded image to have 3 color channels.
+  //强制为三通道彩色图像输入
+  optional bool force_color = 6 [default = false];
+  // Force the decoded image to have 1 color channels.
+  //强制为单通道灰度图像输入
+  optional bool force_gray = 7 [default = false];
+}
+
+</code></pre>
+
+<h2 id="toc_1">数据变换器的实现</h2>
+
+<p>数据变换器声明头文件位于<code>include/cafTe/data_transformer.hpp</code>中，如果需要单独使用该模块,应包含这个头文件。文件内容如下:</p>
+
+<pre><code class="language-c++">#ifndef CAFFE_DATA_TRANSFORMER_HPP
+#define CAFFE_DATA_TRANSFORMER_HPP
+
+#include &lt;vector&gt;
+
+#include &quot;caffe/blob.hpp&quot;
+#include &quot;caffe/common.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
+
+namespace caffe {
+
+/**
+ * @brief Applies common transformations to the input data, such as
+ * scaling, mirroring, substracting the image mean...
+ */
+ //DataTransformer类声明
+template &lt;typename Dtype&gt;
+class DataTransformer {
+ public:
+ //显式构造函数
+  explicit DataTransformer(const TransformationParameter&amp; param, Phase phase);
+  //析构函数
+  virtual ~DataTransformer() {}
+
+  /**
+   * @brief Initialize the Random number generations if needed by the
+   *    transformation.
+   */
+   //初始化随机数种子函数
+  void InitRand();
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to the data.
+   *
+   * @param datum
+   *    Datum containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See data_layer.cpp for an example.
+   */
+   //下面几种函数重载,以适应多种输入数据源
+  void Transform(const Datum&amp; datum, Blob&lt;Dtype&gt;* transformed_blob);
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a vector of Datum.
+   *
+   * @param datum_vector
+   *    A vector of Datum containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See memory_layer.cpp for an example.
+   */
+  void Transform(const vector&lt;Datum&gt; &amp; datum_vector,
+                Blob&lt;Dtype&gt;* transformed_blob);
+
+#ifdef USE_OPENCV
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a vector of Mat.
+   *
+   * @param mat_vector
+   *    A vector of Mat containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See memory_layer.cpp for an example.
+   */
+  void Transform(const vector&lt;cv::Mat&gt; &amp; mat_vector,
+                Blob&lt;Dtype&gt;* transformed_blob);
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a cv::Mat
+   *
+   * @param cv_img
+   *    cv::Mat containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See image_data_layer.cpp for an example.
+   */
+  void Transform(const cv::Mat&amp; cv_img, Blob&lt;Dtype&gt;* transformed_blob);
+#endif  // USE_OPENCV
+
+  /**
+   * @brief Applies the same transformation defined in the data layer&#39;s
+   * transform_param block to all the num images in a input_blob.
+   *
+   * @param input_blob
+   *    A Blob containing the data to be transformed. It applies the same
+   *    transformation to all the num images in the blob.
+   * @param transformed_blob
+   *    This is destination blob, it will contain as many images as the
+   *    input blob. It can be part of top blob&#39;s data.
+   */
+  void Transform(Blob&lt;Dtype&gt;* input_blob, Blob&lt;Dtype&gt;* transformed_blob);
+
+
+ //获取执行Transform后的输出Blob形状
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *
+   * @param datum
+   *    Datum containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const Datum&amp; datum);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *    It uses the first element to infer the shape of the blob.
+   *
+   * @param datum_vector
+   *    A vector of Datum containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const vector&lt;Datum&gt; &amp; datum_vector);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *    It uses the first element to infer the shape of the blob.
+   *
+   * @param mat_vector
+   *    A vector of Mat containing the data to be transformed.
+   */
+#ifdef USE_OPENCV
+  vector&lt;int&gt; InferBlobShape(const vector&lt;cv::Mat&gt; &amp; mat_vector);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *
+   * @param cv_img
+   *    cv::Mat containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const cv::Mat&amp; cv_img);
+#endif  // USE_OPENCV
+
+ protected:
+   /**
+   * @brief Generates a random integer from Uniform({0, 1, ..., n-1}).
+   *
+   * @param n
+   *    The upperbound (exclusive) value of the random number.
+   * @return
+   *    A uniformly random integer value from ({0, 1, ..., n-1}).
+   */
+   //产生取值{0, 1, n-1}的随机整数，服从均匀分布
+  virtual int Rand(int n);
+
+  void Transform(const Datum&amp; datum, Dtype* transformed_data);
+  // Tranformation parameters(变换参数，该数据结构由ProtoBuffer工具自动生成)
+  TransformationParameter param_;
+
+//随机数生成器，声明在include/caffe/common.hpp中
+  shared_ptr&lt;Caffe::RNG&gt; rng_;
+//当前运行阶段，可能为TRAIN或TEST。阶段不同，执行变换会有差异
+  Phase phase_;
+//均值图像,用于从均值文件中读取
+  Blob&lt;Dtype&gt; data_mean_;
+//均值数值,用于从param_中提取
+  vector&lt;Dtype&gt; mean_values_;
+};
+
+}  // namespace caffe
+
+#endif  // CAFFE_DATA_TRANSFORMER_HPP_
+
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14982657549571.html">
                 
                   <h1>Caffe I/O模块</h1>
@@ -253,6 +489,154 @@ class BasePrefetchingDataLayer :
   Blob&lt;Dtype&gt; transformed_data_;    //变换后的数据
 };
 
+
+</code></pre>
+
+<p>数据读取层的实现位于<code>src/caffe/layers/base_data_layer.cpp</code>中，内容如下:</p>
+
+<pre><code class="language-c++">#include &lt;boost/thread.hpp&gt;
+#include &lt;vector&gt;
+
+#include &quot;caffe/blob.hpp&quot;
+#include &quot;caffe/data_transformer.hpp&quot;
+#include &quot;caffe/internal_thread.hpp&quot;
+#include &quot;caffe/layer.hpp&quot;
+#include &quot;caffe/layers/base_data_layer.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
+#include &quot;caffe/util/blocking_queue.hpp&quot;
+
+namespace caffe {
+//构造函数，初始化Layer参数、数据变换器参数
+template &lt;typename Dtype&gt;
+BaseDataLayer&lt;Dtype&gt;::BaseDataLayer(const LayerParameter&amp; param)
+    : Layer&lt;Dtype&gt;(param),
+      transform_param_(param.transform_param()) {
+}
+//BaseDataLayer层设置 
+template &lt;typename Dtype&gt;
+void BaseDataLayer&lt;Dtype&gt;::LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  if (top.size() == 1) {    //判断输出Blob个数，若为1只输出data，若为2则输出data和label
+    output_labels_ = false;
+  } else {
+    output_labels_ = true;
+  }
+  //初始化数据变化器对象
+  data_transformer_.reset(
+      new DataTransformer&lt;Dtype&gt;(transform_param_, this-&gt;phase_));
+  data_transformer_-&gt;InitRand();    //生成随机数种子
+  // The subclasses should setup the size of bottom and top
+  //子类负责设置Top Blob形状
+  DataLayerSetUp(bottom, top);
+}
+//BasePrefetchingDataLayer 构造函数
+template &lt;typename Dtype&gt;
+BasePrefetchingDataLayer&lt;Dtype&gt;::BasePrefetchingDataLayer(
+    const LayerParameter&amp; param)
+    : BaseDataLayer&lt;Dtype&gt;(param),
+      prefetch_(param.data_param().prefetch()),
+      prefetch_free_(), prefetch_full_(), prefetch_current_() {
+  for (int i = 0; i &lt; prefetch_.size(); ++i) {
+    prefetch_[i].reset(new Batch&lt;Dtype&gt;());
+    prefetch_free_.push(prefetch_[i].get());    //将Batch对象都放入空闲队列中
+  }
+}
+//BasePrefetchingDataLayer层配置函数
+template &lt;typename Dtype&gt;
+void BasePrefetchingDataLayer&lt;Dtype&gt;::LayerSetUp(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  BaseDataLayer&lt;Dtype&gt;::LayerSetUp(bottom, top);
+
+  // Before starting the prefetch thread, we make cpu_data and gpu_data
+  // calls so that the prefetch thread does not accidentally make simultaneous
+  // cudaMalloc calls when the main thread is running. In some GPUs this
+  // seems to cause failures if we do not so.
+  //在幵启数据预取线程前，通过调用Blob相应函数先进行cudaMalloc,避免在多线程情况下同时进行cudaMalloc.会导致CUDA API调用失败
+  for (int i = 0; i &lt; prefetch_.size(); ++i) {
+    prefetch_[i]-&gt;data_.mutable_cpu_data();
+    if (this-&gt;output_labels_) {
+      prefetch_[i]-&gt;label_.mutable_cpu_data();
+    }
+  }
+  //如果编译选项没有CPU_ONLY,则需要编译GPU代码
+#ifndef CPU_ONLY    
+  if (Caffe::mode() == Caffe::GPU) {
+    for (int i = 0; i &lt; prefetch_.size(); ++i) {
+      prefetch_[i]-&gt;data_.mutable_gpu_data();
+      if (this-&gt;output_labels_) {
+        prefetch_[i]-&gt;label_.mutable_gpu_data();    //功能同上
+      }
+    }
+  }
+#endif
+  DLOG(INFO) &lt;&lt; &quot;Initializing prefetch&quot;;
+  this-&gt;data_transformer_-&gt;InitRand();
+  StartInternalThread();    //开启内部预取线程
+  DLOG(INFO) &lt;&lt; &quot;Prefetch initialized.&quot;;
+}
+//内部线程入口
+template &lt;typename Dtype&gt;
+void BasePrefetchingDataLayer&lt;Dtype&gt;::InternalThreadEntry() {
+//创建CUDA Stream,非阻塞类型
+#ifndef CPU_ONLY
+  cudaStream_t stream;
+  if (Caffe::mode() == Caffe::GPU) {
+    CUDA_CHECK(cudaStreamCreateWithFlags(&amp;stream, cudaStreamNonBlocking));
+  }
+#endif
+
+  try {
+    while (!must_stop()) {  //循环载入批量数据
+      Batch&lt;Dtype&gt;* batch = prefetch_free_.pop();   //拿到一个空闲Batch
+      load_batch(batch);    //载入批量数据
+#ifndef CPU_ONLY
+      if (Caffe::mode() == Caffe::GPU) {
+        batch-&gt;data_.data().get()-&gt;async_gpu_push(stream);
+        if (this-&gt;output_labels_) {
+          batch-&gt;label_.data().get()-&gt;async_gpu_push(stream);
+        }
+        CUDA_CHECK(cudaStreamSynchronize(stream));//同步到GPU
+      }
+#endif
+      prefetch_full_.push(batch);   //加入到带负载的Batch队列中
+    }
+  } catch (boost::thread_interrupted&amp;) {
+    // Interrupted exception is expected on shutdown(捕获到异常,退出while循环)
+  }
+#ifndef CPU_ONLY
+  if (Caffe::mode() == Caffe::GPU) {
+    CUDA_CHECK(cudaStreamDestroy(stream));  //销毁CUDA Stream
+  }
+#endif
+}
+//前向传波函数
+template &lt;typename Dtype&gt;
+void BasePrefetchingDataLayer&lt;Dtype&gt;::Forward_cpu(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    //从带负载的Batch队列中取出一个Batch对象
+  if (prefetch_current_) {
+    prefetch_free_.push(prefetch_current_);
+  }
+  prefetch_current_ = prefetch_full_.pop(&quot;Waiting for data&quot;);
+  // Reshape to loaded data.(Top Blob根据Batch形状进行变形)
+  top[0]-&gt;ReshapeLike(prefetch_current_-&gt;data_);
+  //将数据放到Top Blob中
+  top[0]-&gt;set_cpu_data(prefetch_current_-&gt;data_.mutable_cpu_data());
+  if (this-&gt;output_labels_) {
+    // Reshape to loaded labels.(同上)
+    top[1]-&gt;ReshapeLike(prefetch_current_-&gt;label_);
+    top[1]-&gt;set_cpu_data(prefetch_current_-&gt;label_.mutable_cpu_data());
+  }
+}
+
+#ifdef CPU_ONLY
+STUB_GPU_FORWARD(BasePrefetchingDataLayer, Forward);
+#endif
+
+INSTANTIATE_CLASS(BaseDataLayer);
+INSTANTIATE_CLASS(BasePrefetchingDataLayer);
+
+}  // namespace caffe
 
 </code></pre>
 
@@ -1659,50 +2043,6 @@ INSTANTIATE_CLASS(Layer);
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14974276192148.html">
-                
-                  <h1>重新利用boot camp安装win10</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>由于原来给win10分的磁盘容量太小,而mac又不能在后续动态给win分区增加磁盘容量,所以只能重新安装分区了.</p>
-
-<ol>
-<li>打开mac系统工具中的磁盘<code>磁盘工具</code>选择总的磁盘,点击上方的<code>分区</code>按钮,将系统中其它分区删掉(通过点击饼图中的对应区域,点击下方的<code>-</code>号),就可以将分区删掉,合并到mac系统磁盘.其他分区比如之前安装win产生的<code>OSXRESERVED Partition</code> </li>
-<li>打开bootcamp,点击恢复按钮,将之前的win系统抹掉,之后就会发现,你的mac系统磁盘变回来了.</li>
-<li>重启一下,之后打开bootcamp,点击下方的<code>继续</code>按钮,选择系统iso镜像,为win系统选择分区大小(这回分多些😓).</li>
-<li>点击确定,等待下载Windows支持软件.
-<img src="media/14974276192148/14974281373736.jpg" alt=""/></li>
-<li>安装之后,在OSRESEVER分区中,的bootcamp文件夹中打开安装驱动的程序.</li>
-</ol>
-
-<p>到此win10 应该就安装好了~</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='MAC%20OS.html'>MAC OS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1786,6 +2126,12 @@ INSTANTIATE_CLASS(Layer);
 	      
 		      
 			      <li class="post">
+			        <a href="14984437069936.html">数据转换器</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14982657549571.html">Caffe I/O模块</a>
 			      </li>
 		     
@@ -1805,12 +2151,6 @@ INSTANTIATE_CLASS(Layer);
 		      
 			      <li class="post">
 			        <a href="14974936829967.html">Caffe中Layer的学习</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14974281629389.html">怎样移除OSXRESERVED分区(如果BootCamp Assistant在安装之后没有成功删除这个分区)</a>
 			      </li>
 		     
 		  

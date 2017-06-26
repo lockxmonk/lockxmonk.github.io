@@ -4,13 +4,227 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-06-23T11:05:33+08:00</updated>
+  <updated>2017-06-24T09:41:34+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[数据转换器]]></title>
+    <link href="https://lockxmonk.github.io/14984437069936.html"/>
+    <updated>2017-06-26T10:21:46+08:00</updated>
+    <id>https://lockxmonk.github.io/14984437069936.html</id>
+    <content type="html"><![CDATA[
+<p>Caffe的数据变换器（DataTransformer)主要提供了对原始输入图像的预处理方法，包括随机切块、随机镜像、幅度缩放、去均值、灰度/色度变换等。相信熟悉图像处理、OpenCV的读者对上述操作并不陌生。</p>
+
+<h2 id="toc_0">数据结构描述</h2>
+
+<pre><code class="language-protobuf">message TransformationParameter {
+  // For data pre-processing, we can do simple scaling and subtracting the
+  // data mean, if provided. Note that the mean subtraction is always carried
+  // out before scaling.
+  //像素幅度缩放参数，默认为1，即不缩放
+  optional float scale = 1 [default = 1];
+  // Specify if we want to randomly mirror data.
+  //图像随机镜像开关，默认为false,即不进行镜像操作
+  optional bool mirror = 2 [default = false];
+  // Specify if we would like to randomly crop an image.
+  //图像随机切块的大小，默认为0,即不进行切块操作
+  optional uint32 crop_size = 3 [default = 0];
+  // mean_file and mean_value cannot be specified at the same time(存储图像均值的文件)
+  optional string mean_file = 4;
+  // if specified can be repeated once (would subtract it from all the channels)
+  // or can be repeated the same number of times as channels
+  // (would subtract them from the corresponding channel)
+  //均值数值，无须读取文件。若数目与图像通道数相等，则每个图像通道分别减去对应的均值；如果只给出一个值.则毎个图像通道都减去同一个均值
+  repeated float mean_value = 5;
+  // Force the decoded image to have 3 color channels.
+  //强制为三通道彩色图像输入
+  optional bool force_color = 6 [default = false];
+  // Force the decoded image to have 1 color channels.
+  //强制为单通道灰度图像输入
+  optional bool force_gray = 7 [default = false];
+}
+
+</code></pre>
+
+<h2 id="toc_1">数据变换器的实现</h2>
+
+<p>数据变换器声明头文件位于<code>include/cafTe/data_transformer.hpp</code>中，如果需要单独使用该模块,应包含这个头文件。文件内容如下:</p>
+
+<pre><code class="language-c++">#ifndef CAFFE_DATA_TRANSFORMER_HPP
+#define CAFFE_DATA_TRANSFORMER_HPP
+
+#include &lt;vector&gt;
+
+#include &quot;caffe/blob.hpp&quot;
+#include &quot;caffe/common.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
+
+namespace caffe {
+
+/**
+ * @brief Applies common transformations to the input data, such as
+ * scaling, mirroring, substracting the image mean...
+ */
+ //DataTransformer类声明
+template &lt;typename Dtype&gt;
+class DataTransformer {
+ public:
+ //显式构造函数
+  explicit DataTransformer(const TransformationParameter&amp; param, Phase phase);
+  //析构函数
+  virtual ~DataTransformer() {}
+
+  /**
+   * @brief Initialize the Random number generations if needed by the
+   *    transformation.
+   */
+   //初始化随机数种子函数
+  void InitRand();
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to the data.
+   *
+   * @param datum
+   *    Datum containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See data_layer.cpp for an example.
+   */
+   //下面几种函数重载,以适应多种输入数据源
+  void Transform(const Datum&amp; datum, Blob&lt;Dtype&gt;* transformed_blob);
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a vector of Datum.
+   *
+   * @param datum_vector
+   *    A vector of Datum containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See memory_layer.cpp for an example.
+   */
+  void Transform(const vector&lt;Datum&gt; &amp; datum_vector,
+                Blob&lt;Dtype&gt;* transformed_blob);
+
+#ifdef USE_OPENCV
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a vector of Mat.
+   *
+   * @param mat_vector
+   *    A vector of Mat containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See memory_layer.cpp for an example.
+   */
+  void Transform(const vector&lt;cv::Mat&gt; &amp; mat_vector,
+                Blob&lt;Dtype&gt;* transformed_blob);
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a cv::Mat
+   *
+   * @param cv_img
+   *    cv::Mat containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See image_data_layer.cpp for an example.
+   */
+  void Transform(const cv::Mat&amp; cv_img, Blob&lt;Dtype&gt;* transformed_blob);
+#endif  // USE_OPENCV
+
+  /**
+   * @brief Applies the same transformation defined in the data layer&#39;s
+   * transform_param block to all the num images in a input_blob.
+   *
+   * @param input_blob
+   *    A Blob containing the data to be transformed. It applies the same
+   *    transformation to all the num images in the blob.
+   * @param transformed_blob
+   *    This is destination blob, it will contain as many images as the
+   *    input blob. It can be part of top blob&#39;s data.
+   */
+  void Transform(Blob&lt;Dtype&gt;* input_blob, Blob&lt;Dtype&gt;* transformed_blob);
+
+
+ //获取执行Transform后的输出Blob形状
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *
+   * @param datum
+   *    Datum containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const Datum&amp; datum);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *    It uses the first element to infer the shape of the blob.
+   *
+   * @param datum_vector
+   *    A vector of Datum containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const vector&lt;Datum&gt; &amp; datum_vector);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *    It uses the first element to infer the shape of the blob.
+   *
+   * @param mat_vector
+   *    A vector of Mat containing the data to be transformed.
+   */
+#ifdef USE_OPENCV
+  vector&lt;int&gt; InferBlobShape(const vector&lt;cv::Mat&gt; &amp; mat_vector);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *
+   * @param cv_img
+   *    cv::Mat containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const cv::Mat&amp; cv_img);
+#endif  // USE_OPENCV
+
+ protected:
+   /**
+   * @brief Generates a random integer from Uniform({0, 1, ..., n-1}).
+   *
+   * @param n
+   *    The upperbound (exclusive) value of the random number.
+   * @return
+   *    A uniformly random integer value from ({0, 1, ..., n-1}).
+   */
+   //产生取值{0, 1, n-1}的随机整数，服从均匀分布
+  virtual int Rand(int n);
+
+  void Transform(const Datum&amp; datum, Dtype* transformed_data);
+  // Tranformation parameters(变换参数，该数据结构由ProtoBuffer工具自动生成)
+  TransformationParameter param_;
+
+//随机数生成器，声明在include/caffe/common.hpp中
+  shared_ptr&lt;Caffe::RNG&gt; rng_;
+//当前运行阶段，可能为TRAIN或TEST。阶段不同，执行变换会有差异
+  Phase phase_;
+//均值图像,用于从均值文件中读取
+  Blob&lt;Dtype&gt; data_mean_;
+//均值数值,用于从param_中提取
+  vector&lt;Dtype&gt; mean_values_;
+};
+
+}  // namespace caffe
+
+#endif  // CAFFE_DATA_TRANSFORMER_HPP_
+
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Caffe I/O模块]]></title>
@@ -151,6 +365,154 @@ class BasePrefetchingDataLayer :
   Blob&lt;Dtype&gt; transformed_data_;    //变换后的数据
 };
 
+
+</code></pre>
+
+<p>数据读取层的实现位于<code>src/caffe/layers/base_data_layer.cpp</code>中，内容如下:</p>
+
+<pre><code class="language-c++">#include &lt;boost/thread.hpp&gt;
+#include &lt;vector&gt;
+
+#include &quot;caffe/blob.hpp&quot;
+#include &quot;caffe/data_transformer.hpp&quot;
+#include &quot;caffe/internal_thread.hpp&quot;
+#include &quot;caffe/layer.hpp&quot;
+#include &quot;caffe/layers/base_data_layer.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
+#include &quot;caffe/util/blocking_queue.hpp&quot;
+
+namespace caffe {
+//构造函数，初始化Layer参数、数据变换器参数
+template &lt;typename Dtype&gt;
+BaseDataLayer&lt;Dtype&gt;::BaseDataLayer(const LayerParameter&amp; param)
+    : Layer&lt;Dtype&gt;(param),
+      transform_param_(param.transform_param()) {
+}
+//BaseDataLayer层设置 
+template &lt;typename Dtype&gt;
+void BaseDataLayer&lt;Dtype&gt;::LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  if (top.size() == 1) {    //判断输出Blob个数，若为1只输出data，若为2则输出data和label
+    output_labels_ = false;
+  } else {
+    output_labels_ = true;
+  }
+  //初始化数据变化器对象
+  data_transformer_.reset(
+      new DataTransformer&lt;Dtype&gt;(transform_param_, this-&gt;phase_));
+  data_transformer_-&gt;InitRand();    //生成随机数种子
+  // The subclasses should setup the size of bottom and top
+  //子类负责设置Top Blob形状
+  DataLayerSetUp(bottom, top);
+}
+//BasePrefetchingDataLayer 构造函数
+template &lt;typename Dtype&gt;
+BasePrefetchingDataLayer&lt;Dtype&gt;::BasePrefetchingDataLayer(
+    const LayerParameter&amp; param)
+    : BaseDataLayer&lt;Dtype&gt;(param),
+      prefetch_(param.data_param().prefetch()),
+      prefetch_free_(), prefetch_full_(), prefetch_current_() {
+  for (int i = 0; i &lt; prefetch_.size(); ++i) {
+    prefetch_[i].reset(new Batch&lt;Dtype&gt;());
+    prefetch_free_.push(prefetch_[i].get());    //将Batch对象都放入空闲队列中
+  }
+}
+//BasePrefetchingDataLayer层配置函数
+template &lt;typename Dtype&gt;
+void BasePrefetchingDataLayer&lt;Dtype&gt;::LayerSetUp(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  BaseDataLayer&lt;Dtype&gt;::LayerSetUp(bottom, top);
+
+  // Before starting the prefetch thread, we make cpu_data and gpu_data
+  // calls so that the prefetch thread does not accidentally make simultaneous
+  // cudaMalloc calls when the main thread is running. In some GPUs this
+  // seems to cause failures if we do not so.
+  //在幵启数据预取线程前，通过调用Blob相应函数先进行cudaMalloc,避免在多线程情况下同时进行cudaMalloc.会导致CUDA API调用失败
+  for (int i = 0; i &lt; prefetch_.size(); ++i) {
+    prefetch_[i]-&gt;data_.mutable_cpu_data();
+    if (this-&gt;output_labels_) {
+      prefetch_[i]-&gt;label_.mutable_cpu_data();
+    }
+  }
+  //如果编译选项没有CPU_ONLY,则需要编译GPU代码
+#ifndef CPU_ONLY    
+  if (Caffe::mode() == Caffe::GPU) {
+    for (int i = 0; i &lt; prefetch_.size(); ++i) {
+      prefetch_[i]-&gt;data_.mutable_gpu_data();
+      if (this-&gt;output_labels_) {
+        prefetch_[i]-&gt;label_.mutable_gpu_data();    //功能同上
+      }
+    }
+  }
+#endif
+  DLOG(INFO) &lt;&lt; &quot;Initializing prefetch&quot;;
+  this-&gt;data_transformer_-&gt;InitRand();
+  StartInternalThread();    //开启内部预取线程
+  DLOG(INFO) &lt;&lt; &quot;Prefetch initialized.&quot;;
+}
+//内部线程入口
+template &lt;typename Dtype&gt;
+void BasePrefetchingDataLayer&lt;Dtype&gt;::InternalThreadEntry() {
+//创建CUDA Stream,非阻塞类型
+#ifndef CPU_ONLY
+  cudaStream_t stream;
+  if (Caffe::mode() == Caffe::GPU) {
+    CUDA_CHECK(cudaStreamCreateWithFlags(&amp;stream, cudaStreamNonBlocking));
+  }
+#endif
+
+  try {
+    while (!must_stop()) {  //循环载入批量数据
+      Batch&lt;Dtype&gt;* batch = prefetch_free_.pop();   //拿到一个空闲Batch
+      load_batch(batch);    //载入批量数据
+#ifndef CPU_ONLY
+      if (Caffe::mode() == Caffe::GPU) {
+        batch-&gt;data_.data().get()-&gt;async_gpu_push(stream);
+        if (this-&gt;output_labels_) {
+          batch-&gt;label_.data().get()-&gt;async_gpu_push(stream);
+        }
+        CUDA_CHECK(cudaStreamSynchronize(stream));//同步到GPU
+      }
+#endif
+      prefetch_full_.push(batch);   //加入到带负载的Batch队列中
+    }
+  } catch (boost::thread_interrupted&amp;) {
+    // Interrupted exception is expected on shutdown(捕获到异常,退出while循环)
+  }
+#ifndef CPU_ONLY
+  if (Caffe::mode() == Caffe::GPU) {
+    CUDA_CHECK(cudaStreamDestroy(stream));  //销毁CUDA Stream
+  }
+#endif
+}
+//前向传波函数
+template &lt;typename Dtype&gt;
+void BasePrefetchingDataLayer&lt;Dtype&gt;::Forward_cpu(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    //从带负载的Batch队列中取出一个Batch对象
+  if (prefetch_current_) {
+    prefetch_free_.push(prefetch_current_);
+  }
+  prefetch_current_ = prefetch_full_.pop(&quot;Waiting for data&quot;);
+  // Reshape to loaded data.(Top Blob根据Batch形状进行变形)
+  top[0]-&gt;ReshapeLike(prefetch_current_-&gt;data_);
+  //将数据放到Top Blob中
+  top[0]-&gt;set_cpu_data(prefetch_current_-&gt;data_.mutable_cpu_data());
+  if (this-&gt;output_labels_) {
+    // Reshape to loaded labels.(同上)
+    top[1]-&gt;ReshapeLike(prefetch_current_-&gt;label_);
+    top[1]-&gt;set_cpu_data(prefetch_current_-&gt;label_.mutable_cpu_data());
+  }
+}
+
+#ifdef CPU_ONLY
+STUB_GPU_FORWARD(BasePrefetchingDataLayer, Forward);
+#endif
+
+INSTANTIATE_CLASS(BaseDataLayer);
+INSTANTIATE_CLASS(BasePrefetchingDataLayer);
+
+}  // namespace caffe
 
 </code></pre>
 
@@ -6295,95 +6657,6 @@ print struct.unpack(&#39;&gt;IH&#39;,&#39;\xf0\xf0\xf0\xf0\x80\x80&#39;)
 <p>所以，尽管Python不适合编写底层操作字节流的代码，但在对性能要求不高的地方，利用<code>struct</code>就方便多了。</p>
 
 <p><code>struct</code>模块定义的数据类型可以参考Python官方文档：<a href="https://docs.python.org/2/library/struct.html#format-characters">https://docs.python.org/2/library/struct.html#format-characters</a></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Base64]]></title>
-    <link href="https://lockxmonk.github.io/14955000885655.html"/>
-    <updated>2017-05-23T08:41:28+08:00</updated>
-    <id>https://lockxmonk.github.io/14955000885655.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">练习:</a>
-</li>
-<li>
-<a href="#toc_1">小结</a>
-</li>
-</ul>
-
-
-<p>Base64是一种用64个字符来表示任意二进制数据的方法。</p>
-
-<p>用记事本打开<code>exe、jpg、pdf</code>这些文件时，我们都会看到一大堆乱码，因为二进制文件包含很多无法显示和打印的字符，所以，如果要让记事本这样的文本处理软件能处理二进制数据，就需要一个二进制到字符串的转换方法。Base64是一种最常见的二进制编码方法。</p>
-
-<p>Base64的原理很简单，首先，准备一个包含64个字符的数组：</p>
-
-<pre><code>[&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, ... &#39;a&#39;, &#39;b&#39;, &#39;c&#39;, ... &#39;0&#39;, &#39;1&#39;, ... &#39;+&#39;, &#39;/&#39;]
-</code></pre>
-
-<p>然后，对二进制数据进行处理，每3个字节一组，一共是<code>3x8=24bit</code>，划为4组，每组正好6个bit：<img src="media/14955000885655/14955010424104.jpg" alt=""/></p>
-
-<p>这样我们得到4个数字作为索引，然后查表，获得相应的4个字符，就是编码后的字符串。</p>
-
-<p>所以，Base64编码会把3字节的二进制数据编码为4字节的文本数据，长度增加33%，好处是编码后的文本数据可以在邮件正文、网页等直接显示。</p>
-
-<p>如果要编码的二进制数据不是3的倍数，最后会剩下1个或2个字节怎么办？Base64用<code>\x00</code>字节在末尾补足后，再在编码的末尾加上1个或2个<code>=</code>号，表示补了多少字节，解码的时候，会自动去掉。</p>
-
-<p>Python内置的<code>base64</code>可以直接进行base64的编解码：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-import base64
-print base64.b64encode(&#39;binary\x00string&#39;)
-print base64.b64decode(&#39;YmluYXJ5AHN0cmluZw==&#39;)
-</code></pre>
-
-<p><img src="media/14955000885655/14955014556004.jpg" alt=""/></p>
-
-<p>由于标准的Base64编码后可能出现字符<code>+</code>和<code>/</code>，在URL中就不能直接作为参数，所以又有一种&quot;url safe&quot;的base64编码，其实就是把字符<code>+</code>和<code>/</code>分别变成<code>-</code>和<code>_</code>：<br/>
-<img src="media/14955000885655/14955018446875.jpg" alt=""/><br/>
-还可以自己定义64个字符的排列顺序，这样就可以自定义Base64编码，不过，通常情况下完全没有必要。</p>
-
-<p>Base64是一种通过查表的编码方法，不能用于加密，即使使用自定义的编码表也不行。</p>
-
-<p>Base64适用于小段内容的编码，比如数字证书签名、Cookie的内容等。</p>
-
-<p>由于<code>=</code>字符也可能出现在Base64编码中，但<code>=</code>用在URL、Cookie里面会造成歧义，所以，很多Base64编码后会把<code>=</code>去掉：</p>
-
-<pre><code># 标准Base64:
-&#39;abcd&#39; -&gt; &#39;YWJjZA==&#39;
-# 自动去掉=:
-&#39;abcd&#39; -&gt; &#39;YWJjZA&#39;
-</code></pre>
-
-<p>去掉=后怎么解码呢？因为Base64是把3个字节变为4个字节，所以，Base64编码的长度永远是4的倍数，因此，需要加上=把Base64字符串的长度变为4的倍数，就可以正常解码了。</p>
-
-<h2 id="toc_0">练习:</h2>
-
-<p>请写一个能去掉<code>=</code>的base64解码函数:</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-import base64
-def safe_b64decode(str):
-    num = len(str)%4
-    if num==0:
-        return base64.b64decode(str)
-    else :
-        for x in range(num):
-             str = str + &#39;=&#39;
-        return str 
-print base64.b64decode(&#39;YWJjZA==&#39;)
-#print base64.b64decode(&#39;YWJjZA&#39;)
-print safe_b64decode(&#39;YWJjZA&#39;)
-</code></pre>
-
-<p><img src="media/14955000885655/14955026953083.jpg" alt=""/></p>
-
-<h2 id="toc_1">小结</h2>
-
-<p>Base64是一种任意二进制到文本字符串的编码方法，常用于在URL、Cookie、网页中传输少量二进制数据。</p>
 
 ]]></content>
   </entry>

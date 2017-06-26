@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  第4条：多用类型常量，少用#define预处理指令 - LZH007
+  数据转换器 - LZH007
   
   </title>
   
@@ -113,14 +113,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>第4条：多用类型常量，少用#define预处理指令</h1>
+          <h1>数据转换器</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/1/13</span>
+          <span class="date">2017/6/26</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
+              <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
            
          
           <span class="comments">
@@ -133,67 +133,210 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>对于一般掌握了Objective-C和C语言的人，也许会用这种方法来定义一个类似动画的时间常量：</p>
+      <p>Caffe的数据变换器（DataTransformer)主要提供了对原始输入图像的预处理方法，包括随机切块、随机镜像、幅度缩放、去均值、灰度/色度变换等。相信熟悉图像处理、OpenCV的读者对上述操作并不陌生。</p>
 
-<pre><code>#define ANIMATION_DURATION = 0.3
-</code></pre>
+<h2 id="toc_0">数据结构描述</h2>
 
-<p>上述预处理指令会吧源代码中的ANIMATION_DURATION字符串替换为0.3。<br/>
-在OC中我们常常用更好的方法来定义，比方说，下面这行代码定义了一个类型为NSTimeInterval的常量：</p>
-
-<pre><code>static const NSTimeInterval KAnimationDuration = 0.3；
-</code></pre>
-
-<p>要注意的是此方式定义的常量包含类型信息，其好处就是清楚的描述了常量的含义，有助于编写开发文档。</p>
-
-<p>还要注意常量的名称。常用的命名法是：若常量局限于某“编译单元（也就是实现文件之内，implementation）”,一般在前面加上字母k；若长亮在类之外课件，则通常以类名为前缀。之后将会更加详细的说命名问题。</p>
-
-<p>定义常量的位置很重要。我们总是很喜欢在头文件里声明预处理命令，这样是很糟糕的。例如，ANIMATION_DURATION这个常量名就不应该在头文件中，因为所有引入了这份头文件的其他文件中都会出现这个名字。static const定义的常量也不应该出现在头文件中。因为OC没有命名空间这一概念，所以那样做就等于声明了一个名字叫kANIMATIONDURATION的全局变量。此名称应该加上前缀，以表明其所属的类，例如可以改为EOCViewClassAnimationDuration。</p>
-
-<p>如果不打算去公开某个常量，则应该将其定义为在使用该常量的实现文件中，比如说，要开发一个使用UIKit框架的iOS应用程序，其中UIView子类中含有表示动画播放时间的常量，那么可以这样写：</p>
-
-<pre><code>//EOCAnimatedView.h
-#import &lt;UIKit/UIKit.h&gt;
-@interface EOCAnimatedView:UIView
--(void)animate;
-@end
-
-//EOCAnimatedView.m
-#import EOCAnimatedView.h
-
-static const NSTimeInterval kAnimationDuration  = 0.3;
-
-@implemention EOCAnimatedView
-
--(void)animate{
-  [UIViewanimateWithDuration:KAnimationDuration 
-                    animate:^(){
-                        //Perform animations
-                    }]
+<pre><code class="language-protobuf">message TransformationParameter {
+  // For data pre-processing, we can do simple scaling and subtracting the
+  // data mean, if provided. Note that the mean subtraction is always carried
+  // out before scaling.
+  //像素幅度缩放参数，默认为1，即不缩放
+  optional float scale = 1 [default = 1];
+  // Specify if we want to randomly mirror data.
+  //图像随机镜像开关，默认为false,即不进行镜像操作
+  optional bool mirror = 2 [default = false];
+  // Specify if we would like to randomly crop an image.
+  //图像随机切块的大小，默认为0,即不进行切块操作
+  optional uint32 crop_size = 3 [default = 0];
+  // mean_file and mean_value cannot be specified at the same time(存储图像均值的文件)
+  optional string mean_file = 4;
+  // if specified can be repeated once (would subtract it from all the channels)
+  // or can be repeated the same number of times as channels
+  // (would subtract them from the corresponding channel)
+  //均值数值，无须读取文件。若数目与图像通道数相等，则每个图像通道分别减去对应的均值；如果只给出一个值.则毎个图像通道都减去同一个均值
+  repeated float mean_value = 5;
+  // Force the decoded image to have 3 color channels.
+  //强制为三通道彩色图像输入
+  optional bool force_color = 6 [default = false];
+  // Force the decoded image to have 1 color channels.
+  //强制为单通道灰度图像输入
+  optional bool force_gray = 7 [default = false];
 }
+
 </code></pre>
 
-<p>变量一定要同时用static和const来声明。如果试图修改const所声明的变量，编译器会报错。static修饰符意味着该变量仅仅在定义此变量的便一单元中可见。编译器每收到一个编译单元，就会输出一份目标文件。在OC中“编译单元”一词 通常指每个类的实现文件（以.m为后缀名）其作用域仅限于由EOCAnimatedView.m所生成的目标文件中。假如声明此变量时不加static,则编译器会为它创建一个“外部符号”(external symbol)。此时,若是另一个编译单元中也声 明了同名变量，那么编译器就拋出一条错误消息。</p>
+<h2 id="toc_1">数据变换器的实现</h2>
 
-<p>有时候需要对外公开某个常量，想要接受常值变量的注册者不需要知道实际的字符串值，只需要以常值变量来注册自己想要接受的通知就可以</p>
+<p>数据变换器声明头文件位于<code>include/cafTe/data_transformer.hpp</code>中，如果需要单独使用该模块,应包含这个头文件。文件内容如下:</p>
 
-<p>此类常量应该放在“全局变量表”中，以便可以在定义该常量的编译单元之外使用。因此可以这样的来定义：</p>
+<pre><code class="language-c++">#ifndef CAFFE_DATA_TRANSFORMER_HPP
+#define CAFFE_DATA_TRANSFORMER_HPP
 
-<pre><code>// in the header file
-extern NSString *const EOCStringConstant;
+#include &lt;vector&gt;
 
-//in the implementation
-NSString *const EOCStringConstant = @&quot;value&quot;;
+#include &quot;caffe/blob.hpp&quot;
+#include &quot;caffe/common.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
+
+namespace caffe {
+
+/**
+ * @brief Applies common transformations to the input data, such as
+ * scaling, mirroring, substracting the image mean...
+ */
+ //DataTransformer类声明
+template &lt;typename Dtype&gt;
+class DataTransformer {
+ public:
+ //显式构造函数
+  explicit DataTransformer(const TransformationParameter&amp; param, Phase phase);
+  //析构函数
+  virtual ~DataTransformer() {}
+
+  /**
+   * @brief Initialize the Random number generations if needed by the
+   *    transformation.
+   */
+   //初始化随机数种子函数
+  void InitRand();
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to the data.
+   *
+   * @param datum
+   *    Datum containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See data_layer.cpp for an example.
+   */
+   //下面几种函数重载,以适应多种输入数据源
+  void Transform(const Datum&amp; datum, Blob&lt;Dtype&gt;* transformed_blob);
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a vector of Datum.
+   *
+   * @param datum_vector
+   *    A vector of Datum containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See memory_layer.cpp for an example.
+   */
+  void Transform(const vector&lt;Datum&gt; &amp; datum_vector,
+                Blob&lt;Dtype&gt;* transformed_blob);
+
+#ifdef USE_OPENCV
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a vector of Mat.
+   *
+   * @param mat_vector
+   *    A vector of Mat containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See memory_layer.cpp for an example.
+   */
+  void Transform(const vector&lt;cv::Mat&gt; &amp; mat_vector,
+                Blob&lt;Dtype&gt;* transformed_blob);
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a cv::Mat
+   *
+   * @param cv_img
+   *    cv::Mat containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See image_data_layer.cpp for an example.
+   */
+  void Transform(const cv::Mat&amp; cv_img, Blob&lt;Dtype&gt;* transformed_blob);
+#endif  // USE_OPENCV
+
+  /**
+   * @brief Applies the same transformation defined in the data layer&#39;s
+   * transform_param block to all the num images in a input_blob.
+   *
+   * @param input_blob
+   *    A Blob containing the data to be transformed. It applies the same
+   *    transformation to all the num images in the blob.
+   * @param transformed_blob
+   *    This is destination blob, it will contain as many images as the
+   *    input blob. It can be part of top blob&#39;s data.
+   */
+  void Transform(Blob&lt;Dtype&gt;* input_blob, Blob&lt;Dtype&gt;* transformed_blob);
+
+
+ //获取执行Transform后的输出Blob形状
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *
+   * @param datum
+   *    Datum containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const Datum&amp; datum);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *    It uses the first element to infer the shape of the blob.
+   *
+   * @param datum_vector
+   *    A vector of Datum containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const vector&lt;Datum&gt; &amp; datum_vector);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *    It uses the first element to infer the shape of the blob.
+   *
+   * @param mat_vector
+   *    A vector of Mat containing the data to be transformed.
+   */
+#ifdef USE_OPENCV
+  vector&lt;int&gt; InferBlobShape(const vector&lt;cv::Mat&gt; &amp; mat_vector);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *
+   * @param cv_img
+   *    cv::Mat containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const cv::Mat&amp; cv_img);
+#endif  // USE_OPENCV
+
+ protected:
+   /**
+   * @brief Generates a random integer from Uniform({0, 1, ..., n-1}).
+   *
+   * @param n
+   *    The upperbound (exclusive) value of the random number.
+   * @return
+   *    A uniformly random integer value from ({0, 1, ..., n-1}).
+   */
+   //产生取值{0, 1, n-1}的随机整数，服从均匀分布
+  virtual int Rand(int n);
+
+  void Transform(const Datum&amp; datum, Dtype* transformed_data);
+  // Tranformation parameters(变换参数，该数据结构由ProtoBuffer工具自动生成)
+  TransformationParameter param_;
+
+//随机数生成器，声明在include/caffe/common.hpp中
+  shared_ptr&lt;Caffe::RNG&gt; rng_;
+//当前运行阶段，可能为TRAIN或TEST。阶段不同，执行变换会有差异
+  Phase phase_;
+//均值图像,用于从均值文件中读取
+  Blob&lt;Dtype&gt; data_mean_;
+//均值数值,用于从param_中提取
+  vector&lt;Dtype&gt; mean_values_;
+};
+
+}  // namespace caffe
+
+#endif  // CAFFE_DATA_TRANSFORMER_HPP_
+
 </code></pre>
-
-<p>这个常量在头文件中声明，在实现文件里面定义。这类常量只能定义一次。</p>
-
-<p>这样定义常量要优于#define，一旦在.m文件中定义好全局常量后，可以随处使用。</p>
-
-<p><strong>要点</strong><br/>
-* 不要用预处理指令定义常量，这样定义出来的常量不包含类型信息，编译器只是会在编译之前执行查找与替换操作。即使有人重新定义了常量值，编译器也不会产生警告信息。<br/>
-* 在实现文件中使用static const来定义“只在编译单元内可见的常量”。由于此类常量不在全局符号表中，所以无需为其名称添加前缀。<br/>
-* 再投问价那种使用extern来声明全局变量，并且在相关的实现文件中定义其值。这种常量要出现在全局符号表中，所以其名称应该加以区隔，通常用与之有关的类名做前缀。</p>
 
 
     
@@ -204,16 +347,13 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14843637552703.html" 
-          title="Previous Post: 第5条：用枚举表示状态、选项、状态码">&laquo; 第5条：用枚举表示状态、选项、状态码</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14842776114163.html" 
-          title="Next Post: 第一章 熟悉Objective-C">第一章 熟悉Objective-C &raquo;</a>
+          <a  href="14982657549571.html" 
+          title="Next Post: Caffe I/O模块">Caffe I/O模块 &raquo;</a>
       
       </p>
         </div>
