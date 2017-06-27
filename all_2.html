@@ -113,6 +113,236 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14957594179111.html">
+                
+                  <h1>网络编程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">TCP/IP</a>
+</li>
+<li>
+<a href="#toc_1">TCP编程</a>
+<ul>
+<li>
+<a href="#toc_2">客户端</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_3">服务器</a>
+</li>
+<li>
+<a href="#toc_4">小结</a>
+</li>
+</ul>
+
+
+<h2 id="toc_0">TCP/IP</h2>
+
+<p>现在的网络编程基本都是在一个统一的通用写一下来进行的,<code>互联网协议簇（Internet Protocol Suite）</code>就是通用协议标准。Internet是由inter和net两个单词组合起来的，原意就是连接“网络”的网络，有了Internet，任何私有网络，只要支持这个协议，就可以联入互联网。</p>
+
+<p>因为互联网协议包含了上百种协议标准，但是最重要的两个协议是TCP和IP协议，所以，大家把互联网的协议简称<strong>TCP/IP</strong>协议。</p>
+
+<p>通信的时候，双方必须知道对方的标识，好比发邮件必须知道对方的邮件地址。互联网上每个计算机的唯一标识就是IP地址，类似123.123.123.123。如果一台计算机同时接入到两个或更多的网络，比如路由器，它就会有两个或多个IP地址，所以，IP地址对应的实际上是计算机的网络接口，通常是网卡。</p>
+
+<p><strong>IP协议负责把数据从一台计算机通过网络发送到另一台计算机。数据被分割成一小块一小块，然后通过IP包发送出去。</strong>由于互联网链路复杂，两台计算机之间经常有多条线路，因此，<strong>路由器就负责决定如何把一个IP包转发出去。IP包的特点是按块发送，途径多个路由，但不保证能到达，也不保证顺序到达。</strong></p>
+
+<p><font color=red>TCP协议则是建立在IP协议之上的。TCP协议负责在两台计算机之间建立可靠连接，保证数据包按顺序到达。TCP协议会通过握手建立连接，然后，对每个IP包编号，确保对方按顺序收到，如果包丢掉了，就自动重发。</font></p>
+
+<p>许多常用的更高级的协议都是建立在TCP协议基础上的，比如用于浏览器的HTTP协议、发送邮件的SMTP协议等。</p>
+
+<p>一个IP包除了包含要传输的数据外，还包含源IP地址和目标IP地址，源端口和目标端口。</p>
+
+<p>端口有什么作用？在两台计算机通信时，只发IP地址是不够的，因为同一台计算机上跑着多个网络程序。一个IP包来了之后，到底是交给浏览器还是QQ，就需要<strong>端口号</strong>来区分。每个网络程序都向操作系统申请唯一的端口号，这样，两个进程在两台计算机之间建立网络连接就需要各自的IP地址和各自的端口号。(在进行tomcat设置的时候,类似也是需要设置端口号.)</p>
+
+<p>一个进程也可能同时与多个计算机建立链接，因此它会申请很多端口。</p>
+
+<h2 id="toc_1">TCP编程</h2>
+
+<p>Socket是网络编程的一个抽象概念。通常我们用一个Socket表示“打开了一个网络链接”，而打开一个Socket需要知道目标计算机的IP地址和端口号，再指定协议类型即可。</p>
+
+<h3 id="toc_2">客户端</h3>
+
+<p>大多数连接都是可靠的TCP连接。创建TCP连接时，主动发起连接的叫客户端，被动响应连接的叫服务器。</p>
+
+<p>我们要创建一个基于TCP连接的Socket，可以这样做：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import socket
+
+s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+
+s = connect((&#39;www.sina.com.cn&#39;,80))
+</code></pre>
+
+<p>创建Socket时，<code>AF_INET</code>指定使用<code>IPv4</code>协议，如果要用更先进的<code>IPv6</code>，就指定为<code>AF_INET6</code>。<code>SOCK_STREAM</code>指定使用面向流的TCP协议，这样，一个<code>Socket</code>对象就创建成功，但是还没有建立连接。</p>
+
+<p>客户端要主动发起TCP连接，必须知道服务器的IP地址和端口号。新浪网站的IP地址可以用域名<code>www.sina.com.cn</code>自动转换到IP地址，但是怎么知道新浪服务器的端口号呢？</p>
+
+<p>答案是作为服务器，提供什么样的服务，端口号就必须固定下来。由于我们想要访问网页，因此新浪提供网页服务的服务器必须把端口号固定在<code>80</code>端口，因为<code>80</code>端口是Web服务的标准端口。其他服务都有对应的标准端口号，例如SMTP服务是25端口，FTP服务是21端口，等等。端口号小于1024的是Internet标准服务的端口，端口号大于1024的，可以任意使用。</p>
+
+<p>因此，我们连接新浪服务器的代码如下：</p>
+
+<pre><code class="language-py">s.connect((&#39;www.sina.com.cn&#39;, 80))
+</code></pre>
+
+<p><strong>注意参数是一个tuple，包含地址和端口号。</strong></p>
+
+<p>建立TCP连接后，我们就可以向新浪服务器发送请求，要求返回首页的内容：</p>
+
+<pre><code class="language-py">s.send(&#39;GET / HTTP/1.1\r\nHost: www.sina.com.cn\r\nConnection: close\r\n\r\n&#39;)
+</code></pre>
+
+<p>TCP连接创建的是双向通道，双方都可以同时给对方发数据。但是谁先发谁后发，怎么协调，要根据具体的协议来决定。例如，HTTP协议规定客户端必须先发请求给服务器，服务器收到后才发数据给客户端。</p>
+
+<p>发送的文本格式必须符合HTTP标准，如果格式没问题，接下来就可以接收新浪服务器返回的数据了：</p>
+
+<pre><code class="language-py"># 接收数据:
+buffer = []
+while True:
+    # 每次最多接收1k字节:
+    d = s.recv(1024)
+    if d:
+        buffer.append(d)
+    else:
+        break
+data = &#39;&#39;.join(buffer)
+</code></pre>
+
+<p>接收数据时，调用<code>recv(max)</code>方法，一次最多接收指定的字节数，因此，在一个while循环中反复接收，直到<code>recv()</code>返回空数据，表示接收完毕，退出循环。</p>
+
+<p>当我们接收完数据后，调用<code>close()</code>方法关闭<code>Socket</code>，这样，一次完整的网络通信就结束了：</p>
+
+<pre><code class="language-py"># 关闭连接:
+s.close()
+</code></pre>
+
+<p>接收到的数据包括<code>HTTP头</code>和<code>网页本身</code>，我们只需要把HTTP头和网页分离一下，把<code>HTTP头</code>打印出来，网页内容保存到文件：</p>
+
+<pre><code class="language-py">header, html = data.split(&#39;\r\n\r\n&#39;, 1)
+print header
+# 把接收的数据写入文件:
+with open(&#39;sina.html&#39;, &#39;wb&#39;) as f:
+    f.write(html)
+</code></pre>
+
+<p>现在，只需要在浏览器中打开这个<code>sina.html</code>文件，就可以看到新浪的首页了。</p>
+
+<h2 id="toc_3">服务器</h2>
+
+<p>和客户端编程相比，服务器编程就要复杂一些。</p>
+
+<p>服务器进程首先要绑定一个端口并监听来自其他客户端的连接。如果某个客户端连接过来了，服务器就与该客户端建立Socket连接，随后的通信就靠这个Socket连接了。</p>
+
+<p>所以，服务器会打开固定端口（比如80）监听，每来一个客户端连接，就创建该Socket连接。由于服务器会有大量来自客户端的连接，所以，服务器要能够区分一个Socket连接是和哪个客户端绑定的。一个Socket依赖4项：服务器地址、服务器端口、客户端地址、客户端端口来唯一确定一个Socket。</p>
+
+<p>但是服务器还需要同时响应多个客户端的请求，所以，每个连接都需要一个新的进程或者新的线程来处理，否则，服务器一次就只能服务一个客户端了。</p>
+
+<p>我们来编写一个简单的服务器程序，它接收客户端连接，把客户端发过来的字符串加上<code>Hello</code>再发回去。</p>
+
+<p>首先，创建一个基于IPv4和TCP协议的Socket：</p>
+
+<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+</code></pre>
+
+<p>然后，我们要绑定监听的地址和端口。服务器可能有多块网卡，可以绑定到某一块网卡的IP地址上，也可以用<code>0.0.0.0</code>绑定到所有的网络地址，还可以用<code>127.0.0.1</code>绑定到本机地址。<code>127.0.0.1</code>是一个特殊的IP地址，表示本机地址，如果绑定到这个地址，客户端必须同时在本机运行才能连接，也就是说，外部的计算机无法连接进来。</p>
+
+<p>端口号需要预先指定。因为我们写的这个服务不是标准服务，所以用<code>9999</code>这个端口号。请注意，小于<code>1024</code>的端口号必须要有管理员权限才能绑定：</p>
+
+<pre><code class="language-py"># 监听端口:
+s.bind((&#39;127.0.0.1&#39;, 9999))
+</code></pre>
+
+<p>紧接着，调用listen()方法开始监听端口，传入的参数指定等待连接的最大数量：<br/>
+<code>py<br/>
+s.listen(5)<br/>
+print &#39;Waiting for connection...&#39;<br/>
+</code></p>
+
+<p>接下来，服务器程序通过一个永久循环来接受来自客户端的连接，<code>accept()</code>会等待并返回一个客户端的连接:</p>
+
+<pre><code class="language-py">while True:
+    # 接受一个新连接:
+    sock, addr = s.accept()
+    # 创建新线程来处理TCP连接:
+    t = threading.Thread(target=tcplink, args=(sock, addr))
+    t.start()
+</code></pre>
+
+<p>每个连接都必须创建新线程（或进程）来处理，否则，单线程在处理连接的过程中，无法接受其他客户端的连接：</p>
+
+<pre><code class="language-py">def tcplink(sock, addr):
+    print &#39;Accept new connection from %s:%s...&#39; % addr
+    sock.send(&#39;Welcome!&#39;)
+    while True:
+        data = sock.recv(1024)
+        time.sleep(1)
+        if data == &#39;exit&#39; or not data:
+            break
+        sock.send(&#39;Hello, %s!&#39; % data)
+    sock.close()
+    print &#39;Connection from %s:%s closed.&#39; % addr
+</code></pre>
+
+<p>连接建立后，服务器首先发一条欢迎消息，然后等待客户端数据，并加上<code>Hello</code>再发送给客户端。如果客户端发送了<code>exit</code>字符串，就直接关闭连接。</p>
+
+<p>要测试这个服务器程序，我们还需要编写一个客户端程序：</p>
+
+<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# 建立连接:
+s.connect((&#39;127.0.0.1&#39;, 9999))
+# 接收欢迎消息:
+print s.recv(1024)
+for data in [&#39;Michael&#39;, &#39;Tracy&#39;, &#39;Sarah&#39;]:
+    # 发送数据:
+    s.send(data)
+    print s.recv(1024)
+s.send(&#39;exit&#39;)
+s.close()
+</code></pre>
+
+<p>我们需要打开两个命令行窗口，一个运行服务器程序，另一个运行客户端程序，就可以看到效果了：<br/>
+(先运行服务器端程序)<br/>
+执行了两次客户端程序:<br/>
+<img src="media/14957594179111/14957645115702.jpg" alt=""/><br/>
+服务端:<br/>
+<img src="media/14957594179111/14957645546966.jpg" alt=""/><br/>
+需要注意的是，客户端程序运行完毕就退出了，而服务器程序会永远运行下去，必须按Ctrl+C退出程序。</p>
+
+<h2 id="toc_4">小结</h2>
+
+<p>用TCP协议进行Socket编程在Python中十分简单，对于客户端，要主动连接服务器的IP和指定端口，对于服务器，要首先监听指定端口，然后，对每一个新的连接，创建一个线程或进程来处理。通常，服务器程序会无限运行下去。</p>
+
+<p>同一个端口，被一个Socket绑定了以后，就不能被别的Socket绑定了。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14957005904776.html">
                 
                   <h1>图形界面</h1>
@@ -937,114 +1167,6 @@ login(user_text, password_text)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14955929300450.html">
-                
-                  <h1>Caffe目录结构</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我们这里先了解一下caffe的目录结构:<br/>
-<img src="media/14955929300450/14961936456285.jpg" alt=""/><br/>
-<img src="media/14955929300450/14961936868967.jpg" alt=""/><br/>
-<img src="media/14955929300450/14961937240927.jpg" alt=""/><br/>
-其中主要关注的就是:include/,src/和tools/,三个目录,需要分析的代码都包含在这里面.</p>
-
-<p>在阅读代码时,如何快速追踪某个关键词?传统的方法是打开某个文件,之后用查找命令来查找关键词.<br/>
-这了我们介绍另一种方法,利用<code>grep</code>命令:</p>
-
-<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;REGISTER_LAYER_CREATOR&quot; *
-</code></pre>
-
-<p><img src="media/14955929300450/14955931415464.jpg" alt=""/><br/>
-我们可以看到,日志输出了很多文件.这种方法无需分别打开每个文件,也能直观的显示了所有包含这个宏的文件名和行号.</p>
-
-<p>这里我们用<code>grep</code>命令来搜索一个宏调用:<code>REGISTER_LAYER_CREATOR</code>,<br/>
-命令行参数解释为:</p>
-
-<blockquote>
-<p>-n  ---显示行号,便于定位<br/>
--H  ---显示文件名,便与定位<br/>
--R  ---递归查找每个子目录,适合工程较大,分多个目录存放的场景</p>
-</blockquote>
-
-<p>利用这种方法可以很容易的在caffe源码中定位很多内容.</p>
-
-<h2 id="toc_0">卷基层</h2>
-
-<p>这里我们假定卷积层有<code>L</code>个输出通道和<code>K</code>个输入通道,于是需要有<code>LK,L=50,K=20</code>个卷积核实现通道数目的转换.这里我们假定卷集核大小为<code>I*J = 5*5</code>,每个输出通道的特征图大小为<code>M*N = 8*8</code>,则该层每个样本做一次前向传播时卷积层计算量为:<br/>
-<code>Calculations(MAC) = I*J*M*N*K*L = 5*5*8*8*50*20=1600000MAC</code><br/>
-实际中使送入一批样本(batch),所以我们这里还需要计算量乘上批量尺寸.</p>
-
-<p>我们这里卷积层的学习参数量为:<br/>
-<code>Params = I*J*K*L = 25000</code><br/>
-所以计算量-参数量之比为<code>CPR=Calculations/Params = M*N = 64</code><br/>
-<font color=red><strong>所以我们得出结论是:卷基层的输出特征图尺寸越大,CPR值越大,参数重复利用率越高.,若一次性输入一批数据(B个样本),则CPR值可再提高B倍.</strong></font></p>
-
-<h2 id="toc_1">全连接层</h2>
-
-<p>早在卷积神经网络出现之前,最早的深度学习网络计算类型都是全连接形式的.如下所示.<br/>
-<img src="media/14955929300450/14961962825939.jpg" alt=""/><br/>
-每个节点与相邻层的所有节点都有连接关系,这是全连接层名称的由来.</p>
-
-<p>全连接层的主要计算类型为矩阵-向量乘(GEMV).假设输入节点组成的向量为x,维度为D,输出节点组成的向量为y,维度为V,则全连接层计算可以表示为:<br/>
-\[y=Wx\]<br/>
-其中,W为<code>V*D</code>维权值矩阵.</p>
-
-<p>我们分析全连接层的参数:<br/>
-<img src="media/14955929300450/14961986814721.jpg" alt=""/></p>
-
-<p><img src="media/14955929300450/14961986616938.jpg" alt=""/></p>
-
-<p>得出输出<code>V=500</code>,输入<code>D=50*4*4 = 800</code>(其中50是输入数量,4*4位图的尺寸)</p>
-
-<p>则全连接层单样本前向传播计算量为:<br/>
-\[<br/>
-CalculationsMAC = V*D<br/>
-                = 800 * 500<br/>
-                = 400000<br/>
-\]<br/>
-参数统计量为:<br/>
-\[<br/>
-Params = V*D<br/>
-       = 800 * 500<br/>
-       = 400000<br/>
-\]<br/>
-所以CPR值为1</p>
-
-<p>所以得出结论,全连接层的CPR值始终为1,与输入,输出维度无关.所以单样本前向向传播计算时,权值重复利用率很低.<br/>
-    我们将一批(B个)样本逐列拼接成矩阵X,一次性通过全连接层,得到一批输出向量构成的矩阵Y,称作批处理(矩阵-矩阵乘计算GEMM):<br/>
-    \[<br/>
-    Y=WX<br/>
-    \]<br/>
-这样全连接层前向计算量提高了B倍,而参数量不变,因此CPR提高了B倍.</p>
-
-<p>与卷积层相比，全连接层参数量是其16倍，而计算量只有其25%.如果输出特征图尺寸相同<code>（M*V = V)</code>，卷积层的CPR值为全连接层的<code>M*N</code>倍。也就是说，卷积层在输出特征图维度实现了<mark>权值共享</mark>。这是降低参数量的重要举措。与此同吋，卷枳层<mark>局部连接</mark>特性 (相比全连接）也大幅减少了参数量,这使得CNN网络中前几层卷积层参数量占比小，计算量占比大；而后几层全连接层参数量占比大，计算量占比小。大多数CNN模型都符合这个特点。<font color=red><strong>因此我们在进行计算加速优化时,重点放在卷积层；而在进行参数优化、权值剪裁时，重点放在全连接层，</strong></font></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/24</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1128,6 +1250,12 @@ Params = V*D<br/>
 	      
 		      
 			      <li class="post">
+			        <a href="14985505390356.html">使用SQLite</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14984437069936.html">数据转换器</a>
 			      </li>
 		     
@@ -1147,12 +1275,6 @@ Params = V*D<br/>
 		      
 			      <li class="post">
 			        <a href="14980135145677.html">Caffe中的Net</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14974936829967.html">Caffe中Layer的学习</a>
 			      </li>
 		     
 		  

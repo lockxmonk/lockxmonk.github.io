@@ -113,6 +113,119 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14937814533169.html">
+                
+                  <h1>ThreadLocal</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在多线程环境下，每个线程都有自己的数据。<strong>一个线程使用自己的局部变量比使用全局变量好，因为局部变量只有线程自己能看见，不会影响其他线程，而全局变量的修改必须加锁。</strong></p>
+
+<p>但是局部变量也有问题，就是在函数调用的时候，传递起来很麻烦：</p>
+
+<pre><code class="language-py">def process_student(name):
+    std = Student(name)
+    # std是局部变量，但是每个函数都要用它，因此必须传进去：
+    do_task_1(std)
+    do_task_2(std)
+
+def do_task_1(std):
+    do_subtask_1(std)
+    do_subtask_2(std)
+
+def do_task_2(std):
+    do_subtask_2(std)
+    do_subtask_2(std)
+</code></pre>
+
+<p>每个函数一层一层调用都这么传参数那还得了？用全局变量？也不行，因为每个线程处理不同的<code>Student</code>对象，不能共享。</p>
+
+<p>如果用一个全局<code>dict</code>存放所有的<code>Student</code>对象，然后以<code>thread</code>自身作为<code>key</code>获得线程对应的<code>Student</code>对象如何？</p>
+
+<pre><code class="language-py">global_dict = {}
+
+def std_thread(name):
+    std = Student(name)
+    # 把std放到全局变量global_dict中：
+    global_dict[threading.current_thread()] = std
+    do_task_1()
+    do_task_2()
+
+def do_task_1():
+    # 不传入std，而是根据当前线程查找：
+    std = global_dict[threading.current_thread()]
+    ...
+
+def do_task_2():
+    # 任何函数都可以查找出当前线程的std变量：
+    std = global_dict[threading.current_thread()]
+    ...
+</code></pre>
+
+<p>这种方式理论上是可行的，它最大的优点是消除了<code>std</code>对象在每层函数中的传递问题，但是，每个函数获取<code>std</code>的代码有点丑。</p>
+
+<p>有没有更简单的方式？</p>
+
+<p><code>ThreadLocal</code>应运而生，不用查找<code>dict</code>，<code>ThreadLocal</code>帮你自动做这件事：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import threading
+
+# 创建全局ThreadLocal对象
+local_school = threading.local()
+
+
+def process_student():
+    print &#39;Hello,%s(in %s)&#39; % (local_school.student, threading.current_thread().name)
+
+
+def process_thread(name):
+    # 绑定ThreadLocal的stutent：
+    local_school.student = name
+    process_student()
+
+t1 = threading.Thread(target=process_thread, args=(&#39;Alice&#39;,), name=&#39;Thread-A&#39;)
+t2 = threading.Thread(target=process_thread, args=(&#39;Bobs&#39;,), name=&#39;Thread-B&#39;)
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+</code></pre>
+
+<p><img src="media/14937814533169/14937825491356.jpg" alt=""/></p>
+
+<p>全局变量<code>local_school</code>就是一个<code>ThreadLocal</code>对象，每个<code>Thread</code>对它都可以读写<code>student</code>属性，但互不影响。你可以把<code>local_school</code>看成全局变量，但每个属性如<code>local_school.student</code>都是线程的局部变量，可以任意读写而互不干扰，也不用管理锁的问题，<code>ThreadLocal</code>内部会处理。</p>
+
+<p>可以理解为全局变量<code>local_school</code>是一个dict，不但可以用<code>local_school.student</code>，还可以绑定其他变量，如<code>local_school.teacher</code>等等。</p>
+
+<p><font color=red><strong><code>ThreadLocal</code>最常用的地方就是为每个线程绑定一个数据库连接，HTTP请求，用户身份信息等，这样一个线程的所有调用到的处理函数都可以非常方便地访问这些资源。</strong><br/>
+</font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/3</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14936919183368.html">
                 
                   <h1>多线程</h1>
@@ -1030,123 +1143,6 @@ with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;w&#3
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14932622908500.html">
-                
-                  <h1>文档测试</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><strong>在python中我们可以执行那些在注释中的代码，来进行测试。</strong></p>
-
-<p>当我们编写注释时，如果写上这样的注释：</p>
-
-<pre><code class="language-py">def abs(n):
-    &#39;&#39;&#39;
-    Function to get absolute value of number.
-
-    Example:
-
-    &gt;&gt;&gt; abs(1)
-    1
-    &gt;&gt;&gt; abs(-1)
-    1
-    &gt;&gt;&gt; abs(0)
-    0
-    &#39;&#39;&#39;
-    return n if n &gt;= 0 else (-n)
-</code></pre>
-
-<p>无疑更明确地告诉函数的调用者该函数的期望输入和输出。</p>
-
-<p><strong>并且，Python内置的“文档测试”（doctest）模块可以直接提取注释中的代码并执行测试。</strong></p>
-
-<p><font color=red>doctest严格按照Python交互式命令行的输入和输出来判断测试结果是否正确。只有测试异常的时候，可以用...表示中间一大段烦人的输出。</font></p>
-
-<p>让我们用doctest来测试上次编写的<code>Dict</code>类：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Dict(dict):
-    
-    &quot;&quot;&quot;
-    Simple dict but also support access as x.y style
-
-    &gt;&gt;&gt; d1 = Dict()
-    &gt;&gt;&gt; d1[&#39;x&#39;] = 100
-    &gt;&gt;&gt; d1.x
-    100
-    &gt;&gt;&gt; d1.y = 200
-    &gt;&gt;&gt; d1[&#39;y&#39;]
-    200
-    &gt;&gt;&gt; d2 = Dict(a=1, b=2, c=&#39;3&#39;)
-    &gt;&gt;&gt; d2.c
-    &#39;3&#39;
-    &gt;&gt;&gt; d2[&#39;empty&#39;]
-    Traceback (most recent call last):
-        ...
-    KeyError: &#39;empty&#39;
-    &gt;&gt;&gt; d2.empty
-    Traceback (most recent call last):
-        ...
-    AttributeError: &#39;Dict&#39; object has no attribute &#39;empty&#39;
-    
-    &quot;&quot;&quot;
-    def __init__(self, **kw):
-        super(Dict, self).__init__(**kw)
-    def __getattr__(self,key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r&quot;&#39;Dict&#39; object has no attribute &#39;%s&#39;&quot; % key)
-        else:
-            pass
-        finally:
-            pass
-    def __setattr__(self,key,value):
-        self[key] = value
-if __name__ == &#39;__main__&#39;:
-    import doctest
-    doctest.testmod()
-</code></pre>
-
-<p>如果什么输出都没有，说明我们编写的<code>doctest</code>运行都是正确的。<br/>
-<img src="media/14932622908500/14932639594028.jpg" alt=""/><br/>
-如果我们把</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; d2.c
-    &#39;4&#39; #3改成4
-</code></pre>
-
-<p>运行后就会显示：</p>
-
-<p><img src="media/14932622908500/14932640459265.jpg" alt=""/></p>
-
-<p><strong>注意到最后两行代码。当模块正常导入时，doctest不会被执行。只有在命令行运行时，才执行doctest。所以，不必担心doctest会在非测试环境下执行。</strong></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1230,6 +1226,12 @@ if __name__ == &#39;__main__&#39;:
 	      
 		      
 			      <li class="post">
+			        <a href="14985505390356.html">使用SQLite</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14984437069936.html">数据转换器</a>
 			      </li>
 		     
@@ -1249,12 +1251,6 @@ if __name__ == &#39;__main__&#39;:
 		      
 			      <li class="post">
 			        <a href="14980135145677.html">Caffe中的Net</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14974936829967.html">Caffe中Layer的学习</a>
 			      </li>
 		     
 		  

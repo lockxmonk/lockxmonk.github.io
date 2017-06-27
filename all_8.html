@@ -113,6 +113,89 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14925924499918.html">
+                
+                  <h1>使用第三方模块</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在Python中，安装第三方模块，是通过setuptools这个工具完成的。Python有两个封装了setuptools的包管理工具：<code>easy_install和pip</code>。<font color=red>目前官方推荐使用<code>pip</code>。</font></p>
+
+<p>Mac和linux本身自带pip，不用安装，在win下需要安装。这里不再过多叙述。</p>
+
+<p>这里试着安装一个第三方库：<strong>Python Imaging Library</strong>，这是Python下非常强大的处理图像的工具库。一般来说，第三方库都会在Python官方的<a href="http://pypi.python.org">http://pypi.python.org</a>网站注册，要安装一个第三方库，必须先知道该库的名称，可以在官网或者pypi上搜索，比如Python Imaging Library的名称叫PIL，因此，安装Python Imaging Library的命令就是：</p>
+
+<p><del>pip install PIL</del>（现在用pillow来代替PIL）</p>
+
+<pre><code>sudo pip install Pillow
+</code></pre>
+
+<p>处理图片的方法为：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+from PIL import Image
+
+im = Image.open(&#39;icon.png&#39;)
+print im.format, im.size, im.mode
+
+im.thumbnail((150,100))
+im.save(&#39;thumb.jpg&#39;,&#39;JPEG&#39;)
+</code></pre>
+
+<p><img src="media/14925924499918/14926575371706.jpg" alt=""/><br/>
+将原图<code>icon.png</code>:<br/>
+<img src="media/14925924499918/icon.png" alt="icon"/></p>
+
+<p>生成一个名为<code>thumb.jpg</code>的图片：<br/>
+<img src="media/14925924499918/thumb.jpg" alt="thumb"/></p>
+
+<blockquote>
+<p>这两张图暂时没有看出明显的区别，需要深入研究。</p>
+</blockquote>
+
+<p>默认情况下，Python解释器会搜索当前目录、所有已安装的内置模块和第三方模块，搜索路径存放在<code>sys</code>模块的<code>path</code>变量中：</p>
+
+<pre><code>&gt;&gt;&gt; import sys
+&gt;&gt;&gt; sys.path
+[&#39;&#39;, &#39;/Library/Python/2.7/site-packages/pip-8.1.1-py2.7.egg&#39;, 
+&#39;/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python27.zip&#39;,... ]
+</code></pre>
+
+<p>想要添加自己的搜索目录可以：</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; import sys
+&gt;&gt;&gt; sys.path.append(&#39;/Users/michael/my_py_scripts&#39;)
+</code></pre>
+
+<p><font color=red>这种方法是在运行时修改，运行结束后失效。</font></p>
+
+<p>第二种方法是设置环境变量<code>PYTHONPATH</code>这里不做详述。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14922429288489.html">
                 
                   <h1>使用模块</h1>
@@ -694,53 +777,6 @@ now()
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14921312042142.html">
-                
-                  <h1>匿名函数</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>当我们在传入函数时，有些时候，不需要显式地定义函数，直接传入匿名函数更方便。</p>
-
-<p>关键字<code>lambda</code>表示匿名函数</p>
-
-<p><strong>匿名函数有个限制，就是只能有一个表达式，不用写<code>return</code>，返回值就是该表达式的结果。</strong></p>
-
-<p>例如：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-print map(lambda x:x*x, [1,2,3,4,5,6])
-</code></pre>
-
-<p><img src="media/14921312042142/14921315287449.jpg" alt=""/></p>
-
-<p><font color=red>其中冒号前面的x表示函数参数。</font></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -824,6 +860,12 @@ print map(lambda x:x*x, [1,2,3,4,5,6])
 	      
 		      
 			      <li class="post">
+			        <a href="14985505390356.html">使用SQLite</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14984437069936.html">数据转换器</a>
 			      </li>
 		     
@@ -843,12 +885,6 @@ print map(lambda x:x*x, [1,2,3,4,5,6])
 		      
 			      <li class="post">
 			        <a href="14980135145677.html">Caffe中的Net</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14974936829967.html">Caffe中Layer的学习</a>
 			      </li>
 		     
 		  
