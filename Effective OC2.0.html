@@ -113,6 +113,156 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14986374781793.html">
+                
+                  <h1>第六条 理解"属性" 这一概念</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>用Objective-C等面向对象语言编程时，“对象”（object)就是“基本构造单元&quot;（building block),开发者可以通过对象来存储并传递数据。在对象之间传递数据并执行任务的过程就叫做“消息传递”（Messaging)。若想编写出髙效且易维护的代码，就一定要熟悉这两个特性的工作原理。</p>
+
+<p>当应用程序运行起来以后,为其提供相关支持的代码叫做<strong>“Objective-C运行期环境”(Objective-C runtime)</strong>,它提供了一些使得对象之间能够传递消息的重要函数，并且包含创建类实例所用的全部逻辑。在理解了运行期环境中各个部分协同工作的原理之后，你的开发水<br/>
+平将会进一步提升。</p>
+
+<h2 id="toc_0">属性</h2>
+
+<p>“属性”（property)是Objecive-C的一项特性，用于封装对象中的数据。Objective-C对象通常会把其所需要的数据保存为各种实例变量。实例变量一般通过“存取方法”（access method)来访问。其中，“获取方法&quot;（getter)用于读取变量值，&quot;设置方法&quot;（setter)用于写入变量值。这个概念已经定型，并且经由“属性”这一特性而成为Objective-C 2.0的一部分,开发者可以令编译器自动编写与属性相关的存取方法。此特性引入了一种新的“点语法”（dot syntax),使开发者可以更为容易地依照类对象来访问存放于其中的数据。你也许已经使用过“属性”这个概念了，不过你未必知道其全部细节。而且，还有很多与属性有关的麻烦事。<strong>第6条将会告诉大家有哪些问题可以用属性来解决，并指出其中所体现出来的关键特性。</strong>在描述个人信息的类中，也许会存放人名、生日、地址等内容。可以在类接口的public<br/>
+区段中声明一些实例变量：</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSObject {
+@public
+    NSString *_firstName;
+    NSString *_lastName;
+@private
+    NSString *_someInternalData;
+}
+@end
+
+</code></pre>
+
+<p>这种写法在其他语言中,java或者c++中比较常见,但是编写Objective-C代码时却很少这么做。这种写法的问题是：<strong>对象布局在编译期（compile time)就已经固定了。只要碰到访问firstName变量的代码，编译器就把其替换为“偏移量”（offset),这个偏移量是“硬编码”（hardcode),表示该变M距离存放对象的<br/>
+内存区域的起始地址有多远。</strong></p>
+
+<p>这种写法的问题是,如果又增加一个实例变量,就麻烦了,例如:</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSObject {
+@public
+    NSString *_dataOfBirth;
+    NSString *_firstName;
+    NSString *_lastName;
+@private
+    NSString *_someInternalData;
+}
+@end
+
+</code></pre>
+
+<p>原来表示<code>_firstName</code>的偏移量现在却指向<code>dateOfBirth</code>了。把偏移量硬编码于其中的那些代码都会读取到错误的值。</p>
+
+<p><strong>如果代码使用了编译期计算出来的偏移量，那么在修改类定义之后必须重新编译，否则就会出错。</strong></p>
+
+<p>例如，某个代码库中的代码使用了一份旧的类定义。如果和其相链接的代码使用了新的类定义，那么运行时就会出现不兼容现象（incompatibility)。各种编程语言都有应对<br/>
+此问题的办法。<strong>Objective-C的做法是，把实例变量当做一种存储偏移量所用的“特殊变量”(special variable),交由“类对象”（class object)保管。偏移量会在运行期査找，如果类的定义变了，那么存储的偏移量也就变了</strong>，这样的话，无论何时访问实例变量，总能使用正确的偏移最。甚至可以在运行期向类中新增实例变量，这就是稳固的<strong>“应用程序二进制接口”（Application Binary Interface，ABI)</strong>。有了这种“稳固的”（nonfragile)的ABI，我们就可以在“class-continuation分类”或实现文件中定义实例变量了。所以说，<font color=red><strong>不一定要在接口中把全部实例变量都声明好，可以将某些变量从接口的public区段里移走，以便保护与类实现有关的内部信息</strong></font>。</p>
+
+<p>下面我们就要来讨论另一种解决方法,也就是&quot;属性&quot;,<strong>我们尽量不要直接访问实例变量，而应该通过存取方法来做。虽说属性最终还是得通过实例变量来实现，但它却提供了一种简洁的抽象机制。</strong>你可以自己编写存取方法，然而在正规的Objective-C编码风格中，存取方法有着严格的命名规范。正因为有了这种严格的命名规范，所以Objective-C这门语言才能根据名称自动创建出存取方法。这时<code>@property</code>语法就派上用场了。</p>
+
+<p>在对象接口的定义中，<strong><font color=red>可以使用属性，这是一种标准的写法，能够访问封装在对象里的数据。因此，也可以把属性当做一种简称，其意思是说：编译器会自动写出一套存取方法,用以访问给定类型中具有给定名称的变量。</font></strong>,例如下面这个类：</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSObject
+@property NSString *firstName;
+@property NSString *lastName;
+
+@end
+
+</code></pre>
+
+<p>对于该类的使用者来说，上述代码写出来的类与下面这种写法等效：</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSObject
+- (NSString*)firstName;
+- (void) setFirstName: (NSString*) firstName;
+- (NSString*)lastName;
+- (void)setLastName:(NSString*)lastName;
+@end
+
+</code></pre>
+
+<p>要访问属性我们可以使用<strong>点语法</strong>,与c语言类似.使用“点语法”和直接调用存取方法之间没有丝毫差别:</p>
+
+<pre><code class="language-objc">
+EOCPerson *aPerson = [Person new];
+aPerson.firstName = @&quot;Bob&quot;; //Same as:
+[aPerson setFirstName:@&quot;Bob&quot;];
+
+NSString *lastName = aPerson.lastName; //Same as:
+NSString *lastName = [aPerson lastName];
+
+</code></pre>
+
+<p>如果使用了属性的话,编译器会自动编写这些属性的访问方法.此过程叫做“自动合成”（autosynthesis)。需要强调的是，这个过程由编译器在编译期执行，所以编辑器里看不到这些“合成方法&quot;（synthesized method)的源代码。</p>
+
+<p>编译器还会自动向类中添加适当的实例变量,并且在属性名前面加下划线，以此作为实例变量的名字.在前例中，会生成两个实例变量，其名称分别为<code>_firstName与_lastName</code>。也可以在类的实现代码里通过<code>@synthesize</code>语法来指定实例变量的名字：</p>
+
+<pre><code class="language-objc">
+@implementation EOCPerson
+@synthesize firstName = _myFirstName;
+@synthesize lastName = _myLastName;
+@end
+
+</code></pre>
+
+<p>前述语法会将生成的实例变量命名为<code>_myFirstName与_myLastName</code>,而不再使用默认的名字。</p>
+
+<p>若不想令编译器自动合成存取方法，则可以自己实现。如果你只实现了其中一个存取方法，那么另外一个还是会由编译器来合成。还有一种办法能阻止编译器自动合成存取方<br/>
+法，就是使用<code>@dynamic</code>关键字,<strong>它会告诉编译器:不要自动创建实现属性所用的实例变量，也不要为其创建存取方法。</strong>而且，在编译访问属性的代码时，即使编译器发现没有定义存取方法，<strong>也不会报错</strong>，它相信这些方法能在运行期找到。比方说，如果从CoreData框架中的<code>NSManagedObject</code>类里继承了一个子类，那么就需要在运行期动态创建存取方法。继承<code>NSManagedObject</code>时之所以要这样做，是因为子类的某些属性不是实例变量，其数据来自后端的数据库中。所以:</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSManagedObject
+@property NSString *firstName;
+@property NSString *lastName;
+@end
+
+@implementation EOCPerson
+@dynamic firstName, lastName;
+
+@end
+</code></pre>
+
+<blockquote>
+<p>编译器不会为上面这个类自动合成存取方法或实例变量。如果用代码访问其中的属性，编译器也不会发出警示信息.</p>
+</blockquote>
+
+<h2 id="toc_1">属性特质</h2>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/28</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14843637552703.html">
                 
                   <h1>第5条：用枚举表示状态、选项、状态码</h1>
@@ -255,7 +405,7 @@ switch (currentState) {
                     <span class="date">2017/1/14</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E7%86%9F%E6%82%89oc.html'>第一章 熟悉oc</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -348,7 +498,7 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
                     <span class="date">2017/1/13</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E7%86%9F%E6%82%89oc.html'>第一章 熟悉oc</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -364,12 +514,44 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
 			<div class="article">
                 <a class="clearlink" href="14842776114163.html">
                 
-                  <h1>第一章 熟悉Objective-C</h1>
+                  <h1></h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<h2 id="toc_0">第1条：了解Objective—C语言的起源</h2>
+                        	<h1 id="toc_0">第1条：了解Objective—C语言的起源</h1>
+
+<ul>
+<li>
+<a href="#toc_0">第1条：了解Objective—C语言的起源</a>
+<ul>
+<li>
+<a href="#toc_1">第2条：在类的头文件中尽量少引入其它头文件</a>
+</li>
+<li>
+<a href="#toc_2">第3条：多用字面量语法，少用与之等价的方法</a>
+<ul>
+<li>
+<a href="#toc_3">字面数值</a>
+</li>
+<li>
+<a href="#toc_4">字面量数组</a>
+</li>
+<li>
+<a href="#toc_5">字面量字典</a>
+</li>
+<li>
+<a href="#toc_6">可变数组与字典</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_7">要点</a>
+</li>
+</ul>
+</li>
+</ul>
+
 
 <p>OC语言使用“消息结构”（messageing structure）而不是函数调用。OC是由Smalltalk演化而来。主要区别为：</p>
 
@@ -519,7 +701,7 @@ mutableDictionary[@&quot;lastName&quot;] = @&quot;Galloway&quot;;
                     <span class="date">2017/1/13</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E7%86%9F%E6%82%89oc.html'>第一章 熟悉oc</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -615,6 +797,18 @@ mutableDictionary[@&quot;lastName&quot;] = @&quot;Galloway&quot;;
 	      
 		      
 			      <li class="post">
+			        <a href="14986374781793.html">第六条 理解"属性" 这一概念</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14986110416063.html">Caffe模型</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14985505390356.html">使用SQLite</a>
 			      </li>
 		     
@@ -628,18 +822,6 @@ mutableDictionary[@&quot;lastName&quot;] = @&quot;Galloway&quot;;
 		      
 			      <li class="post">
 			        <a href="14982657549571.html">Caffe I/O模块</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14980252836745.html">MAC下openBlas的安装</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14980135145677.html">Caffe中的Net</a>
 			      </li>
 		     
 		  

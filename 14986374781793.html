@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Caffe目录结构 - LZH007
+  第六条 理解"属性" 这一概念 - LZH007
   
   </title>
   
@@ -113,14 +113,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>Caffe目录结构</h1>
+          <h1>第六条 理解"属性" 这一概念</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/5/24</span>
+          <span class="date">2017/6/28</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
+              <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
            
          
           <span class="comments">
@@ -133,82 +133,124 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>我们这里先了解一下caffe的目录结构:<br/>
-<img src="media/14955929300450/14961936456285.jpg" alt=""/><br/>
-<img src="media/14955929300450/14961936868967.jpg" alt=""/><br/>
-<img src="media/14955929300450/14961937240927.jpg" alt=""/><br/>
-其中主要关注的就是:include/,src/和tools/,三个目录,需要分析的代码都包含在这里面.</p>
+      <p>用Objective-C等面向对象语言编程时，“对象”（object)就是“基本构造单元&quot;（building block),开发者可以通过对象来存储并传递数据。在对象之间传递数据并执行任务的过程就叫做“消息传递”（Messaging)。若想编写出髙效且易维护的代码，就一定要熟悉这两个特性的工作原理。</p>
 
-<p>在阅读代码时,如何快速追踪某个关键词?传统的方法是打开某个文件,之后用查找命令来查找关键词.<br/>
-这了我们介绍另一种方法,利用<code>grep</code>命令:</p>
+<p>当应用程序运行起来以后,为其提供相关支持的代码叫做<strong>“Objective-C运行期环境”(Objective-C runtime)</strong>,它提供了一些使得对象之间能够传递消息的重要函数，并且包含创建类实例所用的全部逻辑。在理解了运行期环境中各个部分协同工作的原理之后，你的开发水<br/>
+平将会进一步提升。</p>
 
-<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;REGISTER_LAYER_CREATOR&quot; *
+<h2 id="toc_0">属性</h2>
+
+<p>“属性”（property)是Objecive-C的一项特性，用于封装对象中的数据。Objective-C对象通常会把其所需要的数据保存为各种实例变量。实例变量一般通过“存取方法”（access method)来访问。其中，“获取方法&quot;（getter)用于读取变量值，&quot;设置方法&quot;（setter)用于写入变量值。这个概念已经定型，并且经由“属性”这一特性而成为Objective-C 2.0的一部分,开发者可以令编译器自动编写与属性相关的存取方法。此特性引入了一种新的“点语法”（dot syntax),使开发者可以更为容易地依照类对象来访问存放于其中的数据。你也许已经使用过“属性”这个概念了，不过你未必知道其全部细节。而且，还有很多与属性有关的麻烦事。<strong>第6条将会告诉大家有哪些问题可以用属性来解决，并指出其中所体现出来的关键特性。</strong>在描述个人信息的类中，也许会存放人名、生日、地址等内容。可以在类接口的public<br/>
+区段中声明一些实例变量：</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSObject {
+@public
+    NSString *_firstName;
+    NSString *_lastName;
+@private
+    NSString *_someInternalData;
+}
+@end
+
 </code></pre>
 
-<p><img src="media/14955929300450/14955931415464.jpg" alt=""/><br/>
-我们可以看到,日志输出了很多文件.这种方法无需分别打开每个文件,也能直观的显示了所有包含这个宏的文件名和行号.</p>
+<p>这种写法在其他语言中,java或者c++中比较常见,但是编写Objective-C代码时却很少这么做。这种写法的问题是：<strong>对象布局在编译期（compile time)就已经固定了。只要碰到访问firstName变量的代码，编译器就把其替换为“偏移量”（offset),这个偏移量是“硬编码”（hardcode),表示该变M距离存放对象的<br/>
+内存区域的起始地址有多远。</strong></p>
 
-<p>这里我们用<code>grep</code>命令来搜索一个宏调用:<code>REGISTER_LAYER_CREATOR</code>,<br/>
-命令行参数解释为:</p>
+<p>这种写法的问题是,如果又增加一个实例变量,就麻烦了,例如:</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSObject {
+@public
+    NSString *_dataOfBirth;
+    NSString *_firstName;
+    NSString *_lastName;
+@private
+    NSString *_someInternalData;
+}
+@end
+
+</code></pre>
+
+<p>原来表示<code>_firstName</code>的偏移量现在却指向<code>dateOfBirth</code>了。把偏移量硬编码于其中的那些代码都会读取到错误的值。</p>
+
+<p><strong>如果代码使用了编译期计算出来的偏移量，那么在修改类定义之后必须重新编译，否则就会出错。</strong></p>
+
+<p>例如，某个代码库中的代码使用了一份旧的类定义。如果和其相链接的代码使用了新的类定义，那么运行时就会出现不兼容现象（incompatibility)。各种编程语言都有应对<br/>
+此问题的办法。<strong>Objective-C的做法是，把实例变量当做一种存储偏移量所用的“特殊变量”(special variable),交由“类对象”（class object)保管。偏移量会在运行期査找，如果类的定义变了，那么存储的偏移量也就变了</strong>，这样的话，无论何时访问实例变量，总能使用正确的偏移最。甚至可以在运行期向类中新增实例变量，这就是稳固的<strong>“应用程序二进制接口”（Application Binary Interface，ABI)</strong>。有了这种“稳固的”（nonfragile)的ABI，我们就可以在“class-continuation分类”或实现文件中定义实例变量了。所以说，<font color=red><strong>不一定要在接口中把全部实例变量都声明好，可以将某些变量从接口的public区段里移走，以便保护与类实现有关的内部信息</strong></font>。</p>
+
+<p>下面我们就要来讨论另一种解决方法,也就是&quot;属性&quot;,<strong>我们尽量不要直接访问实例变量，而应该通过存取方法来做。虽说属性最终还是得通过实例变量来实现，但它却提供了一种简洁的抽象机制。</strong>你可以自己编写存取方法，然而在正规的Objective-C编码风格中，存取方法有着严格的命名规范。正因为有了这种严格的命名规范，所以Objective-C这门语言才能根据名称自动创建出存取方法。这时<code>@property</code>语法就派上用场了。</p>
+
+<p>在对象接口的定义中，<strong><font color=red>可以使用属性，这是一种标准的写法，能够访问封装在对象里的数据。因此，也可以把属性当做一种简称，其意思是说：编译器会自动写出一套存取方法,用以访问给定类型中具有给定名称的变量。</font></strong>,例如下面这个类：</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSObject
+@property NSString *firstName;
+@property NSString *lastName;
+
+@end
+
+</code></pre>
+
+<p>对于该类的使用者来说，上述代码写出来的类与下面这种写法等效：</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSObject
+- (NSString*)firstName;
+- (void) setFirstName: (NSString*) firstName;
+- (NSString*)lastName;
+- (void)setLastName:(NSString*)lastName;
+@end
+
+</code></pre>
+
+<p>要访问属性我们可以使用<strong>点语法</strong>,与c语言类似.使用“点语法”和直接调用存取方法之间没有丝毫差别:</p>
+
+<pre><code class="language-objc">
+EOCPerson *aPerson = [Person new];
+aPerson.firstName = @&quot;Bob&quot;; //Same as:
+[aPerson setFirstName:@&quot;Bob&quot;];
+
+NSString *lastName = aPerson.lastName; //Same as:
+NSString *lastName = [aPerson lastName];
+
+</code></pre>
+
+<p>如果使用了属性的话,编译器会自动编写这些属性的访问方法.此过程叫做“自动合成”（autosynthesis)。需要强调的是，这个过程由编译器在编译期执行，所以编辑器里看不到这些“合成方法&quot;（synthesized method)的源代码。</p>
+
+<p>编译器还会自动向类中添加适当的实例变量,并且在属性名前面加下划线，以此作为实例变量的名字.在前例中，会生成两个实例变量，其名称分别为<code>_firstName与_lastName</code>。也可以在类的实现代码里通过<code>@synthesize</code>语法来指定实例变量的名字：</p>
+
+<pre><code class="language-objc">
+@implementation EOCPerson
+@synthesize firstName = _myFirstName;
+@synthesize lastName = _myLastName;
+@end
+
+</code></pre>
+
+<p>前述语法会将生成的实例变量命名为<code>_myFirstName与_myLastName</code>,而不再使用默认的名字。</p>
+
+<p>若不想令编译器自动合成存取方法，则可以自己实现。如果你只实现了其中一个存取方法，那么另外一个还是会由编译器来合成。还有一种办法能阻止编译器自动合成存取方<br/>
+法，就是使用<code>@dynamic</code>关键字,<strong>它会告诉编译器:不要自动创建实现属性所用的实例变量，也不要为其创建存取方法。</strong>而且，在编译访问属性的代码时，即使编译器发现没有定义存取方法，<strong>也不会报错</strong>，它相信这些方法能在运行期找到。比方说，如果从CoreData框架中的<code>NSManagedObject</code>类里继承了一个子类，那么就需要在运行期动态创建存取方法。继承<code>NSManagedObject</code>时之所以要这样做，是因为子类的某些属性不是实例变量，其数据来自后端的数据库中。所以:</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSManagedObject
+@property NSString *firstName;
+@property NSString *lastName;
+@end
+
+@implementation EOCPerson
+@dynamic firstName, lastName;
+
+@end
+</code></pre>
 
 <blockquote>
-<p>-n  ---显示行号,便于定位<br/>
--H  ---显示文件名,便与定位<br/>
--R  ---递归查找每个子目录,适合工程较大,分多个目录存放的场景</p>
+<p>编译器不会为上面这个类自动合成存取方法或实例变量。如果用代码访问其中的属性，编译器也不会发出警示信息.</p>
 </blockquote>
 
-<p>利用这种方法可以很容易的在caffe源码中定位很多内容.</p>
-
-<h2 id="toc_0">卷基层</h2>
-
-<p>这里我们假定卷积层有<code>L</code>个输出通道和<code>K</code>个输入通道,于是需要有<code>LK,L=50,K=20</code>个卷积核实现通道数目的转换.这里我们假定卷集核大小为<code>I*J = 5*5</code>,每个输出通道的特征图大小为<code>M*N = 8*8</code>,则该层每个样本做一次前向传播时卷积层计算量为:<br/>
-<code>Calculations(MAC) = I*J*M*N*K*L = 5*5*8*8*50*20=1600000MAC</code><br/>
-实际中使送入一批样本(batch),所以我们这里还需要计算量乘上批量尺寸.</p>
-
-<p>我们这里卷积层的学习参数量为:<br/>
-<code>Params = I*J*K*L = 25000</code><br/>
-所以计算量-参数量之比为<code>CPR=Calculations/Params = M*N = 64</code><br/>
-<font color=red><strong>所以我们得出结论是:卷基层的输出特征图尺寸越大,CPR值越大,参数重复利用率越高.,若一次性输入一批数据(B个样本),则CPR值可再提高B倍.</strong></font></p>
-
-<h2 id="toc_1">全连接层</h2>
-
-<p>早在卷积神经网络出现之前,最早的深度学习网络计算类型都是全连接形式的.如下所示.<br/>
-<img src="media/14955929300450/14961962825939.jpg" alt=""/><br/>
-每个节点与相邻层的所有节点都有连接关系,这是全连接层名称的由来.</p>
-
-<p>全连接层的主要计算类型为矩阵-向量乘(GEMV).假设输入节点组成的向量为x,维度为D,输出节点组成的向量为y,维度为V,则全连接层计算可以表示为:<br/>
-\[y=Wx\]<br/>
-其中,W为<code>V*D</code>维权值矩阵.</p>
-
-<p>我们分析全连接层的参数:<br/>
-<img src="media/14955929300450/14961986814721.jpg" alt=""/></p>
-
-<p><img src="media/14955929300450/14961986616938.jpg" alt=""/></p>
-
-<p>得出输出<code>V=500</code>,输入<code>D=50*4*4 = 800</code>(其中50是输入数量,4*4位图的尺寸)</p>
-
-<p>则全连接层单样本前向传播计算量为:<br/>
-\[<br/>
-CalculationsMAC = V*D<br/>
-                = 800 * 500<br/>
-                = 400000<br/>
-\]<br/>
-参数统计量为:<br/>
-\[<br/>
-Params = V*D<br/>
-       = 800 * 500<br/>
-       = 400000<br/>
-\]<br/>
-所以CPR值为1</p>
-
-<p>所以得出结论,全连接层的CPR值始终为1,与输入,输出维度无关.所以单样本前向向传播计算时,权值重复利用率很低.<br/>
-    我们将一批(B个)样本逐列拼接成矩阵X,一次性通过全连接层,得到一批输出向量构成的矩阵Y,称作批处理(矩阵-矩阵乘计算GEMM):<br/>
-    \[<br/>
-    Y=WX<br/>
-    \]<br/>
-这样全连接层前向计算量提高了B倍,而参数量不变,因此CPR提高了B倍.</p>
-
-<p>与卷积层相比，全连接层参数量是其16倍，而计算量只有其25%.如果输出特征图尺寸相同<code>（M*V = V)</code>，卷积层的CPR值为全连接层的<code>M*N</code>倍。也就是说，卷积层在输出特征图维度实现了<mark>权值共享</mark>。这是降低参数量的重要举措。与此同吋，卷枳层<mark>局部连接</mark>特性 (相比全连接）也大幅减少了参数量,这使得CNN网络中前几层卷积层参数量占比小，计算量占比大；而后几层全连接层参数量占比大，计算量占比小。大多数CNN模型都符合这个特点。<font color=red><strong>因此我们在进行计算加速优化时,重点放在卷积层；而在进行参数优化、权值剪裁时，重点放在全连接层，</strong></font></p>
+<h2 id="toc_1">属性特质</h2>
 
 
     
@@ -219,16 +261,13 @@ Params = V*D<br/>
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14956131169957.html" 
-          title="Previous Post: 在ios中判断一个viewcontroller是都已经正常present">&laquo; 在ios中判断一个viewcontroller是都已经正常present</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14955245049549.html" 
-          title="Next Post: 运行caffe框架中的cifar10样例">运行caffe框架中的cifar10样例 &raquo;</a>
+          <a  href="14986110416063.html" 
+          title="Next Post: Caffe模型">Caffe模型 &raquo;</a>
       
       </p>
         </div>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  MAC OS - LZH007
+  Caffe模型 - LZH007
   
   </title>
   
@@ -104,119 +104,232 @@
        
 
  <script type="text/javascript">
-	$(function(){
-		$('#menu_item_index').addClass('is_active');
-	});
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
 </script>
 <div class="row">
-	<div class="large-8 medium-8 columns">
-		<div class="markdown-body home-categories">
-		
-			<div class="article">
-                <a class="clearlink" href="14974281629389.html">
-                
-                  <h1>怎样移除OSXRESERVED分区(如果BootCamp Assistant在安装之后没有成功删除这个分区)</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ol>
-<li>打开磁盘工具</li>
-<li>点击主物理磁盘(不是下边的分区)</li>
-<li>点击分区按钮</li>
-<li>When you see the pie chart, click on the OSXRESERVED partition in the pie chart</li>
-<li>点击<code>-</code>标志</li>
-<li>click apply</li>
-</ol>
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Caffe模型</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/6/28</span>
 
-<p>Thats it! </p>
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
+           
+         
+          <span class="comments">
+            
 
-<p><strong>DON&#39;T use the ERASE Button in Disk Utility! That will cause problems and it won&#39;t reallocate space back.</strong></p>
+            
+          </span>
 
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='MAC%20OS.html'>MAC OS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
+        </div>
+      </div><!-- article -->
 
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14974276192148.html">
-                
-                  <h1>重新利用boot camp安装win10</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>由于原来给win10分的磁盘容量太小,而mac又不能在后续动态给win分区增加磁盘容量,所以只能重新安装分区了.</p>
+      <div class="article-content">
+      
 
-<ol>
-<li>打开mac系统工具中的磁盘<code>磁盘工具</code>选择总的磁盘,点击上方的<code>分区</code>按钮,将系统中其它分区删掉(通过点击饼图中的对应区域,点击下方的<code>-</code>号),就可以将分区删掉,合并到mac系统磁盘.其他分区比如之前安装win产生的<code>OSXRESERVED Partition</code> </li>
-<li>打开bootcamp,点击恢复按钮,将之前的win系统抹掉,之后就会发现,你的mac系统磁盘变回来了.</li>
-<li>重启一下,之后打开bootcamp,点击下方的<code>继续</code>按钮,选择系统iso镜像,为win系统选择分区大小(这回分多些😓).</li>
-<li>点击确定,等待下载Windows支持软件.
-<img src="media/14974276192148/14974281373736.jpg" alt=""/></li>
-<li>安装之后,在OSRESEVER分区中,的bootcamp文件夹中打开安装驱动的程序.</li>
-</ol>
+<p>我们之前学习过,一个完整的深度学习系统最核心的两个方面是<strong>数据</strong>和<strong>模型</strong>。今大我们 主要关注模型。一个深度学习模型通常由<strong>三部分</strong>参数组成：</p>
 
-<p>到此win10 应该就安装好了~</p>
+<ul>
+<li>可学习参数（Leamable Parameter),又称可训练参数、神经网络权系数、权重，其数值<strong>由模型初始化参数、误差反向传播过程控制</strong>,一般不可人工干预.</li>
+<li>结构参数（Archetecture Parameter),包括<strong>卷积层/全连接层/下采样层数目、卷积核数目、 卷积核大小等描述网络结构的参数</strong>,一旦设定好,在网络训练阶段不能更改;值得注意的是,训练阶段网络结构参数和预测阶段结构参数很可能不同。</li>
+<li>训练超参数（Hyper-Parameter),用来控制网络训练收敛的参数，训练阶段可以自动或手动调节以获得更好的效果，预测阶段不需要该参数.</li>
+</ul>
 
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='MAC%20OS.html'>MAC OS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
+<p>在Caffe中，一个模型的三部分参数分别由<strong>不同模块定义和实现</strong>:</p>
 
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-              
+<ul>
+<li><strong>可学习参数</strong>在内存中使用Blob对象保持，必要时以二进制ProtoBuffer文件(*.caffemodel)形态序列化并存储于磁盘上，便于进一步微调（finetune,又称精调）、共享（例如参数服务器Parameter Server, PS)、性能评估（benchmark)。</li>
+<li><strong>结构参数</strong>使用ProtoBuffer文本格式（*.prototxt)描述，网络初始化时通过该描述文件构建Net对象、Layer对象形成有向无环图结构，在Layer与Layer之间、Net输入源和输出阱均为持有数据和中间结果的Blob对象。</li>
+<li><strong>训练超参数</strong>同样使用ProtoBuffer文本格式（*.prototxt)描述，训练阶段利用该描述文件构建求解器（Solver)对象，该对象按照一定规则在训练网络时自动调节这些超参数值。</li>
+</ul>
+
+<p>我们在MNIST例子中对LeNet-5模型稍微修改一下.变成逻辑回归（Logistic Regression, LR)分类器。<br/>
+<img src="media/14986110416063/14986122892113.jpg" alt=""/></p>
+
+<p>复制一份<code>examples/mnist/lenet_train_test.prototxt</code>,重命名为 <code>lenet_lr.prototxt</code>，修改内容如下:</p>
+
+<pre><code class="language-protobuf">
+name: &quot;LeNet&quot;
+layer {
+  name: &quot;mnist&quot;
+  type: &quot;Data&quot;
+  top: &quot;data&quot;
+  top: &quot;label&quot;
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: &quot;examples/mnist/mnist_train_lmdb&quot;
+    batch_size: 64
+    backend: LMDB
+  }
+}
+layer {
+  name: &quot;mnist&quot;
+  type: &quot;Data&quot;
+  top: &quot;data&quot;
+  top: &quot;label&quot;
+  include {
+    phase: TEST
+  }
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: &quot;examples/mnist/mnist_test_lmdb&quot;
+    batch_size: 100
+    backend: LMDB
+  }
+}
+layer {
+  name: &quot;ip&quot;
+  type: &quot;InnerProduct&quot;
+  bottom: &quot;data&quot;
+  top: &quot;ip&quot;
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 20
+    weight_filler {
+      type: &quot;xavier&quot;
+    }
+    bias_filler {
+      type: &quot;constant&quot;
+    }
+  }
+}
+layer {
+  name: &quot;accuracy&quot;
+  type: &quot;Accuracy&quot;
+  bottom: &quot;ip&quot;
+  bottom: &quot;label&quot;
+  top: &quot;accuracy&quot;
+  include {
+    phase:TEST
+  }
+}
+layer {
+  name: &quot;loss&quot;
+  type: &quot;SoftmaxWithLoss&quot;
+  bottom: &quot;ip&quot;
+  bottom: &quot;label&quot;
+  top: &quot;loss&quot;
+}
+
+</code></pre>
+
+<p>复制一份<code>examples/mnist/lenet_solver.prototxt</code>，重命名为<code>lenet_lr_solver.prototxt</code>,修改内容<br/>
+如下:</p>
+
+<pre><code class="language-protobuf">
+# The train/test net protocol buffer definition
+net: &quot;examples/mnist/lenet_lr.prototxt&quot;
+# test_iter specifies how many forward passes the test should carry out.
+# In the case of MNIST, we have test batch size 100 and 100 test iterations,
+# covering the full 10,000 testing images.
+test_iter: 100
+# Carry out testing every 500 training iterations.
+test_interval: 500
+# The base learning rate, momentum and the weight decay of the network.
+base_lr: 0.01
+momentum: 0.9
+weight_decay: 0.0005
+# The learning rate policy
+lr_policy: &quot;inv&quot;
+gamma: 0.0001
+power: 0.75
+# Display every 100 iterations
+display: 100
+# The maximum number of iterations
+max_iter: 10000
+# snapshot intermediate results
+snapshot: 5000
+snapshot_prefix: &quot;examples/mnist/lenet&quot;
+# solver mode: CPU or GPU
+solver_mode: CPU
+
+</code></pre>
+
+<p>然后运行训练命令,在命令行输入:</p>
+
+<pre><code>./build/tools/caffe train --solver=examples/mnist/lenet_lr_solver.prototxt
+</code></pre>
+
+<p>但是发现报错了:<br/>
+<img src="media/14986110416063/14986154204478.jpg" alt=""/></p>
+
+<p>通过上述错误描述,发现是lmdb数据文件没有的问题....</p>
+
+<p>运行<code>./examples/mnist/create_mnist.sh</code>脚本,将之前下载过的数据转化成lmdb形式.中间的报错和解决如截图所示:</p>
+
+<p><img src="media/14986110416063/14986155733551.jpg" alt=""/></p>
+
+<p>我们成功获得到了lmdb文件.</p>
+
+<p>再次执行训练命令:</p>
+
+<pre><code>master) ✗ ./build/tools/caffe train --solver=examples/mnist/lenet_lr_solver.prototxt
+</code></pre>
+
+<p>然后就发现已经开始训练了.</p>
+
+<p>最后得到结果如图所示:<br/>
+<img src="media/14986110416063/14986195740444.jpg" alt=""/></p>
+
+<p>经过训练，可以获得在测试集上分类准确率为0.9908的模型。相比LeNet-5而言准确率降低了，这也符合直觉，因为将模型简化后参数变少，层数变少，网络表达能力变差。我们今天不关注准确率，只关注模型的表达方式。</p>
 
 
-			<div class="row">
-			  <div class="large-6 columns">
-			  <p class="text-left" style="padding-top:25px;">
-			   
-			  </p>
-			  </div>
-			  <div class="large-6 columns">
-			<p class="text-right" style="padding-top:25px;">
-			
-			</p>
-			  </div>
-			</div>
-		</div>
-	</div><!-- large 8 -->
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="14986374781793.html" 
+          title="Previous Post: 第六条 理解"属性" 这一概念">&laquo; 第六条 理解"属性" 这一概念</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="14985505390356.html" 
+          title="Next Post: 使用SQLite">使用SQLite &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
 
  <div class="large-4 medium-4 columns">
   <div class="hide-for-small">
