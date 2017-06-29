@@ -4,7 +4,7 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-06-28T11:17:40+08:00</updated>
+  <updated>2017-06-28T17:03:28+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
@@ -146,6 +146,17 @@ NSString *lastName = [aPerson lastName];
     <updated>2017-06-28T08:50:41+08:00</updated>
     <id>https://lockxmonk.github.io/14986110416063.html</id>
     <content type="html"><![CDATA[
+<ul>
+<li>
+<a href="#toc_0">内存中的表示</a>
+</li>
+<li>
+<a href="#toc_1">磁盘上表示</a>
+</li>
+<li>
+<a href="#toc_2">Caffe Modal Zoo</a>
+</li>
+</ul>
 
 
 <p>我们之前学习过,一个完整的深度学习系统最核心的两个方面是<strong>数据</strong>和<strong>模型</strong>。今大我们 主要关注模型。一个深度学习模型通常由<strong>三部分</strong>参数组成：</p>
@@ -305,6 +316,203 @@ solver_mode: CPU
 <img src="media/14986110416063/14986195740444.jpg" alt=""/></p>
 
 <p>经过训练，可以获得在测试集上分类准确率为0.9908的模型。相比LeNet-5而言准确率降低了，这也符合直觉，因为将模型简化后参数变少，层数变少，网络表达能力变差。我们今天不关注准确率，只关注模型的表达方式。</p>
+
+<h2 id="toc_0">内存中的表示</h2>
+
+<p>从运行的log文件可以追踪模型是如何从prototxt描述变为内存中表示方式的,</p>
+
+<p>看到这行:</p>
+
+<pre><code>
+ Creating training net from net file:
+examples/mnist/lenet_lr.prototxt
+
+// ...不要在意这些细节
+Initializing net from parameters:
+
+</code></pre>
+
+<p>追踪<code>solver.cpp</code>的第87行，看到如下代码：</p>
+
+<pre><code class="language-c++">
+//前面省略..
+//在solver.hpp 中声明了SolverParameterparam_
+//它是ProtoBuffer工具生成的结构体,用来解析lenet_lr_solver.prototxt
+if (param_.has_net()) {
+    LOG_IF(INFO, Caffe::root_solver()) //打印log
+        //这里param_.net()会返回examples/mnist/lenet_lr.prototxt 
+        &lt;&lt; &quot;Creating training net from net file: &quot; &lt;&lt; param_.net();
+    ReadNetParamsFromTextFileOrDie(param_.net(), &amp;net_param);
+  }
+  
+</code></pre>
+
+<h2 id="toc_1">磁盘上表示</h2>
+
+<p>Caffe使用ProtoBuffer二进制文件有最小文件尺寸，并由ProtoBuffer工具自动生成高效的序列化/反序列化接U口(多语言支持，包括C++、Java、Python)，以及可读性好、兼容二进制文件的文本格式.</p>
+
+<p>我们仍然从运行log查找线索:</p>
+
+<pre><code>Snapshotting to binary proto file
+examples/mn is t/lenet__iter_l 0000. caffemodel
+
+Snapshotting solver state to binary proto file examples/mnist/Xenet_iter_10000.solverstate
+
+</code></pre>
+
+<p>其中,<code>.caffemodel</code>文件是在特定训练间隙保存的二进制文件，包含当前网络各层的权值状态;而<code>.solverstate</code>是与<code>.caffemodel</code>一起产生的二进制文件，<strong>包含从上次停止点恢复训练模型所需的信息</strong>。我们具体看下列代码：</p>
+
+<p>追踪<code>solver.cpp</code>的第445行,上下文信息如下所示:</p>
+
+<pre><code class="language-c++">
+template &lt;typename Dtype&gt;
+string Solver&lt;Dtype&gt;::SnapshotToBinaryProto() {
+//得到模型文件名
+  string model_filename = SnapshotFilename(&quot;.caffemodel&quot;);
+  LOG(INFO) &lt;&lt; &quot;Snapshotting to binary proto file &quot; &lt;&lt; model_filename;
+  NetParameter net_param;
+  //将net_转换为Netparameter
+  net_-&gt;ToProto(&amp;net_param, param_.snapshot_diff());
+  ///写入 ProtoBuffer 二进制文件，这里是 lenet_iter_10000.caffemodel
+    WriteProtoToBinaryFile(net_param, model_filename);
+  return model_filename;
+}
+
+</code></pre>
+
+<p>追踪<code>sgd_solver.cpp</code>的259行:</p>
+
+<pre><code class="language-c++">
+template &lt;typename Dtype&gt;
+void SGDSolver&lt;Dtype&gt;::SnapshotSolverStateToBinaryProto(
+    const string&amp; model_filename) {
+  SolverState state;    //创建一个序列化对象
+  state.set_iter(this-&gt;iter_);  //记录当前的迭代次数
+  state.set_learned_net(model_filename); //记录网络描述文件
+  state.set_current_step(this-&gt;current_step_);  //记录当前步进值
+  state.clear_history();    //清空容器,准备接纳新内容
+  for (int i = 0; i &lt; history_.size(); ++i) {
+    // Add history 记录权值的历史信息
+    BlobProto* history_blob = state.add_history();
+    history_[i]-&gt;ToProto(history_blob);
+  }
+  string snapshot_filename = Solver&lt;Dtype&gt;::SnapshotFilename(&quot;.solverstate&quot;);
+  LOG(INFO)
+    &lt;&lt; &quot;Snapshotting solver state to binary proto file &quot; &lt;&lt; snapshot_filename;
+    //将SolverState对象写入二进制文件（*.solverstate)
+  WriteProtoToBinaryFile(state, snapshot_filename.c_str());
+}
+
+</code></pre>
+
+<p><strong>从磁盘上将模型、求解器状态文件载入内存的过程与上面代码刚好相反，我们可自行跟踪阅读。</strong></p>
+
+<h2 id="toc_2">Caffe Modal Zoo</h2>
+
+<p>对于前面我们运行的简单模型，可以从头训练（from scrash)。然而，对于规模更大、结构更复杂的模型，从头训练需耍解决两个问题：首先是硬件计算能力。模型训练十分消耗计算资源，使用普通计算机需要相当长的时间，不经济：而且世界上每个研究机构都从头训练，重复性工作太多，不环保。其次是调参能力。<strong>同样的模型设计，可能每个人训练结果都不一致，中间调参是项技术活，控制不当会引起训练发散或训练不充分，无法达到理想的分类效果</strong>。</p>
+
+<p>为了解决上述问题,<strong>Caffe Model Zoo</strong>则提供了一个分享模型的平台，世界各地的研究人员都可以把自己的训练成果共享给社区中更多的人使用，节省人力、物力。</p>
+
+<p><strong>今天我们也站在前人的肩膀上，运行一个基于已训练模型的图片分类例程</strong>。我们首先需要下载几个文件。</p>
+
+<p>下载meta数据到当前目录:</p>
+
+<pre><code>➜  caffe git:(master) ✗ cd data/ilsvrc12
+
+➜  ilsvrc12 git:(master) ✗ ./get_ilsvrc_aux.sh
+
+Downloading...
+--2017-06-29 10:54:55--  http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz
+Resolving dl.caffe.berkeleyvision.org... 169.229.222.251
+Connecting to dl.caffe.berkeleyvision.org|169.229.222.251|:80... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: http://202.114.49.110/cache/9/02/berkeleyvision.org/6b5ff42be9dd0690a814318a14401a7f/caffe_ilsvrc12.tar.gz [following]
+--2017-06-29 10:54:56--  http://202.114.49.110/cache/9/02/berkeleyvision.org/6b5ff42be9dd0690a814318a14401a7f/caffe_ilsvrc12.tar.gz
+Connecting to 202.114.49.110:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 17858008 (17M) [application/octet-stream]
+Saving to: ‘caffe_ilsvrc12.tar.gz’
+
+caffe_ilsvrc12.tar. 100%[===================&gt;]  17.03M  9.67MB/s    in 1.8s
+
+2017-06-29 10:54:58 (9.67 MB/s) - ‘caffe_ilsvrc12.tar.gz’ saved [17858008/17858008]
+
+Unzipping...
+Done.
+
+</code></pre>
+
+<p>下载caffenet模型:</p>
+
+<pre><code>➜  ilsvrc12 git:(master) ✗ cd ../../models/bvlc_reference_caffenet
+
+➜  bvlc_reference_caffenet git:(master) ✗ wget http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
+--2017-06-29 11:14:10--  http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
+Resolving dl.caffe.berkeleyvision.org... 169.229.222.251
+Connecting to dl.caffe.berkeleyvision.org|169.229.222.251|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 243862418 (233M) [application/octet-stream]
+Saving to: ‘bvlc_reference_caffenet.caffemodel’
+
+bvlc_reference_caffen 100%[=========================&gt;] 232.56M   129KB/s    in 21m 50s
+
+2017-06-29 11:36:01 (182 KB/s) - ‘bvlc_reference_caffenet.caffemodel’ saved [243862418/243862418]
+
+</code></pre>
+
+<p>回到根目录执行:</p>
+
+<pre><code>
+➜  caffe git:(master) ✗ ./build/examples/cpp_classification/classification.bin \
+models/bvlc_reference_caffenet/deploy.prototxt \
+models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel \
+data/ilsvrc12/imagenet_mean.binaryproto \
+data/ilsvrc12/synset_words.txt \
+examples/images/cat.jpg
+
+
+</code></pre>
+
+<p>发现报错:<br/>
+<img src="media/14986110416063/14987195644285.jpg" alt=""/></p>
+
+<p>执行:</p>
+
+<pre><code>
+➜  caffe git:(master) ✗ install_name_tool -add_rpath &#39;/Users/liangzhonghao/anaconda2/lib&#39;  /usr/local/Cellar/caffe/./build/examples/cpp_classification/classification.bin
+
+</code></pre>
+
+<p>再次运行上面命令,得出结果:<br/>
+<img src="media/14986110416063/14987199347439.jpg" alt=""/></p>
+
+<p>命令行解释如下:</p>
+
+<pre><code class="language-c++">➜  caffe git:(master) ✗ ./build/examples/cpp_classification/classification.bin \        //二进制程序名
+models/bvlc_reference_caffenet/deploy.prototxt \    //模型描述文件
+models/bvlc_reference_caffenet/     bvlc_reference_caffenet.caffemodel \        //*.caffemodel模型权值文件
+data/ilsvrc12/imagenet_mean.binaryproto \       //图像均值文件
+data/ilsvrc12/synset_words.txt \    //图像类别标签信息
+examples/images/mouse.png   //输入待分类图像
+
+</code></pre>
+
+<p>打开输入图像<code>examples/images/cat.jpg</code>:</p>
+
+<p><img src="media/14986110416063/cat.jpg" alt="cat"/></p>
+
+<p>命令行输出的预测结果为:</p>
+
+<p><img src="media/14986110416063/14987205986830.jpg" alt=""/></p>
+
+<p>可见给出了5个预测结果，按照概率分布从高到低的顺序排列。这种预测结果称为<code>Top-5</code>预测结果，对当前样本而言，分类准确率为5项之和。除<code>Top-5</code>预测结果之外，还有<code>Top-3、 Top-1等</code>预测结果，对当前样木的分类正确率分别为0.6749、0.3134。</p>
+
+<p>分类准确率不仅与验证数据集有关，与模型的关系也非常密切。我们在<code>Caffe Model Zoo</code>上找到几个模型在ILSVRC 2012验证数据集上的分类效果，如图所示。<br/>
+<img src="media/14986110416063/14987207716731.jpg" alt=""/></p>
+
+<p>可见单模型<strong>分类性能最好的是BVLC GoogLeNet</strong>。</p>
+
+<p>通过掌握上面的内容，并学习其他更多深度学习模型的设计和训练方法.</p>
 
 ]]></content>
   </entry>
