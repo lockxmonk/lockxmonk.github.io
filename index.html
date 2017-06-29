@@ -239,6 +239,108 @@ NSString *lastName = [aPerson lastName];
 
 <h2 id="toc_1">属性特质</h2>
 
+<p>使用属性时还有一个问题要注意，就是其各种特质（attribute)设定也会影响编译器所生成的存取方法。比如下面这个属性就指定了三项特质：</p>
+
+<pre><code class="language-objc">
+@property (nonatomic, readwrite, copy) NSString * 
+firstName;
+
+</code></pre>
+
+<p><font color=red>属性可以拥有的特质分为四类：</font></p>
+
+<ol>
+<li><p>原子性:<br/>
+在默认情况下，由编译器所合成的方法会通过锁定机制确保其原子性（atomicity) 。如果属性具备nonatomic特质，则不使用同步锁。请注意，尽管没有名为“atomic”的特质（如果某属性不具备nonatomic特质，那它就是“原子的”（atomic)),但是仍然可以在属性特质中写明这一点，编译器不会报错。若是自己定义存取方法，那么就应该遵从与属性特质相符的原子性。</p></li>
+<li><p>读/写权限:</p>
+
+<ul>
+<li>    具备<strong>readwrite</strong>(读写）特质的属性拥有“获取方法”（getter)与“设置方法&quot;（setter)。若该属性由<code>@synthesize</code>实现，则编译器会自动生成这两个方法。</li>
+<li>    具备<strong>readonly</strong>(只读）特质的属性仅拥有获取方法<font color=red>，<strong>只有当该属性由<code>@synthesize</code>实现时，编译器才会为其合成获取方法</strong></font>。你可以用此特质把某个属性对外公开为只读属性,然后在<code>“class-cominuaticm分类”</code>中将其重新定义为读写属性。后面再详述这种做法。</li>
+</ul></li>
+<li><p>内存管理语义:<br/>
+属性用于封装数据，而数据则要有<code>“具体的所有权语义”（concrete ownership semantic)</code>。下面这一组特质<strong>仅会影响“设置方法”(setter)</strong>。例如，用“设置方法”设定一个新值时，它是应该<code>“保留&quot;(retain)</code>此值呢，还是只将其赋给底层实例变量就好？<strong>编译器在合成存取方法时，要根据此特质来决定所生成的代码。如果自己编写存取方法，那么就必须同有关属性所具备的特质相符</strong>。</p>
+
+<ul>
+<li>    <strong>assign</strong>  “设置方法”只会执行针对“纯量类型”（scalar type，例如CGFloat或NSImeger等）的简单赋值操作。</li>
+<li>    <strong>strong</strong>  此特质表明该属性定义了一种“拥有关系”（owning relationship)。为这种属性设置新值时，设置方法会先保留新值，并释放旧值，然后再将新值设置上去。</li>
+<li>    <strong>weak</strong>  此特质表明该属性定义了一种“非拥有关系”（nonowning relationship)。<strong>为这种属性设置新值时，设置方法既不保留新值，也不释放旧值</strong>。此特质同assign类似,然而在属性所指的对象遭到摧毁时，属性值也会清空（nil out)。</li>
+<li>    <strong>unsafe_unretained</strong>  此特质的语义和assign相同，但是它适用于“对象类型”（object type),该特质表达一种“非拥有关系”（“不保留”，unretained),<strong>当目标对象遭到摧毁时，属性值不会自动清空（“不安全”，unsafe),这一点与weak有区别</strong>。</li>
+<li>    <strong>copy</strong>  <font color=red>此特质所表达的所属关系与strong类似。然而设置方法并不保留新值,而是将其“拷贝”（copy)。<strong>当属性类型为<code>NSString*</code>时，经常用此特质来保护其封装性,因为传递给设置方法的新值有可能指向一个<code>NSMutableString类</code>的实例。这个类是<code>NSString的子类</code>，表示一种可以修改其值的字符串，此时若是不拷贝字符串，那么设置完属性之后，字符串的值就可能会在对象不知情的情况下遭人更改。</strong></font>所以，这时就要拷贝一份“不可变”（immutable)的字符串，确保对象中的字符串值不会无意间变动。只要实现属性所用的对象是“可变的”（mutable)，就应该在设置新属性值时拷贝一份.</li>
+</ul></li>
+<li><p>方法名:<br/>
+可通过如下特质来指定存取方法的方法名：</p></li>
+</ol>
+
+<ul>
+<li><strong>getter=<name></strong>  指定“获取方法”的方法名。如果某属性是<code>Boolean</code>型，而你想为其获取方法加上<code>“is”</code>前缀，那么就可以用这个办法来指定。比如说，在<code>UISwitch</code>类中，表示“开关&quot;（switch)是否打开的属性就是这样定义的：</li>
+</ul>
+
+<pre><code class="language-objc">
+@property (nonatomic, getter=isOn) BOOL on;
+
+</code></pre>
+
+<ul>
+<li><p><strong>setter=<name></strong> 指定&quot;设置方法&quot;的方法名.(不太常见)</p>
+
+<p>通过上述特质，可以微调由编译器所合成的存取方法。不过需要注意：<font color=red>若是自己来实现这些存取方法，那么应该保证其具备相关属性所声明的特质</font>。比方说，如果将某个属性声明为<code>copy</code>，那么就应该在“设置方法”中拷贝相关对象，否则会误导该属性的使用者，而且，<br/>
+若是不遵从这一约定，还会令程序产生bug。</p></li>
+</ul>
+
+<p>如果想在其他方法里设置属性值，那么同样要遵守属性定义中所宣称的语义。例如，我们扩充一下前面提到的<code>EOCPerson</code>类。由于字符串值可能会改变，所以要把相关属性的“内存管理语义&quot;声明为<code>copy</code>。该类中新增了一个<strong>‘初始化方法’(initializer)</strong>,用于设置“名&quot;(first name)和“姓”（last name)的初始值：</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSManagedObject
+@property (copy) NSString *firstName;
+©property (copy) NSString *lastName;
+
+- (id)initWithFirstName: (NSString*)firstName
+                lastName:(NSString*)lastName;
+@end
+
+</code></pre>
+
+<p><strong><font color=red>在实现这个自定义的初始化方法时，一定要遵循属性定义中宣称的“copy”语义</font></strong>，因为“属性定义”就相当于“类”和“待设置的属性值”之间所达成的契约。初始化方法的实现代码可以这样写：</p>
+
+<pre><code class="language-objc">
+- (id)initWithFirstName: (NSString*) firstName
+                lastName:(NSString*)lastName
+{
+    if ((self = [super init])) {
+        _firstName = [firstName copy];
+         _lastName = [lastName copy];
+    }
+return self;
+}
+
+</code></pre>
+
+<p>这里也许会有疑问:为何不调用属性所对应的“设置方法”呢？如果用了“设置方法”的话，不是总能保证准确的语义吗？<font color=red>后面第7条学习中将会详细解释为什么决不应该在init(或dealloc)方法中调用存取方法</font>。</p>
+
+<p>要是看过第18条的话，你就会明白，应该尽量使用不可变的对象。如果将这一条套用到<code>EOCPerson</code>类身上，那就等于说，其两个属性都应该设为“只读”。用初始化方法设置好属性值之后，就不能再改变了。在本例中，仍需声明属性的“内存管理语义”。于是可以把属性的定义改成这样：</p>
+
+<pre><code class="language-objc">
+@property (copy, readonly) NSString *firstName;
+@property (copy, readonly) NSString *lastName;
+
+</code></pre>
+
+<p>由于是只读属性，所以编译器不会为其创建对应的“设置方法”，即便如此，我们还是要写上这些属性的语义，以此表明初始化方法在设置这些属性值时所用的方式。要是不写明语义的话，该类的调用者就不知道初始化方法里会拷贝这些属性，他们有可能会在调用初始化方法之前自行拷贝属性值。这种操作是多余而且低效的。</p>
+
+<p><code>atomic与nonatomic</code>的区别就是是否具有原子性,具备atomic特质的获取方法会通过锁定机制来确保其操作的原子性。避免两个进程同时访问同一属性时,读取到其它线程没有修改好的属性值.</p>
+
+<p>在ios开发中,其中所有属性都声明为ncmatomic。这样做的历史原因是：<font color=red>在iOS中使用同步锁的开销较大，这会带来性能问题。</font>一般情况下并不要求属性必须是“原子的”，因为这并不能保证“线程安全&quot;（thread safety),若要实现“线程安全”的操作，还需采用更为深层的锁定机制才行。</p>
+
+<h2 id="toc_2">要点:</h2>
+
+<ul>
+<li> 可以用<code>@property</code>语法来定义对象中所封装的数据。</li>
+<li> 通过“特质”来指定存储数据所需的正确语义。</li>
+<li> 在设置属性所对应的实例变量时，一定要遵从该属性所声明的语义。</li>
+<li> <font color=red>开发iOS程序时应该使用<code>nonatomic</code>属性，因为<code>atomic</code>属性会严重影响性能。</font></li>
+</ul>
+
                         
                       </div>
                   </div>
