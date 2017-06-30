@@ -113,6 +113,144 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14988067800935.html">
+                
+                  <h1>第七条 在对象内部尽量直接访问实例变量</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在对象之外访问实例变量时，总是应该通过<strong>属性</strong>来做,然而在对象内部访问实例变量时,除了几种特殊情况之外，<font color=red><strong>强烈建议大家在读取实例变量的时候采用<mark>直接访问</mark>的形式，而在设置实例变量的时候通过属性来做</strong></font>。</p>
+
+<p>下面举个例子:</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSObject
+@property (nonatomic, copy) NSString *firstName;
+@property (nonatomic, copy) NSString *lastName;
+
+// Convenience for firstName + ” ” 十 lastName:
+-(NSString*)fullName;
+-(void)setFullName:(NSString*) fullName;
+@end
+
+</code></pre>
+
+<p><code>fullName与setFullName</code>这两个“便捷方法”可以这样来实现:</p>
+
+<pre><code class="language-objc">
+-(NSString*)fullName {
+    return [NSString stringWithFormat: @&quot;%@ %@&quot;,
+            self.firstName, self.lastName];
+/** The following assumes all full names have exactly 2
+*   parts. The method could be rewritten to support more
+* exotic names.
+*/
+-(void)setFullName:(NSString*)fullName {
+NSArray *components =
+[fullName componentsSeparatedByString:@&quot; &quot;];
+
+self.firstName = [components objectAtIndex: 0];
+self.lastName = [components objectAtIndex:1];
+}
+
+</code></pre>
+
+<p>然后我们改写上面的例子:</p>
+
+<pre><code class="language-objc">
+-(NSString*)fullName {
+    return [NSString stringWithFormat: @&quot;%@ %@&quot;,
+            _firstName, _lastName];
+
+-(void)setFullName:(NSString*)fullName {
+NSArray *components =
+[fullName componentsSeparatedByString:@&quot; &quot;];
+
+_firstName = [components objectAtIndex: 0];
+_lastName = [components objectAtIndex:1];
+}
+
+</code></pre>
+
+<p>这两种写法各有优点和缺点:</p>
+
+<ul>
+<li><p>由于不经过Objective-C的<strong>“方法派发” (method dispatch，之后第11条）</strong>步骤，所以直接访问实例变量的速度当然比较快。在这种情况下，编译器所生成的代码会直接访问保存对象实例变量的那块内存。</p></li>
+<li><p>直接访问实例变童时，不会调用其“设置方法”,这就绕过了为相关属性所定义的“内<br/>
+存管理语义”。比方说，如果在ARC下直接访问一个声明为copy的属性，那么并不<br/>
+会拷贝该属性，只会保留新值并释放旧值。</p></li>
+<li><p>如果直接访问实例变量，那么不会触发‘键值观测’（Key-Value Observing，KVO)通知。这样做是否会产生问题，还取决于具体的对象行为。</p></li>
+<li><p>通过属性来访问有助于排査与之相关的错误，因为可以给“获取方法”和/或“设置<br/>
+方法”中新增“断点&quot;（breakpoint),监控该属性的调用者及其访问时机。</p></li>
+</ul>
+
+<p>因为各有好处,这里我们就找一个折中方案:<mark>写入实例变量时，通过其“设置方法”来做</mark>，而在<mark>读取实例变量时，则直接访问之</mark>。此办法既能提高读取操作的速度，又能控制对属性的写入操作。之所以要通过“设置方法”来写人实例变量，其首要原因在于，这样做能够确保相关属性的“内存管理语义”得以贯彻。但是，选用这种做法时，需注意几个问题:</p>
+
+<p><strong>第一个要注意的地方就是</strong>，在初始化方法中应该如何设置属性值。这种情况下总是应<br/>
+该<mark>直接访问实例变量</mark>，因为子类可能会<strong>“覆写”（override)设置方法</strong>。假设<code>EOCPerson</code>有一个子类叫做<code>EOCSmithPerson</code>，这个子类专门表示那些姓“Smith”的人。该子类可能会覆写<code>lastName</code>属性所对应的设置方法：</p>
+
+<pre><code class="language-objc">
+-(void)setLastName:(NSString*)lastName {
+    if (![lastName isEqualToString:@&quot;Smith&quot;]){
+      [NSException raise:NSInvalidArgumentException
+                  format:@&quot;Last name must be Smith&quot;];
+}
+    self.lastName = lastname; //这里没有直接访问,而是用的点语法.(最好直接访问)
+}
+
+</code></pre>
+
+<p>在基类<code>EOCPerson</code>的默认初始化方法中，可能会将姓氏设为空字符串。此时若是通过<br/>
+“设置方法”来做，那么<strong>调用的将会是子类的设置方法，从而拋出异常</strong>。但是，某些情况下却又必须在初始化方法中调用设置方法:如果待初始化的实例变量声明在超类中，而我们又无法在子类中直接访问此实例变量的话，那么就需要调用“设置方法”了。</p>
+
+<p><strong>第二个注意问题</strong>是<strong>&quot;惰性初始化&quot;（lazy initialization)</strong>。在这种情况下，必须通过“获取方法”来访问属性，否则，实例变量就永远不会初始化。比方说，<code>EOCPerson</code>类也许会用一个属性来表示人脑中的信息，这个属性所指代的对象相当复杂。由于此属性不常用,而且创建该属性的成本较高，所以，<mark>我们可能会在“获取方法”中对其执行惰性初始化</mark>:</p>
+
+<pre><code class="language-objc">
+-(EOCBrain” brain {
+    if (!_brain) {
+        brain = [Brain new];    //若没有调用获取方法,这句话永远也不会执行,去初始化
+    }
+    return _brain;
+
+</code></pre>
+
+<p>若没有调用“获取方法”就直接访问实例变量，则会看到尚未设置好的<code>brain</code>,所以说,<br/>
+如果使用了“惰性初始化”技术，那么必须通过存取方法来访问<code>brain</code>属性。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li><p>在对象内部读取数据时,应该直接通过实例变量来读，而写入数据时，则应通过属性<br/>
+来写。</p></li>
+<li><p>在初始化方法及<code>dealloc</code>方法中，总是应该直接通过实例变量来读写数据。</p></li>
+<li><p>有时会使用惰性初始化技术配置某份数据,这种情况下，需要通过属性的&quot;获取方法&quot;来读取数据。</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/30</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14986374781793.html">
                 
                   <h1>第六条 理解"属性" 这一概念</h1>
@@ -892,6 +1030,18 @@ mutableDictionary[@&quot;lastName&quot;] = @&quot;Galloway&quot;;
 	      
 		      
 			      <li class="post">
+			        <a href="14988067800935.html">第七条 在对象内部尽量直接访问实例变量</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14987856817486.html">Caffe前向传播计算</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14986374781793.html">第六条 理解"属性" 这一概念</a>
 			      </li>
 		     
@@ -905,18 +1055,6 @@ mutableDictionary[@&quot;lastName&quot;] = @&quot;Galloway&quot;;
 		      
 			      <li class="post">
 			        <a href="14985505390356.html">使用SQLite</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14984437069936.html">数据转换器</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14982657549571.html">Caffe I/O模块</a>
 			      </li>
 		     
 		  

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  I/O编程 - LZH007
+  Caffe代码梳理 - LZH007
   
   </title>
   
@@ -104,176 +104,139 @@
        
 
  <script type="text/javascript">
-  $(function(){
-    $('#menu_item_index').addClass('is_active');
-  });
+	$(function(){
+		$('#menu_item_index').addClass('is_active');
+	});
 </script>
 <div class="row">
-  <div class="large-8 medium-8 columns">
-      <div class="markdown-body article-wrap">
-       <div class="article">
-          
-          <h1>I/O编程</h1>
-     
-        <div class="read-more clearfix">
-          <span class="date">2017/4/27</span>
+	<div class="large-8 medium-8 columns">
+		<div class="markdown-body home-categories">
+		
+			<div class="article">
+                <a class="clearlink" href="14955929300450.html">
+                
+                  <h1>Caffe目录结构</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我们这里先了解一下caffe的目录结构:<br/>
+<img src="media/14955929300450/14961936456285.jpg" alt=""/><br/>
+<img src="media/14955929300450/14961936868967.jpg" alt=""/><br/>
+<img src="media/14955929300450/14961937240927.jpg" alt=""/><br/>
+其中主要关注的就是:include/,src/和tools/,三个目录,需要分析的代码都包含在这里面.</p>
 
-          <span>posted in&nbsp;</span> 
-          
-              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-           
-         
-          <span class="comments">
-            
+<p>在阅读代码时,如何快速追踪某个关键词?传统的方法是打开某个文件,之后用查找命令来查找关键词.<br/>
+这了我们介绍另一种方法,利用<code>grep</code>命令:</p>
 
-            
-          </span>
-
-        </div>
-      </div><!-- article -->
-
-      <div class="article-content">
-      <ul>
-<li>
-<a href="#toc_0">文件读写</a>
-<ul>
-<li>
-<a href="#toc_1">读文件</a>
-</li>
-<li>
-<a href="#toc_2">file-like Object</a>
-</li>
-<li>
-<a href="#toc_3">二进制文件</a>
-</li>
-<li>
-<a href="#toc_4">写文件</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_5">小结</a>
-</li>
-</ul>
-
-
-<h2 id="toc_0">文件读写</h2>
-
-<h3 id="toc_1">读文件</h3>
-
-<p>要以读文件的模式来打开一个文件对象，使用Python内置的<code>open（）</code>函数，传入文件名和标识符：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; f = open(&#39;/Users/michael/test.txt&#39;, &#39;r&#39;)
+<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;REGISTER_LAYER_CREATOR&quot; *
 </code></pre>
 
-<p>标示符&#39;r&#39;表示读，这样，我们就成功地打开了一个文件。</p>
+<p><img src="media/14955929300450/14955931415464.jpg" alt=""/><br/>
+我们可以看到,日志输出了很多文件.这种方法无需分别打开每个文件,也能直观的显示了所有包含这个宏的文件名和行号.</p>
 
-<p>如果文件不存在，open()函数就会抛出一个IOError的错误，并且给出错误码和详细的信息告诉你文件不存在：<br/>
-<img src="media/14932734930436/14932737513488.jpg" alt=""/></p>
+<p>这里我们用<code>grep</code>命令来搜索一个宏调用:<code>REGISTER_LAYER_CREATOR</code>,<br/>
+命令行参数解释为:</p>
 
-<p>如果文件打开成功，接下来，调用<code>read()</code>方法可以一次读取文件的全部内容，Python把内容读到内存，用一个<code>str</code>对象表示：<br/>
-<img src="media/14932734930436/14932741526772.jpg" alt=""/></p>
+<blockquote>
+<p>-n  ---显示行号,便于定位<br/>
+-H  ---显示文件名,便与定位<br/>
+-R  ---递归查找每个子目录,适合工程较大,分多个目录存放的场景</p>
+</blockquote>
 
-<p>由于文件读写时都有可能产生<code>IOError</code>，一旦出错，后面的<code>f.close()</code>就不会调用。所以，为了保证无论是否出错都能正确地关闭文件，我们可以使用<code>try ... finally</code>来实现。这种方法太麻烦。我们这里使用python所提供的方法：</p>
+<p>利用这种方法可以很容易的在caffe源码中定位很多内容.</p>
 
-<p>Python引入了with语句来自动帮我们调用<code>close()</code>方法：</p>
+<h2 id="toc_0">卷基层</h2>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
+<p>这里我们假定卷积层有<code>L</code>个输出通道和<code>K</code>个输入通道,于是需要有<code>LK,L=50,K=20</code>个卷积核实现通道数目的转换.这里我们假定卷集核大小为<code>I*J = 5*5</code>,每个输出通道的特征图大小为<code>M*N = 8*8</code>,则该层每个样本做一次前向传播时卷积层计算量为:<br/>
+<code>Calculations(MAC) = I*J*M*N*K*L = 5*5*8*8*50*20=1600000MAC</code><br/>
+实际中使送入一批样本(batch),所以我们这里还需要计算量乘上批量尺寸.</p>
 
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;r&#39;) as f:
-    print f.read()
-</code></pre>
+<p>我们这里卷积层的学习参数量为:<br/>
+<code>Params = I*J*K*L = 25000</code><br/>
+所以计算量-参数量之比为<code>CPR=Calculations/Params = M*N = 64</code><br/>
+<font color=red><strong>所以我们得出结论是:卷基层的输出特征图尺寸越大,CPR值越大,参数重复利用率越高.,若一次性输入一批数据(B个样本),则CPR值可再提高B倍.</strong></font></p>
 
-<p><img src="media/14932734930436/14932743740546.jpg" alt=""/></p>
+<h2 id="toc_1">全连接层</h2>
 
-<p>这和前面的<code>try ... finally</code>是一样的，但是代码更佳简洁，并且不必调用<code>f.close()</code>方法。</p>
+<p>早在卷积神经网络出现之前,最早的深度学习网络计算类型都是全连接形式的.如下所示.<br/>
+<img src="media/14955929300450/14961962825939.jpg" alt=""/><br/>
+每个节点与相邻层的所有节点都有连接关系,这是全连接层名称的由来.</p>
 
-<p>调用<code>read()</code>会一次性读取文件的全部内容，如果文件有10G，内存就爆了，所以，要保险起见，可以反复调用<code>read(size)</code>方法，每次最多读取<code>size</code>个字节的内容。另外，调用<code>readline()</code>可以每次读取一行内容，调用<code>readlines()</code>一次读取所有内容并按行返回<code>list</code>。因此，要根据需要决定怎么调用。</p>
+<p>全连接层的主要计算类型为矩阵-向量乘(GEMV).假设输入节点组成的向量为x,维度为D,输出节点组成的向量为y,维度为V,则全连接层计算可以表示为:<br/>
+\[y=Wx\]<br/>
+其中,W为<code>V*D</code>维权值矩阵.</p>
 
-<p>如果文件很小，<code>read()</code>一次性读取最方便；如果不能确定文件大小，反复调用<code>read(size)</code>比较保险；如果是配置文件，调用<code>readlines()</code>最方便：</p>
+<p>我们分析全连接层的参数:<br/>
+<img src="media/14955929300450/14961986814721.jpg" alt=""/></p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
+<p><img src="media/14955929300450/14961986616938.jpg" alt=""/></p>
 
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;r&#39;) as f:
-    for line in f.readlines():
-        print(line.strip())  #把末尾的&#39;\n&#39;删掉
-</code></pre>
+<p>得出输出<code>V=500</code>,输入<code>D=50*4*4 = 800</code>(其中50是输入数量,4*4位图的尺寸)</p>
 
-<p><img src="media/14932734930436/14932746986776.jpg" alt=""/></p>
+<p>则全连接层单样本前向传播计算量为:<br/>
+\[<br/>
+CalculationsMAC = V*D<br/>
+                = 800 * 500<br/>
+                = 400000<br/>
+\]<br/>
+参数统计量为:<br/>
+\[<br/>
+Params = V*D<br/>
+       = 800 * 500<br/>
+       = 400000<br/>
+\]<br/>
+所以CPR值为1</p>
 
-<h3 id="toc_2">file-like Object</h3>
+<p>所以得出结论,全连接层的CPR值始终为1,与输入,输出维度无关.所以单样本前向向传播计算时,权值重复利用率很低.<br/>
+    我们将一批(B个)样本逐列拼接成矩阵X,一次性通过全连接层,得到一批输出向量构成的矩阵Y,称作批处理(矩阵-矩阵乘计算GEMM):<br/>
+    \[<br/>
+    Y=WX<br/>
+    \]<br/>
+这样全连接层前向计算量提高了B倍,而参数量不变,因此CPR提高了B倍.</p>
 
-<p>像<code>open()</code>函数返回的这种有个<code>read()</code>方法的对象，在Python中统称为file-like Object。除了file外，还可以是内存的字节流，网络流，自定义流等等。file-like Object不要求从特定类继承，只要写个<code>read()</code>方法就行。</p>
+<p>与卷积层相比，全连接层参数量是其16倍，而计算量只有其25%.如果输出特征图尺寸相同<code>（M*V = V)</code>，卷积层的CPR值为全连接层的<code>M*N</code>倍。也就是说，卷积层在输出特征图维度实现了<mark>权值共享</mark>。这是降低参数量的重要举措。与此同吋，卷枳层<mark>局部连接</mark>特性 (相比全连接）也大幅减少了参数量,这使得CNN网络中前几层卷积层参数量占比小，计算量占比大；而后几层全连接层参数量占比大，计算量占比小。大多数CNN模型都符合这个特点。<font color=red><strong>因此我们在进行计算加速优化时,重点放在卷积层；而在进行参数优化、权值剪裁时，重点放在全连接层，</strong></font></p>
 
-<p><code>StringIO</code>就是在内存中创建的file-like Object，常用作临时缓冲。</p>
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/24</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%E4%BB%A3%E7%A0%81%E6%A2%B3%E7%90%86.html'>Caffe代码梳理</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
 
-<h3 id="toc_3">二进制文件</h3>
-
-<p>前面讲的默认都是读取文本文件，并且是ASCII编码的文本文件。要读取二进制文件，比如图片、视频等等，用<code>rb</code>模式打开文件即可：<br/>
-<img src="media/14932734930436/14932760233490.jpg" alt=""/></p>
-
-<h3 id="toc_4">写文件</h3>
-
-<p>写文件和读文件是一样的，唯一区别是调用<code>open()</code>函数时，传入标识符<code>&#39;w&#39;</code>或者<code>&#39;wb&#39;</code>表示写文本文件或写二进制文件：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; f = open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;, &#39;w&#39;)
-&gt;&gt;&gt; f.write(&#39;Hello, world!Again！&#39;)
-&gt;&gt;&gt; f.close()
-</code></pre>
-
-<p>这里推荐直接调用with方法：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;w&#39;) as f:
-    f.write(&#39;Hello, world!Again!&#39;)
-</code></pre>
-
-<p><img src="media/14932734930436/14932763793296.jpg" alt=""/></p>
-
-<p><font color=red><strong>要注意的是一旦写入文件，原来文件中的内容会被删除！</strong></font></p>
-
-<h2 id="toc_5">小结</h2>
-
-<p>在Python中，文件读写是通过<code>open()</code>函数打开的文件对象完成的。使用<code>with</code>语句操作文件IO是个好习惯。</p>
-
-
-    
-
-      </div>
-
-      <div class="row">
-        <div class="large-6 columns">
-        <p class="text-left" style="padding:15px 0px;">
-      
-          <a href="14932778418691.html" 
-          title="Previous Post: 操作文件和目录">&laquo; 操作文件和目录</a>
-      
-        </p>
-        </div>
-        <div class="large-6 columns">
-      <p class="text-right" style="padding:15px 0px;">
-      
-          <a  href="14932622908500.html" 
-          title="Next Post: 文档测试">文档测试 &raquo;</a>
-      
-      </p>
-        </div>
-      </div>
-      <div class="comments-wrap">
-        <div class="share-comments">
-          
-
-          
-
-          
-        </div>
-      </div>
-    </div><!-- article-wrap -->
-  </div><!-- large 8 -->
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+              
 
 
-
+			<div class="row">
+			  <div class="large-6 columns">
+			  <p class="text-left" style="padding-top:25px;">
+			   
+			  </p>
+			  </div>
+			  <div class="large-6 columns">
+			<p class="text-right" style="padding-top:25px;">
+			
+			</p>
+			  </div>
+			</div>
+		</div>
+	</div><!-- large 8 -->
 
  <div class="large-4 medium-4 columns">
   <div class="hide-for-small">
