@@ -113,6 +113,50 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14974276192148.html">
+                
+                  <h1>重新利用boot camp安装win10</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>由于原来给win10分的磁盘容量太小,而mac又不能在后续动态给win分区增加磁盘容量,所以只能重新安装分区了.</p>
+
+<ol>
+<li>打开mac系统工具中的磁盘<code>磁盘工具</code>选择总的磁盘,点击上方的<code>分区</code>按钮,将系统中其它分区删掉(通过点击饼图中的对应区域,点击下方的<code>-</code>号),就可以将分区删掉,合并到mac系统磁盘.其他分区比如之前安装win产生的<code>OSXRESERVED Partition</code> </li>
+<li>打开bootcamp,点击恢复按钮,将之前的win系统抹掉,之后就会发现,你的mac系统磁盘变回来了.</li>
+<li>重启一下,之后打开bootcamp,点击下方的<code>继续</code>按钮,选择系统iso镜像,为win系统选择分区大小(这回分多些😓).</li>
+<li>点击确定,等待下载Windows支持软件.
+<img src="media/14974276192148/14974281373736.jpg" alt=""/></li>
+<li>安装之后,在OSRESEVER分区中,的bootcamp文件夹中打开安装驱动的程序.</li>
+</ol>
+
+<p>到此win10 应该就安装好了~</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/14</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='MAC%20OS.html'>MAC OS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14970763342670.html">
                 
                   <h1>caffe数据结构描述</h1>
@@ -2047,146 +2091,6 @@ s.close()
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14957005904776.html">
-                
-                  <h1>图形界面</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Python支持多种图形界面的第三方库，包括：<br/>
-* Tk<br/>
-* wxWidgets<br/>
-* Qt<br/>
-* GTK<br/>
-等等.</p>
-
-<p>但是Python自带的库是支持Tk的Tkinter，使用Tkinter，无需安装任何包，就可以直接使用。本章简单介绍如何使用Tkinter进行GUI编程。</p>
-
-<h2 id="toc_0">Tkinter</h2>
-
-<p>我们来梳理一下概念：</p>
-
-<p>我们编写的Python代码会调用内置的Tkinter，Tkinter封装了访问Tk的接口；</p>
-
-<p>Tk是一个图形库，支持多个操作系统，使用Tcl语言开发；</p>
-
-<p>Tk会调用操作系统提供的本地GUI接口，完成最终的GUI。</p>
-
-<p>所以，我们的代码只需要调用Tkinter提供的接口就可以了。</p>
-
-<h2 id="toc_1">第一个GUI程序</h2>
-
-<p>使用Tkinter十分简单，我们来编写一个GUI版本的“Hello, world!”。</p>
-
-<p>第一步是导入Tkinter包的所有内容：</p>
-
-<pre><code class="language-py">from Tkinter import *
-</code></pre>
-
-<p>第二步是从<code>Frame</code>派生一个<code>Application</code>类，这是所有Widget的父容器：</p>
-
-<pre><code class="language-py">
-class Applicition(Frame):
-    def __init__(self, master=None):
-        Frame.__init__(self,master)
-        self.pack()
-        self.creatWidgets()
-
-    def creatWidgets(self):
-        self.helloLabel = Label(self,text = &#39;Hello,world&#39;)
-        self.helloLabel.pack()
-        self.quitButton = Button(self, text = &#39;Quit&#39;,command = self.quit)
-        self.quitButton.pack()
-
-</code></pre>
-
-<p>在GUI中，每个Button、Label、输入框等，都是一个Widget。Frame则是可以容纳其他Widget的Widget，所有的Widget组合起来就是一棵树。</p>
-
-<p><code>pack()</code>方法把Widget加入到父容器中，并实现布局。<code>pack()</code>是最简单的布局，<code>grid()</code>可以实现更复杂的布局。</p>
-
-<p>在<code>createWidgets()</code>方法中，我们创建一个<code>Label</code>和一个<code>Button</code>，当Button被点击时，触发<code>self.quit()</code>使程序退出。</p>
-
-<p>第三步，实例化<code>Application</code>，并启动消息循环：</p>
-
-<pre><code class="language-py">app = Application()
-# 设置窗口标题:
-app.master.title(&#39;Hello World&#39;)
-# 主消息循环:
-app.mainloop()
-</code></pre>
-
-<p>GUI程序的主线程负责监听来自操作系统的消息，并依次处理每一条消息。因此，如果消息处理非常耗时，就需要在新线程中处理。</p>
-
-<p>运行这个GUI程序，可以看到下面的窗口：<br/>
-<img src="media/14957005904776/14957017137688.jpg" alt=""/><br/>
-点击“Quit”按钮或者窗口的“x”结束程序。</p>
-
-<h2 id="toc_2">输入文本</h2>
-
-<p>我们再对这个GUI程序改进一下，加入一个文本框，让用户可以输入文本，然后点按钮后，弹出消息对话框。</p>
-
-<pre><code class="language-py">from Tkinter import *
-import tkMessageBox
-
-
-class Applicition(Frame):
-
-    def __init__(self, master=None):
-        Frame.__init__(self, master)
-        self.pack()
-        self.creatWidgets()
-
-    def creatWidgets(self):
-        self.nameInput = Entry(self)
-        self.nameInput.pack()
-        self.alertButton = Button(self, text=&#39;Hello&#39;, command=self.hello)
-        self.alertButton.pack()
-
-    def hello(self):
-        name = self.nameInput.get() or &#39;world&#39;
-        tkMessageBox.showinfo(&#39;Message&#39;, &#39;Hello,%s&#39; % name)
-
-app = Applicition()
-app.master.title(&#39;Hello World&#39;)
-app.mainloop()
-
-</code></pre>
-
-<p><img src="media/14957005904776/14957022189285.jpg" alt=""/></p>
-
-<p>当用户点击按钮时，触发<code>hello()</code>，通过<code>self.nameInput.get()</code>获得用户输入的文本后，使用<code>tkMessageBox.showinfo()</code>可以弹出消息对话框。</p>
-
-<h2 id="toc_3">小结</h2>
-
-<p>Python内置的Tkinter可以满足基本的GUI程序的要求，如果是非常复杂的GUI程序，建议用操作系统原生支持的语言和库来编写。</p>
-
-<p>源码参考：<a href="https://github.com/michaelliao/learn-python/tree/master/gui">https://github.com/michaelliao/learn-python/tree/master/gui</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/25</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -2270,6 +2174,12 @@ app.mainloop()
 	      
 		      
 			      <li class="post">
+			        <a href="14988713979681.html">Net初始化时的三个登记注册函数</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14988067800935.html">第七条 在对象内部尽量直接访问实例变量</a>
 			      </li>
 		     
@@ -2289,12 +2199,6 @@ app.mainloop()
 		      
 			      <li class="post">
 			        <a href="14986110416063.html">Caffe模型</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14985505390356.html">使用SQLite</a>
 			      </li>
 		     
 		  

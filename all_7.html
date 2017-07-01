@@ -113,6 +113,123 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14932622908500.html">
+                
+                  <h1>文档测试</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><strong>在python中我们可以执行那些在注释中的代码，来进行测试。</strong></p>
+
+<p>当我们编写注释时，如果写上这样的注释：</p>
+
+<pre><code class="language-py">def abs(n):
+    &#39;&#39;&#39;
+    Function to get absolute value of number.
+
+    Example:
+
+    &gt;&gt;&gt; abs(1)
+    1
+    &gt;&gt;&gt; abs(-1)
+    1
+    &gt;&gt;&gt; abs(0)
+    0
+    &#39;&#39;&#39;
+    return n if n &gt;= 0 else (-n)
+</code></pre>
+
+<p>无疑更明确地告诉函数的调用者该函数的期望输入和输出。</p>
+
+<p><strong>并且，Python内置的“文档测试”（doctest）模块可以直接提取注释中的代码并执行测试。</strong></p>
+
+<p><font color=red>doctest严格按照Python交互式命令行的输入和输出来判断测试结果是否正确。只有测试异常的时候，可以用...表示中间一大段烦人的输出。</font></p>
+
+<p>让我们用doctest来测试上次编写的<code>Dict</code>类：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Dict(dict):
+    
+    &quot;&quot;&quot;
+    Simple dict but also support access as x.y style
+
+    &gt;&gt;&gt; d1 = Dict()
+    &gt;&gt;&gt; d1[&#39;x&#39;] = 100
+    &gt;&gt;&gt; d1.x
+    100
+    &gt;&gt;&gt; d1.y = 200
+    &gt;&gt;&gt; d1[&#39;y&#39;]
+    200
+    &gt;&gt;&gt; d2 = Dict(a=1, b=2, c=&#39;3&#39;)
+    &gt;&gt;&gt; d2.c
+    &#39;3&#39;
+    &gt;&gt;&gt; d2[&#39;empty&#39;]
+    Traceback (most recent call last):
+        ...
+    KeyError: &#39;empty&#39;
+    &gt;&gt;&gt; d2.empty
+    Traceback (most recent call last):
+        ...
+    AttributeError: &#39;Dict&#39; object has no attribute &#39;empty&#39;
+    
+    &quot;&quot;&quot;
+    def __init__(self, **kw):
+        super(Dict, self).__init__(**kw)
+    def __getattr__(self,key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(r&quot;&#39;Dict&#39; object has no attribute &#39;%s&#39;&quot; % key)
+        else:
+            pass
+        finally:
+            pass
+    def __setattr__(self,key,value):
+        self[key] = value
+if __name__ == &#39;__main__&#39;:
+    import doctest
+    doctest.testmod()
+</code></pre>
+
+<p>如果什么输出都没有，说明我们编写的<code>doctest</code>运行都是正确的。<br/>
+<img src="media/14932622908500/14932639594028.jpg" alt=""/><br/>
+如果我们把</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; d2.c
+    &#39;4&#39; #3改成4
+</code></pre>
+
+<p>运行后就会显示：</p>
+
+<p><img src="media/14932622908500/14932640459265.jpg" alt=""/></p>
+
+<p><strong>注意到最后两行代码。当模块正常导入时，doctest不会被执行。只有在命令行运行时，才执行doctest。所以，不必担心doctest会在非测试环境下执行。</strong></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/27</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14932573311953.html">
                 
                   <h1>图像去雾相关论文总结</h1>
@@ -857,151 +974,6 @@ except ZeroDivisionError:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14927355881897.html">
-                
-                  <h1>使用元类</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">metaclass</a>
-</li>
-</ul>
-
-
-<p>动态语言和静态语言最大的不同，就是函数和类的定义，不是编译时定义的，而是<strong>运行时动态创建的</strong>。</p>
-
-<p>比方说我们要定义一个<code>Hello</code>的class：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Hello(object):
-    def hello(self, name=&#39;world&#39;):
-        print(&#39;Hello, %s.&#39; % name)
-h = Hello()
-h.hello()
-print (type(Hello))
-print (type(h))
-</code></pre>
-
-<p><img src="media/14927355881897/14927620006235.jpg" alt=""/></p>
-
-<p><font color=red><strong><code>type()</code>函数可以查看一个类型或变量的类型，<code>Hello</code>是一个class，它的类型就是<code>type</code>，而<code>h</code>是一个实例，它的类型就是<code>class Hello</code>。</strong></font></p>
-
-<p>我们说class的定义是运行时动态创建的，而<strong>创建class的方法就是使用<code>type()</code>函数</strong>。</p>
-
-<p><code>type()</code>函数既可以返回一个对象的类型，又可以创建出新的类型，比如，<strong>我们可以通过<code>type()</code>函数创建出Hello类，而无需通过<code>class Hello(object)...</code>的定义</strong>：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def fn(self, name=&#39;world&#39;):   # 先定义函数
-    print(&#39;Hello, %s.&#39; % name)
-
-Hello = type(&#39;Hello&#39;, (object,), dict(hello=fn))  # 创建Hello class
-h = Hello()
-h.hello()
-print(type(Hello))
-print(type(h))
-
-</code></pre>
-
-<p><img src="media/14927355881897/14927623112362.jpg" alt=""/></p>
-
-<p><strong>要创建一个class对象，type()函数依次传入3个参数：</strong></p>
-
-<ol>
-<li>class的名称；</li>
-<li>继承的父类集合，注意Python支持多重继承，如果只有一个父类，别忘了tuple的单元素写法；</li>
-<li>class的方法名称与函数绑定，这里我们把函数<code>fn</code>绑定到方法名<code>hello</code>上。</li>
-</ol>
-
-<p>通过<code>type()</code>函数创建的类和直接写class是完全一样的，因为Python解释器遇到class定义时，仅仅是扫描一下class定义的语法，然后调用<code>type()</code>函数创建出class。</p>
-
-<blockquote>
-<p>正常情况下，我们都用<code>class Xxx...</code>来定义类，但是，<code>type()</code>函数也允许我们动态创建出类来，也就是说，动态语言本身支持运行期动态创建类，这和静态语言有非常大的不同，要在静态语言运行期创建类，必须构造源代码字符串再调用编译器，或者借助一些工具生成字节码实现，本质上都是动态编译，会非常复杂。</p>
-</blockquote>
-
-<h2 id="toc_0">metaclass</h2>
-
-<p>除了使用<code>type()</code>动态创建类以外，要控制类的创建行为，还可以使用metaclass。<br/>
-简单的解释就是：先定义metaclass，就可以创建类，最后创建实例。</p>
-
-<p>所以，metaclass允许你创建类或者修改类。换句话说，你可以把类看成是metaclass创建出来的“实例”。</p>
-
-<p><strong>metaclass是Python面向对象里最难理解，也是最难使用的魔术代码。正常情况下，你不会碰到需要使用metaclass的情况，所以，以下内容看不懂也没关系，因为基本上你不会用到。</strong></p>
-
-<p>我们先看一个简单的例子，这个metaclass可以给我们自定义的MyList增加一个add方法：</p>
-
-<p>定义<code>ListMetaclass</code>，按照默认习惯，metaclass的类名总是以Metaclass结尾，以便清楚地表示这是一个metaclass：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-# metaclass是创建类，所以必须从`type`类型派生：
-class ListMetaclass(type):
-
-    def __new__(cls, name, bases, attrs):
-        attrs[&#39;add&#39;] = lambda self, value: self.append(value)
-        return type.__new__(cls, name, bases, attrs)
-
-
-class MyList(list):
-    __metaclass__ = ListMetaclass  # 指示使用ListMetaclass来定制类
-</code></pre>
-
-<p>当我们写下<code>__metaclass__ = ListMetaclass</code>语句时，魔术就生效了，它指示Python解释器在创建<code>MyList</code>时，要通过<code>ListMetaclass.__new__()</code>来创建，在此，我们可以修改类的定义，比如，加上新的方法，然后，返回修改后的定义。</p>
-
-<p><code>__new__()</code><strong>方法接收到的参数依次是</strong>：</p>
-
-<ol>
-<li><p>当前准备创建的类的对象；</p></li>
-<li><p>类的名字；</p></li>
-<li><p>类继承的父类集合；</p></li>
-<li><p>类的方法集合。</p></li>
-</ol>
-
-<p>我们测试输出为：</p>
-
-<pre><code class="language-py">L = MyList()
-L.add(1)
-print L
-</code></pre>
-
-<p><img src="media/14927355881897/14927637008533.jpg" alt=""/></p>
-
-<p>动态修改有什么意义？直接在MyList定义中写上add()方法不是更简单吗？正常情况下，确实应该直接写，通过metaclass修改纯属变态。</p>
-
-<p>但是，总会遇到需要通过metaclass修改类定义的。ORM就是一个典型的例子。</p>
-
-<p>ORM全称“Object Relational Mapping”，即对象-关系映射，就是把关系数据库的一行映射为一个对象，也就是一个类对应一个表，这样，写代码更简单，不用直接操作SQL语句。</p>
-
-<p>要编写一个ORM框架，所有的类都只能动态定义，因为只有使用者才能根据表的结构定义出对应的类来。</p>
-
-<p>具体方法参见<a href="http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001386820064557c69858840b4c48d2b8411bc2ea9099ba000">廖老师的教学网站</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/21</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1085,6 +1057,12 @@ print L
 	      
 		      
 			      <li class="post">
+			        <a href="14988713979681.html">Net初始化时的三个登记注册函数</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14988067800935.html">第七条 在对象内部尽量直接访问实例变量</a>
 			      </li>
 		     
@@ -1104,12 +1082,6 @@ print L
 		      
 			      <li class="post">
 			        <a href="14986110416063.html">Caffe模型</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14985505390356.html">使用SQLite</a>
 			      </li>
 		     
 		  

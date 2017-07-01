@@ -1,0 +1,526 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Net初始化时的三个登记注册函数 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Net初始化时的三个登记注册函数</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/7/1</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Caffe%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe前向传播计算</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>我们已经知道<code>Init()</code>函数完成了非常关键的网络初始化和层初始化操作.虽然代码很长.但是只要抓住几个核心对象,了解其功能并密切关注其动态,即可掌握<code>Init()</code>函数的执行流程和具体意义.</p>
+
+<p>在<code>Init()</code>中调用了<mark>三个登记注册函数</mark>:</p>
+
+<p><strong>AppendTop</strong>:<br/>
+```c++</p>
+
+<p>// Helper for Net::Init: add a new top blob to the net.<br/>
+//登记每层输出Blob<br/>
+template <typename Dtype><br/>
+void Net<Dtype>::AppendTop(const NetParameter&amp; param, const int layer_id,<br/>
+                           const int top_id, set<string>* available_blobs,<br/>
+                           map<string, int>* blob_name_to_idx) {<br/>
+  shared_ptr<LayerParameter> layer_param(<br/>
+      new LayerParameter(param.layer(layer_id)));<br/>
+  const string&amp; blob_name = (layer_param-&gt;top_size() &gt; top_id) ?<br/>
+      layer_param-&gt;top(top_id) : &quot;(automatic)&quot;;<br/>
+  // Check if we are doing in-place computation(检查是否为原位计算)<br/>
+  if (blob_name_to_idx &amp;&amp; layer_param-&gt;bottom_size() &gt; top_id &amp;&amp;<br/>
+      blob_name == layer_param-&gt;bottom(top_id)) {<br/>
+    // In-place computation(是原位计算)<br/>
+    LOG_IF(INFO, Caffe::root_solver())<br/>
+        &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name &lt;&lt; &quot; (in-place)&quot;;<br/>
+    top_vecs_[layer_id].push_back(blobs_[(<em>blob_name_to_idx)[blob_name]].get());<br/>
+    top_id_vecs_[layer_id].push_back((</em>blob_name_to_idx)[blob_name]);<br/>
+  } else if (blob_name_to_idx &amp;&amp;<br/>
+             blob_name_to_idx-&gt;find(blob_name) != blob_name_to_idx-&gt;end()) {<br/>
+    // If we are not doing in-place computation but have duplicated blobs,<br/>
+    // raise an error.<br/>
+    LOG(FATAL) &lt;&lt; &quot;Top blob &#39;&quot; &lt;&lt; blob_name<br/>
+               &lt;&lt; &quot;&#39; produced by multiple sources.&quot;;<br/>
+  } else {<br/>
+    // Normal output.(正常输出)<br/>
+    if (Caffe::root_solver()) {<br/>
+      LOG(INFO) &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name;<br/>
+    }<br/>
+    shared_ptr<Blob<Dtype> &gt; blob_pointer(new Blob<Dtype>());<br/>
+    //新建一个Blob,插入到Net::blobs_最后<br/>
+    const int blob_id = blobs_.size();<br/>
+    blobs_.push_back(blob_pointer);<br/>
+    blob_names_.push_back(blob_name);<br/>
+    blob_need_backward_.push_back(false);<br/>
+    if (blob_name_to_idx) { (*blob_name_to_idx)[blob_name] = blob_id; }<br/>
+    top_id_vecs_[layer_id].push_back(blob_id);<br/>
+    top_vecs_[layer_id].push_back(blob_pointer.get());<br/>
+  }<br/>
+  if (available_blobs) { available_blobs-&gt;insert(blob_name); }<br/>
+}</p>
+
+<pre><code>
+**AppendBottom**:
+
+
+```c++
+
+// Helper for Net::Init: add a new bottom blob to the net.
+//登记每层输入Blob
+template &lt;typename Dtype&gt;
+int Net&lt;Dtype&gt;::AppendBottom(const NetParameter&amp; param, const int layer_id,
+    const int bottom_id, set&lt;string&gt;* available_blobs,
+    map&lt;string, int&gt;* blob_name_to_idx) {
+  const LayerParameter&amp; layer_param = param.layer(layer_id);
+  const string&amp; blob_name = layer_param.bottom(bottom_id);
+  if (available_blobs-&gt;find(blob_name) == available_blobs-&gt;end()) {
+    LOG(FATAL) &lt;&lt; &quot;Unknown bottom blob &#39;&quot; &lt;&lt; blob_name &lt;&lt; &quot;&#39; (layer &#39;&quot;
+               &lt;&lt; layer_param.name() &lt;&lt; &quot;&#39;, bottom index &quot; &lt;&lt; bottom_id &lt;&lt; &quot;)&quot;;
+  }
+  const int blob_id = (*blob_name_to_idx)[blob_name];
+  LOG_IF(INFO, Caffe::root_solver())
+      &lt;&lt; layer_names_[layer_id] &lt;&lt; &quot; &lt;- &quot; &lt;&lt; blob_name;
+  bottom_vecs_[layer_id].push_back(blobs_[blob_id].get());
+  bottom_id_vecs_[layer_id].push_back(blob_id);
+  available_blobs-&gt;erase(blob_name);
+  bool need_backward = blob_need_backward_[blob_id];
+  // Check if the backpropagation on bottom_id should be skipped(检查是否可以跳过反向传播)
+  if (layer_param.propagate_down_size() &gt; 0) {
+    need_backward = layer_param.propagate_down(bottom_id);
+  }
+  bottom_need_backward_[layer_id].push_back(need_backward);
+  return blob_id;
+}
+
+</code></pre>
+
+<p><strong>AppendParam</strong>:</p>
+
+<pre><code class="language-c++">
+//登记每层权值Blob
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::AppendParam(const NetParameter&amp; param, const int layer_id,
+                             const int param_id) {
+  const LayerParameter&amp; layer_param = layers_[layer_id]-&gt;layer_param();
+  const int param_size = layer_param.param_size();
+  string param_name =
+      (param_size &gt; param_id) ? layer_param.param(param_id).name() : &quot;&quot;;
+  if (param_name.size()) {
+    param_display_names_.push_back(param_name);
+  } else {
+    ostringstream param_display_name;
+    param_display_name &lt;&lt; param_id;
+    param_display_names_.push_back(param_display_name.str());
+  }
+  const int net_param_id = params_.size();
+  params_.push_back(layers_[layer_id]-&gt;blobs()[param_id]);
+  param_id_vecs_[layer_id].push_back(net_param_id);
+  param_layer_indices_.push_back(make_pair(layer_id, param_id));
+  ParamSpec default_param_spec;
+  const ParamSpec* param_spec = (layer_param.param_size() &gt; param_id) ?
+      &amp;layer_param.param(param_id) : &amp;default_param_spec;
+  if (!param_size || !param_name.size() || (param_name.size() &amp;&amp;
+      param_names_index_.find(param_name) == param_names_index_.end())) {
+    // This layer &quot;owns&quot; this parameter blob -- it is either anonymous
+    // (i.e., not given a param_name) or explicitly given a name that we
+    // haven&#39;t already seen.
+    //该层拥有权值Blob
+    param_owners_.push_back(-1);
+    if (param_name.size()) {
+      param_names_index_[param_name] = net_param_id;
+    }
+    const int learnable_param_id = learnable_params_.size();
+    learnable_params_.push_back(params_[net_param_id].get());
+    learnable_param_ids_.push_back(learnable_param_id);
+    has_params_lr_.push_back(param_spec-&gt;has_lr_mult());
+    has_params_decay_.push_back(param_spec-&gt;has_decay_mult());
+    params_lr_.push_back(param_spec-&gt;lr_mult());
+    params_weight_decay_.push_back(param_spec-&gt;decay_mult());
+  } else {
+    // Named param blob with name we&#39;ve seen before: share params(该层共享权值Blob)
+    const int owner_net_param_id = param_names_index_[param_name];
+    param_owners_.push_back(owner_net_param_id);
+    const pair&lt;int, int&gt;&amp; owner_index =
+        param_layer_indices_[owner_net_param_id];
+    const int owner_layer_id = owner_index.first;
+    const int owner_param_id = owner_index.second;
+    LOG_IF(INFO, Caffe::root_solver()) &lt;&lt; &quot;Sharing parameters &#39;&quot; &lt;&lt; param_name
+        &lt;&lt; &quot;&#39; owned by &quot;
+        &lt;&lt; &quot;layer &#39;&quot; &lt;&lt; layer_names_[owner_layer_id] &lt;&lt; &quot;&#39;, param &quot;
+        &lt;&lt; &quot;index &quot; &lt;&lt; owner_param_id;
+    Blob&lt;Dtype&gt;* this_blob = layers_[layer_id]-&gt;blobs()[param_id].get();
+    Blob&lt;Dtype&gt;* owner_blob =
+        layers_[owner_layer_id]-&gt;blobs()[owner_param_id].get();
+    const int param_size = layer_param.param_size();
+    if (param_size &gt; param_id &amp;&amp; (layer_param.param(param_id).share_mode() ==
+                                  ParamSpec_DimCheckMode_PERMISSIVE)) {
+      // Permissive dimension checking -- only check counts are the same.
+      CHECK_EQ(this_blob-&gt;count(), owner_blob-&gt;count())
+          &lt;&lt; &quot;Cannot share param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; owned by layer &#39;&quot;
+          &lt;&lt; layer_names_[owner_layer_id] &lt;&lt; &quot;&#39; with layer &#39;&quot;
+          &lt;&lt; layer_names_[layer_id] &lt;&lt; &quot;&#39;; count mismatch.  Owner layer param &quot;
+          &lt;&lt; &quot;shape is &quot; &lt;&lt; owner_blob-&gt;shape_string() &lt;&lt; &quot;; sharing layer &quot;
+          &lt;&lt; &quot;shape is &quot; &lt;&lt; this_blob-&gt;shape_string();
+    } else {
+      // Strict dimension checking -- all dims must be the same.(严格检查)
+      CHECK(this_blob-&gt;shape() == owner_blob-&gt;shape())
+          &lt;&lt; &quot;Cannot share param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; owned by layer &#39;&quot;
+          &lt;&lt; layer_names_[owner_layer_id] &lt;&lt; &quot;&#39; with layer &#39;&quot;
+          &lt;&lt; layer_names_[layer_id] &lt;&lt; &quot;&#39;; shape mismatch.  Owner layer param &quot;
+          &lt;&lt; &quot;shape is &quot; &lt;&lt; owner_blob-&gt;shape_string() &lt;&lt; &quot;; sharing layer &quot;
+          &lt;&lt; &quot;expects shape &quot; &lt;&lt; this_blob-&gt;shape_string();
+    }
+    const int learnable_param_id = learnable_param_ids_[owner_net_param_id];
+    learnable_param_ids_.push_back(learnable_param_id);
+    if (param_spec-&gt;has_lr_mult()) {
+      if (has_params_lr_[learnable_param_id]) {
+        CHECK_EQ(param_spec-&gt;lr_mult(), params_lr_[learnable_param_id])
+            &lt;&lt; &quot;Shared param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; has mismatched lr_mult.&quot;;
+      } else {
+        has_params_lr_[learnable_param_id] = true;
+        params_lr_[learnable_param_id] = param_spec-&gt;lr_mult();
+      }
+    }
+    if (param_spec-&gt;has_decay_mult()) {
+      if (has_params_decay_[learnable_param_id]) {
+        CHECK_EQ(param_spec-&gt;decay_mult(),
+                 params_weight_decay_[learnable_param_id])
+            &lt;&lt; &quot;Shared param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; has mismatched decay_mult.&quot;;
+      } else {
+        has_params_decay_[learnable_param_id] = true;
+        params_weight_decay_[learnable_param_id] = param_spec-&gt;decay_mult();
+      }
+    }
+  }
+}
+
+</code></pre>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="14988067800935.html" 
+          title="Next Post: 第七条 在对象内部尽量直接访问实例变量">第七条 在对象内部尽量直接访问实例变量 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="14988713979681.html">Net初始化时的三个登记注册函数</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14988067800935.html">第七条 在对象内部尽量直接访问实例变量</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14987856817486.html">Caffe前向传播计算</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14986374781793.html">第六条 理解"属性" 这一概念</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14986110416063.html">Caffe模型</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

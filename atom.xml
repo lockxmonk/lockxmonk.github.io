@@ -4,13 +4,208 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-06-29T16:21:31+08:00</updated>
+  <updated>2017-06-30T16:02:57+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Net初始化时的三个登记注册函数]]></title>
+    <link href="https://lockxmonk.github.io/14988713979681.html"/>
+    <updated>2017-07-01T09:09:57+08:00</updated>
+    <id>https://lockxmonk.github.io/14988713979681.html</id>
+    <content type="html"><![CDATA[
+<p>我们已经知道<code>Init()</code>函数完成了非常关键的网络初始化和层初始化操作.虽然代码很长.但是只要抓住几个核心对象,了解其功能并密切关注其动态,即可掌握<code>Init()</code>函数的执行流程和具体意义.</p>
+
+<p>在<code>Init()</code>中调用了<mark>三个登记注册函数</mark>:</p>
+
+<p><strong>AppendTop</strong>:<br/>
+```c++</p>
+
+<p>// Helper for Net::Init: add a new top blob to the net.<br/>
+//登记每层输出Blob<br/>
+template <typename Dtype><br/>
+void Net<Dtype>::AppendTop(const NetParameter&amp; param, const int layer_id,<br/>
+                           const int top_id, set<string>* available_blobs,<br/>
+                           map<string, int>* blob_name_to_idx) {<br/>
+  shared_ptr<LayerParameter> layer_param(<br/>
+      new LayerParameter(param.layer(layer_id)));<br/>
+  const string&amp; blob_name = (layer_param-&gt;top_size() &gt; top_id) ?<br/>
+      layer_param-&gt;top(top_id) : &quot;(automatic)&quot;;<br/>
+  // Check if we are doing in-place computation(检查是否为原位计算)<br/>
+  if (blob_name_to_idx &amp;&amp; layer_param-&gt;bottom_size() &gt; top_id &amp;&amp;<br/>
+      blob_name == layer_param-&gt;bottom(top_id)) {<br/>
+    // In-place computation(是原位计算)<br/>
+    LOG_IF(INFO, Caffe::root_solver())<br/>
+        &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name &lt;&lt; &quot; (in-place)&quot;;<br/>
+    top_vecs_[layer_id].push_back(blobs_[(<em>blob_name_to_idx)[blob_name]].get());<br/>
+    top_id_vecs_[layer_id].push_back((</em>blob_name_to_idx)[blob_name]);<br/>
+  } else if (blob_name_to_idx &amp;&amp;<br/>
+             blob_name_to_idx-&gt;find(blob_name) != blob_name_to_idx-&gt;end()) {<br/>
+    // If we are not doing in-place computation but have duplicated blobs,<br/>
+    // raise an error.<br/>
+    LOG(FATAL) &lt;&lt; &quot;Top blob &#39;&quot; &lt;&lt; blob_name<br/>
+               &lt;&lt; &quot;&#39; produced by multiple sources.&quot;;<br/>
+  } else {<br/>
+    // Normal output.(正常输出)<br/>
+    if (Caffe::root_solver()) {<br/>
+      LOG(INFO) &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name;<br/>
+    }<br/>
+    shared_ptr<Blob<Dtype> &gt; blob_pointer(new Blob<Dtype>());<br/>
+    //新建一个Blob,插入到Net::blobs_最后<br/>
+    const int blob_id = blobs_.size();<br/>
+    blobs_.push_back(blob_pointer);<br/>
+    blob_names_.push_back(blob_name);<br/>
+    blob_need_backward_.push_back(false);<br/>
+    if (blob_name_to_idx) { (*blob_name_to_idx)[blob_name] = blob_id; }<br/>
+    top_id_vecs_[layer_id].push_back(blob_id);<br/>
+    top_vecs_[layer_id].push_back(blob_pointer.get());<br/>
+  }<br/>
+  if (available_blobs) { available_blobs-&gt;insert(blob_name); }<br/>
+}</p>
+
+<pre><code>
+**AppendBottom**:
+
+
+```c++
+
+// Helper for Net::Init: add a new bottom blob to the net.
+//登记每层输入Blob
+template &lt;typename Dtype&gt;
+int Net&lt;Dtype&gt;::AppendBottom(const NetParameter&amp; param, const int layer_id,
+    const int bottom_id, set&lt;string&gt;* available_blobs,
+    map&lt;string, int&gt;* blob_name_to_idx) {
+  const LayerParameter&amp; layer_param = param.layer(layer_id);
+  const string&amp; blob_name = layer_param.bottom(bottom_id);
+  if (available_blobs-&gt;find(blob_name) == available_blobs-&gt;end()) {
+    LOG(FATAL) &lt;&lt; &quot;Unknown bottom blob &#39;&quot; &lt;&lt; blob_name &lt;&lt; &quot;&#39; (layer &#39;&quot;
+               &lt;&lt; layer_param.name() &lt;&lt; &quot;&#39;, bottom index &quot; &lt;&lt; bottom_id &lt;&lt; &quot;)&quot;;
+  }
+  const int blob_id = (*blob_name_to_idx)[blob_name];
+  LOG_IF(INFO, Caffe::root_solver())
+      &lt;&lt; layer_names_[layer_id] &lt;&lt; &quot; &lt;- &quot; &lt;&lt; blob_name;
+  bottom_vecs_[layer_id].push_back(blobs_[blob_id].get());
+  bottom_id_vecs_[layer_id].push_back(blob_id);
+  available_blobs-&gt;erase(blob_name);
+  bool need_backward = blob_need_backward_[blob_id];
+  // Check if the backpropagation on bottom_id should be skipped(检查是否可以跳过反向传播)
+  if (layer_param.propagate_down_size() &gt; 0) {
+    need_backward = layer_param.propagate_down(bottom_id);
+  }
+  bottom_need_backward_[layer_id].push_back(need_backward);
+  return blob_id;
+}
+
+</code></pre>
+
+<p><strong>AppendParam</strong>:</p>
+
+<pre><code class="language-c++">
+//登记每层权值Blob
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::AppendParam(const NetParameter&amp; param, const int layer_id,
+                             const int param_id) {
+  const LayerParameter&amp; layer_param = layers_[layer_id]-&gt;layer_param();
+  const int param_size = layer_param.param_size();
+  string param_name =
+      (param_size &gt; param_id) ? layer_param.param(param_id).name() : &quot;&quot;;
+  if (param_name.size()) {
+    param_display_names_.push_back(param_name);
+  } else {
+    ostringstream param_display_name;
+    param_display_name &lt;&lt; param_id;
+    param_display_names_.push_back(param_display_name.str());
+  }
+  const int net_param_id = params_.size();
+  params_.push_back(layers_[layer_id]-&gt;blobs()[param_id]);
+  param_id_vecs_[layer_id].push_back(net_param_id);
+  param_layer_indices_.push_back(make_pair(layer_id, param_id));
+  ParamSpec default_param_spec;
+  const ParamSpec* param_spec = (layer_param.param_size() &gt; param_id) ?
+      &amp;layer_param.param(param_id) : &amp;default_param_spec;
+  if (!param_size || !param_name.size() || (param_name.size() &amp;&amp;
+      param_names_index_.find(param_name) == param_names_index_.end())) {
+    // This layer &quot;owns&quot; this parameter blob -- it is either anonymous
+    // (i.e., not given a param_name) or explicitly given a name that we
+    // haven&#39;t already seen.
+    //该层拥有权值Blob
+    param_owners_.push_back(-1);
+    if (param_name.size()) {
+      param_names_index_[param_name] = net_param_id;
+    }
+    const int learnable_param_id = learnable_params_.size();
+    learnable_params_.push_back(params_[net_param_id].get());
+    learnable_param_ids_.push_back(learnable_param_id);
+    has_params_lr_.push_back(param_spec-&gt;has_lr_mult());
+    has_params_decay_.push_back(param_spec-&gt;has_decay_mult());
+    params_lr_.push_back(param_spec-&gt;lr_mult());
+    params_weight_decay_.push_back(param_spec-&gt;decay_mult());
+  } else {
+    // Named param blob with name we&#39;ve seen before: share params(该层共享权值Blob)
+    const int owner_net_param_id = param_names_index_[param_name];
+    param_owners_.push_back(owner_net_param_id);
+    const pair&lt;int, int&gt;&amp; owner_index =
+        param_layer_indices_[owner_net_param_id];
+    const int owner_layer_id = owner_index.first;
+    const int owner_param_id = owner_index.second;
+    LOG_IF(INFO, Caffe::root_solver()) &lt;&lt; &quot;Sharing parameters &#39;&quot; &lt;&lt; param_name
+        &lt;&lt; &quot;&#39; owned by &quot;
+        &lt;&lt; &quot;layer &#39;&quot; &lt;&lt; layer_names_[owner_layer_id] &lt;&lt; &quot;&#39;, param &quot;
+        &lt;&lt; &quot;index &quot; &lt;&lt; owner_param_id;
+    Blob&lt;Dtype&gt;* this_blob = layers_[layer_id]-&gt;blobs()[param_id].get();
+    Blob&lt;Dtype&gt;* owner_blob =
+        layers_[owner_layer_id]-&gt;blobs()[owner_param_id].get();
+    const int param_size = layer_param.param_size();
+    if (param_size &gt; param_id &amp;&amp; (layer_param.param(param_id).share_mode() ==
+                                  ParamSpec_DimCheckMode_PERMISSIVE)) {
+      // Permissive dimension checking -- only check counts are the same.
+      CHECK_EQ(this_blob-&gt;count(), owner_blob-&gt;count())
+          &lt;&lt; &quot;Cannot share param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; owned by layer &#39;&quot;
+          &lt;&lt; layer_names_[owner_layer_id] &lt;&lt; &quot;&#39; with layer &#39;&quot;
+          &lt;&lt; layer_names_[layer_id] &lt;&lt; &quot;&#39;; count mismatch.  Owner layer param &quot;
+          &lt;&lt; &quot;shape is &quot; &lt;&lt; owner_blob-&gt;shape_string() &lt;&lt; &quot;; sharing layer &quot;
+          &lt;&lt; &quot;shape is &quot; &lt;&lt; this_blob-&gt;shape_string();
+    } else {
+      // Strict dimension checking -- all dims must be the same.(严格检查)
+      CHECK(this_blob-&gt;shape() == owner_blob-&gt;shape())
+          &lt;&lt; &quot;Cannot share param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; owned by layer &#39;&quot;
+          &lt;&lt; layer_names_[owner_layer_id] &lt;&lt; &quot;&#39; with layer &#39;&quot;
+          &lt;&lt; layer_names_[layer_id] &lt;&lt; &quot;&#39;; shape mismatch.  Owner layer param &quot;
+          &lt;&lt; &quot;shape is &quot; &lt;&lt; owner_blob-&gt;shape_string() &lt;&lt; &quot;; sharing layer &quot;
+          &lt;&lt; &quot;expects shape &quot; &lt;&lt; this_blob-&gt;shape_string();
+    }
+    const int learnable_param_id = learnable_param_ids_[owner_net_param_id];
+    learnable_param_ids_.push_back(learnable_param_id);
+    if (param_spec-&gt;has_lr_mult()) {
+      if (has_params_lr_[learnable_param_id]) {
+        CHECK_EQ(param_spec-&gt;lr_mult(), params_lr_[learnable_param_id])
+            &lt;&lt; &quot;Shared param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; has mismatched lr_mult.&quot;;
+      } else {
+        has_params_lr_[learnable_param_id] = true;
+        params_lr_[learnable_param_id] = param_spec-&gt;lr_mult();
+      }
+    }
+    if (param_spec-&gt;has_decay_mult()) {
+      if (has_params_decay_[learnable_param_id]) {
+        CHECK_EQ(param_spec-&gt;decay_mult(),
+                 params_weight_decay_[learnable_param_id])
+            &lt;&lt; &quot;Shared param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; has mismatched decay_mult.&quot;;
+      } else {
+        has_params_decay_[learnable_param_id] = true;
+        params_weight_decay_[learnable_param_id] = param_spec-&gt;decay_mult();
+      }
+    }
+  }
+}
+
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[第七条 在对象内部尽量直接访问实例变量]]></title>
@@ -5627,187 +5822,6 @@ parser.event_list()
 <p>这里我们将所遇到的属性,进行人为分类,将包含<code>&#39;event-title&#39;</code>,<code>&#39;time&#39;</code>,<code>&#39;event-location&#39;</code>关键字的属性聚类到一起,</p>
 
 <p><img src="media/14956930097908/14956975668058.jpg" alt=""/></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[itertools]]></title>
-    <link href="https://lockxmonk.github.io/14956760206333.html"/>
-    <updated>2017-05-25T09:33:40+08:00</updated>
-    <id>https://lockxmonk.github.io/14956760206333.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">chain()</a>
-</li>
-<li>
-<a href="#toc_1">groupby()</a>
-</li>
-<li>
-<a href="#toc_2">imap()</a>
-</li>
-<li>
-<a href="#toc_3">ifilter()</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_4">小结</a>
-
-
-<p>Python的内建模块<code>itertools</code>提供了非常有用的用于操作迭代对象的函数。</p>
-
-<p>首先，我们看看<code>itertools</code>提供的几个“无限”迭代器：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-natuals = itertools.count(1)
-for n in natuals:
-    print n
-</code></pre>
-
-<p><img src="media/14956760206333/14956780529492.jpg" alt=""/></p>
-
-<p>因为<code>count()</code>会创建一个无限的迭代器，所以上述代码会打印出自然数序列，根本停不下来，只能按<code>Ctrl+C</code>退出。(有假死的风险)</p>
-
-<p><code>cycle()</code>会把传入的一个序列无限重复下去：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-cs = itertools.cycle(&#39;ABC&#39;)
-for n in cs:
-    print n
-</code></pre>
-
-<p><img src="media/14956760206333/14956783779668.jpg" alt=""/><br/>
-同样停不下来。(很容易程序假死....)</p>
-
-<p><code>repeat()</code>负责把一个元素无限重复下去，不过如果提供第二个参数就可以限定重复次数：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-ns = itertools.repeat(&#39;A&#39;,10)
-for n in ns:
-    print n
-</code></pre>
-
-<p><img src="media/14956760206333/14956789222152.jpg" alt=""/></p>
-
-<p><strong>无限序列只有在<code>for</code>迭代时才会无限地迭代下去，如果只是创建了一个迭代对象，它不会事先把无限个元素生成出来，事实上也不可能在内存中创建无限多个元素。</strong></p>
-
-<p>无限序列虽然可以无限迭代下去，但是通常我们会通过<code>takewhile()</code>等函数根据条件判断来截取出一个有限的序列：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-natuals = itertools.count(1)
-ns = itertools.takewhile(lambda x:x&lt;=10, natuals)
-for n in ns:
-    print n
-</code></pre>
-
-<p><img src="media/14956760206333/14956791893037.jpg" alt=""/></p>
-
-<p><code>itertools</code>提供的几个迭代器操作函数更加有用：</p>
-
-<h2 id="toc_0">chain()</h2>
-
-<p><code>chain()</code>可以把一组迭代对象串联起来，形成一个更大的迭代器：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-for c in itertools.chain(&#39;ABC&#39;, &#39;XYZ&#39;):
-    print c
-</code></pre>
-
-<p><img src="media/14956760206333/14956795463378.jpg" alt=""/></p>
-
-<h2 id="toc_1">groupby()</h2>
-
-<p><code>groupby()</code>把迭代器中相邻的重复元素挑出来放在一起：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-for key,group  in itertools.groupby(&#39;AAAABBBBBCCCAAA&#39;):
-    print key ,list(group)
-</code></pre>
-
-<p><img src="media/14956760206333/14956799374968.jpg" alt=""/><br/>
-<strong>这里注意到打印group的时候用的是list(group),这是因为gruupby返回仍然是一个迭代器!!,迭代器中的元素可以用list(迭代器)来将元素显示出来,但是要注意不要用list来显示那些无限循环的迭代器(会死机....).</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-cs = itertools.repeat(&#39;A&#39;, 10) # 注意字符串也是序列的一种
-print list(cs)
-</code></pre>
-
-<p><img src="media/14956760206333/14956833066876.jpg" alt=""/></p>
-
-<h2 id="toc_2">imap()</h2>
-
-<p><code>imap()</code>和<code>map()</code>的区别在于，<code>imap()</code>可以作用于无穷序列，并且，如果两个序列的长度不一致，以短的那个为准。</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-for x in itertools.imap(lambda x, y: x * y, [10, 20, 30], itertools.count(1)):
-         print x
-</code></pre>
-
-<p><img src="media/14956760206333/14956801958879.jpg" alt=""/></p>
-
-<p>注意<code>imap()</code>返回一个迭代对象，而<code>map()</code>返回<code>list</code>。当你调用<code>map()</code>时，已经计算完毕,当你调用<code>imap()</code>时，并没有进行任何计算：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-r = map(lambda x: x*x, [1, 2, 3])
-print r     # r已经计算出来了
-n = itertools.imap(lambda x: x*x, [1, 2, 3])
-print n     # n只是一个迭代对象
-
-for x in n:
-    print x
-</code></pre>
-
-<p><img src="media/14956760206333/14956804009136.jpg" alt=""/></p>
-
-<p>必须用for循环对r进行迭代，才会在每次循环过程中计算出下一个元素.</p>
-
-<p>这说明<code>imap()</code>实现了“惰性计算”，也就是在需要获得结果的时候才计算。类似<code>imap()</code>这样能够实现惰性计算的函数就可以处理无限序列：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-r = itertools.imap(lambda x: x*x, itertools.count(1)) 
-for n in itertools.takewhile(lambda x: x&lt;100, r):
-      print n
-</code></pre>
-
-<p><img src="media/14956760206333/14956809524908.jpg" alt=""/></p>
-
-<p>如果把imap()换成map()去处理无限序列:</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import itertools
-
-r = map(lambda x: x * x, itertools.count(1))
-print r
-# for n in itertools.takewhile(lambda x: x&lt;100, r):
-# print n
-</code></pre>
-
-<p>会造成电脑死机,由于<code>map()</code>返回的是一个list，所以当用它去处理无限序列的时候，它会尝试计算完之后才返回，但是序列是无限的，所以它会一直计算下去，致使其占用的系统的内存越来越高。(很坑爹....)</p>
-
-<h2 id="toc_3">ifilter()</h2>
-
-<p>不用多说了，<code>ifilter()</code>就是<code>filter()</code>的惰性实现。</p>
-
-<h1 id="toc_4">小结</h1>
-
-<p><code>itertools</code>模块提供的全部是处理迭代功能的函数，它们的返回值不是<code>list</code>，而是迭代对象，只有用<code>for</code>循环迭代的时候才真正计算。</p>
 
 ]]></content>
   </entry>
