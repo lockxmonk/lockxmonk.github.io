@@ -113,6 +113,103 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14990441879389.html">
+                
+                  <h1>Net Forward实现</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>掌握了上次Net的初始化代码以及方法,我们下面来看一下他的<code>Forward</code>代码:</p>
+
+<pre><code class="language-c++">
+template &lt;typename Dtype&gt;
+Dtype Net&lt;Dtype&gt;::ForwardFromTo(int start, int end) {
+//计算从第start到end层的前向传播过程
+  CHECK_GE(start, 0);
+  CHECK_LT(end, layers_.size());
+  Dtype loss = 0;
+  for (int i = start; i &lt;= end; ++i) {
+    for (int c = 0; c &lt; before_forward_.size(); ++c) {
+      before_forward_[c]-&gt;run(i);
+    }
+// LOG(ERROR) &lt;&lt; &quot;Forwarding &quot; &lt;&lt;layer_names_[i];
+// 调用每个Layer的Forward()函数，得到每层loss
+    Dtype layer_loss = layers_[i]-&gt;Forward(bottom_vecs_[i], top_vecs_[i]);
+    loss += layer_loss;
+    if (debug_info_) { ForwardDebugInfo(i); }
+    for (int c = 0; c &lt; after_forward_.size(); ++c) {
+      after_forward_[c]-&gt;run(i);
+    }
+  }
+  //返回loss值
+  return loss;
+}
+
+template &lt;typename Dtype&gt;
+Dtype Net&lt;Dtype&gt;::ForwardFrom(int start) {
+//计算从start开始到最后一层的前向传播过程
+  return ForwardFromTo(start, layers_.size() - 1);
+}
+
+template &lt;typename Dtype&gt;
+Dtype Net&lt;Dtype&gt;::ForwardTo(int end) {
+//计算从第1层到第end层的前向传播过程
+  return ForwardFromTo(0, end);
+}
+
+template &lt;typename Dtype&gt;
+const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Net&lt;Dtype&gt;::Forward(Dtype* loss) {
+//计算整个网络前向传播过程,返回损失值(可选)和网络输出Blob
+  if (loss != NULL) {
+    *loss = ForwardFromTo(0, layers_.size() - 1);
+  } else {
+    ForwardFromTo(0, layers_.size() - 1);
+  }
+  return net_output_blobs_;
+}
+
+template &lt;typename Dtype&gt;
+const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Net&lt;Dtype&gt;::Forward(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt; &amp; bottom, Dtype* loss) {
+    //接受输入Blob作为Net输入，计算前向传播,得到损失值（可选）和网络输出Blob
+  LOG_EVERY_N(WARNING, 1000) &lt;&lt; &quot;DEPRECATED: Forward(bottom, loss) &quot;
+      &lt;&lt; &quot;will be removed in a future version. Use Forward(loss).&quot;;
+  // Copy bottom to net bottoms(直接将输入Blob拷贝到net_input_blobs_中)
+  for (int i = 0; i &lt; bottom.size(); ++i) {
+    net_input_blobs_[i]-&gt;CopyFrom(*bottom[i]);
+  }
+  return Forward(loss);
+}
+
+</code></pre>
+
+<p>到这里 我们就初步了解了所有的前向传波函数,应该能够在脑海中形成DAG数据流动图,后面学习反向传播过程.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/7/3</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe前向传播计算</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14988713979681.html">
                 
                   <h1>Net初始化时的三个登记注册函数</h1>
@@ -2223,112 +2320,6 @@ INSTANTIATE_CLASS(BasePrefetchingDataLayer);
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14980252836745.html">
-                
-                  <h1>MAC下openBlas的安装</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>这里我们安装openblas主要有两种方法:</p>
-
-<ol>
-<li>通过git代码到本地并安装</li>
-<li>通过brew来安装</li>
-</ol>
-
-<h2 id="toc_0">git到本地编译安装.</h2>
-
-<ol>
-<li>git代码到本地并安装</li>
-</ol>
-
-<pre><code>git clone https://github.com/xianyi/OpenBLAS.git
-cd OpenBLAS
-make -j4
-make install
-
-</code></pre>
-
-<ol>
-<li>修改Caffe的<code>Makefile.config</code></li>
-</ol>
-
-<pre><code>BLAS := open
-BLAS_INCLUDE :=  /opt/OpenBLAS/include
-BLAS_LIB := /opt/OpenBLAS/lib
-</code></pre>
-
-<ol>
-<li>caffe重新make</li>
-</ol>
-
-<pre><code>make clean
-make pycaffe
-make all -j4
-make test &amp;&amp; runtest
-</code></pre>
-
-<h2 id="toc_1">使用brew进行安装</h2>
-
-<ol>
-<li><code>brew uninstall openblas; brew install --fresh -vd openblas.</code>运行上面命令安装openblas</li>
-<li>更改<code>Makefile.config</code></li>
-</ol>
-
-<pre><code>
-# Homebrew puts openblas in a directory that is not on the standard search path
-BLAS_INCLUDE := $(shell brew --prefix openblas)/include
-BLAS_LIB := $(shell brew --prefix openblas)/lib
-
-</code></pre>
-
-<ol>
-<li>重新编译</li>
-</ol>
-
-<p><strong>如果有些人遇到了这种错误</strong></p>
-
-<pre><code>In file included from src/caffe/util/blocking_queue.cpp:5:
-In file included from ./include/caffe/layers/base_data_layer.hpp:9:
-In file included from ./include/caffe/layer.hpp:12:
-In file included from ./include/caffe/util/math_functions.hpp:11:
-./include/caffe/util/mkl_alternate.hpp:14:10: fatal error: &#39;cblas.h&#39; file not found
-#include &lt;cblas.h&gt;
-         ^
-1 error generated.
-make: *** [.build_release/src/caffe/util/blocking_queue.o] Error 1
-</code></pre>
-
-<p>可以试试这个命令:</p>
-
-<pre><code>cmake -DCMAKE_CXX_FLAGS=-I/usr/local/opt/openblas/include ..
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/21</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Caffe%20I/O%E6%A8%A1%E5%9D%97.html'>Caffe I/O模块</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -2412,6 +2403,18 @@ make: *** [.build_release/src/caffe/util/blocking_queue.o] Error 1
 	      
 		      
 			      <li class="post">
+			        <a href="14990683410396.html">第8条:理解"对象同等性"这一概念</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14990441879389.html">Net Forward实现</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="14988713979681.html">Net初始化时的三个登记注册函数</a>
 			      </li>
 		     
@@ -2425,18 +2428,6 @@ make: *** [.build_release/src/caffe/util/blocking_queue.o] Error 1
 		      
 			      <li class="post">
 			        <a href="14987856817486.html">Caffe前向传播计算</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14986374781793.html">第六条 理解"属性" 这一概念</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14986110416063.html">Caffe模型</a>
 			      </li>
 		     
 		  

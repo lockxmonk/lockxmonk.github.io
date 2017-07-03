@@ -4,13 +4,236 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-06-30T16:02:57+08:00</updated>
+  <updated>2017-07-03T09:30:53+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[第8条:理解"对象同等性"这一概念]]></title>
+    <link href="https://lockxmonk.github.io/14990683410396.html"/>
+    <updated>2017-07-03T15:52:21+08:00</updated>
+    <id>https://lockxmonk.github.io/14990683410396.html</id>
+    <content type="html"><![CDATA[
+<p>根据“等同性”（equality)来比较对象是一个非常有用的功能。不过，按照<code>==</code>操作符比较出来的结果未必是我们想要的，因为该操作比较的是两个<mark>指针本身</mark>，而不是其所指的对象。应该使用NSObject协议中声明的<strong><mark>“isEqual”</mark></strong>：方法来判断两个对象的等同性。一般来说,两个类型不同的对象总是不相等的（unequal)。某些对象提供了特殊的“等同性判定方法”(equality-checking method),<strong>如果已经知道两个受测对象都属于同一个类，那么就可以使用这种方法</strong>。以下述代码为例：</p>
+
+<pre><code class="language-objc">
+NSString *foo = @&quot;Badger 123&quot;;
+NSString *bar = [NSStringstringWithFormat: @fTBadger %i&quot;, 123】；
+BOOL equalA = (foo == bar); //&lt; equal A - NO
+BOOL equalB = [foo isEqual: bar ] ; //&lt; equalB = YES
+BOOL equalC = [foo isEqualToString:bar]; //&lt; equalC = YES
+
+</code></pre>
+
+<p>上面可以看到<code>==</code>与等同性判断方法之间的差别。<code>NSString</code>类实现了一个自己独有的等同性判断方法，名叫<code>“isEqualToString:”</code>。传递给该方法的对象必须是<code>NSString</code>,否则结果未定义（undefined)。调用该方法比调用<code>“isEqual”</code>方法快，后者还要执行额外的步骤，因为它不知道受测对象的类型(前者指使用NSString所以快些)。</p>
+
+<p><code>NSObject</code>协议中有两个用于判断等同性的关键方法：</p>
+
+<pre><code class="language-objc">
+- (BOOL) isEqual: (id) object;
+- (NSUInteger) hash;
+
+</code></pre>
+
+<p><code>NSObject</code>类对这两个方法的默认实现是：当且仅当其<strong>“指针值&quot;（pointer value)(内存地址)完全相等时，这两个对象才相等。</strong>若想在自定义的对象中正确覆写这些方法，就必须先理解其约定<br/>
+(contract)。如果<code>“isEqual:”</code>方法判定两个对象相等，那么其<code>hash</code>方法也必须返回同一个值。但是，如果两个对象的hash方法返回同一个值，那么“isEqual:”方法未必会认为两者相等。</p>
+
+<p>比如有下面这个类：</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSObject
+@property (nonatomic, copy) NSString *firstName;
+@property (nonatomic, copy) NSString *lastName;
+@property (nonatomic, assign) NSUInteger age;
+@end
+
+</code></pre>
+
+<p>我们认为，如果两个<code>EOCPerson</code>的所有字段均相等，那么这两个对象就相等。于是<code>“isEqual:”</code>方法可以写成：</p>
+
+<pre><code class="language-objc">
+-(BOOL)isEqual:(id)object {
+    if (self == object) return YES;
+    if ( [self class] != [object class]) return NO;
+    EOCPerson ^otherPerson = (EOCPerson*)object;
+    if (! [_firstName isEqualToString:otherPerson.firstName))
+    return NO;
+    if (![_lastName isEqualToString:otherPerson.lastName])
+    return NO;
+    if (_age != otherPerson.age)
+    return NO;
+    return YES;
+}
+
+</code></pre>
+
+<p>首先，直接判断两个指针是否相等。若相等，则其均指向同一对象，所以受测的对象也必定相等。接下来，比较两对象所属的类。若不属于同一个类，则两对象不相等。<code>EOCPerson</code>对象当然不可能与<code>EOCDog</code>对象相等。不过，有时我们可能认为：一个EOCPerson实例可以与其子类（比如EOCSmithPerson)实例相等。在继承体系（inheritance hierarchy)中判断等同属性时,经常遭遇此类问题.所以实现&quot;isEqual:&quot;方法时要考虑到这种情况。最后，检测每个属性是否相等。只要其中有不相等的属性，就判定两对象不等，否则两对象相等。</p>
+
+<p>接下来,我们实现hash方法.回想一下，根据等同性约定：若两对象相等，则其哈希码(hash)也相等，但是两个哈希码相同的对象却未必相等。这是能否正确覆写“isEqual”方法的关键所在。下面这种写法完全可行：</p>
+
+<pre><code class="language-objc">
+-(NSUInteger)hash {
+    return 1337;
+}
+
+</code></pre>
+
+<p>在<code>collection</code>中使用这种对象将产生性能问题，因为collection在检索哈希表（hash table)时，会用对象的哈希码做索引。假如某个<code>collection</code>是用<code>set</code>实现的，那么<code>set</code>可能会根据哈希码把对象分装到不同的数组中。在向<code>set</code>中添加新对象时，要根据其哈希码找到与之相关的那个数组，依次检査其中各个元素，看数组中已有的对象是否和将要添加的新对象相等。如果相等，那就说明要添加的对象已经在set里面了。如果令每个对象都返回相同的哈希码，那么在<code>set</code>中已有<code>1000000</code>个对象的情况下，若是继续向其中添加对象，则需将这<code>1 000000</code>个对象全部扫描一遍。</p>
+
+<p>我们看另一种计算哈希码的方法:</p>
+
+<pre><code class="language-objc">
+-(NSUInteger)hash {
+    NSUInteger firstNameHash = [_firstName hash];
+    NSUInteger lastNameHash = [_lastName hash];
+    NSUInteger ageHash = _age;
+    return firstNameHash ^ lastNameHash ^ ageHash;
+}
+
+</code></pre>
+
+<p>这种做法既能保持较高效率，又能使生成的哈希码至少位于一定范围之内，而不会过于频繁地重复。当然，此算法生成的哈希码还是会碰撞（collision),不过至少可以保证哈希码有多种可能的取值.<strong>编写hash方法时，应该用当前的对象做做实验，以便在减少碰撞频度与降低运算复杂程度之间取舍。</strong></p>
+
+<h2 id="toc_0">特定类所具有的等同性判定方法</h2>
+
+<p>除了刚才提到的<code>NSString</code>之外，<code>NSArray</code>与<code>NSDictionary</code>类也具有特殊的等同性判定方法，前者名为<code>“isEqualToArray:”</code>，后者名为<code>“isEqualToDictionary:”</code>。如果和其相比较的对象不是数组或字典，那么这两个方法会各自抛出异常。由于<code>Objective-C</code>在编译期不做强类型检査（strong type checking),这样容易不小心传入类型错误的对象，因此开发者应该保证所传对象的类型是正确的。</p>
+
+<p>如果我们觉得提供的判断方法不好用,可以自己来写一个,令代码看上<br/>
+去更美观、更易读,使自己编写的判定方法更容易读懂，而且不用再检査两个受测对象的类型了。</p>
+
+<p><strong>在编写判定方法时，也应一并覆写“isEqual:”方法。后者的常见实现方式为：如果受测的参数与接收该消息的对象都属于同一个类，那么就调用自已编写的判定方法，否则就交由超类来判断。</strong></p>
+
+<p>例如:</p>
+
+<pre><code class="language-objc">
+- (BOOL)isEqualToPerson:(EOCPerson*)otherPerson {
+if (self == object) return YES;
+    if (! [_firstName isEqualToString:otherPerson.firstName])
+        return NO;
+    if (![_lastName isEqualToString:otherPerson.lastName])
+        return NO;
+    if (_age != otherPerson.age)
+        return NO;
+    return YES;
+}
+
+-(BOOL)isEqual:(id)object {
+    if ([self class] == [object class]) {
+        return [self isEqualToPerson:(EOCPerson*)object];
+    } else {
+        return [super isEqual:object】；
+
+</code></pre>
+
+<h2 id="toc_1">等同性判定的执行深度</h2>
+
+<p>创建等同性判定方法时，需要决定是根据整个对象来判断等同性，还是仅根据其中几个字段来判断。<code>NSArray</code>的检测方式为先看两个数组所含对象个数是否相同，若相同，则在每个对应位置的两个对象身上调用其<code>“isEqual”</code>方法。如果对应位置上的对象均相等，那么这两个数组就相等，这叫做<strong>“深度等同性判定”（deep equality)。</strong>不过有时候无须将所有数据<br/>
+逐个比较，只根据其中部分数据即可判明二者是否等同。</p>
+
+<p>比方说，我们假设<code>EOCPerson</code>类的实例是根据数据库里的数据创建而来，那么其中就可能会含有另外一个属性，此属性是<strong>“唯一标识符&quot;（unique identifier)</strong>,在数据库中用作“主键”</p>
+
+<pre><code class="language-objc">
+@property NSUInteger identifier;
+
+</code></pre>
+
+<p>在这种情况下，我们也许只会根据标识符来判断等同性，尤其是在此属性声明为<code>readonly</code>时更应该如此。因为只要两者标识符相同，就肯定表示同一个对象，因而必然相等。<br/>
+这样的话，无须逐个比较<code>EOCPerson</code>对象的每条数据，只要标识符相同，就说明这两个对象就是由同一个数据源所创建的，据此我们能够断定，其余数据也必然相同。</p>
+
+<h2 id="toc_2">容器中可变类的等同性</h2>
+
+<p>还有一种情况一定要注意，就是在容器中放入可变类对象的时候。把某个对象放入<code>collection</code>之后，就不应再改变其哈希码了。前面解释过，<code>collection</code>会把各个对象按照其哈希码分装到不同的“箱子数组”中。如果某对象在放入“箱子”之后哈希码又变了，那么其现在所处的这个箱子对它来说就是“错误”的。要想解决这个问题，<strong><mark>需要确保哈希码不是根据对象的“可变部分”（mutable portion)</mark></strong>计算出来的,或是保证放入<code>collection</code>之后就不再改变对象内容了。之后将在第18条中解释为何要将对象做成“不可变的&quot;（immutable)。</p>
+
+<h2 id="toc_3">要点:</h2>
+
+<ul>
+<li>若想检测对象的等同性，请提供<code>“isEqual:”</code>与<code>hash</code>方法。</li>
+<li>相同的对象必须具有相同的哈希码，但是两个哈希码相同的对象却未必相同。</li>
+<li>不要盲目地逐个检测每条属性，而是应该依照具体需求来制定检测方案。</li>
+<li>编写hash方法时，应该使用计算速度快而且哈希码碰撞几率低的箅法。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Net Forward实现]]></title>
+    <link href="https://lockxmonk.github.io/14990441879389.html"/>
+    <updated>2017-07-03T09:09:47+08:00</updated>
+    <id>https://lockxmonk.github.io/14990441879389.html</id>
+    <content type="html"><![CDATA[
+<p>掌握了上次Net的初始化代码以及方法,我们下面来看一下他的<code>Forward</code>代码:</p>
+
+<pre><code class="language-c++">
+template &lt;typename Dtype&gt;
+Dtype Net&lt;Dtype&gt;::ForwardFromTo(int start, int end) {
+//计算从第start到end层的前向传播过程
+  CHECK_GE(start, 0);
+  CHECK_LT(end, layers_.size());
+  Dtype loss = 0;
+  for (int i = start; i &lt;= end; ++i) {
+    for (int c = 0; c &lt; before_forward_.size(); ++c) {
+      before_forward_[c]-&gt;run(i);
+    }
+// LOG(ERROR) &lt;&lt; &quot;Forwarding &quot; &lt;&lt;layer_names_[i];
+// 调用每个Layer的Forward()函数，得到每层loss
+    Dtype layer_loss = layers_[i]-&gt;Forward(bottom_vecs_[i], top_vecs_[i]);
+    loss += layer_loss;
+    if (debug_info_) { ForwardDebugInfo(i); }
+    for (int c = 0; c &lt; after_forward_.size(); ++c) {
+      after_forward_[c]-&gt;run(i);
+    }
+  }
+  //返回loss值
+  return loss;
+}
+
+template &lt;typename Dtype&gt;
+Dtype Net&lt;Dtype&gt;::ForwardFrom(int start) {
+//计算从start开始到最后一层的前向传播过程
+  return ForwardFromTo(start, layers_.size() - 1);
+}
+
+template &lt;typename Dtype&gt;
+Dtype Net&lt;Dtype&gt;::ForwardTo(int end) {
+//计算从第1层到第end层的前向传播过程
+  return ForwardFromTo(0, end);
+}
+
+template &lt;typename Dtype&gt;
+const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Net&lt;Dtype&gt;::Forward(Dtype* loss) {
+//计算整个网络前向传播过程,返回损失值(可选)和网络输出Blob
+  if (loss != NULL) {
+    *loss = ForwardFromTo(0, layers_.size() - 1);
+  } else {
+    ForwardFromTo(0, layers_.size() - 1);
+  }
+  return net_output_blobs_;
+}
+
+template &lt;typename Dtype&gt;
+const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Net&lt;Dtype&gt;::Forward(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt; &amp; bottom, Dtype* loss) {
+    //接受输入Blob作为Net输入，计算前向传播,得到损失值（可选）和网络输出Blob
+  LOG_EVERY_N(WARNING, 1000) &lt;&lt; &quot;DEPRECATED: Forward(bottom, loss) &quot;
+      &lt;&lt; &quot;will be removed in a future version. Use Forward(loss).&quot;;
+  // Copy bottom to net bottoms(直接将输入Blob拷贝到net_input_blobs_中)
+  for (int i = 0; i &lt; bottom.size(); ++i) {
+    net_input_blobs_[i]-&gt;CopyFrom(*bottom[i]);
+  }
+  return Forward(loss);
+}
+
+</code></pre>
+
+<p>到这里 我们就初步了解了所有的前向传波函数,应该能够在脑海中形成DAG数据流动图,后面学习反向传播过程.</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Net初始化时的三个登记注册函数]]></title>
@@ -5588,240 +5811,6 @@ s.close()
 <p>用TCP协议进行Socket编程在Python中十分简单，对于客户端，要主动连接服务器的IP和指定端口，对于服务器，要首先监听指定端口，然后，对每一个新的连接，创建一个线程或进程来处理。通常，服务器程序会无限运行下去。</p>
 
 <p>同一个端口，被一个Socket绑定了以后，就不能被别的Socket绑定了。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[图形界面]]></title>
-    <link href="https://lockxmonk.github.io/14957005904776.html"/>
-    <updated>2017-05-25T16:23:10+08:00</updated>
-    <id>https://lockxmonk.github.io/14957005904776.html</id>
-    <content type="html"><![CDATA[
-<p>Python支持多种图形界面的第三方库，包括：<br/>
-* Tk<br/>
-* wxWidgets<br/>
-* Qt<br/>
-* GTK<br/>
-等等.</p>
-
-<p>但是Python自带的库是支持Tk的Tkinter，使用Tkinter，无需安装任何包，就可以直接使用。本章简单介绍如何使用Tkinter进行GUI编程。</p>
-
-<h2 id="toc_0">Tkinter</h2>
-
-<p>我们来梳理一下概念：</p>
-
-<p>我们编写的Python代码会调用内置的Tkinter，Tkinter封装了访问Tk的接口；</p>
-
-<p>Tk是一个图形库，支持多个操作系统，使用Tcl语言开发；</p>
-
-<p>Tk会调用操作系统提供的本地GUI接口，完成最终的GUI。</p>
-
-<p>所以，我们的代码只需要调用Tkinter提供的接口就可以了。</p>
-
-<h2 id="toc_1">第一个GUI程序</h2>
-
-<p>使用Tkinter十分简单，我们来编写一个GUI版本的“Hello, world!”。</p>
-
-<p>第一步是导入Tkinter包的所有内容：</p>
-
-<pre><code class="language-py">from Tkinter import *
-</code></pre>
-
-<p>第二步是从<code>Frame</code>派生一个<code>Application</code>类，这是所有Widget的父容器：</p>
-
-<pre><code class="language-py">
-class Applicition(Frame):
-    def __init__(self, master=None):
-        Frame.__init__(self,master)
-        self.pack()
-        self.creatWidgets()
-
-    def creatWidgets(self):
-        self.helloLabel = Label(self,text = &#39;Hello,world&#39;)
-        self.helloLabel.pack()
-        self.quitButton = Button(self, text = &#39;Quit&#39;,command = self.quit)
-        self.quitButton.pack()
-
-</code></pre>
-
-<p>在GUI中，每个Button、Label、输入框等，都是一个Widget。Frame则是可以容纳其他Widget的Widget，所有的Widget组合起来就是一棵树。</p>
-
-<p><code>pack()</code>方法把Widget加入到父容器中，并实现布局。<code>pack()</code>是最简单的布局，<code>grid()</code>可以实现更复杂的布局。</p>
-
-<p>在<code>createWidgets()</code>方法中，我们创建一个<code>Label</code>和一个<code>Button</code>，当Button被点击时，触发<code>self.quit()</code>使程序退出。</p>
-
-<p>第三步，实例化<code>Application</code>，并启动消息循环：</p>
-
-<pre><code class="language-py">app = Application()
-# 设置窗口标题:
-app.master.title(&#39;Hello World&#39;)
-# 主消息循环:
-app.mainloop()
-</code></pre>
-
-<p>GUI程序的主线程负责监听来自操作系统的消息，并依次处理每一条消息。因此，如果消息处理非常耗时，就需要在新线程中处理。</p>
-
-<p>运行这个GUI程序，可以看到下面的窗口：<br/>
-<img src="media/14957005904776/14957017137688.jpg" alt=""/><br/>
-点击“Quit”按钮或者窗口的“x”结束程序。</p>
-
-<h2 id="toc_2">输入文本</h2>
-
-<p>我们再对这个GUI程序改进一下，加入一个文本框，让用户可以输入文本，然后点按钮后，弹出消息对话框。</p>
-
-<pre><code class="language-py">from Tkinter import *
-import tkMessageBox
-
-
-class Applicition(Frame):
-
-    def __init__(self, master=None):
-        Frame.__init__(self, master)
-        self.pack()
-        self.creatWidgets()
-
-    def creatWidgets(self):
-        self.nameInput = Entry(self)
-        self.nameInput.pack()
-        self.alertButton = Button(self, text=&#39;Hello&#39;, command=self.hello)
-        self.alertButton.pack()
-
-    def hello(self):
-        name = self.nameInput.get() or &#39;world&#39;
-        tkMessageBox.showinfo(&#39;Message&#39;, &#39;Hello,%s&#39; % name)
-
-app = Applicition()
-app.master.title(&#39;Hello World&#39;)
-app.mainloop()
-
-</code></pre>
-
-<p><img src="media/14957005904776/14957022189285.jpg" alt=""/></p>
-
-<p>当用户点击按钮时，触发<code>hello()</code>，通过<code>self.nameInput.get()</code>获得用户输入的文本后，使用<code>tkMessageBox.showinfo()</code>可以弹出消息对话框。</p>
-
-<h2 id="toc_3">小结</h2>
-
-<p>Python内置的Tkinter可以满足基本的GUI程序的要求，如果是非常复杂的GUI程序，建议用操作系统原生支持的语言和库来编写。</p>
-
-<p>源码参考：<a href="https://github.com/michaelliao/learn-python/tree/master/gui">https://github.com/michaelliao/learn-python/tree/master/gui</a></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[HTMLParser]]></title>
-    <link href="https://lockxmonk.github.io/14956930097908.html"/>
-    <updated>2017-05-25T14:16:49+08:00</updated>
-    <id>https://lockxmonk.github.io/14956930097908.html</id>
-    <content type="html"><![CDATA[
-<p>在Pythonz中我们有可能需要去解析一个爬下来的HTML,我们在Python中应该如何去解析呢?</p>
-
-<p>好在Python提供了<code>HTMLParser</code>来非常方便地解析HTML，只需简单几行代码：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-from HTMLParser import HTMLParser
-from htmlentitydefs import name2codepoint
-
-class MyHTMLParser(HTMLParser):
-    def handle_starttag(self,tag,attrs):
-        print (&#39;&lt;%s&gt;&#39; % tag)
-
-    def handle_endtag(self,tag):
-        print (&#39;&lt;/%s&gt;&#39; % tag)
-    
-    def handle_startendtag(self, tag, attrs):
-        print(&#39;&lt;%s/&gt;&#39; % tag)
-
-    def handle_data(self, data):
-        print(&#39;data&#39;)
-
-    def handle_comment(self, data):
-        print(&#39;&lt;!-- --&gt;&#39;)
-
-    def handle_entityref(self, name):
-        print(&#39;&amp;%s;&#39; % name)
-
-    def handle_charref(self, name):
-        print(&#39;&amp;#%s;&#39; % name)
-parser = MyHTMLParser()
-parser.feed(&#39;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;&lt;p&gt;Some &lt;a href=\&quot;#\&quot;&gt;html&lt;/a&gt; tutorial...&lt;br&gt;END&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;&#39;)
-
-</code></pre>
-
-<p><code>feed()</code>方法可以多次调用，也就是不一定一次把整个HTML字符串都塞进去，可以一部分一部分塞进去。</p>
-
-<p>特殊字符有两种，一种是英文表示的<code>&amp;nbsp;</code>，一种是数字表示的<code>&amp;#1234;</code>，这两种字符都可以通过Parser解析出来。</p>
-
-<h2 id="toc_0">练习</h2>
-
-<p>找一个网页，例如<a href="https://www.python.org/events/python-events/">https://www.python.org/events/python-events/</a>，用浏览器查看源码并复制，然后尝试解析一下HTML，输出Python官网发布的会议时间、名称和地点。</p>
-
-<p>这里我们要解析HTML之前,肯定要先获取该页面元素的代码.我们这里用到了<code>urllib</code>这个库,具体用法为:</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import urllib
-
-PythonPage = urllib.urlopen(&#39;https://www.python.org/events/python-events/&#39;)
-pyhtml = PythonPage.read()  #读取该页面代码.
-print pyhtml
-</code></pre>
-
-<p><img src="media/14956930097908/14956951701372.jpg" alt=""/><br/>
-上面为结果,这里只是部分截图.</p>
-
-<p>下面我们来继续研究上面的问题:</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-from HTMLParser import HTMLParser
-from htmlentitydefs import name2codepoint
-import urllib
-
-
-class PyHTMLParser(HTMLParser):
-
-    def __init__(self):
-        HTMLParser.__init__(self)
-        self._count = 0
-        self._events = dict()
-        self._flag = None
-
-    def handle_starttag(self, tag, attrs):
-        if tag == &#39;h3&#39; and attrs.__contains__((&#39;class&#39;, &#39;event-title&#39;)):
-            self._count += 1
-            self._events[self._count] = dict()
-            self._flag = &#39;event-title&#39;
-        if tag == &#39;time&#39;:
-            self._flag = &#39;time&#39;
-        if tag == &#39;span&#39; and attrs.__contains__((&#39;class&#39;, &#39;event-location&#39;)):
-            self._flag = &#39;event-location&#39;
-
-    def handle_data(self, data):
-        if self._flag == &#39;event-title&#39;:
-            self._events[self._count][self._flag] = data
-        if self._flag == &#39;time&#39;:
-            self._events[self._count][self._flag] = data
-        if self._flag == &#39;event-location&#39;:
-            self._events[self._count][self._flag] = data
-        self._flag = None   #一定要设置为None,防止其它data误入
-
-    def event_list(self):
-        print self._events
-        print &#39;近期关于Python的会议有：&#39;, self._count, &#39;个，具体如下：&#39;
-        for event in self._events.values():
-            print event[&#39;event-title&#39;], &#39;\t&#39;, event[&#39;time&#39;], &#39;\t&#39;, event[&#39;event-location&#39;]
-
-PythonPage = urllib.urlopen(&#39;https://www.python.org/events/python-events/&#39;)
-pyhtml = PythonPage.read()
-parser = PyHTMLParser()
-parser.feed(pyhtml)
-parser.event_list()
-</code></pre>
-
-<p>这里我们将所遇到的属性,进行人为分类,将包含<code>&#39;event-title&#39;</code>,<code>&#39;time&#39;</code>,<code>&#39;event-location&#39;</code>关键字的属性聚类到一起,</p>
-
-<p><img src="media/14956930097908/14956975668058.jpg" alt=""/></p>
 
 ]]></content>
   </entry>
