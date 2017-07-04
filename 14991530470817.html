@@ -1,0 +1,470 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  第九条 以"类族模式"隐藏实现细节 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>第九条 以"类族模式"隐藏实现细节</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/7/4</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>&quot;类族&quot;(class cluster,也叫类簇)是一种很有用的模式(pattern),可以隐藏&quot;抽象基类&quot;(abstract base class)背后的实现细节.</p>
+
+<p>Objective-C的系统框架中普遍使用此模式。比如，iOS的用户界面框架（user interface framework) UIKit中就有一个名为<code>UIButton</code>的类。想创建按钮，需<br/>
+要调用下面这个“类方法”（class method):</p>
+
+<pre><code class="language-objc">+ (UIButton*)buttonWithType:(UIButtonType)type;
+
+</code></pre>
+
+<p>该方法所返回的对象，其类型取决于传入的按钮类型（button type)。然而，不管返回什么类型的对象，它们都继承自同一个基类：<code>UIButton</code>。这么做的意义在于：<strong>UIButton类的使用者无须关心创建出来的按钮具体属于哪个子类，也不用考虑按钮的绘制方式等实现细节。</strong>使用者只需明白如何创建按钮，如何设置像“标题”（title)这样的属性，如何增加触摸动作的目标对象等问题就好。</p>
+
+<p><font color=red>我们使用&quot;类簇&quot;,是为了可以灵活应对多个类，将它们的实现细节隐藏在抽象基类后面，以保持接口简洁。用户无须自己创建子类实例，只需调用基类方法来创建即可。</font></p>
+
+<h2 id="toc_0">创建类簇</h2>
+
+<p>我们现在来看一个样例学习创建类簇.假设有一个处理雇员的类，每个雇员都有“名字”和<br/>
+“薪水”这两个属性，管理者可以命令其执行日常工作。但是，各种雇员的工作内容却不同。经理在带领雇员做项目时，无须关心每个人如何完成其工作，仅需指示其开工即可。</p>
+
+<p>首先要定义抽象类:</p>
+
+<pre><code class="language-objc">typedef NS_ENUM(NSUInteger, EOCEmployeeType) {
+    EOCEmployeeTypeDeveloper,
+    EOCEmployeeTypeDesigner,
+    EOCEmployeeTypeFinance,
+}；
+
+@interface EOCEmployee : NSObject
+
+@property (copy) NSString *name;
+@property NSUInteger salary;
+
+// Helper for creating Employee objects
++ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type;
+//Make Employees do their respective day1s work
+- (void)doADaysWork;
+
+@end
+
+@implementation EOCEmployee
++ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type {
+    switch (type) {
+        case EOCEmployeeTypeDeveloper:
+            return [EOCEmployeeDeveloper new];
+            break;
+        case EOCEmployeeTypeDesigner:
+            return (EOCEmployeeDesigner new];
+            break;
+        case EOCEmployeeTypeFinance:
+            return (EOCEmployeeFinance new];
+            break;
+        }
+}
+-(void)doADaysWork {
+    // Subclasses implement this.
+}
+
+@end 
+
+</code></pre>
+
+<p>每个&quot;实体子类&quot;（concrete subclass) 都从基类继承而来。例如:</p>
+
+<pre><code class="language-objc">
+@interface EOCEmployeeDeveloper : EOCEmployee
+@end
+
+@implementation EOCEmployeeDeveloper
+
+-(void)doADaysWork {    
+    [self writeCode];
+}
+
+@end
+
+</code></pre>
+
+<p>在本例中，基类实现了一个“类方法”，该方法根据待创建的雇员类别分配好对应的雇员类实例。这种“工厂模式”（Factory pattern)是创建类族的办法之一。</p>
+
+<p>OC这门语言没有办法致命某个基类是&quot;抽象的&quot;(abstract).于是,开发者通常会在文档中写明类的用法。这种情况下，基类接口一般都没有名为init的成员方法，这暗<br/>
+示该类的实例也许不应该由用户直接创建。还有一种办法可以确保用户不会使用基类实例,<br/>
+那就是在基类的doADaysWork方法中拋出异常。然而这种做法相当极端，很少有人用。</p>
+
+<p>如果对象所属的类位于某个类族中，那么在査询其类型信息（introspection)时就要当心了（参见第14条)。你可能觉得自己创建了某个类的实例，然而实际上创建的却是其子类的实例。在 <code>Employee</code> 这个例子中，<code>[employee isMemberOfClass:[EOCEmployee class]]</code>似乎会返回YES，但实际上返回的却是NO,因为<code>employee</code>并非Employee类的实例，而是其某个子类的实例。</p>
+
+<h2 id="toc_1">Cocoa里的类簇</h2>
+
+<p>系统框架中有许多类族。大部分<code>collection</code>类都是某个类簇中的抽象基类,例如<code>NSArray</code>与其可变版本<code>NSMutableArray</code>。这样看来，实际上有两个抽象基类，一个用于不可变数组，另一个用于可变数组。尽管具备公共接口的类有两个，但仍然可以合起来算作一个类族(传统类簇模式中,通常只有一个类具备&quot;公共接口&quot;,就是抽象基类)。<strong>不可变的类定义了对所有数组都通用的方法，而可变的类则定义了那些只适用于可变数组的方法。</strong>两个类共属同一类族，这意味着二者在实现各自类型的数组时可以共用实现代码，此外，还能够把可变数组复制为不可变数组，反之亦然。</p>
+
+<p>像NSArray这样的类的背后其实是个类族（对于大部分collection类而言都是这样)，明白这一点很重要，否则就可能会写出下面这种代码：</p>
+
+<pre><code class="language-objc">
+id maybeAnArray = /* ••• */;
+if ([maybeAnArray class) == [NSArray class]) {
+&quot;Will never be hit
+}
+
+</code></pre>
+
+<p>你要是知道<strong>NSArray是个类族</strong>，那就会明白上述代码错在哪里：其中的<code>if</code>语句永远不可能为真。[maybeAnArray class]所返回的类绝不可能是NSArray类本身，因为由NSArray的初始化方法所返回的那个实例其类型是隐藏在类族公共接口（public facade)后面的某个内部类型（internal type)。</p>
+
+<p>不过，仍然有办法可以判断出某个实例所属的类是否位于类族之中。我们不用刚才那种写法，而是改用类型信息查询方法（introspectionmethod)。本书第14条解释了这些方法的用法。若想判断某对象是否位于类族中，<strong>不要直接检测两个“类对象”是否等同，而应该采用下列代码</strong>：</p>
+
+<pre><code class="language-objc">id maybeAnArray = /* ••• */;
+if ([maybeAnArray isKindOfClass:[NSArray class])) {
+    &quot;Will be hit&quot;
+}
+</code></pre>
+
+<p>我们经常需要向类族中新增实体子类，不过这么做的时候得留心。在Employee这个例子中，若是没有“工厂方法”（factory method)的源代码，那就无法向其中新增雇员类别了。然而对于Cocoa中NSArray这样的类族来说，还是有办法新增子类的，但是需要遵守几条规则。这几条规则如下。</p>
+
+<ul>
+<li><p>子类应该继承自类族中的抽象基类。<br/>
+若要编写NSArray类族的子类，则需令其继承自不可变数组的基类或可变数组的基类。</p></li>
+<li><p>子类应该定义自己的数据存储方式。<br/>
+开发者编写NSArray子类时，经常在这个问题上受阻。子类必须用一个实例变量来存放数组中的对象。这似乎与大家预想的不同，我们以为NSArray自己肯定会保存那些对象，所以在子类中就无须再存一份了。但是大家要记住，<mark>NSArray本身只不过是包在其他隐藏对象外面的壳，它仅仅定义了所有数组都需具备的一些接口。对于这个自定义的数组子类来说，可以用NSArray来保存其实例</mark>。</p></li>
+<li><p>子类应当覆写超类文档中指明需要覆写的方法。<br/>
+在每个抽象基类中，都有一些子类必须覆写的方法。比如说，想要编写NSArray的子<br/>
+类，就需要实现<code>count</code>及<code>“objectAtlndex:”</code>方法。像<code>lastObject</code>这种方法则无须实现，因为基类可以根据前两个方法实现出这个方法。</p></li>
+</ul>
+
+<p>在类族中实现子类时所需遵循的规范一般都会定义于基类的文档之中，编码前应该先看看.</p>
+
+<h2 id="toc_2">要点</h2>
+
+<ul>
+<li>类族模式可以把实现细节隐藏在一套简单的公共接口后面。</li>
+<li>系统框架中经常使用类族。</li>
+<li>从类族的公共抽象基类中继承子类时要当心，若有开发文档，则应首先阅读。</li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="14991304296690.html" 
+          title="Next Post: Caffe反向传播计算">Caffe反向传播计算 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="14991530470817.html">第九条 以"类族模式"隐藏实现细节</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14991304296690.html">Caffe反向传播计算</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14990683410396.html">第八条:理解"对象同等性"这一概念</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14990441879389.html">Net Forward实现</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14988713979681.html">Net初始化时的三个登记注册函数</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>
