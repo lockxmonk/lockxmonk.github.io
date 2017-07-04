@@ -113,6 +113,337 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14991530470817.html">
+                
+                  <h1>第九条 以"类族模式"隐藏实现细节</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>&quot;类族&quot;(class cluster,也叫类簇)是一种很有用的模式(pattern),可以隐藏&quot;抽象基类&quot;(abstract base class)背后的实现细节.</p>
+
+<p>Objective-C的系统框架中普遍使用此模式。比如，iOS的用户界面框架（user interface framework) UIKit中就有一个名为<code>UIButton</code>的类。想创建按钮，需<br/>
+要调用下面这个“类方法”（class method):</p>
+
+<pre><code class="language-objc">+ (UIButton*)buttonWithType:(UIButtonType)type;
+
+</code></pre>
+
+<p>该方法所返回的对象，其类型取决于传入的按钮类型（button type)。然而，不管返回什么类型的对象，它们都继承自同一个基类：<code>UIButton</code>。这么做的意义在于：<strong>UIButton类的使用者无须关心创建出来的按钮具体属于哪个子类，也不用考虑按钮的绘制方式等实现细节。</strong>使用者只需明白如何创建按钮，如何设置像“标题”（title)这样的属性，如何增加触摸动作的目标对象等问题就好。</p>
+
+<p><font color=red>我们使用&quot;类簇&quot;,是为了可以灵活应对多个类，将它们的实现细节隐藏在抽象基类后面，以保持接口简洁。用户无须自己创建子类实例，只需调用基类方法来创建即可。</font></p>
+
+<h2 id="toc_0">创建类簇</h2>
+
+<p>我们现在来看一个样例学习创建类簇.假设有一个处理雇员的类，每个雇员都有“名字”和<br/>
+“薪水”这两个属性，管理者可以命令其执行日常工作。但是，各种雇员的工作内容却不同。经理在带领雇员做项目时，无须关心每个人如何完成其工作，仅需指示其开工即可。</p>
+
+<p>首先要定义抽象类:</p>
+
+<pre><code class="language-objc">typedef NS_ENUM(NSUInteger, EOCEmployeeType) {
+    EOCEmployeeTypeDeveloper,
+    EOCEmployeeTypeDesigner,
+    EOCEmployeeTypeFinance,
+}；
+
+@interface EOCEmployee : NSObject
+
+@property (copy) NSString *name;
+@property NSUInteger salary;
+
+// Helper for creating Employee objects
++ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type;
+//Make Employees do their respective day1s work
+- (void)doADaysWork;
+
+@end
+
+@implementation EOCEmployee
++ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type {
+    switch (type) {
+        case EOCEmployeeTypeDeveloper:
+            return [EOCEmployeeDeveloper new];
+            break;
+        case EOCEmployeeTypeDesigner:
+            return (EOCEmployeeDesigner new];
+            break;
+        case EOCEmployeeTypeFinance:
+            return (EOCEmployeeFinance new];
+            break;
+        }
+}
+-(void)doADaysWork {
+    // Subclasses implement this.
+}
+
+@end 
+
+</code></pre>
+
+<p>每个&quot;实体子类&quot;（concrete subclass) 都从基类继承而来。例如:</p>
+
+<pre><code class="language-objc">
+@interface EOCEmployeeDeveloper : EOCEmployee
+@end
+
+@implementation EOCEmployeeDeveloper
+
+-(void)doADaysWork {    
+    [self writeCode];
+}
+
+@end
+
+</code></pre>
+
+<p>在本例中，基类实现了一个“类方法”，该方法根据待创建的雇员类别分配好对应的雇员类实例。这种“工厂模式”（Factory pattern)是创建类族的办法之一。</p>
+
+<p>OC这门语言没有办法致命某个基类是&quot;抽象的&quot;(abstract).于是,开发者通常会在文档中写明类的用法。这种情况下，基类接口一般都没有名为init的成员方法，这暗<br/>
+示该类的实例也许不应该由用户直接创建。还有一种办法可以确保用户不会使用基类实例,<br/>
+那就是在基类的doADaysWork方法中拋出异常。然而这种做法相当极端，很少有人用。</p>
+
+<p>如果对象所属的类位于某个类族中，那么在査询其类型信息（introspection)时就要当心了（参见第14条)。你可能觉得自己创建了某个类的实例，然而实际上创建的却是其子类的实例。在 <code>Employee</code> 这个例子中，<code>[employee isMemberOfClass:[EOCEmployee class]]</code>似乎会返回YES，但实际上返回的却是NO,因为<code>employee</code>并非Employee类的实例，而是其某个子类的实例。</p>
+
+<h2 id="toc_1">Cocoa里的类簇</h2>
+
+<p>系统框架中有许多类族。大部分<code>collection</code>类都是某个类簇中的抽象基类,例如<code>NSArray</code>与其可变版本<code>NSMutableArray</code>。这样看来，实际上有两个抽象基类，一个用于不可变数组，另一个用于可变数组。尽管具备公共接口的类有两个，但仍然可以合起来算作一个类族(传统类簇模式中,通常只有一个类具备&quot;公共接口&quot;,就是抽象基类)。<strong>不可变的类定义了对所有数组都通用的方法，而可变的类则定义了那些只适用于可变数组的方法。</strong>两个类共属同一类族，这意味着二者在实现各自类型的数组时可以共用实现代码，此外，还能够把可变数组复制为不可变数组，反之亦然。</p>
+
+<p>像NSArray这样的类的背后其实是个类族（对于大部分collection类而言都是这样)，明白这一点很重要，否则就可能会写出下面这种代码：</p>
+
+<pre><code class="language-objc">
+id maybeAnArray = /* ••• */;
+if ([maybeAnArray class) == [NSArray class]) {
+&quot;Will never be hit
+}
+
+</code></pre>
+
+<p>你要是知道<strong>NSArray是个类族</strong>，那就会明白上述代码错在哪里：其中的<code>if</code>语句永远不可能为真。[maybeAnArray class]所返回的类绝不可能是NSArray类本身，因为由NSArray的初始化方法所返回的那个实例其类型是隐藏在类族公共接口（public facade)后面的某个内部类型（internal type)。</p>
+
+<p>不过，仍然有办法可以判断出某个实例所属的类是否位于类族之中。我们不用刚才那种写法，而是改用类型信息查询方法（introspectionmethod)。本书第14条解释了这些方法的用法。若想判断某对象是否位于类族中，<strong>不要直接检测两个“类对象”是否等同，而应该采用下列代码</strong>：</p>
+
+<pre><code class="language-objc">id maybeAnArray = /* ••• */;
+if ([maybeAnArray isKindOfClass:[NSArray class])) {
+    &quot;Will be hit&quot;
+}
+</code></pre>
+
+<p>我们经常需要向类族中新增实体子类，不过这么做的时候得留心。在Employee这个例子中，若是没有“工厂方法”（factory method)的源代码，那就无法向其中新增雇员类别了。然而对于Cocoa中NSArray这样的类族来说，还是有办法新增子类的，但是需要遵守几条规则。这几条规则如下。</p>
+
+<ul>
+<li><p>子类应该继承自类族中的抽象基类。<br/>
+若要编写NSArray类族的子类，则需令其继承自不可变数组的基类或可变数组的基类。</p></li>
+<li><p>子类应该定义自己的数据存储方式。<br/>
+开发者编写NSArray子类时，经常在这个问题上受阻。子类必须用一个实例变量来存放数组中的对象。这似乎与大家预想的不同，我们以为NSArray自己肯定会保存那些对象，所以在子类中就无须再存一份了。但是大家要记住，<mark>NSArray本身只不过是包在其他隐藏对象外面的壳，它仅仅定义了所有数组都需具备的一些接口。对于这个自定义的数组子类来说，可以用NSArray来保存其实例</mark>。</p></li>
+<li><p>子类应当覆写超类文档中指明需要覆写的方法。<br/>
+在每个抽象基类中，都有一些子类必须覆写的方法。比如说，想要编写NSArray的子<br/>
+类，就需要实现<code>count</code>及<code>“objectAtlndex:”</code>方法。像<code>lastObject</code>这种方法则无须实现，因为基类可以根据前两个方法实现出这个方法。</p></li>
+</ul>
+
+<p>在类族中实现子类时所需遵循的规范一般都会定义于基类的文档之中，编码前应该先看看.</p>
+
+<h2 id="toc_2">要点</h2>
+
+<ul>
+<li>类族模式可以把实现细节隐藏在一套简单的公共接口后面。</li>
+<li>系统框架中经常使用类族。</li>
+<li>从类族的公共抽象基类中继承子类时要当心，若有开发文档，则应首先阅读。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/7/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14990683410396.html">
+                
+                  <h1>第八条:理解"对象同等性"这一概念</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>根据“等同性”（equality)来比较对象是一个非常有用的功能。不过，按照<code>==</code>操作符比较出来的结果未必是我们想要的，因为该操作比较的是两个<mark>指针本身</mark>，而不是其所指的对象。应该使用NSObject协议中声明的<strong><mark>“isEqual”</mark></strong>：方法来判断两个对象的等同性。一般来说,两个类型不同的对象总是不相等的（unequal)。某些对象提供了特殊的“等同性判定方法”(equality-checking method),<strong>如果已经知道两个受测对象都属于同一个类，那么就可以使用这种方法</strong>。以下述代码为例：</p>
+
+<pre><code class="language-objc">
+NSString *foo = @&quot;Badger 123&quot;;
+NSString *bar = [NSStringstringWithFormat: @fTBadger %i&quot;, 123】；
+BOOL equalA = (foo == bar); //&lt; equal A - NO
+BOOL equalB = [foo isEqual: bar ] ; //&lt; equalB = YES
+BOOL equalC = [foo isEqualToString:bar]; //&lt; equalC = YES
+
+</code></pre>
+
+<p>上面可以看到<code>==</code>与等同性判断方法之间的差别。<code>NSString</code>类实现了一个自己独有的等同性判断方法，名叫<code>“isEqualToString:”</code>。传递给该方法的对象必须是<code>NSString</code>,否则结果未定义（undefined)。调用该方法比调用<code>“isEqual”</code>方法快，后者还要执行额外的步骤，因为它不知道受测对象的类型(前者指使用NSString所以快些)。</p>
+
+<p><code>NSObject</code>协议中有两个用于判断等同性的关键方法：</p>
+
+<pre><code class="language-objc">
+- (BOOL) isEqual: (id) object;
+- (NSUInteger) hash;
+
+</code></pre>
+
+<p><code>NSObject</code>类对这两个方法的默认实现是：当且仅当其<strong>“指针值&quot;（pointer value)(内存地址)完全相等时，这两个对象才相等。</strong>若想在自定义的对象中正确覆写这些方法，就必须先理解其约定<br/>
+(contract)。如果<code>“isEqual:”</code>方法判定两个对象相等，那么其<code>hash</code>方法也必须返回同一个值。但是，如果两个对象的hash方法返回同一个值，那么“isEqual:”方法未必会认为两者相等。</p>
+
+<p>比如有下面这个类：</p>
+
+<pre><code class="language-objc">
+@interface EOCPerson : NSObject
+@property (nonatomic, copy) NSString *firstName;
+@property (nonatomic, copy) NSString *lastName;
+@property (nonatomic, assign) NSUInteger age;
+@end
+
+</code></pre>
+
+<p>我们认为，如果两个<code>EOCPerson</code>的所有字段均相等，那么这两个对象就相等。于是<code>“isEqual:”</code>方法可以写成：</p>
+
+<pre><code class="language-objc">
+-(BOOL)isEqual:(id)object {
+    if (self == object) return YES;
+    if ( [self class] != [object class]) return NO;
+    EOCPerson ^otherPerson = (EOCPerson*)object;
+    if (! [_firstName isEqualToString:otherPerson.firstName))
+    return NO;
+    if (![_lastName isEqualToString:otherPerson.lastName])
+    return NO;
+    if (_age != otherPerson.age)
+    return NO;
+    return YES;
+}
+
+</code></pre>
+
+<p>首先，直接判断两个指针是否相等。若相等，则其均指向同一对象，所以受测的对象也必定相等。接下来，比较两对象所属的类。若不属于同一个类，则两对象不相等。<code>EOCPerson</code>对象当然不可能与<code>EOCDog</code>对象相等。不过，有时我们可能认为：一个EOCPerson实例可以与其子类（比如EOCSmithPerson)实例相等。在继承体系（inheritance hierarchy)中判断等同属性时,经常遭遇此类问题.所以实现&quot;isEqual:&quot;方法时要考虑到这种情况。最后，检测每个属性是否相等。只要其中有不相等的属性，就判定两对象不等，否则两对象相等。</p>
+
+<p>接下来,我们实现hash方法.回想一下，根据等同性约定：若两对象相等，则其哈希码(hash)也相等，但是两个哈希码相同的对象却未必相等。这是能否正确覆写“isEqual”方法的关键所在。下面这种写法完全可行：</p>
+
+<pre><code class="language-objc">
+-(NSUInteger)hash {
+    return 1337;
+}
+
+</code></pre>
+
+<p>在<code>collection</code>中使用这种对象将产生性能问题，因为collection在检索哈希表（hash table)时，会用对象的哈希码做索引。假如某个<code>collection</code>是用<code>set</code>实现的，那么<code>set</code>可能会根据哈希码把对象分装到不同的数组中。在向<code>set</code>中添加新对象时，要根据其哈希码找到与之相关的那个数组，依次检査其中各个元素，看数组中已有的对象是否和将要添加的新对象相等。如果相等，那就说明要添加的对象已经在set里面了。如果令每个对象都返回相同的哈希码，那么在<code>set</code>中已有<code>1000000</code>个对象的情况下，若是继续向其中添加对象，则需将这<code>1 000000</code>个对象全部扫描一遍。</p>
+
+<p>我们看另一种计算哈希码的方法:</p>
+
+<pre><code class="language-objc">
+-(NSUInteger)hash {
+    NSUInteger firstNameHash = [_firstName hash];
+    NSUInteger lastNameHash = [_lastName hash];
+    NSUInteger ageHash = _age;
+    return firstNameHash ^ lastNameHash ^ ageHash;
+}
+
+</code></pre>
+
+<p>这种做法既能保持较高效率，又能使生成的哈希码至少位于一定范围之内，而不会过于频繁地重复。当然，此算法生成的哈希码还是会碰撞（collision),不过至少可以保证哈希码有多种可能的取值.<strong>编写hash方法时，应该用当前的对象做做实验，以便在减少碰撞频度与降低运算复杂程度之间取舍。</strong></p>
+
+<h2 id="toc_0">特定类所具有的等同性判定方法</h2>
+
+<p>除了刚才提到的<code>NSString</code>之外，<code>NSArray</code>与<code>NSDictionary</code>类也具有特殊的等同性判定方法，前者名为<code>“isEqualToArray:”</code>，后者名为<code>“isEqualToDictionary:”</code>。如果和其相比较的对象不是数组或字典，那么这两个方法会各自抛出异常。由于<code>Objective-C</code>在编译期不做强类型检査（strong type checking),这样容易不小心传入类型错误的对象，因此开发者应该保证所传对象的类型是正确的。</p>
+
+<p>如果我们觉得提供的判断方法不好用,可以自己来写一个,令代码看上<br/>
+去更美观、更易读,使自己编写的判定方法更容易读懂，而且不用再检査两个受测对象的类型了。</p>
+
+<p><strong>在编写判定方法时，也应一并覆写“isEqual:”方法。后者的常见实现方式为：如果受测的参数与接收该消息的对象都属于同一个类，那么就调用自已编写的判定方法，否则就交由超类来判断。</strong></p>
+
+<p>例如:</p>
+
+<pre><code class="language-objc">
+- (BOOL)isEqualToPerson:(EOCPerson*)otherPerson {
+if (self == object) return YES;
+    if (! [_firstName isEqualToString:otherPerson.firstName])
+        return NO;
+    if (![_lastName isEqualToString:otherPerson.lastName])
+        return NO;
+    if (_age != otherPerson.age)
+        return NO;
+    return YES;
+}
+
+-(BOOL)isEqual:(id)object {
+    if ([self class] == [object class]) {
+        return [self isEqualToPerson:(EOCPerson*)object];
+    } else {
+        return [super isEqual:object】；
+
+</code></pre>
+
+<h2 id="toc_1">等同性判定的执行深度</h2>
+
+<p>创建等同性判定方法时，需要决定是根据整个对象来判断等同性，还是仅根据其中几个字段来判断。<code>NSArray</code>的检测方式为先看两个数组所含对象个数是否相同，若相同，则在每个对应位置的两个对象身上调用其<code>“isEqual”</code>方法。如果对应位置上的对象均相等，那么这两个数组就相等，这叫做<strong>“深度等同性判定”（deep equality)。</strong>不过有时候无须将所有数据<br/>
+逐个比较，只根据其中部分数据即可判明二者是否等同。</p>
+
+<p>比方说，我们假设<code>EOCPerson</code>类的实例是根据数据库里的数据创建而来，那么其中就可能会含有另外一个属性，此属性是<strong>“唯一标识符&quot;（unique identifier)</strong>,在数据库中用作“主键”</p>
+
+<pre><code class="language-objc">
+@property NSUInteger identifier;
+
+</code></pre>
+
+<p>在这种情况下，我们也许只会根据标识符来判断等同性，尤其是在此属性声明为<code>readonly</code>时更应该如此。因为只要两者标识符相同，就肯定表示同一个对象，因而必然相等。<br/>
+这样的话，无须逐个比较<code>EOCPerson</code>对象的每条数据，只要标识符相同，就说明这两个对象就是由同一个数据源所创建的，据此我们能够断定，其余数据也必然相同。</p>
+
+<h2 id="toc_2">容器中可变类的等同性</h2>
+
+<p>还有一种情况一定要注意，就是在容器中放入可变类对象的时候。把某个对象放入<code>collection</code>之后，就不应再改变其哈希码了。前面解释过，<code>collection</code>会把各个对象按照其哈希码分装到不同的“箱子数组”中。如果某对象在放入“箱子”之后哈希码又变了，那么其现在所处的这个箱子对它来说就是“错误”的。要想解决这个问题，<strong><mark>需要确保哈希码不是根据对象的“可变部分”（mutable portion)</mark></strong>计算出来的,或是保证放入<code>collection</code>之后就不再改变对象内容了。之后将在第18条中解释为何要将对象做成“不可变的&quot;（immutable)。</p>
+
+<h2 id="toc_3">要点:</h2>
+
+<ul>
+<li>若想检测对象的等同性，请提供<code>“isEqual:”</code>与<code>hash</code>方法。</li>
+<li>相同的对象必须具有相同的哈希码，但是两个哈希码相同的对象却未必相同。</li>
+<li>不要盲目地逐个检测每条属性，而是应该依照具体需求来制定检测方案。</li>
+<li>编写hash方法时，应该使用计算速度快而且哈希码碰撞几率低的箅法。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/7/3</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14988067800935.html">
                 
                   <h1>第七条 在对象内部尽量直接访问实例变量</h1>
@@ -585,7 +916,19 @@ return self;
 	      
 		      
 			      <li class="post">
-			        <a href="14990683410396.html">第8条:理解"对象同等性"这一概念</a>
+			        <a href="14991530470817.html">第九条 以"类族模式"隐藏实现细节</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14991304296690.html">Caffe反向传播计算</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14990683410396.html">第八条:理解"对象同等性"这一概念</a>
 			      </li>
 		     
 		  
@@ -598,18 +941,6 @@ return self;
 		      
 			      <li class="post">
 			        <a href="14988713979681.html">Net初始化时的三个登记注册函数</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14988067800935.html">第七条 在对象内部尽量直接访问实例变量</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14987856817486.html">Caffe前向传播计算</a>
 			      </li>
 		     
 		  
