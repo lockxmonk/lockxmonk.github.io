@@ -113,6 +113,301 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15033059328138.html">
+                
+                  <h1>第十一条:理解Objc_msgSend的作用</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在对象中调用方法,在oc中称作&quot;传递消息&quot;.消息有“名称&quot;（name)或“选择子&quot;（selector)，可以接受参数，而且可能还有返回值。</p>
+
+<p>因为OC是C语言的超集,所以我们用C语言来举例.C语言使用“静态绑定”（static binding),也就是说，在编译期就能决定运行时所应调用的函数。</p>
+
+<pre><code class="language-c">#import &lt;stdio.h&gt;
+
+void printHello() {
+    printf (&quot;Hello, world! \n&quot;);
+    }
+void printGoodbye() {
+    printf (&quot;Goodbye, world! \n&quot;);
+
+void doTheThing(int type) {
+    if (type == 0)  {
+        printHello();
+    }else{
+        printGoodbye();
+    }
+    return 0；
+}
+
+</code></pre>
+
+<p>编译器在编译代码的时候就已经知道程序中有<code>printHello</code>与<code>printGoodbye</code>这两个函数了，于是会直接生成调用这些函数的指令。而函数地址实际上是硬编码在指令之中的。</p>
+
+<p>但是将程序改写为下面这样后:</p>
+
+<pre><code class="language-c">#import &lt;stdio.h&gt;
+
+void printHello() {
+    printf (&quot;Hello, world! \n&quot;);
+    }
+void printGoodbye() {
+    printf (&quot;Goodbye, world! \n&quot;);
+
+void doTheThing(int type) {
+    void(*fnc)()
+    if (type == 0)  {
+        fnc = printHello;
+    }else{
+        fnc = printGoodbye;
+    }
+    fnc();
+    return 0；
+}
+
+</code></pre>
+
+<p>这个时候就要使用“动态绑定”（dynamic binding) 了，因为所要调用的函数直到运行期才能确定。编译器在这种情况下生成的指令与刚才那个例子不同，<mark>在第一个例子中，<code>if</code>与<code>else</code>语句里都有函数调用指令。而在第二个例子中，只有一个函数调用指令，不过待调用的函数地址无法硬编码在指令之中，而是要在运行期读取出来</mark>。</p>
+
+<p>在oc中如果向某对象传递消息(方法调用),就会使用动态绑定机制来决定需要调用的方法。在底层，所有方法都是普通的C语言函数，然而对象收到消息之后，究竟该调用哪个方法则完全于运行期决定，甚至可以在程序运行时改变，这些特性使得Objective-C成为一门真正的动态语言。</p>
+
+<p>给对象发送消息可以这样来写：</p>
+
+<pre><code class="language-objc">
+id returnValue = [someObject messageName:parameter];
+
+</code></pre>
+
+<p>在本例中，<code>someObject</code>叫做“接收者”（receiver),<code>messageName</code> 叫做<code>“选择子”</code>（selector)。选择子与参数合起来称为“消息”（message)。编译器看到此消息后，将其转换为一条标准的C语言函数调用，所调用的函数乃是消息传递机制中的核心函数,叫做<code>objc_msgSend</code>,其<br/>
+“原型&quot;（prototype)如下：</p>
+
+<pre><code class="language-c">
+void objc_msgSend(id self, SEL cmd, •••)
+
+</code></pre>
+
+<p>这是个‘参数个数可变的函数’(variadic function)9，能接受两个或两个以上的参数。第一个参数代表接收者，第二个参数代表选择子（SEL是选择子的类型)，后续参数就是消息中的那些参数，其顺序不变。<strong>选择子指的就是方法的名字</strong>。“选择子”与“方法”这两个词经常交替使用。编译器会把刚才那个例子中的消息转换为如下函数：</p>
+
+<pre><code class="language-c">
+id returnValue = objc_msgSend(someObject,
+                            ^selector(messageName:),
+                            parameter);
+
+</code></pre>
+
+<p><code>objc_msgSend</code>函数会依据接收者与选择子的类型来调用适当的方法。为了完成此操作，该方法需要在接收者所属的类中搜寻其“方法列表”（list of methods),如果能找到与选择子名称相符的方法，就跳至其实现代码。若是找不到，那就沿着继承体系继续向上査找，等找到合适的方法之后再跳转。如果最终还是找不到相符的方法，那就执行“消息转发” (message forwarding)操作。消息转发将在第12条中详解。</p>
+
+<p>其它特殊情况需要由一些函数来处理:</p>
+
+<ul>
+<li><strong>objc_msgSendstret。</strong>如果待发送的消息要返回结构体，那么可交由此函数处理。只有当CPU的寄存器能够容纳得下消息返回类型时，这个函数才能处理此消息。若是返回值无法容纳于CPU寄存器中（比如说返回的结构体太大了)，那么就由另一个函数执行派发。此时，那个函数会通过分配在栈上的某个变量来处理消息所返回的结构体。</li>
+<li>ObjC_mSgSerid_fpret。如果消息返回的是浮点数，那么可交由此函数处理,在某些架构的CPU中调用函数时，需要对浮点数寄存器（floating-point register)做特殊处理,也就是说，通常所用的ObjC_msgSend在这种情况下并不合适。这个函数是为了处理x86等架构CPU中某些令人稍觉惊讶的奇怪状况。</li>
+<li>objc_msgSendSuper3 如果要给超类发消息，例如[supermessage:parameter],那么就交由此函数处理。也有另外两个与objc_msgSendstret和objc_MsgSend_fpret等效的函数，用于处理发给super的相应消息。</li>
+</ul>
+
+<p>刚才曾提到,Objc_msgSend等函数一旦找到应该调用的方法之后，就会‘跳转过去’。之所以能这样做，是因为Objective-C对象的每个方法都可以视为简单的C函数，其原型如下：</p>
+
+<pre><code class="language-c">
+&lt;return type&gt; Class_selector(id self, SEL _cmd, •••)
+
+</code></pre>
+
+<p>真正的函数名和上面写的可能不太一样，笔者用“类”（class)和“选择子”（selector)来命名是想解释其工作原理。每个类里都有一张表格，其中的指针都会指向这种函数，而选择子的名称则是査表时所用的“键”。ObjC_msgSend等函数正是通过这张表格来寻找应该执行的方法并跳至其实现的。请注意，原型的样子和ObjC_msgSend函数很像。这不是巧合，而是为了利用“尾调用优化”技术，令“跳至方法实现”这一操作变得更简单些。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>消息由接收者、选择子及参数构成。给某对象&quot;发送消息&quot;(invoke a message)也就相当于在该对象上“调用方法”（call a method)。</li>
+<li>发给某对象的全部消息都要由“动态消息派发系统”（dynamic message dispatch system)来处理，该系统会査出对应的方法，并执行其代码。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/21</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14992368546707.html">
+                
+                  <h1>第10条:在既有类中使用关联对象存放自定义数据</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>有时需要在对象中存放相关信息。这时我们通常会从对象所属的类中继承一个子类，然后改用这个子类对象。然而并非所有情况下都能这么做，<mark>有时候类的实例可能是由某种机制所创建的，而开发者无法令这种机制创建出自己所写的子类实例</mark>。</p>
+
+<p><code>Objective-C</code>中有一项强大的特性可以解决此问题，这就是<code>“关联对象&quot;（Associated Object)</code>。</p>
+
+<p>可以给某对象关联许多其他对象，这些对象通过“键”来区分.存储对象值的时候，可以指明“存储策略”（storage policy),用以维护相应的“内存管理语义”。存储策略由名为<code>Objc_ASSOCiationPolicy</code>的枚举所定义，下表列出了该枚举的取值，同时还列出了与之等效属性：假如关联对象成为了属性，那么它就会具备对应的语义（第6条详解了“属性”这个概念).</p>
+
+<table>
+<thead>
+<tr>
+<th>关联类型</th>
+<th>等效的@property属性</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>OBJC_ASSOCIATION_ASSIGN</td>
+<td>assign</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_RETAIN_NONATOMIC</td>
+<td>nonatomic, retain</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_COPY_NONATOMIC</td>
+<td>nonatomic, copy</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_RETAIN</td>
+<td>retain</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_COPY</td>
+<td>copy</td>
+</tr>
+</tbody>
+</table>
+
+<p>下列方法可以管理关联对象：</p>
+
+<ul>
+<li><p>void objc_setAssociatedObject ( id object, void*key, id value, objc AssociationPolicypolicy)<br/>
+此方法以给定的键和策略为某对象设置关联对象值。</p></li>
+<li><p>id objc_getAssociatedObject(id object, void*key)<br/>
+此方法根据给定的键从某对象中获取相应的关联对象值。</p></li>
+<li><p>void objc removeAssociatedObjects(id object)<br/>
+此方法移除指定对象的全部关联对象。</p></li>
+</ul>
+
+<p>我们可以把某对象想象成<code>NSDictionary</code>,把关联到该对象的值理解为字典中的条目,于是，存取关联对象的值就相当于在NSDictionary对象上调用<code>[object setObject:value forKey:key]</code>与<code>[object objectForKey:key]</code>方法。然而两者之间有个重要差别：设置关联对象时用的键（key)是个&quot;不透明的指针&quot;(opaque pointer)”。如果在两个键上调用<code>“isEqual:”</code>方法的返回值是<code>YES</code>,那么<code>NSDictionary</code>就认为二者相等；然而在设置关联对象值时，若想令两个键匹配到同一个值，则二者必须是完全相同的指针才行。鉴于此，<font color=red>在设置关联对象值时，通常使用<mark>静态全局变量做键</mark></font>。</p>
+
+<h2 id="toc_0">关联对象用法举例</h2>
+
+<p>开发iOS时经常用到<code>UIAlertView</code>类，该类提供了一种标准视图，可向用户展示警告信息.当用户按下按钮关闭该视图时,需要用委托协议（delegate protocol)来处理此动作，但是，要想设置好这个委托机制，就得把创建警告视图和处理按钮动作的代码分开。由于代码分作两块，所以读起来有点乱。比方说，我们在使用<code>UIAlertView</code>时，一般都会这么写：</p>
+
+<pre><code class="language-objc">-(void)askUserAQuestion{
+    UIAlertView *alert = [[UIAlertView alloc]
+                            initWithTitle:@&quot;Question&quot;
+                                  message:@&quot;What do you want to do?&quot;
+                                 delegate:self
+                        cancelButtonTitle:@&quot;Cancel&quot;
+                        otherButtonTitles:@&quot;Continue&quot;, nil]；
+        [alert show];
+}
+
+// UIAlertViewDelegate protocol method
+-(void)alertView:(UIAlertView *)alertView
+        clickedButtonAtlndex:(NSInteger)buttonIndex
+{
+    if (buttonlndex == 0) {
+        [self doCancel];
+    } else {
+        [self doContinue];
+    }
+}
+
+</code></pre>
+
+<p><font color=red>如果想在同一个类里处理多个警告信息视图，那么代码就会变得更为复杂，我们必须在 <code>delegate</code>方法中检査传人的<code>alertView</code>参数，并据此选用相应的逻辑。要是能在创建警告视图的时候直接把处理每个按钮的逻辑都写好，那就简单多了。这可以通过关联对象来做。创建完警告视图之后，设定一个与之关联的&quot;块&quot;(block)，等到执行<code>delegate</code>方法时再将其读出来。</font>此方案的实现代码如下：</p>
+
+<pre><code class="language-objc">
+#import &lt;objc/runtime.h&gt;
+
+static void *EOCMyAlertViewKey = &quot;EOCMyAlertViewKey&quot;;
+
+-(void)askUserAQuestion {
+    UIAlertView *alert = [[UIAlertViewalloc]
+                            initWithTitle:@&quot;Question&quot;
+                                  message: @&quot;What do you want to do?&quot;
+                                 delegate:self
+                        cancelButtonTitle: @&quot;Cancel&quot;,
+                        otherButtonTitles: @&quot;Continue&quot;, nil];
+        void (^block)(NSInteger) = ^(NSInteger buttonIndex){
+            if (buttonlndex == 0) {
+                [self doCancel];
+            }else {
+                [self doContinue];
+            }
+        };
+        objc_setAssociatedObject(alert,
+                                 EOCMyAlertViewKey,
+                                 block,
+                                 OBJC_ASSOCIATION_COPY);
+        [alert show];
+}
+
+// UIAlertViewDelegate protocol method
+-(void)alertView:(UIAlertView*)alertView
+       clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    void (^block)(NSInteger)=
+        objc_getAssociatedObject(alertView, EOCMyAlertViewKey);
+    block(buttonIndex);
+}
+
+
+</code></pre>
+
+<p>以这种方式改写之后，创建警告视图与处理操作结果的代码都放在一起了，这样比原来更易读慷，因为我们无须在两部分代码之间来回游走，即可明白警告视图的用处。但是,采用该方案时需注意：块可能要捕获(capture)某些变量，这也许会造成“保留环”（retain cycle)。第40条详述了此问题。</p>
+
+<p><mark>正如大家所见，这种做法很有用，但是只应该在其他办法行不通时才去考虑用它。若是<br/>
+滥用，则很快就会令代码失控，使其难于调试。</mark>“保留环”产生的原因很难査明，因为关联对象之间的关系并没有正式的定义（formal definition)，其内存管理语义是在关联的时候才定义的，而不是在接口中预先定好的。使用这种写法时要小心，不能仅仅因为某处可以用该写法就一定要用它。想创建这种<code>UIAlertView</code>还有个办法，那就是从中继承子类，把块保存为子类中的属性。笔者认为：若是需要多次用到alert视图，那么这种做法比使用关联对象要好。</p>
+
+<h2 id="toc_1">要点</h2>
+
+<ul>
+<li>可以通过&quot;关联对象&quot;机制来把两个对象连起来</li>
+<li>定义关联对象时可指定内存管理语义，用以模仿定义属性时所采用的“拥有关系”与“非拥有关系”。</li>
+<li>只有在其他做法不可行时才应选用关联对象，因为这种做法通常会引入难于査找的bug。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/7/5</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14991530470817.html">
                 
                   <h1>第九条 以"类族模式"隐藏实现细节</h1>
@@ -833,255 +1128,6 @@ return self;
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14843637552703.html">
-                
-                  <h1>第5条：用枚举表示状态、选项、状态码</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>枚举只是一种常量命名的方式。某个对象所经历的各种状态就可以定义为一个简单的枚举集。比如说，用枚举表示socket connection的状态：</p>
-
-<pre><code>enum  EOCConnectionState{
-    EOCConnectionStateDisconnected，
-    EOCConnectionStateConnecting，
-    EOCConnectionStateConnected，
-}
-</code></pre>
-
-<p>这样便于理解，其中编译器会自动为每一个枚举分配一个独有的编号，从0开始，实现枚举所用的数据类型取决于编译器，不过其二进制位（bit)的个数必须能完全表示下枚举编号才行。在前例中，由于最大编号是2,所以使用1个字节的char类型即可。</p>
-
-<p>然而定义枚举变量的方式却不太简洁，要依如下语法编写：</p>
-
-<pre><code>enum EOCConnectionState state = EOCConnectionStateDisconnected;
-</code></pre>
-
-<p>若是每次不用敲入enum而只需写EOCConnectionState就好了。要想这样做，则需使用typedef关键字重新定义枚举类型：</p>
-
-<pre><code>enum EOCConnectionState {
-EOCConnectionStateDisconnected,
-EOCConnectionStateConnecting,
-EOCConnectionStateConnected,
-)；
-typedef enum EOCConnectionState EOCConnectionState;
-</code></pre>
-
-<p>现在可以用简写的EOCConnectionState来代替完整的enum EOCConnectionState 了：</p>
-
-<pre><code>EOCConnectionState state = EOCConnectionStateDisconnected;
-
-</code></pre>
-
-<p>在C++之后可以指定用何种“底层数据类型”来保存枚举类型的变量。这样做的好处是可以向前声明枚举变量了。若不指定底层数据类型，则无法向前声明枚举类型，因为编译器不清楚底层数据类型的大小,所以在用到此枚举类型时，也就不知道究竞该给变量分配多少空间。</p>
-
-<p>指定底层数据类型所用的语法是：</p>
-
-<pre><code>enum EOCConnectionStateConnectionState : NSInteger { /*...*/ };
-
-</code></pre>
-
-<p>还可以不使用编译器所分配的序号，而是手工指定某个枚举成员所对应的值。语法如下：</p>
-
-<pre><code>enum EOCConnectionStateConnectionState {
-EOCConnectionStateDisconnected = 1,
-EOCConnectionStateConnectingf
-EOCConnectionStateConnected
-}；
-</code></pre>
-
-<p>上述代码把EOCConnectionStateDisconnected的值设为1,而不使用编译器所分配的0，如前所述，接下来几个枚举的值都会在上一个的基础上递增1。比如说，EOCConnectionState-Connected的值就是3。</p>
-
-<p>还有一种情况应该使用枚举类型，那就是定义选项的时候。若这些选项可以彼此组合，则更应如此。只要枚举定义得对，各选项之间就可通过“按位或操作符”（bitwise OR operator)来组合。例如，iOSUI框架中有如下枚举类型，用来表示某个视图应该如何在水平或垂直方向上调整大小：</p>
-
-<pre><code>enum UIViewAutoresizing {
-   UIViewAutoresizingNone                  =0，
-   UIViewAutoresizingFlexibleLeftMargin    =1&lt;&lt;0,
-   UIViewAutoresizingFlexibleWidth         =1&lt;&lt;1,
-   UIViewAutoresizingFlexibleRightMargin   =1&lt;&lt;2,
-   □IViewAutoresizingFlexibleTopMargin     =1&lt;&lt;3,
-   UIViewAutoresizingFlexibleHeight        =1&lt;&lt;4,
-   UIViewAutoresizingFlexibleBottomMargin  =1&lt;&lt;5,
-}
-</code></pre>
-
-<p>每个选项均可以启用或者禁用，，使用上述方式来定义枚举值即可保证这一点，因为在每个枚举值所对应的二进制表示中，只有1个二进制位的值是1。用“按位或操作符”可组合多个选项，例如：<br/>
-<code>UIViewAutoResizingFlexibleWidth|UIViewAutoresizingFlexibleHeight<br/>
-</code><br/>
-下图列出了每个枚举成员的二进制值，并演示了刚才那两个枚举组合之后的值。用“按位或操作符”(bitwise OR operator)即可判断出是否已启用某个选项：</p>
-
-<pre><code>enum UIViewAutoresizing resizing =
-UIViewAutoresizingFlexiblGWidth | UIViewAutoresizingFlexibleHeight;
-
-if (resizing &amp; UIViewAutoresizingFlexibleWidth) {
-// UIViewAutoresizingFlexibleWidth is set
-}
-</code></pre>
-
-<p><img src="media/14843637552703/14845291672791.jpg" alt=""/><br/>
-　　上图中每个枚举值的二进制表示，以及对其中两个枚举值执行按位或操作之后的二进制值。</p>
-
-<p>　　在Foundation框架中也定义了一些辅助的宏，用这些宏来定义枚举类型时，也可以指定用于保存枚举值的底层数据类型。这些宏具备向后兼容（backward compatibility)能力，<font color=red><strong>如果目标平台的编译器支持新标准，那就使用新式语法，</strong></font>否则改用旧式语法。这些宏是用#define预处理指令来定义的，其中一个用于定义像EOCConnectionState这种普通的枚举类型，另一个用于定义像UIViewAutoresizing这种包含一系列选项的枚举类型，其用法如下：</p>
-
-<pre><code>typedef NS^ENUM(NSUInteger, EOCConnectionState) {
-    EOCConnectionStateDisconnected,
-    EOCConnectionStateConnecting,
-    EOCConnectionStateConnected,
-}；
-typedef NS_OPTIONS(NSUInteger, EOCPermittedDirection) {
-    EOCPermittedDirectionUp =   1   &lt;&lt;  0,
-    EOCPermittedDirectionDown   =   1   &lt;&lt;  1,
-    EOCPermittedDirectionLeft   =   1   &lt;&lt;  2,
-    EOCPermittedDirectionRight  =   1   &lt;&lt;  3,
-</code></pre>
-
-<p>最后还有一种枚举的用法，就是在switch语句里，有时可以这样定义：</p>
-
-<pre><code>typedef NS_ENUM(NSUInteger, EOCConnectionState) {
-    EOCConnectionStateDisconnected,
-    EOCConnectionStateConnecting,
-    EOCConnectionStateConnected,
-}；
-switch (currentState) {
-    EOCConnectionStateDisconnected:
-        // Handle disconnected state
-        break;
-    EOCConnectionStateConnecting:
-        // Handle connecting state
-        break;
-    EOCConnectionStateConnected:
-        // Handle connected state
-        break;
-}
-</code></pre>
-
-<p>我们总习惯在switch语句中加上default分支。然而，若是用枚举来定义状态机（state machine),则最好不要有default分支,因为不加default的话，如果稍后又加了一种状态，那么编译器就会发出警告信息，提示新加入的状态并未在switch分支中处理。假如写上了 default分支，那么它就会处理这个新状态，从而导致编译器不发瞀告信息，不利于程序的编写。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>应该用枚举来表示状态机的状态、传递给方法的选项以及状态码等值，给这些值起个易懂的名字。</li>
-<li>如果把传递给某个方法的选项表示为枚举类型，而多个选项又可同时使用，那么就将各选项值定义为2的幂，以便通过按位或操作将其组合起来。</li>
-<li>用NS_ENUM与NS_OPTIONS宏来定义枚举类型，并指明其底层数据类型。这样做可以确保枚举是用开发者所选的底层数据类型实现出来的，而不会采用编泽器所选的类型。</li>
-<li>在处理枚举类型的switch语句中不要实现default分支。这样的话，加入新枚举之后，编译器就会提示开发者：switch语句并未处理所有枚举，有利于定位TODO方位。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/1/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E7%86%9F%E6%82%89oc.html'>第一章 熟悉oc</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14842935189837.html">
-                
-                  <h1>第4条：多用类型常量，少用#define预处理指令</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>对于一般掌握了Objective-C和C语言的人，也许会用这种方法来定义一个类似动画的时间常量：</p>
-
-<pre><code>#define ANIMATION_DURATION = 0.3
-</code></pre>
-
-<p>上述预处理指令会吧源代码中的ANIMATION_DURATION字符串替换为0.3。<br/>
-在OC中我们常常用更好的方法来定义，比方说，下面这行代码定义了一个类型为NSTimeInterval的常量：</p>
-
-<pre><code>static const NSTimeInterval KAnimationDuration = 0.3；
-</code></pre>
-
-<p>要注意的是此方式定义的常量包含类型信息，其好处就是清楚的描述了常量的含义，有助于编写开发文档。</p>
-
-<p>还要注意常量的名称。常用的命名法是：若常量局限于某“编译单元（也就是实现文件之内，implementation）”,一般在前面加上字母k；若长亮在类之外课件，则通常以类名为前缀。之后将会更加详细的说命名问题。</p>
-
-<p>定义常量的位置很重要。我们总是很喜欢在头文件里声明预处理命令，这样是很糟糕的。例如，ANIMATION_DURATION这个常量名就不应该在头文件中，因为所有引入了这份头文件的其他文件中都会出现这个名字。static const定义的常量也不应该出现在头文件中。因为OC没有命名空间这一概念，所以那样做就等于声明了一个名字叫kANIMATIONDURATION的全局变量。此名称应该加上前缀，以表明其所属的类，例如可以改为EOCViewClassAnimationDuration。</p>
-
-<p>如果不打算去公开某个常量，则应该将其定义为在使用该常量的实现文件中，比如说，要开发一个使用UIKit框架的iOS应用程序，其中UIView子类中含有表示动画播放时间的常量，那么可以这样写：</p>
-
-<pre><code>//EOCAnimatedView.h
-#import &lt;UIKit/UIKit.h&gt;
-@interface EOCAnimatedView:UIView
--(void)animate;
-@end
-
-//EOCAnimatedView.m
-#import EOCAnimatedView.h
-
-static const NSTimeInterval kAnimationDuration  = 0.3;
-
-@implemention EOCAnimatedView
-
--(void)animate{
-  [UIViewanimateWithDuration:KAnimationDuration 
-                    animate:^(){
-                        //Perform animations
-                    }]
-}
-</code></pre>
-
-<p>变量一定要同时用static和const来声明。如果试图修改const所声明的变量，编译器会报错。static修饰符意味着该变量仅仅在定义此变量的便一单元中可见。编译器每收到一个编译单元，就会输出一份目标文件。在OC中“编译单元”一词 通常指每个类的实现文件（以.m为后缀名）其作用域仅限于由EOCAnimatedView.m所生成的目标文件中。假如声明此变量时不加static,则编译器会为它创建一个“外部符号”(external symbol)。此时,若是另一个编译单元中也声 明了同名变量，那么编译器就拋出一条错误消息。</p>
-
-<p>有时候需要对外公开某个常量，想要接受常值变量的注册者不需要知道实际的字符串值，只需要以常值变量来注册自己想要接受的通知就可以</p>
-
-<p>此类常量应该放在“全局变量表”中，以便可以在定义该常量的编译单元之外使用。因此可以这样的来定义：</p>
-
-<pre><code>// in the header file
-extern NSString *const EOCStringConstant;
-
-//in the implementation
-NSString *const EOCStringConstant = @&quot;value&quot;;
-</code></pre>
-
-<p>这个常量在头文件中声明，在实现文件里面定义。这类常量只能定义一次。</p>
-
-<p>这样定义常量要优于#define，一旦在.m文件中定义好全局常量后，可以随处使用。</p>
-
-<p><strong>要点</strong><br/>
-* 不要用预处理指令定义常量，这样定义出来的常量不包含类型信息，编译器只是会在编译之前执行查找与替换操作。即使有人重新定义了常量值，编译器也不会产生警告信息。<br/>
-* 在实现文件中使用static const来定义“只在编译单元内可见的常量”。由于此类常量不在全局符号表中，所以无需为其名称添加前缀。<br/>
-* 再投问价那种使用extern来声明全局变量，并且在相关的实现文件中定义其值。这种常量要出现在全局符号表中，所以其名称应该加以区隔，通常用与之有关的类名做前缀。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/1/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E7%86%9F%E6%82%89oc.html'>第一章 熟悉oc</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1165,31 +1211,31 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
 	      
 		      
 			      <li class="post">
-			        <a href="14991530470817.html">第九条 以"类族模式"隐藏实现细节</a>
+			        <a href="15033059328138.html">第十一条:理解Objc_msgSend的作用</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14991304296690.html">Caffe反向传播计算</a>
+			        <a href="15032784762045.html">小论文想法</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14990683410396.html">第八条:理解"对象同等性"这一概念</a>
+			        <a href="14993030681229.html">Caffe最优化求解过程</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14990441879389.html">Net Forward实现</a>
+			        <a href="14992368546707.html">第10条:在既有类中使用关联对象存放自定义数据</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14988713979681.html">Net初始化时的三个登记注册函数</a>
+			        <a href="14992160809956.html">SoftmaxWithLossLayer的实现</a>
 			      </li>
 		     
 		  
@@ -1265,7 +1311,7 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
     </script>
 
     <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
-<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

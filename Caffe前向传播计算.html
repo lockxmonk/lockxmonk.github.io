@@ -221,57 +221,56 @@ const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Net&lt;Dtype&gt;::Forward(
 
 <p>在<code>Init()</code>中调用了<mark>三个登记注册函数</mark>:</p>
 
-<p><strong>AppendTop</strong>:<br/>
-```c++</p>
+<p><strong>AppendTop</strong>:</p>
 
-<p>// Helper for Net::Init: add a new top blob to the net.<br/>
-//登记每层输出Blob<br/>
-template <typename Dtype><br/>
-void Net<Dtype>::AppendTop(const NetParameter&amp; param, const int layer_id,<br/>
-                           const int top_id, set<string>* available_blobs,<br/>
-                           map<string, int>* blob_name_to_idx) {<br/>
-  shared_ptr<LayerParameter> layer_param(<br/>
-      new LayerParameter(param.layer(layer_id)));<br/>
-  const string&amp; blob_name = (layer_param-&gt;top_size() &gt; top_id) ?<br/>
-      layer_param-&gt;top(top_id) : &quot;(automatic)&quot;;<br/>
-  // Check if we are doing in-place computation(检查是否为原位计算)<br/>
-  if (blob_name_to_idx &amp;&amp; layer_param-&gt;bottom_size() &gt; top_id &amp;&amp;<br/>
-      blob_name == layer_param-&gt;bottom(top_id)) {<br/>
-    // In-place computation(是原位计算)<br/>
-    LOG_IF(INFO, Caffe::root_solver())<br/>
-        &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name &lt;&lt; &quot; (in-place)&quot;;<br/>
-    top_vecs_[layer_id].push_back(blobs_[(<em>blob_name_to_idx)[blob_name]].get());<br/>
-    top_id_vecs_[layer_id].push_back((</em>blob_name_to_idx)[blob_name]);<br/>
-  } else if (blob_name_to_idx &amp;&amp;<br/>
-             blob_name_to_idx-&gt;find(blob_name) != blob_name_to_idx-&gt;end()) {<br/>
-    // If we are not doing in-place computation but have duplicated blobs,<br/>
-    // raise an error.<br/>
-    LOG(FATAL) &lt;&lt; &quot;Top blob &#39;&quot; &lt;&lt; blob_name<br/>
-               &lt;&lt; &quot;&#39; produced by multiple sources.&quot;;<br/>
-  } else {<br/>
-    // Normal output.(正常输出)<br/>
-    if (Caffe::root_solver()) {<br/>
-      LOG(INFO) &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name;<br/>
-    }<br/>
-    shared_ptr<Blob<Dtype> &gt; blob_pointer(new Blob<Dtype>());<br/>
-    //新建一个Blob,插入到Net::blobs_最后<br/>
-    const int blob_id = blobs_.size();<br/>
-    blobs_.push_back(blob_pointer);<br/>
-    blob_names_.push_back(blob_name);<br/>
-    blob_need_backward_.push_back(false);<br/>
-    if (blob_name_to_idx) { (*blob_name_to_idx)[blob_name] = blob_id; }<br/>
-    top_id_vecs_[layer_id].push_back(blob_id);<br/>
-    top_vecs_[layer_id].push_back(blob_pointer.get());<br/>
-  }<br/>
-  if (available_blobs) { available_blobs-&gt;insert(blob_name); }<br/>
-}</p>
+<pre><code class="language-c++">
+// Helper for Net::Init: add a new top blob to the net.
+//登记每层输出Blob
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::AppendTop(const NetParameter&amp; param, const int layer_id,
+                           const int top_id, set&lt;string&gt;* available_blobs,
+                           map&lt;string, int&gt;* blob_name_to_idx) {
+  shared_ptr&lt;LayerParameter&gt; layer_param(
+      new LayerParameter(param.layer(layer_id)));
+  const string&amp; blob_name = (layer_param-&gt;top_size() &gt; top_id) ?
+      layer_param-&gt;top(top_id) : &quot;(automatic)&quot;;
+  // Check if we are doing in-place computation(检查是否为原位计算)
+  if (blob_name_to_idx &amp;&amp; layer_param-&gt;bottom_size() &gt; top_id &amp;&amp;
+      blob_name == layer_param-&gt;bottom(top_id)) {
+    // In-place computation(是原位计算)
+    LOG_IF(INFO, Caffe::root_solver())
+        &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name &lt;&lt; &quot; (in-place)&quot;;
+    top_vecs_[layer_id].push_back(blobs_[(*blob_name_to_idx)[blob_name]].get());
+    top_id_vecs_[layer_id].push_back((*blob_name_to_idx)[blob_name]);
+  } else if (blob_name_to_idx &amp;&amp;
+             blob_name_to_idx-&gt;find(blob_name) != blob_name_to_idx-&gt;end()) {
+    // If we are not doing in-place computation but have duplicated blobs,
+    // raise an error.
+    LOG(FATAL) &lt;&lt; &quot;Top blob &#39;&quot; &lt;&lt; blob_name
+               &lt;&lt; &quot;&#39; produced by multiple sources.&quot;;
+  } else {
+    // Normal output.(正常输出)
+    if (Caffe::root_solver()) {
+      LOG(INFO) &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name;
+    }
+    shared_ptr&lt;Blob&lt;Dtype&gt; &gt; blob_pointer(new Blob&lt;Dtype&gt;());
+    //新建一个Blob,插入到Net::blobs_最后
+    const int blob_id = blobs_.size();
+    blobs_.push_back(blob_pointer);
+    blob_names_.push_back(blob_name);
+    blob_need_backward_.push_back(false);
+    if (blob_name_to_idx) { (*blob_name_to_idx)[blob_name] = blob_id; }
+    top_id_vecs_[layer_id].push_back(blob_id);
+    top_vecs_[layer_id].push_back(blob_pointer.get());
+  }
+  if (available_blobs) { available_blobs-&gt;insert(blob_name); }
+}
 
-<pre><code>
-**AppendBottom**:
+</code></pre>
 
+<p><strong>AppendBottom</strong>:</p>
 
-```c++
-
+<pre><code class="language-c++">
 // Helper for Net::Init: add a new bottom blob to the net.
 //登记每层输入Blob
 template &lt;typename Dtype&gt;
@@ -857,31 +856,31 @@ NetParameterlayers_.push_back(LayerRegistry&lt;Dtype&gt;::CreateLayer(layer_para
 	      
 		      
 			      <li class="post">
-			        <a href="14991530470817.html">第九条 以"类族模式"隐藏实现细节</a>
+			        <a href="15033059328138.html">第十一条:理解Objc_msgSend的作用</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14991304296690.html">Caffe反向传播计算</a>
+			        <a href="15032784762045.html">小论文想法</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14990683410396.html">第八条:理解"对象同等性"这一概念</a>
+			        <a href="14993030681229.html">Caffe最优化求解过程</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14990441879389.html">Net Forward实现</a>
+			        <a href="14992368546707.html">第10条:在既有类中使用关联对象存放自定义数据</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14988713979681.html">Net初始化时的三个登记注册函数</a>
+			        <a href="14992160809956.html">SoftmaxWithLossLayer的实现</a>
 			      </li>
 		     
 		  
@@ -957,7 +956,7 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
     </script>
 
     <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
-<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

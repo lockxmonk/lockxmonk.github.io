@@ -1,0 +1,655 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  SoftmaxWithLossLayer的实现 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>SoftmaxWithLossLayer的实现</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/7/5</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Caffe%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe反向传播计算</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>我们找到<code>SoftmaxWithLossLayer.hpp</code>文件查看声明,如下:</p>
+
+<pre><code class="language-c++">
+//将实数预测向量通过Softmax计算获得每个类别的概率分布
+//这个类比单独SoftmaxLayer + MultinomialLogisticLossLayer在梯度数值计算上更加稳定
+//Test阶段，这个层可以直接用SoftmaxLayer代替
+/**
+ *输入Blob 1为预测结果，形状为N x K x 1 x 1，K为总类别数目，N为批量数。取值范围为（-Inf, Inf)，
+ *表示每个类别获得的分类score,值越大说明输入图像与该类别越接近
+ *输入Blob 2为真实标签，形状为N x 1 x 1 x 1
+ *输出Blob为计算得到的交叉熵分类损失E，形状为1 x 1 x 1 x 1
+**/
+template &lt;typename Dtype&gt;
+class SoftmaxWithLossLayer : public LossLayer&lt;Dtype&gt; {
+ public:
+   /**
+    * @param param provides LossParameter loss_param, with options:
+    *  - ignore_label (optional)
+    *    Specify a label value that should be ignored when computing the loss.
+    *  - normalize (optional, default true)
+    *    If true, the loss is normalized by the number of (nonignored) labels
+    *    present; otherwise the loss is simply summed over spatial locations.
+    */
+    explicit SoftmaxWithLossLayer(const LayerParameter&amp; param)
+      : LossLayer&lt;Dtype&gt;(param) {}
+  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  virtual inline const char* type() const { return &quot;SoftmaxWithLoss&quot;; }
+  virtual inline int ExactNumTopBlobs() const { return -1; }
+  virtual inline int MinTopBlobs() const { return 1; }
+  virtual inline int MaxTopBlobs() const { return 2; }
+
+ protected:
+  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+      
+/**
+   * @brief Computes the softmax loss error gradient w.r.t. the predictions.
+   *
+   * Gradients cannot be computed with respect to the label inputs (bottom[1]),
+   * so this method ignores bottom[1] and requires !propagate_down[1], crashing
+   * if propagate_down[1] is set.
+   *
+   * @param top output Blob vector (length 1), providing the error gradient with
+   *      respect to the outputs
+   *   -# @f$ (1 \times 1 \times 1 \times 1) @f$
+   *      This Blob&#39;s diff will simply contain the loss_weight* @f$ \lambda @f$,
+   *      as @f$ \lambda @f$ is the coefficient of this layer&#39;s output
+   *      @f$\ell_i@f$ in the overall Net loss
+   *      @f$ E = \lambda_i \ell_i + \mbox{other loss terms}@f$; hence
+   *      @f$ \frac{\partial E}{\partial \ell_i} = \lambda_i @f$.
+   *      (*Assuming that this top Blob is not used as a bottom (input) by any
+   *      other layer of the Net.)
+   * @param propagate_down see Layer::Backward.
+   *      propagate_down[1] must be false as we can&#39;t compute gradients with
+   *      respect to the labels.
+   * @param bottom input Blob vector (length 2)
+   *   -# @f$ (N \times C \times H \times W) @f$
+   *      the predictions @f$ x @f$; Backward computes diff
+   *      @f$ \frac{\partial E}{\partial x} @f$
+   *   -# @f$ (N \times 1 \times 1 \times 1) @f$
+   *      the labels -- ignored as we can&#39;t compute their error gradients
+   */
+  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
+  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
+      
+/// Read the normalization mode parameter and compute the normalizer based
+  /// on the blob size.  If normalization_mode is VALID, the count of valid
+  /// outputs will be read from valid_count, unless it is -1 in which case
+  /// all outputs are assumed to be valid.
+  virtual Dtype get_normalizer(
+      LossParameter_NormalizationMode normalization_mode, int valid_count);
+
+  /// The internal SoftmaxLayer used to map predictions to a distribution.(内置一个SoftmaxLayer对象)
+  shared_ptr&lt;Layer&lt;Dtype&gt; &gt; softmax_layer_;
+  /// prob stores the output probability predictions from the SoftmaxLayer.
+  Blob&lt;Dtype&gt; prob_;
+  /// bottom vector holder used in call to the underlying SoftmaxLayer::Forward
+  vector&lt;Blob&lt;Dtype&gt;*&gt; softmax_bottom_vec_;
+  /// top vector holder used in call to the underlying SoftmaxLayer::Forward
+  vector&lt;Blob&lt;Dtype&gt;*&gt; softmax_top_vec_;
+  /// Whether to ignore instances with a certain label.
+  bool has_ignore_label_;
+  /// The label indicating that an instance should be ignored.
+  int ignore_label_;
+  /// How to normalize the output loss.
+  LossParameter_NormalizationMode normalization_;
+
+  int softmax_axis_, outer_num_, inner_num_;
+};
+
+</code></pre>
+
+<p>之后我们来看实现的<code>.cpp</code>文件:</p>
+
+<p>第一个是SetUp函数.<br/>
+```c++</p>
+
+<p>template <typename Dtype><br/>
+void SoftmaxWithLossLayer<Dtype>::LayerSetUp(<br/>
+    const vector<Blob<Dtype><em>&gt;&amp; bottom, const vector<Blob<Dtype></em>&gt;&amp; top) {<br/>
+  LossLayer<Dtype>::LayerSetUp(bottom, top);<br/>
+  //创建时动态修改本层的LayerParameter参数，适应SoftmaxLayer<br/>
+  LayerParameter softmax_param(this-&gt;layer_param_);<br/>
+  softmax_param.set_type(&quot;Softmax&quot;);<br/>
+  softmax_layer_ = LayerRegistry<Dtype>::CreateLayer(softmax_param);<br/>
+  softmax_bottom_vec_.clear();<br/>
+  softmax_bottom_vec_.push_back(bottom[0]);<br/>
+  softmax_top_vec_.clear();<br/>
+  softmax_top_vec_.push_back(&amp;prob_);<br/>
+  softmax_layer_-&gt;SetUp(softmax_bottom_vec_, softmax_top_vec_);</p>
+
+<p>has_ignore_label_ =<br/>
+    this-&gt;layer_param_.loss_param().has_ignore_label();<br/>
+  if (has_ignore_label_) {<br/>
+    ignore_label_ = this-&gt;layer_param_.loss_param().ignore_label();<br/>
+  }<br/>
+  if (!this-&gt;layer_param_.loss_param().has_normalization() &amp;&amp;<br/>
+      this-&gt;layer_param_.loss_param().has_normalize()) {<br/>
+    normalization_ = this-&gt;layer_param_.loss_param().normalize() ?<br/>
+                     LossParameter_NormalizationMode_VALID :<br/>
+                     LossParameter_NormalizationMode_BATCH_SIZE;<br/>
+  } else {<br/>
+    normalization_ = this-&gt;layer_param_.loss_param().normalization();<br/>
+  }<br/>
+}</p>
+
+<pre><code>可见，在SetUp阶段，创建了内部SoftmaxLayer对象并配置了其输入/输出Blob，然后调用该对象的SetUp函数。
+
+
+下面看看`SoftmaxWithLossLayer`的前向传播函数：
+
+```c++
+
+template &lt;typename Dtype&gt;
+void SoftmaxWithLossLayer&lt;Dtype&gt;::Forward_cpu(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  // The forward pass computes the softmax prob values.(内部SoftmaxLayer的前向传播计算)
+  softmax_layer_-&gt;Forward(softmax_bottom_vec_, softmax_top_vec_);
+  //获得概率密度
+  const Dtype* prob_data = prob_.cpu_data();
+  //获得标签值
+  const Dtype* label = bottom[1]-&gt;cpu_data();
+  int dim = prob_.count() / outer_num_;
+  int count = 0;
+  Dtype loss = 0;
+  for (int i = 0; i &lt; outer_num_; ++i) {
+    for (int j = 0; j &lt; inner_num_; j++) {
+      const int label_value = static_cast&lt;int&gt;(label[i * inner_num_ + j]);
+      if (has_ignore_label_ &amp;&amp; label_value == ignore_label_) {
+        continue;
+      }
+      DCHECK_GE(label_value, 0);
+      DCHECK_LT(label_value, prob_.shape(softmax_axis_));
+      //计算损失函数-log(prob[label])
+      loss -= log(std::max(prob_data[i * dim + label_value * inner_num_ + j],
+                           Dtype(FLT_MIN)));
+      ++count;
+    }
+  }
+  //设置输出Blob值
+  top[0]-&gt;mutable_cpu_data()[0] = loss / get_normalizer(normalization_, count);
+  if (top.size() == 2) {
+    top[1]-&gt;ShareData(prob_);
+  }
+}
+
+
+</code></pre>
+
+<p>可见通过内部<code>SoftmaxLayer</code>对象非常简洁。我们再看一下 Backward计算:</p>
+
+<pre><code class="language-c++">
+template &lt;typename Dtype&gt;
+void SoftmaxWithLossLayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+    const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+  if (propagate_down[1]) {
+   //label输入Blob不做反向传播
+    LOG(FATAL) &lt;&lt; this-&gt;type()
+               &lt;&lt; &quot; Layer cannot backpropagate to label inputs.&quot;;
+  }
+  if (propagate_down[0]) {
+    Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
+    const Dtype* prob_data = prob_.cpu_data();
+    //将概率密度拷贝输入Blob的diff域
+    caffe_copy(prob_.count(), prob_data, bottom_diff);
+    const Dtype* label = bottom[1]-&gt;cpu_data();
+    int dim = prob_.count() / outer_num_;
+    int count = 0;
+    for (int i = 0; i &lt; outer_num_; ++i) {
+      for (int j = 0; j &lt; inner_num_; ++j) {
+        const int label_value = static_cast&lt;int&gt;(label[i * inner_num_ + j]);
+        if (has_ignore_label_ &amp;&amp; label_value == ignore_label_) {
+          for (int c = 0; c &lt; bottom[0]-&gt;shape(softmax_axis_); ++c) {
+            bottom_diff[i * dim + c * inner_num_ + j] = 0;
+          }
+        } else {
+        //在输入Blob的diff域，计算当前槪率密度与理想概率密度(label 对应类别概率为1,其他类别 概肀为0)之差，实现误差反向传播
+          bottom_diff[i * dim + label_value * inner_num_ + j] -= 1;
+          ++count;
+        }
+      }
+    }
+    // Scale gradient(适当的缩放)
+    Dtype loss_weight = top[0]-&gt;cpu_diff()[0] /
+                        get_normalizer(normalization_, count);
+    caffe_scal(prob_.count(), loss_weight, bottom_diff);
+  }
+}
+</code></pre>
+
+<p>通过对Caffe损失层的研究，我们了解到，前向传播阶段数据逐层传播，到损失层计算预测概率密度和损失函数；而反向传播阶段则从损失层开始，由预测概率密度与理想概率密度(这就是有监督学习的佐证)<strong>差值</strong>得到误差（diff),然后将由下一节内容逐层反向传播。我们已经知道一个Blob是由data和diff两部分构成的，如果说数据读取层是data之源，那么损失层就是diff之源。</p>
+
+<h2 id="toc_0">反向传播的实现</h2>
+
+<p>Caffe Net数据结构中的&#39;Backward函数具体的声明和实现文件为<code>net.hpp</code>和<code>net.cpp</code>:</p>
+
+<pre><code class="language-c++">//从第start层反向传播到达第end层
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::BackwardFromTo(int start, int end) {
+  CHECK_GE(end, 0);
+  CHECK_LT(start, layers_.size());
+  for (int i = start; i &gt;= end; --i) {
+    for (int c = 0; c &lt; before_backward_.size(); ++c) {
+      before_backward_[c]-&gt;run(i);
+    }
+    if (layer_need_backward_[i]) {
+    //遍历每个居，调用相应的Backward函数
+      layers_[i]-&gt;Backward(
+          top_vecs_[i], bottom_need_backward_[i], bottom_vecs_[i]);
+      if (debug_info_) { BackwardDebugInfo(i); }
+    }
+    for (int c = 0; c &lt; after_backward_.size(); ++c) {
+      after_backward_[c]-&gt;run(i);
+    }
+  }
+}
+
+//从第start层幵始到第一层的反向传播过程
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::BackwardFrom(int start) {
+  BackwardFromTo(start, 0);
+}
+
+//从最后一层开始到第end层的反向传播过程
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::BackwardTo(int end) {
+  BackwardFromTo(layers_.size() - 1, end);
+}
+
+//整个网络的反向传播过程
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::Backward() {
+  BackwardFromTo(layers_.size() - 1, 0);
+  if (debug_info_) {
+  //如果打幵了调试信息开关(在prototxt中设定），则计算所有权值的data/diff的L1、L2范数，监控其变化情况，避免发散
+    Dtype asum_data = 0, asum_diff = 0, sumsq_data = 0, sumsq_diff = 0;
+    for (int i = 0; i &lt; learnable_params_.size(); ++i) {
+      asum_data += learnable_params_[i]-&gt;asum_data();
+      asum_diff += learnable_params_[i]-&gt;asum_diff();
+      sumsq_data += learnable_params_[i]-&gt;sumsq_data();
+      sumsq_diff += learnable_params_[i]-&gt;sumsq_diff();
+    }
+    const Dtype l2norm_data = std::sqrt(sumsq_data);
+    const Dtype l2norm_diff = std::sqrt(sumsq_diff);
+    LOG(ERROR) &lt;&lt; &quot;    [Backward] All net params (data, diff): &quot;
+               &lt;&lt; &quot;L1 norm = (&quot; &lt;&lt; asum_data &lt;&lt; &quot;, &quot; &lt;&lt; asum_diff &lt;&lt; &quot;); &quot;
+               &lt;&lt; &quot;L2 norm = (&quot; &lt;&lt; l2norm_data &lt;&lt; &quot;, &quot; &lt;&lt; l2norm_diff &lt;&lt; &quot;)&quot;;
+  }
+}
+
+//更新权值函数，在反向传播结束后调用
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::Update() {
+  for (int i = 0; i &lt; learnable_params_.size(); ++i) {
+  //调用内部Blob的Update()函数，具体计算为data = data - diff
+    learnable_params_[i]-&gt;Update();
+  }
+}
+
+//权值diff清零
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::ClearParamDiffs() {
+  for (int i = 0; i &lt; learnable_params_.size(); ++i) {
+    Blob&lt;Dtype&gt;* blob = learnable_params_[i];
+    switch (Caffe::mode()) {
+    case Caffe::CPU:
+      caffe_set(blob-&gt;count(), static_cast&lt;Dtype&gt;(0),
+                blob-&gt;mutable_cpu_diff());
+      break;
+    case Caffe::GPU:
+#ifndef CPU_ONLY
+      caffe_gpu_set(blob-&gt;count(), static_cast&lt;Dtype&gt;(0),
+                    blob-&gt;mutable_gpu_diff());
+#else
+      NO_GPU;
+#endif
+      break;
+    }
+  }
+}
+
+</code></pre>
+
+<p>到此,caffe基本的backward反向传播过程就清楚了,这样对于设计更复杂的有监督学习算法具有指导意义。</p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="14992368546707.html" 
+          title="Previous Post: 第10条:在既有类中使用关联对象存放自定义数据">&laquo; 第10条:在既有类中使用关联对象存放自定义数据</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="14991530470817.html" 
+          title="Next Post: 第九条 以"类族模式"隐藏实现细节">第九条 以"类族模式"隐藏实现细节 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15033059328138.html">第十一条:理解Objc_msgSend的作用</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15032784762045.html">小论文想法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14993030681229.html">Caffe最优化求解过程</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14992368546707.html">第10条:在既有类中使用关联对象存放自定义数据</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14992160809956.html">SoftmaxWithLossLayer的实现</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>
