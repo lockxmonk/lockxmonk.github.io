@@ -113,6 +113,417 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15034774413129.html">
+                
+                  <h1>第十三条 用"方法调配技术"调试"黑盒方法"</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>因为OC可以在运行期解析 一个对象究竟调用何种方法,所以我们也可以在运行期改变相对应的方法. </p>
+
+<p><font color=red>因为与给定的选择子名称相对应的方法也可以在运行期改变.所以若能善用此特性，则可发挥出巨大优势，因为我们既不需要源代码，也不需要通过继承子类来覆写方法就能改变这个类本身的功能。这样一来，新功能将在本类的所有实例中生效，而不是仅限于覆写了相关方法的那些子类实例。此方案经常称为<mark>“方法调配”（method swizzling)</mark> e</font></p>
+
+<p>类的方法列表会把选择子的名称映射到相关的方法实现之上，使得“动态消息派发系统” 能够据此找到应该调用的方法。这些方法均以函数指针的形式来表示，这种指针叫做<code>IMP</code>, 其原型如下：</p>
+
+<pre><code class="language-objc">
+id (*IMP)(id, SEL ,...)
+
+</code></pre>
+
+<p>我们用NSString类来举例,下图表示<code>lowercaseString、uppercaseString、capitalizedString</code>方法映射到了不同的<code>IMP</code>上.</p>
+
+<p><img src="media/15034774413129/15034784608780.jpg" alt=""/></p>
+
+<p>OC运行期系统,提供有方法来操作这个映射表.我们可以向这个表中,<strong>新增选择子,改变选择子所对应的方法实现,交换两个选择子所映射的指针</strong>.类似下图:<br/>
+<img src="media/15034774413129/15034786156175.jpg" alt=""/></p>
+
+<p>新表中,多了一个<code>newSelector</code>选择子,并且其他方法的实现也互换了.上述修改均无须编写子类，只是修改了“方法表”的布局.</p>
+
+<p>下面我们来讨论如何互换两个方法的实现:</p>
+
+<p>想要互换两个方法的实现可以,有下列函数:</p>
+
+<pre><code class="language-objc">//互换m1和m2的实现
+void method_exchangeImplementations(Method m1, Method m2)
+
+</code></pre>
+
+<p>m1和m2的方法实现可以通过下面方法实现:</p>
+
+<pre><code class="language-objc">
+Method class_getInstanceMethod(Class aClass, SEL aSelector)
+
+</code></pre>
+
+<p>此函数根据给定的选择从类中取出与之相关的方法。</p>
+
+<p>下面我们完整的举一个例子,来演示交换前面提到的<code>lowercaseString</code> 与 <code>uppercaseString</code>方法实现:</p>
+
+<pre><code class="language-objc">
+Method originalMethod =
+    class_getInstanceMethod([NSStringclass],
+                            @selector(lowercaseString));
+Method swappedMethod =
+    class_getInstanceMethod([NSStringclass],
+                            @selector(uppercaseString)); 
+                            method_exchangeImplementations(originalMethod,swappedMethod);
+
+</code></pre>
+
+<p>从现在开始,如果在NSString实例上调用<code>lowercaseString</code>,那么执行的将是<code>uppercaseString</code>,反之亦然:</p>
+
+<pre><code class="language-objc">
+NSString *string = @&quot;This iS tHe StRiNg&quot;;
+NSString *lowercaseString = [string lowercaseString];
+NSLog(&quot;lowercaseString = %@&quot;, lowercaseString);
+// Output: lowercaseString = THIS IS THE STRING
+
+
+NSString *uppercaseString - [string uppercaseString】；
+NSLog (@&quot;uppercaseString = %@&quot;, uppercaseString);
+// Output: uppercaseString = this is the string
+
+</code></pre>
+
+<p>刚才向大家演示了如何交换两个方法实现，然而在实际应用中，像这样直接交换两 个方法实现的，意义并不大。因为<code>lowercaseString</code>与<code>uppercaseString</code>这两个方法已经各自实现得很好，没必要再交换了。但是，可以通过这一手段来为既有的方法实现增添新功能。<font color=red>比方说，想要在调用<code>lowercaseString</code>时记录某些信息，这时就可以通过交换方法实现来达成此目标。我们新编写一个方法，在此方法中实现所需的附加功能，并调用原有实现</font>。</p>
+
+<p>新方法可以添加至NSString的一个&quot;分类(category)&quot;中:</p>
+
+<pre><code class="language-objc">
+@interface NSString (EOCMyAdditions)
+
+-(NSString*)eoc_myLowercaseString;
+
+@end
+
+</code></pre>
+
+<p>上面的新方法将与原有的方法互换,如下图所示:</p>
+
+<p><img src="media/15034774413129/15034869016993.jpg" alt=""/></p>
+
+<p>新方法的实现代码可以这样写:</p>
+
+<pre><code class="language-objc">
+0implementation NSString (EOCMyAdditions)
+
+-(NSString*)eoc_myLowercaseString {
+    NSString *lowercase = [self eoc_myLowercaseString];
+    NSLog (@&quot;%@ =&gt; %@&quot;, self, lowercase); 
+    return lowercase;
+)
+@end
+
+</code></pre>
+
+<p>这段代码看上去好像会陷人递归调用的<strong>死循环</strong>，<mark><strong>不过大家要记住，此方法是准备和 lowercaseString方法互换的。所以，在运行期，eoc_myLowercaseString选择子实际上对应于原有的lowercaseString方法实现</strong>。</mark>最后，通过下列代码来交换这两个方法实现：</p>
+
+<pre><code class="language-objc">Method originalMethod =
+    class_getInstanceMethod([NSString class],
+                            @selector(lowercaseString)〉；
+Method swappedMethod =
+    class_getInstanceMethod([NSString class]f
+                            @selector(eoc_myLowercaseString)); 
+                            method_exchangeImplementations(originalMethod , swappedMethod);
+
+</code></pre>
+
+<p>之后我们只要如下执行就会发现:</p>
+
+<pre><code class="language-objc">
+NSString *string = @&quot;ThIs iS tHe StRiNg&quot;;
+NSString *lowercaseString = [string lowercaseString];
+//输出了下面这行
+// Output: This iS tHe StRiNg =&gt; this is the string
+
+</code></pre>
+
+<blockquote>
+<p><strong>通过此方案，开发者可以为那些“完全不知道其具体实现的&quot;（completely opaque, “完全 不透明的”）黑盒方法增加日志记录功能，这非常有助于程序调试。然而，此做法只在调试程序时有用。很少有人在调试程序之外的场合用上述“方法调配技术”来永久改动某个类的功能。不能仅仅因为Objective-C语言里有这个特性就一定要用它。若是滥用，反而会令代码变得不易读懂且难于维护。</strong></p>
+</blockquote>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li><p>在运行期，可以向类中新增或替换选择子所对应的方法实现。</p></li>
+<li><p>使用另一份实现来替换原有的方法实现，这道工序叫做“方法调配”，开发者常用此技术向原有实现中添加新功能。</p></li>
+<li><p>一般来说，只有调试程序的时候才需要在运行期修改方法实现，这种做法不宜滥用。</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15033908572762.html">
+                
+                  <h1>第十二条 消息转发机制(Message forwarding)</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>第11条讲解了对象的消息传递机制，并强调了其重要性。第12条则要讲解另外一个重要的问题，就是对象在收到无法解读的消息之后会发生什么情况。若想令类能理解某条消息，我们必须以程序码实现出对应的方法才行。<font color=red><strong>但是，在编译期向类发送了其无法解读的消息并不会报错，因为在运行期可以继续向类中添加方法，所以编译器在编译时还无法确知类中到底会不会有某个方法实现。</strong></font>当对象接收到无法解读的消息后，就会启动<mark>“消息转发&quot;（message forwarding)机制</mark>，程序员可经由此过程告沂对象应该如何处理未知消息。</p>
+
+<p>消息转发分为两大阶段:</p>
+
+<ol>
+<li><p>先征询接收者，所属的类，看其是否能动态添加方法，以处理当前这个“未知的选择子&quot;（unknown selector),这叫做“动态方法解析”（dynamic method resolution)。</p></li>
+<li><p>涉及“完整的消息转发机制”（full forwarding mechanism)。如果运行期系统已经把第一阶段执行完了，那么接收者自己就无法再以动态新增方法的手段来响应包含该选择子的消息了。此时，运行期系统会请求接收者以其他手段来处理与消息相关的方法调用。这又细分为<strong>两小步</strong>。首先，请接收者看看有没有其他对象能处理这条消息。若有，则运行期系统会把消息转给那个对象，于是消息转发过程结束，一切如常。若没有“备援的接收者”（replacement receiver)，则启动完整的消息转发机制，运行期系统会把与消息有关的全部细节都封装到<code>NSInvocation</code>对象中，再给接收者最后一次机会，令其设法解决当前还未处理的这条消息。</p></li>
+</ol>
+
+<h2 id="toc_0">动态方法解析</h2>
+
+<p>对象在收到无法解读的消息后，首先将调用其所属类的下列类方法：</p>
+
+<pre><code class="language-objc">
++ (BOOL)resolvelnstanceMethod:(SEL)selector
+
+</code></pre>
+
+<p>该方法的参数就是那个未知的选择子，其返回值为<code>Boolean</code>类型，表示这个类是否能新增一个实例方法用以处理此选择子。在继续往下执行转发机制之前，本类有机会新增一个处理此选择子的方法。假如尚未实现的方法不是实例方法而是类方法，那么运行期系统就会调用另外一个方法，该方法与 <code>“resolvelnstanceMethod:”</code> 类似，叫做 <code>“resolveClassMethod:”</code>。使用这种办法的前提是：相关方法的实现代码已经写好，只等着运行的时候动态插在类里面就可以了。此方案常用来实现<code>@dynamic</code>属性（参见第6条)，比如说，要访问<code>CoreData</code>框架中<code>NSManagedObjects</code>对象的属性时就可以这么做，因为实现这些属性所需的存取方法在编译期就能确定。</p>
+
+<p>下列代码演示了如何用<code>“resolvelnstanceMethod:”</code>来实现<code>@dynamic</code>属性：</p>
+
+<pre><code class="language-objc">
+id autoDictionaryGetter(id self, SEL _cmd);
+void autoDictionarySetter(id selff SEL _cmd, id value);
++ (BOOL)resolvelnstanceMethod:(SEL)selector {
+    NSString *selectorString = NSStringFromSelector(selector);
+    if ( /* selector is from a ©dynamic property ★/ ){
+        if([selectorstring has Prefix: @&quot;set&quot;]){
+            class addMethod(self,
+                            selector,
+                            (IMP)autoDictionarySetter,
+                            &quot;v@ :@&quot;);
+    } else {
+        class_addMethod(self,
+                        selector,
+                        (IMP)autoDictionaryGetter,
+                        &quot;@ @:&quot;);
+        }              
+        return YES;
+    }
+return [super resolvelnstanceMethod:selector];
+
+}
+
+</code></pre>
+
+<h2 id="toc_1">备援接受者</h2>
+
+<p>当前接收者还有第二次机会能处理未知的选择子，在这一步中，运行期系统会问它：能不能把这条消息转给其他接收者来处理。与该步骤对应的处理方法如下：</p>
+
+<pre><code class="language-objc">
+-(id)forwardingTargetForSelector:(SEL)selector
+
+</code></pre>
+
+<p>方法参数代表未知的选择子，若当前接收者能找到备援对象，则将其返回，若找不到，就返回<code>nil</code>。通过此方案，我们可以用“组合”（composition)来模拟出“多重继承”（multiple inheritance)的某些特性。在一个对象内部，可能还有一系列其他对象，该对象可经由此方法将能够处理某选择子的相关内部对象返回，这样的话，在外界看来，好像是该对象亲自处理了这些消息似的。</p>
+
+<p><font color=red>请注意，我们无法操作经由这一步所转发的消息。若是想在发送给备援接收者之前先修改消息内容，那就得通过完整的消息转发机制来做了。</font></p>
+
+<h2 id="toc_2">完整的消息转发</h2>
+
+<p>如果转发算法已经来到这一步的话，那么唯一能做的就是启用完整的消息转发机制了。首先创建<code>NSInvocation</code>对象，把与尚未处理的那条消息有关的全部细节都封于其中。此对象包含选择子、目标（target)及参数。在触发NSIrwocation对象时，“消息派发系统”(message-dispatch system)将亲自出马，把消息指派给目标对象。<br/>
+此步骤会调用下列方法来转发消息：</p>
+
+<pre><code class="language-objc">
+-(void)forwardlnvocation:(NSInvocation*)invocation
+
+</code></pre>
+
+<p>这个方法可以实现得很简单：只需改变调用目标，使消息在新目标上得以调用即可。然<br/>
+而这样实现出来的方法与“备援接收者”方案所实现的方法等效，所以很少有人采用这么简<br/>
+单的实现方式。比较有用的实现方式为：在触发消息前，先以某种方式改变消息内容，比如追加另外一个参数，或是改换选择子，等等。</p>
+
+<p>实现此方法时，若发现某调用操作不应由本类处理，则需调用超类的同名方法。这样的话，继承体系中的每个类都有机会处理此调用请求，直至<code>NSObject</code>。如果最后调用了<code>NSObject</code>类的方法，那么该方法还会继而调用<code>“doesNotRecognizeSelector:”</code>以抛出异常，此异常表明选择子最终未能得到处理。</p>
+
+<h2 id="toc_3">消息转发全流程</h2>
+
+<p>下图展示了消息转发机制处理消息的各个步骤:<br/>
+<img src="media/15033908572762/15033988345236.jpg" alt=""/></p>
+
+<p><font color=red>接收者在每一步中均有机会处理消息。步骤越往后，处理消息的代价就越大。</font>最好能在第一步就处理完，这样的话，运行期系统就可以将此方法缓存起来了。如果这个类的实例稍后还收到同名选择子，那么根本无须启动消息转发流程。</p>
+
+<h2 id="toc_4">完整的示例</h2>
+
+<p>假设要编写一个类似于“字典”的对象，它里面可以容纳其他对象，只不过开发者要直接通过属性来存取其中的数据。这个类的设计思路是：由幵发者来添加属性定义，并将其声明为<code>@dynamic</code>，而类则会自动处理相关属性值的存放与获取操作。</p>
+
+<p>定义该类的接口为:</p>
+
+<pre><code class="language-objc">
+#import &lt;Foundation/Foundation.h&gt;
+@interface EOCAutoDictionary : NSObject
+@property (nonatomic, strong) NSNumber *number;
+@property (nonatomic, strong) NSDate *date;
+@property (nonatomic, strong)id qpaqueObject;
+
+@end
+
+</code></pre>
+
+<p>本例中，这些属性具体是什么其实无关紧要。笔者用了这么多种数据类型，只是想演示此 功能很有用。在类的内部，每个属性的值还是会存放在字典里，所以我们先在类中编写如下代码，并将属性声明为@dynamiC，这样的话，编译器就不会为其自动生成实例变量及存取方法了：</p>
+
+<pre><code class="language-objc">
+#import &quot;EOCAutoDictionary.h&quot;
+#import &lt;objc/runtime.h&gt;
+
+@interface EOCAutoDictionary ()
+
+@property (nonatomic, strong) NSMutableDictionary *backingstore;
+
+@end
+
+@implementation EOCAutoDictionary
+
+@dynamic string, number, date, opaqueObject;
+
+-(id)init {
+    if ( (self = [super init]}} {
+          _backingStore = [NSMutableDictionary new];
+}
+    return self;
+}
+
+</code></pre>
+
+<p>本例的关键在于<code>resolvelnstanceMethod:</code>方法的实现代码：</p>
+
+<pre><code class="language-objc">
++ (BOOL)resolvelnstanceMethod:(SEL)selector {
+    NSString *selectorstring = NSStringFromSelector(selector); 
+    if ([selectorstring hasPrefix: @&quot;set&quot;]){
+        class_addMethod(self,
+                        selector,
+                        (IMP)autoDictionarySetter
+                         &quot;v@:@&quot;);
+    } else {
+        class_addMethod(self,
+                        selector,
+                        (IMP)autoDictionaryGetter,
+                        &quot;@@:&quot;;)    
+    }
+    return YES;
+}
+@end
+
+</code></pre>
+
+<p>当开发者首次在<code>EOCAutoDictionary</code>实例上访问某个属性时，运行期系统还找不到 对应的选择子，因为所需的选择子既没有直接实现，也没有合成出来。现在假设要写入 <code>opaqueObject</code>属性，那么系统就会以<code>“setOpaqueObject:”</code>为选择子来调用上面这个方法。 同理，在读取该属性时，系统也会调用上述方法，只不过传入的选择子是<code>opaqueObject</code>。</p>
+
+<p><code>resolvelnslanceMethod</code>方法会判断选择子的前缀是否为set，以此分辨其是set选择子还是 get选择子。在这两种情况下，都要向类中新增一个处理该选择子所用的方法，这两个方 法分别以<code>autoDictionarySetter</code>及<code>autoDictionaryGetter</code>函数指针的形式出现。此时就用到<code>class_addMethod</code>方法，它可以向类中动态地添加方法，用以处理给定的选择子。第三个参 数为函数指针，指向待添加的方法。而最后一个参数则表示待添加方法的“类型编码”（type encoding)。在本例中，编码开头的字符表示方法的返回值类型，后续字符则表示其所接受的各个参数.</p>
+
+<p><code>getter</code>函数可以用下列代码实现:</p>
+
+<pre><code class="language-objc">
+id autoDictionaryGetter(id self, SEL _cmd) {
+    //Get the backing store from the object
+    EOCAutoDictionary *typedSelf = (EOCAutoDictionary^)self；
+    NSMutableDictionary *backingStore = typedSelf.backingStore;
+    //The key is simply the selector name 
+    NSString *key = NSStringFromSelector(_cmd);
+    // Return the value
+    return [backingStore objectForKey:key];
+}
+
+</code></pre>
+
+<p>而setter函数则可以这么写：</p>
+
+<pre><code class="language-objc">
+void autoDictionarySetter(id self, SEL _cmd, id value) {
+    //Get the backing store from the object
+    EOCAutoDictionary *typedSelf = (EOCAutoDictionary*)self；
+    NSMutableDictionary *backingStore = typedSelf.backingStore;
+
+    /** The selector will be for example, &quot;setOpaqueObject:&quot;
+    *   We need to remove the &quot;set&quot;，and lowercase the first
+    *   letter of the remainder.
+    */
+    
+    NSString *selectorstring = NSStringFromSelector(_cmd);
+    NSMutablestring *key = [selectorstring mutableCopy】；
+    // Remove the &quot; : &quot; at the end 
+    [key deleteCharactersInRange:NSMakeRange(key.length - 1, 1)];
+    // Remove the fsetf prefix
+    [key deleteCharactersInRange:NSMakeRange(0, 3)];
+    // Lowercase the first character
+    NSString *lowercaseFirstChar = [[key substringToIndex:1] lowercasestring];
+    [key replaceCharactersInRange:NSMakeRange(0 ,1) withString:lowercaseFirstChar];
+    if (value) {
+    [backingStore setObject:value forKey:key];
+    } else {
+    [backingStore removeObjectForKey:key];
+    }
+}
+
+</code></pre>
+
+<p>EOCAutoDictionary的用法很简单：</p>
+
+<pre><code class="language-objc">
+    EOCAutoDictionary *dict = [EOCAutoDictionarynew];
+    diet.date = [NSDatedateWithTimeIntervalSincel970:475372800];
+    NSLog (@&quot;diet .date = %@&quot; , dict.date);
+    // Output: diet.date = 1985-01-24 00:00:00 +0000
+
+</code></pre>
+
+<p>其他属性的访问方式与<code>date</code>类似，要想添加新属性，只需来定义，并将其声明为<code>@dynamic</code>即可。</p>
+
+<h2 id="toc_5">要点</h2>
+
+<ul>
+<li>若对象无法响应某个选择子，则进人消息转发流程。</li>
+<li>通过运行期的动态方法解析功能，我们可以在需要用到某个方法时再将其加入类中。 </li>
+<li>对象可以把其无法解读的某些选择子转交给其他对象来处理。</li>
+<li>经过上述两步之后，如果还是没办法处理选择子，那就启动完整的消息转发机制。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15033059328138.html">
                 
                   <h1>第十一条:理解Objc_msgSend的作用</h1>
@@ -542,510 +953,6 @@ static void *EOCMyAlertViewKey = &quot;EOCMyAlertViewKey&quot;;
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14992160809956.html">
-                
-                  <h1>SoftmaxWithLossLayer的实现</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我们找到<code>SoftmaxWithLossLayer.hpp</code>文件查看声明,如下:</p>
-
-<pre><code class="language-c++">
-//将实数预测向量通过Softmax计算获得每个类别的概率分布
-//这个类比单独SoftmaxLayer + MultinomialLogisticLossLayer在梯度数值计算上更加稳定
-//Test阶段，这个层可以直接用SoftmaxLayer代替
-/**
- *输入Blob 1为预测结果，形状为N x K x 1 x 1，K为总类别数目，N为批量数。取值范围为（-Inf, Inf)，
- *表示每个类别获得的分类score,值越大说明输入图像与该类别越接近
- *输入Blob 2为真实标签，形状为N x 1 x 1 x 1
- *输出Blob为计算得到的交叉熵分类损失E，形状为1 x 1 x 1 x 1
-**/
-template &lt;typename Dtype&gt;
-class SoftmaxWithLossLayer : public LossLayer&lt;Dtype&gt; {
- public:
-   /**
-    * @param param provides LossParameter loss_param, with options:
-    *  - ignore_label (optional)
-    *    Specify a label value that should be ignored when computing the loss.
-    *  - normalize (optional, default true)
-    *    If true, the loss is normalized by the number of (nonignored) labels
-    *    present; otherwise the loss is simply summed over spatial locations.
-    */
-    explicit SoftmaxWithLossLayer(const LayerParameter&amp; param)
-      : LossLayer&lt;Dtype&gt;(param) {}
-  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual inline const char* type() const { return &quot;SoftmaxWithLoss&quot;; }
-  virtual inline int ExactNumTopBlobs() const { return -1; }
-  virtual inline int MinTopBlobs() const { return 1; }
-  virtual inline int MaxTopBlobs() const { return 2; }
-
- protected:
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-      
-/**
-   * @brief Computes the softmax loss error gradient w.r.t. the predictions.
-   *
-   * Gradients cannot be computed with respect to the label inputs (bottom[1]),
-   * so this method ignores bottom[1] and requires !propagate_down[1], crashing
-   * if propagate_down[1] is set.
-   *
-   * @param top output Blob vector (length 1), providing the error gradient with
-   *      respect to the outputs
-   *   -# @f$ (1 \times 1 \times 1 \times 1) @f$
-   *      This Blob&#39;s diff will simply contain the loss_weight* @f$ \lambda @f$,
-   *      as @f$ \lambda @f$ is the coefficient of this layer&#39;s output
-   *      @f$\ell_i@f$ in the overall Net loss
-   *      @f$ E = \lambda_i \ell_i + \mbox{other loss terms}@f$; hence
-   *      @f$ \frac{\partial E}{\partial \ell_i} = \lambda_i @f$.
-   *      (*Assuming that this top Blob is not used as a bottom (input) by any
-   *      other layer of the Net.)
-   * @param propagate_down see Layer::Backward.
-   *      propagate_down[1] must be false as we can&#39;t compute gradients with
-   *      respect to the labels.
-   * @param bottom input Blob vector (length 2)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the predictions @f$ x @f$; Backward computes diff
-   *      @f$ \frac{\partial E}{\partial x} @f$
-   *   -# @f$ (N \times 1 \times 1 \times 1) @f$
-   *      the labels -- ignored as we can&#39;t compute their error gradients
-   */
-  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-      
-/// Read the normalization mode parameter and compute the normalizer based
-  /// on the blob size.  If normalization_mode is VALID, the count of valid
-  /// outputs will be read from valid_count, unless it is -1 in which case
-  /// all outputs are assumed to be valid.
-  virtual Dtype get_normalizer(
-      LossParameter_NormalizationMode normalization_mode, int valid_count);
-
-  /// The internal SoftmaxLayer used to map predictions to a distribution.(内置一个SoftmaxLayer对象)
-  shared_ptr&lt;Layer&lt;Dtype&gt; &gt; softmax_layer_;
-  /// prob stores the output probability predictions from the SoftmaxLayer.
-  Blob&lt;Dtype&gt; prob_;
-  /// bottom vector holder used in call to the underlying SoftmaxLayer::Forward
-  vector&lt;Blob&lt;Dtype&gt;*&gt; softmax_bottom_vec_;
-  /// top vector holder used in call to the underlying SoftmaxLayer::Forward
-  vector&lt;Blob&lt;Dtype&gt;*&gt; softmax_top_vec_;
-  /// Whether to ignore instances with a certain label.
-  bool has_ignore_label_;
-  /// The label indicating that an instance should be ignored.
-  int ignore_label_;
-  /// How to normalize the output loss.
-  LossParameter_NormalizationMode normalization_;
-
-  int softmax_axis_, outer_num_, inner_num_;
-};
-
-</code></pre>
-
-<p>之后我们来看实现的<code>.cpp</code>文件:</p>
-
-<p>第一个是SetUp函数.<br/>
-```c++</p>
-
-<p>template <typename Dtype><br/>
-void SoftmaxWithLossLayer<Dtype>::LayerSetUp(<br/>
-    const vector<Blob<Dtype><em>&gt;&amp; bottom, const vector<Blob<Dtype></em>&gt;&amp; top) {<br/>
-  LossLayer<Dtype>::LayerSetUp(bottom, top);<br/>
-  //创建时动态修改本层的LayerParameter参数，适应SoftmaxLayer<br/>
-  LayerParameter softmax_param(this-&gt;layer_param_);<br/>
-  softmax_param.set_type(&quot;Softmax&quot;);<br/>
-  softmax_layer_ = LayerRegistry<Dtype>::CreateLayer(softmax_param);<br/>
-  softmax_bottom_vec_.clear();<br/>
-  softmax_bottom_vec_.push_back(bottom[0]);<br/>
-  softmax_top_vec_.clear();<br/>
-  softmax_top_vec_.push_back(&amp;prob_);<br/>
-  softmax_layer_-&gt;SetUp(softmax_bottom_vec_, softmax_top_vec_);</p>
-
-<p>has_ignore_label_ =<br/>
-    this-&gt;layer_param_.loss_param().has_ignore_label();<br/>
-  if (has_ignore_label_) {<br/>
-    ignore_label_ = this-&gt;layer_param_.loss_param().ignore_label();<br/>
-  }<br/>
-  if (!this-&gt;layer_param_.loss_param().has_normalization() &amp;&amp;<br/>
-      this-&gt;layer_param_.loss_param().has_normalize()) {<br/>
-    normalization_ = this-&gt;layer_param_.loss_param().normalize() ?<br/>
-                     LossParameter_NormalizationMode_VALID :<br/>
-                     LossParameter_NormalizationMode_BATCH_SIZE;<br/>
-  } else {<br/>
-    normalization_ = this-&gt;layer_param_.loss_param().normalization();<br/>
-  }<br/>
-}</p>
-
-<pre><code>可见，在SetUp阶段，创建了内部SoftmaxLayer对象并配置了其输入/输出Blob，然后调用该对象的SetUp函数。
-
-
-下面看看`SoftmaxWithLossLayer`的前向传播函数：
-
-```c++
-
-template &lt;typename Dtype&gt;
-void SoftmaxWithLossLayer&lt;Dtype&gt;::Forward_cpu(
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  // The forward pass computes the softmax prob values.(内部SoftmaxLayer的前向传播计算)
-  softmax_layer_-&gt;Forward(softmax_bottom_vec_, softmax_top_vec_);
-  //获得概率密度
-  const Dtype* prob_data = prob_.cpu_data();
-  //获得标签值
-  const Dtype* label = bottom[1]-&gt;cpu_data();
-  int dim = prob_.count() / outer_num_;
-  int count = 0;
-  Dtype loss = 0;
-  for (int i = 0; i &lt; outer_num_; ++i) {
-    for (int j = 0; j &lt; inner_num_; j++) {
-      const int label_value = static_cast&lt;int&gt;(label[i * inner_num_ + j]);
-      if (has_ignore_label_ &amp;&amp; label_value == ignore_label_) {
-        continue;
-      }
-      DCHECK_GE(label_value, 0);
-      DCHECK_LT(label_value, prob_.shape(softmax_axis_));
-      //计算损失函数-log(prob[label])
-      loss -= log(std::max(prob_data[i * dim + label_value * inner_num_ + j],
-                           Dtype(FLT_MIN)));
-      ++count;
-    }
-  }
-  //设置输出Blob值
-  top[0]-&gt;mutable_cpu_data()[0] = loss / get_normalizer(normalization_, count);
-  if (top.size() == 2) {
-    top[1]-&gt;ShareData(prob_);
-  }
-}
-
-
-</code></pre>
-
-<p>可见通过内部<code>SoftmaxLayer</code>对象非常简洁。我们再看一下 Backward计算:</p>
-
-<pre><code class="language-c++">
-template &lt;typename Dtype&gt;
-void SoftmaxWithLossLayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-    const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
-  if (propagate_down[1]) {
-   //label输入Blob不做反向传播
-    LOG(FATAL) &lt;&lt; this-&gt;type()
-               &lt;&lt; &quot; Layer cannot backpropagate to label inputs.&quot;;
-  }
-  if (propagate_down[0]) {
-    Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
-    const Dtype* prob_data = prob_.cpu_data();
-    //将概率密度拷贝输入Blob的diff域
-    caffe_copy(prob_.count(), prob_data, bottom_diff);
-    const Dtype* label = bottom[1]-&gt;cpu_data();
-    int dim = prob_.count() / outer_num_;
-    int count = 0;
-    for (int i = 0; i &lt; outer_num_; ++i) {
-      for (int j = 0; j &lt; inner_num_; ++j) {
-        const int label_value = static_cast&lt;int&gt;(label[i * inner_num_ + j]);
-        if (has_ignore_label_ &amp;&amp; label_value == ignore_label_) {
-          for (int c = 0; c &lt; bottom[0]-&gt;shape(softmax_axis_); ++c) {
-            bottom_diff[i * dim + c * inner_num_ + j] = 0;
-          }
-        } else {
-        //在输入Blob的diff域，计算当前槪率密度与理想概率密度(label 对应类别概率为1,其他类别 概肀为0)之差，实现误差反向传播
-          bottom_diff[i * dim + label_value * inner_num_ + j] -= 1;
-          ++count;
-        }
-      }
-    }
-    // Scale gradient(适当的缩放)
-    Dtype loss_weight = top[0]-&gt;cpu_diff()[0] /
-                        get_normalizer(normalization_, count);
-    caffe_scal(prob_.count(), loss_weight, bottom_diff);
-  }
-}
-</code></pre>
-
-<p>通过对Caffe损失层的研究，我们了解到，前向传播阶段数据逐层传播，到损失层计算预测概率密度和损失函数；而反向传播阶段则从损失层开始，由预测概率密度与理想概率密度(这就是有监督学习的佐证)<strong>差值</strong>得到误差（diff),然后将由下一节内容逐层反向传播。我们已经知道一个Blob是由data和diff两部分构成的，如果说数据读取层是data之源，那么损失层就是diff之源。</p>
-
-<h2 id="toc_0">反向传播的实现</h2>
-
-<p>Caffe Net数据结构中的&#39;Backward函数具体的声明和实现文件为<code>net.hpp</code>和<code>net.cpp</code>:</p>
-
-<pre><code class="language-c++">//从第start层反向传播到达第end层
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::BackwardFromTo(int start, int end) {
-  CHECK_GE(end, 0);
-  CHECK_LT(start, layers_.size());
-  for (int i = start; i &gt;= end; --i) {
-    for (int c = 0; c &lt; before_backward_.size(); ++c) {
-      before_backward_[c]-&gt;run(i);
-    }
-    if (layer_need_backward_[i]) {
-    //遍历每个居，调用相应的Backward函数
-      layers_[i]-&gt;Backward(
-          top_vecs_[i], bottom_need_backward_[i], bottom_vecs_[i]);
-      if (debug_info_) { BackwardDebugInfo(i); }
-    }
-    for (int c = 0; c &lt; after_backward_.size(); ++c) {
-      after_backward_[c]-&gt;run(i);
-    }
-  }
-}
-
-//从第start层幵始到第一层的反向传播过程
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::BackwardFrom(int start) {
-  BackwardFromTo(start, 0);
-}
-
-//从最后一层开始到第end层的反向传播过程
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::BackwardTo(int end) {
-  BackwardFromTo(layers_.size() - 1, end);
-}
-
-//整个网络的反向传播过程
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::Backward() {
-  BackwardFromTo(layers_.size() - 1, 0);
-  if (debug_info_) {
-  //如果打幵了调试信息开关(在prototxt中设定），则计算所有权值的data/diff的L1、L2范数，监控其变化情况，避免发散
-    Dtype asum_data = 0, asum_diff = 0, sumsq_data = 0, sumsq_diff = 0;
-    for (int i = 0; i &lt; learnable_params_.size(); ++i) {
-      asum_data += learnable_params_[i]-&gt;asum_data();
-      asum_diff += learnable_params_[i]-&gt;asum_diff();
-      sumsq_data += learnable_params_[i]-&gt;sumsq_data();
-      sumsq_diff += learnable_params_[i]-&gt;sumsq_diff();
-    }
-    const Dtype l2norm_data = std::sqrt(sumsq_data);
-    const Dtype l2norm_diff = std::sqrt(sumsq_diff);
-    LOG(ERROR) &lt;&lt; &quot;    [Backward] All net params (data, diff): &quot;
-               &lt;&lt; &quot;L1 norm = (&quot; &lt;&lt; asum_data &lt;&lt; &quot;, &quot; &lt;&lt; asum_diff &lt;&lt; &quot;); &quot;
-               &lt;&lt; &quot;L2 norm = (&quot; &lt;&lt; l2norm_data &lt;&lt; &quot;, &quot; &lt;&lt; l2norm_diff &lt;&lt; &quot;)&quot;;
-  }
-}
-
-//更新权值函数，在反向传播结束后调用
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::Update() {
-  for (int i = 0; i &lt; learnable_params_.size(); ++i) {
-  //调用内部Blob的Update()函数，具体计算为data = data - diff
-    learnable_params_[i]-&gt;Update();
-  }
-}
-
-//权值diff清零
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::ClearParamDiffs() {
-  for (int i = 0; i &lt; learnable_params_.size(); ++i) {
-    Blob&lt;Dtype&gt;* blob = learnable_params_[i];
-    switch (Caffe::mode()) {
-    case Caffe::CPU:
-      caffe_set(blob-&gt;count(), static_cast&lt;Dtype&gt;(0),
-                blob-&gt;mutable_cpu_diff());
-      break;
-    case Caffe::GPU:
-#ifndef CPU_ONLY
-      caffe_gpu_set(blob-&gt;count(), static_cast&lt;Dtype&gt;(0),
-                    blob-&gt;mutable_gpu_diff());
-#else
-      NO_GPU;
-#endif
-      break;
-    }
-  }
-}
-
-</code></pre>
-
-<p>到此,caffe基本的backward反向传播过程就清楚了,这样对于设计更复杂的有监督学习算法具有指导意义。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/7/5</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Caffe%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe反向传播计算</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14991530470817.html">
-                
-                  <h1>第九条 以"类族模式"隐藏实现细节</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>&quot;类族&quot;(class cluster,也叫类簇)是一种很有用的模式(pattern),可以隐藏&quot;抽象基类&quot;(abstract base class)背后的实现细节.</p>
-
-<p>Objective-C的系统框架中普遍使用此模式。比如，iOS的用户界面框架（user interface framework) UIKit中就有一个名为<code>UIButton</code>的类。想创建按钮，需<br/>
-要调用下面这个“类方法”（class method):</p>
-
-<pre><code class="language-objc">+ (UIButton*)buttonWithType:(UIButtonType)type;
-
-</code></pre>
-
-<p>该方法所返回的对象，其类型取决于传入的按钮类型（button type)。然而，不管返回什么类型的对象，它们都继承自同一个基类：<code>UIButton</code>。这么做的意义在于：<strong>UIButton类的使用者无须关心创建出来的按钮具体属于哪个子类，也不用考虑按钮的绘制方式等实现细节。</strong>使用者只需明白如何创建按钮，如何设置像“标题”（title)这样的属性，如何增加触摸动作的目标对象等问题就好。</p>
-
-<p><font color=red>我们使用&quot;类簇&quot;,是为了可以灵活应对多个类，将它们的实现细节隐藏在抽象基类后面，以保持接口简洁。用户无须自己创建子类实例，只需调用基类方法来创建即可。</font></p>
-
-<h2 id="toc_0">创建类簇</h2>
-
-<p>我们现在来看一个样例学习创建类簇.假设有一个处理雇员的类，每个雇员都有“名字”和<br/>
-“薪水”这两个属性，管理者可以命令其执行日常工作。但是，各种雇员的工作内容却不同。经理在带领雇员做项目时，无须关心每个人如何完成其工作，仅需指示其开工即可。</p>
-
-<p>首先要定义抽象类:</p>
-
-<pre><code class="language-objc">typedef NS_ENUM(NSUInteger, EOCEmployeeType) {
-    EOCEmployeeTypeDeveloper,
-    EOCEmployeeTypeDesigner,
-    EOCEmployeeTypeFinance,
-}；
-
-@interface EOCEmployee : NSObject
-
-@property (copy) NSString *name;
-@property NSUInteger salary;
-
-// Helper for creating Employee objects
-+ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type;
-//Make Employees do their respective day1s work
-- (void)doADaysWork;
-
-@end
-
-@implementation EOCEmployee
-+ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type {
-    switch (type) {
-        case EOCEmployeeTypeDeveloper:
-            return [EOCEmployeeDeveloper new];
-            break;
-        case EOCEmployeeTypeDesigner:
-            return (EOCEmployeeDesigner new];
-            break;
-        case EOCEmployeeTypeFinance:
-            return (EOCEmployeeFinance new];
-            break;
-        }
-}
--(void)doADaysWork {
-    // Subclasses implement this.
-}
-
-@end 
-
-</code></pre>
-
-<p>每个&quot;实体子类&quot;（concrete subclass) 都从基类继承而来。例如:</p>
-
-<pre><code class="language-objc">
-@interface EOCEmployeeDeveloper : EOCEmployee
-@end
-
-@implementation EOCEmployeeDeveloper
-
--(void)doADaysWork {    
-    [self writeCode];
-}
-
-@end
-
-</code></pre>
-
-<p>在本例中，基类实现了一个“类方法”，该方法根据待创建的雇员类别分配好对应的雇员类实例。这种“工厂模式”（Factory pattern)是创建类族的办法之一。</p>
-
-<p>OC这门语言没有办法致命某个基类是&quot;抽象的&quot;(abstract).于是,开发者通常会在文档中写明类的用法。这种情况下，基类接口一般都没有名为init的成员方法，这暗<br/>
-示该类的实例也许不应该由用户直接创建。还有一种办法可以确保用户不会使用基类实例,<br/>
-那就是在基类的doADaysWork方法中拋出异常。然而这种做法相当极端，很少有人用。</p>
-
-<p>如果对象所属的类位于某个类族中，那么在査询其类型信息（introspection)时就要当心了（参见第14条)。你可能觉得自己创建了某个类的实例，然而实际上创建的却是其子类的实例。在 <code>Employee</code> 这个例子中，<code>[employee isMemberOfClass:[EOCEmployee class]]</code>似乎会返回YES，但实际上返回的却是NO,因为<code>employee</code>并非Employee类的实例，而是其某个子类的实例。</p>
-
-<h2 id="toc_1">Cocoa里的类簇</h2>
-
-<p>系统框架中有许多类族。大部分<code>collection</code>类都是某个类簇中的抽象基类,例如<code>NSArray</code>与其可变版本<code>NSMutableArray</code>。这样看来，实际上有两个抽象基类，一个用于不可变数组，另一个用于可变数组。尽管具备公共接口的类有两个，但仍然可以合起来算作一个类族(传统类簇模式中,通常只有一个类具备&quot;公共接口&quot;,就是抽象基类)。<strong>不可变的类定义了对所有数组都通用的方法，而可变的类则定义了那些只适用于可变数组的方法。</strong>两个类共属同一类族，这意味着二者在实现各自类型的数组时可以共用实现代码，此外，还能够把可变数组复制为不可变数组，反之亦然。</p>
-
-<p>像NSArray这样的类的背后其实是个类族（对于大部分collection类而言都是这样)，明白这一点很重要，否则就可能会写出下面这种代码：</p>
-
-<pre><code class="language-objc">
-id maybeAnArray = /* ••• */;
-if ([maybeAnArray class) == [NSArray class]) {
-&quot;Will never be hit
-}
-
-</code></pre>
-
-<p>你要是知道<strong>NSArray是个类族</strong>，那就会明白上述代码错在哪里：其中的<code>if</code>语句永远不可能为真。[maybeAnArray class]所返回的类绝不可能是NSArray类本身，因为由NSArray的初始化方法所返回的那个实例其类型是隐藏在类族公共接口（public facade)后面的某个内部类型（internal type)。</p>
-
-<p>不过，仍然有办法可以判断出某个实例所属的类是否位于类族之中。我们不用刚才那种写法，而是改用类型信息查询方法（introspectionmethod)。本书第14条解释了这些方法的用法。若想判断某对象是否位于类族中，<strong>不要直接检测两个“类对象”是否等同，而应该采用下列代码</strong>：</p>
-
-<pre><code class="language-objc">id maybeAnArray = /* ••• */;
-if ([maybeAnArray isKindOfClass:[NSArray class])) {
-    &quot;Will be hit&quot;
-}
-</code></pre>
-
-<p>我们经常需要向类族中新增实体子类，不过这么做的时候得留心。在Employee这个例子中，若是没有“工厂方法”（factory method)的源代码，那就无法向其中新增雇员类别了。然而对于Cocoa中NSArray这样的类族来说，还是有办法新增子类的，但是需要遵守几条规则。这几条规则如下。</p>
-
-<ul>
-<li><p>子类应该继承自类族中的抽象基类。<br/>
-若要编写NSArray类族的子类，则需令其继承自不可变数组的基类或可变数组的基类。</p></li>
-<li><p>子类应该定义自己的数据存储方式。<br/>
-开发者编写NSArray子类时，经常在这个问题上受阻。子类必须用一个实例变量来存放数组中的对象。这似乎与大家预想的不同，我们以为NSArray自己肯定会保存那些对象，所以在子类中就无须再存一份了。但是大家要记住，<mark>NSArray本身只不过是包在其他隐藏对象外面的壳，它仅仅定义了所有数组都需具备的一些接口。对于这个自定义的数组子类来说，可以用NSArray来保存其实例</mark>。</p></li>
-<li><p>子类应当覆写超类文档中指明需要覆写的方法。<br/>
-在每个抽象基类中，都有一些子类必须覆写的方法。比如说，想要编写NSArray的子<br/>
-类，就需要实现<code>count</code>及<code>“objectAtlndex:”</code>方法。像<code>lastObject</code>这种方法则无须实现，因为基类可以根据前两个方法实现出这个方法。</p></li>
-</ul>
-
-<p>在类族中实现子类时所需遵循的规范一般都会定义于基类的文档之中，编码前应该先看看.</p>
-
-<h2 id="toc_2">要点</h2>
-
-<ul>
-<li>类族模式可以把实现细节隐藏在一套简单的公共接口后面。</li>
-<li>系统框架中经常使用类族。</li>
-<li>从类族的公共抽象基类中继承子类时要当心，若有开发文档，则应首先阅读。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/7/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1129,6 +1036,18 @@ if ([maybeAnArray isKindOfClass:[NSArray class])) {
 	      
 		      
 			      <li class="post">
+			        <a href="15034774413129.html">第十三条 用"方法调配技术"调试"黑盒方法"</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15033908572762.html">第十二条 消息转发机制(Message forwarding)</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15033059328138.html">第十一条:理解Objc_msgSend的作用</a>
 			      </li>
 		     
@@ -1142,18 +1061,6 @@ if ([maybeAnArray isKindOfClass:[NSArray class])) {
 		      
 			      <li class="post">
 			        <a href="14993030681229.html">Caffe最优化求解过程</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14992368546707.html">第10条:在既有类中使用关联对象存放自定义数据</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14992160809956.html">SoftmaxWithLossLayer的实现</a>
 			      </li>
 		     
 		  

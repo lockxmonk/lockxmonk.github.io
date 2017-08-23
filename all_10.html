@@ -113,6 +113,735 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14926766188460.html">
+                
+                  <h1>面向对象高级编程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">使用__slots__</a>
+</li>
+<li>
+<a href="#toc_1">使用@property</a>
+</li>
+<li>
+<a href="#toc_2">多重继承</a>
+<ul>
+<li>
+<a href="#toc_3">Mixin</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_4">定制类</a>
+<ul>
+<li>
+<a href="#toc_5">__str__</a>
+</li>
+<li>
+<a href="#toc_6">__iter__</a>
+</li>
+<li>
+<a href="#toc_7">__getitem__</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_8">__getattr__</a>
+</li>
+<li>
+<a href="#toc_9">__call__</a>
+</li>
+</ul>
+
+
+<p>正常情况下，当我们定义了一个class，创建了一个class的实例后，我们可以给该实例绑定任何属性和方法，这就是动态语言的灵活性。</p>
+
+<p><strong><em>我们可以动态的给某一个实例绑定属性、方法。要绑定该类所有的实例的话，则可以将方法绑定到该类上。</em></strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+
+class Student(object):
+    &quot;&quot;&quot;docstring for Student&quot;&quot;&quot;
+    pass
+s = Student()
+s.name = &#39;梁中豪&#39;  # 动态给实例绑定一个属性
+
+from types import MethodType
+
+
+def set_age(self, age):  # 定义一个函数作为实例方法
+    self.age = age
+s.set_age = MethodType(set_age, s, Student)  # 给实例绑定一个方法
+s.set_age(25)
+
+# 为了给所有实例都绑定方法，可以给class绑定方法：
+
+
+def set_score(self, score):  # 定义一个函数作为实例方法
+    self.score = score
+Student.set_score = MethodType(set_score, None, Student)
+s.set_score(100) #给class绑定方法后，所有实例均可调用
+s2 = Student()
+s2.set_score(90)
+print s.name, s.age, s.score, s2.score
+</code></pre>
+
+<p><img src="media/14926766188460/14926773474695.jpg" alt=""/></p>
+
+<h2 id="toc_0">使用__slots__</h2>
+
+<p>如果我们想要限制class的属性怎么办？比如，只允许对Student实例添加<code>name和age</code>属性。那么可以使用一个特殊的<code>__slots__</code>变量。</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+
+class Student(object):
+    &quot;&quot;&quot;docstring for Student&quot;&quot;&quot;
+    __slots__ = (&#39;name&#39;,&#39;age&#39;)
+    
+s = Student()
+s.name = &#39;梁中豪&#39;
+s.age = 21
+print s.name, s.age
+s.score = 90
+print s.score
+
+</code></pre>
+
+<p><img src="media/14926766188460/14926779162430.jpg" alt=""/></p>
+
+<p><font color=red>使用<code>__slots__</code>要注意，<code>__slots__</code>定义的属性仅对当前类起作用，对继承的子类是不起作用的. 除非在子类中也定义<code>__slots__</code>，这样，子类允许定义的属性就是自身的<code>__slots__</code>加上父类的<code>__slots__</code>。<br/>
+</font></p>
+
+<h2 id="toc_1">使用@property</h2>
+
+<p>在绑定属性时，如果我们直接把属性暴露出去，虽然写起来很简单，但是，没办法检查参数，导致可以把成绩随便改。</p>
+
+<p>这显然不合逻辑。为了限制score的范围，可以通过一个<code>set_score()</code>方法来设置成绩，再通过一个<code>get_score()</code>来获取成绩，这样，在<code>set_score()</code>方法里，就可以检查参数：</p>
+
+<pre><code class="language-py">class Student(object):
+
+    def get_score(self):
+        return self._score
+
+    def set_score(self, value):
+        if not isinstance(value, int):
+            raise ValueError(&#39;score must be an integer!&#39;)
+        if value &lt; 0 or value &gt; 100:
+            raise ValueError(&#39;score must between 0 ~ 100!&#39;)
+        self._score = value
+s = Student()
+s.set_score(50)
+s.get_score()
+s.set_score(999)
+s.get_score()
+</code></pre>
+
+<p><img src="media/14926766188460/14927376402165.jpg" alt=""/></p>
+
+<p>上面的调用方法又略显复杂，没有直接用属性这么直接简单。</p>
+
+<p>对于类的方法，装饰器一样起作用。Python内置的<code>@property</code>装饰器就是负责把一个方法变成属性调用的：</p>
+
+<pre><code class="language-py">
+class Student(object):
+
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self, value):
+        if not isinstance(value, int):
+            raise ValueError(&#39;score must be an integer!&#39;)
+        if value &lt; 0 or value &gt; 100:
+            raise ValueError(&#39;score must between 0 ~ 100!&#39;)
+        self._score = value
+
+s = Student
+s.score = 60
+print s.score
+</code></pre>
+
+<p><code>@property</code>的实现比较复杂，我们先考察如何使用。把一个<code>getter</code>方法变成属性，只需要加上<code>@property</code>就可以了，此时，<code>@property</code>本身又创建了另一个装饰器<code>@score.setter</code>，负责把一个<code>setter</code>方法变成属性赋值</p>
+
+<p>如果只定义getter方法，不定义setter方法就是一个只读属性：</p>
+
+<pre><code class="language-py">class Student(object):
+
+    @property
+    def birth(self):
+        return self._birth
+
+    @birth.setter
+    def birth(self, value):
+        self._birth = value
+
+    @property
+    def age(self):
+        return 2014 - self._birth
+s = Student()
+s.birth = 23
+print s.birth
+</code></pre>
+
+<h2 id="toc_2">多重继承</h2>
+
+<p>继承是面向对象编程的一个重要的方式，因为通过继承，子类就可以扩展父类的功能。</p>
+
+<p>一个类可以继承多个类，称为多重继承，如下所示：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Animal(object):
+    &quot;&quot;&quot;docstring for Animal&quot;&quot;&quot;
+    pass
+
+
+class Mammal(Animal):
+    &quot;&quot;&quot;docstring for Mammal&quot;&quot;&quot;
+    print &#39;Mammal&#39;
+
+
+class Bird(Animal):
+    &quot;&quot;&quot;docstring for Bird&quot;&quot;&quot;
+    print &#39;Bird&#39;
+
+
+class Runable(object):
+    &quot;&quot;&quot;docstring for Runable&quot;&quot;&quot;
+
+    def run(self):
+        print &#39;Running...&#39;
+
+
+class Flyable(object):
+    &quot;&quot;&quot;docstring for Flyable&quot;&quot;&quot;
+
+    def fly(self):
+        print &#39;Flying...&#39;
+
+
+class Dog(Mammal, Runable):
+    &quot;&quot;&quot;docstring for Dog&quot;&quot;&quot;
+    pass
+
+
+class Bat(Mammal, Flyable):
+    &quot;&quot;&quot;docstring for Bat&quot;&quot;&quot;
+    pass
+</code></pre>
+
+<p>通过多重继承，一个子类就可以同时获得多个父类的所有功能。</p>
+
+<h3 id="toc_3">Mixin</h3>
+
+<p>在设计类的继承关系时，通常，主线都是单一继承下来的，例如，<code>Ostrich</code>继承自<code>Bird</code>。但是，如果需要“混入”额外的功能，通过多重继承就可以实现，比如，让<code>Ostrich</code>除了继承自<code>Bird</code>外，再同时继承<code>Runnable</code>。这种设计通常称之为<code>Mixin</code>。</p>
+
+<p>为了更好地看出继承关系，我们把Runnable和Flyable改为<code>RunnableMixin</code>和<code>FlyableMixin</code>。类似的，你还可以定义出肉食动物<code>CarnivorousMixin</code>和植食动物<code>HerbivoresMixin</code>，让某个动物同时拥有好几个<code>Mixin</code>：</p>
+
+<pre><code class="language-py">class Dog(Mammal, RunnableMixin, CarnivorousMixin):
+    pass
+</code></pre>
+
+<p>由于Python允许使用多重继承，因此，Mixin就是一种常见的设计。</p>
+
+<p><strong>只允许单一继承的语言（如Java）不能使用Mixin的设计</strong>。</p>
+
+<h2 id="toc_4">定制类</h2>
+
+<p>看到类似<code>__slots__</code>这种形如<code>__xxx__</code>的变量或者函数名就要注意，这些在Python中是有特殊用途的。</p>
+
+<p>类似有很多特殊变量来帮助我们定制类：</p>
+
+<h3 id="toc_5">__str__</h3>
+
+<p>我们先定义一个<code>Student</code>类，打印一个实例：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+    def __init__(self, name):
+        super(Students, self).__init__()
+        self.name = name
+print Students(&#39;LZH&#39;)
+</code></pre>
+
+<p><img src="media/14926766188460/14927559673818.jpg" alt=""/><br/>
+得到上图所示，我们可以定制所打印的内容。</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+    def __init__(self, name):
+        super(Students, self).__init__()
+        self.name = name
+    def __str__(self):
+        return &#39;Students object (name:%s)&#39; %self.name
+print Students(&#39;LZH&#39;)
+</code></pre>
+
+<p><img src="media/14926766188460/14927560929527.jpg" alt=""/><br/>
+这样打印出来的实例，不但好看，而且容易看出实例内部重要的数据。<br/>
+当然这只是负责定制<code>print</code>方法输出的内容。直接敲变量不用<code>print</code>，打印出来的实例还是不好看。</p>
+
+<p>这是因为直接显示变量调用的不是<code>__str__()</code>，而是<code>__repr__()</code>，两者的区别是<code>__str__()</code>返回用户看到的字符串，而<code>__repr__()</code>返回程序开发者看到的字符串，也就是说，<code>__repr__()</code>是为调试服务的。</p>
+
+<pre><code class="language-py">class Student(object):
+    def __init__(self, name):
+        self.name = name
+    def __str__(self):
+        return &#39;Student object (name=%s)&#39; % self.name
+    __repr__ = __str__  #因为两者方法几乎一样，所以可以直接偷懒将前者赋值给repr
+</code></pre>
+
+<h3 id="toc_6">__iter__</h3>
+
+<p>如果一个类想被用于<code>for ... in</code>循环，类似<code>list或tuple</code>那样，就必须实现一个<code>__iter__()</code>方法，该方法返回一个迭代对象，然后，Python的for循环就会不断调用该迭代对象的<code>next()</code>方法拿到循环的下一个值，直到遇到StopIteration错误时退出循环。</p>
+
+<p>我们以斐波那契数列为例，写一个Fib类，可以作用于for循环：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+
+class Fib(object):
+    &quot;&quot;&quot;docstring for Fib&quot;&quot;&quot;
+
+    def __init__(self):
+        self.a, self.b = 0, 1  # 初始化两个计数器a，b
+
+    def __iter__(self):
+        return self  # 实例本身就是迭代对象，故返回自己
+
+    def next(self):
+        self.a, self.b = self.b, self.a + self.b
+        if self.a &gt; 100:
+            raise StopIteration()
+        return self.a
+
+for n in Fib():
+    print n
+</code></pre>
+
+<p><img src="media/14926766188460/14927569583236.jpg" alt=""/></p>
+
+<h3 id="toc_7">__getitem__</h3>
+
+<p>上述要表现得像list那样按照下标取出元素，需要实现<code>__getitem__()</code>方法：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+class Fib(object):
+    &quot;&quot;&quot;docstring for Fib&quot;&quot;&quot;
+
+    def __getitem__(self, n):
+        a, b = 1, 1
+        for x in range(n):
+            a, b = b, a + b
+        print a
+
+f = Fib()
+f[0]
+f[2]
+f[4]
+
+</code></pre>
+
+<p><img src="media/14926766188460/14927581032895.jpg" alt=""/></p>
+
+<p>不能简单的直接执行切片方法，Fib会报错。原因是<code>__getitem__()</code>传入的参数可能是一个int，也可能是一个切片对象slice，所以要做判断：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+
+class Fib(object):
+    &quot;&quot;&quot;docstring for Fib&quot;&quot;&quot;
+
+    def __getitem__(self, n):
+        if isinstance(n, int):
+            a, b = 1, 1
+            for x in range(n):
+                a, b = b, a + b
+            print a
+        if isinstance(n, slice):
+            start = n.start
+            stop = n.stop
+            a, b = 1, 1
+            L = []
+            for x in range(stop):
+                if x &gt;= start:
+                    L.append(a)
+                a, b = b, a + b
+            print L
+
+f = Fib()
+f[5]
+f[1:5]
+</code></pre>
+
+<p><img src="media/14926766188460/14927591015675.jpg" alt=""/></p>
+
+<h2 id="toc_8">__getattr__</h2>
+
+<p>当定义好一个类后，若实例调用一个不存在的属性，则会报错，但是我们可以运用<code>__getattr__</code>动态返回一个属性。例如：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Student(object):
+
+    def __init__(self):
+        self.name = &#39;Michael&#39;
+
+    def __getattr__(self, attr):
+        if attr==&#39;score&#39;:
+            return 99
+
+s = Student()
+print s.name
+print s.score
+print s.age
+</code></pre>
+
+<p><img src="media/14926766188460/14927598715799.jpg" alt=""/><br/>
+只有在没有找到属性的情况下，才调用<code>__getattr__</code>，已有的属性，比如<code>name</code>，不会在<code>__getattr__</code>中查找。</p>
+
+<p>此外，注意到任意调用如<code>s.age</code>都会返回<code>None</code>，这是因为我们定义的<code>__getattr__</code>默认返回就是<code>None</code>。</p>
+
+<p><strong>这实际上可以把一个类的所有属性和方法调用全部动态化处理了，不需要任何特殊手段。例如动态的拼接api接口：</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Chain(object):
+
+    def __init__(self, path=&#39;&#39;):
+        self._path = path
+
+    def __getattr__(self, path):
+        return Chain(&#39;%s/%s&#39; % (self._path, path))
+
+    def __str__(self):
+        return self._path
+print Chain().status.user.timeline.list
+print Chain(&#39;LZH&#39;).status.user.timeline.list
+</code></pre>
+
+<p><img src="media/14926766188460/14927597036919.jpg" alt=""/></p>
+
+<h2 id="toc_9">__call__</h2>
+
+<p>任何类，只需要定义一个__call__()方法，就可以直接对实例进行调用。请看示例：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+    def __init__(self, name):
+        super(Students, self).__init__()
+        self.name = name
+    def __call__(self):
+        print (&#39;My name is %s.&#39; % self.name)
+
+s = Students(&#39;LZH&#39;)
+s()
+</code></pre>
+
+<p><img src="media/14926766188460/14927611817291.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14926712777578.html">
+                
+                  <h1>类和实例</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">数据封装</a>
+</li>
+<li>
+<a href="#toc_1">访问限制</a>
+</li>
+<li>
+<a href="#toc_2">继承和多态</a>
+</li>
+<li>
+<a href="#toc_3">获取对象信息</a>
+<ul>
+<li>
+<a href="#toc_4">使用type()</a>
+</li>
+<li>
+<a href="#toc_5">使用isinstance()</a>
+</li>
+<li>
+<a href="#toc_6">使用dir()</a>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>在Python中，定义类是通过<code>class</code>关键字：</p>
+
+<pre><code class="language-py">class Student(object):
+    pass
+</code></pre>
+
+<p><code>class</code>后面紧接着是类名，即<code>Student</code>，类名通常是大写开头的单词，紧接着是<code>(object)</code>，表示该类是从哪个类继承下来的，继承的概念我们后面再讲，通常，<strong>如果没有合适的继承类，就使用object类，这是所有类最终都会继承的类</strong>。</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.name = name
+        self.score = score
+</code></pre>
+
+<p>注意到<code>__init__</code>方法的第一个参数永远是self，表示创建的实例本身，因此，在<code>__init__</code>方法内部，就可以把各种属性绑定到<code>self</code>，因为<code>self</code>就指向创建的实例本身。</p>
+
+<p>和普通的函数相比，在类中定义的函数只有一点不同，<font color=red>就是第一个参数永远是实例变量self，并且，调用时，不用传递该参数。除此之外，类的方法和普通函数没有什么区别，所以，你仍然可以用默认参数、可变参数和关键字参数。</font></p>
+
+<h2 id="toc_0">数据封装</h2>
+
+<p>面向对象编程的一个重要特点就是数据封装，创建实例需要给出<code>name</code>和<code>score</code>，而如何打印，都是在Student类的内部定义的，这些数据和逻辑被“封装”起来了，调用很容易，但却不用知道内部实现的细节。</p>
+
+<p>例如下面增加一个成绩分类的方法：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.name = name
+        self.score = score
+
+    def print_score(self):
+        print &#39;%s:%s&#39; % (self.name, self.score)
+
+    def get_grade(self):
+        if self.score &gt;= 90:
+            print &#39;A&#39;
+        elif self.score &gt;= 60:
+            print &#39;B&#39;
+        else:
+            print &#39;C&#39;
+
+bart = Students(&#39;Bart&#39;, 59)
+lisa = Students(&#39;梁中豪&#39;, 100)
+bart.print_score()
+bart.get_grade()
+lisa.print_score()
+lisa.get_grade()
+</code></pre>
+
+<h2 id="toc_1">访问限制</h2>
+
+<p>在Class内部，可以有属性和方法，而外部代码可以通过直接调用实例变量的方法来操作数据，这样，就隐藏了内部的复杂逻辑。</p>
+
+<p>但是，从前面Student类的定义来看，外部代码还是可以自由地修改一个实例的<code>name</code>、<code>score</code>属性</p>
+
+<p>如果要让内部属性不被外部访问，可以把属性的名称前加上两个下划线<code>__</code>，<font color=red>在Python中，实例的变量名如果以<code>__</code>开头，就变成了一个私有变量（private），只有内部可以访问，外部不能访问，</font>所以，我们把Student类改一改：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.__name = name
+        self.__score = score
+
+    def print_score(self):
+        print &#39;%s:%s&#39; % (self.__name, self.__score)
+
+   
+bart = Students(&#39;Bart&#39;, 59)
+lisa = Students(&#39;梁中豪&#39;, 100)
+bart.print_score()
+lisa.__name
+</code></pre>
+
+<p>改完后，对于外部代码来说，没什么变动，但是已经无法从外部访问实例变量.<code>__name</code>和实例变量<code>.__score</code>了：<br/>
+<img src="media/14926712777578/14926727380387.jpg" alt=""/><br/>
+如果又要允许外部代码修改score,可以给Student类增加set_score方法.这里跟java很像。不在过多叙述。</p>
+
+<h2 id="toc_2">继承和多态</h2>
+
+<p>在OOP程序设计中，当我们定义一个class的时候，可以从某个现有的class继承，新的class称为子类（Subclass），而被继承的class称为基类、父类或超类（Base class、Super class）。</p>
+
+<p>继承最大的好处是子类获得了父类的全部功能。由于<code>Animial</code>实现了<code>run()</code>方法，因此，<code>Dog</code>和<code>Cat</code>作为它的子类，什么事也没干，就自动拥有了<code>run()</code>方法，当然也可以对父类方法进行重写。</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Animal(object):
+    &quot;&quot;&quot;docstring for Animal&quot;&quot;&quot;
+
+    def run(self):
+        print &#39;Animal is running..&#39;
+
+
+class Dog(Animal):
+    pass
+
+
+class Cat(Animal):
+    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
+
+    def run(self):
+        print &#39;Cat is running..&#39;
+
+dog = Dog()
+dog.run()
+
+cat = Cat()
+cat.run()
+
+</code></pre>
+
+<p><img src="media/14926712777578/14926743181176.jpg" alt=""/></p>
+
+<h2 id="toc_3">获取对象信息</h2>
+
+<p>当我们拿到一个对象的引用时，如何知道这个对象是什么类型？</p>
+
+<h3 id="toc_4">使用type()</h3>
+
+<p>基本类型都可以用<code>type()</code>判断：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+print type(123),type(&#39;str&#39;),type(None)
+</code></pre>
+
+<p><img src="media/14926712777578/14926750871663.jpg" alt=""/></p>
+
+<p>Python把每种type类型都定义好了常量，放在types模块里，使用之前，需要先导入：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import types
+print type(&#39;abc&#39;)==types.StringType
+print type(u&#39;abc&#39;)==types.UnicodeType
+print type([])==types.ListType
+print type(str) == types.TypeType
+</code></pre>
+
+<p><img src="media/14926712777578/14926752976543.jpg" alt=""/><br/>
+<strong>最后注意到有一种类型就叫TypeType，所有类型本身的类型就是TypeType.比如<code>int，str</code>等</strong></p>
+
+<h3 id="toc_5">使用isinstance()</h3>
+
+<p>我们使用<code>isinstance()</code>来判断class的类型，例如：</p>
+
+<pre><code class="language-py">class Animals(object):
+    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
+    pass
+class Cat(Animals):
+    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
+    pass
+class Dog(Animals):
+    &quot;&quot;&quot;docstring for Dog&quot;&quot;&quot;
+    pass
+a = Animals()
+d = Dog()
+h = Cat()
+print isinstance(h, Cat),isinstance(d, Dog),isinstance(a, Animals)
+</code></pre>
+
+<p><img src="media/14926712777578/14926756201012.jpg" alt=""/></p>
+
+<p>当然也可以用<code>isinstance()</code>来判断基本类型</p>
+
+<h3 id="toc_6">使用dir()</h3>
+
+<p>如果要获得一个对象的所有属性和方法，可以使用<code>dir()</code>函数，它返回一个包含字符串的<code>list</code>，比如，获得一个str对象的所有属性和方法：</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; dir(&#39;abc&#39;)
+</code></pre>
+
+<p><img src="media/14926712777578/14926758082813.jpg" alt=""/></p>
+
+<p><strong>仅仅把属性和方法列出来是不够的，配合<code>getattr()、setattr()以及hasattr()</code>，我们可以直接操作一个对象的状态：</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+class Animals(object):
+    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
+
+    def __init__(self):
+        self.x = 9
+
+    def power(self):
+        print self.x * self.x
+obj = Animals()
+
+print hasattr(obj, &#39;x&#39;)  # 有属性&#39;x&#39;吗？
+print hasattr(obj, &#39;y&#39;)  # 有属性&#39;y&#39;吗？
+print setattr(obj, &#39;y&#39;, 19)  # 设置一个属性&#39;y&#39;
+print getattr(obj, &#39;y&#39;)  # 获取属性&#39;y&#39;
+print obj.y
+</code></pre>
+
+<p><img src="media/14926712777578/14926764199501.jpg" alt=""/></p>
+
+<p>也可以获得对象的方法：</p>
+
+<pre><code class="language-py">fn = getattr(obj, &#39;power&#39;)
+print fn,fn(),
+</code></pre>
+
+<p><img src="media/14926712777578/14926765852729.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14926690841704.html">
                 
                   <h1>面向对象编程</h1>
@@ -456,275 +1185,6 @@ except ImportError: # 导入失败会捕获到ImportError
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14922391300067.html">
-                
-                  <h1>偏函数</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Python的<code>functools</code>模块提供了很多有用的功能，其中一个就是偏函数（Partial function）。要注意，这里的偏函数和数学意义上的偏函数不一样。</p>
-
-<p><code>int()</code>函数可以把字符串转换为整数<br/>
-例如：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-num = int(&#39;12345&#39;)
-num1 = int(&#39;12345&#39;, base=8)
-num2 = int(&#39;12345&#39;, 16)
-print num, num1, num2
-</code></pre>
-
-<p><img src="media/14922391300067/14922396420577.jpg" alt=""/></p>
-
-<p>其中<code>base</code>参数可以指定转换的进制</p>
-
-<p>假设要转换大量的二进制字符串，每次都传入<code>int(x, base=2)</code>非常麻烦，于是，我们想到，可以定义一个<code>int2()</code>的函数，默认把<code>base=2</code>传进去：</p>
-
-<pre><code class="language-py">def int2(x,base=2):
-    return int(x,base)
-
-</code></pre>
-
-<p>这样我们转换二进制就很方便，<code>functools.partial</code>就是帮助我们创建一个偏函数的，不需要我们自己定义<code>int2()</code>，可以直接使用下面的代码创建一个新的函数<code>int2</code>：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import functools
-int2 = functools.partial(int, base=8)
-num = int2(&#39;10000&#39;)
-num1 = int2(&#39;10000&#39;,base=2)
-print num,num1  
-</code></pre>
-
-<p><img src="media/14922391300067/14922410514665.jpg" alt=""/></p>
-
-<p>创建偏函数时，实际上可以接收函数对象、<code>*args和**kw</code>这3个参数:</p>
-
-<pre><code class="language-py">int2 = functools.partial(int, base=2)
-#相当于下面
-kw = { base: 2 }
-int(&#39;10010&#39;, **kw)
-
-max2 = functools.partial(max, 10)
-#相当于下面，实际上会把10作为*args的一部分自动加到左边
-args = (10, 5, 6, 7)
-max(*args)
-</code></pre>
-
-<blockquote>
-<p>总结：当函数的参数个数太多，需要简化时，使用<code>functools.partial</code>可以创建一个新的函数，这个新函数可以固定住原函数的部分参数，从而在调用时更简单。</p>
-</blockquote>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/15</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14921577512970.html">
-                
-                  <h1>支持向量机</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">线性可支持性良机与硬间隔最大化</a>
-<ul>
-<li>
-<a href="#toc_1">线性可支持向量机</a>
-</li>
-<li>
-<a href="#toc_2">函数间隔和几何间隔</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_3">间隔最大化</a>
-<ul>
-<li>
-<ul>
-<li>
-<a href="#toc_4">1. 最大间隔分离超平面</a>
-</li>
-<li>
-<a href="#toc_5">2.最大间隔分离超平面的存在唯一性</a>
-</li>
-<li>
-<a href="#toc_6">3.支持向量和间隔边界</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>支持向量机（support vector machines，SVM)是一种二类分类模型。它的基本模型是定义在特征空间上的间隔最大的线性分类器，间隔最大使它有别于感知机；支持向量机还包括核技巧，这使它成为实质上的非线性分类器.<font color=red>支持向量机的学习策略就是间隔最大化，可形式化为一个求解凸二次规划（convex quadratic programming)的问题，也等价于正则化的合页损失函数的最小化问题.</font>支持向量机的<strong><em>学习算法是求解凸二次规划的最优化算法</em></strong>.</p>
-
-<p>支持向量机学习方法包含构建由简至繁的模型：线性可分支持向量机（linear support vector machine in linearly separable ease)、线性支持向量机（linear support vector machine)及非线性支持向量机（ncm-linear support vector machine).简单模型是复杂模型的基础，也是复杂模型的特殊情况.当训练数据线性可分时，通过硬间隔最大化（hard margin maximization)，学习一个线性的分类器，<strong><em>即线性可分支持向量机，又称为硬间隔支持向量机</em></strong>；当训练数据近似线性可分时，通过软间隔最大化（soft margin maximization)，也学习一个线性的分类器，<strong><em>即线性支持向量机，又称为软间隔支持向量机</em></strong>；<strong><em>当训练数据线性不可分时，通过使用核技巧 (kernel trick)及软间隔最大化，学习非线性支持向量机</em></strong>.</p>
-
-<p>当输入空间为欧氏空间或离散集合、特征空间为希尔伯特空间时，<strong><em>核函数(kernel fimcticm)表示将输入从输入空间映射到特征空间得到的特征向量之间的内积.</em></strong>通过使用核函数可以学习非线性支持向量机，等价于隐式地在高维的特征空间中学习线性支持向量机.这样的方法称为核技巧.<strong>核方法（kernel method)是比支持向量机更为一般的机器学习方法</strong>.</p>
-
-<p>Cortes与Vapnik提出线性支持向量机，Boser、Guyon与Vapnik又引入核技巧，提出非线性支持向量机.</p>
-
-<p>本次一次学习3类支持向量机、核函数以及一种跨苏学习方法——序列最小最优化算法(SMO)</p>
-
-<h2 id="toc_0">线性可支持性良机与硬间隔最大化</h2>
-
-<h3 id="toc_1">线性可支持向量机</h3>
-
-<p>考虑一个二类分类问题，假设输入空间与特征空间为两个不同的空间.输入空间为欧氏空间或离散集合，特征空间为欧氏空间或希尔伯特空间.线性可分支持向量机、线性支持向量机假设这两个空间的元素一一对应，并将输入空间中的输入映射为特征空间中的特征向量.非线性支持向量机利用一个从输入空间到特征空间的非线性映射将输入映射为特征向量.所以，输入都由输入空间转换到特征空间，支持向量机的学习是在特征空间进行的.</p>
-
-<p>假设给定一个特征空间上的训练数据集：<br/>
-\(T={\{x_1,y_1},(x_2,y_2),...(x_N,y_N)\}\)<br/>
-,其中，\(x_i \in \mathcal{X}=R^n,y_i \in \mathcal{Y}={\{+1,-1}\},i=1,2,...N,x_i\)为第i个特征向量，也成为实例，\(y_i为x_i的类标记，当y_i=+1时，称x_i为正例；当y_i=-1时，称x_i为负例,(x_i,y_i)成为样本点，再假设训练数据集是线性可分的\)</p>
-
-<p>学习的目标是在特征空间中找到一个分离超平面，能将实例分到不同的类，分离超平面对应于方程\(w*x+b=0\),它由法向量w和截距b决定，可用(w,b)来表示.分离超平面将特征空间划分为两部分，一部分是正类，一部分是负类.法向量指向的一侧为正类，另一侧为负类.</p>
-
-<p>一般地，当训练数据集线性可分时，存在无穷个分离超平面可将两类数据正确分开.感知机利用误分类最小的策略，求得分离超平面，不过这时的解有无穷多个,<font color=red>线性可分支持向量机利用间隔最大化求最优分离超平面，这时，解是唯一的.</font></p>
-
-<p><strong><em>下面给出线性可支持向量机的定义</em></strong>：<br/>
-<img src="media/14921577512970/14922239390041.jpg" alt=""/></p>
-
-<p>考虑如图7.1所示的二维特征空间中的分类问题.图中“。”表示正例，“x” 表示负例。训练数据集线性可分，这时有许多直线能将两类数据正确划分.线性可分支持向量机对应着将两类数据正确划分并且间隔最大的直线，如图7.1所示.<br/>
-<img src="media/14921577512970/14922248209178.jpg" alt=""/></p>
-
-<p>间隔最大及相应的约束最优化问题将在下面叙述.这里先介绍<font color=red>函数间隔和几何间隔的概念</font>.</p>
-
-<h3 id="toc_2">函数间隔和几何间隔</h3>
-
-<p>在图7.1中，有A,B,C三个点，表示3个实例，均在分离超平面的正类一侧，预测它们的类.点A距分离超平面较远，若预测该点为正类，就比较确信预测是正确的；点C距分离超平面较近，若预测该点为正类就不那么确信；点B介于点A与C之间，预测其为正类的确信度也在A与C之间.</p>
-
-<p>一般来说，一个点距离分离超平面的远近可以表示分类预测的确信程度.在超平面w*x+ b = 0确定的情况下，|w*x+b丨能够相对地表示点x距离超平面的远近.而w*+b的符号与类标记y的符号是否一致能够表示分类是否正确.所以可用量y(w*x+b)来表示分类的正确性及确信度，这就是函数间隔（fimctional margin)的概念.</p>
-
-<p><strong>下面给出函数间隔的定义：</strong></p>
-
-<p><img src="media/14921577512970/14925656291102.jpg" alt=""/></p>
-
-<p>函数间隔可以表示分类预测的正确性及确信度.<strong><em>但是选择分离超平面时，只有函数间隔还不够.因为只要成比例地改变w和例如将它们改为2w和2b,超平面并没有改变，但函数间隔却成为原来的2倍</em></strong>.这一事实启示我们，可以对分离超平面的法向量w加某些约束，如规范化，||w||=1，使得间隔是确定的.这时函数间隔成为几何间隔（geometric margin).</p>
-
-<p>下图给出了超平面（w，b）及其法向量w，点A表示某一实例\(x_i\)，其类标记为\(y_i =+1\)，点A与超平面（w，b）的距离由线段AB给出，记作\(\gamma_i\)。<br/>
-<img src="media/14921577512970/14925666238039.jpg" alt=""/><br/>
-一般的，当样本点\((x_i,y_i)\)被超平面\((w,b)\)正确分类是，点\(x_i\)与超平面\((w,b)\)的距离是：<br/>
-<img src="media/14921577512970/14925667203290.jpg" alt=""/><br/>
-所以：由这一事实导出几何间隔的概念。<br/>
-<img src="media/14921577512970/14925667539444.jpg" alt=""/></p>
-
-<p>下面具体给出几何间隔的定义：<br/>
-<img src="media/14921577512970/14925669395725.jpg" alt=""/></p>
-
-<p>从函数间隔和几何间隔的定义（式(7.3)〜式(7.6))可知，函数间隔和几何间隔有下面的关系：<br/>
-<img src="media/14921577512970/14925676726509.jpg" alt=""/></p>
-
-<p><strong><em>如果||w||=1,那么函数间隔和几何间隔相等.如果超平面参数w和b成比例地改变（超平面没有改变)，函数间隔也按此比例改变，而几何间隔不变.</em></strong></p>
-
-<h2 id="toc_3">间隔最大化</h2>
-
-<p>支持向量机学习的基本想法是求解能够正确划分训练数据集并且<strong><em>几何间隔</em></strong>最大的分离超平面.对线性可分的训练数据集而言，线性可分分离超平面有无穷多个（等价于感知机)，<strong><em>但是几何间隔最大的分离超平面是唯一的</em></strong>.这里的间隔最大化又称为硬间隔最大化（与将要讨论的训练数据集近似线性可分时的软间隔最大化相对应).</p>
-
-<p><font color=red>间隔最大化的直观解释是：对训练数据集找到几何间隔最大的超平面意味着以充分大的确信度对训练数据进行分类.也就是说，不仅将正负实例点分开，而且对最难分的实例点（离超平面最近的点）也有足够大的确信度将它们分开.这样的超平面应该对未知的新实例有很好的分类预测能力.</font></p>
-
-<h4 id="toc_4">1. 最大间隔分离超平面</h4>
-
-<p>下面考虑如何求得一个几何间隔最大的分离超平面，即最大间隔分离超平面.具体地，这个问题可以表示为下面的约束最优化问题：<br/>
-<img src="media/14921577512970/14925687970547.jpg" alt=""/><br/>
-即我们希望最大化超平面(w,b)关于训练数据集的几何间隔\(\gamma\),约束条件表示的是超平面(w, b)关于每个训练样本点的几何间隔至少是\(\gamma\).</p>
-
-<p>考虑几何间隔和函数间隔的关系式(7.8),可将这个问题改写为:<br/>
-<img src="media/14921577512970/14925690130129.jpg" alt=""/><br/>
-这是一个凸二次规划（convex quadratic programming)问题，凸优化问题是指约束最优化问题。</p>
-
-<p>凸优化问题是指约束最优化问题：<br/>
-    <img src="media/14921577512970/14925706995554.jpg" alt=""/></p>
-
-<p>当目标函数f(w)是二次函数且约束函数\(g_i(w)\)是仿射函数时，上述凸最优化问题成为凸二次规划问题。</p>
-
-<blockquote>
-<p>仿射函数即由1阶多项式构成的函数，一般形式为 f(x)=Ax+b，这里A是一个 m×k 矩阵，x是一个k向量,b是一个m向量，实际上反映了一种从 k维到m维的空间映射关系。</p>
-</blockquote>
-
-<p>如果求出了约束最优化问题(7.13)〜(7.14)的解\(w^*,b^*\)，那么就可以得到最大间隔分离超平面\(w^*·x + b = 0\)及分类决策函数\(f(x)=sign(w^*+b^*)\),即线性可分支持向量机模型.</p>
-
-<p>根据上面所得出的结论，就有下面的支持向量机的学习算法————<strong>最大间隔法(maximum margin method )</strong></p>
-
-<p><img src="media/14921577512970/14925717155289.jpg" alt=""/></p>
-
-<h4 id="toc_5">2.最大间隔分离超平面的存在唯一性</h4>
-
-<p>线性可分训练数据集的最大间隔分离超平面是存在且唯一的。</p>
-
-<p><strong>定理7.1 (最大间隔分离趄平面的存在唯一性）</strong>若训练数据集T线性可分，则可将训练数据集中的样本点完全正确分开的最大间隔分离超平面存在且唯一.</p>
-
-<blockquote>
-<p>这里关于唯一性的证明不在总结。相关资料可以阅读《统计学习方法》p101.</p>
-</blockquote>
-
-<h4 id="toc_6">3.支持向量和间隔边界</h4>
-
-<p><font color=red>在线性可分情况下，训练数据集的样本点中与分离超平面距离最近的样本点的实例称为支持向量（support vector).</font>支持向量是使约束条件式(7.14)等号成立的点，即：<br/>
-<img src="media/14921577512970/14925722828338.jpg" alt=""/><br/>
-对\(y_i=+1\)的正例点，支持向量在超平面：<br/>
-<img src="media/14921577512970/14925723574226.jpg" alt=""/></p>
-
-<p>对\(y_i=-1\)的负例点，支持向量在超平面：<br/>
-<img src="media/14921577512970/14925723990202.jpg" alt=""/></p>
-
-<p>如下图所示，在\(H_1和H_2上的点就是支持向量\)<br/>
-<img src="media/14921577512970/14925724626444.jpg" alt=""/></p>
-
-<p>注意到\(H_1\)和\(H_2\)平行，并且没有实例点落在它们中间.在\(H_1\)与\(H_2\)之间形成一条长带，分离超平面与它们平行且位于它们中央.长带的宽度，即\(H_1\)与\(H_2\)之间的距离称为间隔（margin).间隔依赖于分离超平面的法向量w，等于\(\frac{2}{||w||}\).<br/>
-\(H_1\)和\(H_2\)称为间隔边界.</p>
-
-<p><font color=red>在决定分离超平面时只有支持向量起作用，而其他实例点并不起作用</font>。如果移动支持向量将改变所求的解；但是如果在间隔边界以外移动其他实例点，<strong>甚至去掉这些点，则解是不会改变的</strong>.<font color=red>由于支持向量在确定分离超平面中起着决定性作用，所以将这种分类模型称为支持向量机</font>.支持向量的个数一般很少，所以支 持向量机由很少的“重要的”训练样本确定.</p>
-
-<p><strong>下面举例说明：</strong></p>
-
-<p><img src="media/14921577512970/14925909777337.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -808,6 +1268,18 @@ max(*args)
 	      
 		      
 			      <li class="post">
+			        <a href="15034774413129.html">第十三条 用"方法调配技术"调试"黑盒方法"</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15033908572762.html">第十二条 消息转发机制(Message forwarding)</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15033059328138.html">第十一条:理解Objc_msgSend的作用</a>
 			      </li>
 		     
@@ -821,18 +1293,6 @@ max(*args)
 		      
 			      <li class="post">
 			        <a href="14993030681229.html">Caffe最优化求解过程</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14992368546707.html">第10条:在既有类中使用关联对象存放自定义数据</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="14992160809956.html">SoftmaxWithLossLayer的实现</a>
 			      </li>
 		     
 		  

@@ -1,0 +1,561 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  第十二条 消息转发机制(Message forwarding) - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>第十二条 消息转发机制(Message forwarding)</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/8/22</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>第11条讲解了对象的消息传递机制，并强调了其重要性。第12条则要讲解另外一个重要的问题，就是对象在收到无法解读的消息之后会发生什么情况。若想令类能理解某条消息，我们必须以程序码实现出对应的方法才行。<font color=red><strong>但是，在编译期向类发送了其无法解读的消息并不会报错，因为在运行期可以继续向类中添加方法，所以编译器在编译时还无法确知类中到底会不会有某个方法实现。</strong></font>当对象接收到无法解读的消息后，就会启动<mark>“消息转发&quot;（message forwarding)机制</mark>，程序员可经由此过程告沂对象应该如何处理未知消息。</p>
+
+<p>消息转发分为两大阶段:</p>
+
+<ol>
+<li><p>先征询接收者，所属的类，看其是否能动态添加方法，以处理当前这个“未知的选择子&quot;（unknown selector),这叫做“动态方法解析”（dynamic method resolution)。</p></li>
+<li><p>涉及“完整的消息转发机制”（full forwarding mechanism)。如果运行期系统已经把第一阶段执行完了，那么接收者自己就无法再以动态新增方法的手段来响应包含该选择子的消息了。此时，运行期系统会请求接收者以其他手段来处理与消息相关的方法调用。这又细分为<strong>两小步</strong>。首先，请接收者看看有没有其他对象能处理这条消息。若有，则运行期系统会把消息转给那个对象，于是消息转发过程结束，一切如常。若没有“备援的接收者”（replacement receiver)，则启动完整的消息转发机制，运行期系统会把与消息有关的全部细节都封装到<code>NSInvocation</code>对象中，再给接收者最后一次机会，令其设法解决当前还未处理的这条消息。</p></li>
+</ol>
+
+<h2 id="toc_0">动态方法解析</h2>
+
+<p>对象在收到无法解读的消息后，首先将调用其所属类的下列类方法：</p>
+
+<pre><code class="language-objc">
++ (BOOL)resolvelnstanceMethod:(SEL)selector
+
+</code></pre>
+
+<p>该方法的参数就是那个未知的选择子，其返回值为<code>Boolean</code>类型，表示这个类是否能新增一个实例方法用以处理此选择子。在继续往下执行转发机制之前，本类有机会新增一个处理此选择子的方法。假如尚未实现的方法不是实例方法而是类方法，那么运行期系统就会调用另外一个方法，该方法与 <code>“resolvelnstanceMethod:”</code> 类似，叫做 <code>“resolveClassMethod:”</code>。使用这种办法的前提是：相关方法的实现代码已经写好，只等着运行的时候动态插在类里面就可以了。此方案常用来实现<code>@dynamic</code>属性（参见第6条)，比如说，要访问<code>CoreData</code>框架中<code>NSManagedObjects</code>对象的属性时就可以这么做，因为实现这些属性所需的存取方法在编译期就能确定。</p>
+
+<p>下列代码演示了如何用<code>“resolvelnstanceMethod:”</code>来实现<code>@dynamic</code>属性：</p>
+
+<pre><code class="language-objc">
+id autoDictionaryGetter(id self, SEL _cmd);
+void autoDictionarySetter(id selff SEL _cmd, id value);
++ (BOOL)resolvelnstanceMethod:(SEL)selector {
+    NSString *selectorString = NSStringFromSelector(selector);
+    if ( /* selector is from a ©dynamic property ★/ ){
+        if([selectorstring has Prefix: @&quot;set&quot;]){
+            class addMethod(self,
+                            selector,
+                            (IMP)autoDictionarySetter,
+                            &quot;v@ :@&quot;);
+    } else {
+        class_addMethod(self,
+                        selector,
+                        (IMP)autoDictionaryGetter,
+                        &quot;@ @:&quot;);
+        }              
+        return YES;
+    }
+return [super resolvelnstanceMethod:selector];
+
+}
+
+</code></pre>
+
+<h2 id="toc_1">备援接受者</h2>
+
+<p>当前接收者还有第二次机会能处理未知的选择子，在这一步中，运行期系统会问它：能不能把这条消息转给其他接收者来处理。与该步骤对应的处理方法如下：</p>
+
+<pre><code class="language-objc">
+-(id)forwardingTargetForSelector:(SEL)selector
+
+</code></pre>
+
+<p>方法参数代表未知的选择子，若当前接收者能找到备援对象，则将其返回，若找不到，就返回<code>nil</code>。通过此方案，我们可以用“组合”（composition)来模拟出“多重继承”（multiple inheritance)的某些特性。在一个对象内部，可能还有一系列其他对象，该对象可经由此方法将能够处理某选择子的相关内部对象返回，这样的话，在外界看来，好像是该对象亲自处理了这些消息似的。</p>
+
+<p><font color=red>请注意，我们无法操作经由这一步所转发的消息。若是想在发送给备援接收者之前先修改消息内容，那就得通过完整的消息转发机制来做了。</font></p>
+
+<h2 id="toc_2">完整的消息转发</h2>
+
+<p>如果转发算法已经来到这一步的话，那么唯一能做的就是启用完整的消息转发机制了。首先创建<code>NSInvocation</code>对象，把与尚未处理的那条消息有关的全部细节都封于其中。此对象包含选择子、目标（target)及参数。在触发NSIrwocation对象时，“消息派发系统”(message-dispatch system)将亲自出马，把消息指派给目标对象。<br/>
+此步骤会调用下列方法来转发消息：</p>
+
+<pre><code class="language-objc">
+-(void)forwardlnvocation:(NSInvocation*)invocation
+
+</code></pre>
+
+<p>这个方法可以实现得很简单：只需改变调用目标，使消息在新目标上得以调用即可。然<br/>
+而这样实现出来的方法与“备援接收者”方案所实现的方法等效，所以很少有人采用这么简<br/>
+单的实现方式。比较有用的实现方式为：在触发消息前，先以某种方式改变消息内容，比如追加另外一个参数，或是改换选择子，等等。</p>
+
+<p>实现此方法时，若发现某调用操作不应由本类处理，则需调用超类的同名方法。这样的话，继承体系中的每个类都有机会处理此调用请求，直至<code>NSObject</code>。如果最后调用了<code>NSObject</code>类的方法，那么该方法还会继而调用<code>“doesNotRecognizeSelector:”</code>以抛出异常，此异常表明选择子最终未能得到处理。</p>
+
+<h2 id="toc_3">消息转发全流程</h2>
+
+<p>下图展示了消息转发机制处理消息的各个步骤:<br/>
+<img src="media/15033908572762/15033988345236.jpg" alt=""/></p>
+
+<p><font color=red>接收者在每一步中均有机会处理消息。步骤越往后，处理消息的代价就越大。</font>最好能在第一步就处理完，这样的话，运行期系统就可以将此方法缓存起来了。如果这个类的实例稍后还收到同名选择子，那么根本无须启动消息转发流程。</p>
+
+<h2 id="toc_4">完整的示例</h2>
+
+<p>假设要编写一个类似于“字典”的对象，它里面可以容纳其他对象，只不过开发者要直接通过属性来存取其中的数据。这个类的设计思路是：由幵发者来添加属性定义，并将其声明为<code>@dynamic</code>，而类则会自动处理相关属性值的存放与获取操作。</p>
+
+<p>定义该类的接口为:</p>
+
+<pre><code class="language-objc">
+#import &lt;Foundation/Foundation.h&gt;
+@interface EOCAutoDictionary : NSObject
+@property (nonatomic, strong) NSNumber *number;
+@property (nonatomic, strong) NSDate *date;
+@property (nonatomic, strong)id qpaqueObject;
+
+@end
+
+</code></pre>
+
+<p>本例中，这些属性具体是什么其实无关紧要。笔者用了这么多种数据类型，只是想演示此 功能很有用。在类的内部，每个属性的值还是会存放在字典里，所以我们先在类中编写如下代码，并将属性声明为@dynamiC，这样的话，编译器就不会为其自动生成实例变量及存取方法了：</p>
+
+<pre><code class="language-objc">
+#import &quot;EOCAutoDictionary.h&quot;
+#import &lt;objc/runtime.h&gt;
+
+@interface EOCAutoDictionary ()
+
+@property (nonatomic, strong) NSMutableDictionary *backingstore;
+
+@end
+
+@implementation EOCAutoDictionary
+
+@dynamic string, number, date, opaqueObject;
+
+-(id)init {
+    if ( (self = [super init]}} {
+          _backingStore = [NSMutableDictionary new];
+}
+    return self;
+}
+
+</code></pre>
+
+<p>本例的关键在于<code>resolvelnstanceMethod:</code>方法的实现代码：</p>
+
+<pre><code class="language-objc">
++ (BOOL)resolvelnstanceMethod:(SEL)selector {
+    NSString *selectorstring = NSStringFromSelector(selector); 
+    if ([selectorstring hasPrefix: @&quot;set&quot;]){
+        class_addMethod(self,
+                        selector,
+                        (IMP)autoDictionarySetter
+                         &quot;v@:@&quot;);
+    } else {
+        class_addMethod(self,
+                        selector,
+                        (IMP)autoDictionaryGetter,
+                        &quot;@@:&quot;;)    
+    }
+    return YES;
+}
+@end
+
+</code></pre>
+
+<p>当开发者首次在<code>EOCAutoDictionary</code>实例上访问某个属性时，运行期系统还找不到 对应的选择子，因为所需的选择子既没有直接实现，也没有合成出来。现在假设要写入 <code>opaqueObject</code>属性，那么系统就会以<code>“setOpaqueObject:”</code>为选择子来调用上面这个方法。 同理，在读取该属性时，系统也会调用上述方法，只不过传入的选择子是<code>opaqueObject</code>。</p>
+
+<p><code>resolvelnslanceMethod</code>方法会判断选择子的前缀是否为set，以此分辨其是set选择子还是 get选择子。在这两种情况下，都要向类中新增一个处理该选择子所用的方法，这两个方 法分别以<code>autoDictionarySetter</code>及<code>autoDictionaryGetter</code>函数指针的形式出现。此时就用到<code>class_addMethod</code>方法，它可以向类中动态地添加方法，用以处理给定的选择子。第三个参 数为函数指针，指向待添加的方法。而最后一个参数则表示待添加方法的“类型编码”（type encoding)。在本例中，编码开头的字符表示方法的返回值类型，后续字符则表示其所接受的各个参数.</p>
+
+<p><code>getter</code>函数可以用下列代码实现:</p>
+
+<pre><code class="language-objc">
+id autoDictionaryGetter(id self, SEL _cmd) {
+    //Get the backing store from the object
+    EOCAutoDictionary *typedSelf = (EOCAutoDictionary^)self；
+    NSMutableDictionary *backingStore = typedSelf.backingStore;
+    //The key is simply the selector name 
+    NSString *key = NSStringFromSelector(_cmd);
+    // Return the value
+    return [backingStore objectForKey:key];
+}
+
+</code></pre>
+
+<p>而setter函数则可以这么写：</p>
+
+<pre><code class="language-objc">
+void autoDictionarySetter(id self, SEL _cmd, id value) {
+    //Get the backing store from the object
+    EOCAutoDictionary *typedSelf = (EOCAutoDictionary*)self；
+    NSMutableDictionary *backingStore = typedSelf.backingStore;
+
+    /** The selector will be for example, &quot;setOpaqueObject:&quot;
+    *   We need to remove the &quot;set&quot;，and lowercase the first
+    *   letter of the remainder.
+    */
+    
+    NSString *selectorstring = NSStringFromSelector(_cmd);
+    NSMutablestring *key = [selectorstring mutableCopy】；
+    // Remove the &quot; : &quot; at the end 
+    [key deleteCharactersInRange:NSMakeRange(key.length - 1, 1)];
+    // Remove the fsetf prefix
+    [key deleteCharactersInRange:NSMakeRange(0, 3)];
+    // Lowercase the first character
+    NSString *lowercaseFirstChar = [[key substringToIndex:1] lowercasestring];
+    [key replaceCharactersInRange:NSMakeRange(0 ,1) withString:lowercaseFirstChar];
+    if (value) {
+    [backingStore setObject:value forKey:key];
+    } else {
+    [backingStore removeObjectForKey:key];
+    }
+}
+
+</code></pre>
+
+<p>EOCAutoDictionary的用法很简单：</p>
+
+<pre><code class="language-objc">
+    EOCAutoDictionary *dict = [EOCAutoDictionarynew];
+    diet.date = [NSDatedateWithTimeIntervalSincel970:475372800];
+    NSLog (@&quot;diet .date = %@&quot; , dict.date);
+    // Output: diet.date = 1985-01-24 00:00:00 +0000
+
+</code></pre>
+
+<p>其他属性的访问方式与<code>date</code>类似，要想添加新属性，只需来定义，并将其声明为<code>@dynamic</code>即可。</p>
+
+<h2 id="toc_5">要点</h2>
+
+<ul>
+<li>若对象无法响应某个选择子，则进人消息转发流程。</li>
+<li>通过运行期的动态方法解析功能，我们可以在需要用到某个方法时再将其加入类中。 </li>
+<li>对象可以把其无法解读的某些选择子转交给其他对象来处理。</li>
+<li>经过上述两步之后，如果还是没办法处理选择子，那就启动完整的消息转发机制。</li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15034774413129.html" 
+          title="Previous Post: 第十三条 用"方法调配技术"调试"黑盒方法"">&laquo; 第十三条 用"方法调配技术"调试"黑盒方法"</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15033059328138.html" 
+          title="Next Post: 第十一条:理解Objc_msgSend的作用">第十一条:理解Objc_msgSend的作用 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15034774413129.html">第十三条 用"方法调配技术"调试"黑盒方法"</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15033908572762.html">第十二条 消息转发机制(Message forwarding)</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15033059328138.html">第十一条:理解Objc_msgSend的作用</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15032784762045.html">小论文想法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="14993030681229.html">Caffe最优化求解过程</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>
