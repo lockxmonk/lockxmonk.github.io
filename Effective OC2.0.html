@@ -113,9 +113,102 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15037310867483.html">
+                
+                  <h1>第十九条 使用清晰而协调的命名方式</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我们在使用OC的时候，发现这门语言很繁琐，代码中一般有<code>“in“，”for”，“with”</code>等介词，其他编程语言则很少使用这些他们认为多余的字眼。以下面代码为例子：</p>
+
+<pre><code class="language-objc">NSString *text = @&quot;The quick brown fox jumped over the lazy dog&quot;;
+NSString *newText =
+[text stringByReplacingOccurrencesOfString: @&quot;fox&quot;,
+                                withString:@&quot;cat&quot;];
+</code></pre>
+
+<p>但是，<code>Objective-C</code>的命名方式虽然长一点，但是却非常淸晰。</p>
+
+<p><strong><font color=red>方法与变量名使用了“驼峰式大小写命名法&quot;（camel casing)——以小写字母开头，其后每个单词首字母大写。类名也用驼峰命名法，不过其首字母要大写，而且前面通常还有两三个前缀字母。</font></strong></p>
+
+<h2 id="toc_0">方法命名</h2>
+
+<p>方法名很长对冉繁琐，但是易于阅读，理解其中的意思。但是如果过长会起到反效果。例如：</p>
+
+<pre><code class="language-objc">-(EOCRectangle*)union:(EOCRectangle*)rectangle // Unclear 
+-(float) calculateTheArea // Too verbose
+
+//应该改成
+-(EOCRectangle*)unionRectangle:(EOCRectangle*)rectangle 
+-(float) area
+</code></pre>
+
+<p><strong>给方法命名时的注意事项可总结成下面几条规则：</strong></p>
+
+<blockquote>
+<ul>
+<li>如果方法的返回值是新创建的，那么方法名的首个词应是返回值的类型，除非前面还 有修饰语，例如<code>localizedString</code>。属性的存取方法不遵循这种命名方式，因为一般认 为这些方法不会创建新对象，即便有时返回内部对象的一份拷贝，我们也认为那相当 于原有的对象。这些存取方法应该按照其所对应的属性来命名。</li>
+<li>应该把表示参数类型的名词放在参数前面。</li>
+<li>如果方法要在当前对象上执行操作，那么就应该包含动词；若执行操作时还需要参数, 则应该在动词后面加上一个或多个名词。</li>
+<li>不要使用str这种简称，应该用string这样的全称。</li>
+<li>Boolean属性应加is前缀。如果某方法返回非属性的Boolean值，那么应该根据其功 能，选用has或is当前缀。</li>
+<li>将get这个前缀留给那些借由“输出参数”来保存返回值的方法，比如说，把返回值 填充到“C语言式数组”（C_style array)里的那种方法就可以使用这个词做前缀。</li>
+</ul>
+</blockquote>
+
+<h2 id="toc_1">类与协议的命名</h2>
+
+<p>应该为类与协议的名称加上前缀，以避免命名空间冲突（参见第15条)，而且应该像给 方法起名时那样把词句组织好，使其从左至右读起来较为通顺。例如，在<code>NSArray</code>的子类中，有一个用于表示可变数组的类，叫做<code>NSMutableArray</code>, <code>mutable</code>这个词放在<code>array</code>前面, 用以表明这是一种特殊的<code>array</code>(数组）。</p>
+
+<p>例如iOS的UI库UIKit，其中协议与类的命名惯例为：</p>
+
+<ul>
+<li>UIView    (类)</li>
+<li>UIViewController（类）</li>
+<li>UITableView （类）</li>
+<li>UITableViewController（类）</li>
+<li>UITableViewDelegate（协议）</li>
+</ul>
+
+<p>最重要的一点就是，命名方式应该协调一致。</p>
+
+<h2 id="toc_2">要点</h2>
+
+<ul>
+<li>起名时应遵从标准的Objective-C命名规范，这样创建出来的接口更容易为开发者所理解。</li>
+<li>方法名要言简意赅，从左至右读起来要像个日常用语中的句子才好。</li>
+<li>方法名里不要使用缩略后的类型名称。</li>
+<li>给方法起名时的第一要务就是确保其风格与你自己的代码或所要集成的框架相符。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15037148888105.html">
                 
-                  <h1>尽量使用不可变对象</h1>
+                  <h1>第十八条 尽量使用不可变对象</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
@@ -695,168 +788,6 @@ struct objc_class {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15034774413129.html">
-                
-                  <h1>第十三条 用"方法调配技术"调试"黑盒方法"</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>因为OC可以在运行期解析 一个对象究竟调用何种方法,所以我们也可以在运行期改变相对应的方法. </p>
-
-<p><font color=red>因为与给定的选择子名称相对应的方法也可以在运行期改变.所以若能善用此特性，则可发挥出巨大优势，因为我们既不需要源代码，也不需要通过继承子类来覆写方法就能改变这个类本身的功能。这样一来，新功能将在本类的所有实例中生效，而不是仅限于覆写了相关方法的那些子类实例。此方案经常称为<mark>“方法调配”（method swizzling)</mark> e</font></p>
-
-<p>类的方法列表会把选择子的名称映射到相关的方法实现之上，使得“动态消息派发系统” 能够据此找到应该调用的方法。这些方法均以函数指针的形式来表示，这种指针叫做<code>IMP</code>, 其原型如下：</p>
-
-<pre><code class="language-objc">
-id (*IMP)(id, SEL ,...)
-
-</code></pre>
-
-<p>我们用NSString类来举例,下图表示<code>lowercaseString、uppercaseString、capitalizedString</code>方法映射到了不同的<code>IMP</code>上.</p>
-
-<p><img src="media/15034774413129/15034784608780.jpg" alt=""/></p>
-
-<p>OC运行期系统,提供有方法来操作这个映射表.我们可以向这个表中,<strong>新增选择子,改变选择子所对应的方法实现,交换两个选择子所映射的指针</strong>.类似下图:<br/>
-<img src="media/15034774413129/15034786156175.jpg" alt=""/></p>
-
-<p>新表中,多了一个<code>newSelector</code>选择子,并且其他方法的实现也互换了.上述修改均无须编写子类，只是修改了“方法表”的布局.</p>
-
-<p>下面我们来讨论如何互换两个方法的实现:</p>
-
-<p>想要互换两个方法的实现可以,有下列函数:</p>
-
-<pre><code class="language-objc">//互换m1和m2的实现
-void method_exchangeImplementations(Method m1, Method m2)
-
-</code></pre>
-
-<p>m1和m2的方法实现可以通过下面方法实现:</p>
-
-<pre><code class="language-objc">
-Method class_getInstanceMethod(Class aClass, SEL aSelector)
-
-</code></pre>
-
-<p>此函数根据给定的选择从类中取出与之相关的方法。</p>
-
-<p>下面我们完整的举一个例子,来演示交换前面提到的<code>lowercaseString</code> 与 <code>uppercaseString</code>方法实现:</p>
-
-<pre><code class="language-objc">
-Method originalMethod =
-    class_getInstanceMethod([NSStringclass],
-                            @selector(lowercaseString));
-Method swappedMethod =
-    class_getInstanceMethod([NSStringclass],
-                            @selector(uppercaseString)); 
-                            method_exchangeImplementations(originalMethod,swappedMethod);
-
-</code></pre>
-
-<p>从现在开始,如果在NSString实例上调用<code>lowercaseString</code>,那么执行的将是<code>uppercaseString</code>,反之亦然:</p>
-
-<pre><code class="language-objc">
-NSString *string = @&quot;This iS tHe StRiNg&quot;;
-NSString *lowercaseString = [string lowercaseString];
-NSLog(&quot;lowercaseString = %@&quot;, lowercaseString);
-// Output: lowercaseString = THIS IS THE STRING
-
-
-NSString *uppercaseString - [string uppercaseString】；
-NSLog (@&quot;uppercaseString = %@&quot;, uppercaseString);
-// Output: uppercaseString = this is the string
-
-</code></pre>
-
-<p>刚才向大家演示了如何交换两个方法实现，然而在实际应用中，像这样直接交换两 个方法实现的，意义并不大。因为<code>lowercaseString</code>与<code>uppercaseString</code>这两个方法已经各自实现得很好，没必要再交换了。但是，可以通过这一手段来为既有的方法实现增添新功能。<font color=red>比方说，想要在调用<code>lowercaseString</code>时记录某些信息，这时就可以通过交换方法实现来达成此目标。我们新编写一个方法，在此方法中实现所需的附加功能，并调用原有实现</font>。</p>
-
-<p>新方法可以添加至NSString的一个&quot;分类(category)&quot;中:</p>
-
-<pre><code class="language-objc">
-@interface NSString (EOCMyAdditions)
-
--(NSString*)eoc_myLowercaseString;
-
-@end
-
-</code></pre>
-
-<p>上面的新方法将与原有的方法互换,如下图所示:</p>
-
-<p><img src="media/15034774413129/15034869016993.jpg" alt=""/></p>
-
-<p>新方法的实现代码可以这样写:</p>
-
-<pre><code class="language-objc">
-0implementation NSString (EOCMyAdditions)
-
--(NSString*)eoc_myLowercaseString {
-    NSString *lowercase = [self eoc_myLowercaseString];
-    NSLog (@&quot;%@ =&gt; %@&quot;, self, lowercase); 
-    return lowercase;
-)
-@end
-
-</code></pre>
-
-<p>这段代码看上去好像会陷人递归调用的<strong>死循环</strong>，<mark><strong>不过大家要记住，此方法是准备和 lowercaseString方法互换的。所以，在运行期，eoc_myLowercaseString选择子实际上对应于原有的lowercaseString方法实现</strong>。</mark>最后，通过下列代码来交换这两个方法实现：</p>
-
-<pre><code class="language-objc">Method originalMethod =
-    class_getInstanceMethod([NSString class],
-                            @selector(lowercaseString)〉；
-Method swappedMethod =
-    class_getInstanceMethod([NSString class]f
-                            @selector(eoc_myLowercaseString)); 
-                            method_exchangeImplementations(originalMethod , swappedMethod);
-
-</code></pre>
-
-<p>之后我们只要如下执行就会发现:</p>
-
-<pre><code class="language-objc">
-NSString *string = @&quot;ThIs iS tHe StRiNg&quot;;
-NSString *lowercaseString = [string lowercaseString];
-//输出了下面这行
-// Output: This iS tHe StRiNg =&gt; this is the string
-
-</code></pre>
-
-<blockquote>
-<p><strong>通过此方案，开发者可以为那些“完全不知道其具体实现的&quot;（completely opaque, “完全 不透明的”）黑盒方法增加日志记录功能，这非常有助于程序调试。然而，此做法只在调试程序时有用。很少有人在调试程序之外的场合用上述“方法调配技术”来永久改动某个类的功能。不能仅仅因为Objective-C语言里有这个特性就一定要用它。若是滥用，反而会令代码变得不易读懂且难于维护。</strong></p>
-</blockquote>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li><p>在运行期，可以向类中新增或替换选择子所对应的方法实现。</p></li>
-<li><p>使用另一份实现来替换原有的方法实现，这道工序叫做“方法调配”，开发者常用此技术向原有实现中添加新功能。</p></li>
-<li><p>一般来说，只有调试程序的时候才需要在运行期修改方法实现，这种做法不宜滥用。</p></li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -940,7 +871,13 @@ NSString *lowercaseString = [string lowercaseString];
 	      
 		      
 			      <li class="post">
-			        <a href="15037148888105.html">尽量使用不可变对象</a>
+			        <a href="15037310867483.html">第十九条 使用清晰而协调的命名方式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15037148888105.html">第十八条 尽量使用不可变对象</a>
 			      </li>
 		     
 		  
@@ -959,12 +896,6 @@ NSString *lowercaseString = [string lowercaseString];
 		      
 			      <li class="post">
 			        <a href="15036306506140.html">第十五条 用前缀避免命名空间冲突</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15035622628066.html">第十四条 理解"类对象"的用意</a>
 			      </li>
 		     
 		  
