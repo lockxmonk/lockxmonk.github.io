@@ -1,0 +1,440 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  第十六条 提供"全能初始化方法" - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>第十六条 提供"全能初始化方法"</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/8/25</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>我们知道,所有的对象都要初始化但是有些对象可能有很多初始化方法(根据初始的信息来选择用哪个).我们以iOS的UI框架UIKit为例，其中有个类叫做<code>UITableViewCell</code>,初始化该类对象 时，需要指明其样式及标识符，标识符能够区分不同类型的单元格。由于这种对象的创 建成本较高，所以绘制表格时可依照标识符来复用，以提升程序效率。<strong><font color=red>我们把这种可为 对象提供必要信息以便其能完成工作的初始化方法叫做“全能初始化方法”（designated initializer)</font></strong></p>
+
+<p>我们看下面这个NSDate的例子：</p>
+
+<pre><code class="language-objc">-(id)init
+-(id)initWithString:(NSString*)string
+-(id)initWithTimelntervalSinceNow:(NSTimelnterval)seconds
+-(id)initWithTimelnterval:(NSTimelnterval)seconds
+                sinceDate:(NSDate*)refDate
+-(id)initWithTimeIntervalSinceReferenceDate:(NSTimelnterval)seconds
+-(id)initWithTimeIntervalSincel970:(NSTimelnterval)seconds
+</code></pre>
+
+<p><mark><strong>那么多的初始化方法中，我们要选一个全能初始化方法，让其他的初始化方法都来调用它。</strong></mark>，只有在全能初始化方法中，才会存储内部数据。这样的话，当底层数据存储机制改变时，只需修改此方法的代码就好，无须改动其他初始化方法。</p>
+
+<p>我们来用代码举例：</p>
+
+<p><em>首先定义一个表示矩形的类：</em></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@interface EOCRectangle : NSObject
+@property (nonatomic, assign, readonly) float width;
+@property (nonatomic, assign, readonly) float height; 
+@end
+</code></pre>
+
+<p>然后定义一个初始化方法：</p>
+
+<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight:(float)height
+{
+    if ((self = [super init])) {
+        _width = width;
+        _height = height;
+    }
+    return self;
+}
+</code></pre>
+
+<p>这样就会有一个问题，当有人用<code>[[EOCRectanglealloc]init]</code>来创建矩形时，因为<code>NSObject</code>中已经实现了<code>init</code>方法，如果把<code>alloc</code>方法分配好的<code>EOCRectangle</code>交由此方法来初始化，那么矩形的宽度与高度就是0,因为全部实例变量都设为0了。这种情况我们应该覆写<code>init</code>方法：</p>
+
+<pre><code class="language-objc">// Using default values
+-(id)init {
+    return [self initWithWidth:5.Of andHeight:10.Of];
+)
+// Throwing an exception
+-(id)init {
+    @throw [NSException
+    exceptionWithName:NSInternalInconsistencyException 
+    reason:@&quot;Must use initWithWidth:andHeight: instead.&quot; 
+    userInfo：nil]；
+}
+</code></pre>
+
+<p>还有一种情况，当我们创建名叫<code>EOCSquare</code>的类，令其成为<code>EOCRectangle</code>的子类时，新类的初始化方法写的时候要注意：</p>
+
+<pre><code class="language-objc">@import &quot;EOCRectangle.h&quot;
+@interface EOCSquare : EOCRectangle 
+-(id)initWithDimension:(float)dimension; 
+@end
+
+@implementation EOCSquare
+-(id)initWithDimension:(float)dimension {
+    return [super initwithwidth:dimension andHeightidimension];
+}
+@end
+</code></pre>
+
+<p>这了我们发现上面代码的初始化方法调用了父类的初始化方法，这样可能会导致一个问题：创建出一个”高度”和“宽度”不相等的正方形。所以：<strong><font color=red>如果子类的全能初始化方法与超类方法的名称不 同，那么总应覆写超类的全能初始化方法。</font></strong>在<code>EOCSquare</code>这个例子中，应该像下面这样覆写<code>EOCRectangle</code>的全能初始化方法：</p>
+
+<pre><code class="language-objc">-(id)initWithWidth:(float)width andHeight:(float)height { 
+    float dimension = MAX (width, height);  
+    return [self initWithDimension:dimension];
+}
+</code></pre>
+
+<p>覆写了这个方法之后，即便使用<code>init</code>来初始化<code>EOCSquare</code>对象，也能照常工作。原因在于, <code>EOCRectangle</code>类覆写了 <code>init</code>方法，并以默认值为参数，调用了该类的全能初始化方法。在用<code>init</code>方法初始化<code>EOCSquare</code>对象时，也会这么调用，不过由于<code>“initWithWidth:andHeight:”</code>已经在子类中覆写了，所以实际上执行的是<code>EOCSquare</code>类的这一份实现代码，而此代码又会调用本类的全能初始化方法。因此一切正常，调用者不可能创建出边长不相等的<code>EOCSquare</code>对象。</p>
+
+<p>当然如果我们不想覆写父类的全能初始化方法，认为这是调用者自己犯了错误。在这种情况下，常用的办法是覆写超类的全能初始化方法并于其中抛出异常：</p>
+
+<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight: (float) height {
+    @throw 
+        [NSException 
+            exceptionWithName:NSInternallnconsistencyException
+            reason: @&quot;Must use initWithDimension: instead.&quot;
+             userInfo：nil];
+</code></pre>
+
+<p><strong><mark>有时如果某个队形对象的实例有两种完全不同的创建方式，必须分开处理，所以就要编写多个全能初始化方法。</mark></strong>只要记住每个子类的全能初始化方法都应该调用其超类的对应方法，并逐层向上，应该先调用超类的相关方法，然后再执行与本类有关的任务。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>在类中提供一个全能初始化方法，并于文档里指明。其他初始化方法均应调用此方法。</li>
+<li><p>若全能初始化方法与超类不同，则需覆写超类中的对应方法。</p></li>
+<li><p>如果超类的初始化方法不适用于子类，那么应该覆写这个超类方法，并在其中抛出异常。</p></li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15037100500253.html" 
+          title="Previous Post: 第十七条 实现description方法">&laquo; 第十七条 实现description方法</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15036306506140.html" 
+          title="Next Post: 第十五条 用前缀避免命名空间冲突">第十五条 用前缀避免命名空间冲突 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15037148888105.html">尽量使用不可变对象</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15037100500253.html">第十七条 实现description方法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15036443106558.html">第十六条 提供"全能初始化方法"</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15036306506140.html">第十五条 用前缀避免命名空间冲突</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15035622628066.html">第十四条 理解"类对象"的用意</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

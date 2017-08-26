@@ -182,23 +182,21 @@
 
 <p>首先在RN引用的类中加入<code>UIDocumentInteractionControllerDelegate</code>我们要用到这个来呈现预览视图：</p>
 
-<p>NativeUtil.h<br/>
-```oc</p>
+<p>NativeUtil.h</p>
 
-<h1 id="toc_0">import <Foundation/Foundation.h></h1>
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+#import &quot;RCTBridgeModule.h&quot;
+#import &quot;UIView+React.h&quot;       //要引入这个头文件，在rn中创建和加载原声视图
 
-<h1 id="toc_1">import &quot;RCTBridgeModule.h&quot;</h1>
 
-<h1 id="toc_2">import &quot;UIView+React.h&quot;       //要引入这个头文件，在rn中创建和加载原声视图</h1>
+@interface NativeUtil : NSObject &lt;RCTBridgeModule,UIDocumentInteractionControllerDelegate&gt;
 
-<p>@interface NativeUtil : NSObject <RCTBridgeModule,UIDocumentInteractionControllerDelegate></p>
-
-<p>@end<br/>
-```</p>
+@end
+</code></pre>
 
 <p>在NativeUtil.m中实现该委托。定义一个暴露给RN的方法，在js中调用：</p>
 
-<pre><code class="language-oc">RCT_EXPORT_METHOD(ShowFileChooser: (RCTResponseSenderBlock)callback){
+<pre><code class="language-objc">RCT_EXPORT_METHOD(ShowFileChooser: (RCTResponseSenderBlock)callback){
   
     NSString *filePath = @&quot;ceshi007&quot;;           callback(@[[NSNull null],filePath]);    //测试callback，从native向rn传值。
 
@@ -218,7 +216,7 @@
 
 <p>之后定义<code>(UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller</code>方法，要加载出来预览的界面，上述方法必须实现，且返回一个当前的页面的ViewController。用于作为预览视图的父ViewController来弹出modal。</p>
 
-<pre><code class="language-oc">- (UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller{
+<pre><code class="language-objc">- (UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller{
   UIViewController *newVC =[self getPresentedViewController];  //获取当前屏幕中present出来的viewcontroller。
    return newVC;
 };
@@ -226,7 +224,7 @@
 
 <p>这里我们是在一个非视图类创建并在加载一个视图，所以我们要先获取到当前界面的<code>ViewController</code>，将被展示的<code>view</code>加到当前<code>view</code>的子视图，或用当前view <code>presentViewController</code>，或<code>pushViewContrller</code>。这里我从网上找到了两个方法：</p>
 
-<pre><code class="language-oc">//获取当前屏幕显示的viewcontroller
+<pre><code class="language-objc">//获取当前屏幕显示的viewcontroller
 - (UIViewController *)getCurrentVC  
 {  
     UIViewController *result = nil;  
@@ -257,7 +255,7 @@
 } 
 </code></pre>
 
-<pre><code class="language-oc">//获取当前屏幕中present出来的viewcontroller
+<pre><code class="language-objc">//获取当前屏幕中present出来的viewcontroller
 - (UIViewController *)getPresentedViewController  
 {  
     UIViewController *appRootVC = [UIApplication sharedApplication].keyWindow.rootViewController;  
@@ -382,31 +380,31 @@
 	      
 		      
 			      <li class="post">
-			        <a href="15034774413129.html">第十三条 用"方法调配技术"调试"黑盒方法"</a>
+			        <a href="15037148888105.html">尽量使用不可变对象</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15033908572762.html">第十二条 消息转发机制(Message forwarding)</a>
+			        <a href="15037100500253.html">第十七条 实现description方法</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15033059328138.html">第十一条:理解Objc_msgSend的作用</a>
+			        <a href="15036443106558.html">第十六条 提供"全能初始化方法"</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15032784762045.html">小论文想法</a>
+			        <a href="15036306506140.html">第十五条 用前缀避免命名空间冲突</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="14993030681229.html">Caffe最优化求解过程</a>
+			        <a href="15035622628066.html">第十四条 理解"类对象"的用意</a>
 			      </li>
 		     
 		  

@@ -4,13 +4,486 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-08-22T19:35:25+08:00</updated>
+  <updated>2017-08-26T10:30:59+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[尽量使用不可变对象]]></title>
+    <link href="https://lockxmonk.github.io/15037148888105.html"/>
+    <updated>2017-08-26T10:34:48+08:00</updated>
+    <id>https://lockxmonk.github.io/15037148888105.html</id>
+    <content type="html"><![CDATA[
+<p>我们在设计类的时候，运用属性来封装数据。并且使用属性时候，<strong>可以将属性直接设置为“只读”（read-only）</strong>。默认情况下是“可读也可写”的。</p>
+
+<p>不过，一般情况下我们要建模的数据未必需要改变。比方说，某数据所表示的对象源自一项只读的网络服务(web service),里面可能包含一系列需要显示在地图上的相关点，像这种对象就没必要改变其内容。即使修改了，新数据也不会推送回服务器.</p>
+
+<p>而且如果把可变对象（mutable object)放入<code>collection</code>之后又修改其内容，那么很容易就会破坏<code>set</code>的内部数据结构，使其失去固有的语义。</p>
+
+<p>我们来举例：</p>
+
+<p>为了将<code>EOCPointOflnterest</code>做成不可变的类，需要把所有属性都声明为<code>readonly</code>:</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@interface EOCPointOfInterest : NSObject
+@property (nonatomic, copy, readonly) NSString *identifier; 
+@property (nonatomic, copy, readonly) NSString* title;
+@property (nonatomic, assign, readonly) float latitude; 
+@property (nonatomic, assign, readonly) float longitude;
+-(id) initWithldentifier: (NSString*) identifier 
+                   title:(NSString*)title 
+                   latitude: (float) latitude 
+                   longitude: (float) longitude;
+@end
+
+</code></pre>
+
+<p>这样后如果有人想要改变属性值，那么编译时就会报错。对象中的属性值可以读出，但是无法写入，这就能保证<code>EOCPointOfluterest</code>中的各个数据之间总是相互协调的。</p>
+
+<p>但是我们有时想要修改封装在对象内部的数据，不想令这些数据为外人所改动。这种情况下，通常做法是在对象内部将<code>readonly</code>属性重新声明为<code>readwrite</code>。当然，如果该属性是nonatomic 的，那么这样做可能会产生“竞争条件”（racecondition)。在对象内部写人某属性时，对象外的 观察者也许正读取该属性。若想避免此问题，我们可以在必要时通过<mark>“派发队列&quot;（dispatchqueue）等手段，将(包括对象内部的）所有数据存取操作都设为同步操作</mark>。<strong><font color=red>将属性在对象内部重新声明为<code>readwrite</code>这一操作可于<code>“class-continuation分类”</code>中完成，在公共接口中声明的属性可于此处重新声明，属性的其他特质必须保持不变，而<code>readonly</code>可扩展为<code>readwrite</code>。</font></strong></p>
+
+<p>其 <code>“class-continuation分类”</code>可以这样写：</p>
+
+<pre><code class="language-objc">// .m文件中
+#import &quot;EOCPointOfInterest.h&quot;
+
+@interface EOCPointOfInterest : NSObject
+@property (nonatomic, copy, readwrite) NSString *identifier; 
+@property (nonatomic, copy, readwrite) NSString* title;
+@property (nonatomic, assign, readwrite) float latitude; 
+@property (nonatomic, assign, readwrite) float longitude;
+
+@implementation EOCPointOfInterest
+
+/* ... */
+
+@end
+</code></pre>
+
+<p>现在，只能于<code>EOCPoimOflnterest</code>实现代码内部设置这些属性值了。但是我们其实可以同构KVC键值编码来设置这些属性值。不过，这样显然违背了我们的本意，绕过了提供的API。不推荐这种做法。</p>
+
+<p>我们定义类公共的API时，<strong><font color=red>要注意一件事情：对象里表示各种collection的那些属性究竞应该设成可变的，还是不可变的。</font></strong>例如，我们用某个类来表示个人信息，该类里还存放了一些引用，指向此人的诸位朋友。你可能想把这个人的全部朋友都放在一个“列表&quot;（list)里，并将其做成属性。假如开发者可以添加或删除此人的朋友，那么这个属性就需要用可变的<code>set</code>来实现。在这种情况下，通常应该提供一个<code>readonly</code>属性供外界使用，该属性将返回不可变的<code>set</code>, 而此<code>set</code>则是内部那个可变<code>set</code>的一份拷贝。比方说，下面这段代码就能够实现出这样一个类：</p>
+
+<pre><code class="language-objc">// EOCPerson.h
+#import &lt;Foundation/Foundation•h&gt;
+@interface EOCPerson : NSObject
+@property (nonatomic, copy, readonly) NSString *firstName; 
+@property (nonatomic, copy, readonly) NSString *lastName; 
+@property (nonatomic, strong, readonly) NSSet *friends;
+-(id)initWithFirstName:(NSString*)firstName
+          andLastName:(NSString*)lastName;
+-(void)addFriend:(EOCPerson*)person;
+-(void)removeFriend:(EOCPerson*)person;
+
+@end
+
+// EOCPerson.m #import &quot;EOCPerson•!!
+@interface EOCPerson ()
+@property (nonatomic, copy, readwrite) NSString *firstName; 
+@property (nonatomic, copy, readwrite) NSString *lastName;
+@end
+@implementation EOCPerson {
+    NSMutableSet *_internalFriends;
+}
+
+-(NSSet*)friends {
+    return [_internalFriends copy];
+}
+-(void)addFriend:(EOCPerson*)person {
+    [_internalFriends addObject:person];
+} 
+
+-(void)removeFriend:(EOCPerson*)person {
+    [_internalFriends removeObjectrperson];
+}
+
+-(id)initWithFirstName: (NSString*)firstName andLastName:(NSString*)lastName { 
+    if ((self = [super init】））{
+         _firstName = firstName;
+         _lastName = lastName;
+         _internalFriends = [NSMutableSet new];
+    }
+    return self;
+}
+
+@end
+
+</code></pre>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>尽量创建不可变的对象。</li>
+<li>若某属性仅可于对象内部修改，则在<code>“class-continuation分类”</code>中将其由<code>readonly</code>属性扩展为<code>readwrite</code>属性</li>
+<li>不要把可变的<code>collection</code>作为属性公开，而应提供相关方法，以此修改对象中的可变<code>collection</code>。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[第十七条 实现description方法]]></title>
+    <link href="https://lockxmonk.github.io/15037100500253.html"/>
+    <updated>2017-08-26T09:14:10+08:00</updated>
+    <id>https://lockxmonk.github.io/15037100500253.html</id>
+    <content type="html"><![CDATA[
+<p>调试程序时，我们一般要将对象的属性<code>NSLog</code>出来：</p>
+
+<pre><code class="language-objc">NSLog(@&quot;object = %@&quot;,object);
+</code></pre>
+
+<p>如果我们输出的对象是数组，或者字典和其它数据是可以将数据打印出来。但是如果打印的是自定义的类，那么输出的对象就类似于：</p>
+
+<pre><code class="language-objc">object = &lt;EOCPerson:0x7fd9a1600600&gt;
+</code></pre>
+
+<p>上面这种信息很不实用，所以我们要在自己的类里覆写<code>description</code>方法，否则打印信息时就会调用<code>NSObject</code>类所实现的默认方法。此方法定义在<code>NSObject</code>协议里，不过<code>NSObject</code>类也实现了它。</p>
+
+<p>想输出更为有用的信息也很简单，只需覆写<code>description</code>方法并将描述此对象的字符串 返回即可。例如，有下面这个代表个人信息的类：</p>
+
+<pre><code class="language-objc">//EOCPerson.h
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface EOCPerson : NSObject
+
+@property(nonatomic, readonly, copy)NSString *firstname;
+@property (nonatomic, copy, readonly) NSString *lastName;
+
+-(id) initWithFirstName: (NSString*) firstName lastName:(NSString*) lastName;
+
+@end
+
+//EOCPerson.m
+#import &quot;EOCPerson.h&quot;
+
+@implementation EOCPerson
+
+-(id)initWithFirstName:(NSString *)firstName lastName:(NSString *)lastName{
+    if ((self = [super init])) {
+        _firstname = [firstName copy];
+        _lastName = [lastName copy];
+    }
+    return self;
+}
+//description方法
+-(NSString*)description{
+
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , \&quot;%@ %@\&quot;&gt;&quot; , [self class], self ,_firstname ,_lastName ];
+}
+
+@end
+
+
+</code></pre>
+
+<p>那么输出就是：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+#import &quot;EOCPerson.h&quot;
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        EOCPerson *person = [[EOCPerson alloc] initWithFirstName:@&quot;Liang&quot; lastName:@&quot;Zhonghao&quot;];
+        NSLog(@&quot;Person = %@&quot; , person);
+    }
+    return 0;
+}
+
+</code></pre>
+
+<p><img src="media/15037100500253/15037119639541.jpg" alt=""/></p>
+
+<blockquote>
+<p><strong>建议：在新实现的 description方法中，也应该像默认的实现那样，打印出类的名字和指针地址，因为这些内容 有时也许会用到。</strong></p>
+</blockquote>
+
+<p>我们也可以借助字典类型的<code>description</code>方法来将打印何种信息标识出来：</p>
+
+<pre><code class="language-objc">
+-(NSString*)description{
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , 
+    [self class],
+     self, 
+     @{@&quot;firstname&quot;:_firstname,
+       @&quot;lastname&quot;:_lastName}];
+}
+</code></pre>
+
+<p>输出为：<br/>
+<img src="media/15037100500253/15037132520686.jpg" alt=""/></p>
+
+<p><code>NSObject</code>协议中还有个方法要注意，那就是<code>debugDescription</code>,此方法的用意与 <code>description</code>非常相似。二者区别在于，<code>debugDescription</code>方法是开发者在调试器（debugger) 中以控制台命令打印对象时才调用的。在<code>NSObject</code>类的默认实现中，此方法只是直接调用了<code>description</code>。我们还拿上个例子来说明：</p>
+
+<p><img src="media/15037100500253/15037137809556.jpg" alt=""/></p>
+
+<p>我们在NSLog下面打一个断点，进入调试模式，之后向调试控制台里输入命令。LLDB的“po”命令 可以完成对象打印（print-object)工作，其输出如下：<br/>
+<img src="media/15037100500253/15037138780545.jpg" alt=""/></p>
+
+<p>当然我们可以把人名放在<code>EOCPerson</code>对象的普通描述信息中，而把更详尽的内容放在调试所用的描述信息里：</p>
+
+<pre><code class="language-objc">-(NSString*)description{
+    return [NSString stringWithFormat:@&quot;%@ : %@&gt;&quot; , _firstname ,_lastName ];
+}
+
+-(NSString*)debugDescription{
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , [self class], self , @{@&quot;firstname&quot;:_firstname,@&quot;lastname&quot;:_lastName}];
+}
+
+</code></pre>
+
+<p>运行之后如下：<br/>
+<img src="media/15037100500253/15037141337080.jpg" alt=""/></p>
+
+<p>你可能不想把类名与指针地址这种额外内容放在普通的描述信息里，但是却希望调试的 时候能够很方便地看到它们，在此情况下，就可以使用这种输出方式来实现。Foundation框架的<code>NSArray</code>类就是这么做的.</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>实现<code>description</code>方法返回一个有意义的字符串，用以描述该实例。</li>
+<li>若想在调试时打印出更详尽的对象描述信息，则应实现<code>debugDescription</code>方法。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[第十六条 提供"全能初始化方法"]]></title>
+    <link href="https://lockxmonk.github.io/15036443106558.html"/>
+    <updated>2017-08-25T14:58:30+08:00</updated>
+    <id>https://lockxmonk.github.io/15036443106558.html</id>
+    <content type="html"><![CDATA[
+<p>我们知道,所有的对象都要初始化但是有些对象可能有很多初始化方法(根据初始的信息来选择用哪个).我们以iOS的UI框架UIKit为例，其中有个类叫做<code>UITableViewCell</code>,初始化该类对象 时，需要指明其样式及标识符，标识符能够区分不同类型的单元格。由于这种对象的创 建成本较高，所以绘制表格时可依照标识符来复用，以提升程序效率。<strong><font color=red>我们把这种可为 对象提供必要信息以便其能完成工作的初始化方法叫做“全能初始化方法”（designated initializer)</font></strong></p>
+
+<p>我们看下面这个NSDate的例子：</p>
+
+<pre><code class="language-objc">-(id)init
+-(id)initWithString:(NSString*)string
+-(id)initWithTimelntervalSinceNow:(NSTimelnterval)seconds
+-(id)initWithTimelnterval:(NSTimelnterval)seconds
+                sinceDate:(NSDate*)refDate
+-(id)initWithTimeIntervalSinceReferenceDate:(NSTimelnterval)seconds
+-(id)initWithTimeIntervalSincel970:(NSTimelnterval)seconds
+</code></pre>
+
+<p><mark><strong>那么多的初始化方法中，我们要选一个全能初始化方法，让其他的初始化方法都来调用它。</strong></mark>，只有在全能初始化方法中，才会存储内部数据。这样的话，当底层数据存储机制改变时，只需修改此方法的代码就好，无须改动其他初始化方法。</p>
+
+<p>我们来用代码举例：</p>
+
+<p><em>首先定义一个表示矩形的类：</em></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@interface EOCRectangle : NSObject
+@property (nonatomic, assign, readonly) float width;
+@property (nonatomic, assign, readonly) float height; 
+@end
+</code></pre>
+
+<p>然后定义一个初始化方法：</p>
+
+<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight:(float)height
+{
+    if ((self = [super init])) {
+        _width = width;
+        _height = height;
+    }
+    return self;
+}
+</code></pre>
+
+<p>这样就会有一个问题，当有人用<code>[[EOCRectanglealloc]init]</code>来创建矩形时，因为<code>NSObject</code>中已经实现了<code>init</code>方法，如果把<code>alloc</code>方法分配好的<code>EOCRectangle</code>交由此方法来初始化，那么矩形的宽度与高度就是0,因为全部实例变量都设为0了。这种情况我们应该覆写<code>init</code>方法：</p>
+
+<pre><code class="language-objc">// Using default values
+-(id)init {
+    return [self initWithWidth:5.Of andHeight:10.Of];
+)
+// Throwing an exception
+-(id)init {
+    @throw [NSException
+    exceptionWithName:NSInternalInconsistencyException 
+    reason:@&quot;Must use initWithWidth:andHeight: instead.&quot; 
+    userInfo：nil]；
+}
+</code></pre>
+
+<p>还有一种情况，当我们创建名叫<code>EOCSquare</code>的类，令其成为<code>EOCRectangle</code>的子类时，新类的初始化方法写的时候要注意：</p>
+
+<pre><code class="language-objc">@import &quot;EOCRectangle.h&quot;
+@interface EOCSquare : EOCRectangle 
+-(id)initWithDimension:(float)dimension; 
+@end
+
+@implementation EOCSquare
+-(id)initWithDimension:(float)dimension {
+    return [super initwithwidth:dimension andHeightidimension];
+}
+@end
+</code></pre>
+
+<p>这了我们发现上面代码的初始化方法调用了父类的初始化方法，这样可能会导致一个问题：创建出一个”高度”和“宽度”不相等的正方形。所以：<strong><font color=red>如果子类的全能初始化方法与超类方法的名称不 同，那么总应覆写超类的全能初始化方法。</font></strong>在<code>EOCSquare</code>这个例子中，应该像下面这样覆写<code>EOCRectangle</code>的全能初始化方法：</p>
+
+<pre><code class="language-objc">-(id)initWithWidth:(float)width andHeight:(float)height { 
+    float dimension = MAX (width, height);  
+    return [self initWithDimension:dimension];
+}
+</code></pre>
+
+<p>覆写了这个方法之后，即便使用<code>init</code>来初始化<code>EOCSquare</code>对象，也能照常工作。原因在于, <code>EOCRectangle</code>类覆写了 <code>init</code>方法，并以默认值为参数，调用了该类的全能初始化方法。在用<code>init</code>方法初始化<code>EOCSquare</code>对象时，也会这么调用，不过由于<code>“initWithWidth:andHeight:”</code>已经在子类中覆写了，所以实际上执行的是<code>EOCSquare</code>类的这一份实现代码，而此代码又会调用本类的全能初始化方法。因此一切正常，调用者不可能创建出边长不相等的<code>EOCSquare</code>对象。</p>
+
+<p>当然如果我们不想覆写父类的全能初始化方法，认为这是调用者自己犯了错误。在这种情况下，常用的办法是覆写超类的全能初始化方法并于其中抛出异常：</p>
+
+<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight: (float) height {
+    @throw 
+        [NSException 
+            exceptionWithName:NSInternallnconsistencyException
+            reason: @&quot;Must use initWithDimension: instead.&quot;
+             userInfo：nil];
+</code></pre>
+
+<p><strong><mark>有时如果某个队形对象的实例有两种完全不同的创建方式，必须分开处理，所以就要编写多个全能初始化方法。</mark></strong>只要记住每个子类的全能初始化方法都应该调用其超类的对应方法，并逐层向上，应该先调用超类的相关方法，然后再执行与本类有关的任务。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>在类中提供一个全能初始化方法，并于文档里指明。其他初始化方法均应调用此方法。</li>
+<li><p>若全能初始化方法与超类不同，则需覆写超类中的对应方法。</p></li>
+<li><p>如果超类的初始化方法不适用于子类，那么应该覆写这个超类方法，并在其中抛出异常。</p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[第十五条 用前缀避免命名空间冲突]]></title>
+    <link href="https://lockxmonk.github.io/15036306506140.html"/>
+    <updated>2017-08-25T11:10:50+08:00</updated>
+    <id>https://lockxmonk.github.io/15036306506140.html</id>
+    <content type="html"><![CDATA[
+<p>oc与其他语言一个主要区别是没有那种内置的命名空间(namespace)机制. <mark>所以我们在编码时一定要注意命名冲突,尤其是潜在的命名冲突.</mark></p>
+
+<p>我们在创建应用程序时一定要注意,使用Cocoa创建应用程序时一定要注意,<strong><font color=red>Apple宣称保留使用&quot;两个字母前缀&quot;的权利</font></strong>,也就是说选用的前缀应该都是<strong><font color=red>三个字母</font></strong>.</p>
+
+<p>我们尤其应该注意,当你使用的一个三方库引入了一个你之前引入过的三方库.如果引入的这两个库的作者都没有给自己的库加前缀,那么应用程序很容易出现重复符号错误.</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li><p>选择与你公司,应用程序或二者有关联的名称作为类名的前缀,并在所有代码中均使用这一前缀.</p></li>
+<li><p>若自己所开发的程序库用到了第三方库,则应该为其中的名称加上前缀.</p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[第十四条 理解"类对象"的用意]]></title>
+    <link href="https://lockxmonk.github.io/15035622628066.html"/>
+    <updated>2017-08-24T16:11:02+08:00</updated>
+    <id>https://lockxmonk.github.io/15035622628066.html</id>
+    <content type="html"><![CDATA[
+<p>OC是一个极其动态的语言,那么运行期时,如何知道某个对象的类型呢? <mark>对象类型并非在编译期就绑定好了，而是要在运行期査找</mark>。而 且，还有个特殊的类型叫做id,它能指代任意的Objective-C对象类型。一般情况下，应该指明消息接收者的具体类型，这样的话，如果向其发送了无法解读的消息，那么编译器就会产生警告信息。而类型为<code>id</code>的对象则不然，编译器假定它能响应所有消息。</p>
+
+<p>“在运行期检视对象类型”这一操作也叫做<code>“类型信息査询”（introspection, “内省”）</code>，这 个强大而有用的特性内置于<code>Foundation</code>框架的<code>NSObject</code>协议里，凡是由公共根类（common root class，即NSObject与NSProxy)继承而来的对象都要遵从此协议。在程序中不要直接比较对象所属的类，明智的做法是调用“类型信息査询方法”</p>
+
+<p>我们先来了解Objective-C对象的本质:</p>
+
+<p><font color=red>每个Objective-C对象实例都是指向某块内存数据的指针。</font>所以在声明变量时，类型后面要跟一个字符：</p>
+
+<pre><code class="language-objc">NSString *pointerVariable = @&quot;Some string&quot;;
+</code></pre>
+
+<p>对于通用的对象类型id,由于其本身已经是指针了，所以我们能够这样写：</p>
+
+<pre><code class="language-objc">id genericTypedString = @&quot;Some string&quot;;
+</code></pre>
+
+<p>上面这种定义方式与用<code>NSString*</code>来定义相比，其语法意义相同。唯一区别在于，如果声明时指定了具体类型，那么在该类实例上调用其所没有的方法时，编译器会探知此情况,并发出警告信息。</p>
+
+<p>描述Objective-C对象所用的数据结构定义在运行期程序库的头文件里，<code>id</code>类型本身也<br/>
+在定义在这里：</p>
+
+<pre><code class="language-objc">typedef struct objc_object {
+    Class isa;
+} *id;
+</code></pre>
+
+<p><mark>由此可见，每个对象结构体的首个成员是<code>Class</code>类的变量。该变量定义了对象所属的类, 通常称为<code>“is a”</code>指针。例如，刚才的例子中所用的对象“是一个”（is a) NSString,所以其<code>“is a”</code>指针就指向<code>NSString</code>。</mark></p>
+
+<p><code>Class</code>对象也定义在运行期程序库的头文件中：</p>
+
+<pre><code class="language-objc">typedef struct objc_class *Class;
+struct objc_class {
+    Class isa;
+    Class super_class;
+    const char *name;
+    long version;
+    long info;
+    long instance_size;
+    struct objc_ivar_list *ivars;
+    struct objc_method_list **methodLists;
+    struct objc_cache *cache;
+    struct objc_protocol list *protocols;
+)；
+</code></pre>
+
+<p>此结构体存放类的<code>“元数据&quot;（metadata)</code>,例如类的实例实现了几个方法，具备多少个实例变量等信息。此结构体的首个变量也是<code>isa</code>指针，这说明<code>Class</code>本身亦为Objective-C对象。<font color=red> <strong>结构体里还有个变量叫做<code>superclass</code>,它定义了本类的超类。类对象所属的类型（也就是isa 指针所指向的类型）是另外一个类，叫做“元类&quot;（metaclass)，用来表述类对象本身所具备的元数据。“类方法”就定义于此处，因为这些方法可以理解成类对象的实例方法。</strong></font><mark>每个类仅有一个“类对象”，而每个“类对象”仅有一个与之相关的“元类”。</mark></p>
+
+<p>假设有个名为<code>SomeClass</code>的子类从<code>NSObject</code>中继承而来，则其继承体系如图所示。</p>
+
+<p><img src="media/15035622628066/15035642742167.jpg" alt=""/></p>
+
+<p><font color=red><strong>superclass 指针确立了继承关系，而 isa 指针描述了实例所属的类。</strong></font>通过这张布局关系图即可执行“类型信息査询”。我们可以査出对象是否能响应某个选择子，是否遵从某项协议，并且能看出此对象位于“类继承体系”（class hierarchy)的哪一部分。</p>
+
+<h2 id="toc_0">在类继承体系中查询类型信息</h2>
+
+<p>可以用类信息査询方法来检视类继承体系。<code>“isMemberOfClass:”</code>能够判断出对象是否为某个特定类的实例，而<code>“isKindOfClass:”</code>则能够判断出对象是否为某类或其派生类的实例,例如：</p>
+
+<pre><code class="language-objc">NSMutableDictionary *dict = [NSMutableDictionary new];
+[diet isMemberOfClass: [NSDictionary class] ] ; ///&lt; NO 
+[diet isMemberOfClass:[NSMutableDictionary class】】； ///&lt; YES 
+[diet isKindOfClass: [NSDictionary class】];///&lt; YES 
+[diet isKindOfClass2 [NSArray class]]; ///&lt; NO
+</code></pre>
+
+<p>像这样的类型信息査询方法使用isa指针获取对象所属的类，然后通过superclass指针 在继承体系中游走。由于对象是动态的，所以此特性显得极为重要。Objective-C与你可能熟 悉的其他语言不同，在此语言中，必须査询类型信息，方能完全了解对象的真实类型。</p>
+
+<p>由于Objective-C使用“动态类型系统&quot;（dynamic typing)，所以用于査询对象所属类的类 型信息査询功能非常有用。从<code>collection</code>中获取对象时，通常会査询类型信息，这些对象不 是“强类型的”（strongly typed),把它们从<code>collection</code>中取出来时，其类型通常是<code>id</code>。如果想 知道具体类型，那就可以使用类型信息査询方法。例如，想根据数组中存储的对象生成以逗 号分隔的字符串（comma-separated string),并将其存至文本文件，就可以使用下列代码：</p>
+
+<pre><code class="language-objc">-(NSString*)commaSeparatedStringFromObjects:(NSArray*)array {
+    NSMutablestring *string = [NSMutableStringnew]; 
+    for (id object in array) {
+        if ([object isKindOfClass:[NSStringclass]]) {
+            [string appendFormat:@&quot;%@,&quot;, object];
+        }else if ([object isKindOfClass:[NSNumberclass]）{
+            [string appendFormat:@&quot;%d&quot;, [object intValue]]；
+        } else if ([object isKindOfClass:[NSDataclass]])    {
+            NSString *base64Encoded = /* base64 encoded data */;
+            [string appendFormat: @&quot;%@&quot;, base64Encoded];
+        } else {
+              //Type not supported
+        }
+    }   
+    return string;
+}
+</code></pre>
+
+<p><mark>我们应该尽量使用类型信息査询方法，而不应该直接比较两个类对象是否等同(例如<code>if([object class] == [EOCSomeClass class])</code>)</mark>，因为前者可以正确处理那些使用了消息传递机制（参见第12条）的对象。比方 说，某个对象可能会把其收到的所有选择子都转发给另外一个对象。这样的对象叫做“代理” (proxy)，此种对象均以<code>NSProxy</code>为根类。</p>
+
+<p>通常情况下，如果在此种代理对象上调用class方法，那么返回的是代理对象本身（此类 是NSProxy的子类)，而非接受的代理的对象所属的类。然而，若是改用“isKindOfClass:” 这样的类型信息査询方法，那么代理对象就会把这条消息转给“接受代理的对象”（proxied object)。<font color=red>也就是说，这条消息的返回值与直接在接受代理的对象上面査询其类型所得的结果 相同。因此，这样査出来的类对象与通过class方法所返回的那个类对象不同，class方法所返回的类表示发起代理的对象，而非接受代理的对象。</font></p>
+
+<h2 id="toc_1">要点</h2>
+
+<ul>
+<li>每个实例都有一个指向Class对象的指针，用以表明其类型，而这些Class对象则构成了类的继承体系。</li>
+<li>如果对象类型无法在编译期确定，那么就应该使用类型信息査询方法来探知。</li>
+<li>尽量使用类型信息査询方法来确定对象类型，而不要直接比较类对象，因为某些对象可能实现了消息转发功能。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[第十三条 用"方法调配技术"调试"黑盒方法"]]></title>
@@ -2552,1664 +3025,6 @@ return self;
 <li> 在设置属性所对应的实例变量时，一定要遵从该属性所声明的语义。</li>
 <li> <font color=red>开发iOS程序时应该使用<code>nonatomic</code>属性，因为<code>atomic</code>属性会严重影响性能。</font></li>
 </ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Caffe模型]]></title>
-    <link href="https://lockxmonk.github.io/14986110416063.html"/>
-    <updated>2017-06-28T08:50:41+08:00</updated>
-    <id>https://lockxmonk.github.io/14986110416063.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">内存中的表示</a>
-</li>
-<li>
-<a href="#toc_1">磁盘上表示</a>
-</li>
-<li>
-<a href="#toc_2">Caffe Modal Zoo</a>
-</li>
-</ul>
-
-
-<p>我们之前学习过,一个完整的深度学习系统最核心的两个方面是<strong>数据</strong>和<strong>模型</strong>。今大我们 主要关注模型。一个深度学习模型通常由<strong>三部分</strong>参数组成：</p>
-
-<ul>
-<li>可学习参数（Leamable Parameter),又称可训练参数、神经网络权系数、权重，其数值<strong>由模型初始化参数、误差反向传播过程控制</strong>,一般不可人工干预.</li>
-<li>结构参数（Archetecture Parameter),包括<strong>卷积层/全连接层/下采样层数目、卷积核数目、 卷积核大小等描述网络结构的参数</strong>,一旦设定好,在网络训练阶段不能更改;值得注意的是,训练阶段网络结构参数和预测阶段结构参数很可能不同。</li>
-<li>训练超参数（Hyper-Parameter),用来控制网络训练收敛的参数，训练阶段可以自动或手动调节以获得更好的效果，预测阶段不需要该参数.</li>
-</ul>
-
-<p>在Caffe中，一个模型的三部分参数分别由<strong>不同模块定义和实现</strong>:</p>
-
-<ul>
-<li><strong>可学习参数</strong>在内存中使用Blob对象保持，必要时以二进制ProtoBuffer文件(*.caffemodel)形态序列化并存储于磁盘上，便于进一步微调（finetune,又称精调）、共享（例如参数服务器Parameter Server, PS)、性能评估（benchmark)。</li>
-<li><strong>结构参数</strong>使用ProtoBuffer文本格式（*.prototxt)描述，网络初始化时通过该描述文件构建Net对象、Layer对象形成有向无环图结构，在Layer与Layer之间、Net输入源和输出阱均为持有数据和中间结果的Blob对象。</li>
-<li><strong>训练超参数</strong>同样使用ProtoBuffer文本格式（*.prototxt)描述，训练阶段利用该描述文件构建求解器（Solver)对象，该对象按照一定规则在训练网络时自动调节这些超参数值。</li>
-</ul>
-
-<p>我们在MNIST例子中对LeNet-5模型稍微修改一下.变成逻辑回归（Logistic Regression, LR)分类器。<br/>
-<img src="media/14986110416063/14986122892113.jpg" alt=""/></p>
-
-<p>复制一份<code>examples/mnist/lenet_train_test.prototxt</code>,重命名为 <code>lenet_lr.prototxt</code>，修改内容如下:</p>
-
-<pre><code class="language-protobuf">
-name: &quot;LeNet&quot;
-layer {
-  name: &quot;mnist&quot;
-  type: &quot;Data&quot;
-  top: &quot;data&quot;
-  top: &quot;label&quot;
-  include {
-    phase: TRAIN
-  }
-  transform_param {
-    scale: 0.00390625
-  }
-  data_param {
-    source: &quot;examples/mnist/mnist_train_lmdb&quot;
-    batch_size: 64
-    backend: LMDB
-  }
-}
-layer {
-  name: &quot;mnist&quot;
-  type: &quot;Data&quot;
-  top: &quot;data&quot;
-  top: &quot;label&quot;
-  include {
-    phase: TEST
-  }
-  transform_param {
-    scale: 0.00390625
-  }
-  data_param {
-    source: &quot;examples/mnist/mnist_test_lmdb&quot;
-    batch_size: 100
-    backend: LMDB
-  }
-}
-layer {
-  name: &quot;ip&quot;
-  type: &quot;InnerProduct&quot;
-  bottom: &quot;data&quot;
-  top: &quot;ip&quot;
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  inner_product_param {
-    num_output: 20
-    weight_filler {
-      type: &quot;xavier&quot;
-    }
-    bias_filler {
-      type: &quot;constant&quot;
-    }
-  }
-}
-layer {
-  name: &quot;accuracy&quot;
-  type: &quot;Accuracy&quot;
-  bottom: &quot;ip&quot;
-  bottom: &quot;label&quot;
-  top: &quot;accuracy&quot;
-  include {
-    phase:TEST
-  }
-}
-layer {
-  name: &quot;loss&quot;
-  type: &quot;SoftmaxWithLoss&quot;
-  bottom: &quot;ip&quot;
-  bottom: &quot;label&quot;
-  top: &quot;loss&quot;
-}
-
-</code></pre>
-
-<p>复制一份<code>examples/mnist/lenet_solver.prototxt</code>，重命名为<code>lenet_lr_solver.prototxt</code>,修改内容<br/>
-如下:</p>
-
-<pre><code class="language-protobuf">
-# The train/test net protocol buffer definition
-net: &quot;examples/mnist/lenet_lr.prototxt&quot;
-# test_iter specifies how many forward passes the test should carry out.
-# In the case of MNIST, we have test batch size 100 and 100 test iterations,
-# covering the full 10,000 testing images.
-test_iter: 100
-# Carry out testing every 500 training iterations.
-test_interval: 500
-# The base learning rate, momentum and the weight decay of the network.
-base_lr: 0.01
-momentum: 0.9
-weight_decay: 0.0005
-# The learning rate policy
-lr_policy: &quot;inv&quot;
-gamma: 0.0001
-power: 0.75
-# Display every 100 iterations
-display: 100
-# The maximum number of iterations
-max_iter: 10000
-# snapshot intermediate results
-snapshot: 5000
-snapshot_prefix: &quot;examples/mnist/lenet&quot;
-# solver mode: CPU or GPU
-solver_mode: CPU
-
-</code></pre>
-
-<p>然后运行训练命令,在命令行输入:</p>
-
-<pre><code>./build/tools/caffe train --solver=examples/mnist/lenet_lr_solver.prototxt
-</code></pre>
-
-<p>但是发现报错了:<br/>
-<img src="media/14986110416063/14986154204478.jpg" alt=""/></p>
-
-<p>通过上述错误描述,发现是lmdb数据文件没有的问题....</p>
-
-<p>运行<code>./examples/mnist/create_mnist.sh</code>脚本,将之前下载过的数据转化成lmdb形式.中间的报错和解决如截图所示:</p>
-
-<p><img src="media/14986110416063/14986155733551.jpg" alt=""/></p>
-
-<p>我们成功获得到了lmdb文件.</p>
-
-<p>再次执行训练命令:</p>
-
-<pre><code>master) ✗ ./build/tools/caffe train --solver=examples/mnist/lenet_lr_solver.prototxt
-</code></pre>
-
-<p>然后就发现已经开始训练了.</p>
-
-<p>最后得到结果如图所示:<br/>
-<img src="media/14986110416063/14986195740444.jpg" alt=""/></p>
-
-<p>经过训练，可以获得在测试集上分类准确率为0.9908的模型。相比LeNet-5而言准确率降低了，这也符合直觉，因为将模型简化后参数变少，层数变少，网络表达能力变差。我们今天不关注准确率，只关注模型的表达方式。</p>
-
-<h2 id="toc_0">内存中的表示</h2>
-
-<p>从运行的log文件可以追踪模型是如何从prototxt描述变为内存中表示方式的,</p>
-
-<p>看到这行:</p>
-
-<pre><code>
- Creating training net from net file:
-examples/mnist/lenet_lr.prototxt
-
-// ...不要在意这些细节
-Initializing net from parameters:
-
-</code></pre>
-
-<p>追踪<code>solver.cpp</code>的第87行，看到如下代码：</p>
-
-<pre><code class="language-c++">
-//前面省略..
-//在solver.hpp 中声明了SolverParameterparam_
-//它是ProtoBuffer工具生成的结构体,用来解析lenet_lr_solver.prototxt
-if (param_.has_net()) {
-    LOG_IF(INFO, Caffe::root_solver()) //打印log
-        //这里param_.net()会返回examples/mnist/lenet_lr.prototxt 
-        &lt;&lt; &quot;Creating training net from net file: &quot; &lt;&lt; param_.net();
-    ReadNetParamsFromTextFileOrDie(param_.net(), &amp;net_param);
-  }
-  
-</code></pre>
-
-<h2 id="toc_1">磁盘上表示</h2>
-
-<p>Caffe使用ProtoBuffer二进制文件有最小文件尺寸，并由ProtoBuffer工具自动生成高效的序列化/反序列化接U口(多语言支持，包括C++、Java、Python)，以及可读性好、兼容二进制文件的文本格式.</p>
-
-<p>我们仍然从运行log查找线索:</p>
-
-<pre><code>Snapshotting to binary proto file
-examples/mn is t/lenet__iter_l 0000. caffemodel
-
-Snapshotting solver state to binary proto file examples/mnist/Xenet_iter_10000.solverstate
-
-</code></pre>
-
-<p>其中,<code>.caffemodel</code>文件是在特定训练间隙保存的二进制文件，包含当前网络各层的权值状态;而<code>.solverstate</code>是与<code>.caffemodel</code>一起产生的二进制文件，<strong>包含从上次停止点恢复训练模型所需的信息</strong>。我们具体看下列代码：</p>
-
-<p>追踪<code>solver.cpp</code>的第445行,上下文信息如下所示:</p>
-
-<pre><code class="language-c++">
-template &lt;typename Dtype&gt;
-string Solver&lt;Dtype&gt;::SnapshotToBinaryProto() {
-//得到模型文件名
-  string model_filename = SnapshotFilename(&quot;.caffemodel&quot;);
-  LOG(INFO) &lt;&lt; &quot;Snapshotting to binary proto file &quot; &lt;&lt; model_filename;
-  NetParameter net_param;
-  //将net_转换为Netparameter
-  net_-&gt;ToProto(&amp;net_param, param_.snapshot_diff());
-  ///写入 ProtoBuffer 二进制文件，这里是 lenet_iter_10000.caffemodel
-    WriteProtoToBinaryFile(net_param, model_filename);
-  return model_filename;
-}
-
-</code></pre>
-
-<p>追踪<code>sgd_solver.cpp</code>的259行:</p>
-
-<pre><code class="language-c++">
-template &lt;typename Dtype&gt;
-void SGDSolver&lt;Dtype&gt;::SnapshotSolverStateToBinaryProto(
-    const string&amp; model_filename) {
-  SolverState state;    //创建一个序列化对象
-  state.set_iter(this-&gt;iter_);  //记录当前的迭代次数
-  state.set_learned_net(model_filename); //记录网络描述文件
-  state.set_current_step(this-&gt;current_step_);  //记录当前步进值
-  state.clear_history();    //清空容器,准备接纳新内容
-  for (int i = 0; i &lt; history_.size(); ++i) {
-    // Add history 记录权值的历史信息
-    BlobProto* history_blob = state.add_history();
-    history_[i]-&gt;ToProto(history_blob);
-  }
-  string snapshot_filename = Solver&lt;Dtype&gt;::SnapshotFilename(&quot;.solverstate&quot;);
-  LOG(INFO)
-    &lt;&lt; &quot;Snapshotting solver state to binary proto file &quot; &lt;&lt; snapshot_filename;
-    //将SolverState对象写入二进制文件（*.solverstate)
-  WriteProtoToBinaryFile(state, snapshot_filename.c_str());
-}
-
-</code></pre>
-
-<p><strong>从磁盘上将模型、求解器状态文件载入内存的过程与上面代码刚好相反，我们可自行跟踪阅读。</strong></p>
-
-<h2 id="toc_2">Caffe Modal Zoo</h2>
-
-<p>对于前面我们运行的简单模型，可以从头训练（from scrash)。然而，对于规模更大、结构更复杂的模型，从头训练需耍解决两个问题：首先是硬件计算能力。模型训练十分消耗计算资源，使用普通计算机需要相当长的时间，不经济：而且世界上每个研究机构都从头训练，重复性工作太多，不环保。其次是调参能力。<strong>同样的模型设计，可能每个人训练结果都不一致，中间调参是项技术活，控制不当会引起训练发散或训练不充分，无法达到理想的分类效果</strong>。</p>
-
-<p>为了解决上述问题,<strong>Caffe Model Zoo</strong>则提供了一个分享模型的平台，世界各地的研究人员都可以把自己的训练成果共享给社区中更多的人使用，节省人力、物力。</p>
-
-<p><strong>今天我们也站在前人的肩膀上，运行一个基于已训练模型的图片分类例程</strong>。我们首先需要下载几个文件。</p>
-
-<p>下载meta数据到当前目录:</p>
-
-<pre><code>➜  caffe git:(master) ✗ cd data/ilsvrc12
-
-➜  ilsvrc12 git:(master) ✗ ./get_ilsvrc_aux.sh
-
-Downloading...
---2017-06-29 10:54:55--  http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz
-Resolving dl.caffe.berkeleyvision.org... 169.229.222.251
-Connecting to dl.caffe.berkeleyvision.org|169.229.222.251|:80... connected.
-HTTP request sent, awaiting response... 302 Found
-Location: http://202.114.49.110/cache/9/02/berkeleyvision.org/6b5ff42be9dd0690a814318a14401a7f/caffe_ilsvrc12.tar.gz [following]
---2017-06-29 10:54:56--  http://202.114.49.110/cache/9/02/berkeleyvision.org/6b5ff42be9dd0690a814318a14401a7f/caffe_ilsvrc12.tar.gz
-Connecting to 202.114.49.110:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 17858008 (17M) [application/octet-stream]
-Saving to: ‘caffe_ilsvrc12.tar.gz’
-
-caffe_ilsvrc12.tar. 100%[===================&gt;]  17.03M  9.67MB/s    in 1.8s
-
-2017-06-29 10:54:58 (9.67 MB/s) - ‘caffe_ilsvrc12.tar.gz’ saved [17858008/17858008]
-
-Unzipping...
-Done.
-
-</code></pre>
-
-<p>下载caffenet模型:</p>
-
-<pre><code>➜  ilsvrc12 git:(master) ✗ cd ../../models/bvlc_reference_caffenet
-
-➜  bvlc_reference_caffenet git:(master) ✗ wget http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
---2017-06-29 11:14:10--  http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
-Resolving dl.caffe.berkeleyvision.org... 169.229.222.251
-Connecting to dl.caffe.berkeleyvision.org|169.229.222.251|:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 243862418 (233M) [application/octet-stream]
-Saving to: ‘bvlc_reference_caffenet.caffemodel’
-
-bvlc_reference_caffen 100%[=========================&gt;] 232.56M   129KB/s    in 21m 50s
-
-2017-06-29 11:36:01 (182 KB/s) - ‘bvlc_reference_caffenet.caffemodel’ saved [243862418/243862418]
-
-</code></pre>
-
-<p>回到根目录执行:</p>
-
-<pre><code>
-➜  caffe git:(master) ✗ ./build/examples/cpp_classification/classification.bin \
-models/bvlc_reference_caffenet/deploy.prototxt \
-models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel \
-data/ilsvrc12/imagenet_mean.binaryproto \
-data/ilsvrc12/synset_words.txt \
-examples/images/cat.jpg
-
-
-</code></pre>
-
-<p>发现报错:<br/>
-<img src="media/14986110416063/14987195644285.jpg" alt=""/></p>
-
-<p>执行:</p>
-
-<pre><code>
-➜  caffe git:(master) ✗ install_name_tool -add_rpath &#39;/Users/liangzhonghao/anaconda2/lib&#39;  /usr/local/Cellar/caffe/./build/examples/cpp_classification/classification.bin
-
-</code></pre>
-
-<p>再次运行上面命令,得出结果:<br/>
-<img src="media/14986110416063/14987199347439.jpg" alt=""/></p>
-
-<p>命令行解释如下:</p>
-
-<pre><code class="language-c++">➜  caffe git:(master) ✗ ./build/examples/cpp_classification/classification.bin \        //二进制程序名
-models/bvlc_reference_caffenet/deploy.prototxt \    //模型描述文件
-models/bvlc_reference_caffenet/     bvlc_reference_caffenet.caffemodel \        //*.caffemodel模型权值文件
-data/ilsvrc12/imagenet_mean.binaryproto \       //图像均值文件
-data/ilsvrc12/synset_words.txt \    //图像类别标签信息
-examples/images/mouse.png   //输入待分类图像
-
-</code></pre>
-
-<p>打开输入图像<code>examples/images/cat.jpg</code>:</p>
-
-<p><img src="media/14986110416063/cat.jpg" alt="cat"/></p>
-
-<p>命令行输出的预测结果为:</p>
-
-<p><img src="media/14986110416063/14987205986830.jpg" alt=""/></p>
-
-<p>可见给出了5个预测结果，按照概率分布从高到低的顺序排列。这种预测结果称为<code>Top-5</code>预测结果，对当前样本而言，分类准确率为5项之和。除<code>Top-5</code>预测结果之外，还有<code>Top-3、 Top-1等</code>预测结果，对当前样木的分类正确率分别为0.6749、0.3134。</p>
-
-<p>分类准确率不仅与验证数据集有关，与模型的关系也非常密切。我们在<code>Caffe Model Zoo</code>上找到几个模型在ILSVRC 2012验证数据集上的分类效果，如图所示。<br/>
-<img src="media/14986110416063/14987207716731.jpg" alt=""/></p>
-
-<p>可见单模型<strong>分类性能最好的是BVLC GoogLeNet</strong>。</p>
-
-<p>通过掌握上面的内容，并学习其他更多深度学习模型的设计和训练方法.</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用SQLite]]></title>
-    <link href="https://lockxmonk.github.io/14985505390356.html"/>
-    <updated>2017-06-27T16:02:19+08:00</updated>
-    <id>https://lockxmonk.github.io/14985505390356.html</id>
-    <content type="html"><![CDATA[
-<p>SQLite是一种嵌入式数据库，它的数据库就是一个文件。由于SQLite本身是C写的，而且体积很小，所以，经常被集成到各种应用程序中，甚至在iOS和Android的App中都可以集成。</p>
-
-<p>Python就内置了SQLite3，所以，在Python中使用SQLite，不需要安装任何东西，直接使用。</p>
-
-<p>在使用SQLite前，我们先要搞清楚几个概念：</p>
-
-<ol>
-<li><p>表是数据库中存放关系数据的集合，一个数据库里面通常都包含多个表，比如学生的表，班级的表，学校的表，等等。表和表之间通过外键关联。</p></li>
-<li><p>要操作关系数据库，首先需要连接到数据库，一个数据库连接称为Connection；</p></li>
-<li><p>连接到数据库后，需要打开游标，称之为Cursor，通过Cursor执行SQL语句，然后，获得执行结果。</p></li>
-<li><p>Python定义了一套操作数据库的API接口，任何数据库要连接到Python，只需要提供符合Python标准的数据库驱动即可。</p></li>
-</ol>
-
-<p>由于SQLite的驱动内置在Python标准库中，所以我们可以直接来操作SQLite数据库。</p>
-
-<p>我们在Python交互式命令行实践一下：</p>
-
-<pre><code class="language-python">
-# 导入SQLite驱动:
-&gt;&gt;&gt; import sqlite3
-
-# 连接到SQLite数据库
-# 数据库文件是test.db
-# 如果文件不存在，会自动在当前目录创建:
-&gt;&gt;&gt; conn = sqlite3.connect(&#39;test.db&#39;)
-# 创建一个Cursor:
-&gt;&gt;&gt; cursor = conn.cursor()
-# 执行一条SQL语句，创建user表:
-&gt;&gt;&gt; cursor.execute(&#39;create table user (id varchar(20) primary key, name varchar(20))&#39;)
-&lt;sqlite3.Cursor object at 0x104082490&gt;
-# 继续执行一条SQL语句，插入一条记录:
-&gt;&gt;&gt; cursor.execute(&#39;insert into user (id, name) values (\&#39;1\&#39; , \&#39;Michale\&#39;)&#39;)
-&lt;sqlite3.Cursor object at 0x104082490&gt;
-# 通过rowcount获得插入的行数:
-&gt;&gt;&gt; cursor.rowcount
-1
-# 关闭Cursor:
-&gt;&gt;&gt; cursor.close()
-# 提交事务:
-&gt;&gt;&gt; conn.commit()
-# 关闭Connection:
-&gt;&gt;&gt; conn.close()
-
-</code></pre>
-
-<p>创建和插入表数据后,我们来查询:</p>
-
-<pre><code class="language-python">
-&gt;&gt;&gt; conn = sqlite3.connect(&#39;test.db&#39;)
-&gt;&gt;&gt; cursor = conn.cursor()
-# 执行查询语句:
-&gt;&gt;&gt; cursor.execute(&#39;select * from user where id = ? &#39;, (&#39;1&#39;,))
-&lt;sqlite3.Cursor object at 0x104082500&gt;
-# 获得查询结果集:
-&gt;&gt;&gt; values = cursor.fetchall()
-&gt;&gt;&gt; values
-[(u&#39;1&#39;, u&#39;Michale&#39;)]
-&gt;&gt;&gt; cursor.close()
-&gt;&gt;&gt; conn.close()
-</code></pre>
-
-<p><font color=red><strong>注意事项</strong></font></p>
-
-<ol>
-<li><p>使用Python的DB-API时，只要搞清楚Connection和Cursor对象，打开后一定记得关闭，就可以放心地使用。</p></li>
-<li><p>使用Cursor对象执行<code>insert</code>，<code>update</code>，<code>delete</code>语句时，执行结果由<code>rowcount</code>返回影响的行数，就可以拿到执行结果。</p></li>
-<li><p>使用Cursor对象执行<code>select</code>语句时，通过<code>featchall()</code>可以拿到结果集。结果集是一个<code>list</code>，每个元素都是一个<code>tuple</code>，对应一行记录。</p></li>
-<li><p>如果SQL语句带有参数，那么需要把参数按照位置传递给<code>execute()</code>方法，有几个<code>?</code>占位符就必须对应几个参数，例如：</p></li>
-</ol>
-
-<pre><code class="language-py">
-cursor.execute(&#39;select * from user where name=? and pwd=?&#39;, (&#39;abc&#39;, &#39;123456&#39;))
-
-</code></pre>
-
-<p>SQLite支持常见的标准SQL语句以及几种常见的数据类型。具体文档请参阅SQLite官方网站。</p>
-
-<h2 id="toc_0">小结</h2>
-
-<p>在Python中操作数据库时，要先导入数据库对应的驱动，然后，通过Connection对象和Cursor对象操作数据。</p>
-
-<p>要确保打开的Connection对象和Cursor对象都正确地被关闭，否则，资源就会泄露。</p>
-
-<p>如何才能确保出错的情况下也关闭掉Connection对象和Cursor对象呢？请回忆<code>try:...except:...finally:...</code>的用法。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[数据转换器]]></title>
-    <link href="https://lockxmonk.github.io/14984437069936.html"/>
-    <updated>2017-06-26T10:21:46+08:00</updated>
-    <id>https://lockxmonk.github.io/14984437069936.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">数据结构描述</a>
-</li>
-<li>
-<a href="#toc_1">数据变换器的实现</a>
-</li>
-</ul>
-
-
-<p>Caffe的数据变换器（DataTransformer)主要提供了对原始输入图像的预处理方法，包括随机切块、随机镜像、幅度缩放、去均值、灰度/色度变换等。相信熟悉图像处理、OpenCV的读者对上述操作并不陌生。</p>
-
-<h2 id="toc_0">数据结构描述</h2>
-
-<pre><code class="language-protobuf">message TransformationParameter {
-  // For data pre-processing, we can do simple scaling and subtracting the
-  // data mean, if provided. Note that the mean subtraction is always carried
-  // out before scaling.
-  //像素幅度缩放参数，默认为1，即不缩放
-  optional float scale = 1 [default = 1];
-  // Specify if we want to randomly mirror data.
-  //图像随机镜像开关，默认为false,即不进行镜像操作
-  optional bool mirror = 2 [default = false];
-  // Specify if we would like to randomly crop an image.
-  //图像随机切块的大小，默认为0,即不进行切块操作
-  optional uint32 crop_size = 3 [default = 0];
-  // mean_file and mean_value cannot be specified at the same time(存储图像均值的文件)
-  optional string mean_file = 4;
-  // if specified can be repeated once (would subtract it from all the channels)
-  // or can be repeated the same number of times as channels
-  // (would subtract them from the corresponding channel)
-  //均值数值，无须读取文件。若数目与图像通道数相等，则每个图像通道分别减去对应的均值；如果只给出一个值.则毎个图像通道都减去同一个均值
-  repeated float mean_value = 5;
-  // Force the decoded image to have 3 color channels.
-  //强制为三通道彩色图像输入
-  optional bool force_color = 6 [default = false];
-  // Force the decoded image to have 1 color channels.
-  //强制为单通道灰度图像输入
-  optional bool force_gray = 7 [default = false];
-}
-
-</code></pre>
-
-<h2 id="toc_1">数据变换器的实现</h2>
-
-<p>数据变换器声明头文件位于<code>include/cafTe/data_transformer.hpp</code>中，如果需要单独使用该模块,应包含这个头文件。文件内容如下:</p>
-
-<pre><code class="language-c++">#ifndef CAFFE_DATA_TRANSFORMER_HPP
-#define CAFFE_DATA_TRANSFORMER_HPP
-
-#include &lt;vector&gt;
-
-#include &quot;caffe/blob.hpp&quot;
-#include &quot;caffe/common.hpp&quot;
-#include &quot;caffe/proto/caffe.pb.h&quot;
-
-namespace caffe {
-
-/**
- * @brief Applies common transformations to the input data, such as
- * scaling, mirroring, substracting the image mean...
- */
- //DataTransformer类声明
-template &lt;typename Dtype&gt;
-class DataTransformer {
- public:
- //显式构造函数
-  explicit DataTransformer(const TransformationParameter&amp; param, Phase phase);
-  //析构函数
-  virtual ~DataTransformer() {}
-
-  /**
-   * @brief Initialize the Random number generations if needed by the
-   *    transformation.
-   */
-   //初始化随机数种子函数
-  void InitRand();
-
-  /**
-   * @brief Applies the transformation defined in the data layer&#39;s
-   * transform_param block to the data.
-   *
-   * @param datum
-   *    Datum containing the data to be transformed.
-   * @param transformed_blob
-   *    This is destination blob. It can be part of top blob&#39;s data if
-   *    set_cpu_data() is used. See data_layer.cpp for an example.
-   */
-   //下面几种函数重载,以适应多种输入数据源
-  void Transform(const Datum&amp; datum, Blob&lt;Dtype&gt;* transformed_blob);
-
-  /**
-   * @brief Applies the transformation defined in the data layer&#39;s
-   * transform_param block to a vector of Datum.
-   *
-   * @param datum_vector
-   *    A vector of Datum containing the data to be transformed.
-   * @param transformed_blob
-   *    This is destination blob. It can be part of top blob&#39;s data if
-   *    set_cpu_data() is used. See memory_layer.cpp for an example.
-   */
-  void Transform(const vector&lt;Datum&gt; &amp; datum_vector,
-                Blob&lt;Dtype&gt;* transformed_blob);
-
-#ifdef USE_OPENCV
-  /**
-   * @brief Applies the transformation defined in the data layer&#39;s
-   * transform_param block to a vector of Mat.
-   *
-   * @param mat_vector
-   *    A vector of Mat containing the data to be transformed.
-   * @param transformed_blob
-   *    This is destination blob. It can be part of top blob&#39;s data if
-   *    set_cpu_data() is used. See memory_layer.cpp for an example.
-   */
-  void Transform(const vector&lt;cv::Mat&gt; &amp; mat_vector,
-                Blob&lt;Dtype&gt;* transformed_blob);
-
-  /**
-   * @brief Applies the transformation defined in the data layer&#39;s
-   * transform_param block to a cv::Mat
-   *
-   * @param cv_img
-   *    cv::Mat containing the data to be transformed.
-   * @param transformed_blob
-   *    This is destination blob. It can be part of top blob&#39;s data if
-   *    set_cpu_data() is used. See image_data_layer.cpp for an example.
-   */
-  void Transform(const cv::Mat&amp; cv_img, Blob&lt;Dtype&gt;* transformed_blob);
-#endif  // USE_OPENCV
-
-  /**
-   * @brief Applies the same transformation defined in the data layer&#39;s
-   * transform_param block to all the num images in a input_blob.
-   *
-   * @param input_blob
-   *    A Blob containing the data to be transformed. It applies the same
-   *    transformation to all the num images in the blob.
-   * @param transformed_blob
-   *    This is destination blob, it will contain as many images as the
-   *    input blob. It can be part of top blob&#39;s data.
-   */
-  void Transform(Blob&lt;Dtype&gt;* input_blob, Blob&lt;Dtype&gt;* transformed_blob);
-
-
- //获取执行Transform后的输出Blob形状
-  /**
-   * @brief Infers the shape of transformed_blob will have when
-   *    the transformation is applied to the data.
-   *
-   * @param datum
-   *    Datum containing the data to be transformed.
-   */
-  vector&lt;int&gt; InferBlobShape(const Datum&amp; datum);
-  /**
-   * @brief Infers the shape of transformed_blob will have when
-   *    the transformation is applied to the data.
-   *    It uses the first element to infer the shape of the blob.
-   *
-   * @param datum_vector
-   *    A vector of Datum containing the data to be transformed.
-   */
-  vector&lt;int&gt; InferBlobShape(const vector&lt;Datum&gt; &amp; datum_vector);
-  /**
-   * @brief Infers the shape of transformed_blob will have when
-   *    the transformation is applied to the data.
-   *    It uses the first element to infer the shape of the blob.
-   *
-   * @param mat_vector
-   *    A vector of Mat containing the data to be transformed.
-   */
-#ifdef USE_OPENCV
-  vector&lt;int&gt; InferBlobShape(const vector&lt;cv::Mat&gt; &amp; mat_vector);
-  /**
-   * @brief Infers the shape of transformed_blob will have when
-   *    the transformation is applied to the data.
-   *
-   * @param cv_img
-   *    cv::Mat containing the data to be transformed.
-   */
-  vector&lt;int&gt; InferBlobShape(const cv::Mat&amp; cv_img);
-#endif  // USE_OPENCV
-
- protected:
-   /**
-   * @brief Generates a random integer from Uniform({0, 1, ..., n-1}).
-   *
-   * @param n
-   *    The upperbound (exclusive) value of the random number.
-   * @return
-   *    A uniformly random integer value from ({0, 1, ..., n-1}).
-   */
-   //产生取值{0, 1, n-1}的随机整数，服从均匀分布
-  virtual int Rand(int n);
-
-  void Transform(const Datum&amp; datum, Dtype* transformed_data);
-  // Tranformation parameters(变换参数，该数据结构由ProtoBuffer工具自动生成)
-  TransformationParameter param_;
-
-//随机数生成器，声明在include/caffe/common.hpp中
-  shared_ptr&lt;Caffe::RNG&gt; rng_;
-//当前运行阶段，可能为TRAIN或TEST。阶段不同，执行变换会有差异
-  Phase phase_;
-//均值图像,用于从均值文件中读取
-  Blob&lt;Dtype&gt; data_mean_;
-//均值数值,用于从param_中提取
-  vector&lt;Dtype&gt; mean_values_;
-};
-
-}  // namespace caffe
-
-#endif  // CAFFE_DATA_TRANSFORMER_HPP_
-
-</code></pre>
-
-<p>数据变化器的实现文件位于<code>src/caffe/data_transformer.cpp</code>，我们来深入阅读一下。</p>
-
-<pre><code class="language-c++">#ifdef USE_OPENCV
-#include &lt;opencv2/core/core.hpp&gt;
-#endif  // USE_OPENCV
-
-#include &lt;string&gt;
-#include &lt;vector&gt;
-
-#include &quot;caffe/data_transformer.hpp&quot;
-#include &quot;caffe/util/io.hpp&quot;
-#include &quot;caffe/util/math_functions.hpp&quot;
-#include &quot;caffe/util/rng.hpp&quot;
-
-namespace caffe {
-//构造函数
-template&lt;typename Dtype&gt;
-DataTransformer&lt;Dtype&gt;::DataTransformer(const TransformationParameter&amp; param,
-    Phase phase)
-    : param_(param), phase_(phase) {        //初始化param_和phase_
-  // check if we want to use mean_file(查看是否使用均值文件)
-  if (param_.has_mean_file()) {
-  //如果定了均值文件，又指定了均值数值，则报错，只能2选1
-    CHECK_EQ(param_.mean_value_size(), 0) &lt;&lt;
-      &quot;Cannot specify mean_file and mean_value at the same time&quot;;
-    const string&amp; mean_file = param.mean_file();    //获取均值文件名
-    if (Caffe::root_solver()) {
-      LOG(INFO) &lt;&lt; &quot;Loading mean file from: &quot; &lt;&lt; mean_file;
-    }
-    //从均值文件中读取数据到blob_proto对象中
-    BlobProto blob_proto;
-    ReadProtoFromBinaryFileOrDie(mean_file.c_str(), &amp;blob_proto);
-    //从blob_proto将均值反序列化到data_mean_内存中 
-    data_mean_.FromProto(blob_proto);
-  }
-  // check if we want to use mean_value(均值数值)
-  if (param_.mean_value_size() &gt; 0) {
-    CHECK(param_.has_mean_file() == false) &lt;&lt;
-      &quot;Cannot specify mean_file and mean_value at the same time&quot;;
-    for (int c = 0; c &lt; param_.mean_value_size(); ++c) {
-      mean_values_.push_back(param_.mean_value(c));//从param_中读取均值数值,不在读取均值文件
-    }
-  }
-}
-//变换函数，从众多重载函数中，我们选择一个重点讲解，其他的计算流程都类似
-//下面函数使用了Datum作为输入，这个结构体我们可以从caffe.proto中一窥究竟
-/*
-    // Datum用来从LMDB/LEVELDB中读取数据，或将数据写入LMDB/LEVELDB,和BlobProto有相似的功能,只是BlobProto用于模型权值序列化/反序列化，而Datum专为数据或特征阁（feature map)提供序列化/反序列化服务.
-message Datum {
- //数据维度信息，channels * height ★ width
-  optional int32 channels = 1;
-  optional int32 height = 2;
-  optional int32 width = 3;
-  // the actual image data, in bytes(图像数据，以字节类型存储)
-  optional bytes data = 4;
-  //标签数据，统一用int32类型存储
-  optional int32 label = 5;
-  // Optionally, the datum could also hold float data.(可选，图像数据也可以用float类型存储 )
-  repeated float float_data = 6;
-  // If true data contains an encoded image that need to be decoded(是否为编码数据，默认不是)
-  optional bool encoded = 7 [default = false];
-}
-*/
-
-//下面函数输入为Datum,输出为数据指针 
-template&lt;typename Dtype&gt;
-void DataTransformer&lt;Dtype&gt;::Transform(const Datum&amp; datum,
-                                       Dtype* transformed_data) {
-  //获得datum数据字串、维度信息
-  const string&amp; data = datum.data();
-  const int datum_channels = datum.channels();
-  const int datum_height = datum.height();
-  const int datum_width = datum.width();
-
-//从取处理参数，如切块大小、幅度缩放、随机镜像、图像均值等
-  const int crop_size = param_.crop_size();
-  const Dtype scale = param_.scale();
-  const bool do_mirror = param_.mirror() &amp;&amp; Rand(2);
-  const bool has_mean_file = param_.has_mean_file();
-  const bool has_uint8 = data.size() &gt; 0;
-  const bool has_mean_values = mean_values_.size() &gt; 0;
-
-  CHECK_GT(datum_channels, 0);  //保证输入数据通道数大于0
-  CHECK_GE(datum_height, crop_size);    //保证输入数据宽和高大于切块大小
-  CHECK_GE(datum_width, crop_size);
-//获得图像均值
-  Dtype* mean = NULL;
-  if (has_mean_file) {  //若指定了图像均值文件
-  //保证图像均值的维度与输入图像数据的维度完全相同 
-    CHECK_EQ(datum_channels, data_mean_.channels());
-    CHECK_EQ(datum_height, data_mean_.height());
-    CHECK_EQ(datum_width, data_mean_.width());
-    mean = data_mean_.mutable_cpu_data(); //夺取图像均值数据控制权
-  }
-  if (has_mean_values) {    //若没有指定图像均值文件，而是直接给出数值
-  //保证均值数值维度为1,或与输人图像数据的channels数目相同
-    CHECK(mean_values_.size() == 1 || mean_values_.size() == datum_channels) &lt;&lt;
-     &quot;Specify either 1 mean_value or as many as channels: &quot; &lt;&lt; datum_channels;
-    if (datum_channels &gt; 1 &amp;&amp; mean_values_.size() == 1) {
-      // Replicate the mean_value for simplicity(若均值数值维度为1,而输入数据channels数目大于1,则重复该值channels次 )
-      for (int c = 1; c &lt; datum_channels; ++c) {
-        mean_values_.push_back(mean_values_[0]);
-      }
-    }
-  }
-  //输入图像宽和高
-  int height = datum_height;
-  int width = datum_width;
-  //开始图像切块
-  int h_off = 0;
-  int w_off = 0;
-  if (crop_size) { //crop_size不为0，则进行切块;若为0表示不切块
-    height = crop_size;
-    width = crop_size;
-    // We only do random crop when we do training.
-    if (phase_ == TRAIN) {
-      h_off = Rand(datum_height - crop_size + 1); //切块的 height偏移量
-      w_off = Rand(datum_width - crop_size + 1);  //切块的 width 偏移量
-    } else {
-      h_off = (datum_height - crop_size) / 2;
-      w_off = (datum_width - crop_size) / 2;
-    }
-  }
-
-  Dtype datum_element;      //存放输入图像的像素值
-  int top_index, data_index;    //分别存放输出index,输入index
-  for (int c = 0; c &lt; datum_channels; ++c) {
-    for (int h = 0; h &lt; height; ++h) {
-      for (int w = 0; w &lt; width; ++w) {
-        data_index = (c * datum_height + h_off + h) * datum_width + w_off + w;
-        if (do_mirror) {    //若需要镜像操作，则对输出index设置width反向
-          top_index = (c * height + h) * width + (width - 1 - w);
-        } else {
-          top_index = (c * height + h) * width + w;
-        }
-        if (has_uint8) {    //若datum中使用uint8存储图像数据，需要转换为float
-          datum_element =
-            static_cast&lt;Dtype&gt;(static_cast&lt;uint8_t&gt;(data[data_index]));
-        } else {
-          datum_element = datum.float_data(data_index);
-        }
-        if (has_mean_file) {    //若指定了均值文件
-          transformed_data[top_index] =
-            (datum_element - mean[data_index]) * scale; // 执行去均值、幅度缩放
-        } else {
-          if (has_mean_values) {    //若指定了均值数值
-            transformed_data[top_index] =
-              (datum_element - mean_values_[c]) * scale;    //去均值,幅度缩放
-          } else {
-            transformed_data[top_index] = datum_element * scale;    //不去均值,制作幅度缩放
-          }
-        }
-      }
-    }
-  }
-}
-
-//与上面函数类似.只是输出变为Blob
-template&lt;typename Dtype&gt;
-void DataTransformer&lt;Dtype&gt;::Transform(const Datum&amp; datum,
-                                       Blob&lt;Dtype&gt;* transformed_blob) {
-  // If datum is encoded, decode and transform the cv::image.(如果datum是经过编码的图像，则先解码 )
-  if (datum.encoded()) {
-#ifdef USE_OPENCV
-    CHECK(!(param_.force_color() &amp;&amp; param_.force_gray()))
-        &lt;&lt; &quot;cannot set both force_color and force_gray&quot;;
-    cv::Mat cv_img;
-    if (param_.force_color() || param_.force_gray()) {
-    // If force_color then decode in color otherwise decode in gray.
-      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
-    } else {
-      cv_img = DecodeDatumToCVMatNative(datum);
-    }
-    // Transform the cv::image into blob.(将cv::image变为Blob)
-    return Transform(cv_img, transformed_blob);
-#else
-    LOG(FATAL) &lt;&lt; &quot;Encoded datum requires OpenCV; compile with USE_OPENCV.&quot;;
-#endif  // USE_OPENCV
-  } else {
-    if (param_.force_color() || param_.force_gray()) {
-      LOG(ERROR) &lt;&lt; &quot;force_color and force_gray only for encoded datum&quot;;
-    }
-  }
-
-  const int crop_size = param_.crop_size();
-  const int datum_channels = datum.channels();
-  const int datum_height = datum.height();
-  const int datum_width = datum.width();
-
-  // Check dimensions.
-  const int channels = transformed_blob-&gt;channels();
-  const int height = transformed_blob-&gt;height();
-  const int width = transformed_blob-&gt;width();
-  const int num = transformed_blob-&gt;num();
-
-  CHECK_EQ(channels, datum_channels);
-  CHECK_LE(height, datum_height);
-  CHECK_LE(width, datum_width);
-  CHECK_GE(num, 1);
-
-  if (crop_size) {
-    CHECK_EQ(crop_size, height);
-    CHECK_EQ(crop_size, width);
-  } else {
-    CHECK_EQ(datum_height, height);
-    CHECK_EQ(datum_width, width);
-  }
-
-  Dtype* transformed_data = transformed_blob-&gt;mutable_cpu_data();
-  Transform(datum, transformed_data);   //参数变换完毕，调用现有函数
-}
-
-//对一组datum进行变换
-template&lt;typename Dtype&gt;
-void DataTransformer&lt;Dtype&gt;::Transform(const vector&lt;Datum&gt; &amp; datum_vector,
-                                       Blob&lt;Dtype&gt;* transformed_blob) {
-  const int datum_num = datum_vector.size();
-  const int num = transformed_blob-&gt;num();
-  const int channels = transformed_blob-&gt;channels();
-  const int height = transformed_blob-&gt;height();
-  const int width = transformed_blob-&gt;width();
-
-  CHECK_GT(datum_num, 0) &lt;&lt; &quot;There is no datum to add&quot;;
-  CHECK_LE(datum_num, num) &lt;&lt;
-    &quot;The size of datum_vector must be no greater than transformed_blob-&gt;num()&quot;;
-  Blob&lt;Dtype&gt; uni_blob(1, channels, height, width); //临时Blob
-  //依次对每个datum进行变换.放入对应的Blob中
-  for (int item_id = 0; item_id &lt; datum_num; ++item_id) {
-    int offset = transformed_blob-&gt;offset(item_id);
-    uni_blob.set_cpu_data(transformed_blob-&gt;mutable_cpu_data() + offset);
-    Transform(datum_vector[item_id], &amp;uni_blob);
-  }
-}
-//对一组输入cv::Mat对象进行变换.放入Blob中
-#ifdef USE_OPENCV
-template&lt;typename Dtype&gt;
-void DataTransformer&lt;Dtype&gt;::Transform(const vector&lt;cv::Mat&gt; &amp; mat_vector,
-                                       Blob&lt;Dtype&gt;* transformed_blob) {
-  const int mat_num = mat_vector.size();
-  const int num = transformed_blob-&gt;num();
-  const int channels = transformed_blob-&gt;channels();
-  const int height = transformed_blob-&gt;height();
-  const int width = transformed_blob-&gt;width();
-
-  CHECK_GT(mat_num, 0) &lt;&lt; &quot;There is no MAT to add&quot;;
-  CHECK_EQ(mat_num, num) &lt;&lt;
-    &quot;The size of mat_vector must be equals to transformed_blob-&gt;num()&quot;;
-  Blob&lt;Dtype&gt; uni_blob(1, channels, height, width);
-  for (int item_id = 0; item_id &lt; mat_num; ++item_id) {
-    int offset = transformed_blob-&gt;offset(item_id);
-    uni_blob.set_cpu_data(transformed_blob-&gt;mutable_cpu_data() + offset);
-    Transform(mat_vector[item_id], &amp;uni_blob);
-  }
-}
-
-//对一个cv:Mat对象进行变换
-template&lt;typename Dtype&gt;
-void DataTransformer&lt;Dtype&gt;::Transform(const cv::Mat&amp; cv_img,
-                                       Blob&lt;Dtype&gt;* transformed_blob) {
-  const int crop_size = param_.crop_size();
-  const int img_channels = cv_img.channels();
-  const int img_height = cv_img.rows;
-  const int img_width = cv_img.cols;
-
-  // Check dimensions.
-  const int channels = transformed_blob-&gt;channels();
-  const int height = transformed_blob-&gt;height();
-  const int width = transformed_blob-&gt;width();
-  const int num = transformed_blob-&gt;num();
-
-  CHECK_EQ(channels, img_channels);
-  CHECK_LE(height, img_height);
-  CHECK_LE(width, img_width);
-  CHECK_GE(num, 1);
-
-  CHECK(cv_img.depth() == CV_8U) &lt;&lt; &quot;Image data type must be unsigned byte&quot;;
-
-  const Dtype scale = param_.scale();
-  const bool do_mirror = param_.mirror() &amp;&amp; Rand(2);
-  const bool has_mean_file = param_.has_mean_file();
-  const bool has_mean_values = mean_values_.size() &gt; 0;
-
-  CHECK_GT(img_channels, 0);
-  CHECK_GE(img_height, crop_size);
-  CHECK_GE(img_width, crop_size);
-
-  Dtype* mean = NULL;
-  if (has_mean_file) {
-    CHECK_EQ(img_channels, data_mean_.channels());
-    CHECK_EQ(img_height, data_mean_.height());
-    CHECK_EQ(img_width, data_mean_.width());
-    mean = data_mean_.mutable_cpu_data();
-  }
-  if (has_mean_values) {
-    CHECK(mean_values_.size() == 1 || mean_values_.size() == img_channels) &lt;&lt;
-     &quot;Specify either 1 mean_value or as many as channels: &quot; &lt;&lt; img_channels;
-    if (img_channels &gt; 1 &amp;&amp; mean_values_.size() == 1) {
-      // Replicate the mean_value for simplicity(复制均值数值,便于操作)
-      for (int c = 1; c &lt; img_channels; ++c) {
-        mean_values_.push_back(mean_values_[0]);
-      }
-    }
-  }
-
-  int h_off = 0;
-  int w_off = 0;
-  cv::Mat cv_cropped_img = cv_img;
-  if (crop_size) {
-    CHECK_EQ(crop_size, height);
-    CHECK_EQ(crop_size, width);
-    // We only do random crop when we do training.
-    if (phase_ == TRAIN) {
-      h_off = Rand(img_height - crop_size + 1);
-      w_off = Rand(img_width - crop_size + 1);
-    } else {
-      h_off = (img_height - crop_size) / 2;
-      w_off = (img_width - crop_size) / 2;
-    }
-    cv::Rect roi(w_off, h_off, crop_size, crop_size);
-    cv_cropped_img = cv_img(roi);
-  } else {
-    CHECK_EQ(img_height, height);
-    CHECK_EQ(img_width, width);
-  }
-
-  CHECK(cv_cropped_img.data);
-
-  Dtype* transformed_data = transformed_blob-&gt;mutable_cpu_data();
-  int top_index;
-  for (int h = 0; h &lt; height; ++h) {
-    const uchar* ptr = cv_cropped_img.ptr&lt;uchar&gt;(h);
-    int img_index = 0;
-    for (int w = 0; w &lt; width; ++w) {
-      for (int c = 0; c &lt; img_channels; ++c) {
-        if (do_mirror) {
-          top_index = (c * height + h) * width + (width - 1 - w);
-        } else {
-          top_index = (c * height + h) * width + w;
-        }
-        // int top_index = (c * height + h) * width + w;
-        Dtype pixel = static_cast&lt;Dtype&gt;(ptr[img_index++]);
-        if (has_mean_file) {
-          int mean_index = (c * img_height + h_off + h) * img_width + w_off + w;
-          transformed_data[top_index] =
-            (pixel - mean[mean_index]) * scale;
-        } else {
-          if (has_mean_values) {
-            transformed_data[top_index] =
-              (pixel - mean_values_[c]) * scale;
-          } else {
-            transformed_data[top_index] = pixel * scale;
-          }
-        }
-      }
-    }
-  }
-}
-#endif  // USE_OPENCV
-
-//输入是Blob,输出也是Blob
-template&lt;typename Dtype&gt;
-void DataTransformer&lt;Dtype&gt;::Transform(Blob&lt;Dtype&gt;* input_blob,
-                                       Blob&lt;Dtype&gt;* transformed_blob) {
-  const int crop_size = param_.crop_size();
-  const int input_num = input_blob-&gt;num();
-  const int input_channels = input_blob-&gt;channels();
-  const int input_height = input_blob-&gt;height();
-  const int input_width = input_blob-&gt;width();
-
-  if (transformed_blob-&gt;count() == 0) {
-    // Initialize transformed_blob with the right shape.(初始化变换后的Blob的形状)
-    if (crop_size) {
-      transformed_blob-&gt;Reshape(input_num, input_channels,
-                                crop_size, crop_size);
-    } else {
-      transformed_blob-&gt;Reshape(input_num, input_channels,
-                                input_height, input_width);
-    }
-  }
-
-  const int num = transformed_blob-&gt;num();
-  const int channels = transformed_blob-&gt;channels();
-  const int height = transformed_blob-&gt;height();
-  const int width = transformed_blob-&gt;width();
-  const int size = transformed_blob-&gt;count();
-
-  CHECK_LE(input_num, num);
-  CHECK_EQ(input_channels, channels);
-  CHECK_GE(input_height, height);
-  CHECK_GE(input_width, width);
-
-
-  const Dtype scale = param_.scale();
-  const bool do_mirror = param_.mirror() &amp;&amp; Rand(2);
-  const bool has_mean_file = param_.has_mean_file();
-  const bool has_mean_values = mean_values_.size() &gt; 0;
-
-  int h_off = 0;
-  int w_off = 0;
-  if (crop_size) {
-    CHECK_EQ(crop_size, height);
-    CHECK_EQ(crop_size, width);
-    // We only do random crop when we do training.
-    if (phase_ == TRAIN) {
-      h_off = Rand(input_height - crop_size + 1);
-      w_off = Rand(input_width - crop_size + 1);
-    } else {
-      h_off = (input_height - crop_size) / 2;
-      w_off = (input_width - crop_size) / 2;
-    }
-  } else {
-    CHECK_EQ(input_height, height);
-    CHECK_EQ(input_width, width);
-  }
-
-  Dtype* input_data = input_blob-&gt;mutable_cpu_data();
-  if (has_mean_file) {
-    CHECK_EQ(input_channels, data_mean_.channels());
-    CHECK_EQ(input_height, data_mean_.height());
-    CHECK_EQ(input_width, data_mean_.width());
-    for (int n = 0; n &lt; input_num; ++n) {
-      int offset = input_blob-&gt;offset(n);
-      caffe_sub(data_mean_.count(), input_data + offset,
-            data_mean_.cpu_data(), input_data + offset);
-    }
-  }
-
-  if (has_mean_values) {
-    CHECK(mean_values_.size() == 1 || mean_values_.size() == input_channels) &lt;&lt;
-     &quot;Specify either 1 mean_value or as many as channels: &quot; &lt;&lt; input_channels;
-    if (mean_values_.size() == 1) {
-      caffe_add_scalar(input_blob-&gt;count(), -(mean_values_[0]), input_data);
-    } else {
-      for (int n = 0; n &lt; input_num; ++n) {
-        for (int c = 0; c &lt; input_channels; ++c) {
-          int offset = input_blob-&gt;offset(n, c);
-          caffe_add_scalar(input_height * input_width, -(mean_values_[c]),
-            input_data + offset);
-        }
-      }
-    }
-  }
-
-  Dtype* transformed_data = transformed_blob-&gt;mutable_cpu_data();
-
-  for (int n = 0; n &lt; input_num; ++n) {
-    int top_index_n = n * channels;
-    int data_index_n = n * channels;
-    for (int c = 0; c &lt; channels; ++c) {
-      int top_index_c = (top_index_n + c) * height;
-      int data_index_c = (data_index_n + c) * input_height + h_off;
-      for (int h = 0; h &lt; height; ++h) {
-        int top_index_h = (top_index_c + h) * width;
-        int data_index_h = (data_index_c + h) * input_width + w_off;
-        if (do_mirror) {
-          int top_index_w = top_index_h + width - 1;
-          for (int w = 0; w &lt; width; ++w) {
-            transformed_data[top_index_w-w] = input_data[data_index_h + w];
-          }
-        } else {
-          for (int w = 0; w &lt; width; ++w) {
-            transformed_data[top_index_h + w] = input_data[data_index_h + w];
-          }
-        }
-      }
-    }
-  }
-  if (scale != Dtype(1)) {
-    DLOG(INFO) &lt;&lt; &quot;Scale: &quot; &lt;&lt; scale;
-    caffe_scal(size, scale, transformed_data);
-  }
-}
-
-//获得数据变换输出Blob尺寸
-template&lt;typename Dtype&gt;
-vector&lt;int&gt; DataTransformer&lt;Dtype&gt;::InferBlobShape(const Datum&amp; datum) {
-  if (datum.encoded()) {
-#ifdef USE_OPENCV
-    CHECK(!(param_.force_color() &amp;&amp; param_.force_gray()))
-        &lt;&lt; &quot;cannot set both force_color and force_gray&quot;;
-    cv::Mat cv_img;
-    if (param_.force_color() || param_.force_gray()) {
-    // If force_color then decode in color otherwise decode in gray.
-      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
-    } else {
-      cv_img = DecodeDatumToCVMatNative(datum);
-    }
-    // InferBlobShape using the cv::image.
-    return InferBlobShape(cv_img);
-#else
-    LOG(FATAL) &lt;&lt; &quot;Encoded datum requires OpenCV; compile with USE_OPENCV.&quot;;
-#endif  // USE_OPENCV
-  }
-  const int crop_size = param_.crop_size();
-  const int datum_channels = datum.channels();
-  const int datum_height = datum.height();
-  const int datum_width = datum.width();
-  // Check dimensions.
-  CHECK_GT(datum_channels, 0);
-  CHECK_GE(datum_height, crop_size);
-  CHECK_GE(datum_width, crop_size);
-  // Build BlobShape.
-  vector&lt;int&gt; shape(4);
-  shape[0] = 1;
-  shape[1] = datum_channels;
-  shape[2] = (crop_size)? crop_size: datum_height;
-  shape[3] = (crop_size)? crop_size: datum_width;
-  return shape;
-}
-
-
-template&lt;typename Dtype&gt;
-vector&lt;int&gt; DataTransformer&lt;Dtype&gt;::InferBlobShape(
-    const vector&lt;Datum&gt; &amp; datum_vector) {
-  const int num = datum_vector.size();
-  CHECK_GT(num, 0) &lt;&lt; &quot;There is no datum to in the vector&quot;;
-  // Use first datum in the vector to InferBlobShape.
-  vector&lt;int&gt; shape = InferBlobShape(datum_vector[0]);
-  // Adjust num to the size of the vector.
-  shape[0] = num;
-  return shape;
-}
-
-#ifdef USE_OPENCV
-template&lt;typename Dtype&gt;
-vector&lt;int&gt; DataTransformer&lt;Dtype&gt;::InferBlobShape(const cv::Mat&amp; cv_img) {
-  const int crop_size = param_.crop_size();
-  const int img_channels = cv_img.channels();
-  const int img_height = cv_img.rows;
-  const int img_width = cv_img.cols;
-  // Check dimensions.
-  CHECK_GT(img_channels, 0);
-  CHECK_GE(img_height, crop_size);
-  CHECK_GE(img_width, crop_size);
-  // Build BlobShape.
-  vector&lt;int&gt; shape(4);
-  shape[0] = 1;
-  shape[1] = img_channels;
-  shape[2] = (crop_size)? crop_size: img_height;
-  shape[3] = (crop_size)? crop_size: img_width;
-  return shape;
-}
-
-template&lt;typename Dtype&gt;
-vector&lt;int&gt; DataTransformer&lt;Dtype&gt;::InferBlobShape(
-    const vector&lt;cv::Mat&gt; &amp; mat_vector) {
-  const int num = mat_vector.size();
-  CHECK_GT(num, 0) &lt;&lt; &quot;There is no cv_img to in the vector&quot;;
-  // Use first cv_img in the vector to InferBlobShape.
-  vector&lt;int&gt; shape = InferBlobShape(mat_vector[0]);
-  // Adjust num to the size of the vector.
-  shape[0] = num;
-  return shape;
-}
-#endif  // USE_OPENCV
-
-//初始化随机数种子
-template &lt;typename Dtype&gt;
-void DataTransformer&lt;Dtype&gt;::InitRand() {
-//如果在初始化参数中要求对输入进行随机镜像操作，或者在训练阶段需要随机切块,那么需要初始化随机数种子
-  const bool needs_rand = param_.mirror() ||
-      (phase_ == TRAIN &amp;&amp; param_.crop_size());
-  if (needs_rand) {
-    const unsigned int rng_seed = caffe_rng_rand();
-    rng_.reset(new Caffe::RNG(rng_seed));
-  } else {
-    rng_.reset();
-  }
-}
-
-//生成0~n-1之间的随机数
-template &lt;typename Dtype&gt;
-int DataTransformer&lt;Dtype&gt;::Rand(int n) {
-  CHECK(rng_);
-  CHECK_GT(n, 0);
-  caffe::rng_t* rng =
-      static_cast&lt;caffe::rng_t*&gt;(rng_-&gt;generator());
-  return ((*rng)() % n);
-}
-
-INSTANTIATE_CLASS(DataTransformer);
-
-}  // namespace caffe
-
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Caffe I/O模块]]></title>
-    <link href="https://lockxmonk.github.io/14982657549571.html"/>
-    <updated>2017-06-24T08:55:54+08:00</updated>
-    <id>https://lockxmonk.github.io/14982657549571.html</id>
-    <content type="html"><![CDATA[
-<p>这里我们讨论学习Caffe的I/O模块，即与<strong>数据</strong>打交道的模块。</p>
-
-<p>我们在运行Caffe例程前，首先需要将原始数据转换为<strong>LMDB</strong>格式，训练网络时则需要由数据读取层(DataLayer)不断地从LMDB读取数据，送入后续卷积、下采样 等计算层。作为基础,Caffe I/O模块的效率直接影响到处理效果。</p>
-
-<h2 id="toc_0">数据读取层</h2>
-
-<p>Caffe数据读取层(DataLayer)是Layer的派生类。除了读取LMDB、LEVELDB之外，也可以从原始图像直接读取(ImageDataLayer)。</p>
-
-<h3 id="toc_1">数据结构描述</h3>
-
-<p>我们在<code>caffe.proto</code>中可以找到,关于数据结构的描述</p>
-
-<pre><code class="language-protobuf">message DataParameter {
-//输入数据使用的DB类型
-  enum DB {
-    LEVELDB = 0;    //使用 LEVELDB
-    LMDB = 1;       //使用 LMDB
-  }
-  // Specify the data source.(源数据的路径)
-  optional string source = 1;
-  // Specify the batch size.( 一个批量数据包含的图片数)
-  optional uint32 batch_size = 4;
-  // The rand_skip variable is for the data layer to skip a few data points
-  // to avoid all asynchronous sgd clients to start at the same point. The skip
-  // point would be set as rand_skip * rand(0,1). Note that rand_skip should not
-  // be larger than the number of keys in the database.
-  // DEPRECATED. Each solver accesses a different subset of the database.
-  //随机跳过若干图片，跳跃数为rand_skip * rand(0, 1)
-  optional uint32 rand_skip = 7 [default = 0];
-  //默认输入数据使用DB类型，默认为LEVELDB
-  optional DB backend = 8 [default = LEVELDB];
-  // DEPRECATED. See TransformationParameter. For data pre-processing, we can do
-  // simple scaling and subtracting the data mean, if provided. Note that the
-  // mean subtraction is always carried out before scaling.
-  //scale、mean_file、crop_size、mirror 均为旧版参数，现已转移到 TransformationParameter
-  optional float scale = 2 [default = 1];
-  optional string mean_file = 3;
-  // DEPRECATED. See TransformationParameter. Specify if we would like to randomly
-  // crop an image.
-  optional uint32 crop_size = 5 [default = 0];
-  // DEPRECATED. See TransformationParameter. Specify if we want to randomly mirror
-  // data.
-  optional bool mirror = 6 [default = false];
-  //强制编码图像为三通道彩色图像
-  optional bool force_encoded_color = 9 [default = false];
-  // Prefetch queue (Increase if data feeding bandwidth varies, within the
-  // limit of device memory for GPU training)
-  //预取队列(预先放到主机内存中的批量数.默认为4个Batch)
-  optional uint32 prefetch = 10 [default = 4];
-}
-
-</code></pre>
-
-<h3 id="toc_2">数据读取层的实现</h3>
-
-<p>数据读取层声明位于<code>include/caffe/layers/base_data_layers.hpp</code>中，如果需要单独使用该层，则应包含这个头文件.</p>
-
-<pre><code class="language-c++">namespace caffe {
-
-/**
- * @brief Provides base for data layers that feed blobs to the Net.
- *
- * TODO(dox): thorough documentation for Forward and proto params.
- */
-template &lt;typename Dtype&gt;
-class BaseDataLayer : public Layer&lt;Dtype&gt; {
- public:
- //显式构造函数
-  explicit BaseDataLayer(const LayerParameter&amp; param);
-  // LayerSetUp: implements common data layer setup functionality, and calls
-  // DataLayerSetUp to do special data layer setup for individual layer types.
-  // This method may not be overridden except by the BasePrefetchingDataLayer.
-  //层配置，实现通用层配置功能，之后调用DataLayerSetUp进行数据读取层的特别配置 
-  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void DataLayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {}
-  // Data layers have no bottoms, so reshaping is trivial.(数据读取没有Bottom Blob,变形操作很简单 )
-  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {}
-//反向传播函数不需要做任何操作
-  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {}
-  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {}
-
- protected:
- //数据预处理变换器参数
-  TransformationParameter transform_param_;
-  //数据预处理变换器
-  shared_ptr&lt;DataTransformer&lt;Dtype&gt; &gt; data_transformer_;
-  //是否输出标签数据
-  bool output_labels_;
-};
-//批量数据，用于存放数据读取层输出
-template &lt;typename Dtype&gt;
-class Batch {
- public:
- //包含两个Blob: data_用于存放图片数据，label_用于存放标签
-  Blob&lt;Dtype&gt; data_, label_;
-};
-
-//带预取功能的数据读取派生于BaseDataLayer和InternalThread
-template &lt;typename Dtype&gt;
-class BasePrefetchingDataLayer :
-    public BaseDataLayer&lt;Dtype&gt;, public InternalThread {
- public:
- //显式构造函数
-  explicit BasePrefetchingDataLayer(const LayerParameter&amp; param);
-  // LayerSetUp: implements common data layer setup functionality, and calls
-  // DataLayerSetUp to do special data layer setup for individual layer types.
-  // This method may not be overridden.
-  //层设置函数
-  void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-//前向传播
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-
- protected:
-  virtual void InternalThreadEntry();   //内部线程入口
-  virtual void load_batch(Batch&lt;Dtype&gt;* batch) = 0; //载入批量数据,纯虚函数
-
-  vector&lt;shared_ptr&lt;Batch&lt;Dtype&gt; &gt; &gt; prefetch_; //预取Buffer
-  BlockingQueue&lt;Batch&lt;Dtype&gt;*&gt; prefetch_free_;  //空闲Batch队列
-  BlockingQueue&lt;Batch&lt;Dtype&gt;*&gt; prefetch_full_;  //已加载Batch队列
-  Batch&lt;Dtype&gt;* prefetch_current_;  //当前Batch(猜的)
-
-  Blob&lt;Dtype&gt; transformed_data_;    //变换后的数据
-};
-
-
-</code></pre>
-
-<p>数据读取层的实现位于<code>src/caffe/layers/base_data_layer.cpp</code>中，内容如下:</p>
-
-<pre><code class="language-c++">#include &lt;boost/thread.hpp&gt;
-#include &lt;vector&gt;
-
-#include &quot;caffe/blob.hpp&quot;
-#include &quot;caffe/data_transformer.hpp&quot;
-#include &quot;caffe/internal_thread.hpp&quot;
-#include &quot;caffe/layer.hpp&quot;
-#include &quot;caffe/layers/base_data_layer.hpp&quot;
-#include &quot;caffe/proto/caffe.pb.h&quot;
-#include &quot;caffe/util/blocking_queue.hpp&quot;
-
-namespace caffe {
-//构造函数，初始化Layer参数、数据变换器参数
-template &lt;typename Dtype&gt;
-BaseDataLayer&lt;Dtype&gt;::BaseDataLayer(const LayerParameter&amp; param)
-    : Layer&lt;Dtype&gt;(param),
-      transform_param_(param.transform_param()) {
-}
-//BaseDataLayer层设置 
-template &lt;typename Dtype&gt;
-void BaseDataLayer&lt;Dtype&gt;::LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  if (top.size() == 1) {    //判断输出Blob个数，若为1只输出data，若为2则输出data和label
-    output_labels_ = false;
-  } else {
-    output_labels_ = true;
-  }
-  //初始化数据变化器对象
-  data_transformer_.reset(
-      new DataTransformer&lt;Dtype&gt;(transform_param_, this-&gt;phase_));
-  data_transformer_-&gt;InitRand();    //生成随机数种子
-  // The subclasses should setup the size of bottom and top
-  //子类负责设置Top Blob形状
-  DataLayerSetUp(bottom, top);
-}
-//BasePrefetchingDataLayer 构造函数
-template &lt;typename Dtype&gt;
-BasePrefetchingDataLayer&lt;Dtype&gt;::BasePrefetchingDataLayer(
-    const LayerParameter&amp; param)
-    : BaseDataLayer&lt;Dtype&gt;(param),
-      prefetch_(param.data_param().prefetch()),
-      prefetch_free_(), prefetch_full_(), prefetch_current_() {
-  for (int i = 0; i &lt; prefetch_.size(); ++i) {
-    prefetch_[i].reset(new Batch&lt;Dtype&gt;());
-    prefetch_free_.push(prefetch_[i].get());    //将Batch对象都放入空闲队列中
-  }
-}
-//BasePrefetchingDataLayer层配置函数
-template &lt;typename Dtype&gt;
-void BasePrefetchingDataLayer&lt;Dtype&gt;::LayerSetUp(
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  BaseDataLayer&lt;Dtype&gt;::LayerSetUp(bottom, top);
-
-  // Before starting the prefetch thread, we make cpu_data and gpu_data
-  // calls so that the prefetch thread does not accidentally make simultaneous
-  // cudaMalloc calls when the main thread is running. In some GPUs this
-  // seems to cause failures if we do not so.
-  //在幵启数据预取线程前，通过调用Blob相应函数先进行cudaMalloc,避免在多线程情况下同时进行cudaMalloc.会导致CUDA API调用失败
-  for (int i = 0; i &lt; prefetch_.size(); ++i) {
-    prefetch_[i]-&gt;data_.mutable_cpu_data();
-    if (this-&gt;output_labels_) {
-      prefetch_[i]-&gt;label_.mutable_cpu_data();
-    }
-  }
-  //如果编译选项没有CPU_ONLY,则需要编译GPU代码
-#ifndef CPU_ONLY    
-  if (Caffe::mode() == Caffe::GPU) {
-    for (int i = 0; i &lt; prefetch_.size(); ++i) {
-      prefetch_[i]-&gt;data_.mutable_gpu_data();
-      if (this-&gt;output_labels_) {
-        prefetch_[i]-&gt;label_.mutable_gpu_data();    //功能同上
-      }
-    }
-  }
-#endif
-  DLOG(INFO) &lt;&lt; &quot;Initializing prefetch&quot;;
-  this-&gt;data_transformer_-&gt;InitRand();
-  StartInternalThread();    //开启内部预取线程
-  DLOG(INFO) &lt;&lt; &quot;Prefetch initialized.&quot;;
-}
-//内部线程入口
-template &lt;typename Dtype&gt;
-void BasePrefetchingDataLayer&lt;Dtype&gt;::InternalThreadEntry() {
-//创建CUDA Stream,非阻塞类型
-#ifndef CPU_ONLY
-  cudaStream_t stream;
-  if (Caffe::mode() == Caffe::GPU) {
-    CUDA_CHECK(cudaStreamCreateWithFlags(&amp;stream, cudaStreamNonBlocking));
-  }
-#endif
-
-  try {
-    while (!must_stop()) {  //循环载入批量数据
-      Batch&lt;Dtype&gt;* batch = prefetch_free_.pop();   //拿到一个空闲Batch
-      load_batch(batch);    //载入批量数据
-#ifndef CPU_ONLY
-      if (Caffe::mode() == Caffe::GPU) {
-        batch-&gt;data_.data().get()-&gt;async_gpu_push(stream);
-        if (this-&gt;output_labels_) {
-          batch-&gt;label_.data().get()-&gt;async_gpu_push(stream);
-        }
-        CUDA_CHECK(cudaStreamSynchronize(stream));//同步到GPU
-      }
-#endif
-      prefetch_full_.push(batch);   //加入到带负载的Batch队列中
-    }
-  } catch (boost::thread_interrupted&amp;) {
-    // Interrupted exception is expected on shutdown(捕获到异常,退出while循环)
-  }
-#ifndef CPU_ONLY
-  if (Caffe::mode() == Caffe::GPU) {
-    CUDA_CHECK(cudaStreamDestroy(stream));  //销毁CUDA Stream
-  }
-#endif
-}
-//前向传波函数
-template &lt;typename Dtype&gt;
-void BasePrefetchingDataLayer&lt;Dtype&gt;::Forward_cpu(
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-    //从带负载的Batch队列中取出一个Batch对象
-  if (prefetch_current_) {
-    prefetch_free_.push(prefetch_current_);
-  }
-  prefetch_current_ = prefetch_full_.pop(&quot;Waiting for data&quot;);
-  // Reshape to loaded data.(Top Blob根据Batch形状进行变形)
-  top[0]-&gt;ReshapeLike(prefetch_current_-&gt;data_);
-  //将数据放到Top Blob中
-  top[0]-&gt;set_cpu_data(prefetch_current_-&gt;data_.mutable_cpu_data());
-  if (this-&gt;output_labels_) {
-    // Reshape to loaded labels.(同上)
-    top[1]-&gt;ReshapeLike(prefetch_current_-&gt;label_);
-    top[1]-&gt;set_cpu_data(prefetch_current_-&gt;label_.mutable_cpu_data());
-  }
-}
-
-#ifdef CPU_ONLY
-STUB_GPU_FORWARD(BasePrefetchingDataLayer, Forward);
-#endif
-
-INSTANTIATE_CLASS(BaseDataLayer);
-INSTANTIATE_CLASS(BasePrefetchingDataLayer);
-
-}  // namespace caffe
-
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[MAC下openBlas的安装]]></title>
-    <link href="https://lockxmonk.github.io/14980252836745.html"/>
-    <updated>2017-06-21T14:08:03+08:00</updated>
-    <id>https://lockxmonk.github.io/14980252836745.html</id>
-    <content type="html"><![CDATA[
-<p>这里我们安装openblas主要有两种方法:</p>
-
-<ol>
-<li>通过git代码到本地并安装</li>
-<li>通过brew来安装</li>
-</ol>
-
-<h2 id="toc_0">git到本地编译安装.</h2>
-
-<ol>
-<li>git代码到本地并安装</li>
-</ol>
-
-<pre><code>git clone https://github.com/xianyi/OpenBLAS.git
-cd OpenBLAS
-make -j4
-make install
-
-</code></pre>
-
-<ol>
-<li>修改Caffe的<code>Makefile.config</code></li>
-</ol>
-
-<pre><code>BLAS := open
-BLAS_INCLUDE :=  /opt/OpenBLAS/include
-BLAS_LIB := /opt/OpenBLAS/lib
-</code></pre>
-
-<ol>
-<li>caffe重新make</li>
-</ol>
-
-<pre><code>make clean
-make pycaffe
-make all -j4
-make test &amp;&amp; runtest
-</code></pre>
-
-<h2 id="toc_1">使用brew进行安装</h2>
-
-<ol>
-<li><code>brew uninstall openblas; brew install --fresh -vd openblas.</code>运行上面命令安装openblas</li>
-<li>更改<code>Makefile.config</code></li>
-</ol>
-
-<pre><code>
-# Homebrew puts openblas in a directory that is not on the standard search path
-BLAS_INCLUDE := $(shell brew --prefix openblas)/include
-BLAS_LIB := $(shell brew --prefix openblas)/lib
-
-</code></pre>
-
-<ol>
-<li>重新编译</li>
-</ol>
-
-<p><strong>如果有些人遇到了这种错误</strong></p>
-
-<pre><code>In file included from src/caffe/util/blocking_queue.cpp:5:
-In file included from ./include/caffe/layers/base_data_layer.hpp:9:
-In file included from ./include/caffe/layer.hpp:12:
-In file included from ./include/caffe/util/math_functions.hpp:11:
-./include/caffe/util/mkl_alternate.hpp:14:10: fatal error: &#39;cblas.h&#39; file not found
-#include &lt;cblas.h&gt;
-         ^
-1 error generated.
-make: *** [.build_release/src/caffe/util/blocking_queue.o] Error 1
-</code></pre>
-
-<p>可以试试这个命令:</p>
-
-<pre><code>cmake -DCMAKE_CXX_FLAGS=-I/usr/local/opt/openblas/include ..
-</code></pre>
 
 ]]></content>
   </entry>

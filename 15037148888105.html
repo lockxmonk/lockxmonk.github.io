@@ -1,0 +1,444 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  尽量使用不可变对象 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>尽量使用不可变对象</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/8/26</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>我们在设计类的时候，运用属性来封装数据。并且使用属性时候，<strong>可以将属性直接设置为“只读”（read-only）</strong>。默认情况下是“可读也可写”的。</p>
+
+<p>不过，一般情况下我们要建模的数据未必需要改变。比方说，某数据所表示的对象源自一项只读的网络服务(web service),里面可能包含一系列需要显示在地图上的相关点，像这种对象就没必要改变其内容。即使修改了，新数据也不会推送回服务器.</p>
+
+<p>而且如果把可变对象（mutable object)放入<code>collection</code>之后又修改其内容，那么很容易就会破坏<code>set</code>的内部数据结构，使其失去固有的语义。</p>
+
+<p>我们来举例：</p>
+
+<p>为了将<code>EOCPointOflnterest</code>做成不可变的类，需要把所有属性都声明为<code>readonly</code>:</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@interface EOCPointOfInterest : NSObject
+@property (nonatomic, copy, readonly) NSString *identifier; 
+@property (nonatomic, copy, readonly) NSString* title;
+@property (nonatomic, assign, readonly) float latitude; 
+@property (nonatomic, assign, readonly) float longitude;
+-(id) initWithldentifier: (NSString*) identifier 
+                   title:(NSString*)title 
+                   latitude: (float) latitude 
+                   longitude: (float) longitude;
+@end
+
+</code></pre>
+
+<p>这样后如果有人想要改变属性值，那么编译时就会报错。对象中的属性值可以读出，但是无法写入，这就能保证<code>EOCPointOfluterest</code>中的各个数据之间总是相互协调的。</p>
+
+<p>但是我们有时想要修改封装在对象内部的数据，不想令这些数据为外人所改动。这种情况下，通常做法是在对象内部将<code>readonly</code>属性重新声明为<code>readwrite</code>。当然，如果该属性是nonatomic 的，那么这样做可能会产生“竞争条件”（racecondition)。在对象内部写人某属性时，对象外的 观察者也许正读取该属性。若想避免此问题，我们可以在必要时通过<mark>“派发队列&quot;（dispatchqueue）等手段，将(包括对象内部的）所有数据存取操作都设为同步操作</mark>。<strong><font color=red>将属性在对象内部重新声明为<code>readwrite</code>这一操作可于<code>“class-continuation分类”</code>中完成，在公共接口中声明的属性可于此处重新声明，属性的其他特质必须保持不变，而<code>readonly</code>可扩展为<code>readwrite</code>。</font></strong></p>
+
+<p>其 <code>“class-continuation分类”</code>可以这样写：</p>
+
+<pre><code class="language-objc">// .m文件中
+#import &quot;EOCPointOfInterest.h&quot;
+
+@interface EOCPointOfInterest : NSObject
+@property (nonatomic, copy, readwrite) NSString *identifier; 
+@property (nonatomic, copy, readwrite) NSString* title;
+@property (nonatomic, assign, readwrite) float latitude; 
+@property (nonatomic, assign, readwrite) float longitude;
+
+@implementation EOCPointOfInterest
+
+/* ... */
+
+@end
+</code></pre>
+
+<p>现在，只能于<code>EOCPoimOflnterest</code>实现代码内部设置这些属性值了。但是我们其实可以同构KVC键值编码来设置这些属性值。不过，这样显然违背了我们的本意，绕过了提供的API。不推荐这种做法。</p>
+
+<p>我们定义类公共的API时，<strong><font color=red>要注意一件事情：对象里表示各种collection的那些属性究竞应该设成可变的，还是不可变的。</font></strong>例如，我们用某个类来表示个人信息，该类里还存放了一些引用，指向此人的诸位朋友。你可能想把这个人的全部朋友都放在一个“列表&quot;（list)里，并将其做成属性。假如开发者可以添加或删除此人的朋友，那么这个属性就需要用可变的<code>set</code>来实现。在这种情况下，通常应该提供一个<code>readonly</code>属性供外界使用，该属性将返回不可变的<code>set</code>, 而此<code>set</code>则是内部那个可变<code>set</code>的一份拷贝。比方说，下面这段代码就能够实现出这样一个类：</p>
+
+<pre><code class="language-objc">// EOCPerson.h
+#import &lt;Foundation/Foundation•h&gt;
+@interface EOCPerson : NSObject
+@property (nonatomic, copy, readonly) NSString *firstName; 
+@property (nonatomic, copy, readonly) NSString *lastName; 
+@property (nonatomic, strong, readonly) NSSet *friends;
+-(id)initWithFirstName:(NSString*)firstName
+          andLastName:(NSString*)lastName;
+-(void)addFriend:(EOCPerson*)person;
+-(void)removeFriend:(EOCPerson*)person;
+
+@end
+
+// EOCPerson.m #import &quot;EOCPerson•!!
+@interface EOCPerson ()
+@property (nonatomic, copy, readwrite) NSString *firstName; 
+@property (nonatomic, copy, readwrite) NSString *lastName;
+@end
+@implementation EOCPerson {
+    NSMutableSet *_internalFriends;
+}
+
+-(NSSet*)friends {
+    return [_internalFriends copy];
+}
+-(void)addFriend:(EOCPerson*)person {
+    [_internalFriends addObject:person];
+} 
+
+-(void)removeFriend:(EOCPerson*)person {
+    [_internalFriends removeObjectrperson];
+}
+
+-(id)initWithFirstName: (NSString*)firstName andLastName:(NSString*)lastName { 
+    if ((self = [super init】））{
+         _firstName = firstName;
+         _lastName = lastName;
+         _internalFriends = [NSMutableSet new];
+    }
+    return self;
+}
+
+@end
+
+</code></pre>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>尽量创建不可变的对象。</li>
+<li>若某属性仅可于对象内部修改，则在<code>“class-continuation分类”</code>中将其由<code>readonly</code>属性扩展为<code>readwrite</code>属性</li>
+<li>不要把可变的<code>collection</code>作为属性公开，而应提供相关方法，以此修改对象中的可变<code>collection</code>。</li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15037100500253.html" 
+          title="Next Post: 第十七条 实现description方法">第十七条 实现description方法 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15037148888105.html">尽量使用不可变对象</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15037100500253.html">第十七条 实现description方法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15036443106558.html">第十六条 提供"全能初始化方法"</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15036306506140.html">第十五条 用前缀避免命名空间冲突</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15035622628066.html">第十四条 理解"类对象"的用意</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>
