@@ -113,6 +113,136 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15038893459243.html">
+                
+                  <h1>iOS 中协议和委托传值的用法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>虽然之前一直听过和看过委托模式，但是并没有实际的操作。这次来实现一个简单的委托样例。来加深自己的了解。</p>
+
+<p>项目目录结构为：<br/>
+<img src="media/15038893459243/15039018875452.jpg" alt=""/></p>
+
+<p>首先我们创建一个协议：<code>ProtocolA</code></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+@protocol ProtocolA &lt;NSObject&gt;
+
+@required
+
+-(void)sendValue:(NSString*)str;
+
+
+@end
+</code></pre>
+
+<p>其中有一个方法<code>sendValue:</code>，由于加上了<code>@required</code>前缀，所以这个方法时必须实现的。如果想要一个方法是可选则实现与否，则要加上<code>@optional</code>。</p>
+
+<p>之后我们创建一个类<code>ClassA</code>：</p>
+
+<pre><code class="language-objc">//该类遵循ProtocolA，并且实现了它的方法
+
+//ClassA.h
+#import &lt;Foundation/Foundation.h&gt;
+#import &quot;ProtocolA.h&quot;
+
+@interface ClassA : NSObject&lt;ProtocolA&gt;
+
+@end
+
+//ClassA.m
+#import &quot;ClassA.h&quot;
+
+@implementation ClassA
+
+-(void)sendValue:(NSString *)str{
+    NSLog(@&quot;我是传过来的值：%@&quot; , str);
+}
+
+@end
+
+</code></pre>
+
+<p>写到这里，我们大概可以猜到，我们想让<code>ClassA</code>的实例来接受一个委托实现<code>ProtocolA</code>中的方法。</p>
+
+<p>所以我们这里继续创建一个<code>ClassB</code>，让它来发出一个委托，让<code>ClassA</code>代替它实现。</p>
+
+<pre><code class="language-objc">//ClassB.h
+
+#import &lt;Foundation/Foundation.h&gt;
+#import &quot;ClassA.h&quot;
+
+@interface ClassB : NSObject
+//这里我们创建了一个delegate对象，用于设置委托对象。
+@property(weak,nonatomic) id&lt;ProtocolA&gt; delegate;
+//创建一个方法来执行委托操作
+-(void)dowork;
+
+@end
+
+//ClassB.m
+
+#import &quot;ClassB.h&quot;
+
+@implementation ClassB
+
+//创建a的实例，将a设置为接受委托的对象。
+-(void)dowork{
+    ClassA *a = [ClassA new];
+    self.delegate = a;
+    //当响应了委托方法时，执行sendValue：
+    if ([self.delegate respondsToSelector:@selector(sendValue:)]) { // 如果协议响应了sendValue:方法
+        [self.delegate sendValue:@&quot;Hello&quot;]; // 通知执行协议方法
+    }
+}
+
+@end
+</code></pre>
+
+<p>最后在<code>main.m</code>中，执行：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+#import &quot;ClassB.h&quot;
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        ClassB *b = [ClassB new];
+        [b dowork];
+    }
+    return 0;
+}
+</code></pre>
+
+<p><strong>运行结果为：</strong><br/>
+<img src="media/15038893459243/15039016722409.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/28</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14956131169957.html">
                 
                   <h1>在ios中判断一个viewcontroller是都已经正常present</h1>
@@ -380,6 +510,24 @@
 	      
 		      
 			      <li class="post">
+			        <a href="15038893459243.html">iOS 中协议和委托传值的用法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15038851180831.html">第二十一条 理解Objective-C的错误模型</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15038831182450.html">第二十条 为私有方法名加上前缀</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15037310867483.html">第十九条 使用清晰而协调的命名方式</a>
 			      </li>
 		     
@@ -387,24 +535,6 @@
 		      
 			      <li class="post">
 			        <a href="15037148888105.html">第十八条 尽量使用不可变对象</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15037100500253.html">第十七条 实现description方法</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15036443106558.html">第十六条 提供"全能初始化方法"</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15036306506140.html">第十五条 用前缀避免命名空间冲突</a>
 			      </li>
 		     
 		  

@@ -1,0 +1,414 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  第二十一条 理解Objective-C的错误模型 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>第二十一条 理解Objective-C的错误模型</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/8/28</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p><code>Objective-C</code>语言不例外的也有“异常”（exception)机制，但是与其它语言肯定存在差异。我们要重新学习一下。</p>
+
+<p>首先就是，<code>“自动引用计数”（Automatic ReferenceCounting, ARC)</code>在默认情况下不是<code>“异常安全的&quot;（exception safe)</code>。具体来说，这意味着：如果抛出异常，那么本应在作用域末尾释放的对象现在却不会自动释放了。<strong><font color=red>如果想生成“异常安全”的代码，可以通过设置编译器的标志来实现，不过这将引入一些额外代码，在不抛出异常时，也照样要执行这部分代码。</font></strong>需要打开的编译器标志叫做<code>-fobjc-arc-exceptions</code>。</p>
+
+<p>但是我们应该注意，<mark>Objective-C语言只有在极其罕见的情况下拋出异常，异常拋出之后，无须考虑恢复问题，而且应用程序此时也应该退出。</mark>这就是说，不用再编写复杂的“异常安全”代码了。</p>
+
+<p>异常只应该用于极其严重的错误，比如说，你编写了某个抽象基类，它的正确用法是先从中继承一个子类，然后使用这个子类。在这种情况下，如果有人直接使用了这个抽象基类，那么可以考虑抛出异常。</p>
+
+<p>与其他语言不同，Objective-C中没办法将某个类标识为“抽象 类”。要想达成类似效果，最好的办法是在那些子类必须覆写的超类方法里抛出异常。这样的话，只要有人直接创建抽象基类的实例并使用它，即会拋出异常：</p>
+
+<pre><code class="language-objc">-(void)mustOverrideMethod {
+NSString *reason = [NSStringstringWithFormat: 
+                    @&quot;%@ must be overridden&quot;,
+                    NSStringFromSelector(_cmd)];
+@throw [NSException
+    exceptionWithName:NSInternalInconsistencyException 
+    reason:reason 
+    userInfo：nil];
+}
+</code></pre>
+
+<p>既然异常只用于处理严重错误（fatal error,致命错误)，那么对其他错误怎么办呢？在出 现“不那么严重的错误&quot;（nonfatal error,非致命错误）时，Objective-C语言所用的编程范式为: 令方法返回<code>nil/0</code>,或是使用<code>NSError</code>，以表明其中有错误发生。例如，如果初始化方法无法根据传入的参数来初始化当前实例，那么就可以令其返回nil/0:</p>
+
+<pre><code class="language-objc">-(id)initWithValue:(id)value { 
+    if ((self = [super init])){
+        if ( /* Value means instance can11 be created */ ) { 
+        self = nil;
+     } else {
+        // Initialize instance
+        }
+     }
+    return self;
+}
+</code></pre>
+
+<p>在这种情况下，如果<code>if</code>语句发现无法用传人的参数值来初始化当前实例（比如这个方法 要求传入的value参数必须是<code>non-nil</code>的)，那么就把<code>self</code>设置成<code>nil</code>,这样的话，整个方法的 返回值也就是<code>nil</code>了。调用者发现初始化方法并没有把实例创建好，于是便可确定其中发生了错误。</p>
+
+<p><code>NSError</code>的用法更加灵活，因为经由此对象，我们可以把导致错误的原因回报给调用者。 <code>NSError</code>对象里封装了三条信息：</p>
+
+<ul>
+<li><p><strong>Error domain(错误范围，其类型为字符串）</strong><br/>
+错误发生的范围。也就是产生错误的根源，通常用一个特有的全局变量来定义。比方说，<code>“处理URL的子系统”（URL-handling subsystem)</code>在从URL中解析或取得数据时如果出错了，那么就会使用<code>NSURLErrorDomain</code>来表示错误范围。</p></li>
+<li><p><strong>Error code(错误码，其类型为整数）</strong><br/>
+独有的错误代码，用以指明在某个范围内具体发生了何种错误。某个特定范围内可能会发生一系列相关错误，这些错误情况通常采用<code>enum</code>来定义。例如，当<code>HTTP</code>请求出错时，可能会把<code>HTTP</code>状态码设为错误码。</p></li>
+<li><p><strong>Uesr info(用户信息，其类型为字典）</strong><br/>
+有关此错误的额外信息，其中或许包含一段“<code>本地化的描述”（localized description)</code>, 或许还含有导致该错误发生的另外一个错误，经由此种信息，可将相关错误串成一条 <code>“错误链”（chain of errors)</code>。</p></li>
+</ul>
+
+<p>NSError的一种常见用法是，经由方法的“输出参数”返回给调用者。比如像这样：</p>
+
+<pre><code class="language-objc">-(BOOL)doSomething: (NSError**)error
+</code></pre>
+
+<p>用例为：</p>
+
+<pre><code class="language-objc">NSError *error = nil;
+BOOL ret = [object doSomething:&amp;error];
+    if (error) {
+//There was an error
+}
+</code></pre>
+
+<p>也可以通过委托协议来传递此错误。有错误发生时，当前对象会把错误信息经由协议中的某个方法传给其<code>委托对象（delegate)</code>。这里不做过多说明。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>只有发生了可使整个应用程序崩溃的严重错误时，才应使用异常。</li>
+<li>在错误不那么严重的情况下，可以指派“委托方法”（delegate method)来处理错误，也可以把错误信息放在<code>NSError</code>对象里，经由“输出参数”返回给调用者。</li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15038893459243.html" 
+          title="Previous Post: iOS 中协议和委托传值的用法">&laquo; iOS 中协议和委托传值的用法</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15038831182450.html" 
+          title="Next Post: 第二十条 为私有方法名加上前缀">第二十条 为私有方法名加上前缀 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15038893459243.html">iOS 中协议和委托传值的用法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15038851180831.html">第二十一条 理解Objective-C的错误模型</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15038831182450.html">第二十条 为私有方法名加上前缀</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15037310867483.html">第十九条 使用清晰而协调的命名方式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15037148888105.html">第十八条 尽量使用不可变对象</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

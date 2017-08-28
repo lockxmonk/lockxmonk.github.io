@@ -113,6 +113,660 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14974936829967.html">
+                
+                  <h1>Caffe中Layer的学习</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Layer是Caffe的基本计算单元，至少有一个输入Blob (Bottom Blob)和一个输出Blob (Top Blob),部分Layer带有权值(Weight)和偏置项（Bias),<strong>有两个运算方向</strong>：前向传播（Forward)和反向传播（Backward)，其中前向传播计算会对输入Blob进行某种处理（存权值和偏置项的Layer会利用这些对输入进行处理）,得到输出Blob;而反向传播计算则对输出Blob的diff进行某种处理，得到输入Blob的diff(有权值和偏置项的Layer可能也会计算权值Blob、偏置项Blob的diff)。</p>
+
+<h2 id="toc_0">layer中的数据结构描述</h2>
+
+<p>我们可以搜索caffe中关于<code>message LayerParameter</code>的类,来了解.<br/>
+如果你一开始找不到这个类在那个文件描述,可以用下面这个命令去搜索:</p>
+
+<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;message LayerParameter&quot; *
+</code></pre>
+
+<p><img src="media/14974936829967/14974948024735.jpg" alt=""/><br/>
+得到它的路径.</p>
+
+<p>我们发现是在<code>src/caffe/proto/caffe.proto</code>这个路径中.因为caffe使用<code>google_protobuf</code>数据类型来声明layer.关于<code>google_protobuf</code>的相关内容,之后可以研究一下.</p>
+
+<p>这里我们看一下源码:</p>
+
+<pre><code class="language-protobuf">//注意：如果你增加了1个新的LayerParameter域，一定记得更新一个可用ID
+// LayerParameter 下一个layer-specific ID: 147 (last added: recurrent_param)
+message LayerParameter {
+  optional string name = 1; // the layer name
+  optional string type = 2; // the layer type
+  repeated string bottom = 3; // 输入Blob(bottom Blob)的名称
+  repeated string top = 4; // 输出Blob(Top Blob)的名称
+
+  // 当前计算阶段（TRAIN 或 TEST)
+    optional Phase phase = 10;
+
+  // 为每个Top Blob分配对损失函数的权重，毎个Layer都有默认值，要么为0,表示不参与目标函数计算：要么为1，表示参与损失函数计算
+  repeated float loss_weight = 5;
+
+  // 指定训练参数（例如相对全局学习常数的缩放因子，以及用于权值共享 的名称或其他设置)
+  repeated ParamSpec param = 6;
+
+  // 承载了该层数值参数的Blob
+  repeated BlobProto blobs = 7;
+  //是否对Bottom Blob进行反向传播过程。该字段的维度应与 Bottom Blob个数一致
+  // Specifies whether to backpropagate to each bottom. If unspecified,
+  // Caffe will automatically infer whether each input needs backpropagation
+  // to compute parameter gradients. If set to true for some inputs,
+  // backpropagation to those inputs is forced; if set false for some inputs,
+  // backpropagation to those inputs is skipped.
+  //
+  // The size must be either 0 or equal to the number of bottoms.
+  repeated bool propagate_down = 11;
+
+ //控制某个层在某个时刻是否包含在网络中，基于当前NetState。你可以为include或exclude(不要同时）指定非零值。如果没有任何规则，那么该层一直包含在网络中：如果当前NetState满足了任何1个指定规则，耶么该层会被包含或排斥
+  // Rules controlling whether and when a layer is included in the network,
+  // based on the current NetState.  You may specify a non-zero number of rules
+  // to include OR exclude, but not both.  If no include or exclude rules are
+  // specified, the layer is always included.  If the current NetState meets
+  // ANY (i.e., one or more) of the specified rules, the layer is
+  // included/excluded.
+  repeated NetStateRule include = 8;
+  repeated NetStateRule exclude = 9;
+
+  // Parameters for data pre-processing.数据预处理参数
+  optional TransformationParameter transform_param = 100;
+
+  // Parameters shared by loss layers.所有损失层共享的参数
+  optional LossParameter loss_param = 101;
+  
+  
+  //特定类型层的参数。注意一些层实现时可能有多于一种的计算引擎，这些层包括一个引擎类型和引擎参数来选择实现.默认引擎是在编译阶段由引擎开关设置的
+  // Layer type-specific parameters.
+  //
+  // Note: certain layers may have more than one computational engine
+  // for their implementation. These layers include an Engine type and
+  // engine parameter for selecting the implementation.
+  // The default for the engine is set by the ENGINE switch at compile-time.
+  optional AccuracyParameter accuracy_param = 102;
+  optional ArgMaxParameter argmax_param = 103;
+  optional BatchNormParameter batch_norm_param = 139;
+  optional BiasParameter bias_param = 141;
+  optional ConcatParameter concat_param = 104;
+  optional ContrastiveLossParameter contrastive_loss_param = 105;
+  optional ConvolutionParameter convolution_param = 106;
+  optional CropParameter crop_param = 144;
+  optional DataParameter data_param = 107;
+  optional DropoutParameter dropout_param = 108;
+  optional DummyDataParameter dummy_data_param = 109;
+  optional EltwiseParameter eltwise_param = 110;
+  optional ELUParameter elu_param = 140;
+  optional EmbedParameter embed_param = 137;
+  optional ExpParameter exp_param = 111;
+  optional FlattenParameter flatten_param = 135;
+  optional HDF5DataParameter hdf5_data_param = 112;
+  optional HDF5OutputParameter hdf5_output_param = 113;
+  optional HingeLossParameter hinge_loss_param = 114;
+  optional ImageDataParameter image_data_param = 115;
+  optional InfogainLossParameter infogain_loss_param = 116;
+  optional InnerProductParameter inner_product_param = 117;
+  optional InputParameter input_param = 143;
+  optional LogParameter log_param = 134;
+  optional LRNParameter lrn_param = 118;
+  optional MemoryDataParameter memory_data_param = 119;
+  optional MVNParameter mvn_param = 120;
+  optional ParameterParameter parameter_param = 145;
+  optional PoolingParameter pooling_param = 121;
+  optional PowerParameter power_param = 122;
+  optional PReLUParameter prelu_param = 131;
+  optional PythonParameter python_param = 130;
+  optional RecurrentParameter recurrent_param = 146;
+  optional ReductionParameter reduction_param = 136;
+  optional ReLUParameter relu_param = 123;
+  optional ReshapeParameter reshape_param = 133;
+  optional ScaleParameter scale_param = 142;
+  optional SigmoidParameter sigmoid_param = 124;
+  optional SoftmaxParameter softmax_param = 125;
+  optional SPPParameter spp_param = 132;
+  optional SliceParameter slice_param = 126;
+  optional TanHParameter tanh_param = 127;
+  optional ThresholdParameter threshold_param = 128;
+  optional TileParameter tile_param = 138;
+  optional WindowDataParameter window_data_param = 129;
+}
+
+</code></pre>
+
+<h2 id="toc_1">Layer是怎么炼成的</h2>
+
+<p>Layer头文件位于<code>include/caffe/layer.hpp</code>中，我们来解析一下: </p>
+
+<pre><code class="language-c++">#ifndef CAFFE_LAYER_H_
+#define CAFFE_LAYER_H_
+
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+#include &quot;caffe/blob.hpp&quot;
+#include &quot;caffe/common.hpp&quot;
+#include &quot;caffe/layer_factory.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
+#include &quot;caffe/util/math_functions.hpp&quot;
+
+/**
+ Forward declare boost::thread instead of including boost/thread.hpp
+ to avoid a boost/NVCC issues (#1009, #1010) on OSX.
+ */
+namespace boost { class mutex; }
+
+namespace caffe {
+
+/**
+ * @brief An interface for the units of computation which can be composed into a
+ *        Net.
+ *
+ * Layer%s must implement a Forward function, in which they take their input
+ * (bottom) Blob%s (if any) and compute their output Blob%s (if any).
+ * They may also implement a Backward function, in which they compute the error
+ * gradients with respect to their input Blob%s, given the error gradients with
+ * their output Blob%s.
+ */
+template &lt;typename Dtype&gt;
+class Layer {
+ public:
+  /**
+   * You should not implement your own constructor. Any set up code should go
+   * to SetUp(), where the dimensions of the bottom blobs are provided to the
+   * layer.
+   */
+   //显式构造函数，从LayerParameter对象中加载配置
+  explicit Layer(const LayerParameter&amp; param)
+    : layer_param_(param) {
+      // Set phase(训练/预测) and copy blobs (if there are any).
+      phase_ = param.phase();
+      if (layer_param_.blobs_size() &gt; 0) {
+        //按 layer_param_设置本身Blob对象个数，并依次将每个Blob对象尺寸调整为与layer_param_中的Blob尺寸一致
+        blobs_.resize(layer_param_.blobs_size());
+        for (int i = 0; i &lt; layer_param_.blobs_size(); ++i) {
+          blobs_[i].reset(new Blob&lt;Dtype&gt;());
+          blobs_[i]-&gt;FromProto(layer_param_.blobs(i));
+        }
+      }
+    }
+    //析构函数
+  virtual ~Layer() {}
+
+  /**
+   * @brief Implements common layer setup functionality.
+   *
+   * @param bottom the preshaped input blobs
+   * @param top
+   *     the allocated but unshaped output blobs, to be shaped by Reshape
+   *
+   * Checks that the number of bottom and top blobs is correct.
+   * Calls LayerSetUp to do special layer setup for individual layer types,
+   * followed by Reshape to set up sizes of top blobs and internal buffers.
+   * Sets up the loss weight multiplier blobs for any non-zero loss weights.
+   * This method may not be overridden.
+   */
+   
+   //配置函数,实现常用层配置接口，不可被覆盖
+  void SetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    CheckBlobCounts(bottom, top);   //检查Blob
+    LayerSetUp(bottom, top);        //  与层类型相关的配置过程
+    Reshape(bottom, top);       //对Top Blob变形
+    SetLossWeights(top);        //设置损失权值因子Blob
+  }
+
+  /**
+   * @brief Does layer-specific setup: your layer should implement this function
+   *        as well as Reshape.
+   *
+   * @param bottom
+   *     the preshaped input blobs, whose data fields store the input data for
+   *     this layer
+   * @param top
+   *     the allocated but unshaped output blobs
+   *
+   * This method should do one-time layer specific setup. This includes reading
+   * and processing relevent parameters from the &lt;code&gt;layer_param_&lt;/code&gt;.
+   * Setting up the shapes of top blobs and internal buffers should be done in
+   * &lt;code&gt;Reshape&lt;/code&gt;, which will be called before the forward pass to
+   * adjust the top blob sizes.
+   */
+   
+   //层配置（虚）函数，做特定类型层相关的配置，由该类型层自己实现
+  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {}
+   
+   //变形（纯虚）函数，修改Top Blob以及内部Blob缓冲区的形状
+  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) = 0;
+
+ 
+   //前向传播函数,给定Bottom Blob,计算Top Blob和loss,返回值为当前层loss
+   //该函数会调用相应设裕包装闲数，如Forward_cpu或Forward_gpu来实现真正的计算过程。如果该层有任意非零loss_weights参数，那么包装函数会计算并返回loss
+   //派生类应该实现Forward_cpu和Forward_gpu (可选〉
+  inline Dtype Forward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+
+  //反向传播函数，给定Top Blob误差梯度，汁算Bottom Blob误差梯度
+  //参数说明:
+  // top-Top Blob，其diff域包含来自上一层的误差梯度
+  // propagate_down -- 多路幵关，与Bottom Blob矢量维度相问，每个值表示是否将误差梯度传递到对应的 Bottom Blob
+  // bottom—Bottom Blob，其diff域需要由该函数计算得到
+  // 该函数会调用相应设备包装函数，如Backward_cpu或Backward_gpu来实现真正的计算过程，由派生类负责实现
+  inline void Backward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
+
+  //返回Layer内部可训练的权值、偏置项Blob向量
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt;&amp; blobs() {
+    return blobs_;
+  }
+
+  //返回Layer初始化参数（由ProtoBuffer提供)
+  const LayerParameter&amp; layer_param() const { return layer_param_; }
+
+  //将Layer初始化参数写入ProtoBuffer缓冲区
+  virtual void ToProto(LayerParameter* param, bool write_diff = false);
+
+  //返回与某个Top Blob相关的标量loss值
+  inline Dtype loss(const int top_index) const {
+    return (loss_.size() &gt; top_index) ? loss_[top_index] : Dtype(0);
+  }
+
+  //设置与某个Top Blob相关的标量loss值
+  inline void set_loss(const int top_index, const Dtype value) {
+    if (loss_.size() &lt;= top_index) {
+      loss_.resize(top_index + 1, Dtype(0));
+    }
+    loss_[top_index] = value;
+  }
+
+  //返回层类型字符串,便于识別,由派生类负责实现
+  virtual inline const char* type() const { return &quot;&quot;; }
+
+ //返回该Layer需要的输入Blob数目.-1表示不关心。由派生类负责实现
+  virtual inline int ExactNumBottomBlobs() const { return -1; }
+
+  virtual inline int MinBottomBlobs() const { return -1; }
+  
+  virtual inline int MaxBottomBlobs() const { return -1; }
+  //返回该Layer需要的输出Blob数目.-1表示不关心。由派生类负责实现
+  virtual inline int ExactNumTopBlobs() const { return -1; }
+ 
+  virtual inline int MinTopBlobs() const { return -1; }
+  
+  virtual inline int MaxTopBlobs() const { return -1; }
+  
+  //返回该Layer是否有相同的输入/输出Blob，由派生类负责实现
+  virtual inline bool EqualNumBottomTopBlobs() const { return false; }
+
+  //返回是否允许匿名Top Blob,即由该Layer自动创建。若为真，在Net::Init()函数中会创建足够多的匿名Top Blob来满足该 Layer ExactNumTopBlobs()、MinTopBlobs()需求
+  virtual inline bool AutoTopBlobs() const { return false; }
+
+  //返回某些Bottom Blob足否允许强制反向传播，如果AllowForceBackward(i) === false,将会忽略 force_backward 设定
+  virtual inline bool AllowForceBackward(const int bottom_index) const {
+    return true;
+  }
+
+  //指定该Layer是否计算相对权值或偏置项的梯度，具体相对谁由param_id指定
+  inline bool param_propagate_down(const int param_id) {
+    return (param_propagate_down_.size() &gt; param_id) ?
+        param_propagate_down_[param_id] : false;
+  }
+  
+  //设置该Layer是否计算相对权值或偏置项的梯度，具体相对谁由param_id指定
+  inline void set_param_propagate_down(const int param_id, const bool value) {
+    if (param_propagate_down_.size() &lt;= param_id) {
+      param_propagate_down_.resize(param_id + 1, true);
+    }
+    param_propagate_down_[param_id] = value;
+  }
+
+
+ protected:
+  /** The protobuf that stores the layer parameters */
+  LayerParameter layer_param_;
+  /** 当前所处阶段: TRAIN or TEST */
+  Phase phase_;
+  /** The vector that stores the learnable parameters as a set of blobs. */
+  //Layer 内部权值或偏置项，以 Blob 方式组织
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt; blobs_;
+  /** Vector indicating whether to compute the diff of each param blob. */
+  //标志位，是否计算对应参数的误差梯度
+  vector&lt;bool&gt; param_propagate_down_;
+
+  //标志位，在目标函数中，是否每个Top Blob都有非零权重
+  vector&lt;Dtype&gt; loss_;
+
+//下面4个函数，我们会在各个Layer派生类中经常看到
+
+  /** @brief Using the CPU device, compute the layer output. */
+  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) = 0;
+  /**
+   * @brief Using the GPU device, compute the layer output.
+   *        Fall back to Forward_cpu() if unavailable.
+   */
+  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    // LOG(WARNING) &lt;&lt; &quot;Using CPU code as backup.&quot;;
+    return Forward_cpu(bottom, top);
+  }
+
+  /**
+   * @brief Using the CPU device, compute the gradients for any parameters and
+   *        for the bottom blobs if propagate_down is true.
+   */
+  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) = 0;
+  /**
+   * @brief Using the GPU device, compute the gradients for any parameters and
+   *        for the bottom blobs if propagate_down is true.
+   *        Fall back to Backward_cpu() if unavailable.
+   */
+  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+    // LOG(WARNING) &lt;&lt; &quot;Using CPU code as backup.&quot;;
+    Backward_cpu(top, propagate_down, bottom);
+  }
+
+  /**
+   * Called by the parent Layer&#39;s SetUp to check that the number of bottom
+   * and top Blobs provided as input match the expected numbers specified by
+   * the {ExactNum,Min,Max}{Bottom,Top}Blobs() functions.
+   */
+   //校验输入/输出Blob数目是否满足Layer要求
+  virtual void CheckBlobCounts(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+                               const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    if (ExactNumBottomBlobs() &gt;= 0) {
+      CHECK_EQ(ExactNumBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes &quot; &lt;&lt; ExactNumBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (MinBottomBlobs() &gt;= 0) {
+      CHECK_LE(MinBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes at least &quot; &lt;&lt; MinBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (MaxBottomBlobs() &gt;= 0) {
+      CHECK_GE(MaxBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes at most &quot; &lt;&lt; MaxBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (ExactNumTopBlobs() &gt;= 0) {
+      CHECK_EQ(ExactNumTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces &quot; &lt;&lt; ExactNumTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (MinTopBlobs() &gt;= 0) {
+      CHECK_LE(MinTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces at least &quot; &lt;&lt; MinTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (MaxTopBlobs() &gt;= 0) {
+      CHECK_GE(MaxTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces at most &quot; &lt;&lt; MaxTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (EqualNumBottomTopBlobs()) {
+      CHECK_EQ(bottom.size(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces one top blob as output for each &quot;
+          &lt;&lt; &quot;bottom blob input.&quot;;
+    }
+  }
+
+  /**
+   * Called by SetUp to initialize the weights associated with any top blobs in
+   * the loss function. Store non-zero loss weights in the diff blob.
+   */
+   //该函数在Layer的Setup函数中被调用，主要目的是初始化与Top Blob相关的loss权重，放到Top Blob的diff域，实际由Forward()计算loss函数
+   //loss_weight == 0,表示当前层不参与loss函数汁算，大部分Layer属于这一类
+   //loss_weight ==1,表示当前层参与loss函数汁算，损失层（LossLayer) 属于这一类
+  inline void SetLossWeights(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  //从ProtoBuffer对象中获得Layer参数，这里需要用loss_weight参数
+    const int num_loss_weights = layer_param_.loss_weight_size();
+    //如果 ProtoBuffer中存在至少一个loss_weight参数,loss_weight参数个数应当与Top Blob数目相同，或者不要loss_weight参数
+    if (num_loss_weights) {
+      CHECK_EQ(top.size(), num_loss_weights) &lt;&lt; &quot;loss_weight must be &quot;
+          &quot;unspecified or specified once per top blob.&quot;;
+    //遍历每个Top Blob
+      for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      // 从 ProtoBuffer 对象拿到 loss_weight 实际值(0 或者1)
+        const Dtype loss_weight = layer_param_.loss_weight(top_id);
+        //若为0,跳过
+        if (loss_weight == Dtype(0)) { continue; }\
+        //若不为0,则对网络进行相关设置
+        this-&gt;set_loss(top_id, loss_weight);    //本地记录loss_weight值
+        const int count = top[top_id]-&gt;count();
+        Dtype* loss_multiplier = top[top_id]-&gt;mutable_cpu_diff();
+        //将loss_weight值入 Top Blob 的diff域，传递到其他需耍使用的地一方，实现远程同步
+        caffe_set(count, loss_weight, loss_multiplier);
+      }
+    }
+  }
+
+ private:
+ //禁用拷贝构造函数和賦值运算函数 
+  DISABLE_COPY_AND_ASSIGN(Layer);
+};  // class Layer
+
+// Forward and backward wrappers. You should implement the cpu and
+// gpu specific implementations instead, and should not change these
+// functions.
+//使用时只需在派生类中改写 Forward_cpu、Forward_gpu、Backward_cpu、Backward_gpu
+template &lt;typename Dtype&gt;
+inline Dtype Layer&lt;Dtype&gt;::Forward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  Dtype loss = 0;
+  Reshape(bottom, top);
+  switch (Caffe::mode()) {      //判断计算设备
+  case Caffe::CPU:      //在CPU上执行Forward计算
+    Forward_cpu(bottom, top);   //调用CPU版本的 Forward函数
+    //还没完，要计算loss (如果有的话)
+    for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      if (!this-&gt;loss(top_id)) { continue; }
+      const int count = top[top_id]-&gt;count();
+      // 若为 LossLayer，则已经通过Forward函数计算出全局损失函数，放在Top Blob data域
+      const Dtype* data = top[top_id]-&gt;cpu_data();
+      // 若loss_weight不为0,则己经在SetLossWeights函数中将loss权重放在Top Blob diff域
+      const Dtype* loss_weights = top[top_id]-&gt;cpu_diff();
+      // 计算加权后的loss之和，得到标量loss值
+      loss += caffe_cpu_dot(count, data, loss_weights);
+    }
+    break;
+  case Caffe::GPU:
+    Forward_gpu(bottom, top);
+#ifndef CPU_ONLY
+    for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      if (!this-&gt;loss(top_id)) { continue; }
+      const int count = top[top_id]-&gt;count();
+      const Dtype* data = top[top_id]-&gt;gpu_data();
+      const Dtype* loss_weights = top[top_id]-&gt;gpu_diff();
+      Dtype blob_loss = 0;
+      caffe_gpu_dot(count, data, loss_weights, &amp;blob_loss);
+      loss += blob_loss;
+    }
+#endif
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
+  }
+  return loss;
+}
+//反向传播函数,直接调用对应设备函数
+template &lt;typename Dtype&gt;
+inline void Layer&lt;Dtype&gt;::Backward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+    const vector&lt;bool&gt;&amp; propagate_down,
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+  switch (Caffe::mode()) {
+  case Caffe::CPU:
+    Backward_cpu(top, propagate_down, bottom);
+    break;
+  case Caffe::GPU:
+    Backward_gpu(top, propagate_down, bottom);
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
+  }
+}
+
+//将层配置参数序列化为ProtoBuffer
+template &lt;typename Dtype&gt;
+void Layer&lt;Dtype&gt;::ToProto(LayerParameter* param, bool write_diff) {
+  param-&gt;Clear();
+  param-&gt;CopyFrom(layer_param_);
+  param-&gt;clear_blobs();
+  for (int i = 0; i &lt; blobs_.size(); ++i) { //权值和偏置项也会保存
+    blobs_[i]-&gt;ToProto(param-&gt;add_blobs(), write_diff);
+  }
+}
+
+}  // namespace caffe
+
+#endif  // CAFFE_LAYER_H_
+
+</code></pre>
+
+<p><code>Layer</code>源文件位于<code>src/caffe/layer.cpp</code>中:</p>
+
+<pre><code class="language-c++">#include &quot;caffe/layer.hpp&quot;
+
+namespace caffe {
+
+INSTANTIATE_CLASS(Layer);
+
+}  // namespace caffe
+
+</code></pre>
+
+<p>可见Layer大部分函数并没有实现，只有虚函数，真正的实现都在派生类中。具体代码可以进一步阅读 <code>src/caffe/丨ayers/*.cpp</code>。</p>
+
+<p>在使用 Layer 之前，需要先包含头文件<code>#include &lt;caffe/layer.hpp&gt;</code>，再通过<code>using namespace caffe;</code>使用命名空间caffe。如果代码中试图创建Layer对象，编译时会报错：</p>
+
+<p><code>error: cannot declare variable &#39;a^ to be of abstract type &#39;caffe：:Layer&lt;float&gt;</code></p>
+
+<p>这是因为Layer类是一个虚基类，不能直接创建对象。关于虚基类,这里不再过多说明.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/15</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%20%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.html'>Caffe 数据结构</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14974281629389.html">
+                
+                  <h1>怎样移除OSXRESERVED分区(如果BootCamp Assistant在安装之后没有成功删除这个分区)</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ol>
+<li>打开磁盘工具</li>
+<li>点击主物理磁盘(不是下边的分区)</li>
+<li>点击分区按钮</li>
+<li>When you see the pie chart, click on the OSXRESERVED partition in the pie chart</li>
+<li>点击<code>-</code>标志</li>
+<li>click apply</li>
+</ol>
+
+<p>Thats it! </p>
+
+<p><strong>DON&#39;T use the ERASE Button in Disk Utility! That will cause problems and it won&#39;t reallocate space back.</strong></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/14</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='MAC%20OS.html'>MAC OS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14974276192148.html">
+                
+                  <h1>重新利用boot camp安装win10</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>由于原来给win10分的磁盘容量太小,而mac又不能在后续动态给win分区增加磁盘容量,所以只能重新安装分区了.</p>
+
+<ol>
+<li>打开mac系统工具中的磁盘<code>磁盘工具</code>选择总的磁盘,点击上方的<code>分区</code>按钮,将系统中其它分区删掉(通过点击饼图中的对应区域,点击下方的<code>-</code>号),就可以将分区删掉,合并到mac系统磁盘.其他分区比如之前安装win产生的<code>OSXRESERVED Partition</code> </li>
+<li>打开bootcamp,点击恢复按钮,将之前的win系统抹掉,之后就会发现,你的mac系统磁盘变回来了.</li>
+<li>重启一下,之后打开bootcamp,点击下方的<code>继续</code>按钮,选择系统iso镜像,为win系统选择分区大小(这回分多些😓).</li>
+<li>点击确定,等待下载Windows支持软件.
+<img src="media/14974276192148/14974281373736.jpg" alt=""/></li>
+<li>安装之后,在OSRESEVER分区中,的bootcamp文件夹中打开安装驱动的程序.</li>
+</ol>
+
+<p>到此win10 应该就安装好了~</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/14</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='MAC%20OS.html'>MAC OS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14970763342670.html">
                 
                   <h1>caffe数据结构描述</h1>
@@ -1738,455 +2392,6 @@ void ReLULayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14957648679184.html">
-                
-                  <h1>UDP编程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>TCP是建立可靠连接，并且通信双方都可以以流的形式发送数据。相对TCP，UDP则是<strong>面向无连接</strong>的协议。</p>
-
-<p><font color=red>使用UDP协议时，不需要建立连接，只需要知道对方的IP地址和端口号，就可以直接发数据包。但是，能不能到达就不知道了。</p>
-
-<p>虽然用UDP传输数据不可靠，但它的优点是和TCP比，速度快，对于不要求可靠到达的数据，就可以使用UDP协议。</font></p>
-
-<p>我们来看看如何通过UDP协议传输数据。和TCP类似，使用<mark>UDP的通信双方也分为客户端和服务器</mark>。服务器首先需要绑定端口：</p>
-
-<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# 绑定端口:
-s.bind((&#39;127.0.0.1&#39;, 9999))
-</code></pre>
-
-<p>创建Socket时，<code>SOCK_DGRAM</code>指定了这个Socket的类型是UDP。绑定端口和TCP一样，但是不需要调用<code>listen()</code>方法，而是直接接收来自任何客户端的数据：</p>
-
-<pre><code class="language-py">print &#39;Bind UDP on 9999...&#39;
-while True:
-    # 接收数据:
-    data, addr = s.recvfrom(1024)
-    print &#39;Received from %s:%s.&#39; % addr
-    s.sendto(&#39;Hello, %s!&#39; % data, addr)
-</code></pre>
-
-<p><code>recvfrom()</code>方法返回数据和客户端的地址与端口，这样，服务器收到数据后，直接调用<code>sendto()</code>就可以把数据用UDP发给客户端。</p>
-
-<p>注意这里省掉了多线程，因为这个例子很简单。</p>
-
-<p>客户端使用UDP时，首先仍然创建基于UDP的Socket，然后，不需要调用<code>connect()</code>，直接通过<code>sendto()</code>给服务器发数据：</p>
-
-<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-for data in [&#39;Michael&#39;, &#39;Tracy&#39;, &#39;Sarah&#39;]:
-    # 发送数据:
-    s.sendto(data, (&#39;127.0.0.1&#39;, 9999))
-    # 接收数据:
-    print s.recv(1024)
-s.close()
-</code></pre>
-
-<p>客户端:<br/>
-<img src="media/14957648679184/14957678758780.jpg" alt=""/><br/>
-服务器:<br/>
-<img src="media/14957648679184/14957678951579.jpg" alt=""/><br/>
-客户端从服务器接收数据仍然调用<code>recv()</code>方法。</p>
-
-<h2 id="toc_0">小结</h2>
-
-<p>UDP的使用与TCP类似，但是不需要建立连接。此外，服务器绑定UDP端口和TCP端口互不冲突，也就是说，UDP的9999端口与TCP的9999端口可以各自绑定。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14957594179111.html">
-                
-                  <h1>网络编程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">TCP/IP</a>
-</li>
-<li>
-<a href="#toc_1">TCP编程</a>
-<ul>
-<li>
-<a href="#toc_2">客户端</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_3">服务器</a>
-</li>
-<li>
-<a href="#toc_4">小结</a>
-</li>
-</ul>
-
-
-<h2 id="toc_0">TCP/IP</h2>
-
-<p>现在的网络编程基本都是在一个统一的通用写一下来进行的,<code>互联网协议簇（Internet Protocol Suite）</code>就是通用协议标准。Internet是由inter和net两个单词组合起来的，原意就是连接“网络”的网络，有了Internet，任何私有网络，只要支持这个协议，就可以联入互联网。</p>
-
-<p>因为互联网协议包含了上百种协议标准，但是最重要的两个协议是TCP和IP协议，所以，大家把互联网的协议简称<strong>TCP/IP</strong>协议。</p>
-
-<p>通信的时候，双方必须知道对方的标识，好比发邮件必须知道对方的邮件地址。互联网上每个计算机的唯一标识就是IP地址，类似123.123.123.123。如果一台计算机同时接入到两个或更多的网络，比如路由器，它就会有两个或多个IP地址，所以，IP地址对应的实际上是计算机的网络接口，通常是网卡。</p>
-
-<p><strong>IP协议负责把数据从一台计算机通过网络发送到另一台计算机。数据被分割成一小块一小块，然后通过IP包发送出去。</strong>由于互联网链路复杂，两台计算机之间经常有多条线路，因此，<strong>路由器就负责决定如何把一个IP包转发出去。IP包的特点是按块发送，途径多个路由，但不保证能到达，也不保证顺序到达。</strong></p>
-
-<p><font color=red>TCP协议则是建立在IP协议之上的。TCP协议负责在两台计算机之间建立可靠连接，保证数据包按顺序到达。TCP协议会通过握手建立连接，然后，对每个IP包编号，确保对方按顺序收到，如果包丢掉了，就自动重发。</font></p>
-
-<p>许多常用的更高级的协议都是建立在TCP协议基础上的，比如用于浏览器的HTTP协议、发送邮件的SMTP协议等。</p>
-
-<p>一个IP包除了包含要传输的数据外，还包含源IP地址和目标IP地址，源端口和目标端口。</p>
-
-<p>端口有什么作用？在两台计算机通信时，只发IP地址是不够的，因为同一台计算机上跑着多个网络程序。一个IP包来了之后，到底是交给浏览器还是QQ，就需要<strong>端口号</strong>来区分。每个网络程序都向操作系统申请唯一的端口号，这样，两个进程在两台计算机之间建立网络连接就需要各自的IP地址和各自的端口号。(在进行tomcat设置的时候,类似也是需要设置端口号.)</p>
-
-<p>一个进程也可能同时与多个计算机建立链接，因此它会申请很多端口。</p>
-
-<h2 id="toc_1">TCP编程</h2>
-
-<p>Socket是网络编程的一个抽象概念。通常我们用一个Socket表示“打开了一个网络链接”，而打开一个Socket需要知道目标计算机的IP地址和端口号，再指定协议类型即可。</p>
-
-<h3 id="toc_2">客户端</h3>
-
-<p>大多数连接都是可靠的TCP连接。创建TCP连接时，主动发起连接的叫客户端，被动响应连接的叫服务器。</p>
-
-<p>我们要创建一个基于TCP连接的Socket，可以这样做：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import socket
-
-s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-
-s = connect((&#39;www.sina.com.cn&#39;,80))
-</code></pre>
-
-<p>创建Socket时，<code>AF_INET</code>指定使用<code>IPv4</code>协议，如果要用更先进的<code>IPv6</code>，就指定为<code>AF_INET6</code>。<code>SOCK_STREAM</code>指定使用面向流的TCP协议，这样，一个<code>Socket</code>对象就创建成功，但是还没有建立连接。</p>
-
-<p>客户端要主动发起TCP连接，必须知道服务器的IP地址和端口号。新浪网站的IP地址可以用域名<code>www.sina.com.cn</code>自动转换到IP地址，但是怎么知道新浪服务器的端口号呢？</p>
-
-<p>答案是作为服务器，提供什么样的服务，端口号就必须固定下来。由于我们想要访问网页，因此新浪提供网页服务的服务器必须把端口号固定在<code>80</code>端口，因为<code>80</code>端口是Web服务的标准端口。其他服务都有对应的标准端口号，例如SMTP服务是25端口，FTP服务是21端口，等等。端口号小于1024的是Internet标准服务的端口，端口号大于1024的，可以任意使用。</p>
-
-<p>因此，我们连接新浪服务器的代码如下：</p>
-
-<pre><code class="language-py">s.connect((&#39;www.sina.com.cn&#39;, 80))
-</code></pre>
-
-<p><strong>注意参数是一个tuple，包含地址和端口号。</strong></p>
-
-<p>建立TCP连接后，我们就可以向新浪服务器发送请求，要求返回首页的内容：</p>
-
-<pre><code class="language-py">s.send(&#39;GET / HTTP/1.1\r\nHost: www.sina.com.cn\r\nConnection: close\r\n\r\n&#39;)
-</code></pre>
-
-<p>TCP连接创建的是双向通道，双方都可以同时给对方发数据。但是谁先发谁后发，怎么协调，要根据具体的协议来决定。例如，HTTP协议规定客户端必须先发请求给服务器，服务器收到后才发数据给客户端。</p>
-
-<p>发送的文本格式必须符合HTTP标准，如果格式没问题，接下来就可以接收新浪服务器返回的数据了：</p>
-
-<pre><code class="language-py"># 接收数据:
-buffer = []
-while True:
-    # 每次最多接收1k字节:
-    d = s.recv(1024)
-    if d:
-        buffer.append(d)
-    else:
-        break
-data = &#39;&#39;.join(buffer)
-</code></pre>
-
-<p>接收数据时，调用<code>recv(max)</code>方法，一次最多接收指定的字节数，因此，在一个while循环中反复接收，直到<code>recv()</code>返回空数据，表示接收完毕，退出循环。</p>
-
-<p>当我们接收完数据后，调用<code>close()</code>方法关闭<code>Socket</code>，这样，一次完整的网络通信就结束了：</p>
-
-<pre><code class="language-py"># 关闭连接:
-s.close()
-</code></pre>
-
-<p>接收到的数据包括<code>HTTP头</code>和<code>网页本身</code>，我们只需要把HTTP头和网页分离一下，把<code>HTTP头</code>打印出来，网页内容保存到文件：</p>
-
-<pre><code class="language-py">header, html = data.split(&#39;\r\n\r\n&#39;, 1)
-print header
-# 把接收的数据写入文件:
-with open(&#39;sina.html&#39;, &#39;wb&#39;) as f:
-    f.write(html)
-</code></pre>
-
-<p>现在，只需要在浏览器中打开这个<code>sina.html</code>文件，就可以看到新浪的首页了。</p>
-
-<h2 id="toc_3">服务器</h2>
-
-<p>和客户端编程相比，服务器编程就要复杂一些。</p>
-
-<p>服务器进程首先要绑定一个端口并监听来自其他客户端的连接。如果某个客户端连接过来了，服务器就与该客户端建立Socket连接，随后的通信就靠这个Socket连接了。</p>
-
-<p>所以，服务器会打开固定端口（比如80）监听，每来一个客户端连接，就创建该Socket连接。由于服务器会有大量来自客户端的连接，所以，服务器要能够区分一个Socket连接是和哪个客户端绑定的。一个Socket依赖4项：服务器地址、服务器端口、客户端地址、客户端端口来唯一确定一个Socket。</p>
-
-<p>但是服务器还需要同时响应多个客户端的请求，所以，每个连接都需要一个新的进程或者新的线程来处理，否则，服务器一次就只能服务一个客户端了。</p>
-
-<p>我们来编写一个简单的服务器程序，它接收客户端连接，把客户端发过来的字符串加上<code>Hello</code>再发回去。</p>
-
-<p>首先，创建一个基于IPv4和TCP协议的Socket：</p>
-
-<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-</code></pre>
-
-<p>然后，我们要绑定监听的地址和端口。服务器可能有多块网卡，可以绑定到某一块网卡的IP地址上，也可以用<code>0.0.0.0</code>绑定到所有的网络地址，还可以用<code>127.0.0.1</code>绑定到本机地址。<code>127.0.0.1</code>是一个特殊的IP地址，表示本机地址，如果绑定到这个地址，客户端必须同时在本机运行才能连接，也就是说，外部的计算机无法连接进来。</p>
-
-<p>端口号需要预先指定。因为我们写的这个服务不是标准服务，所以用<code>9999</code>这个端口号。请注意，小于<code>1024</code>的端口号必须要有管理员权限才能绑定：</p>
-
-<pre><code class="language-py"># 监听端口:
-s.bind((&#39;127.0.0.1&#39;, 9999))
-</code></pre>
-
-<p>紧接着，调用listen()方法开始监听端口，传入的参数指定等待连接的最大数量：<br/>
-<code>py<br/>
-s.listen(5)<br/>
-print &#39;Waiting for connection...&#39;<br/>
-</code></p>
-
-<p>接下来，服务器程序通过一个永久循环来接受来自客户端的连接，<code>accept()</code>会等待并返回一个客户端的连接:</p>
-
-<pre><code class="language-py">while True:
-    # 接受一个新连接:
-    sock, addr = s.accept()
-    # 创建新线程来处理TCP连接:
-    t = threading.Thread(target=tcplink, args=(sock, addr))
-    t.start()
-</code></pre>
-
-<p>每个连接都必须创建新线程（或进程）来处理，否则，单线程在处理连接的过程中，无法接受其他客户端的连接：</p>
-
-<pre><code class="language-py">def tcplink(sock, addr):
-    print &#39;Accept new connection from %s:%s...&#39; % addr
-    sock.send(&#39;Welcome!&#39;)
-    while True:
-        data = sock.recv(1024)
-        time.sleep(1)
-        if data == &#39;exit&#39; or not data:
-            break
-        sock.send(&#39;Hello, %s!&#39; % data)
-    sock.close()
-    print &#39;Connection from %s:%s closed.&#39; % addr
-</code></pre>
-
-<p>连接建立后，服务器首先发一条欢迎消息，然后等待客户端数据，并加上<code>Hello</code>再发送给客户端。如果客户端发送了<code>exit</code>字符串，就直接关闭连接。</p>
-
-<p>要测试这个服务器程序，我们还需要编写一个客户端程序：</p>
-
-<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# 建立连接:
-s.connect((&#39;127.0.0.1&#39;, 9999))
-# 接收欢迎消息:
-print s.recv(1024)
-for data in [&#39;Michael&#39;, &#39;Tracy&#39;, &#39;Sarah&#39;]:
-    # 发送数据:
-    s.send(data)
-    print s.recv(1024)
-s.send(&#39;exit&#39;)
-s.close()
-</code></pre>
-
-<p>我们需要打开两个命令行窗口，一个运行服务器程序，另一个运行客户端程序，就可以看到效果了：<br/>
-(先运行服务器端程序)<br/>
-执行了两次客户端程序:<br/>
-<img src="media/14957594179111/14957645115702.jpg" alt=""/><br/>
-服务端:<br/>
-<img src="media/14957594179111/14957645546966.jpg" alt=""/><br/>
-需要注意的是，客户端程序运行完毕就退出了，而服务器程序会永远运行下去，必须按Ctrl+C退出程序。</p>
-
-<h2 id="toc_4">小结</h2>
-
-<p>用TCP协议进行Socket编程在Python中十分简单，对于客户端，要主动连接服务器的IP和指定端口，对于服务器，要首先监听指定端口，然后，对每一个新的连接，创建一个线程或进程来处理。通常，服务器程序会无限运行下去。</p>
-
-<p>同一个端口，被一个Socket绑定了以后，就不能被别的Socket绑定了。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14957005904776.html">
-                
-                  <h1>图形界面</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Python支持多种图形界面的第三方库，包括：<br/>
-* Tk<br/>
-* wxWidgets<br/>
-* Qt<br/>
-* GTK<br/>
-等等.</p>
-
-<p>但是Python自带的库是支持Tk的Tkinter，使用Tkinter，无需安装任何包，就可以直接使用。本章简单介绍如何使用Tkinter进行GUI编程。</p>
-
-<h2 id="toc_0">Tkinter</h2>
-
-<p>我们来梳理一下概念：</p>
-
-<p>我们编写的Python代码会调用内置的Tkinter，Tkinter封装了访问Tk的接口；</p>
-
-<p>Tk是一个图形库，支持多个操作系统，使用Tcl语言开发；</p>
-
-<p>Tk会调用操作系统提供的本地GUI接口，完成最终的GUI。</p>
-
-<p>所以，我们的代码只需要调用Tkinter提供的接口就可以了。</p>
-
-<h2 id="toc_1">第一个GUI程序</h2>
-
-<p>使用Tkinter十分简单，我们来编写一个GUI版本的“Hello, world!”。</p>
-
-<p>第一步是导入Tkinter包的所有内容：</p>
-
-<pre><code class="language-py">from Tkinter import *
-</code></pre>
-
-<p>第二步是从<code>Frame</code>派生一个<code>Application</code>类，这是所有Widget的父容器：</p>
-
-<pre><code class="language-py">
-class Applicition(Frame):
-    def __init__(self, master=None):
-        Frame.__init__(self,master)
-        self.pack()
-        self.creatWidgets()
-
-    def creatWidgets(self):
-        self.helloLabel = Label(self,text = &#39;Hello,world&#39;)
-        self.helloLabel.pack()
-        self.quitButton = Button(self, text = &#39;Quit&#39;,command = self.quit)
-        self.quitButton.pack()
-
-</code></pre>
-
-<p>在GUI中，每个Button、Label、输入框等，都是一个Widget。Frame则是可以容纳其他Widget的Widget，所有的Widget组合起来就是一棵树。</p>
-
-<p><code>pack()</code>方法把Widget加入到父容器中，并实现布局。<code>pack()</code>是最简单的布局，<code>grid()</code>可以实现更复杂的布局。</p>
-
-<p>在<code>createWidgets()</code>方法中，我们创建一个<code>Label</code>和一个<code>Button</code>，当Button被点击时，触发<code>self.quit()</code>使程序退出。</p>
-
-<p>第三步，实例化<code>Application</code>，并启动消息循环：</p>
-
-<pre><code class="language-py">app = Application()
-# 设置窗口标题:
-app.master.title(&#39;Hello World&#39;)
-# 主消息循环:
-app.mainloop()
-</code></pre>
-
-<p>GUI程序的主线程负责监听来自操作系统的消息，并依次处理每一条消息。因此，如果消息处理非常耗时，就需要在新线程中处理。</p>
-
-<p>运行这个GUI程序，可以看到下面的窗口：<br/>
-<img src="media/14957005904776/14957017137688.jpg" alt=""/><br/>
-点击“Quit”按钮或者窗口的“x”结束程序。</p>
-
-<h2 id="toc_2">输入文本</h2>
-
-<p>我们再对这个GUI程序改进一下，加入一个文本框，让用户可以输入文本，然后点按钮后，弹出消息对话框。</p>
-
-<pre><code class="language-py">from Tkinter import *
-import tkMessageBox
-
-
-class Applicition(Frame):
-
-    def __init__(self, master=None):
-        Frame.__init__(self, master)
-        self.pack()
-        self.creatWidgets()
-
-    def creatWidgets(self):
-        self.nameInput = Entry(self)
-        self.nameInput.pack()
-        self.alertButton = Button(self, text=&#39;Hello&#39;, command=self.hello)
-        self.alertButton.pack()
-
-    def hello(self):
-        name = self.nameInput.get() or &#39;world&#39;
-        tkMessageBox.showinfo(&#39;Message&#39;, &#39;Hello,%s&#39; % name)
-
-app = Applicition()
-app.master.title(&#39;Hello World&#39;)
-app.mainloop()
-
-</code></pre>
-
-<p><img src="media/14957005904776/14957022189285.jpg" alt=""/></p>
-
-<p>当用户点击按钮时，触发<code>hello()</code>，通过<code>self.nameInput.get()</code>获得用户输入的文本后，使用<code>tkMessageBox.showinfo()</code>可以弹出消息对话框。</p>
-
-<h2 id="toc_3">小结</h2>
-
-<p>Python内置的Tkinter可以满足基本的GUI程序的要求，如果是非常复杂的GUI程序，建议用操作系统原生支持的语言和库来编写。</p>
-
-<p>源码参考：<a href="https://github.com/michaelliao/learn-python/tree/master/gui">https://github.com/michaelliao/learn-python/tree/master/gui</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/25</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -2270,6 +2475,24 @@ app.mainloop()
 	      
 		      
 			      <li class="post">
+			        <a href="15038893459243.html">iOS 中协议和委托传值的用法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15038851180831.html">第二十一条 理解Objective-C的错误模型</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15038831182450.html">第二十条 为私有方法名加上前缀</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15037310867483.html">第十九条 使用清晰而协调的命名方式</a>
 			      </li>
 		     
@@ -2277,24 +2500,6 @@ app.mainloop()
 		      
 			      <li class="post">
 			        <a href="15037148888105.html">第十八条 尽量使用不可变对象</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15037100500253.html">第十七条 实现description方法</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15036443106558.html">第十六条 提供"全能初始化方法"</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15036306506140.html">第十五条 用前缀避免命名空间冲突</a>
 			      </li>
 		     
 		  
