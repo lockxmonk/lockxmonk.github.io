@@ -113,6 +113,535 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15038851180831.html">
+                
+                  <h1>第二十一条 理解Objective-C的错误模型</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><code>Objective-C</code>语言不例外的也有“异常”（exception)机制，但是与其它语言肯定存在差异。我们要重新学习一下。</p>
+
+<p>首先就是，<code>“自动引用计数”（Automatic ReferenceCounting, ARC)</code>在默认情况下不是<code>“异常安全的&quot;（exception safe)</code>。具体来说，这意味着：如果抛出异常，那么本应在作用域末尾释放的对象现在却不会自动释放了。<strong><font color=red>如果想生成“异常安全”的代码，可以通过设置编译器的标志来实现，不过这将引入一些额外代码，在不抛出异常时，也照样要执行这部分代码。</font></strong>需要打开的编译器标志叫做<code>-fobjc-arc-exceptions</code>。</p>
+
+<p>但是我们应该注意，<mark>Objective-C语言只有在极其罕见的情况下拋出异常，异常拋出之后，无须考虑恢复问题，而且应用程序此时也应该退出。</mark>这就是说，不用再编写复杂的“异常安全”代码了。</p>
+
+<p>异常只应该用于极其严重的错误，比如说，你编写了某个抽象基类，它的正确用法是先从中继承一个子类，然后使用这个子类。在这种情况下，如果有人直接使用了这个抽象基类，那么可以考虑抛出异常。</p>
+
+<p>与其他语言不同，Objective-C中没办法将某个类标识为“抽象 类”。要想达成类似效果，最好的办法是在那些子类必须覆写的超类方法里抛出异常。这样的话，只要有人直接创建抽象基类的实例并使用它，即会拋出异常：</p>
+
+<pre><code class="language-objc">-(void)mustOverrideMethod {
+NSString *reason = [NSStringstringWithFormat: 
+                    @&quot;%@ must be overridden&quot;,
+                    NSStringFromSelector(_cmd)];
+@throw [NSException
+    exceptionWithName:NSInternalInconsistencyException 
+    reason:reason 
+    userInfo：nil];
+}
+</code></pre>
+
+<p>既然异常只用于处理严重错误（fatal error,致命错误)，那么对其他错误怎么办呢？在出 现“不那么严重的错误&quot;（nonfatal error,非致命错误）时，Objective-C语言所用的编程范式为: 令方法返回<code>nil/0</code>,或是使用<code>NSError</code>，以表明其中有错误发生。例如，如果初始化方法无法根据传入的参数来初始化当前实例，那么就可以令其返回nil/0:</p>
+
+<pre><code class="language-objc">-(id)initWithValue:(id)value { 
+    if ((self = [super init])){
+        if ( /* Value means instance can11 be created */ ) { 
+        self = nil;
+     } else {
+        // Initialize instance
+        }
+     }
+    return self;
+}
+</code></pre>
+
+<p>在这种情况下，如果<code>if</code>语句发现无法用传人的参数值来初始化当前实例（比如这个方法 要求传入的value参数必须是<code>non-nil</code>的)，那么就把<code>self</code>设置成<code>nil</code>,这样的话，整个方法的 返回值也就是<code>nil</code>了。调用者发现初始化方法并没有把实例创建好，于是便可确定其中发生了错误。</p>
+
+<p><code>NSError</code>的用法更加灵活，因为经由此对象，我们可以把导致错误的原因回报给调用者。 <code>NSError</code>对象里封装了三条信息：</p>
+
+<ul>
+<li><p><strong>Error domain(错误范围，其类型为字符串）</strong><br/>
+错误发生的范围。也就是产生错误的根源，通常用一个特有的全局变量来定义。比方说，<code>“处理URL的子系统”（URL-handling subsystem)</code>在从URL中解析或取得数据时如果出错了，那么就会使用<code>NSURLErrorDomain</code>来表示错误范围。</p></li>
+<li><p><strong>Error code(错误码，其类型为整数）</strong><br/>
+独有的错误代码，用以指明在某个范围内具体发生了何种错误。某个特定范围内可能会发生一系列相关错误，这些错误情况通常采用<code>enum</code>来定义。例如，当<code>HTTP</code>请求出错时，可能会把<code>HTTP</code>状态码设为错误码。</p></li>
+<li><p><strong>Uesr info(用户信息，其类型为字典）</strong><br/>
+有关此错误的额外信息，其中或许包含一段“<code>本地化的描述”（localized description)</code>, 或许还含有导致该错误发生的另外一个错误，经由此种信息，可将相关错误串成一条 <code>“错误链”（chain of errors)</code>。</p></li>
+</ul>
+
+<p>NSError的一种常见用法是，经由方法的“输出参数”返回给调用者。比如像这样：</p>
+
+<pre><code class="language-objc">-(BOOL)doSomething: (NSError**)error
+</code></pre>
+
+<p>用例为：</p>
+
+<pre><code class="language-objc">NSError *error = nil;
+BOOL ret = [object doSomething:&amp;error];
+    if (error) {
+//There was an error
+}
+</code></pre>
+
+<p>也可以通过委托协议来传递此错误。有错误发生时，当前对象会把错误信息经由协议中的某个方法传给其<code>委托对象（delegate)</code>。这里不做过多说明。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>只有发生了可使整个应用程序崩溃的严重错误时，才应使用异常。</li>
+<li>在错误不那么严重的情况下，可以指派“委托方法”（delegate method)来处理错误，也可以把错误信息放在<code>NSError</code>对象里，经由“输出参数”返回给调用者。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/28</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15038831182450.html">
+                
+                  <h1>第二十条 为私有方法名加上前缀</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>一个类所做的事情，通常要比外面看到的更多。编写类的实现代码时，我们经常要编写在内部使用的方法。<strong><font color=red>这里我们要注意，一定要为这种内部实现的方法加上前缀，这有助于调试，有利于区分私有方法和公共方法。区分私有和公共方法，主要是为了方便修改内部的私有方法和相关实现代码，防止随意修改公共API。</font></strong></p>
+
+<p>我通常在私有方法前面加上<code>“_p”</code>，例如：</p>
+
+<pre><code class="language-objc">
+-(void)p_privateMethod{
+    /*.....*/
+}
+</code></pre>
+
+<p>我们之所以要加上前缀，是因为OC不像java和c++语言可以在前面将方法声明为私有。每个对象都可以响应任何方法(由于其强大的动态特性造成的)。</p>
+
+<p>加前缀的时候要避免只用一个<code>“_”</code>，<strong><font color=red>因为苹果公司在自己的类中就是这么做的，所以我们要避开这种方式，防止造成继承一个类的时候，子类无意间覆写了父类的方法。</font></strong></p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>给私有方法的名称加上前缀，这样可以很容易地将其同公共方法区分开。</li>
+<li>不要单用一个下划线做私有方法的前缀，因为这种做法是预留给苹果公司用的。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/28</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15037310867483.html">
+                
+                  <h1>第十九条 使用清晰而协调的命名方式</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我们在使用OC的时候，发现这门语言很繁琐，代码中一般有<code>“in“，”for”，“with”</code>等介词，其他编程语言则很少使用这些他们认为多余的字眼。以下面代码为例子：</p>
+
+<pre><code class="language-objc">NSString *text = @&quot;The quick brown fox jumped over the lazy dog&quot;;
+NSString *newText =
+[text stringByReplacingOccurrencesOfString: @&quot;fox&quot;,
+                                withString:@&quot;cat&quot;];
+</code></pre>
+
+<p>但是，<code>Objective-C</code>的命名方式虽然长一点，但是却非常淸晰。</p>
+
+<p><strong><font color=red>方法与变量名使用了“驼峰式大小写命名法&quot;（camel casing)——以小写字母开头，其后每个单词首字母大写。类名也用驼峰命名法，不过其首字母要大写，而且前面通常还有两三个前缀字母。</font></strong></p>
+
+<h2 id="toc_0">方法命名</h2>
+
+<p>方法名很长对冉繁琐，但是易于阅读，理解其中的意思。但是如果过长会起到反效果。例如：</p>
+
+<pre><code class="language-objc">-(EOCRectangle*)union:(EOCRectangle*)rectangle // Unclear 
+-(float) calculateTheArea // Too verbose
+
+//应该改成
+-(EOCRectangle*)unionRectangle:(EOCRectangle*)rectangle 
+-(float) area
+</code></pre>
+
+<p><strong>给方法命名时的注意事项可总结成下面几条规则：</strong></p>
+
+<blockquote>
+<ul>
+<li>如果方法的返回值是新创建的，那么方法名的首个词应是返回值的类型，除非前面还 有修饰语，例如<code>localizedString</code>。属性的存取方法不遵循这种命名方式，因为一般认 为这些方法不会创建新对象，即便有时返回内部对象的一份拷贝，我们也认为那相当 于原有的对象。这些存取方法应该按照其所对应的属性来命名。</li>
+<li>应该把表示参数类型的名词放在参数前面。</li>
+<li>如果方法要在当前对象上执行操作，那么就应该包含动词；若执行操作时还需要参数, 则应该在动词后面加上一个或多个名词。</li>
+<li>不要使用str这种简称，应该用string这样的全称。</li>
+<li>Boolean属性应加is前缀。如果某方法返回非属性的Boolean值，那么应该根据其功 能，选用has或is当前缀。</li>
+<li>将get这个前缀留给那些借由“输出参数”来保存返回值的方法，比如说，把返回值 填充到“C语言式数组”（C_style array)里的那种方法就可以使用这个词做前缀。</li>
+</ul>
+</blockquote>
+
+<h2 id="toc_1">类与协议的命名</h2>
+
+<p>应该为类与协议的名称加上前缀，以避免命名空间冲突（参见第15条)，而且应该像给 方法起名时那样把词句组织好，使其从左至右读起来较为通顺。例如，在<code>NSArray</code>的子类中，有一个用于表示可变数组的类，叫做<code>NSMutableArray</code>, <code>mutable</code>这个词放在<code>array</code>前面, 用以表明这是一种特殊的<code>array</code>(数组）。</p>
+
+<p>例如iOS的UI库UIKit，其中协议与类的命名惯例为：</p>
+
+<ul>
+<li>UIView    (类)</li>
+<li>UIViewController（类）</li>
+<li>UITableView （类）</li>
+<li>UITableViewController（类）</li>
+<li>UITableViewDelegate（协议）</li>
+</ul>
+
+<p>最重要的一点就是，命名方式应该协调一致。</p>
+
+<h2 id="toc_2">要点</h2>
+
+<ul>
+<li>起名时应遵从标准的Objective-C命名规范，这样创建出来的接口更容易为开发者所理解。</li>
+<li>方法名要言简意赅，从左至右读起来要像个日常用语中的句子才好。</li>
+<li>方法名里不要使用缩略后的类型名称。</li>
+<li>给方法起名时的第一要务就是确保其风格与你自己的代码或所要集成的框架相符。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15037148888105.html">
+                
+                  <h1>第十八条 尽量使用不可变对象</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我们在设计类的时候，运用属性来封装数据。并且使用属性时候，<strong>可以将属性直接设置为“只读”（read-only）</strong>。默认情况下是“可读也可写”的。</p>
+
+<p>不过，一般情况下我们要建模的数据未必需要改变。比方说，某数据所表示的对象源自一项只读的网络服务(web service),里面可能包含一系列需要显示在地图上的相关点，像这种对象就没必要改变其内容。即使修改了，新数据也不会推送回服务器.</p>
+
+<p>而且如果把可变对象（mutable object)放入<code>collection</code>之后又修改其内容，那么很容易就会破坏<code>set</code>的内部数据结构，使其失去固有的语义。</p>
+
+<p>我们来举例：</p>
+
+<p>为了将<code>EOCPointOflnterest</code>做成不可变的类，需要把所有属性都声明为<code>readonly</code>:</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@interface EOCPointOfInterest : NSObject
+@property (nonatomic, copy, readonly) NSString *identifier; 
+@property (nonatomic, copy, readonly) NSString* title;
+@property (nonatomic, assign, readonly) float latitude; 
+@property (nonatomic, assign, readonly) float longitude;
+-(id) initWithldentifier: (NSString*) identifier 
+                   title:(NSString*)title 
+                   latitude: (float) latitude 
+                   longitude: (float) longitude;
+@end
+
+</code></pre>
+
+<p>这样后如果有人想要改变属性值，那么编译时就会报错。对象中的属性值可以读出，但是无法写入，这就能保证<code>EOCPointOfluterest</code>中的各个数据之间总是相互协调的。</p>
+
+<p>但是我们有时想要修改封装在对象内部的数据，不想令这些数据为外人所改动。这种情况下，通常做法是在对象内部将<code>readonly</code>属性重新声明为<code>readwrite</code>。当然，如果该属性是nonatomic 的，那么这样做可能会产生“竞争条件”（racecondition)。在对象内部写人某属性时，对象外的 观察者也许正读取该属性。若想避免此问题，我们可以在必要时通过<mark>“派发队列&quot;（dispatchqueue）等手段，将(包括对象内部的）所有数据存取操作都设为同步操作</mark>。<strong><font color=red>将属性在对象内部重新声明为<code>readwrite</code>这一操作可于<code>“class-continuation分类”</code>中完成，在公共接口中声明的属性可于此处重新声明，属性的其他特质必须保持不变，而<code>readonly</code>可扩展为<code>readwrite</code>。</font></strong></p>
+
+<p>其 <code>“class-continuation分类”</code>可以这样写：</p>
+
+<pre><code class="language-objc">// .m文件中
+#import &quot;EOCPointOfInterest.h&quot;
+
+@interface EOCPointOfInterest : NSObject
+@property (nonatomic, copy, readwrite) NSString *identifier; 
+@property (nonatomic, copy, readwrite) NSString* title;
+@property (nonatomic, assign, readwrite) float latitude; 
+@property (nonatomic, assign, readwrite) float longitude;
+
+@implementation EOCPointOfInterest
+
+/* ... */
+
+@end
+</code></pre>
+
+<p>现在，只能于<code>EOCPoimOflnterest</code>实现代码内部设置这些属性值了。但是我们其实可以同构KVC键值编码来设置这些属性值。不过，这样显然违背了我们的本意，绕过了提供的API。不推荐这种做法。</p>
+
+<p>我们定义类公共的API时，<strong><font color=red>要注意一件事情：对象里表示各种collection的那些属性究竞应该设成可变的，还是不可变的。</font></strong>例如，我们用某个类来表示个人信息，该类里还存放了一些引用，指向此人的诸位朋友。你可能想把这个人的全部朋友都放在一个“列表&quot;（list)里，并将其做成属性。假如开发者可以添加或删除此人的朋友，那么这个属性就需要用可变的<code>set</code>来实现。在这种情况下，通常应该提供一个<code>readonly</code>属性供外界使用，该属性将返回不可变的<code>set</code>, 而此<code>set</code>则是内部那个可变<code>set</code>的一份拷贝。比方说，下面这段代码就能够实现出这样一个类：</p>
+
+<pre><code class="language-objc">// EOCPerson.h
+#import &lt;Foundation/Foundation•h&gt;
+@interface EOCPerson : NSObject
+@property (nonatomic, copy, readonly) NSString *firstName; 
+@property (nonatomic, copy, readonly) NSString *lastName; 
+@property (nonatomic, strong, readonly) NSSet *friends;
+-(id)initWithFirstName:(NSString*)firstName
+          andLastName:(NSString*)lastName;
+-(void)addFriend:(EOCPerson*)person;
+-(void)removeFriend:(EOCPerson*)person;
+
+@end
+
+// EOCPerson.m #import &quot;EOCPerson•!!
+@interface EOCPerson ()
+@property (nonatomic, copy, readwrite) NSString *firstName; 
+@property (nonatomic, copy, readwrite) NSString *lastName;
+@end
+@implementation EOCPerson {
+    NSMutableSet *_internalFriends;
+}
+
+-(NSSet*)friends {
+    return [_internalFriends copy];
+}
+-(void)addFriend:(EOCPerson*)person {
+    [_internalFriends addObject:person];
+} 
+
+-(void)removeFriend:(EOCPerson*)person {
+    [_internalFriends removeObjectrperson];
+}
+
+-(id)initWithFirstName: (NSString*)firstName andLastName:(NSString*)lastName { 
+    if ((self = [super init】））{
+         _firstName = firstName;
+         _lastName = lastName;
+         _internalFriends = [NSMutableSet new];
+    }
+    return self;
+}
+
+@end
+
+</code></pre>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>尽量创建不可变的对象。</li>
+<li>若某属性仅可于对象内部修改，则在<code>“class-continuation分类”</code>中将其由<code>readonly</code>属性扩展为<code>readwrite</code>属性</li>
+<li>不要把可变的<code>collection</code>作为属性公开，而应提供相关方法，以此修改对象中的可变<code>collection</code>。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15037100500253.html">
+                
+                  <h1>第十七条 实现description方法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>调试程序时，我们一般要将对象的属性<code>NSLog</code>出来：</p>
+
+<pre><code class="language-objc">NSLog(@&quot;object = %@&quot;,object);
+</code></pre>
+
+<p>如果我们输出的对象是数组，或者字典和其它数据是可以将数据打印出来。但是如果打印的是自定义的类，那么输出的对象就类似于：</p>
+
+<pre><code class="language-objc">object = &lt;EOCPerson:0x7fd9a1600600&gt;
+</code></pre>
+
+<p>上面这种信息很不实用，所以我们要在自己的类里覆写<code>description</code>方法，否则打印信息时就会调用<code>NSObject</code>类所实现的默认方法。此方法定义在<code>NSObject</code>协议里，不过<code>NSObject</code>类也实现了它。</p>
+
+<p>想输出更为有用的信息也很简单，只需覆写<code>description</code>方法并将描述此对象的字符串 返回即可。例如，有下面这个代表个人信息的类：</p>
+
+<pre><code class="language-objc">//EOCPerson.h
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface EOCPerson : NSObject
+
+@property(nonatomic, readonly, copy)NSString *firstname;
+@property (nonatomic, copy, readonly) NSString *lastName;
+
+-(id) initWithFirstName: (NSString*) firstName lastName:(NSString*) lastName;
+
+@end
+
+//EOCPerson.m
+#import &quot;EOCPerson.h&quot;
+
+@implementation EOCPerson
+
+-(id)initWithFirstName:(NSString *)firstName lastName:(NSString *)lastName{
+    if ((self = [super init])) {
+        _firstname = [firstName copy];
+        _lastName = [lastName copy];
+    }
+    return self;
+}
+//description方法
+-(NSString*)description{
+
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , \&quot;%@ %@\&quot;&gt;&quot; , [self class], self ,_firstname ,_lastName ];
+}
+
+@end
+
+
+</code></pre>
+
+<p>那么输出就是：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+#import &quot;EOCPerson.h&quot;
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        EOCPerson *person = [[EOCPerson alloc] initWithFirstName:@&quot;Liang&quot; lastName:@&quot;Zhonghao&quot;];
+        NSLog(@&quot;Person = %@&quot; , person);
+    }
+    return 0;
+}
+
+</code></pre>
+
+<p><img src="media/15037100500253/15037119639541.jpg" alt=""/></p>
+
+<blockquote>
+<p><strong>建议：在新实现的 description方法中，也应该像默认的实现那样，打印出类的名字和指针地址，因为这些内容 有时也许会用到。</strong></p>
+</blockquote>
+
+<p>我们也可以借助字典类型的<code>description</code>方法来将打印何种信息标识出来：</p>
+
+<pre><code class="language-objc">
+-(NSString*)description{
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , 
+    [self class],
+     self, 
+     @{@&quot;firstname&quot;:_firstname,
+       @&quot;lastname&quot;:_lastName}];
+}
+</code></pre>
+
+<p>输出为：<br/>
+<img src="media/15037100500253/15037132520686.jpg" alt=""/></p>
+
+<p><code>NSObject</code>协议中还有个方法要注意，那就是<code>debugDescription</code>,此方法的用意与 <code>description</code>非常相似。二者区别在于，<code>debugDescription</code>方法是开发者在调试器（debugger) 中以控制台命令打印对象时才调用的。在<code>NSObject</code>类的默认实现中，此方法只是直接调用了<code>description</code>。我们还拿上个例子来说明：</p>
+
+<p><img src="media/15037100500253/15037137809556.jpg" alt=""/></p>
+
+<p>我们在NSLog下面打一个断点，进入调试模式，之后向调试控制台里输入命令。LLDB的“po”命令 可以完成对象打印（print-object)工作，其输出如下：<br/>
+<img src="media/15037100500253/15037138780545.jpg" alt=""/></p>
+
+<p>当然我们可以把人名放在<code>EOCPerson</code>对象的普通描述信息中，而把更详尽的内容放在调试所用的描述信息里：</p>
+
+<pre><code class="language-objc">-(NSString*)description{
+    return [NSString stringWithFormat:@&quot;%@ : %@&gt;&quot; , _firstname ,_lastName ];
+}
+
+-(NSString*)debugDescription{
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , [self class], self , @{@&quot;firstname&quot;:_firstname,@&quot;lastname&quot;:_lastName}];
+}
+
+</code></pre>
+
+<p>运行之后如下：<br/>
+<img src="media/15037100500253/15037141337080.jpg" alt=""/></p>
+
+<p>你可能不想把类名与指针地址这种额外内容放在普通的描述信息里，但是却希望调试的 时候能够很方便地看到它们，在此情况下，就可以使用这种输出方式来实现。Foundation框架的<code>NSArray</code>类就是这么做的.</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>实现<code>description</code>方法返回一个有意义的字符串，用以描述该实例。</li>
+<li>若想在调试时打印出更详尽的对象描述信息，则应实现<code>debugDescription</code>方法。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15036443106558.html">
                 
                   <h1>第十六条 提供"全能初始化方法"</h1>
@@ -240,723 +769,6 @@
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15036306506140.html">
-                
-                  <h1>第十五条 用前缀避免命名空间冲突</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>oc与其他语言一个主要区别是没有那种内置的命名空间(namespace)机制. <mark>所以我们在编码时一定要注意命名冲突,尤其是潜在的命名冲突.</mark></p>
-
-<p>我们在创建应用程序时一定要注意,使用Cocoa创建应用程序时一定要注意,<strong><font color=red>Apple宣称保留使用&quot;两个字母前缀&quot;的权利</font></strong>,也就是说选用的前缀应该都是<strong><font color=red>三个字母</font></strong>.</p>
-
-<p>我们尤其应该注意,当你使用的一个三方库引入了一个你之前引入过的三方库.如果引入的这两个库的作者都没有给自己的库加前缀,那么应用程序很容易出现重复符号错误.</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li><p>选择与你公司,应用程序或二者有关联的名称作为类名的前缀,并在所有代码中均使用这一前缀.</p></li>
-<li><p>若自己所开发的程序库用到了第三方库,则应该为其中的名称加上前缀.</p></li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/25</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15035622628066.html">
-                
-                  <h1>第十四条 理解"类对象"的用意</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>OC是一个极其动态的语言,那么运行期时,如何知道某个对象的类型呢? <mark>对象类型并非在编译期就绑定好了，而是要在运行期査找</mark>。而 且，还有个特殊的类型叫做id,它能指代任意的Objective-C对象类型。一般情况下，应该指明消息接收者的具体类型，这样的话，如果向其发送了无法解读的消息，那么编译器就会产生警告信息。而类型为<code>id</code>的对象则不然，编译器假定它能响应所有消息。</p>
-
-<p>“在运行期检视对象类型”这一操作也叫做<code>“类型信息査询”（introspection, “内省”）</code>，这 个强大而有用的特性内置于<code>Foundation</code>框架的<code>NSObject</code>协议里，凡是由公共根类（common root class，即NSObject与NSProxy)继承而来的对象都要遵从此协议。在程序中不要直接比较对象所属的类，明智的做法是调用“类型信息査询方法”</p>
-
-<p>我们先来了解Objective-C对象的本质:</p>
-
-<p><font color=red>每个Objective-C对象实例都是指向某块内存数据的指针。</font>所以在声明变量时，类型后面要跟一个字符：</p>
-
-<pre><code class="language-objc">NSString *pointerVariable = @&quot;Some string&quot;;
-</code></pre>
-
-<p>对于通用的对象类型id,由于其本身已经是指针了，所以我们能够这样写：</p>
-
-<pre><code class="language-objc">id genericTypedString = @&quot;Some string&quot;;
-</code></pre>
-
-<p>上面这种定义方式与用<code>NSString*</code>来定义相比，其语法意义相同。唯一区别在于，如果声明时指定了具体类型，那么在该类实例上调用其所没有的方法时，编译器会探知此情况,并发出警告信息。</p>
-
-<p>描述Objective-C对象所用的数据结构定义在运行期程序库的头文件里，<code>id</code>类型本身也<br/>
-在定义在这里：</p>
-
-<pre><code class="language-objc">typedef struct objc_object {
-    Class isa;
-} *id;
-</code></pre>
-
-<p><mark>由此可见，每个对象结构体的首个成员是<code>Class</code>类的变量。该变量定义了对象所属的类, 通常称为<code>“is a”</code>指针。例如，刚才的例子中所用的对象“是一个”（is a) NSString,所以其<code>“is a”</code>指针就指向<code>NSString</code>。</mark></p>
-
-<p><code>Class</code>对象也定义在运行期程序库的头文件中：</p>
-
-<pre><code class="language-objc">typedef struct objc_class *Class;
-struct objc_class {
-    Class isa;
-    Class super_class;
-    const char *name;
-    long version;
-    long info;
-    long instance_size;
-    struct objc_ivar_list *ivars;
-    struct objc_method_list **methodLists;
-    struct objc_cache *cache;
-    struct objc_protocol list *protocols;
-)；
-</code></pre>
-
-<p>此结构体存放类的<code>“元数据&quot;（metadata)</code>,例如类的实例实现了几个方法，具备多少个实例变量等信息。此结构体的首个变量也是<code>isa</code>指针，这说明<code>Class</code>本身亦为Objective-C对象。<font color=red> <strong>结构体里还有个变量叫做<code>superclass</code>,它定义了本类的超类。类对象所属的类型（也就是isa 指针所指向的类型）是另外一个类，叫做“元类&quot;（metaclass)，用来表述类对象本身所具备的元数据。“类方法”就定义于此处，因为这些方法可以理解成类对象的实例方法。</strong></font><mark>每个类仅有一个“类对象”，而每个“类对象”仅有一个与之相关的“元类”。</mark></p>
-
-<p>假设有个名为<code>SomeClass</code>的子类从<code>NSObject</code>中继承而来，则其继承体系如图所示。</p>
-
-<p><img src="media/15035622628066/15035642742167.jpg" alt=""/></p>
-
-<p><font color=red><strong>superclass 指针确立了继承关系，而 isa 指针描述了实例所属的类。</strong></font>通过这张布局关系图即可执行“类型信息査询”。我们可以査出对象是否能响应某个选择子，是否遵从某项协议，并且能看出此对象位于“类继承体系”（class hierarchy)的哪一部分。</p>
-
-<h2 id="toc_0">在类继承体系中查询类型信息</h2>
-
-<p>可以用类信息査询方法来检视类继承体系。<code>“isMemberOfClass:”</code>能够判断出对象是否为某个特定类的实例，而<code>“isKindOfClass:”</code>则能够判断出对象是否为某类或其派生类的实例,例如：</p>
-
-<pre><code class="language-objc">NSMutableDictionary *dict = [NSMutableDictionary new];
-[diet isMemberOfClass: [NSDictionary class] ] ; ///&lt; NO 
-[diet isMemberOfClass:[NSMutableDictionary class】】； ///&lt; YES 
-[diet isKindOfClass: [NSDictionary class】];///&lt; YES 
-[diet isKindOfClass2 [NSArray class]]; ///&lt; NO
-</code></pre>
-
-<p>像这样的类型信息査询方法使用isa指针获取对象所属的类，然后通过superclass指针 在继承体系中游走。由于对象是动态的，所以此特性显得极为重要。Objective-C与你可能熟 悉的其他语言不同，在此语言中，必须査询类型信息，方能完全了解对象的真实类型。</p>
-
-<p>由于Objective-C使用“动态类型系统&quot;（dynamic typing)，所以用于査询对象所属类的类 型信息査询功能非常有用。从<code>collection</code>中获取对象时，通常会査询类型信息，这些对象不 是“强类型的”（strongly typed),把它们从<code>collection</code>中取出来时，其类型通常是<code>id</code>。如果想 知道具体类型，那就可以使用类型信息査询方法。例如，想根据数组中存储的对象生成以逗 号分隔的字符串（comma-separated string),并将其存至文本文件，就可以使用下列代码：</p>
-
-<pre><code class="language-objc">-(NSString*)commaSeparatedStringFromObjects:(NSArray*)array {
-    NSMutablestring *string = [NSMutableStringnew]; 
-    for (id object in array) {
-        if ([object isKindOfClass:[NSStringclass]]) {
-            [string appendFormat:@&quot;%@,&quot;, object];
-        }else if ([object isKindOfClass:[NSNumberclass]）{
-            [string appendFormat:@&quot;%d&quot;, [object intValue]]；
-        } else if ([object isKindOfClass:[NSDataclass]])    {
-            NSString *base64Encoded = /* base64 encoded data */;
-            [string appendFormat: @&quot;%@&quot;, base64Encoded];
-        } else {
-              //Type not supported
-        }
-    }   
-    return string;
-}
-</code></pre>
-
-<p><mark>我们应该尽量使用类型信息査询方法，而不应该直接比较两个类对象是否等同(例如<code>if([object class] == [EOCSomeClass class])</code>)</mark>，因为前者可以正确处理那些使用了消息传递机制（参见第12条）的对象。比方 说，某个对象可能会把其收到的所有选择子都转发给另外一个对象。这样的对象叫做“代理” (proxy)，此种对象均以<code>NSProxy</code>为根类。</p>
-
-<p>通常情况下，如果在此种代理对象上调用class方法，那么返回的是代理对象本身（此类 是NSProxy的子类)，而非接受的代理的对象所属的类。然而，若是改用“isKindOfClass:” 这样的类型信息査询方法，那么代理对象就会把这条消息转给“接受代理的对象”（proxied object)。<font color=red>也就是说，这条消息的返回值与直接在接受代理的对象上面査询其类型所得的结果 相同。因此，这样査出来的类对象与通过class方法所返回的那个类对象不同，class方法所返回的类表示发起代理的对象，而非接受代理的对象。</font></p>
-
-<h2 id="toc_1">要点</h2>
-
-<ul>
-<li>每个实例都有一个指向Class对象的指针，用以表明其类型，而这些Class对象则构成了类的继承体系。</li>
-<li>如果对象类型无法在编译期确定，那么就应该使用类型信息査询方法来探知。</li>
-<li>尽量使用类型信息査询方法来确定对象类型，而不要直接比较类对象，因为某些对象可能实现了消息转发功能。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/24</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15034774413129.html">
-                
-                  <h1>第十三条 用"方法调配技术"调试"黑盒方法"</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>因为OC可以在运行期解析 一个对象究竟调用何种方法,所以我们也可以在运行期改变相对应的方法. </p>
-
-<p><font color=red>因为与给定的选择子名称相对应的方法也可以在运行期改变.所以若能善用此特性，则可发挥出巨大优势，因为我们既不需要源代码，也不需要通过继承子类来覆写方法就能改变这个类本身的功能。这样一来，新功能将在本类的所有实例中生效，而不是仅限于覆写了相关方法的那些子类实例。此方案经常称为<mark>“方法调配”（method swizzling)</mark> e</font></p>
-
-<p>类的方法列表会把选择子的名称映射到相关的方法实现之上，使得“动态消息派发系统” 能够据此找到应该调用的方法。这些方法均以函数指针的形式来表示，这种指针叫做<code>IMP</code>, 其原型如下：</p>
-
-<pre><code class="language-objc">
-id (*IMP)(id, SEL ,...)
-
-</code></pre>
-
-<p>我们用NSString类来举例,下图表示<code>lowercaseString、uppercaseString、capitalizedString</code>方法映射到了不同的<code>IMP</code>上.</p>
-
-<p><img src="media/15034774413129/15034784608780.jpg" alt=""/></p>
-
-<p>OC运行期系统,提供有方法来操作这个映射表.我们可以向这个表中,<strong>新增选择子,改变选择子所对应的方法实现,交换两个选择子所映射的指针</strong>.类似下图:<br/>
-<img src="media/15034774413129/15034786156175.jpg" alt=""/></p>
-
-<p>新表中,多了一个<code>newSelector</code>选择子,并且其他方法的实现也互换了.上述修改均无须编写子类，只是修改了“方法表”的布局.</p>
-
-<p>下面我们来讨论如何互换两个方法的实现:</p>
-
-<p>想要互换两个方法的实现可以,有下列函数:</p>
-
-<pre><code class="language-objc">//互换m1和m2的实现
-void method_exchangeImplementations(Method m1, Method m2)
-
-</code></pre>
-
-<p>m1和m2的方法实现可以通过下面方法实现:</p>
-
-<pre><code class="language-objc">
-Method class_getInstanceMethod(Class aClass, SEL aSelector)
-
-</code></pre>
-
-<p>此函数根据给定的选择从类中取出与之相关的方法。</p>
-
-<p>下面我们完整的举一个例子,来演示交换前面提到的<code>lowercaseString</code> 与 <code>uppercaseString</code>方法实现:</p>
-
-<pre><code class="language-objc">
-Method originalMethod =
-    class_getInstanceMethod([NSStringclass],
-                            @selector(lowercaseString));
-Method swappedMethod =
-    class_getInstanceMethod([NSStringclass],
-                            @selector(uppercaseString)); 
-                            method_exchangeImplementations(originalMethod,swappedMethod);
-
-</code></pre>
-
-<p>从现在开始,如果在NSString实例上调用<code>lowercaseString</code>,那么执行的将是<code>uppercaseString</code>,反之亦然:</p>
-
-<pre><code class="language-objc">
-NSString *string = @&quot;This iS tHe StRiNg&quot;;
-NSString *lowercaseString = [string lowercaseString];
-NSLog(&quot;lowercaseString = %@&quot;, lowercaseString);
-// Output: lowercaseString = THIS IS THE STRING
-
-
-NSString *uppercaseString - [string uppercaseString】；
-NSLog (@&quot;uppercaseString = %@&quot;, uppercaseString);
-// Output: uppercaseString = this is the string
-
-</code></pre>
-
-<p>刚才向大家演示了如何交换两个方法实现，然而在实际应用中，像这样直接交换两 个方法实现的，意义并不大。因为<code>lowercaseString</code>与<code>uppercaseString</code>这两个方法已经各自实现得很好，没必要再交换了。但是，可以通过这一手段来为既有的方法实现增添新功能。<font color=red>比方说，想要在调用<code>lowercaseString</code>时记录某些信息，这时就可以通过交换方法实现来达成此目标。我们新编写一个方法，在此方法中实现所需的附加功能，并调用原有实现</font>。</p>
-
-<p>新方法可以添加至NSString的一个&quot;分类(category)&quot;中:</p>
-
-<pre><code class="language-objc">
-@interface NSString (EOCMyAdditions)
-
--(NSString*)eoc_myLowercaseString;
-
-@end
-
-</code></pre>
-
-<p>上面的新方法将与原有的方法互换,如下图所示:</p>
-
-<p><img src="media/15034774413129/15034869016993.jpg" alt=""/></p>
-
-<p>新方法的实现代码可以这样写:</p>
-
-<pre><code class="language-objc">
-0implementation NSString (EOCMyAdditions)
-
--(NSString*)eoc_myLowercaseString {
-    NSString *lowercase = [self eoc_myLowercaseString];
-    NSLog (@&quot;%@ =&gt; %@&quot;, self, lowercase); 
-    return lowercase;
-)
-@end
-
-</code></pre>
-
-<p>这段代码看上去好像会陷人递归调用的<strong>死循环</strong>，<mark><strong>不过大家要记住，此方法是准备和 lowercaseString方法互换的。所以，在运行期，eoc_myLowercaseString选择子实际上对应于原有的lowercaseString方法实现</strong>。</mark>最后，通过下列代码来交换这两个方法实现：</p>
-
-<pre><code class="language-objc">Method originalMethod =
-    class_getInstanceMethod([NSString class],
-                            @selector(lowercaseString)〉；
-Method swappedMethod =
-    class_getInstanceMethod([NSString class]f
-                            @selector(eoc_myLowercaseString)); 
-                            method_exchangeImplementations(originalMethod , swappedMethod);
-
-</code></pre>
-
-<p>之后我们只要如下执行就会发现:</p>
-
-<pre><code class="language-objc">
-NSString *string = @&quot;ThIs iS tHe StRiNg&quot;;
-NSString *lowercaseString = [string lowercaseString];
-//输出了下面这行
-// Output: This iS tHe StRiNg =&gt; this is the string
-
-</code></pre>
-
-<blockquote>
-<p><strong>通过此方案，开发者可以为那些“完全不知道其具体实现的&quot;（completely opaque, “完全 不透明的”）黑盒方法增加日志记录功能，这非常有助于程序调试。然而，此做法只在调试程序时有用。很少有人在调试程序之外的场合用上述“方法调配技术”来永久改动某个类的功能。不能仅仅因为Objective-C语言里有这个特性就一定要用它。若是滥用，反而会令代码变得不易读懂且难于维护。</strong></p>
-</blockquote>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li><p>在运行期，可以向类中新增或替换选择子所对应的方法实现。</p></li>
-<li><p>使用另一份实现来替换原有的方法实现，这道工序叫做“方法调配”，开发者常用此技术向原有实现中添加新功能。</p></li>
-<li><p>一般来说，只有调试程序的时候才需要在运行期修改方法实现，这种做法不宜滥用。</p></li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15033908572762.html">
-                
-                  <h1>第十二条 消息转发机制(Message forwarding)</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>第11条讲解了对象的消息传递机制，并强调了其重要性。第12条则要讲解另外一个重要的问题，就是对象在收到无法解读的消息之后会发生什么情况。若想令类能理解某条消息，我们必须以程序码实现出对应的方法才行。<font color=red><strong>但是，在编译期向类发送了其无法解读的消息并不会报错，因为在运行期可以继续向类中添加方法，所以编译器在编译时还无法确知类中到底会不会有某个方法实现。</strong></font>当对象接收到无法解读的消息后，就会启动<mark>“消息转发&quot;（message forwarding)机制</mark>，程序员可经由此过程告沂对象应该如何处理未知消息。</p>
-
-<p>消息转发分为两大阶段:</p>
-
-<ol>
-<li><p>先征询接收者，所属的类，看其是否能动态添加方法，以处理当前这个“未知的选择子&quot;（unknown selector),这叫做“动态方法解析”（dynamic method resolution)。</p></li>
-<li><p>涉及“完整的消息转发机制”（full forwarding mechanism)。如果运行期系统已经把第一阶段执行完了，那么接收者自己就无法再以动态新增方法的手段来响应包含该选择子的消息了。此时，运行期系统会请求接收者以其他手段来处理与消息相关的方法调用。这又细分为<strong>两小步</strong>。首先，请接收者看看有没有其他对象能处理这条消息。若有，则运行期系统会把消息转给那个对象，于是消息转发过程结束，一切如常。若没有“备援的接收者”（replacement receiver)，则启动完整的消息转发机制，运行期系统会把与消息有关的全部细节都封装到<code>NSInvocation</code>对象中，再给接收者最后一次机会，令其设法解决当前还未处理的这条消息。</p></li>
-</ol>
-
-<h2 id="toc_0">动态方法解析</h2>
-
-<p>对象在收到无法解读的消息后，首先将调用其所属类的下列类方法：</p>
-
-<pre><code class="language-objc">
-+ (BOOL)resolvelnstanceMethod:(SEL)selector
-
-</code></pre>
-
-<p>该方法的参数就是那个未知的选择子，其返回值为<code>Boolean</code>类型，表示这个类是否能新增一个实例方法用以处理此选择子。在继续往下执行转发机制之前，本类有机会新增一个处理此选择子的方法。假如尚未实现的方法不是实例方法而是类方法，那么运行期系统就会调用另外一个方法，该方法与 <code>“resolvelnstanceMethod:”</code> 类似，叫做 <code>“resolveClassMethod:”</code>。使用这种办法的前提是：相关方法的实现代码已经写好，只等着运行的时候动态插在类里面就可以了。此方案常用来实现<code>@dynamic</code>属性（参见第6条)，比如说，要访问<code>CoreData</code>框架中<code>NSManagedObjects</code>对象的属性时就可以这么做，因为实现这些属性所需的存取方法在编译期就能确定。</p>
-
-<p>下列代码演示了如何用<code>“resolvelnstanceMethod:”</code>来实现<code>@dynamic</code>属性：</p>
-
-<pre><code class="language-objc">
-id autoDictionaryGetter(id self, SEL _cmd);
-void autoDictionarySetter(id selff SEL _cmd, id value);
-+ (BOOL)resolvelnstanceMethod:(SEL)selector {
-    NSString *selectorString = NSStringFromSelector(selector);
-    if ( /* selector is from a ©dynamic property ★/ ){
-        if([selectorstring has Prefix: @&quot;set&quot;]){
-            class addMethod(self,
-                            selector,
-                            (IMP)autoDictionarySetter,
-                            &quot;v@ :@&quot;);
-    } else {
-        class_addMethod(self,
-                        selector,
-                        (IMP)autoDictionaryGetter,
-                        &quot;@ @:&quot;);
-        }              
-        return YES;
-    }
-return [super resolvelnstanceMethod:selector];
-
-}
-
-</code></pre>
-
-<h2 id="toc_1">备援接受者</h2>
-
-<p>当前接收者还有第二次机会能处理未知的选择子，在这一步中，运行期系统会问它：能不能把这条消息转给其他接收者来处理。与该步骤对应的处理方法如下：</p>
-
-<pre><code class="language-objc">
--(id)forwardingTargetForSelector:(SEL)selector
-
-</code></pre>
-
-<p>方法参数代表未知的选择子，若当前接收者能找到备援对象，则将其返回，若找不到，就返回<code>nil</code>。通过此方案，我们可以用“组合”（composition)来模拟出“多重继承”（multiple inheritance)的某些特性。在一个对象内部，可能还有一系列其他对象，该对象可经由此方法将能够处理某选择子的相关内部对象返回，这样的话，在外界看来，好像是该对象亲自处理了这些消息似的。</p>
-
-<p><font color=red>请注意，我们无法操作经由这一步所转发的消息。若是想在发送给备援接收者之前先修改消息内容，那就得通过完整的消息转发机制来做了。</font></p>
-
-<h2 id="toc_2">完整的消息转发</h2>
-
-<p>如果转发算法已经来到这一步的话，那么唯一能做的就是启用完整的消息转发机制了。首先创建<code>NSInvocation</code>对象，把与尚未处理的那条消息有关的全部细节都封于其中。此对象包含选择子、目标（target)及参数。在触发NSIrwocation对象时，“消息派发系统”(message-dispatch system)将亲自出马，把消息指派给目标对象。<br/>
-此步骤会调用下列方法来转发消息：</p>
-
-<pre><code class="language-objc">
--(void)forwardlnvocation:(NSInvocation*)invocation
-
-</code></pre>
-
-<p>这个方法可以实现得很简单：只需改变调用目标，使消息在新目标上得以调用即可。然<br/>
-而这样实现出来的方法与“备援接收者”方案所实现的方法等效，所以很少有人采用这么简<br/>
-单的实现方式。比较有用的实现方式为：在触发消息前，先以某种方式改变消息内容，比如追加另外一个参数，或是改换选择子，等等。</p>
-
-<p>实现此方法时，若发现某调用操作不应由本类处理，则需调用超类的同名方法。这样的话，继承体系中的每个类都有机会处理此调用请求，直至<code>NSObject</code>。如果最后调用了<code>NSObject</code>类的方法，那么该方法还会继而调用<code>“doesNotRecognizeSelector:”</code>以抛出异常，此异常表明选择子最终未能得到处理。</p>
-
-<h2 id="toc_3">消息转发全流程</h2>
-
-<p>下图展示了消息转发机制处理消息的各个步骤:<br/>
-<img src="media/15033908572762/15033988345236.jpg" alt=""/></p>
-
-<p><font color=red>接收者在每一步中均有机会处理消息。步骤越往后，处理消息的代价就越大。</font>最好能在第一步就处理完，这样的话，运行期系统就可以将此方法缓存起来了。如果这个类的实例稍后还收到同名选择子，那么根本无须启动消息转发流程。</p>
-
-<h2 id="toc_4">完整的示例</h2>
-
-<p>假设要编写一个类似于“字典”的对象，它里面可以容纳其他对象，只不过开发者要直接通过属性来存取其中的数据。这个类的设计思路是：由幵发者来添加属性定义，并将其声明为<code>@dynamic</code>，而类则会自动处理相关属性值的存放与获取操作。</p>
-
-<p>定义该类的接口为:</p>
-
-<pre><code class="language-objc">
-#import &lt;Foundation/Foundation.h&gt;
-@interface EOCAutoDictionary : NSObject
-@property (nonatomic, strong) NSNumber *number;
-@property (nonatomic, strong) NSDate *date;
-@property (nonatomic, strong)id qpaqueObject;
-
-@end
-
-</code></pre>
-
-<p>本例中，这些属性具体是什么其实无关紧要。笔者用了这么多种数据类型，只是想演示此 功能很有用。在类的内部，每个属性的值还是会存放在字典里，所以我们先在类中编写如下代码，并将属性声明为@dynamiC，这样的话，编译器就不会为其自动生成实例变量及存取方法了：</p>
-
-<pre><code class="language-objc">
-#import &quot;EOCAutoDictionary.h&quot;
-#import &lt;objc/runtime.h&gt;
-
-@interface EOCAutoDictionary ()
-
-@property (nonatomic, strong) NSMutableDictionary *backingstore;
-
-@end
-
-@implementation EOCAutoDictionary
-
-@dynamic string, number, date, opaqueObject;
-
--(id)init {
-    if ( (self = [super init]}} {
-          _backingStore = [NSMutableDictionary new];
-}
-    return self;
-}
-
-</code></pre>
-
-<p>本例的关键在于<code>resolvelnstanceMethod:</code>方法的实现代码：</p>
-
-<pre><code class="language-objc">
-+ (BOOL)resolvelnstanceMethod:(SEL)selector {
-    NSString *selectorstring = NSStringFromSelector(selector); 
-    if ([selectorstring hasPrefix: @&quot;set&quot;]){
-        class_addMethod(self,
-                        selector,
-                        (IMP)autoDictionarySetter
-                         &quot;v@:@&quot;);
-    } else {
-        class_addMethod(self,
-                        selector,
-                        (IMP)autoDictionaryGetter,
-                        &quot;@@:&quot;;)    
-    }
-    return YES;
-}
-@end
-
-</code></pre>
-
-<p>当开发者首次在<code>EOCAutoDictionary</code>实例上访问某个属性时，运行期系统还找不到 对应的选择子，因为所需的选择子既没有直接实现，也没有合成出来。现在假设要写入 <code>opaqueObject</code>属性，那么系统就会以<code>“setOpaqueObject:”</code>为选择子来调用上面这个方法。 同理，在读取该属性时，系统也会调用上述方法，只不过传入的选择子是<code>opaqueObject</code>。</p>
-
-<p><code>resolvelnslanceMethod</code>方法会判断选择子的前缀是否为set，以此分辨其是set选择子还是 get选择子。在这两种情况下，都要向类中新增一个处理该选择子所用的方法，这两个方 法分别以<code>autoDictionarySetter</code>及<code>autoDictionaryGetter</code>函数指针的形式出现。此时就用到<code>class_addMethod</code>方法，它可以向类中动态地添加方法，用以处理给定的选择子。第三个参 数为函数指针，指向待添加的方法。而最后一个参数则表示待添加方法的“类型编码”（type encoding)。在本例中，编码开头的字符表示方法的返回值类型，后续字符则表示其所接受的各个参数.</p>
-
-<p><code>getter</code>函数可以用下列代码实现:</p>
-
-<pre><code class="language-objc">
-id autoDictionaryGetter(id self, SEL _cmd) {
-    //Get the backing store from the object
-    EOCAutoDictionary *typedSelf = (EOCAutoDictionary^)self；
-    NSMutableDictionary *backingStore = typedSelf.backingStore;
-    //The key is simply the selector name 
-    NSString *key = NSStringFromSelector(_cmd);
-    // Return the value
-    return [backingStore objectForKey:key];
-}
-
-</code></pre>
-
-<p>而setter函数则可以这么写：</p>
-
-<pre><code class="language-objc">
-void autoDictionarySetter(id self, SEL _cmd, id value) {
-    //Get the backing store from the object
-    EOCAutoDictionary *typedSelf = (EOCAutoDictionary*)self；
-    NSMutableDictionary *backingStore = typedSelf.backingStore;
-
-    /** The selector will be for example, &quot;setOpaqueObject:&quot;
-    *   We need to remove the &quot;set&quot;，and lowercase the first
-    *   letter of the remainder.
-    */
-    
-    NSString *selectorstring = NSStringFromSelector(_cmd);
-    NSMutablestring *key = [selectorstring mutableCopy】；
-    // Remove the &quot; : &quot; at the end 
-    [key deleteCharactersInRange:NSMakeRange(key.length - 1, 1)];
-    // Remove the fsetf prefix
-    [key deleteCharactersInRange:NSMakeRange(0, 3)];
-    // Lowercase the first character
-    NSString *lowercaseFirstChar = [[key substringToIndex:1] lowercasestring];
-    [key replaceCharactersInRange:NSMakeRange(0 ,1) withString:lowercaseFirstChar];
-    if (value) {
-    [backingStore setObject:value forKey:key];
-    } else {
-    [backingStore removeObjectForKey:key];
-    }
-}
-
-</code></pre>
-
-<p>EOCAutoDictionary的用法很简单：</p>
-
-<pre><code class="language-objc">
-    EOCAutoDictionary *dict = [EOCAutoDictionarynew];
-    diet.date = [NSDatedateWithTimeIntervalSincel970:475372800];
-    NSLog (@&quot;diet .date = %@&quot; , dict.date);
-    // Output: diet.date = 1985-01-24 00:00:00 +0000
-
-</code></pre>
-
-<p>其他属性的访问方式与<code>date</code>类似，要想添加新属性，只需来定义，并将其声明为<code>@dynamic</code>即可。</p>
-
-<h2 id="toc_5">要点</h2>
-
-<ul>
-<li>若对象无法响应某个选择子，则进人消息转发流程。</li>
-<li>通过运行期的动态方法解析功能，我们可以在需要用到某个方法时再将其加入类中。 </li>
-<li>对象可以把其无法解读的某些选择子转交给其他对象来处理。</li>
-<li>经过上述两步之后，如果还是没办法处理选择子，那就启动完整的消息转发机制。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/22</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15033059328138.html">
-                
-                  <h1>第十一条:理解Objc_msgSend的作用</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在对象中调用方法,在oc中称作&quot;传递消息&quot;.消息有“名称&quot;（name)或“选择子&quot;（selector)，可以接受参数，而且可能还有返回值。</p>
-
-<p>因为OC是C语言的超集,所以我们用C语言来举例.C语言使用“静态绑定”（static binding),也就是说，在编译期就能决定运行时所应调用的函数。</p>
-
-<pre><code class="language-c">#import &lt;stdio.h&gt;
-
-void printHello() {
-    printf (&quot;Hello, world! \n&quot;);
-    }
-void printGoodbye() {
-    printf (&quot;Goodbye, world! \n&quot;);
-
-void doTheThing(int type) {
-    if (type == 0)  {
-        printHello();
-    }else{
-        printGoodbye();
-    }
-    return 0；
-}
-
-</code></pre>
-
-<p>编译器在编译代码的时候就已经知道程序中有<code>printHello</code>与<code>printGoodbye</code>这两个函数了，于是会直接生成调用这些函数的指令。而函数地址实际上是硬编码在指令之中的。</p>
-
-<p>但是将程序改写为下面这样后:</p>
-
-<pre><code class="language-c">#import &lt;stdio.h&gt;
-
-void printHello() {
-    printf (&quot;Hello, world! \n&quot;);
-    }
-void printGoodbye() {
-    printf (&quot;Goodbye, world! \n&quot;);
-
-void doTheThing(int type) {
-    void(*fnc)()
-    if (type == 0)  {
-        fnc = printHello;
-    }else{
-        fnc = printGoodbye;
-    }
-    fnc();
-    return 0；
-}
-
-</code></pre>
-
-<p>这个时候就要使用“动态绑定”（dynamic binding) 了，因为所要调用的函数直到运行期才能确定。编译器在这种情况下生成的指令与刚才那个例子不同，<mark>在第一个例子中，<code>if</code>与<code>else</code>语句里都有函数调用指令。而在第二个例子中，只有一个函数调用指令，不过待调用的函数地址无法硬编码在指令之中，而是要在运行期读取出来</mark>。</p>
-
-<p>在oc中如果向某对象传递消息(方法调用),就会使用动态绑定机制来决定需要调用的方法。在底层，所有方法都是普通的C语言函数，然而对象收到消息之后，究竟该调用哪个方法则完全于运行期决定，甚至可以在程序运行时改变，这些特性使得Objective-C成为一门真正的动态语言。</p>
-
-<p>给对象发送消息可以这样来写：</p>
-
-<pre><code class="language-objc">
-id returnValue = [someObject messageName:parameter];
-
-</code></pre>
-
-<p>在本例中，<code>someObject</code>叫做“接收者”（receiver),<code>messageName</code> 叫做<code>“选择子”</code>（selector)。选择子与参数合起来称为“消息”（message)。编译器看到此消息后，将其转换为一条标准的C语言函数调用，所调用的函数乃是消息传递机制中的核心函数,叫做<code>objc_msgSend</code>,其<br/>
-“原型&quot;（prototype)如下：</p>
-
-<pre><code class="language-c">
-void objc_msgSend(id self, SEL cmd, •••)
-
-</code></pre>
-
-<p>这是个‘参数个数可变的函数’(variadic function)9，能接受两个或两个以上的参数。第一个参数代表接收者，第二个参数代表选择子（SEL是选择子的类型)，后续参数就是消息中的那些参数，其顺序不变。<strong>选择子指的就是方法的名字</strong>。“选择子”与“方法”这两个词经常交替使用。编译器会把刚才那个例子中的消息转换为如下函数：</p>
-
-<pre><code class="language-c">
-id returnValue = objc_msgSend(someObject,
-                            ^selector(messageName:),
-                            parameter);
-
-</code></pre>
-
-<p><code>objc_msgSend</code>函数会依据接收者与选择子的类型来调用适当的方法。为了完成此操作，该方法需要在接收者所属的类中搜寻其“方法列表”（list of methods),如果能找到与选择子名称相符的方法，就跳至其实现代码。若是找不到，那就沿着继承体系继续向上査找，等找到合适的方法之后再跳转。如果最终还是找不到相符的方法，那就执行“消息转发” (message forwarding)操作。消息转发将在第12条中详解。</p>
-
-<p>其它特殊情况需要由一些函数来处理:</p>
-
-<ul>
-<li><strong>objc_msgSendstret。</strong>如果待发送的消息要返回结构体，那么可交由此函数处理。只有当CPU的寄存器能够容纳得下消息返回类型时，这个函数才能处理此消息。若是返回值无法容纳于CPU寄存器中（比如说返回的结构体太大了)，那么就由另一个函数执行派发。此时，那个函数会通过分配在栈上的某个变量来处理消息所返回的结构体。</li>
-<li>ObjC_mSgSerid_fpret。如果消息返回的是浮点数，那么可交由此函数处理,在某些架构的CPU中调用函数时，需要对浮点数寄存器（floating-point register)做特殊处理,也就是说，通常所用的ObjC_msgSend在这种情况下并不合适。这个函数是为了处理x86等架构CPU中某些令人稍觉惊讶的奇怪状况。</li>
-<li>objc_msgSendSuper3 如果要给超类发消息，例如[supermessage:parameter],那么就交由此函数处理。也有另外两个与objc_msgSendstret和objc_MsgSend_fpret等效的函数，用于处理发给super的相应消息。</li>
-</ul>
-
-<p>刚才曾提到,Objc_msgSend等函数一旦找到应该调用的方法之后，就会‘跳转过去’。之所以能这样做，是因为Objective-C对象的每个方法都可以视为简单的C函数，其原型如下：</p>
-
-<pre><code class="language-c">
-&lt;return type&gt; Class_selector(id self, SEL _cmd, •••)
-
-</code></pre>
-
-<p>真正的函数名和上面写的可能不太一样，笔者用“类”（class)和“选择子”（selector)来命名是想解释其工作原理。每个类里都有一张表格，其中的指针都会指向这种函数，而选择子的名称则是査表时所用的“键”。ObjC_msgSend等函数正是通过这张表格来寻找应该执行的方法并跳至其实现的。请注意，原型的样子和ObjC_msgSend函数很像。这不是巧合，而是为了利用“尾调用优化”技术，令“跳至方法实现”这一操作变得更简单些。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>消息由接收者、选择子及参数构成。给某对象&quot;发送消息&quot;(invoke a message)也就相当于在该对象上“调用方法”（call a method)。</li>
-<li>发给某对象的全部消息都要由“动态消息派发系统”（dynamic message dispatch system)来处理，该系统会査出对应的方法，并执行其代码。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/21</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1040,31 +852,31 @@ id returnValue = objc_msgSend(someObject,
 	      
 		      
 			      <li class="post">
-			        <a href="15038893459243.html">iOS 中协议和委托传值的用法</a>
+			        <a href="15041475233104.html">消息转发机制的简单实现</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15038851180831.html">第二十一条 理解Objective-C的错误模型</a>
+			        <a href="15041406291157.html">第24条 将类的实现代码分散到便于管理的数个分类之中</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15038831182450.html">第二十条 为私有方法名加上前缀</a>
+			        <a href="15040800241477.html">iOS基础概念总结（一）</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15037310867483.html">第十九条 使用清晰而协调的命名方式</a>
+			        <a href="15040539328891.html">第23条：通过委托与数据源协议进行对象间通信</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15037148888105.html">第十八条 尽量使用不可变对象</a>
+			        <a href="15039678296448.html">第二十二条 理解NSCopying协议</a>
 			      </li>
 		     
 		  

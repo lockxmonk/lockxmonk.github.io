@@ -113,6 +113,161 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15039678296448.html">
+                
+                  <h1>第二十二条 理解NSCopying协议</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>使用对象时经常需要拷贝它。在<code>Objective-C</code>中，此操作通过copy方法完成。如果想令自己的类支持拷贝操作，那就要实现<code>NSCopying</code>协议，该协议只有一个方法：</p>
+
+<pre><code class="language-objc">-(id)copyWithZone:(NSZone*)zone
+</code></pre>
+
+<p>为何会出现<code>NSZone</code>呢？因为以前开发程序时，会据此把内存分成不同的“区”（zone), 而对象会创建在某个区里面。现在不用了，每个程序只有一个区：<code>“默认区”（default zone)</code>。 所以说，尽管必须实现这个方法，但是你不必担心其中的<code>zone</code>参数。</p>
+
+<p><strong><font color=red>copy方法由NSObject实现，该方法只是以“默认区”为参数来调用<code>“copyWithZone:”</code>。 我们总是想覆写copy方法，其实真正需要实现的却是<code>“copyWithZone:”</code>方法。这里我们一定要注意。</font></strong></p>
+
+<p><mark>若想使某个类支持拷贝功能，只需声明该类遵从NSCopying协议，并实现其中的那个方法即可。</mark>比方说，有个表示个人信息的类，可以在其接口定义中声明此类遵从 <code>NSCopying</code> 协议：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@interface EOCPerson : NSObject &lt;NSCopying&gt;
+@property (nonatomic, copy, readonly) NSString *firstName;
+@property (nonatomic, copy, readonly) NSString *lastName;
+-(id)initWithFirstName:(NSString*)firstName
+          andLastName: (NSString*)lastName;
+
+@end
+</code></pre>
+
+<p>然后，实现协议中规定的方法：</p>
+
+<pre><code class="language-objc">-(id)copyWithZone:(NSZone*)zone {
+    EOCPerson *copy = [[[self class] allocWithZone:zone]
+                     initWithFirstName :_firstName
+                            andLastName:_lastName];
+    return copy;
+}
+</code></pre>
+
+<p>当然我们又是也要考虑具体情况，除了要拷贝对象，还要完成其他一些操作，比如类对象中的数据结构可能并未在初始化方法中设置好，需要另行设置。</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@interface EOCPerson : NSObject&lt;NSCopying&gt;
+@property (nonatomic, copy, readonly) NSString *firstName; 
+@property (nonatomic, copy, readonly) NSString *lastName;
+-(id)initWithFirstName: (NSString*) firstName
+            andLastName:(NSString*)lastName;
+-(void)addFriend:(EOCPerson*)person;
+-(void)removeFriend:(EOCPerson*)person;
+
+@end
+
+@implementation EOCPerson {
+    NSMutableSet *_friends;
+)
+- (id)initWithFirstName: (NSString*) firstName
+             andLastName:(NSString*)lastName { 
+    if ((self = [super init])) {
+    _firstName = [firstName copy];
+    _lastName = [lastName copy];
+    _friends = [NSMutableSet newJ;
+    }
+    return self;
+
+}
+-(void)addFriend:(EOCPerson*)person {
+    [_friends addObject:person];
+}
+-(void)removeFriend:(EOCPerson*)person {
+    [_friends removeObject:person];
+}
+-(id)copyWithZone:(NSZone*)zone {
+    EOCPerson *copy =[[[self class] allocWithZone:zone]
+                        initWithFirstName: _firstName
+                        andLastName:_lastName]; 
+    copy-&gt;_friends = [_friends mutableCopy]; 
+    return copy;
+}
+@end
+</code></pre>
+
+<p><mark>这次所实现的方法比原来多了一些代码，它把本对象的<code>_friends</code>实例变量复制了一份, 令<code>copy</code>对象的<code>_frieiids</code>实例变量指向这个复制过的<code>set</code>。注意，这里使用了<code>-&gt;</code>语法，因为<code>_friends</code>并非属性，只是个在内部使用的实例变量。</mark>其实也可以声明一个属性来表示它，不过由于该变量不会在本类之外使用，所以那么做没必要。</p>
+
+<p>我们在上面发现了一个<code>mutableCopy</code>方法，此方法来自另一个叫做<code>NSMutableCopying</code>的协议。该协议与<code>NSCopying</code>类似，也只定义了一个方法，然而方法名不同：</p>
+
+<pre><code class="language-objc">- (id)mutableCopyWithZone:(NSZone*)zone
+</code></pre>
+
+<p><code>mutableCopy</code>这个“辅助方法”（helper)与<code>copy</code>相似，也是用默认的<code>zone</code>参数来调<code>“mutableCopyWithZone:”</code>。如果你的类分为可变版本（mutable variant)与不可变版本 (immutable variant),那么就应该实现<code>NSMutableCopying</code>。若采用此模式，则在可变类中覆写<code>“copyWithZone:”</code>方法时，<font color=red>不要返回可变的拷贝，而应返回一份不可变的版本。</font><mark><strong>无论当前实例是否可变，若需获取其可变版本的拷贝，均应调用<code>mutableCopy</code>方法。同理，若需要不可变的拷贝，则总应通过<code>copy</code>方法来获取。</strong></mark></p>
+
+<p>对于不可变的<code>NSArray</code>与可变的<code>NSMutableArray</code>来说，下列关系总是成立的：</p>
+
+<pre><code class="language-objc">-[NSMutableArray copy] =&gt;NSArray
+-[NSArray mutableCopy】 =&gt;NSMutableArray
+</code></pre>
+
+<p>所谓我们会发现：<strong><font color=red>在可变对象上调用copy方法会返冋另外一个不可变类的实例。这样做是为了能在可变版本与不可变版本之间自由切换。</font></strong></p>
+
+<h2 id="toc_0">浅拷贝与深拷贝</h2>
+
+<p>在编写拷贝方法时，还要决定一个问题，就是应该执行<code>“深拷贝”（deep copy)</code>还是<code>“浅拷贝”（shallow copy)</code>。<font color=red>深拷贝的意思就是：在拷贝对象自身时，将其底层数据也一并复制过 去。</font><mark><code>Foundation</code>框架中的所有<code>collection</code>类在默认情况下都执行浅拷贝，也就是说，只拷贝容器对象本身，而不复制其中数据。这样做的主要原因在于，容器内的对象未必都能拷贝，而且调用者也未必想在拷贝容器时一并拷贝其中的每个对象</mark>。</p>
+
+<p><img src="media/15039678296448/15039726127594.jpg" alt=""/></p>
+
+<p>一般情况下，我们会遵照系统框架所使用的那种模式，在自定义的类中以浅拷贝的方式实现<code>“copyWithZone:”</code>方法。但如果有必要的话，也可以增加一个执行深拷贝的方法。以 <code>NSSet</code>为例，该类提供了下面这个初始化方法，用以执行深拷贝：</p>
+
+<pre><code class="language-objc">-(id)initWithSet:(NSArray*)array copyltems:(BOOL)copyltems
+</code></pre>
+
+<p>若<code>copyltem</code>参数设为<code>YES</code>,则该方法会向数组中的每个元素发送<code>copy</code>消息，用拷贝好的元素创建新的set,并将其返回给调用者。<br/>
+在<code>EOCPerson</code>那个例子中，存放朋友对象的<code>set</code>是用<code>“ copyWithZone:”</code>方法来拷贝的， 根据刚才讲的内容可知，这种浅拷贝方式不会逐个复制<code>set</code>中的元素。若需要深拷贝的话, 则可像下面这样，编写一个专供深拷贝所用的方法：</p>
+
+<pre><code class="language-objc">-(id)deepCopy {
+    EOCPerson *copy =[[[self class] alloc]
+                initWithFirstName:_firstName
+                      andLastName:_lastName];               
+    copy-&gt;_friends = [[NSMutableSet alloc] initWithSetfriends copyltems:YES];
+    return copy;
+}
+</code></pre>
+
+<p>因为没有专门定义深拷贝的协议，所以其具体执行方式由每个类来确定，你只需决定自 己所写的类是否要提供深拷贝方法即可。另外，不要假定遵从了 <code>NSCopying</code>协议的对象都会执行深拷贝。在绝大多数情况下，执行的都是浅拷贝。如果需要在某对象上执行深拷贝，那 么除非该类的文档说它是用深拷贝来实现<code>NSCopying</code>协议的，否则，要么寻找能够执行深拷贝的相关方法，要么自己编写方法来做。</p>
+
+<h2 id="toc_1">要点</h2>
+
+<ul>
+<li>若想令自己所写的对象具有拷贝功能，则需实现<code>NSCopying</code>协议。</li>
+<li>如果自定义的对象分为可变版本与不可变版本，那么就要同时实现<code>NSCopying</code>与 <code>NSMutableCopying</code> 协议。</li>
+<li>复制对象时需决定采用浅拷贝还是深拷贝，一般情况下应该尽量执行浅拷贝。</li>
+<li>如果你所写的对象需要深拷贝，那么可考虑新增一个专门执行深拷贝的方法。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/29</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15038851180831.html">
                 
                   <h1>第二十一条 理解Objective-C的错误模型</h1>
@@ -641,134 +796,6 @@ int main(int argc, const char * argv[]) {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15036443106558.html">
-                
-                  <h1>第十六条 提供"全能初始化方法"</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我们知道,所有的对象都要初始化但是有些对象可能有很多初始化方法(根据初始的信息来选择用哪个).我们以iOS的UI框架UIKit为例，其中有个类叫做<code>UITableViewCell</code>,初始化该类对象 时，需要指明其样式及标识符，标识符能够区分不同类型的单元格。由于这种对象的创 建成本较高，所以绘制表格时可依照标识符来复用，以提升程序效率。<strong><font color=red>我们把这种可为 对象提供必要信息以便其能完成工作的初始化方法叫做“全能初始化方法”（designated initializer)</font></strong></p>
-
-<p>我们看下面这个NSDate的例子：</p>
-
-<pre><code class="language-objc">-(id)init
--(id)initWithString:(NSString*)string
--(id)initWithTimelntervalSinceNow:(NSTimelnterval)seconds
--(id)initWithTimelnterval:(NSTimelnterval)seconds
-                sinceDate:(NSDate*)refDate
--(id)initWithTimeIntervalSinceReferenceDate:(NSTimelnterval)seconds
--(id)initWithTimeIntervalSincel970:(NSTimelnterval)seconds
-</code></pre>
-
-<p><mark><strong>那么多的初始化方法中，我们要选一个全能初始化方法，让其他的初始化方法都来调用它。</strong></mark>，只有在全能初始化方法中，才会存储内部数据。这样的话，当底层数据存储机制改变时，只需修改此方法的代码就好，无须改动其他初始化方法。</p>
-
-<p>我们来用代码举例：</p>
-
-<p><em>首先定义一个表示矩形的类：</em></p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-@interface EOCRectangle : NSObject
-@property (nonatomic, assign, readonly) float width;
-@property (nonatomic, assign, readonly) float height; 
-@end
-</code></pre>
-
-<p>然后定义一个初始化方法：</p>
-
-<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight:(float)height
-{
-    if ((self = [super init])) {
-        _width = width;
-        _height = height;
-    }
-    return self;
-}
-</code></pre>
-
-<p>这样就会有一个问题，当有人用<code>[[EOCRectanglealloc]init]</code>来创建矩形时，因为<code>NSObject</code>中已经实现了<code>init</code>方法，如果把<code>alloc</code>方法分配好的<code>EOCRectangle</code>交由此方法来初始化，那么矩形的宽度与高度就是0,因为全部实例变量都设为0了。这种情况我们应该覆写<code>init</code>方法：</p>
-
-<pre><code class="language-objc">// Using default values
--(id)init {
-    return [self initWithWidth:5.Of andHeight:10.Of];
-)
-// Throwing an exception
--(id)init {
-    @throw [NSException
-    exceptionWithName:NSInternalInconsistencyException 
-    reason:@&quot;Must use initWithWidth:andHeight: instead.&quot; 
-    userInfo：nil]；
-}
-</code></pre>
-
-<p>还有一种情况，当我们创建名叫<code>EOCSquare</code>的类，令其成为<code>EOCRectangle</code>的子类时，新类的初始化方法写的时候要注意：</p>
-
-<pre><code class="language-objc">@import &quot;EOCRectangle.h&quot;
-@interface EOCSquare : EOCRectangle 
--(id)initWithDimension:(float)dimension; 
-@end
-
-@implementation EOCSquare
--(id)initWithDimension:(float)dimension {
-    return [super initwithwidth:dimension andHeightidimension];
-}
-@end
-</code></pre>
-
-<p>这了我们发现上面代码的初始化方法调用了父类的初始化方法，这样可能会导致一个问题：创建出一个”高度”和“宽度”不相等的正方形。所以：<strong><font color=red>如果子类的全能初始化方法与超类方法的名称不 同，那么总应覆写超类的全能初始化方法。</font></strong>在<code>EOCSquare</code>这个例子中，应该像下面这样覆写<code>EOCRectangle</code>的全能初始化方法：</p>
-
-<pre><code class="language-objc">-(id)initWithWidth:(float)width andHeight:(float)height { 
-    float dimension = MAX (width, height);  
-    return [self initWithDimension:dimension];
-}
-</code></pre>
-
-<p>覆写了这个方法之后，即便使用<code>init</code>来初始化<code>EOCSquare</code>对象，也能照常工作。原因在于, <code>EOCRectangle</code>类覆写了 <code>init</code>方法，并以默认值为参数，调用了该类的全能初始化方法。在用<code>init</code>方法初始化<code>EOCSquare</code>对象时，也会这么调用，不过由于<code>“initWithWidth:andHeight:”</code>已经在子类中覆写了，所以实际上执行的是<code>EOCSquare</code>类的这一份实现代码，而此代码又会调用本类的全能初始化方法。因此一切正常，调用者不可能创建出边长不相等的<code>EOCSquare</code>对象。</p>
-
-<p>当然如果我们不想覆写父类的全能初始化方法，认为这是调用者自己犯了错误。在这种情况下，常用的办法是覆写超类的全能初始化方法并于其中抛出异常：</p>
-
-<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight: (float) height {
-    @throw 
-        [NSException 
-            exceptionWithName:NSInternallnconsistencyException
-            reason: @&quot;Must use initWithDimension: instead.&quot;
-             userInfo：nil];
-</code></pre>
-
-<p><strong><mark>有时如果某个队形对象的实例有两种完全不同的创建方式，必须分开处理，所以就要编写多个全能初始化方法。</mark></strong>只要记住每个子类的全能初始化方法都应该调用其超类的对应方法，并逐层向上，应该先调用超类的相关方法，然后再执行与本类有关的任务。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>在类中提供一个全能初始化方法，并于文档里指明。其他初始化方法均应调用此方法。</li>
-<li><p>若全能初始化方法与超类不同，则需覆写超类中的对应方法。</p></li>
-<li><p>如果超类的初始化方法不适用于子类，那么应该覆写这个超类方法，并在其中抛出异常。</p></li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/25</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -852,31 +879,31 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
-			        <a href="15038893459243.html">iOS 中协议和委托传值的用法</a>
+			        <a href="15041475233104.html">消息转发机制的简单实现</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15038851180831.html">第二十一条 理解Objective-C的错误模型</a>
+			        <a href="15041406291157.html">第24条 将类的实现代码分散到便于管理的数个分类之中</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15038831182450.html">第二十条 为私有方法名加上前缀</a>
+			        <a href="15040800241477.html">iOS基础概念总结（一）</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15037310867483.html">第十九条 使用清晰而协调的命名方式</a>
+			        <a href="15040539328891.html">第23条：通过委托与数据源协议进行对象间通信</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15037148888105.html">第十八条 尽量使用不可变对象</a>
+			        <a href="15039678296448.html">第二十二条 理解NSCopying协议</a>
 			      </li>
 		     
 		  

@@ -113,6 +113,844 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14938589289379.html">
+                
+                  <h1>进程与线程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我们已经熟悉多线程与多进程。他们各有优点与缺点，这里我们简单的说明一下：</p>
+
+<p>首先，要实现多任务，<font color=red>通常我们会设计Master-Worker模式，Master负责分配任务，Worker负责执行任务，因此，多任务环境下，通常是一个Master，多个Worker。</font></p>
+
+<p><strong>如果用多进程实现Master-Worker，主进程就是Master，其他进程就是Worker。</strong></p>
+
+<p><strong>如果用多线程实现Master-Worker，主线程就是Master，其他线程就是Worker。</strong></p>
+
+<p>多进程模式最大的优点就是<strong>稳定性高</strong>，因为一个子进程崩溃了，不会影响主进程和其他子进程。（<strong>当然主进程挂了所有进程就全挂了，但是Master进程只负责分配任务，挂掉的概率低</strong>）著名的Apache最早就是采用多进程模式。</p>
+
+<p>多进程模式的<font color=red>缺点是创建进程的代价大</font>，在Unix/Linux系统下，用fork调用还行，在Windows下创建进程开销巨大。另外，操作系统能同时运行的进程数也是有限的，在内存和CPU的限制下，如果有几千个进程同时运行，操作系统连调度都会成问题。</p>
+
+<p>多线程模式通常比多进程快一点，但是也快不到哪去，而且，<font color=red>多线程模式致命的缺点就是任何一个线程挂掉都可能直接造成整个进程崩溃，因为所有线程共享进程的内存。</font>在Windows上，如果一个线程执行的代码出了问题，你经常可以看到这样的提示：“该程序执行了非法操作，即将关闭”，其实往往是某个线程出了问题，但是操作系统会强制结束整个进程。</p>
+
+<p>在Windows下，多线程的效率比多进程要高，所以微软的IIS服务器默认采用多线程模式。由于多线程存在稳定性的问题，IIS的稳定性就不如Apache。为了缓解这个问题，IIS和Apache现在又有多进程+多线程的混合模式，真是把问题越搞越复杂。</p>
+
+<h2 id="toc_0">线程切换</h2>
+
+<p>无论是多进程还是多线程，只要数量一多，<strong>效率肯定上不去</strong>，为什么呢？</p>
+
+<p>因为多任务的执行，需要线程或进程的切换，<strong>操作系统在切换时会先保存当前执行的现场环境（CPU寄存器状态、内存页等），然后，把新任务的执行环境准备好（恢复上次的寄存器状态，切换内存页等），才能开始执行。</strong>这个切换过程虽然很快，但是也需要耗费时间。如果有几千个任务同时进行，操作系统可能就主要忙着切换任务，根本没有多少时间去执行任务了，这种情况最常见的就是硬盘狂响，点窗口无反应，系统处于假死状态。</p>
+
+<p><strong>所以，多任务一旦多到一个限度，就会消耗掉系统所有的资源，结果效率急剧下降，所有任务都做不好。</strong></p>
+
+<h2 id="toc_1">计算密集型和IO密集型</h2>
+
+<p>是否采用多任务的第二个考虑是任务的类型。我们可以把任务分为<font color=red><strong>计算密集型和IO密集型。</strong></font></p>
+
+<p>计算密集型任务的特点是要进行大量的计算，消耗CPU资源，比如计算圆周率、对视频进行高清解码等等，全靠CPU的运算能力。<font color=red><strong>这种计算密集型任务虽然也可以用多任务完成，但是任务越多，花在任务切换的时间就越多，CPU执行任务的效率就越低，所以，要最高效地利用CPU，计算密集型任务同时进行的数量应当等于CPU的核心数。</strong></font></p>
+
+<p>计算密集型任务由于主要消耗CPU资源，因此，代码运行效率至关重要。<strong>Python这样的脚本语言运行效率很低，完全不适合计算密集型任务。对于计算密集型任务，最好用C语言编写。</strong></p>
+
+<p>第二种任务的类型是IO密集型，涉及到网络、磁盘IO的任务都是IO密集型任务，这类任务的特点是CPU消耗很少，任务的大部分时间都在等待IO操作完成（因为IO的速度远远低于CPU和内存的速度）。<font color=red><strong>对于IO密集型任务，任务越多，CPU效率越高，但也有一个限度。常见的大部分任务都是IO密集型任务，比如Web应用。</strong></font></p>
+
+<p>IO密集型任务执行期间，99%的时间都花在IO上，花在CPU上的时间很少，因此，用运行速度极快的C语言替换用Python这样运行速度极低的脚本语言，完全无法提升运行效率。<strong>对于IO密集型任务，最合适的语言就是开发效率最高（代码量最少）的语言，脚本语言是首选，C语言最差。</strong></p>
+
+<h2 id="toc_2">异步IO</h2>
+
+<p>考虑到CPU和IO之间巨大的速度差异，一个任务在执行的过程中大部分时间都在等待IO操作，<strong>单进程单线程模型会导致别的任务无法并行执行，因此，我们才需要多进程模型或者多线程模型来支持多任务并发执行。</strong></p>
+
+<blockquote>
+<p><strong>使用了异步IO，在发起IO请求到实际使用数据这段时间 内，程序还可以继续做其他事情。</strong></p>
+</blockquote>
+
+<p>现代操作系统对IO操作已经做了巨大的改进，最大的特点就是支持异步IO。如果充分利用操作系统提供的异步IO支持，就可以用单进程单线程模型来执行多任务，这种全新的模型称为事件驱动模型，<strong>Nginx就是支持异步IO的Web服务器，它在单核CPU上采用单进程模型就可以高效地支持多任务。</strong>在多核CPU上，可以运行多个进程（数量与CPU核心数相同），充分利用多核CPU。由于系统总的进程数量十分有限，因此操作系统调度非常高效。用异步IO编程模型来实现多任务是一个主要的趋势。</p>
+
+<p><font color=red><strong>对应到Python语言，单进程的异步编程模型称为协程，有了协程的支持，就可以基于事件驱动编写高效的多任务程序。我们会在后面学习如何编写协程。</strong></font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14937814533169.html">
+                
+                  <h1>ThreadLocal</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在多线程环境下，每个线程都有自己的数据。<strong>一个线程使用自己的局部变量比使用全局变量好，因为局部变量只有线程自己能看见，不会影响其他线程，而全局变量的修改必须加锁。</strong></p>
+
+<p>但是局部变量也有问题，就是在函数调用的时候，传递起来很麻烦：</p>
+
+<pre><code class="language-py">def process_student(name):
+    std = Student(name)
+    # std是局部变量，但是每个函数都要用它，因此必须传进去：
+    do_task_1(std)
+    do_task_2(std)
+
+def do_task_1(std):
+    do_subtask_1(std)
+    do_subtask_2(std)
+
+def do_task_2(std):
+    do_subtask_2(std)
+    do_subtask_2(std)
+</code></pre>
+
+<p>每个函数一层一层调用都这么传参数那还得了？用全局变量？也不行，因为每个线程处理不同的<code>Student</code>对象，不能共享。</p>
+
+<p>如果用一个全局<code>dict</code>存放所有的<code>Student</code>对象，然后以<code>thread</code>自身作为<code>key</code>获得线程对应的<code>Student</code>对象如何？</p>
+
+<pre><code class="language-py">global_dict = {}
+
+def std_thread(name):
+    std = Student(name)
+    # 把std放到全局变量global_dict中：
+    global_dict[threading.current_thread()] = std
+    do_task_1()
+    do_task_2()
+
+def do_task_1():
+    # 不传入std，而是根据当前线程查找：
+    std = global_dict[threading.current_thread()]
+    ...
+
+def do_task_2():
+    # 任何函数都可以查找出当前线程的std变量：
+    std = global_dict[threading.current_thread()]
+    ...
+</code></pre>
+
+<p>这种方式理论上是可行的，它最大的优点是消除了<code>std</code>对象在每层函数中的传递问题，但是，每个函数获取<code>std</code>的代码有点丑。</p>
+
+<p>有没有更简单的方式？</p>
+
+<p><code>ThreadLocal</code>应运而生，不用查找<code>dict</code>，<code>ThreadLocal</code>帮你自动做这件事：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import threading
+
+# 创建全局ThreadLocal对象
+local_school = threading.local()
+
+
+def process_student():
+    print &#39;Hello,%s(in %s)&#39; % (local_school.student, threading.current_thread().name)
+
+
+def process_thread(name):
+    # 绑定ThreadLocal的stutent：
+    local_school.student = name
+    process_student()
+
+t1 = threading.Thread(target=process_thread, args=(&#39;Alice&#39;,), name=&#39;Thread-A&#39;)
+t2 = threading.Thread(target=process_thread, args=(&#39;Bobs&#39;,), name=&#39;Thread-B&#39;)
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+</code></pre>
+
+<p><img src="media/14937814533169/14937825491356.jpg" alt=""/></p>
+
+<p>全局变量<code>local_school</code>就是一个<code>ThreadLocal</code>对象，每个<code>Thread</code>对它都可以读写<code>student</code>属性，但互不影响。你可以把<code>local_school</code>看成全局变量，但每个属性如<code>local_school.student</code>都是线程的局部变量，可以任意读写而互不干扰，也不用管理锁的问题，<code>ThreadLocal</code>内部会处理。</p>
+
+<p>可以理解为全局变量<code>local_school</code>是一个dict，不但可以用<code>local_school.student</code>，还可以绑定其他变量，如<code>local_school.teacher</code>等等。</p>
+
+<p><font color=red><strong><code>ThreadLocal</code>最常用的地方就是为每个线程绑定一个数据库连接，HTTP请求，用户身份信息等，这样一个线程的所有调用到的处理函数都可以非常方便地访问这些资源。</strong><br/>
+</font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/3</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14936919183368.html">
+                
+                  <h1>多线程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">Lock</a>
+</li>
+<li>
+<a href="#toc_1">小结</a>
+</li>
+</ul>
+
+
+<p>多任务可以由多进程完成，也可以由一个进程内的多线程完成。</p>
+
+<p>我们前面提到了进程是由若干线程组成的，一个进程至少有一个线程。</p>
+
+<p>由于线程是操作系统直接支持的执行单元，因此，高级语言通常都内置多线程的支持，Python也不例外，并且，Python的线程是真正的Posix Thread，而不是模拟出来的线程。</p>
+
+<p>Python的标准库提供了两个模块：<code>thread</code>和<code>threading</code>，<code>thread</code>是低级模块，<code>threading</code>是高级模块，对<code>thread</code>进行了封装。绝大多数情况下，我们只需要使用<code>threading</code>这个高级模块。</p>
+
+<p>启动一个线程就是把一个函数传入并创建<code>Thread</code>实例，然后调用<code>start()</code>开始执行：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import time,threading
+
+#新线程执行的代码
+def loop():
+    print &#39;thread %s is running...&#39; % threading.current_thread().name
+    n = 0
+    while n&lt;5:
+        n = n+1
+        print &#39;thread %s &gt;&gt;&gt; %s&#39; %(threading.current_thread().name,n)
+        time.sleep(1)
+    print &#39;thread %s ended.&#39; %threading.current_thread().name
+
+print &#39;thread %s is running...&#39; % threading.current_thread().name
+t= threading.Thread(target=loop,name=&#39;LoopThread&#39;)
+t.start()
+t.join()
+print &#39;thread %s ended.&#39; % threading.current_thread().name
+</code></pre>
+
+<p><img src="media/14936919183368/14936948712548.jpg" alt=""/></p>
+
+<p>由于任何进程默认就会启动一个线程，我们把该线程称为主线程，主线程又可以启动新的线程，Python的<code>threading</code>模块有个<code>current_thread()</code>函数，它永远返回当前线程的实例。主线程实例的名字叫<code>MainThread</code>，子线程的名字在创建时指定，我们用<code>LoopThread</code>命名子线程。名字仅仅在打印时用来显示，完全没有其他意义，如果不起名字Python就自动给线程命名为<code>Thread-1，Thread-2……</code></p>
+
+<h2 id="toc_0">Lock</h2>
+
+<p>多线程和多进程最大的不同在于，多进程中，同一个变量，各自有一份拷贝存在于每个进程中，互不影响，<strong>而多线程中，所有变量都由所有线程共享，所以，任何一个变量都可以被任何一个线程修改，因此，线程之间共享数据最大的危险在于多个线程同时改一个变量，把内容给改乱了。</strong></p>
+
+<p>来看看多个线程同时操作一个变量怎么把内容给改乱了：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import time,threading
+
+# 假定这是你的银行存款:
+balance = 0
+
+def change_it(n):
+    # 先存后取，结果应该为0:
+    global balance
+    balance = balance + n
+    balance = balance - n
+
+def run_thread(n):
+    for i in range(100000):
+        change_it(n)
+
+t1 = threading.Thread(target=run_thread, args=(5,))
+t2 = threading.Thread(target=run_thread, args=(8,))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+print balance
+</code></pre>
+
+<p><img src="media/14936919183368/14936957737021.jpg" alt=""/><br/>
+结果为<code>14</code>而不是<code>0</code></p>
+
+<p>我们定义了一个共享变量<code>balance</code>，初始值为0，并且启动两个线程，先存后取，理论上结果应该为0，但是，由于线程的调度是由操作系统决定的，当<code>t1、t2</code>交替执行时，只要循环次数足够多，<code>balance</code>的结果就不一定是0了。</p>
+
+<p>我们为了得到准确的结果，在某个线程正在修改<code>balance</code>时就要为该线程上一把锁，直到锁释放，其它线程继续执行。创建一个锁就是通过<code>threading.Lock()</code>来实现：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import time,threading
+
+# 假定这是你的银行存款:
+balance = 0
+lock=threading.Lock()
+
+def change_it(n):
+    # 先存后取，结果应该为0:
+    global balance
+    balance = balance + n
+    balance = balance - n
+
+def run_thread(n):
+    for i in range(100000):
+        #先获取锁
+        lock.acquire()
+        try:
+            change_it(n)
+        finally:
+            # 改完了一定要释放锁:
+            lock.release()
+        
+t1 = threading.Thread(target=run_thread, args=(5,))
+t2 = threading.Thread(target=run_thread, args=(8,))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+print balance
+</code></pre>
+
+<p><img src="media/14936919183368/14937055756329.jpg" alt=""/></p>
+
+<p>当多个线程同时执行lock.acquire()时，只有一个线程能成功地获取锁，然后继续执行代码，其他线程就继续等待直到获得锁为止。</p>
+
+<p>获得锁的线程用完后一定要释放锁，否则那些苦苦等待锁的线程将永远等待下去，成为死线程。所以我们用<code>try...finally</code>来确保锁一定会被释放。</p>
+
+<h2 id="toc_1">小结</h2>
+
+<p>多线程编程，模型复杂，容易发生冲突，必须用锁加以隔离，同时，又要小心死锁的发生。</p>
+
+<p><strong>Python解释器由于设计时有GIL全局锁，导致了多线程无法利用多核。多线程的并发在Python中就是一个美丽的梦</strong></p>
+
+<p><font color=red>Python虽然不能利用多线程实现多核任务，但可以通过多进程实现多核任务。多个Python进程有各自独立的GIL锁，互不影响。<br/>
+</font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14936863062791.html">
+                
+                  <h1>进程和线程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">多进程</a>
+</li>
+<li>
+<a href="#toc_1">multiprocessing</a>
+</li>
+<li>
+<a href="#toc_2">Pool</a>
+</li>
+<li>
+<a href="#toc_3">进程间通信</a>
+<ul>
+<li>
+<a href="#toc_4">小结</a>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>我们前面编写的所有的Python程序，都是执行单任务的进程，也就是只有一个线程。如果我们要同时执行多个任务怎么办</p>
+
+<p>一种是启动多个进程，每个进程虽然只有一个线程，但多个进程可以一块执行多个任务。</p>
+
+<p><strong>还有一种方法是启动一个进程，在一个进程内启动多个线程，这样，多个线程也可以一块执行多个任务。</strong></p>
+
+<p>当然还有第三种方法，就是启动多个进程，每个进程再启动多个线程，这样同时执行的任务就更多了，当然这种模型更复杂，实际很少采用。</p>
+
+<p>总结一下就是，多任务的实现有3种方式：</p>
+
+<ul>
+<li>多进程模式；</li>
+<li>多线程模式；</li>
+<li>多进程+多线程模式。</li>
+</ul>
+
+<blockquote>
+<p>线程是最小的执行单元，而进程由至少一个线程组成。如何调度进程和线程，完全由操作系统决定，程序自己不能决定什么时候执行，执行多长时间。</p>
+</blockquote>
+
+<h2 id="toc_0">多进程</h2>
+
+<p>Unix/Linux操作系统提供了一个<code>fork()</code>系统调用，它非常特殊。普通的函数调用，调用一次，返回一次，但是<code>fork()</code><font color=red>调用一次，返回两次，因为操作系统自动把当前进程（称为父进程）复制了一份（称为子进程），然后，分别在父进程和子进程内返回</font>。</p>
+
+<p>子进程永远返回<code>0</code>，而父进程返回子进程的ID。这样做的理由是，一个父进程可以fork出很多子进程，所以，父进程要记下每个子进程的ID，而子进程只需要调用<code>getppid()</code>就可以拿到父进程的ID。</p>
+
+<p>Python的<code>os</code>模块封装了常见的系统调用，其中就包括<code>fork</code>，可以在Python程序中轻松创建子进程：</p>
+
+<pre><code class="language-py">import os
+
+print &#39;Process (%s) start&#39; %os.getpid()
+
+pid = os.fork()
+if pid == 0:
+    print &#39;I am child process (%s) and my parent is %s.&#39; %(os.getpid(),os.getppid())
+else:
+    print &#39;I (%s) just created a child process (%s)&#39; %(os.getpid(),pid)
+</code></pre>
+
+<p><img src="media/14936863062791/14936874189758.jpg" alt=""/></p>
+
+<p>第一次返回父进程，第二次返回子进程。所以分别打印出了不同的结果。</p>
+
+<p>有了<code>fork</code>调用，一个进程在接到新任务时就可以复制出一个子进程来处理新任务，常见的Apache服务器就是由父进程监听端口，每当有新的http请求时，就fork出子进程来处理新的http请求。</p>
+
+<h2 id="toc_1">multiprocessing</h2>
+
+<p>如果你打算编写多进程的服务程序，Unix/Linux无疑是正确的选择。由于Windows没有<code>fork</code>调用，难道在Windows上无法用Python编写多进程的程序？</p>
+
+<p>由于Python是跨平台的，自然也应该提供一个跨平台的多进程支持。<code>multiprocessing</code>模块就是跨平台版本的多进程模块。</p>
+
+<p><code>multiprocessing</code>模块提供了一个<code>Process</code>类来代表一个进程对象，下面的例子演示了启动一个子进程并等待其结束：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+from multiprocessing import Process
+
+import os
+
+# 子进程要执行的代码
+
+
+def run_proc(name):
+    print &#39;Run child process %s(%s)&#39; % (name, os.getpid())
+
+if __name__ == &#39;__main__&#39;:
+    print &#39;Parent process %s.&#39; % os.getpid()
+p = Process(target=run_proc, args=(&#39;test&#39;,))
+print &#39;Process will start.&#39;
+p.start()
+p.join()
+print &#39;Process end&#39;
+</code></pre>
+
+<p><img src="media/14936863062791/14936889041171.jpg" alt=""/></p>
+
+<p>创建子进程时，只需要传入一个执行函数和函数的参数，创建一个<code>Process</code>实例，用<code>start()</code>方法启动，这样创建进程比<code>fork()</code>还要简单。</p>
+
+<p><code>join()</code>方法可以等待子进程结束后再继续往下运行，通常用于进程间的同步。</p>
+
+<h2 id="toc_2">Pool</h2>
+
+<p>如果要启动大量的子进程，可以用进程池的方式批量创建子进程：</p>
+
+<pre><code class="language-py">from multiprocessing import Pool
+import os
+import time
+import random
+
+
+def long_time_task(name):
+    print &#39;Run task %s(%s)...&#39; % (name, os.getpid())
+    start = time.time()
+    time.sleep(random.random() * 3)
+    end = time.time()
+    print &#39;Task %s runs %0.2f seconds.&#39; % (name, (end - start))
+
+if __name__ == &#39;__main__&#39;:
+    print &#39;Parent process %s.&#39; % os.getpid()
+    p = Pool()
+    for i in range(9):
+        p.apply_async(long_time_task, args=(i,))
+    print &#39;Waiting for all subprocesses done...&#39;
+    p.close()
+    p.join()
+    print &#39;All subprocess done&#39;
+</code></pre>
+
+<p><img src="media/14936863062791/14936904615182.jpg" alt=""/></p>
+
+<p>代码解读：</p>
+
+<p>对<code>Pool</code>对象调用<code>join()</code>方法会等待所有子进程执行完毕，调用<code>join()</code>之前必须先调用<code>close()</code>，调用<code>close()</code>之后就不能继续添加新的<code>Process</code>了。</p>
+
+<p>请注意输出的结果，task 0~7是立刻执行的，而task 8要等待前面某个task完成后才执行，这是因为Pool的默认大小在我的电脑上是8，因此，最多同时执行8个进程。这是Pool有意设计的限制，并不是操作系统的限制。如果改成：<code>p = Pool(9)</code></p>
+
+<p>就可以同时跑9个进程。</p>
+
+<p>由于Pool的默认大小是CPU的核数，如果你不幸拥有8核CPU，你要提交至少9个子进程才能看到上面的等待效果。</p>
+
+<h2 id="toc_3">进程间通信</h2>
+
+<p><code>Process</code>之间肯定是需要通信的，操作系统提供了很多机制来实现进程间的通信。Python的<code>multiprocessing</code>模块包装了底层的机制，提供了<code>Queue</code>、<code>Pipes</code>等多种方式来交换数据。</p>
+
+<p>我们以<code>Queue</code>为例，在父进程中创建两个子进程，一个往<code>Queue</code>里写数据，一个从<code>Queue</code>里读数据：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from multiprocessing import Process,Queue
+import os,time,random
+
+#写数据进程执行的代码
+def write(q):
+    for value in [&#39;A&#39;,&#39;B&#39;,&#39;C&#39;]:
+        print &#39;Put %s to quene...&#39; % value
+        q.put(value)
+        time.sleep(random.random())
+#读数据进程执行的代码
+def read(q):
+    while True:
+        value = q.get(True)
+        print &#39;Get %s from quene.&#39; %value
+
+if __name__==&#39;__main__&#39;:
+    #父进程创建Quene,并传给各个子进程：
+    q = Queue()
+    pw = Process(target=write,args=(q,))
+    pr = Process(target=read,args=(q,))
+    #启动子进程pw，写入：
+    pw.start()
+    #启动子进程pr，读取：
+    pr.start()
+    #等待pw结束：
+    pw.join()
+    #pr进程里是死循环，无法等待其结束，只能强行终止：
+    pr.terminate()
+
+</code></pre>
+
+<p><img src="media/14936863062791/14936917220576.jpg" alt=""/></p>
+
+<p>在Unix/Linux下，<code>multiprocessing</code>模块封装了<code>fork()</code>调用，使我们不需要关注<code>fork()</code>的细节。由于Windows没有fork调用，因此，<code>multiprocessing</code>需要“模拟”出fork的效果，父进程所有Python对象都必须通过<code>pickle</code>序列化再传到子进程去，所有，如果<code>multiprocessing</code>在Windows下调用失败了，要先考虑是不是pickle失败了。</p>
+
+<h3 id="toc_4">小结</h3>
+
+<p>在Unix/Linux下，可以使用<code>fork()</code>调用实现多进程。</p>
+
+<p>要实现跨平台的多进程，可以使用<code>multiprocessing</code>模块。</p>
+
+<p>进程间通信是通过<code>Queue、Pipes</code>等实现的。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14933396433742.html">
+                
+                  <h1>序列化</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">JSON</a>
+</li>
+<li>
+<a href="#toc_1">JSON进阶</a>
+</li>
+<li>
+<a href="#toc_2">小结</a>
+</li>
+</ul>
+
+
+<p><strong>我们把变量从内存中变成可存储或传输的过程称之为序列化，在Python中叫pickling，在其他语言中也被称之为serialization，marshalling，flattening等等，都是一个意思。</strong></p>
+
+<p>序列化之后，就可以把序列化后的内容写入磁盘，或者通过网络传输到别的机器上。</p>
+
+<p>反过来，把变量内容从序列化的对象重新读到内存里称之为反序列化，即unpickling。</p>
+
+<p>Python提供两个模块来实现序列化：<code>cPickle</code>和<code>pickle</code>。这两个模块功能是一样的，区别在于<code>cPickle</code>是C语言写的，速度快，<code>pickle</code>是纯Python写的，速度慢，跟<code>cStringIO和StringIO</code>一个道理。用的时候，先尝试导入<code>cPickle</code>，如果失败，再导入<code>pickle</code>：</p>
+
+<pre><code class="language-py">try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+</code></pre>
+
+<p>我们尝试把一个对象序列化并写入文件：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+try:
+    import cPickle as pickle
+except ImportError: 
+    import pickle
+
+d = dict(name=&#39;LZH&#39;,age=20,score=88)
+print pickle.dumps(d)
+</code></pre>
+
+<p><img src="media/14933396433742/14933403797179.jpg" alt=""/></p>
+
+<p><code>pickle.dumps()</code>方法把任意对象序列化成一个<code>str</code>，然后，就可以把这个<code>str</code>写入文件。或者用另一个方法<code>pickle.dump()</code>直接把对象序列化后写入一个<code>file-like Object</code>：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+try:
+    import cPickle as pickle
+except ImportError: 
+    import pickle
+
+d = dict(name=&#39;梁中豪&#39;,age=20,score=88)
+f = open(&#39;test.txt&#39;,&#39;wb&#39;)  
+pickle.dump(d,f)
+f.close
+
+</code></pre>
+
+<p><img src="media/14933396433742/14933405542811.jpg" alt=""/></p>
+
+<p>我们可以读取文件中这些内容，并且将他们反序列化来显示原来的内容：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+try:
+    import cPickle as pickle
+except ImportError: 
+    import pickle
+
+#d = dict(name=&#39;梁中豪&#39;,age=20,score=88)
+f = open(&#39;test.txt&#39;,&#39;rb&#39;)  
+print pickle.load(f)
+f.close
+
+</code></pre>
+
+<p>可以先把内容读到一个<code>str</code>，然后用<code>pickle.loads()</code>方法反序列化出对象，也可以直接用<code>pickle.load()</code>方法从一个<code>file-like Object</code>中直接反序列化出对象</p>
+
+<p>Pickle的问题和所有其他编程语言特有的序列化问题一样，就是它只能用于Python，并且可能不同版本的Python彼此都不兼容，因此，只能用Pickle保存那些不重要的数据，不能成功地反序列化也没关系。</p>
+
+<p>下面我们用JSON来进行网络间的数据传递。</p>
+
+<h2 id="toc_0">JSON</h2>
+
+<p>如果我们要在不同的编程语言之间传递对象，<strong>就必须把对象序列化为标准格式，比如XML，但更好的方法是序列化为JSON，因为JSON表示出来就是一个字符串</strong>，可以被所有语言读取，也可以方便地存储到磁盘或者通过网络传输。JSON不仅是标准格式，并且比XML更快，而且可以直接在Web页面中读取，非常方便。</p>
+
+<p><strong><code>JSON</code>表示的对象就是标准的<code>JavaScript</code>语言的对象，<code>JSON</code>和Python内置的数据类型对应如下：</strong></p>
+
+<table>
+<thead>
+<tr>
+<th>Json类型</th>
+<th>Python类型</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>{}</td>
+<td>dict</td>
+</tr>
+<tr>
+<td>[]</td>
+<td>list</td>
+</tr>
+<tr>
+<td>string</td>
+<td>str或u&#39;unicode&#39;</td>
+</tr>
+<tr>
+<td>12345.56</td>
+<td>int或float</td>
+</tr>
+<tr>
+<td>true/false</td>
+<td>True/False</td>
+</tr>
+<tr>
+<td>null</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+
+<p>Python内置的<code>json</code>模块提供了非常完善的Python对象到JSON格式的转换。我们先看看如何把Python对象变成一个JSON：</p>
+
+<pre><code class="language-py">import json
+d = dict(name=&#39;Lichao&#39;, age=20, score=88)
+print json.dumps(d)
+
+</code></pre>
+
+<p><img src="media/14933396433742/14933496188910.jpg" alt=""/></p>
+
+<p><code>dumps()</code>方法返回一个<code>str</code>，内容就是标准的JSON。类似的，<code>dump()</code>方法可以直接把JSON写入一个<code>file-like Object</code>。</p>
+
+<p>要把JSON反序列化为Python对象，用<code>loads()</code>或者对应的<code>load()</code>方法，前者把JSON的字符串反序列化，后者从<code>file-like Object</code>中读取字符串并反序列化：</p>
+
+<pre><code class="language-py">import json
+json_str = &#39;{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Lichao&quot;}&#39;
+print json.loads(json_str)
+</code></pre>
+
+<p><img src="media/14933396433742/14933497889867.jpg" alt=""/></p>
+
+<p>有一点需要注意，就是反序列化得到的所有字符串对象默认都是<code>unicode</code>而不是<code>str</code>。由于JSON标准规定JSON编码是UTF-8，所以我们总是能正确地在Python的<code>str或unicode</code>与JSON的字符串之间转换。</p>
+
+<h2 id="toc_1">JSON进阶</h2>
+
+<p>Python的<code>dict</code>对象可以直接序列化为JSON的<code>{}</code>，不过，很多时候，我们更喜欢用<code>class</code>表示对象，比如定义<code>Student</code>类，然后序列化：</p>
+
+<pre><code class="language-py">import json
+
+
+class Student(object):
+
+    def __init__(self, name, age, score):
+        super(Student, self).__init__()
+        self.name = name
+        self.age = age
+        self.score = score
+
+s = Student(&#39;LiChao&#39;, 20, 88)
+print(json.dumps(s))
+</code></pre>
+
+<p><img src="media/14933396433742/14933605238135.jpg" alt=""/><br/>
+向上述那样调用，会报错，因为<code>Student</code>对象不是一个可序列化为JSON的对象。</p>
+
+<p>我们仔细看看<code>dumps()</code>方法的参数列表，可以发现，除了第一个必须的<code>obj</code>参数外，<code>dumps()</code>方法还提供了一大堆的可选参数。</p>
+
+<p>这些可选参数就是让我们来定制JSON序列化。前面的代码之所以无法把<code>Student</code>类实例序列化为JSON，是因为默认情况下，<code>dumps()</code>方法不知道如何将<code>Student</code>实例变为一个JSON的<code>{}</code>对象。</p>
+
+<p>可选参数<code>default</code>就是把任意一个对象变成一个可序列为JSON的对象，我们只需要为<code>Student</code>专门写一个转换函数，再把函数传进去即可：</p>
+
+<pre><code class="language-py">import json
+
+def student2dict(std):
+    return {
+    &#39;name&#39;:std.name,
+    &#39;age&#39;:std.age,
+    &#39;score&#39;:std.score
+    }
+
+class Student(object):
+
+    def __init__(self, name, age, score):
+        super(Student, self).__init__()
+        self.name = name
+        self.age = age
+        self.score = score
+
+s = Student(&#39;LiChao&#39;, 20, 88)
+print(json.dumps(s,default=student2dict))
+</code></pre>
+
+<p><img src="media/14933396433742/14933609788679.jpg" alt=""/></p>
+
+<p>这样，<code>Student</code>实例首先被<code>student2dict()</code>函数转换成<code>dict</code>，然后再被顺利序列化为<code>JSON</code>。</p>
+
+<p><strong>不过，下次如果遇到一个<code>Teacher</code>类的实例，照样无法序列化为<code>JSON</code>。我们可以偷个懒，把任意<code>class</code>的实例变为<code>dict</code>：</strong></p>
+
+<pre><code class="language-py">print(json.dumps(s, default=lambda obj: obj.__dict__))
+</code></pre>
+
+<p>因为通常<code>class</code>的实例都有一个<code>__dict__</code>属性，它就是一个dict，用来存储实例变量。也有少数例外，比如定义了<code>__slots__</code>的class。</p>
+
+<p>同样的道理，如果我们要把JSON反序列化为一个<code>Student</code>对象实例，<code>loads()</code>方法首先转换出一个dict对象，然后，我们传入的<code>object_hook</code>函数负责把<code>dict</code>转换为<code>Student</code>实例：</p>
+
+<pre><code class="language-py">import json
+
+def dict2students(d):
+    return Student(d[&#39;name&#39;],d[&#39;age&#39;],d[&#39;score&#39;])
+
+class Student(object):
+
+    def __init__(self, name, age, score):
+        super(Student, self).__init__()
+        self.name = name
+        self.age = age
+        self.score = score
+
+json_str = &#39;{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Bob&quot;}&#39;
+print(json.loads(json_str,object_hook=dict2students))
+</code></pre>
+
+<p><img src="media/14933396433742/14933619206509.jpg" alt=""/></p>
+
+<p>打印出的是反序列化的<code>Student</code>实例对象。</p>
+
+<h2 id="toc_2">小结</h2>
+
+<p>Python语言特定的序列化模块是<code>pickle</code>，但如果要把序列化搞得更通用、更符合Web标准，就可以使用<code>json</code>模块。</p>
+
+<p><code>json</code>模块的<code>dumps()和loads()</code>函数是定义得非常好的接口的典范。当我们使用时，只需要传入一个必须的参数。但是，当默认的序列化或反序列机制不满足我们的要求时，我们又可以传入更多的参数来定制序列化或反序列化的规则，既做到了接口简单易用，又做到了充分的扩展性和灵活性。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/28</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14932778418691.html">
                 
                   <h1>操作文件和目录</h1>
@@ -249,585 +1087,6 @@ search(&#39;pr&#39;)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14932734930436.html">
-                
-                  <h1>I/O编程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">文件读写</a>
-<ul>
-<li>
-<a href="#toc_1">读文件</a>
-</li>
-<li>
-<a href="#toc_2">file-like Object</a>
-</li>
-<li>
-<a href="#toc_3">二进制文件</a>
-</li>
-<li>
-<a href="#toc_4">写文件</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_5">小结</a>
-</li>
-</ul>
-
-
-<h2 id="toc_0">文件读写</h2>
-
-<h3 id="toc_1">读文件</h3>
-
-<p>要以读文件的模式来打开一个文件对象，使用Python内置的<code>open（）</code>函数，传入文件名和标识符：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; f = open(&#39;/Users/michael/test.txt&#39;, &#39;r&#39;)
-</code></pre>
-
-<p>标示符&#39;r&#39;表示读，这样，我们就成功地打开了一个文件。</p>
-
-<p>如果文件不存在，open()函数就会抛出一个IOError的错误，并且给出错误码和详细的信息告诉你文件不存在：<br/>
-<img src="media/14932734930436/14932737513488.jpg" alt=""/></p>
-
-<p>如果文件打开成功，接下来，调用<code>read()</code>方法可以一次读取文件的全部内容，Python把内容读到内存，用一个<code>str</code>对象表示：<br/>
-<img src="media/14932734930436/14932741526772.jpg" alt=""/></p>
-
-<p>由于文件读写时都有可能产生<code>IOError</code>，一旦出错，后面的<code>f.close()</code>就不会调用。所以，为了保证无论是否出错都能正确地关闭文件，我们可以使用<code>try ... finally</code>来实现。这种方法太麻烦。我们这里使用python所提供的方法：</p>
-
-<p>Python引入了with语句来自动帮我们调用<code>close()</code>方法：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;r&#39;) as f:
-    print f.read()
-</code></pre>
-
-<p><img src="media/14932734930436/14932743740546.jpg" alt=""/></p>
-
-<p>这和前面的<code>try ... finally</code>是一样的，但是代码更佳简洁，并且不必调用<code>f.close()</code>方法。</p>
-
-<p>调用<code>read()</code>会一次性读取文件的全部内容，如果文件有10G，内存就爆了，所以，要保险起见，可以反复调用<code>read(size)</code>方法，每次最多读取<code>size</code>个字节的内容。另外，调用<code>readline()</code>可以每次读取一行内容，调用<code>readlines()</code>一次读取所有内容并按行返回<code>list</code>。因此，要根据需要决定怎么调用。</p>
-
-<p>如果文件很小，<code>read()</code>一次性读取最方便；如果不能确定文件大小，反复调用<code>read(size)</code>比较保险；如果是配置文件，调用<code>readlines()</code>最方便：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;r&#39;) as f:
-    for line in f.readlines():
-        print(line.strip())  #把末尾的&#39;\n&#39;删掉
-</code></pre>
-
-<p><img src="media/14932734930436/14932746986776.jpg" alt=""/></p>
-
-<h3 id="toc_2">file-like Object</h3>
-
-<p>像<code>open()</code>函数返回的这种有个<code>read()</code>方法的对象，在Python中统称为file-like Object。除了file外，还可以是内存的字节流，网络流，自定义流等等。file-like Object不要求从特定类继承，只要写个<code>read()</code>方法就行。</p>
-
-<p><code>StringIO</code>就是在内存中创建的file-like Object，常用作临时缓冲。</p>
-
-<h3 id="toc_3">二进制文件</h3>
-
-<p>前面讲的默认都是读取文本文件，并且是ASCII编码的文本文件。要读取二进制文件，比如图片、视频等等，用<code>rb</code>模式打开文件即可：<br/>
-<img src="media/14932734930436/14932760233490.jpg" alt=""/></p>
-
-<h3 id="toc_4">写文件</h3>
-
-<p>写文件和读文件是一样的，唯一区别是调用<code>open()</code>函数时，传入标识符<code>&#39;w&#39;</code>或者<code>&#39;wb&#39;</code>表示写文本文件或写二进制文件：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; f = open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;, &#39;w&#39;)
-&gt;&gt;&gt; f.write(&#39;Hello, world!Again！&#39;)
-&gt;&gt;&gt; f.close()
-</code></pre>
-
-<p>这里推荐直接调用with方法：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;w&#39;) as f:
-    f.write(&#39;Hello, world!Again!&#39;)
-</code></pre>
-
-<p><img src="media/14932734930436/14932763793296.jpg" alt=""/></p>
-
-<p><font color=red><strong>要注意的是一旦写入文件，原来文件中的内容会被删除！</strong></font></p>
-
-<h2 id="toc_5">小结</h2>
-
-<p>在Python中，文件读写是通过<code>open()</code>函数打开的文件对象完成的。使用<code>with</code>语句操作文件IO是个好习惯。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14932622908500.html">
-                
-                  <h1>文档测试</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><strong>在python中我们可以执行那些在注释中的代码，来进行测试。</strong></p>
-
-<p>当我们编写注释时，如果写上这样的注释：</p>
-
-<pre><code class="language-py">def abs(n):
-    &#39;&#39;&#39;
-    Function to get absolute value of number.
-
-    Example:
-
-    &gt;&gt;&gt; abs(1)
-    1
-    &gt;&gt;&gt; abs(-1)
-    1
-    &gt;&gt;&gt; abs(0)
-    0
-    &#39;&#39;&#39;
-    return n if n &gt;= 0 else (-n)
-</code></pre>
-
-<p>无疑更明确地告诉函数的调用者该函数的期望输入和输出。</p>
-
-<p><strong>并且，Python内置的“文档测试”（doctest）模块可以直接提取注释中的代码并执行测试。</strong></p>
-
-<p><font color=red>doctest严格按照Python交互式命令行的输入和输出来判断测试结果是否正确。只有测试异常的时候，可以用...表示中间一大段烦人的输出。</font></p>
-
-<p>让我们用doctest来测试上次编写的<code>Dict</code>类：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Dict(dict):
-    
-    &quot;&quot;&quot;
-    Simple dict but also support access as x.y style
-
-    &gt;&gt;&gt; d1 = Dict()
-    &gt;&gt;&gt; d1[&#39;x&#39;] = 100
-    &gt;&gt;&gt; d1.x
-    100
-    &gt;&gt;&gt; d1.y = 200
-    &gt;&gt;&gt; d1[&#39;y&#39;]
-    200
-    &gt;&gt;&gt; d2 = Dict(a=1, b=2, c=&#39;3&#39;)
-    &gt;&gt;&gt; d2.c
-    &#39;3&#39;
-    &gt;&gt;&gt; d2[&#39;empty&#39;]
-    Traceback (most recent call last):
-        ...
-    KeyError: &#39;empty&#39;
-    &gt;&gt;&gt; d2.empty
-    Traceback (most recent call last):
-        ...
-    AttributeError: &#39;Dict&#39; object has no attribute &#39;empty&#39;
-    
-    &quot;&quot;&quot;
-    def __init__(self, **kw):
-        super(Dict, self).__init__(**kw)
-    def __getattr__(self,key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r&quot;&#39;Dict&#39; object has no attribute &#39;%s&#39;&quot; % key)
-        else:
-            pass
-        finally:
-            pass
-    def __setattr__(self,key,value):
-        self[key] = value
-if __name__ == &#39;__main__&#39;:
-    import doctest
-    doctest.testmod()
-</code></pre>
-
-<p>如果什么输出都没有，说明我们编写的<code>doctest</code>运行都是正确的。<br/>
-<img src="media/14932622908500/14932639594028.jpg" alt=""/><br/>
-如果我们把</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; d2.c
-    &#39;4&#39; #3改成4
-</code></pre>
-
-<p>运行后就会显示：</p>
-
-<p><img src="media/14932622908500/14932640459265.jpg" alt=""/></p>
-
-<p><strong>注意到最后两行代码。当模块正常导入时，doctest不会被执行。只有在命令行运行时，才执行doctest。所以，不必担心doctest会在非测试环境下执行。</strong></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14932573311953.html">
-                
-                  <h1>图像去雾相关论文总结</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">1.特征学习的单幅图像去雾算法 2016年</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_1">2.尺度自适应暗通道先验去雾方法</a>
-
-
-<h2 id="toc_0">1.特征学习的单幅图像去雾算法 2016年</h2>
-
-<p><strong>目的：</strong>为提高图像去雾的普适性，提出一种特征学习的单幅图像去雾方法。</p>
-
-<p><strong>方法：</strong>通过稀疏自动编码机对有雾图像进行<strong>多尺度的纹理结构特征提取</strong>，同时抽取各种与雾相关的颜色特征。然后采用多层神经网络进行样本训练，得到雾天条件下纹理结构特征及颜色特征与场景深度间的映射关系，并估算出有雾图像的场景深度图。最后结合大气散射模型，根据场景深度图复原无雾图像。</p>
-
-<p><strong>结论：对实验结果的定性及定量分 析表明，本文算法能有效获取有雾图像的场景深度，复原出视觉效果理想的无雾图像，且具有很好的场景普适性。</strong></p>
-
-<p><strong>理解</strong>：<font color=red>本文认为图像去雾的问题可进一步转化为场景深度d的求解问题。</font>本文通过自动编码机获取到图片中物体的纹理特征，然后用多尺度的方法分别提取<strong>颜色特征、暗原色特征、颜色衰减特征、纹理结构</strong>特征。<strong>四者结合对场景深度进行估计</strong>。</p>
-
-<p><strong>可以改进的</strong>：</p>
-
-<ol>
-<li><p>算法实时性不够强，效率比较低，可以考虑缩小图片尺寸，降低数据量，从而运用到视频去雾。</p></li>
-<li><p>对雾气分布不均匀的图像，效果不理想，需要结合不同的气象模型来建立更为鲁棒的物理模型。</p></li>
-</ol>
-
-<h1 id="toc_1">2.尺度自适应暗通道先验去雾方法</h1>
-
-<p><strong>目的：</strong><br/>
-针对暗通道先验去雾方法的尺度选择问题 提出了一种尺度自适应方法， 根据图像的颜色和边 缘特征将暗通道求解的尺度自适应地调整到一个合适的范围。</p>
-
-<p><strong>方法：</strong></p>
-
-<ol>
-<li><p>由颜色特征求解初始尺度：<font color=red>对于图像的不同区域采用不同的尺度求解暗通道: 在亮度较低或饱和度较高的区域，采用较小尺度; 在亮度较高且饱和度较低的区域，采用较大尺度;在景深突变处，采用较小尺度;在平滑区域，采用较大尺度。</font></p></li>
-<li><p>由边缘特征对尺度进行修正:由于“光晕”现象发生在景深突变处，如果在边缘附近采用较小的尺度，可使透射率的求解窗口\(Ω_r(x)\)尽量不跨越景深边界，从而减小“光晕”现象; 在非边缘处采用较大的尺度，可以增大 \(J_{dark}(x)→0\)的概率，使复原图像的背景更平滑，噪声和失真更小。 由边缘特征对初始尺度\(r_0(x)\)进行修正.</p></li>
-</ol>
-
-<p><strong>结论：</strong><br/>
-整个去雾过程参数自动配置，无需人工干预，兼顾不同尺度复原图像的优点，复原图像色彩自然，对比度提升显著，并有效抑制了“光晕”现象。对多种雾化场景图像的处理结果表明: <strong>文中方法对场景的适应性强， 在任何情况下的处理结果均能达到 DG 方法的最优结果，甚至更好。</strong></p>
-
-<p><strong>理解：</strong><br/>
-该论文主要是针对HE的去雾方法，对暗通道尺寸进行自适应确定，减少了人工干预的复杂度。</p>
-
-<p><strong>可以改进：</strong><br/>
-<font color=red>该算法在运行时间上可以改进，也可以利用机器学习的方法来提取图片特征，避免Canny算子的局限性造成的边缘提取误差。<br/>
-可以与上篇论文进行结合来提高上文尺度特征提取的效率。</font></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14928484245894.html">
-                
-                  <h1>文档测试</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>如果你经常阅读Python的官方文档，可以看到很多文档都有示例代码。比如<a href="https://docs.python.org/2/library/re.html">re</a>模块就带了很多示例代码：</p>
-
-<pre><code>&gt;&gt;&gt; import re
-&gt;&gt;&gt; m = re.search(&#39;(?&lt;=abc)def&#39;, &#39;abcdef&#39;)
-&gt;&gt;&gt; m.group(0)
-&#39;def&#39;
-</code></pre>
-
-<p>可以把这些示例代码在Python的交互式环境下输入并执行，结果与文档中的示例代码显示的一致。</p>
-
-<p>这些代码与其他说明可以写在注释中，然后，由一些工具来自动生成文档。既然这些代码本身就可以粘贴出来直接运行，那么，可不可以自动执行写在注释中的这些代码呢？</p>
-
-<p>答案是肯定的。</p>
-
-<p>当我们编写注释时，如果写上这样的注释：</p>
-
-<pre><code class="language-py">
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/22</span>
-                    
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14928429198094.html">
-                
-                  <h1>单元测试</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我们来编写一个<code>Dict</code>类，这个类的行为和<code>dict</code>一致，但是可以通过属性来访问，用起来就像下面这样：</p>
-
-<pre><code>&gt;&gt;&gt; d = Dict(a=1, b=2)
-&gt;&gt;&gt; d[&#39;a&#39;]
-1
-&gt;&gt;&gt; d.a
-1
-</code></pre>
-
-<p>mydict.py代码为：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Dict(dict):
-
-    def __init__(self, **kw):
-        super(Dict, self).__init__(**kw)
-
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r &quot; &#39;Dict&#39; object has no atr &#39;%s&#39; &quot; % key)
-        else:
-            pass
-        finally:
-            pass
-
-    def __setattr__(self, key, value):
-        self[key] = value
-
-</code></pre>
-
-<p>为了编写单元测试，我们需要引入Python自带的<code>unittest</code>模块，编写<code>mydict_test.py</code>如下：</p>
-
-<pre><code class="language-py">import unittest
-
-from mydict import Dict
-
-
-class TestDict(unittest.TestCase):
-
-    def test_init(self):
-        d = Dict(a=1, b=&#39;test&#39;)
-        self.assertEquals(d.a, 1)
-        self.assertEquals(d.b, &#39;test&#39;)
-        self.assertTrue(isinstance(d, dict))
-
-    def test_key(self):
-        d = Dict()
-        d[&#39;key&#39;] = &#39;value&#39;
-        self.assertEquals(d.key, &#39;value&#39;)
-
-    def test_attr(self):
-        d = Dict()
-        d.key = &#39;value&#39;
-        self.assertTrue(&#39;key&#39; in d)
-        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
-
-    def test_keyerror(self):
-        d = Dict()
-        with self.assertRaises(KeyError):
-            value = d[&#39;empty&#39;]
-
-    def test_attrerror(self):
-        d = Dict()
-        with self.assertRaises(AttributeError)
-            value = d.empty
-
-</code></pre>
-
-<p>编写单元测试时，我们需要编写一个测试类，从<code>unittest.TestCase</code>继承。</p>
-
-<p>以<code>test</code>开头的方法就是测试方法，不以<code>test</code>开头的方法不被认为是测试方法，测试的时候不会被执行。</p>
-
-<p>对每一类测试都需要编写一个<code>test_xxx()</code>方法。由于<code>unittest.TestCase</code>提供了很多内置的条件判断，我们只需要调用这些方法就可以断言输出是否是我们所期望的。最常用的断言就是<code>assertEquals()：</code></p>
-
-<pre><code class="language-py">self.assertEquals(abs(-1), 1) # 断言函数返回的结果与1相等
-</code></pre>
-
-<p>另一种重要的断言就是期待抛出指定类型的<code>Error</code>，比如通过<code>d[&#39;empty&#39;]</code>访问不存在的key时，断言会抛出<code>KeyError</code>：</p>
-
-<pre><code class="language-py">with self.assertRaises(KeyError):
-    value = d[&#39;empty&#39;]
-</code></pre>
-
-<p>而通过<code>d.empty</code>访问不存在的<code>key</code>时，我们期待抛出<code>AttributeError</code>：</p>
-
-<pre><code class="language-py">with self.assertRaises(AttributeError):
-    value = d.empty
-</code></pre>
-
-<h2 id="toc_0">运行单元测试</h2>
-
-<p>一旦编写好单元测试，我们就可以运行单元测试。最简单的运行方式是在<code>mydict_test.py</code>的最后加上两行代码：</p>
-
-<pre><code class="language-py">if __name__ == &#39;__main__&#39;:
-    unittest.main()
-</code></pre>
-
-<p>这样就可以把<code>mydict_test.py</code>当做正常的python脚本运行：</p>
-
-<p><img src="media/14928429198094/14928450280463.jpg" alt=""/></p>
-
-<p>另一种更常见的方法是在命令行通过参数<code>-m unittest</code>直接运行单元测试:<br/>
-<img src="media/14928429198094/14928451217135.jpg" alt=""/></p>
-
-<p>这是推荐的做法，因为这样可以一次批量运行很多单元测试，并且，有很多工具可以自动来运行这些单元测试。</p>
-
-<h2 id="toc_1">setUp与tearDown</h2>
-
-<p>可以在单元测试中编写两个特殊的<code>setUp()</code>和<code>tearDown()</code>方法。这两个方法会分别在每<strong>调用一个测试方法的前后分别被执行</strong>。</p>
-
-<p><code>setUp()和tearDown()</code>方法有什么用呢？设想你的测试需要启动一个数据库，这时，就可以在<code>setUp()</code>方法中连接数据库，在<code>tearDown()</code>方法中关闭数据库，这样，不必在每个测试方法中重复相同的代码：</p>
-
-<pre><code class="language-py">import unittest
-
-from mydict import Dict
-
-class TestDict(unittest.TestCase):
-
-    def setUp(self):    
-        print &#39;setUp...&#39;
-
-    def tearDown(self):
-        print &#39;tearDown...&#39;
-    
-    def test_init(self):    
-        d = Dict(a=1, b=&#39;test&#39;)
-        self.assertEquals(d.a, 1)   
-        self.assertEquals(d.b, &#39;test&#39;)
-        self.assertTrue(isinstance(d, dict))
-
-    def test_key(self):
-        d = Dict()
-        d[&#39;key&#39;] = &#39;value&#39;
-        self.assertEquals(d.key, &#39;value&#39;)
-
-    def test_attr(self):
-        d = Dict()
-        d.key = &#39;value&#39;
-        self.assertTrue(&#39;key&#39; in d)
-        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
-
-    def test_keyerror(self):
-        d = Dict()
-        with self.assertRaises(KeyError):
-            value = d[&#39;empty&#39;]
-
-    def test_attrerror(self):
-        d = Dict()
-        with self.assertRaises(AttributeError):
-            value = d.empty
-
-if __name__ == &#39;__main__&#39;:
-     unittest.main()
-</code></pre>
-
-<p><img src="media/14928429198094/14928470586520.jpg" alt=""/></p>
-
-<h2 id="toc_2">总结</h2>
-
-<ol>
-<li><p>单元测试可以有效地测试某个程序模块的行为，是未来重构代码的信心保证。</p></li>
-<li><p>单元测试的测试用例要覆盖常用的输入组合、边界条件和异常。</p></li>
-<li><p>单元测试代码要非常简单，如果测试代码太复杂，那么测试代码本身就可能有bug。</p></li>
-<li><p>单元测试通过了并不意味着程序就没有bug了，但是不通过程序肯定有bug。</p></li>
-</ol>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/22</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -911,31 +1170,31 @@ if __name__ == &#39;__main__&#39;:
 	      
 		      
 			      <li class="post">
-			        <a href="15038893459243.html">iOS 中协议和委托传值的用法</a>
+			        <a href="15041475233104.html">消息转发机制的简单实现</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15038851180831.html">第二十一条 理解Objective-C的错误模型</a>
+			        <a href="15041406291157.html">第24条 将类的实现代码分散到便于管理的数个分类之中</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15038831182450.html">第二十条 为私有方法名加上前缀</a>
+			        <a href="15040800241477.html">iOS基础概念总结（一）</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15037310867483.html">第十九条 使用清晰而协调的命名方式</a>
+			        <a href="15040539328891.html">第23条：通过委托与数据源协议进行对象间通信</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15037148888105.html">第十八条 尽量使用不可变对象</a>
+			        <a href="15039678296448.html">第二十二条 理解NSCopying协议</a>
 			      </li>
 		     
 		  

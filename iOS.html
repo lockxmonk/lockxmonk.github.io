@@ -113,6 +113,244 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15041475233104.html">
+                
+                  <h1>消息转发机制的简单实现</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">第一种</h2>
+
+<p>首先我们来实现这两个方法：<br/><br/>
++(BOOL)resolveInstanceMethod:    (SEL)sel</p>
+
+<p>+(BOOL)resolveClassMethod:(SEL)sel</p>
+
+<p>这两个方法用于方法的动态解析，当一个对象执行一个方法时，发现没有找到所对应的实现。这是就要靠上面的方法来动态添加实现了</p>
+
+<p>举例来说：</p>
+
+<pre><code class="language-objc">//
+//  Person.h
+//  消息转发
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface Person : NSObject
+//接口中声明一个方法
+-(void)run;
+
+@end
+
+//
+//  Person.m
+//  消息转发
+
+
+#import &quot;Person.h&quot;
+#import &lt;objc/runtime.h&gt;
+@implementation Person //在部署的时候我们没有实现接口中声明的run方法
+
+
+//编写C函数实现代码
+void addrun (id self, SEL _cmd){
+    NSLog(@&quot;%@　%s&quot;,self,sel_getName(_cmd));
+}
+
++(BOOL)resolveInstanceMethod:(SEL)sel{
+    if (sel ==@selector(run)) {
+    //如果响应run方法，我们动态将上面实现的addrun方法添加到当前类中。
+        class_addMethod(self, sel, (IMP)addrun, &quot;v@:&quot;);
+    }
+    
+    return [super resolveInstanceMethod:sel];
+}
+
+@end
+
+//  main.m
+//  消息转发
+
+
+#import &lt;Foundation/Foundation.h&gt;
+#import &quot;Person.h&quot;
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+    //执行代码
+        Person *man = [Person new];
+        [man run];
+    }
+    return 0;
+}
+</code></pre>
+
+<p>结果为：<img src="media/15041475233104/15041480973843.jpg" alt=""/><br/>
+说明执行了我们添加的那个方法，而并没有报错。</p>
+
+<h2 id="toc_1">第二种</h2>
+
+<p>我们可以动态的向类中添加方法来解决无选择子的问题，我们也可以选择转换接受者来选择可以处理该选择子的对象。</p>
+
+<p>首先当我们，没有处理第一种方法的时候，运行期系统会给我们第二个机会，询问是否有备用的接受者。我们就要实现<code>orwardingTargetForSelector</code>了</p>
+
+<p>我们举例来看：</p>
+
+<p>首先我们先创建一个新类Car，并且创建一个<code>run</code>方法：</p>
+
+<p><img src="media/15041475233104/15041487720558.jpg" alt=""/></p>
+
+<p>然后在Person.m中，不对<code>resolveInstanceMethod</code>进行任何处理，在<code>forwardingTargetForSelector</code>中返回一个<code>Car</code>实例：<br/>
+<img src="media/15041475233104/15041488721835.jpg" alt=""/></p>
+
+<p>然后继续执行<code>main.m</code>文件，运行为：<br/>
+<img src="media/15041475233104/15041489461207.jpg" alt=""/></p>
+
+<p>说明系统已经将所要实现方法的对象转换为<code>Car</code>的实例对象。</p>
+
+<h2 id="toc_2">第三种</h2>
+
+<p>如果前两种我们都没有实现的话，就会进入第三种，执行完整的消息转发机制。</p>
+
+<p>就会调用两个方法<code>methodSignatureForSelector</code>和<code>forwardInvocation</code></p>
+
+<p><code>methodSignatureForSelector</code>方法用来指定方法签名，返回<code>nil</code>表示不处理，否则会进入下一步调用<code>forwardInvocation</code>方法。其中这个签名就是给<code>forwardInvocation</code>中的参数<code>NSInvocation</code>调用的。</p>
+
+<p><img src="media/15041475233104/15041604848181.jpg" alt=""/></p>
+
+<p>开头我们要找的错误<code>unrecognized selector sent to instance</code>原因，原来就是因为<code>methodSignatureForSelector</code>这个方法中，由于没有找到<code>run</code>对应的实现方法，所以返回了一个空的方法签名，最终导致程序报错崩溃。</p>
+
+<p>所以我们需要做的是自己新建方法签名，再在<code>forwardInvocation</code>中用你要转发的那个对象调用这个对应的签名，这样也实现了消息转发。</p>
+
+<p>关于生成签名的类型<code>&quot;v@:&quot;</code>解释一下。每一个方法会默认隐藏两个参数，<code>self</code>、<code>_cmd</code>，<code>self</code>代表方法调用者，<code>_cmd</code>代表这个方法的<code>SEL</code>，签名类型就是用来描述这个方法的返回值、参数的，<code>v</code>代表返回值为<code>void</code>，<code>@</code>表示<code>self</code>，<code>:</code>表示<code>_cmd</code>。</p>
+
+<p><strong>所以第二个和第三个字符必须是<code>“@:”</code> ，第一个字符是返回类型.</strong></p>
+
+<p><strong>具体的可以看一下了解</strong>：<a href="https://developer.apple.com/library/etc/redirect/xcode/content/1189/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100">Type Encodeing</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15040800241477.html">
+                
+                  <h1>iOS基础概念总结（一）</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">1. OC的前向声明</a>
+</li>
+<li>
+<a href="#toc_1">2. #import和#include的区别？</a>
+</li>
+<li>
+<a href="#toc_2">3. 用NSLog函数输出一个浮点类型，结果四舍五入，并保留一位小数</a>
+</li>
+<li>
+<a href="#toc_3">4.property属性的修饰符有什么样的作用</a>
+</li>
+<li>
+<a href="#toc_4">5. self.name=@object和_name=@object有什么不同?</a>
+</li>
+</ul>
+
+
+<h2 id="toc_0">1. OC的前向声明</h2>
+
+<p>由于在编译 <code>Person</code> 类的文件时，不需要知道Dog类的全部细节（Dog类中的方法），若使用 <code>#import &quot;Dog.h&quot;</code> 则必须知道<code>Dog.h</code>的全部细节，而Person类中只需要知道类名Dog就可以了,可用通过以下方式告诉编译器<code>@class Dog;</code>这种方式叫<code>向前声明 （forward declaring）</code>,当<code>.m</code>文件中要了解实现细节的时候在引入<code>dog.h</code></p>
+
+<pre><code class="language-objc">//Person.h
+#import &lt;Foundation/Foundation.h&gt;
+@class Dog;  //前向声明
+@interface Person : NSObject
+@property (nonatomic, strong) NSString *name;
+@property (nonatomic, strong) Dog *dog;
+
+</code></pre>
+
+<ul>
+<li><strong>向前声明解决了两个类互相引用的问题。</strong></li>
+<li><strong>向前声明可用降低编译时间，除非必要，则可以使用向前申明，并在实现文件中映入头文件，这样做可用尽量降低类之间的耦合。</strong></li>
+</ul>
+
+<h2 id="toc_1">2. #import和#include的区别？</h2>
+
+<p><code>#import</code>是<code>Objective-C</code>导入头文件的语法，可保证不会重复导入。<br/>
+<code>#include</code>是C/C++导入头文件的语法，如果是objective-c与C/C++混编码，对于C/C++类型的文件，还是使用#include来引入，这种写法需要添加防重复导入的语法。</p>
+
+<h2 id="toc_2">3. 用NSLog函数输出一个浮点类型，结果四舍五入，并保留一位小数</h2>
+
+<pre><code class="language-objc">float money = 1.011;
+NSLog(@&quot;%.1f&quot;, money);
+</code></pre>
+
+<h2 id="toc_3">4.property属性的修饰符有什么样的作用</h2>
+
+<p><code>property</code>是属性访问声明，扩号内支持以下几个属性：</p>
+
+<ul>
+<li><strong>getter=getName、setter=setName</strong>：设置setter与getter的方法名</li>
+<li><p><strong>readwrite、readonly</strong>：设置可供访问级别</p></li>
+<li><p><strong>assign</strong>：方法直接赋值，不进行任何retain操作，为了解决原类型与环循引用问题</p></li>
+<li><p><strong>retain</strong>：其setter方法对参数进行release旧值再retain新值，所有实现都是这个顺序</p></li>
+<li><p><strong>strong</strong>：此特质表明该属性定义了一种“拥有关系”（owning relationship)。为这种属性设置新值时，设置方法会先保留新值，并释放旧值，然后再将新值设置上去。</p></li>
+<li><p><strong>weak</strong>  此特质表明该属性定义了一种“非拥有关系”（nonowning relationship)。<strong>为这种属性设置新值时，设置方法既不保留新值，也不释放旧值</strong>。此特质同assign类似,然而在属性所指的对象遭到摧毁时，属性值也会清空（nil out)。</p></li>
+<li><p><strong>unsafe_unretained</strong>  此特质的语义和assign相同，但是它适用于“对象类型”（object type),该特质表达一种“非拥有关系”（“不保留”，unretained),<strong>当目标对象遭到摧毁时，属性值不会自动清空（“不安全”，unsafe),这一点与weak有区别</strong>。</p></li>
+<li><p><strong>copy</strong>：其setter方法进行copy操作，与retain处理流程一样，先对旧值release，再copy出新的对象，retainCount为1。这是为了减少对上下文的依赖而引入的机制。</p></li>
+<li><p><strong>nonatomic</strong>：非原子性访问，不加同步， 多线程并发访问会提高性能。注意，如果不加此属性，则默认是两个访问方法都为原子型事务访问。</p></li>
+</ul>
+
+<h2 id="toc_4">5. self.name=@object和_name=@object有什么不同?</h2>
+
+<p><code>self.name =”object”：</code>会调用对象的<code>setName()</code>方法；<code>name = “object”：</code>会直接把<code>&quot;object&quot;</code>字符串赋值给当前对象的<code>name</code>属性。后者的效率会很高，因为没有调用set方法而是直接方法问内存。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/30</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15038893459243.html">
                 
                   <h1>iOS 中协议和委托传值的用法</h1>
@@ -510,31 +748,31 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
-			        <a href="15038893459243.html">iOS 中协议和委托传值的用法</a>
+			        <a href="15041475233104.html">消息转发机制的简单实现</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15038851180831.html">第二十一条 理解Objective-C的错误模型</a>
+			        <a href="15041406291157.html">第24条 将类的实现代码分散到便于管理的数个分类之中</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15038831182450.html">第二十条 为私有方法名加上前缀</a>
+			        <a href="15040800241477.html">iOS基础概念总结（一）</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15037310867483.html">第十九条 使用清晰而协调的命名方式</a>
+			        <a href="15040539328891.html">第23条：通过委托与数据源协议进行对象间通信</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15037148888105.html">第十八条 尽量使用不可变对象</a>
+			        <a href="15039678296448.html">第二十二条 理解NSCopying协议</a>
 			      </li>
 		     
 		  
