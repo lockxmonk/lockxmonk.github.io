@@ -159,12 +159,11 @@
 *   parts. The method could be rewritten to support more
 * exotic names.
 */
--(void)setFullName:(NSString*)fullName {
-NSArray *components =
-[fullName componentsSeparatedByString:@&quot; &quot;];
+-(void)setFullName: (NSString*)fullName {
+    NSArray *components = [fullName componentsSeparatedByString:@&quot; &quot;];
 
-self.firstName = [components objectAtIndex: 0];
-self.lastName = [components objectAtIndex:1];
+    self.firstName = [components objectAtIndex: 0];
+    self.lastName = [components objectAtIndex:1];
 }
 
 </code></pre>
@@ -177,11 +176,10 @@ self.lastName = [components objectAtIndex:1];
             _firstName, _lastName];
 
 -(void)setFullName:(NSString*)fullName {
-NSArray *components =
-[fullName componentsSeparatedByString:@&quot; &quot;];
+        NSArray *components = [fullName componentsSeparatedByString:@&quot; &quot;];
 
-_firstName = [components objectAtIndex: 0];
-_lastName = [components objectAtIndex:1];
+    _firstName = [components objectAtIndex: 0];
+    _lastName = [components objectAtIndex:1];
 }
 
 </code></pre>
@@ -220,7 +218,7 @@ _lastName = [components objectAtIndex:1];
 <p><strong>第二个注意问题</strong>是<strong>&quot;惰性初始化&quot;（lazy initialization)</strong>。在这种情况下，必须通过“获取方法”来访问属性，否则，实例变量就永远不会初始化。比方说，<code>EOCPerson</code>类也许会用一个属性来表示人脑中的信息，这个属性所指代的对象相当复杂。由于此属性不常用,而且创建该属性的成本较高，所以，<mark>我们可能会在“获取方法”中对其执行惰性初始化</mark>:</p>
 
 <pre><code class="language-objc">
--(EOCBrain” brain {
+-(EOCBrain)brain {
     if (!_brain) {
         brain = [Brain new];    //若没有调用获取方法,这句话永远也不会执行,去初始化
     }
@@ -343,31 +341,31 @@ _lastName = [components objectAtIndex:1];
 	      
 		      
 			      <li class="post">
-			        <a href="15041475233104.html">消息转发机制的简单实现</a>
+			        <a href="15042539845357.html">KVO的简单实现</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15041406291157.html">第24条 将类的实现代码分散到便于管理的数个分类之中</a>
+			        <a href="15042325338088.html">第27条 使用“class-continuation分类”隐藏实现细节</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15040800241477.html">iOS基础概念总结（一）</a>
+			        <a href="15042285213204.html">第26条 不要在分类中声明属性</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15040539328891.html">第23条：通过委托与数据源协议进行对象间通信</a>
+			        <a href="15042274785369.html">第25条 总是为第三方类的分类名称加前缀</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15039678296448.html">第二十二条 理解NSCopying协议</a>
+			        <a href="15041689865677.html">指针问题</a>
 			      </li>
 		     
 		  
