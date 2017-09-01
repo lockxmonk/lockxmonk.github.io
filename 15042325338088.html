@@ -1,0 +1,511 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  第27条 使用“class-continuation分类”隐藏实现细节 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>第27条 使用“class-continuation分类”隐藏实现细节</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/9/1</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">第一种用途</h2>
+
+<p>类中经常会包含一些无须对外公布的方法及实例变最。其实这些内容也可以对外公布, 并且写明其为私有，开发者不应依赖它们。但是<code>OC</code>的动态性，使得不可能实现真正的私有方法或私有实例变量。</p>
+
+<p>但是我们最好还是只把确实需要对外公布的那部分内容公开。那么，这种不需对外公布但却应该具有的方法及实例变量应该怎么写呢？此时，这个特殊的<code>“class-continuation分类”</code>就派上用场了。</p>
+
+<p><font color=red><strong>“class-continuation分类”和普通的分类不同，它必须定义在其所接续的那个类的实现文件里。</strong></font></p>
+
+<p>例如：</p>
+
+<pre><code class="language-objc">//EOCPerson.m
+@interface EOCPerson () {
+    NSString * _anInstanceVariable;
+}
+// Method declarations here 
+@end
+@implementation EOCPerson {
+    int _anotherInstanceVariable;
+}
+// Method implementations here 
+@end
+</code></pre>
+
+<p>我们这样定义的目的是将这些方法或者实例变量隐藏起来，只供本类使用。即便在公共接口里将其标注为private,也还是会泄漏实现细节。</p>
+
+<p>例如有个绝密的类，不想给其他人知道。 假设你所写的某个类拥有那个绝密类的实例，而这个实例变量又声明在公共接口里面：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+@class EOCSuperSecretClass;
+
+@interface EOCClass : NSObject {
+@private
+    EOCSuperSecretClass *_secretInstance;
+@end
+</code></pre>
+
+<p>这样别人就会知道有一个叫<code>EOCSuperSecretClass</code>的类了。</p>
+
+<p>所以我们通常应该这样：</p>
+
+<pre><code class="language-objc">// EOCClass.h
+#import &lt;Foundation/Foundation.h&gt;
+@interface EOCClass : NSObject 
+@end
+
+// EOCClass .m 
+#import &quot;EOCClass.h&quot;
+#import &quot;EOCSuperSecretClass.h&quot;
+@interface EOCClass ()  {
+    EOCSuperSecretClass *_secretInstance;
+@end
+
+@implementation EOCClass
+// Methods here
+@end
+</code></pre>
+
+<h2 id="toc_1">第二种用途</h2>
+
+<p>编写<code>Objective-C++</code>代码时 <code>“class-continuation分类”</code>也很有用。<code>Objective-C++</code>是 <code>OC</code>与<code>C++</code>的混合体，其代码可以用这两种语言来编写。由于兼容性原因，游戏后 端一般用<code>C++</code>来写。另外，有时候要使用的第三方库可能只有<code>C++</code>绑定，此时也必须使用 <code>C++</code>来编码。在这些情况下，使用<code>&quot;class-continuation分类&quot;</code>会很方便。假设某个类打算这样写：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt; 
+#include &quot;SomeCppClass.h&quot; 
+@interface EOCClass : NSObject { 
+@private
+    SomeCppClass _cppClass;
+@end
+</code></pre>
+
+<p>该类的实现文件可能叫做<code>EOCClass.mm</code>,其中<code>.mm</code>扩展名表示编译器应该将此文件按<code>Objective-C++</code>来编译，否则，就无法正确引人<code>SomeCppClass.h</code>了。然而请注意，名为<code>SomeCppClass</code>的这个<code>C++</code>类必须完全引入，因为编译器要完整地解析其定义方能得知<code>_cppClass</code>实例变量的大小。于是，只要是包含<code>EOCClass.h</code>的类，都必须编译为 <code>Objective-C++</code>才行，因为它们都引入了<code>SomeCppClass</code>类的头文件。这很快就会失控，最终 导致整个应用程序全部都要编译为ObjeCtive-C++。这样显然会增加编码的负担。</p>
+
+<p>也许我们会想用前向声明来避免导入<code>SomeCppClass.h</code>,比如：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt; 
+
+class SomeCppClass;
+
+@interface EOCClass : NSObject { 
+@private
+    SomeCppClass *_cppClass;
+@end
+</code></pre>
+
+<p>现在实例变量必须是指针，若不是，则编译器无法得知其大小，从而会报错。但所有指针的大小确实都是固定的，于是编译器只需知道其所指的类型即可。</p>
+
+<p>虽然我们这样做没有<code>#include &quot;SomeCppClass.h&quot;</code>但是我们前向声明该类时所用的<code>class</code>关键字还是<code>C++</code>下的关键字，所以仍然需要按照<code>OC</code>来编译才行。</p>
+
+<p>我们这里的解决方法还是一样，既然变量是<code>private</code>的，我们还是可以将它在<code>“class-continuation分类”</code>声明，改写成：</p>
+
+<pre><code class="language-objc">// EOCClass. h
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface EOCClass : NSObject
+
+
+// EOCClass.mm 
+#import &quot;EOCClass.h&quot;
+#include &quot;SomeCppClass.h&quot;
+
+@interface EOCClass ()  {
+    SomeCppClass _cppClass;
+}
+@end
+
+@implementation EOCClass 
+@end
+</code></pre>
+
+<p>改写后的<code>EOCClass</code>类，其头文件里就没有<code>C++</code>代码了，使用头文件的人甚至意识不到其底层实现代码中混有<code>C++</code>成分。某些系统库用到了这种模式，比如网页浏览器框架<code>WebKit</code>,其大部分代码都以<code>C++</code>编写，然而对外展示出来的却是一套整洁的<code>Objective-C</code>接口。<code>CoreAnimation</code>里面也用到了此模式，它的许多后端代码都用<code>C++</code>写成，但对外公布的却是一套纯<code>Objective-C</code>接口。</p>
+
+<h2 id="toc_2">第三种用法</h2>
+
+<p>就是将<code>public</code>接口中声明为“只读”的 属性扩展为“可读写”，以便在类的内部设置其值。</p>
+
+<p>例如：</p>
+
+<pre><code class="language-objc">// .h文件
+#import &lt;Foundation/Foundation.h&gt;
+@interface EOCPerson : NSObject
+
+@property (nonatomic, copy, readonly) NSString *firstName; 
+@property (nonatomic, copy, readonly) NSString *lastName;
+
+-(id) initWithFirstName : (NSString*) firstName
+                lastName: (NSString*) lastName;
+
+@end
+
+</code></pre>
+
+<p>我们一般会在<code>“class-continuaticm分类”</code>中把这两个属性扩展为“可读写”：</p>
+
+<pre><code class="language-objc">@interface EOCPerson ()
+@property (nonatomic, copy, readwrite) NSString *firstName;
+@property (nonatomic, copy, readwrite) NSString *lastName;
+
+-(void)p_privateMethod;
+@end
+</code></pre>
+
+<p>只需要用上面几行代码就行了。现在<code>EOCPerson</code>的实现代码可以随意调用<code>“setFirstName:”</code>或<code>“setLastName:”</code>这两个设置方法，也可以用“点语法”来设置属性。这样做很有用，既能令外界无法修改对象，又能在其内部按照需要管理其数据。</p>
+
+<p>只会在类的实现代码中用到的私有方法也可以声明在<code>“class-continuation分类”</code>中。这么做比较合适，因为它描述了那些只在类实现代码中才会使用的方法。上述的私有方法加上了<code>p_</code>前缀。</p>
+
+<h2 id="toc_3">第四种用法</h2>
+
+<p>当我们想要把对象所遵守的协议视为私有，就可以在<code>“class-continuation分类”</code>中声明。例如：</p>
+
+<pre><code class="language-objc">#import &quot;EOCPerson•h&quot;
+#import &quot;EOCSecretDelegate.h&quot;
+@interface EOCPerson () &lt;EOCSecretDelegate&gt; 
+@end
+@implementation EOCPerson
+    /*.....*/
+@end
+</code></pre>
+
+<h2 id="toc_4">要点</h2>
+
+<ul>
+<li><p>通过<code>“class-continuation分类”</code>向类中新增实例变量。</p></li>
+<li><p>如果某属性在主接口中声明为“只读”，而类的内部又要用设置方法修改此属性，那么就在<code>“class-continuation分类”</code>中将其扩展为“可读写”</p></li>
+<li><p>把私有方法的原型声明在<code>“class-continuation分类”</code>里面。</p></li>
+<li><p>若想使类所遵循的协议不为人所知，则可于<code>“class-continuation分类”</code>中声明。 </p></li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15042539845357.html" 
+          title="Previous Post: KVO的简单实现">&laquo; KVO的简单实现</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15042285213204.html" 
+          title="Next Post: 第26条 不要在分类中声明属性">第26条 不要在分类中声明属性 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15042539845357.html">KVO的简单实现</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15042325338088.html">第27条 使用“class-continuation分类”隐藏实现细节</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15042285213204.html">第26条 不要在分类中声明属性</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15042274785369.html">第25条 总是为第三方类的分类名称加前缀</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15041689865677.html">指针问题</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>
