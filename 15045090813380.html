@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Map/Reduce - LZH007
+  第三十九条 用handler块降低代码分散程度 - LZH007
   
   </title>
   
@@ -113,14 +113,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>Map/Reduce</h1>
+          <h1>第三十九条 用handler块降低代码分散程度</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/4/13</span>
+          <span class="date">2017/9/4</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+              <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
            
          
           <span class="comments">
@@ -133,26 +133,104 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>1.利用map()函数，把用户输入的不规范的英文名字，变为首字母大写，其他小写的规范名字。输入：[&#39;adam&#39;, &#39;LISA&#39;, &#39;barT&#39;]，输出：[&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]。</p>
+      <p>iOS中我们经常采用异步执行任务的方式，来避免主线程的阻塞。因为<code>“系统监控器”（system watchdog)</code>在发现某个应用程序的主线程已经阻塞了一段时间之后，就会令其终止。导致程序崩溃。</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def upper(s):
-    return s.capitalize()
-print(map(upper, [&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]) )
+<p>但是异步方法执行任务后，需要以某种手段来通知相关代码。实现这一功能有很多方法，常用的技巧是设计一个委托协议，令关注此事件的对象遵从该协议。对象成为<code>delegate</code>之后，就可以在相关事件发生时（例如某个异步任务执行完毕时）得到通知了。例如：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@class EOCNetworkFetcher;
+@protocol EOCNetworkFetcherDelegate &lt;NSObject&gt;
+-(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher 
+    didFinishWithData:(NSData*)data;
+@end
+
+@interface EOCNetworkFetcher : NSObject 
+@property (nonatomic, weak) id &lt;EOCNetworkFetcherDelegate&gt; delegate; 
+-(id)initWithURL:(NSURL*)url;
+-(void)start;
+@end
 </code></pre>
 
-<p><img src="media/14920523812017/14920538865556.jpg" alt=""/></p>
+<p>其它类可以像下面这样来使用：</p>
 
-<p>2.Python提供的sum()函数可以接受一个list并求和，请编写一个prod()函数，可以接受一个list并利用reduce()求积。</p>
+<pre><code class="language-objc">-(void)fetchFooData {
+    NSURL *url = [[NSURL alloc] initWithString:
+                    @&quot;http: //www.example.com/foo.dat&quot;]; 
+    EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url]; 
+    fetcher.delegate = self;
+    [fetcher start];
+}
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def prod(x,y):
-    return x*y
-m = [1,2,3,4]
-print (reduce(prod,m))
+-(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher didFinishWithData:(NSData*)data
+{
+    _fetchedFooData = data;
+}
 </code></pre>
 
-<p><img src="media/14920523812017/14920539075590.jpg" alt=""/></p>
+<p>上面在<code>EOCNetworkFetcher</code>类中声明了一个协议，协议中有一个方法用于通知对象已获取完数据。</p>
+
+<p>之后想要获取到通知的对象遵守该协议，成为它的委托对象。这样在执行完<code>start</code>方法之后，<code>EOCNetworkFetcher</code>会调用委托对象所遵守的协议方法，让委托对象获取收到的数据（也就是通知它）。</p>
+
+<p>上面这种做法没有错误，确实可行。但是如果我们改用块来写的话，代码会更清晰。就是把<code>completion handler</code>定义为块类型，将其当作参数直接传给<code>start</code>方法:</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+typedef void(^EOCNetworkFetcherCompletionHandler)(NSData *data);
+@interface EOCNetworkFetcher : NSObject 
+-(id)initWithURL:(NSURL*)url;
+-(void)startWithCompletionHandler:
+            (EOCNetworkFetcherCompletionHandler)handler;
+@end
+</code></pre>
+
+<p>这和使用委托协议很想，不过多了个好处，就是可以在调用<code>start</code>方法时直接以内联形式 定义<code>completion handler</code>,以此方式来使用<code>“网络数据获取器”（network fetcher)</code>,可以令代码比原先易懂很多。例如，下面这个类就以块的形式来定义<code>completion handler</code>,并以此为参数调用<code>API</code>:</p>
+
+<pre><code class="language-objc">-(void)fetchFooData {
+NSURL *url = [[NSURL alloc] initWithString:
+@&quot;http://www.example.com/foo.dat&quot;]; 
+EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
+[fetcher startWithCompletionHandler:^(NSData *data){ 
+    _fetchedFooData = data;
+})；
+</code></pre>
+
+<p>与使用委托模式的代码相比，用块写出来的代码显然更为整洁。异步任务执行完毕后所需运行的业务逻辑，和启动异步任务所用的代码放在了一起。而且，由于块声明在创建获取器的范围里，所以它可以访问此范围内的全部变量。</p>
+
+<p>这种写法其实最重要的用途是处理错误。现在很多基于块的<code>API</code>都使用块来处理错误，可以分别用两个处理程序来处理操作失败的情况和操作成功的情况。也可以把处理失败情况所需的代码，与处理正常情况所用的代码，都封装到同一个<code>completion handler</code>块里,我们建议使用后者，因为苹果公司也是这样设计<code>API</code>的。我们举例来说：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@class EOCNetworkFetcher;
+typedef void(^EOCNetworkFetcherCompletionHandler) 
+                                (NSData *data, NSError *error);
+
+@interface EOCNetworkFetcher : NSObject
+-(id)initWithURL:(NSURL*)url;
+-(void)startWithCompletionHandler:
+                (EOCNetworkFetcherCompletionHandler)completion;
+@end
+</code></pre>
+
+<p>此种API的调用方式如下:</p>
+
+<pre><code class="language-objc">EOCNetworkFetcher *fetcher =
+        [[EOCNetworkFetcher alloc] initWithURL:url]; 
+[fetcher startWithCompletionHander:
+    ^(NSData *data, NSError *error){ 
+    if (error) {
+        //Handle failure 
+    }else {
+        // Handle success
+    }
+}];
+</code></pre>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>在创建对象时，可以使用内联的<code>handler</code>块将相关业务逻辑一并声明。</li>
+<li>在有多个实例需要监控时，如果采用委托模式，那么经常需要根据传入的对象来切 换，而若改用<code>handler</code>块来实现，则可直接将块与相关对象放在一起。</li>
+<li>设计API时如果用到了<code>handler</code>块，那么可以增加一个参数，使调用者可通过此参数来决定应该把块安排在哪个队列上执行。</li>
+</ul>
 
 
     
@@ -163,16 +241,13 @@ print (reduce(prod,m))
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14920527647833.html" 
-          title="Previous Post: Filter">&laquo; Filter</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14920445399813.html" 
-          title="Next Post: 模型学习的最优化算法（接上一文）">模型学习的最优化算法（接上一文） &raquo;</a>
+          <a  href="15044922241087.html" 
+          title="Next Post: 第三十八条 为常用的块类型创建typedef">第三十八条 为常用的块类型创建typedef &raquo;</a>
       
       </p>
         </div>

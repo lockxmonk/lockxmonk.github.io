@@ -4,13 +4,346 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-08-31T14:28:48+08:00</updated>
+  <updated>2017-09-04T11:20:54+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[第三十九条 用handler块降低代码分散程度]]></title>
+    <link href="https://lockxmonk.github.io/15045090813380.html"/>
+    <updated>2017-09-04T15:11:21+08:00</updated>
+    <id>https://lockxmonk.github.io/15045090813380.html</id>
+    <content type="html"><![CDATA[
+<p>iOS中我们经常采用异步执行任务的方式，来避免主线程的阻塞。因为<code>“系统监控器”（system watchdog)</code>在发现某个应用程序的主线程已经阻塞了一段时间之后，就会令其终止。导致程序崩溃。</p>
+
+<p>但是异步方法执行任务后，需要以某种手段来通知相关代码。实现这一功能有很多方法，常用的技巧是设计一个委托协议，令关注此事件的对象遵从该协议。对象成为<code>delegate</code>之后，就可以在相关事件发生时（例如某个异步任务执行完毕时）得到通知了。例如：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@class EOCNetworkFetcher;
+@protocol EOCNetworkFetcherDelegate &lt;NSObject&gt;
+-(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher 
+    didFinishWithData:(NSData*)data;
+@end
+
+@interface EOCNetworkFetcher : NSObject 
+@property (nonatomic, weak) id &lt;EOCNetworkFetcherDelegate&gt; delegate; 
+-(id)initWithURL:(NSURL*)url;
+-(void)start;
+@end
+</code></pre>
+
+<p>其它类可以像下面这样来使用：</p>
+
+<pre><code class="language-objc">-(void)fetchFooData {
+    NSURL *url = [[NSURL alloc] initWithString:
+                    @&quot;http: //www.example.com/foo.dat&quot;]; 
+    EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url]; 
+    fetcher.delegate = self;
+    [fetcher start];
+}
+
+-(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher didFinishWithData:(NSData*)data
+{
+    _fetchedFooData = data;
+}
+</code></pre>
+
+<p>上面在<code>EOCNetworkFetcher</code>类中声明了一个协议，协议中有一个方法用于通知对象已获取完数据。</p>
+
+<p>之后想要获取到通知的对象遵守该协议，成为它的委托对象。这样在执行完<code>start</code>方法之后，<code>EOCNetworkFetcher</code>会调用委托对象所遵守的协议方法，让委托对象获取收到的数据（也就是通知它）。</p>
+
+<p>上面这种做法没有错误，确实可行。但是如果我们改用块来写的话，代码会更清晰。就是把<code>completion handler</code>定义为块类型，将其当作参数直接传给<code>start</code>方法:</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+typedef void(^EOCNetworkFetcherCompletionHandler)(NSData *data);
+@interface EOCNetworkFetcher : NSObject 
+-(id)initWithURL:(NSURL*)url;
+-(void)startWithCompletionHandler:
+            (EOCNetworkFetcherCompletionHandler)handler;
+@end
+</code></pre>
+
+<p>这和使用委托协议很想，不过多了个好处，就是可以在调用<code>start</code>方法时直接以内联形式 定义<code>completion handler</code>,以此方式来使用<code>“网络数据获取器”（network fetcher)</code>,可以令代码比原先易懂很多。例如，下面这个类就以块的形式来定义<code>completion handler</code>,并以此为参数调用<code>API</code>:</p>
+
+<pre><code class="language-objc">-(void)fetchFooData {
+NSURL *url = [[NSURL alloc] initWithString:
+@&quot;http://www.example.com/foo.dat&quot;]; 
+EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
+[fetcher startWithCompletionHandler:^(NSData *data){ 
+    _fetchedFooData = data;
+})；
+</code></pre>
+
+<p>与使用委托模式的代码相比，用块写出来的代码显然更为整洁。异步任务执行完毕后所需运行的业务逻辑，和启动异步任务所用的代码放在了一起。而且，由于块声明在创建获取器的范围里，所以它可以访问此范围内的全部变量。</p>
+
+<p>这种写法其实最重要的用途是处理错误。现在很多基于块的<code>API</code>都使用块来处理错误，可以分别用两个处理程序来处理操作失败的情况和操作成功的情况。也可以把处理失败情况所需的代码，与处理正常情况所用的代码，都封装到同一个<code>completion handler</code>块里,我们建议使用后者，因为苹果公司也是这样设计<code>API</code>的。我们举例来说：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@class EOCNetworkFetcher;
+typedef void(^EOCNetworkFetcherCompletionHandler) 
+                                (NSData *data, NSError *error);
+
+@interface EOCNetworkFetcher : NSObject
+-(id)initWithURL:(NSURL*)url;
+-(void)startWithCompletionHandler:
+                (EOCNetworkFetcherCompletionHandler)completion;
+@end
+</code></pre>
+
+<p>此种API的调用方式如下:</p>
+
+<pre><code class="language-objc">EOCNetworkFetcher *fetcher =
+        [[EOCNetworkFetcher alloc] initWithURL:url]; 
+[fetcher startWithCompletionHander:
+    ^(NSData *data, NSError *error){ 
+    if (error) {
+        //Handle failure 
+    }else {
+        // Handle success
+    }
+}];
+</code></pre>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>在创建对象时，可以使用内联的<code>handler</code>块将相关业务逻辑一并声明。</li>
+<li>在有多个实例需要监控时，如果采用委托模式，那么经常需要根据传入的对象来切 换，而若改用<code>handler</code>块来实现，则可直接将块与相关对象放在一起。</li>
+<li>设计API时如果用到了<code>handler</code>块，那么可以增加一个参数，使调用者可通过此参数来决定应该把块安排在哪个队列上执行。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[第三十八条 为常用的块类型创建typedef]]></title>
+    <link href="https://lockxmonk.github.io/15044922241087.html"/>
+    <updated>2017-09-04T10:30:24+08:00</updated>
+    <id>https://lockxmonk.github.io/15044922241087.html</id>
+    <content type="html"><![CDATA[
+<p>我们在定义一个块时，语法是这样的：</p>
+
+<pre><code class="language-objc">int^(variableName)(BOOL flag,int value) = ^(BOOL flag, int value){
+    //Implemention
+    return someInt;
+}
+</code></pre>
+
+<p>此块接受两个类型分别为<code>BOOL</code>及<code>int</code>的参数，并返回类型为<code>int</code>的值。并且把它赋给了一个变量。</p>
+
+<p>与其他类型的变量不同，在定义块变量时，要把变量名放在类型之中，而不要放在右侧。这种语法非常难记，也非常难读。<strong><font color=red>鉴于此，我们应该为常用的块类型起个别名，</font></strong>尤其是打算把代码发布成API供他人使用时，更应这样做。开发者可以起个更为易读的名字来表示块的用途，而把块的类型隐藏在其后面。例如：</p>
+
+<pre><code class="language-objc">//定义
+typedef int(^EOCSomeBlock)(BOOL flag, int value);
+</code></pre>
+
+<p>声明变量时，要把名称放在类型中间，并在前面加上<code>“^”</code>符号，而定义新类型时也得这么做。上面这条语句向系统中新增了一个名为<code>EOCSomeBlock</code>的类型。此后，不用再以复杂的块类型来创建变量了，直接使用新类型即可：</p>
+
+<pre><code class="language-objc">EOCSomeBlock block = ^(BOOL flag, int value){
+    // Implementation
+};
+</code></pre>
+
+<p><strong><mark>这次代码读起来就顺畅多了：与定义其他变量时一样，变量类型在左边，变量名在右边。</mark></strong></p>
+
+<p>我们可以利用这个将使用块的API做的简单易用些，例如：</p>
+
+<pre><code class="language-objc">-(void)startWithCompletionHandler:
+            (void(^)(NSData *data, NSError *error))completion;
+</code></pre>
+
+<p>上面代码接受了一个块作为参数，所以我们可以用上面定义块的方法来改写它：</p>
+
+<pre><code class="language-objc">typedef void(^EOCCompletionHandler)(NSData *data, NSError *error);
+
+-(void)startWithCompletionHandler: (EOCCompletionHandler)completion;
+</code></pre>
+
+<p>现在参数看上去就简单多了，而且易于理解。</p>
+
+<p>我们在定义块的时候要注意，最好在使用块类型的类中定义这些<code>typedef</code>，而且还应该把这个类的名字加在由<code>typedef</code>所定义的新类型名前面，这样可以阐明块的用途。还可以用<code>typedef</code>给同一个块签名类型创建数个别名。在这件事上，多多益善。因为，开发者看到类型的别名以及签名中的参数之后，可以很容易的理解类型的用途。</p>
+
+<p>与此相似，如果有好几个类都要执行相似但各有区别的异步任务，而这几个类又不 能放人同一个继承体系，那么，每个类就应该有自己的<code>completion handler</code>类型。这几个<code>completion handler</code>的签名也许完全相同，但最好还是在每个类里都各自定义一个别名，而不 要共用同一个名称。反之，若这些类能纳人同一个继承中，则应该将类型定义语句放在超类中，以供各子类使用。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>以<code>typedef</code>重新定义块类型，可令块变量用起来更加简单。</li>
+<li>定义新类型时应遵从现有的命名习惯，勿使其名称与别的类型相冲突。</li>
+<li>不妨为同一个块签名定义多个类型别名。如果要重构的代码使用了块类型的某个别名，那么只需修改相应<code>typedef</code>中的块签名即可，无须改动其他<code>typedef</code>。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[第三十七条 理解“块”这一概念]]></title>
+    <link href="https://lockxmonk.github.io/15043212815193.html"/>
+    <updated>2017-09-02T11:01:21+08:00</updated>
+    <id>https://lockxmonk.github.io/15043212815193.html</id>
+    <content type="html"><![CDATA[
+<p>首先，块与函数类似，只不过是直接定义在另一个函数里的，和定义它的那个函数共享同一 个范围内的东西。块用<code>“^”</code>符号来表示，后面跟着一对花括号，括号里面是块的实现代码。 例如，下面就是个简单的块：</p>
+
+<pre><code class="language-objc">^{
+    //Block implementation here
+}
+</code></pre>
+
+<p>块其实就是个值，而且自有其相关类型。与<code>int</code>、<code>float</code>或<code>Objective-C</code>对象一样，也可以把块赋给变量,然后像使用其他变量那样使用它。块类型的语法与函数指针近似。下面列出的这个块很简单，没有参数，也不返回值：</p>
+
+<pre><code class="language-objc">void (^someBlock) () = A {
+    //Block implementation here
+}；
+</code></pre>
+
+<p>这段代码定义了一个名为<code>someBlock</code>的变量。由于变量名写在正中间，所以看上去也许 =有点怪，不过一旦理解了语法，很容易就能读懂。块类型的语法结构如下：</p>
+
+<pre><code class="language-objc">return_type (^block_name)(parameters)
+</code></pre>
+
+<p>我们来举个例子，下面这种写法所定义的块，返回<code>int</code>值，并且接受两个<code>int</code>做参数：</p>
+
+<pre><code class="language-objc">int (^addBlock) (int a, int b) = ^(int a, int b){
+     return a + b;
+};
+</code></pre>
+
+<p>定义好之后，就可以像函数那样使用了。比方说，<code>addBlock</code>块可以这样用:</p>
+
+<pre><code class="language-objc">int add = addBlock (2, 5) ;  //&lt; add = 12
+</code></pre>
+
+<p>块的强大之处是：在声明它的范围里，所有变量都可以为其所捕获。这也就是说，那个范围里的全部变量，在块里依然可用。比如，下面这段代码所定义的块，就使用了块以外的变量：</p>
+
+<pre><code class="language-objc">int additional = 5;
+int (^addBlock) (int a, int b) = ^(int a, int b){ 
+    return a + b + additional;
+};
+
+int add = addBlock (2, 5);  //&lt; add = 12
+</code></pre>
+
+<p>默认情况下，为块所捕获的变量，是不可以在块里修改的。在本例中，假如块内的代码改动了<code>additional</code>变量的值，那么编译器就会报错。不过，声明变量的时候可以加上<code>__block</code> 修饰符，这样就可以在块内修改了。</p>
+
+<p>例如：</p>
+
+<pre><code class="language-objc">__block int additional = 5;
+int (^addBlock) (int a, int b) = ^(int a, int b){   
+    additional++;
+    return a + b + additional;
+};
+
+int add = addBlock (2, 5);  //&lt; add = 13
+</code></pre>
+
+<p>块的另一个用法是<code>“内联块”（inline block）</code>，例如：</p>
+
+<pre><code class="language-objc">NSArray *array = @[@0, @1, @2, @3, @4, @5];
+_block NSInteger count = 0;
+[array enumerateObjectsUsingBlock:
+    ^(NSNumber *number, NSUInteger idx, BOOL *stop){
+        if([number compare:@2] == NSOrderedAscending) { 
+        count++;
+    }
+}];
+//count = 2
+</code></pre>
+
+<p>这段范例代码也演示了<code>“内联块”（inline block)</code>的用法。传给<code>“numerateObjectsUsingBlock:”</code>方法的块并未先賦给局部变量,而是直接内联在函数调用里了。</p>
+
+<p>然后我们在声明和使用块的时候，要注意它的作用范围。定义块的时候，其所占的内存区域是分配在栈中的。这就是说，块只在定义它的那个范围内有效。比如下面这个：</p>
+
+<pre><code class="language-objc">void(^block)();
+if ( /* some condition */ ){
+    block = ^{
+        NSLog(@&quot;Block A&quot;);
+    };
+} else {
+    block = ^{
+        NSLog(@&quot;Block B&quot;);
+    };
+}
+block();
+</code></pre>
+
+<p>定义在<code>if</code>及<code>else</code>语句中的两个块都分配在栈内存中。编译器会给每个块分配好栈内存, 然而等离开了相应的范围之后，编译器有可能把分配给块的内存覆写掉。于是，这两个块只 能保证在对应的<code>if</code>或<code>else</code>语句范围内有效。这样写出来的代码可以编译，但是运行起来时而正确，时而错误。若编译器未覆写待执行的块，则程序照常运行，若覆写，则程序崩溃。</p>
+
+<p>我们为了解决这个问题可以给块对象发送<code>copy</code>消息以拷贝之。这样的话，就可以把块从栈复制到堆了。</p>
+
+<p>拷贝后的块，可以在定义它的那个范围之外使用。而且，一旦复制到堆上，块就成了带引用计数的对象了。后续的复制操作都不会真的执行复制，只是递增块对象的引用计数。如果不再使用这个块，那就应将其释放，在ARC环境下会自动释放。</p>
+
+<p>改动后跟下面一样：</p>
+
+<pre><code class="language-objc">void (^block)();
+if (/* some condition */ ){ 
+    block = [^{
+        NSLog(@,fBlock Aw);
+    } copy];
+} else {
+    block = [^{
+        NSLog(@&quot;Block B&quot;);
+    } copy];
+}
+block();
+</code></pre>
+
+<p>除了“桟块”和“堆块”之外，还有一类块叫做<strong><mark>“全局块”（global block)</mark></strong>。这种块不会捕捉任何状态（比如外围的变量等)，运行时也无须有状态来参与。块所使用的整个内存区域，在编译期已经完全确定了，因此，全局块可以声明在全局内存里，而不需要在每次用到 的时候于栈中创建。另外，全局块的拷贝操作是个空操作，因为全局块决不可能为系统所回收。这种块实际上相当于单例。下面就是个全局块：</p>
+
+<pre><code class="language-objc">void (^block)() = ^{
+    NSLog(@&quot;This is a block&quot;);
+};
+</code></pre>
+
+<p><mark>由于运行该块所需的全部信息都能在编译期确定，所以可把它做成全局块。</mark>这完全是种优化技术：若把如此简单的块当成复杂的块来处理，那就会在复制及丢弃该块时执行一些无谓的操作。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>块是<code>C、C++、Objective-C</code>中的词法闭包。</li>
+<li>块可接受参数，也可返回值。</li>
+<li>块可以分配在栈或堆上，也可以是全局的。分配在栈上的块可拷贝到堆里，这样的话，就和标准的<code>Objective-C</code>对象一样，具备引用计数了。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[通过协议提供匿名方法]]></title>
+    <link href="https://lockxmonk.github.io/15043134527493.html"/>
+    <updated>2017-09-02T08:50:52+08:00</updated>
+    <id>https://lockxmonk.github.io/15043134527493.html</id>
+    <content type="html"><![CDATA[
+<p>协议定义了一系列方法，遵从此协议的对象应该实现它们（如果这些方法不是可选的, 那么就必须实现)。于是，我们可以用协议把自己所写的<code>API</code>之中的实现细节隐藏起来，将返回的对象设计为遵从此协议的纯<code>id</code>类型。</p>
+
+<p>这样的话，想要隐藏的类名就不会出现在<code>API</code>之中了。若是接口背后有多个不同的实现类，而你又不想指明具体使用哪个类，那么可以考虑用这个办法——因为有时候这些类可能会变，有时候它们又无法容纳于标准的类继承体系中，因而不能以某个公共基类来统一表示。</p>
+
+<p>此概念经常称为<code>“匿名对象&quot;(anonymous object)</code>，这与其他语言中的“匿名对象”不同，在那些语言中，该词是指以内联形式所创建出来的无名类，而此词在<code>Objective-C</code>中则不是这个意思。</p>
+
+<p>我们之前说的委托与数据源对象，就用到了这个方法。例如在定义“受委托者（delegate）”属性时：</p>
+
+<pre><code class="language-objc">@property {nonatomic, weak) id &lt;EOCDelegate&gt; delegate;
+
+</code></pre>
+
+<p>由于该属性的类型是<code>id&lt;EOCDelegate&gt;</code>,所以实际上任何类的对象都能充当这一属性, 即便该类不继承自<code>NSObject</code>也可以，只要遵循<code>EOCDelegate</code>协议就行。对于具备此属性的类来说，<code>delegate</code>就是“匿名的”（ammymous)。如有需要，可在运行期査出此对象所属的类型（参见第14条）。然而这样做不太好，因为指定属性类型时所写的那个<code>EOCDelegate</code>契约已经表明此对象的具体类型无关紧要了。</p>
+
+<p>当然还有其它的用法，这里我们就不举例了。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>协议可在某种程度上提供匿名类型。具体的对象类型可以淡化成遵从某协议的<code>id</code>类型，协议里规定了对象所应实现的方法。</li>
+<li>使用匿名对象来隐藏类型名称（或类名）。</li>
+<li>如果具体类型不重要，重要的是对象能够响应（定义在协议里的）特定方法，那么可使用匿名对象来表示。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[KVO的简单实现]]></title>
@@ -1539,381 +1872,6 @@ int main(int argc, const char * argv[]) {
 <ul>
 <li>实现<code>description</code>方法返回一个有意义的字符串，用以描述该实例。</li>
 <li>若想在调试时打印出更详尽的对象描述信息，则应实现<code>debugDescription</code>方法。</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第十六条 提供"全能初始化方法"]]></title>
-    <link href="https://lockxmonk.github.io/15036443106558.html"/>
-    <updated>2017-08-25T14:58:30+08:00</updated>
-    <id>https://lockxmonk.github.io/15036443106558.html</id>
-    <content type="html"><![CDATA[
-<p>我们知道,所有的对象都要初始化但是有些对象可能有很多初始化方法(根据初始的信息来选择用哪个).我们以iOS的UI框架UIKit为例，其中有个类叫做<code>UITableViewCell</code>,初始化该类对象 时，需要指明其样式及标识符，标识符能够区分不同类型的单元格。由于这种对象的创 建成本较高，所以绘制表格时可依照标识符来复用，以提升程序效率。<strong><font color=red>我们把这种可为 对象提供必要信息以便其能完成工作的初始化方法叫做“全能初始化方法”（designated initializer)</font></strong></p>
-
-<p>我们看下面这个NSDate的例子：</p>
-
-<pre><code class="language-objc">-(id)init
--(id)initWithString:(NSString*)string
--(id)initWithTimelntervalSinceNow:(NSTimelnterval)seconds
--(id)initWithTimelnterval:(NSTimelnterval)seconds
-                sinceDate:(NSDate*)refDate
--(id)initWithTimeIntervalSinceReferenceDate:(NSTimelnterval)seconds
--(id)initWithTimeIntervalSincel970:(NSTimelnterval)seconds
-</code></pre>
-
-<p><mark><strong>那么多的初始化方法中，我们要选一个全能初始化方法，让其他的初始化方法都来调用它。</strong></mark>，只有在全能初始化方法中，才会存储内部数据。这样的话，当底层数据存储机制改变时，只需修改此方法的代码就好，无须改动其他初始化方法。</p>
-
-<p>我们来用代码举例：</p>
-
-<p><em>首先定义一个表示矩形的类：</em></p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-@interface EOCRectangle : NSObject
-@property (nonatomic, assign, readonly) float width;
-@property (nonatomic, assign, readonly) float height; 
-@end
-</code></pre>
-
-<p>然后定义一个初始化方法：</p>
-
-<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight:(float)height
-{
-    if ((self = [super init])) {
-        _width = width;
-        _height = height;
-    }
-    return self;
-}
-</code></pre>
-
-<p>这样就会有一个问题，当有人用<code>[[EOCRectanglealloc]init]</code>来创建矩形时，因为<code>NSObject</code>中已经实现了<code>init</code>方法，如果把<code>alloc</code>方法分配好的<code>EOCRectangle</code>交由此方法来初始化，那么矩形的宽度与高度就是0,因为全部实例变量都设为0了。这种情况我们应该覆写<code>init</code>方法：</p>
-
-<pre><code class="language-objc">// Using default values
--(id)init {
-    return [self initWithWidth:5.Of andHeight:10.Of];
-)
-// Throwing an exception
--(id)init {
-    @throw [NSException
-    exceptionWithName:NSInternalInconsistencyException 
-    reason:@&quot;Must use initWithWidth:andHeight: instead.&quot; 
-    userInfo：nil]；
-}
-</code></pre>
-
-<p>还有一种情况，当我们创建名叫<code>EOCSquare</code>的类，令其成为<code>EOCRectangle</code>的子类时，新类的初始化方法写的时候要注意：</p>
-
-<pre><code class="language-objc">@import &quot;EOCRectangle.h&quot;
-@interface EOCSquare : EOCRectangle 
--(id)initWithDimension:(float)dimension; 
-@end
-
-@implementation EOCSquare
--(id)initWithDimension:(float)dimension {
-    return [super initwithwidth:dimension andHeightidimension];
-}
-@end
-</code></pre>
-
-<p>这了我们发现上面代码的初始化方法调用了父类的初始化方法，这样可能会导致一个问题：创建出一个”高度”和“宽度”不相等的正方形。所以：<strong><font color=red>如果子类的全能初始化方法与超类方法的名称不 同，那么总应覆写超类的全能初始化方法。</font></strong>在<code>EOCSquare</code>这个例子中，应该像下面这样覆写<code>EOCRectangle</code>的全能初始化方法：</p>
-
-<pre><code class="language-objc">-(id)initWithWidth:(float)width andHeight:(float)height { 
-    float dimension = MAX (width, height);  
-    return [self initWithDimension:dimension];
-}
-</code></pre>
-
-<p>覆写了这个方法之后，即便使用<code>init</code>来初始化<code>EOCSquare</code>对象，也能照常工作。原因在于, <code>EOCRectangle</code>类覆写了 <code>init</code>方法，并以默认值为参数，调用了该类的全能初始化方法。在用<code>init</code>方法初始化<code>EOCSquare</code>对象时，也会这么调用，不过由于<code>“initWithWidth:andHeight:”</code>已经在子类中覆写了，所以实际上执行的是<code>EOCSquare</code>类的这一份实现代码，而此代码又会调用本类的全能初始化方法。因此一切正常，调用者不可能创建出边长不相等的<code>EOCSquare</code>对象。</p>
-
-<p>当然如果我们不想覆写父类的全能初始化方法，认为这是调用者自己犯了错误。在这种情况下，常用的办法是覆写超类的全能初始化方法并于其中抛出异常：</p>
-
-<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight: (float) height {
-    @throw 
-        [NSException 
-            exceptionWithName:NSInternallnconsistencyException
-            reason: @&quot;Must use initWithDimension: instead.&quot;
-             userInfo：nil];
-</code></pre>
-
-<p><strong><mark>有时如果某个队形对象的实例有两种完全不同的创建方式，必须分开处理，所以就要编写多个全能初始化方法。</mark></strong>只要记住每个子类的全能初始化方法都应该调用其超类的对应方法，并逐层向上，应该先调用超类的相关方法，然后再执行与本类有关的任务。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>在类中提供一个全能初始化方法，并于文档里指明。其他初始化方法均应调用此方法。</li>
-<li><p>若全能初始化方法与超类不同，则需覆写超类中的对应方法。</p></li>
-<li><p>如果超类的初始化方法不适用于子类，那么应该覆写这个超类方法，并在其中抛出异常。</p></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第十五条 用前缀避免命名空间冲突]]></title>
-    <link href="https://lockxmonk.github.io/15036306506140.html"/>
-    <updated>2017-08-25T11:10:50+08:00</updated>
-    <id>https://lockxmonk.github.io/15036306506140.html</id>
-    <content type="html"><![CDATA[
-<p>oc与其他语言一个主要区别是没有那种内置的命名空间(namespace)机制. <mark>所以我们在编码时一定要注意命名冲突,尤其是潜在的命名冲突.</mark></p>
-
-<p>我们在创建应用程序时一定要注意,使用Cocoa创建应用程序时一定要注意,<strong><font color=red>Apple宣称保留使用&quot;两个字母前缀&quot;的权利</font></strong>,也就是说选用的前缀应该都是<strong><font color=red>三个字母</font></strong>.</p>
-
-<p>我们尤其应该注意,当你使用的一个三方库引入了一个你之前引入过的三方库.如果引入的这两个库的作者都没有给自己的库加前缀,那么应用程序很容易出现重复符号错误.</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li><p>选择与你公司,应用程序或二者有关联的名称作为类名的前缀,并在所有代码中均使用这一前缀.</p></li>
-<li><p>若自己所开发的程序库用到了第三方库,则应该为其中的名称加上前缀.</p></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第十四条 理解"类对象"的用意]]></title>
-    <link href="https://lockxmonk.github.io/15035622628066.html"/>
-    <updated>2017-08-24T16:11:02+08:00</updated>
-    <id>https://lockxmonk.github.io/15035622628066.html</id>
-    <content type="html"><![CDATA[
-<p>OC是一个极其动态的语言,那么运行期时,如何知道某个对象的类型呢? <mark>对象类型并非在编译期就绑定好了，而是要在运行期査找</mark>。而 且，还有个特殊的类型叫做id,它能指代任意的Objective-C对象类型。一般情况下，应该指明消息接收者的具体类型，这样的话，如果向其发送了无法解读的消息，那么编译器就会产生警告信息。而类型为<code>id</code>的对象则不然，编译器假定它能响应所有消息。</p>
-
-<p>“在运行期检视对象类型”这一操作也叫做<code>“类型信息査询”（introspection, “内省”）</code>，这 个强大而有用的特性内置于<code>Foundation</code>框架的<code>NSObject</code>协议里，凡是由公共根类（common root class，即NSObject与NSProxy)继承而来的对象都要遵从此协议。在程序中不要直接比较对象所属的类，明智的做法是调用“类型信息査询方法”</p>
-
-<p>我们先来了解Objective-C对象的本质:</p>
-
-<p><font color=red>每个Objective-C对象实例都是指向某块内存数据的指针。</font>所以在声明变量时，类型后面要跟一个字符：</p>
-
-<pre><code class="language-objc">NSString *pointerVariable = @&quot;Some string&quot;;
-</code></pre>
-
-<p>对于通用的对象类型id,由于其本身已经是指针了，所以我们能够这样写：</p>
-
-<pre><code class="language-objc">id genericTypedString = @&quot;Some string&quot;;
-</code></pre>
-
-<p>上面这种定义方式与用<code>NSString*</code>来定义相比，其语法意义相同。唯一区别在于，如果声明时指定了具体类型，那么在该类实例上调用其所没有的方法时，编译器会探知此情况,并发出警告信息。</p>
-
-<p>描述Objective-C对象所用的数据结构定义在运行期程序库的头文件里，<code>id</code>类型本身也<br/>
-在定义在这里：</p>
-
-<pre><code class="language-objc">typedef struct objc_object {
-    Class isa;
-} *id;
-</code></pre>
-
-<p><mark>由此可见，每个对象结构体的首个成员是<code>Class</code>类的变量。该变量定义了对象所属的类, 通常称为<code>“is a”</code>指针。例如，刚才的例子中所用的对象“是一个”（is a) NSString,所以其<code>“is a”</code>指针就指向<code>NSString</code>。</mark></p>
-
-<p><code>Class</code>对象也定义在运行期程序库的头文件中：</p>
-
-<pre><code class="language-objc">typedef struct objc_class *Class;
-struct objc_class {
-    Class isa;
-    Class super_class;
-    const char *name;
-    long version;
-    long info;
-    long instance_size;
-    struct objc_ivar_list *ivars;
-    struct objc_method_list **methodLists;
-    struct objc_cache *cache;
-    struct objc_protocol list *protocols;
-)；
-</code></pre>
-
-<p>此结构体存放类的<code>“元数据&quot;（metadata)</code>,例如类的实例实现了几个方法，具备多少个实例变量等信息。此结构体的首个变量也是<code>isa</code>指针，这说明<code>Class</code>本身亦为Objective-C对象。<font color=red> <strong>结构体里还有个变量叫做<code>superclass</code>,它定义了本类的超类。类对象所属的类型（也就是isa 指针所指向的类型）是另外一个类，叫做“元类&quot;（metaclass)，用来表述类对象本身所具备的元数据。“类方法”就定义于此处，因为这些方法可以理解成类对象的实例方法。</strong></font><mark>每个类仅有一个“类对象”，而每个“类对象”仅有一个与之相关的“元类”。</mark></p>
-
-<p>假设有个名为<code>SomeClass</code>的子类从<code>NSObject</code>中继承而来，则其继承体系如图所示。</p>
-
-<p><img src="media/15035622628066/15035642742167.jpg" alt=""/></p>
-
-<p><font color=red><strong>superclass 指针确立了继承关系，而 isa 指针描述了实例所属的类。</strong></font>通过这张布局关系图即可执行“类型信息査询”。我们可以査出对象是否能响应某个选择子，是否遵从某项协议，并且能看出此对象位于“类继承体系”（class hierarchy)的哪一部分。</p>
-
-<h2 id="toc_0">在类继承体系中查询类型信息</h2>
-
-<p>可以用类信息査询方法来检视类继承体系。<code>“isMemberOfClass:”</code>能够判断出对象是否为某个特定类的实例，而<code>“isKindOfClass:”</code>则能够判断出对象是否为某类或其派生类的实例,例如：</p>
-
-<pre><code class="language-objc">NSMutableDictionary *dict = [NSMutableDictionary new];
-[diet isMemberOfClass: [NSDictionary class] ] ; ///&lt; NO 
-[diet isMemberOfClass:[NSMutableDictionary class】】； ///&lt; YES 
-[diet isKindOfClass: [NSDictionary class】];///&lt; YES 
-[diet isKindOfClass2 [NSArray class]]; ///&lt; NO
-</code></pre>
-
-<p>像这样的类型信息査询方法使用isa指针获取对象所属的类，然后通过superclass指针 在继承体系中游走。由于对象是动态的，所以此特性显得极为重要。Objective-C与你可能熟 悉的其他语言不同，在此语言中，必须査询类型信息，方能完全了解对象的真实类型。</p>
-
-<p>由于Objective-C使用“动态类型系统&quot;（dynamic typing)，所以用于査询对象所属类的类 型信息査询功能非常有用。从<code>collection</code>中获取对象时，通常会査询类型信息，这些对象不 是“强类型的”（strongly typed),把它们从<code>collection</code>中取出来时，其类型通常是<code>id</code>。如果想 知道具体类型，那就可以使用类型信息査询方法。例如，想根据数组中存储的对象生成以逗 号分隔的字符串（comma-separated string),并将其存至文本文件，就可以使用下列代码：</p>
-
-<pre><code class="language-objc">-(NSString*)commaSeparatedStringFromObjects:(NSArray*)array {
-    NSMutablestring *string = [NSMutableStringnew]; 
-    for (id object in array) {
-        if ([object isKindOfClass:[NSStringclass]]) {
-            [string appendFormat:@&quot;%@,&quot;, object];
-        }else if ([object isKindOfClass:[NSNumberclass]）{
-            [string appendFormat:@&quot;%d&quot;, [object intValue]]；
-        } else if ([object isKindOfClass:[NSDataclass]])    {
-            NSString *base64Encoded = /* base64 encoded data */;
-            [string appendFormat: @&quot;%@&quot;, base64Encoded];
-        } else {
-              //Type not supported
-        }
-    }   
-    return string;
-}
-</code></pre>
-
-<p><mark>我们应该尽量使用类型信息査询方法，而不应该直接比较两个类对象是否等同(例如<code>if([object class] == [EOCSomeClass class])</code>)</mark>，因为前者可以正确处理那些使用了消息传递机制（参见第12条）的对象。比方 说，某个对象可能会把其收到的所有选择子都转发给另外一个对象。这样的对象叫做“代理” (proxy)，此种对象均以<code>NSProxy</code>为根类。</p>
-
-<p>通常情况下，如果在此种代理对象上调用class方法，那么返回的是代理对象本身（此类 是NSProxy的子类)，而非接受的代理的对象所属的类。然而，若是改用“isKindOfClass:” 这样的类型信息査询方法，那么代理对象就会把这条消息转给“接受代理的对象”（proxied object)。<font color=red>也就是说，这条消息的返回值与直接在接受代理的对象上面査询其类型所得的结果 相同。因此，这样査出来的类对象与通过class方法所返回的那个类对象不同，class方法所返回的类表示发起代理的对象，而非接受代理的对象。</font></p>
-
-<h2 id="toc_1">要点</h2>
-
-<ul>
-<li>每个实例都有一个指向Class对象的指针，用以表明其类型，而这些Class对象则构成了类的继承体系。</li>
-<li>如果对象类型无法在编译期确定，那么就应该使用类型信息査询方法来探知。</li>
-<li>尽量使用类型信息査询方法来确定对象类型，而不要直接比较类对象，因为某些对象可能实现了消息转发功能。</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第十三条 用"方法调配技术"调试"黑盒方法"]]></title>
-    <link href="https://lockxmonk.github.io/15034774413129.html"/>
-    <updated>2017-08-23T16:37:21+08:00</updated>
-    <id>https://lockxmonk.github.io/15034774413129.html</id>
-    <content type="html"><![CDATA[
-<p>因为OC可以在运行期解析 一个对象究竟调用何种方法,所以我们也可以在运行期改变相对应的方法. </p>
-
-<p><font color=red>因为与给定的选择子名称相对应的方法也可以在运行期改变.所以若能善用此特性，则可发挥出巨大优势，因为我们既不需要源代码，也不需要通过继承子类来覆写方法就能改变这个类本身的功能。这样一来，新功能将在本类的所有实例中生效，而不是仅限于覆写了相关方法的那些子类实例。此方案经常称为<mark>“方法调配”（method swizzling)</mark> e</font></p>
-
-<p>类的方法列表会把选择子的名称映射到相关的方法实现之上，使得“动态消息派发系统” 能够据此找到应该调用的方法。这些方法均以函数指针的形式来表示，这种指针叫做<code>IMP</code>, 其原型如下：</p>
-
-<pre><code class="language-objc">
-id (*IMP)(id, SEL ,...)
-
-</code></pre>
-
-<p>我们用NSString类来举例,下图表示<code>lowercaseString、uppercaseString、capitalizedString</code>方法映射到了不同的<code>IMP</code>上.</p>
-
-<p><img src="media/15034774413129/15034784608780.jpg" alt=""/></p>
-
-<p>OC运行期系统,提供有方法来操作这个映射表.我们可以向这个表中,<strong>新增选择子,改变选择子所对应的方法实现,交换两个选择子所映射的指针</strong>.类似下图:<br/>
-<img src="media/15034774413129/15034786156175.jpg" alt=""/></p>
-
-<p>新表中,多了一个<code>newSelector</code>选择子,并且其他方法的实现也互换了.上述修改均无须编写子类，只是修改了“方法表”的布局.</p>
-
-<p>下面我们来讨论如何互换两个方法的实现:</p>
-
-<p>想要互换两个方法的实现可以,有下列函数:</p>
-
-<pre><code class="language-objc">//互换m1和m2的实现
-void method_exchangeImplementations(Method m1, Method m2)
-
-</code></pre>
-
-<p>m1和m2的方法实现可以通过下面方法实现:</p>
-
-<pre><code class="language-objc">
-Method class_getInstanceMethod(Class aClass, SEL aSelector)
-
-</code></pre>
-
-<p>此函数根据给定的选择从类中取出与之相关的方法。</p>
-
-<p>下面我们完整的举一个例子,来演示交换前面提到的<code>lowercaseString</code> 与 <code>uppercaseString</code>方法实现:</p>
-
-<pre><code class="language-objc">
-Method originalMethod =
-    class_getInstanceMethod([NSStringclass],
-                            @selector(lowercaseString));
-Method swappedMethod =
-    class_getInstanceMethod([NSStringclass],
-                            @selector(uppercaseString)); 
-                            method_exchangeImplementations(originalMethod,swappedMethod);
-
-</code></pre>
-
-<p>从现在开始,如果在NSString实例上调用<code>lowercaseString</code>,那么执行的将是<code>uppercaseString</code>,反之亦然:</p>
-
-<pre><code class="language-objc">
-NSString *string = @&quot;This iS tHe StRiNg&quot;;
-NSString *lowercaseString = [string lowercaseString];
-NSLog(&quot;lowercaseString = %@&quot;, lowercaseString);
-// Output: lowercaseString = THIS IS THE STRING
-
-
-NSString *uppercaseString - [string uppercaseString】；
-NSLog (@&quot;uppercaseString = %@&quot;, uppercaseString);
-// Output: uppercaseString = this is the string
-
-</code></pre>
-
-<p>刚才向大家演示了如何交换两个方法实现，然而在实际应用中，像这样直接交换两 个方法实现的，意义并不大。因为<code>lowercaseString</code>与<code>uppercaseString</code>这两个方法已经各自实现得很好，没必要再交换了。但是，可以通过这一手段来为既有的方法实现增添新功能。<font color=red>比方说，想要在调用<code>lowercaseString</code>时记录某些信息，这时就可以通过交换方法实现来达成此目标。我们新编写一个方法，在此方法中实现所需的附加功能，并调用原有实现</font>。</p>
-
-<p>新方法可以添加至NSString的一个&quot;分类(category)&quot;中:</p>
-
-<pre><code class="language-objc">
-@interface NSString (EOCMyAdditions)
-
--(NSString*)eoc_myLowercaseString;
-
-@end
-
-</code></pre>
-
-<p>上面的新方法将与原有的方法互换,如下图所示:</p>
-
-<p><img src="media/15034774413129/15034869016993.jpg" alt=""/></p>
-
-<p>新方法的实现代码可以这样写:</p>
-
-<pre><code class="language-objc">
-0implementation NSString (EOCMyAdditions)
-
--(NSString*)eoc_myLowercaseString {
-    NSString *lowercase = [self eoc_myLowercaseString];
-    NSLog (@&quot;%@ =&gt; %@&quot;, self, lowercase); 
-    return lowercase;
-)
-@end
-
-</code></pre>
-
-<p>这段代码看上去好像会陷人递归调用的<strong>死循环</strong>，<mark><strong>不过大家要记住，此方法是准备和 lowercaseString方法互换的。所以，在运行期，eoc_myLowercaseString选择子实际上对应于原有的lowercaseString方法实现</strong>。</mark>最后，通过下列代码来交换这两个方法实现：</p>
-
-<pre><code class="language-objc">Method originalMethod =
-    class_getInstanceMethod([NSString class],
-                            @selector(lowercaseString)〉；
-Method swappedMethod =
-    class_getInstanceMethod([NSString class]f
-                            @selector(eoc_myLowercaseString)); 
-                            method_exchangeImplementations(originalMethod , swappedMethod);
-
-</code></pre>
-
-<p>之后我们只要如下执行就会发现:</p>
-
-<pre><code class="language-objc">
-NSString *string = @&quot;ThIs iS tHe StRiNg&quot;;
-NSString *lowercaseString = [string lowercaseString];
-//输出了下面这行
-// Output: This iS tHe StRiNg =&gt; this is the string
-
-</code></pre>
-
-<blockquote>
-<p><strong>通过此方案，开发者可以为那些“完全不知道其具体实现的&quot;（completely opaque, “完全 不透明的”）黑盒方法增加日志记录功能，这非常有助于程序调试。然而，此做法只在调试程序时有用。很少有人在调试程序之外的场合用上述“方法调配技术”来永久改动某个类的功能。不能仅仅因为Objective-C语言里有这个特性就一定要用它。若是滥用，反而会令代码变得不易读懂且难于维护。</strong></p>
-</blockquote>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li><p>在运行期，可以向类中新增或替换选择子所对应的方法实现。</p></li>
-<li><p>使用另一份实现来替换原有的方法实现，这道工序叫做“方法调配”，开发者常用此技术向原有实现中添加新功能。</p></li>
-<li><p>一般来说，只有调试程序的时候才需要在运行期修改方法实现，这种做法不宜滥用。</p></li>
 </ul>
 
 ]]></content>

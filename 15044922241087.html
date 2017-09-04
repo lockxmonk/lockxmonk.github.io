@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Map/Reduce - LZH007
+  第三十八条 为常用的块类型创建typedef - LZH007
   
   </title>
   
@@ -113,14 +113,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>Map/Reduce</h1>
+          <h1>第三十八条 为常用的块类型创建typedef</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/4/13</span>
+          <span class="date">2017/9/4</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+              <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
            
          
           <span class="comments">
@@ -133,26 +133,57 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>1.利用map()函数，把用户输入的不规范的英文名字，变为首字母大写，其他小写的规范名字。输入：[&#39;adam&#39;, &#39;LISA&#39;, &#39;barT&#39;]，输出：[&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]。</p>
+      <p>我们在定义一个块时，语法是这样的：</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def upper(s):
-    return s.capitalize()
-print(map(upper, [&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]) )
+<pre><code class="language-objc">int^(variableName)(BOOL flag,int value) = ^(BOOL flag, int value){
+    //Implemention
+    return someInt;
+}
 </code></pre>
 
-<p><img src="media/14920523812017/14920538865556.jpg" alt=""/></p>
+<p>此块接受两个类型分别为<code>BOOL</code>及<code>int</code>的参数，并返回类型为<code>int</code>的值。并且把它赋给了一个变量。</p>
 
-<p>2.Python提供的sum()函数可以接受一个list并求和，请编写一个prod()函数，可以接受一个list并利用reduce()求积。</p>
+<p>与其他类型的变量不同，在定义块变量时，要把变量名放在类型之中，而不要放在右侧。这种语法非常难记，也非常难读。<strong><font color=red>鉴于此，我们应该为常用的块类型起个别名，</font></strong>尤其是打算把代码发布成API供他人使用时，更应这样做。开发者可以起个更为易读的名字来表示块的用途，而把块的类型隐藏在其后面。例如：</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def prod(x,y):
-    return x*y
-m = [1,2,3,4]
-print (reduce(prod,m))
+<pre><code class="language-objc">//定义
+typedef int(^EOCSomeBlock)(BOOL flag, int value);
 </code></pre>
 
-<p><img src="media/14920523812017/14920539075590.jpg" alt=""/></p>
+<p>声明变量时，要把名称放在类型中间，并在前面加上<code>“^”</code>符号，而定义新类型时也得这么做。上面这条语句向系统中新增了一个名为<code>EOCSomeBlock</code>的类型。此后，不用再以复杂的块类型来创建变量了，直接使用新类型即可：</p>
+
+<pre><code class="language-objc">EOCSomeBlock block = ^(BOOL flag, int value){
+    // Implementation
+};
+</code></pre>
+
+<p><strong><mark>这次代码读起来就顺畅多了：与定义其他变量时一样，变量类型在左边，变量名在右边。</mark></strong></p>
+
+<p>我们可以利用这个将使用块的API做的简单易用些，例如：</p>
+
+<pre><code class="language-objc">-(void)startWithCompletionHandler:
+            (void(^)(NSData *data, NSError *error))completion;
+</code></pre>
+
+<p>上面代码接受了一个块作为参数，所以我们可以用上面定义块的方法来改写它：</p>
+
+<pre><code class="language-objc">typedef void(^EOCCompletionHandler)(NSData *data, NSError *error);
+
+-(void)startWithCompletionHandler: (EOCCompletionHandler)completion;
+</code></pre>
+
+<p>现在参数看上去就简单多了，而且易于理解。</p>
+
+<p>我们在定义块的时候要注意，最好在使用块类型的类中定义这些<code>typedef</code>，而且还应该把这个类的名字加在由<code>typedef</code>所定义的新类型名前面，这样可以阐明块的用途。还可以用<code>typedef</code>给同一个块签名类型创建数个别名。在这件事上，多多益善。因为，开发者看到类型的别名以及签名中的参数之后，可以很容易的理解类型的用途。</p>
+
+<p>与此相似，如果有好几个类都要执行相似但各有区别的异步任务，而这几个类又不 能放人同一个继承体系，那么，每个类就应该有自己的<code>completion handler</code>类型。这几个<code>completion handler</code>的签名也许完全相同，但最好还是在每个类里都各自定义一个别名，而不 要共用同一个名称。反之，若这些类能纳人同一个继承中，则应该将类型定义语句放在超类中，以供各子类使用。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>以<code>typedef</code>重新定义块类型，可令块变量用起来更加简单。</li>
+<li>定义新类型时应遵从现有的命名习惯，勿使其名称与别的类型相冲突。</li>
+<li>不妨为同一个块签名定义多个类型别名。如果要重构的代码使用了块类型的某个别名，那么只需修改相应<code>typedef</code>中的块签名即可，无须改动其他<code>typedef</code>。</li>
+</ul>
 
 
     
@@ -163,16 +194,16 @@ print (reduce(prod,m))
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14920527647833.html" 
-          title="Previous Post: Filter">&laquo; Filter</a>
+          <a href="15045090813380.html" 
+          title="Previous Post: 第三十九条 用handler块降低代码分散程度">&laquo; 第三十九条 用handler块降低代码分散程度</a>
       
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14920445399813.html" 
-          title="Next Post: 模型学习的最优化算法（接上一文）">模型学习的最优化算法（接上一文） &raquo;</a>
+          <a  href="15043212815193.html" 
+          title="Next Post: 第三十七条 理解“块”这一概念">第三十七条 理解“块”这一概念 &raquo;</a>
       
       </p>
         </div>

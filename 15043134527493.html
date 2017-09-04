@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Map/Reduce - LZH007
+  通过协议提供匿名方法 - LZH007
   
   </title>
   
@@ -113,14 +113,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>Map/Reduce</h1>
+          <h1>通过协议提供匿名方法</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/4/13</span>
+          <span class="date">2017/9/2</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+              <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
            
          
           <span class="comments">
@@ -133,26 +133,29 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>1.利用map()函数，把用户输入的不规范的英文名字，变为首字母大写，其他小写的规范名字。输入：[&#39;adam&#39;, &#39;LISA&#39;, &#39;barT&#39;]，输出：[&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]。</p>
+      <p>协议定义了一系列方法，遵从此协议的对象应该实现它们（如果这些方法不是可选的, 那么就必须实现)。于是，我们可以用协议把自己所写的<code>API</code>之中的实现细节隐藏起来，将返回的对象设计为遵从此协议的纯<code>id</code>类型。</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def upper(s):
-    return s.capitalize()
-print(map(upper, [&#39;Adam&#39;, &#39;Lisa&#39;, &#39;Bart&#39;]) )
+<p>这样的话，想要隐藏的类名就不会出现在<code>API</code>之中了。若是接口背后有多个不同的实现类，而你又不想指明具体使用哪个类，那么可以考虑用这个办法——因为有时候这些类可能会变，有时候它们又无法容纳于标准的类继承体系中，因而不能以某个公共基类来统一表示。</p>
+
+<p>此概念经常称为<code>“匿名对象&quot;(anonymous object)</code>，这与其他语言中的“匿名对象”不同，在那些语言中，该词是指以内联形式所创建出来的无名类，而此词在<code>Objective-C</code>中则不是这个意思。</p>
+
+<p>我们之前说的委托与数据源对象，就用到了这个方法。例如在定义“受委托者（delegate）”属性时：</p>
+
+<pre><code class="language-objc">@property {nonatomic, weak) id &lt;EOCDelegate&gt; delegate;
+
 </code></pre>
 
-<p><img src="media/14920523812017/14920538865556.jpg" alt=""/></p>
+<p>由于该属性的类型是<code>id&lt;EOCDelegate&gt;</code>,所以实际上任何类的对象都能充当这一属性, 即便该类不继承自<code>NSObject</code>也可以，只要遵循<code>EOCDelegate</code>协议就行。对于具备此属性的类来说，<code>delegate</code>就是“匿名的”（ammymous)。如有需要，可在运行期査出此对象所属的类型（参见第14条）。然而这样做不太好，因为指定属性类型时所写的那个<code>EOCDelegate</code>契约已经表明此对象的具体类型无关紧要了。</p>
 
-<p>2.Python提供的sum()函数可以接受一个list并求和，请编写一个prod()函数，可以接受一个list并利用reduce()求积。</p>
+<p>当然还有其它的用法，这里我们就不举例了。</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def prod(x,y):
-    return x*y
-m = [1,2,3,4]
-print (reduce(prod,m))
-</code></pre>
+<h2 id="toc_0">要点</h2>
 
-<p><img src="media/14920523812017/14920539075590.jpg" alt=""/></p>
+<ul>
+<li>协议可在某种程度上提供匿名类型。具体的对象类型可以淡化成遵从某协议的<code>id</code>类型，协议里规定了对象所应实现的方法。</li>
+<li>使用匿名对象来隐藏类型名称（或类名）。</li>
+<li>如果具体类型不重要，重要的是对象能够响应（定义在协议里的）特定方法，那么可使用匿名对象来表示。</li>
+</ul>
 
 
     
@@ -163,16 +166,16 @@ print (reduce(prod,m))
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14920527647833.html" 
-          title="Previous Post: Filter">&laquo; Filter</a>
+          <a href="15043212815193.html" 
+          title="Previous Post: 第三十七条 理解“块”这一概念">&laquo; 第三十七条 理解“块”这一概念</a>
       
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14920445399813.html" 
-          title="Next Post: 模型学习的最优化算法（接上一文）">模型学习的最优化算法（接上一文） &raquo;</a>
+          <a  href="15042539845357.html" 
+          title="Next Post: KVO的简单实现">KVO的简单实现 &raquo;</a>
       
       </p>
         </div>

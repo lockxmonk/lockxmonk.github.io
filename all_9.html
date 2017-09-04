@@ -113,6 +113,663 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14956760206333.html">
+                
+                  <h1>itertools</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">chain()</a>
+</li>
+<li>
+<a href="#toc_1">groupby()</a>
+</li>
+<li>
+<a href="#toc_2">imap()</a>
+</li>
+<li>
+<a href="#toc_3">ifilter()</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_4">小结</a>
+
+
+<p>Python的内建模块<code>itertools</code>提供了非常有用的用于操作迭代对象的函数。</p>
+
+<p>首先，我们看看<code>itertools</code>提供的几个“无限”迭代器：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+natuals = itertools.count(1)
+for n in natuals:
+    print n
+</code></pre>
+
+<p><img src="media/14956760206333/14956780529492.jpg" alt=""/></p>
+
+<p>因为<code>count()</code>会创建一个无限的迭代器，所以上述代码会打印出自然数序列，根本停不下来，只能按<code>Ctrl+C</code>退出。(有假死的风险)</p>
+
+<p><code>cycle()</code>会把传入的一个序列无限重复下去：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+cs = itertools.cycle(&#39;ABC&#39;)
+for n in cs:
+    print n
+</code></pre>
+
+<p><img src="media/14956760206333/14956783779668.jpg" alt=""/><br/>
+同样停不下来。(很容易程序假死....)</p>
+
+<p><code>repeat()</code>负责把一个元素无限重复下去，不过如果提供第二个参数就可以限定重复次数：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+ns = itertools.repeat(&#39;A&#39;,10)
+for n in ns:
+    print n
+</code></pre>
+
+<p><img src="media/14956760206333/14956789222152.jpg" alt=""/></p>
+
+<p><strong>无限序列只有在<code>for</code>迭代时才会无限地迭代下去，如果只是创建了一个迭代对象，它不会事先把无限个元素生成出来，事实上也不可能在内存中创建无限多个元素。</strong></p>
+
+<p>无限序列虽然可以无限迭代下去，但是通常我们会通过<code>takewhile()</code>等函数根据条件判断来截取出一个有限的序列：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+natuals = itertools.count(1)
+ns = itertools.takewhile(lambda x:x&lt;=10, natuals)
+for n in ns:
+    print n
+</code></pre>
+
+<p><img src="media/14956760206333/14956791893037.jpg" alt=""/></p>
+
+<p><code>itertools</code>提供的几个迭代器操作函数更加有用：</p>
+
+<h2 id="toc_0">chain()</h2>
+
+<p><code>chain()</code>可以把一组迭代对象串联起来，形成一个更大的迭代器：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+for c in itertools.chain(&#39;ABC&#39;, &#39;XYZ&#39;):
+    print c
+</code></pre>
+
+<p><img src="media/14956760206333/14956795463378.jpg" alt=""/></p>
+
+<h2 id="toc_1">groupby()</h2>
+
+<p><code>groupby()</code>把迭代器中相邻的重复元素挑出来放在一起：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+for key,group  in itertools.groupby(&#39;AAAABBBBBCCCAAA&#39;):
+    print key ,list(group)
+</code></pre>
+
+<p><img src="media/14956760206333/14956799374968.jpg" alt=""/><br/>
+<strong>这里注意到打印group的时候用的是list(group),这是因为gruupby返回仍然是一个迭代器!!,迭代器中的元素可以用list(迭代器)来将元素显示出来,但是要注意不要用list来显示那些无限循环的迭代器(会死机....).</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+cs = itertools.repeat(&#39;A&#39;, 10) # 注意字符串也是序列的一种
+print list(cs)
+</code></pre>
+
+<p><img src="media/14956760206333/14956833066876.jpg" alt=""/></p>
+
+<h2 id="toc_2">imap()</h2>
+
+<p><code>imap()</code>和<code>map()</code>的区别在于，<code>imap()</code>可以作用于无穷序列，并且，如果两个序列的长度不一致，以短的那个为准。</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+for x in itertools.imap(lambda x, y: x * y, [10, 20, 30], itertools.count(1)):
+         print x
+</code></pre>
+
+<p><img src="media/14956760206333/14956801958879.jpg" alt=""/></p>
+
+<p>注意<code>imap()</code>返回一个迭代对象，而<code>map()</code>返回<code>list</code>。当你调用<code>map()</code>时，已经计算完毕,当你调用<code>imap()</code>时，并没有进行任何计算：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+r = map(lambda x: x*x, [1, 2, 3])
+print r     # r已经计算出来了
+n = itertools.imap(lambda x: x*x, [1, 2, 3])
+print n     # n只是一个迭代对象
+
+for x in n:
+    print x
+</code></pre>
+
+<p><img src="media/14956760206333/14956804009136.jpg" alt=""/></p>
+
+<p>必须用for循环对r进行迭代，才会在每次循环过程中计算出下一个元素.</p>
+
+<p>这说明<code>imap()</code>实现了“惰性计算”，也就是在需要获得结果的时候才计算。类似<code>imap()</code>这样能够实现惰性计算的函数就可以处理无限序列：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+r = itertools.imap(lambda x: x*x, itertools.count(1)) 
+for n in itertools.takewhile(lambda x: x&lt;100, r):
+      print n
+</code></pre>
+
+<p><img src="media/14956760206333/14956809524908.jpg" alt=""/></p>
+
+<p>如果把imap()换成map()去处理无限序列:</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import itertools
+
+r = map(lambda x: x * x, itertools.count(1))
+print r
+# for n in itertools.takewhile(lambda x: x&lt;100, r):
+# print n
+</code></pre>
+
+<p>会造成电脑死机,由于<code>map()</code>返回的是一个list，所以当用它去处理无限序列的时候，它会尝试计算完之后才返回，但是序列是无限的，所以它会一直计算下去，致使其占用的系统的内存越来越高。(很坑爹....)</p>
+
+<h2 id="toc_3">ifilter()</h2>
+
+<p>不用多说了，<code>ifilter()</code>就是<code>filter()</code>的惰性实现。</p>
+
+<h1 id="toc_4">小结</h1>
+
+<p><code>itertools</code>模块提供的全部是处理迭代功能的函数，它们的返回值不是<code>list</code>，而是迭代对象，只有用<code>for</code>循环迭代的时候才真正计算。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/25</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14956154840973.html">
+                
+                  <h1>hashlib</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">摘要算法简介</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_1">==MD5是最常见的摘要算法，速度很快，生成结果是固定的128 bit字节，通常用一个32位的16进制字符串表示。</a>
+<ul>
+<li>
+<a href="#toc_2">摘要算法应用</a>
+<ul>
+<li>
+<a href="#toc_3">练习:根据用户输入的口令，计算出存储在数据库中的MD5口令：</a>
+</li>
+<li>
+<a href="#toc_4">练习：设计一个验证用户登录的函数，根据用户输入的口令是否正确，返回True或False：</a>
+</li>
+<li>
+<a href="#toc_5">练习：根据用户输入的登录名和口令模拟用户注册，计算更安全的MD5：</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_6">小结</a>
+</li>
+</ul>
+
+
+<h2 id="toc_0">摘要算法简介</h2>
+
+<p>Python的hashlib提供了常见的摘要算法，如MD5，SHA1等等。</p>
+
+<p>什么是摘要算法呢？摘要算法又称哈希算法、散列算法。它通过一个函数，把任意长度的数据转换为一个长度固定的数据串（通常用16进制的字符串表示）。</p>
+
+<p>举个例子，你写了一篇文章，内容是一个字符串<code>&#39;how to use python hashlib - by Michael&#39;</code>，并附上这篇文章的摘要是<code>&#39;2d73d4f15c0db7f5ecb321b6a65e5d6d&#39;</code>。如果有人篡改了你的文章，并发表为<code>&#39;how to use python hashlib - by Bob&#39;</code>，你可以一下子指出Bob篡改了你的文章，因为根据<code>&#39;how to use python hashlib - by Bob&#39;</code>计算出的摘要不同于原始文章的摘要。</p>
+
+<p>可见，摘要算法就是通过摘要函数<code>f()</code>对任意长度的数据<code>data</code>计算出固定长度的摘要<code>digest</code>，目的是为了发现原始数据是否被人篡改过。</p>
+
+<p><font color=red><strong>摘要算法之所以能指出数据是否被篡改过，就是因为摘要函数是一个单向函数，计算f(data)很容易，但通过digest反推data却非常困难。而且，对原始数据做一个bit的修改，都会导致计算出的摘要完全不同。</strong></font></p>
+
+<p>我们以常见的摘要算法MD5为例，计算出一个字符串的MD5值：</p>
+
+<pre><code class="language-py">import hashlib
+
+md5 = hashlib.md5()
+md5.update(&#39;how to use md5 in python hashlib?&#39;)
+
+print md5.hexdigest()
+</code></pre>
+
+<p>结果为:<br/>
+<img src="media/14956154840973/14956157660396.jpg" alt=""/></p>
+
+<p>如果数据量很大，可以分块多次调用<code>update()</code>，最后计算的结果是一样的：</p>
+
+<pre><code class="language-py">import hashlib
+
+md5 = hashlib.md5()
+md5.update(&#39;how to use md5 in &#39;)
+md5.update(&#39;python hashlib?&#39;)
+print md5.hexdigest()
+
+</code></pre>
+
+<p>结果仍然为:<br/>
+<img src="media/14956154840973/14956158401991.jpg" alt=""/></p>
+
+<p>当改动一个字母之后,结果会完全不同.</p>
+
+<h1 id="toc_1">==MD5是最常见的摘要算法，速度很快，生成结果是固定的128 bit字节，通常用一个32位的16进制字符串表示。</h1>
+
+<p>另一种常见的摘要算法是<code>SHA1</code>，调用<code>SHA1</code>和调用<code>MD5</code>完全类似：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+import hashlib
+
+sha1 = hashlib.sha1()
+sha1.update(&#39;how to use md5 in &#39;)
+sha1.update(&#39;python hashlib?&#39;)
+print sha1.hexdigest()
+</code></pre>
+
+<p><img src="media/14956154840973/14956161682665.jpg" alt=""/></p>
+
+<p>SHA1的结果是160 bit字节，通常用一个40位的16进制字符串表示。</p>
+
+<p>比SHA1更安全的算法是SHA256和SHA512，不过越安全的算法越慢，而且摘要长度更长。</p>
+
+<blockquote>
+<p>有没有可能两个不同的数据通过某个摘要算法得到了相同的摘要？完全有可能，因为任何摘要算法都是把无限多的数据集合映射到一个有限的集合中。这种情况称为碰撞，比如Bob试图根据你的摘要反推出一篇文章&#39;how to learn hashlib in python - by Bob&#39;，并且这篇文章的摘要恰好和你的文章完全一致，这种情况也并非不可能出现，但是非常非常困难。</p>
+</blockquote>
+
+<h2 id="toc_2">摘要算法应用</h2>
+
+<p>一个正确的应用是在存储的数据库表中,将用户登录用的密码进行转换,防止数据泄露导致黑客或者内部人员获取.</p>
+
+<p>正确的保存口令的方式是不存储用户的明文口令，而是存储用户口令的摘要，比如MD5：</p>
+
+<table>
+<thead>
+<tr>
+<th>username</th>
+<th>password</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>michael</td>
+<td>e10adc3949ba59abbe56e057f20f883e</td>
+</tr>
+<tr>
+<td>bob</td>
+<td>878ef96e86145580c38c87f0410ad153</td>
+</tr>
+<tr>
+<td>alice</td>
+<td>99b1c2188db85afee403b1536010c2c9</td>
+</tr>
+</tbody>
+</table>
+
+<p>当用户登录时，首先计算用户输入的明文口令的MD5，然后和数据库存储的MD5对比，如果一致，说明口令输入正确，如果不一致，口令肯定错误。</p>
+
+<h3 id="toc_3">练习:根据用户输入的口令，计算出存储在数据库中的MD5口令：</h3>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+import hashlib
+
+def calc_md5(password):
+    md5 = hashlib.md5()
+    md5.update(password)
+    return md5.hexdigest()
+password_text = raw_input(&#39;输入密码:&#39;)
+print calc_md5(password_text)
+</code></pre>
+
+<p><img src="media/14956154840973/14956172486330.jpg" alt=""/></p>
+
+<p>存储MD5的好处是即使运维人员能访问数据库，也无法获知用户的明文口令。</p>
+
+<h3 id="toc_4">练习：设计一个验证用户登录的函数，根据用户输入的口令是否正确，返回True或False：</h3>
+
+<pre><code class="language-py">db = {
+    &#39;michael&#39;: &#39;e10adc3949ba59abbe56e057f20f883e&#39;,
+    &#39;bob&#39;: &#39;878ef96e86145580c38c87f0410ad153&#39;,
+    &#39;alice&#39;: &#39;99b1c2188db85afee403b1536010c2c9&#39;
+}
+
+def login(user, password):
+    pass
+</code></pre>
+
+<p>实现代码为:</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+import hashlib
+db = {
+    &#39;michael&#39;: &#39;e10adc3949ba59abbe56e057f20f883e&#39;,
+    &#39;bob&#39;: &#39;878ef96e86145580c38c87f0410ad153&#39;,
+    &#39;hao&#39;: &#39;e10adc3949ba59abbe56e057f20f883e&#39;
+}
+
+def calc_md5(password):
+    md5 = hashlib.md5()
+    md5.update(password)
+    return md5.hexdigest()
+def login(user,password):
+    md5 = hashlib.md5()
+    md5.update(password)
+    if user in db:
+        if db[user]==md5.hexdigest():
+            print &#39;登陆成功&#39;
+        else :
+            print &#39;失败&#39;
+    else:
+        print&#39;该用户不存在&#39;
+user_text = raw_input(&#39;请输入用户名: &#39;)    
+password_text = raw_input(&#39;输入密码: &#39;)
+
+print calc_md5(password_text)
+login(user_text, password_text)
+</code></pre>
+
+<p><img src="media/14956154840973/14956740702158.jpg" alt=""/></p>
+
+<p>对于用户来讲，当然不要使用过于简单的口令。但是，我们能否在程序设计上对简单口令加强保护呢？</p>
+
+<p>由于常用口令的MD5值很容易被计算出来，所以，要确保存储的用户口令不是那些已经被计算出来的常用口令的MD5，这一方法通过对原始口令加一个复杂字符串来实现，俗称“加盐”：</p>
+
+<pre><code class="language-py">def calc_md5(password):
+    return get_md5(password + &#39;the-Salt&#39;)
+</code></pre>
+
+<p>经过Salt处理的MD5口令，只要Salt不被黑客知道，即使用户输入简单口令，也很难通过MD5反推明文口令。</p>
+
+<p><mark>但是如果有两个用户都使用了相同的简单口令比如123456，在数据库中，将存储两条相同的MD5值，这说明这两个用户的口令是一样的。有没有办法让使用相同口令的用户存储不同的MD5呢？</mark></p>
+
+<p><strong>如果假定用户无法修改登录名，就可以通过把登录名作为Salt的一部分来计算MD5，从而实现相同口令的用户也存储不同的MD5。</strong></p>
+
+<h3 id="toc_5">练习：根据用户输入的登录名和口令模拟用户注册，计算更安全的MD5：</h3>
+
+<pre><code class="language-py">db = {}
+
+def register(username, password):
+    db[username] = get_md5(password + username + &#39;the-Salt&#39;)
+</code></pre>
+
+<p>然后，根据修改后的MD5算法实现用户登录的验证：</p>
+
+<pre><code class="language-py">def login(username, password):
+    pass
+</code></pre>
+
+<p>实现代码:</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+import hashlib
+db = {}
+def register(username,password):
+    if username in db:
+        print &#39;用户已存在&#39;
+    else:
+        db[username] = get_md5(password + username + &#39;the-Slat&#39;) 
+def get_md5(text):
+    md5 = hashlib.md5()
+    md5.update(text)
+    return md5.hexdigest()
+def login(user,password):
+    md5 = hashlib.md5()
+    md5.update(password + user + &#39;the-Slat&#39;)
+    if user in db:
+        if db[user]==md5.hexdigest():
+            print &#39;登陆成功&#39;
+        else :
+            print &#39;失败&#39;
+    else:
+        print&#39;该用户不存在或者密码错误&#39;
+register(&#39;hao&#39;, &#39;123456&#39;)
+register(&#39;hao&#39;, &#39;12212&#39;)    #重复注册会显示失败
+user_text = raw_input(&#39;请输入用户名: &#39;)    
+password_text = raw_input(&#39;输入密码: &#39;)
+
+login(user_text, password_text)
+</code></pre>
+
+<p><img src="media/14956154840973/14956751273389.jpg" alt=""/></p>
+
+<h2 id="toc_6">小结</h2>
+
+<p>摘要算法在很多地方都有广泛的应用。<strong>要注意摘要算法不是加密算法，不能用于加密（因为无法通过摘要反推明文）</strong>，只能用于防篡改，但是它的单向计算特性决定了可以在不存储明文口令的情况下验证用户口令。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/24</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14956131169957.html">
+                
+                  <h1>在ios中判断一个viewcontroller是都已经正常present</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>之前present一个视图的时候,从来没有研究过如何判断一个视图是都已经正常弹出.比如下面这个方法是否正常执行:</p>
+
+<pre><code class="language-oc">[documentInteractionController presentPreviewAnimated:YES]
+</code></pre>
+
+<p>然而今天有一个需求需要知道上述方法是否正常执行,并弹出视图.</p>
+
+<p>之后通过阅读该方法的源码后发现:</p>
+
+<pre><code class="language-oc">// Bypasses the menu and opens the full screen preview window for the item at URL.  Returns NO if the item could not be previewed.
+// Note that you must implement the delegate method documentInteractionControllerViewControllerForPreview: to preview the document.
+- (BOOL)presentPreviewAnimated:(BOOL)animated;
+</code></pre>
+
+<p>该方法返回一个BOOL类型的值:当没有正常执行该方法时,会返回NO.正常返回YES.</p>
+
+<p>类似的还有如下方法:</p>
+
+<pre><code class="language-oc">- (BOOL)isBeingPresented NS_AVAILABLE_IOS(5_0);
+- (BOOL)isBeingDismissed NS_AVAILABLE_IOS(5_0);
+
+- (BOOL)isMovingToParentViewController NS_AVAILABLE_IOS(5_0);
+- (BOOL)isMovingFromParentViewController NS_AVAILABLE_IOS(5_0);
+</code></pre>
+
+<p>来判断viewController是消失还是出现在当前页面中.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/24</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14955929300450.html">
+                
+                  <h1>Caffe目录结构</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我们这里先了解一下caffe的目录结构:<br/>
+<img src="media/14955929300450/14961936456285.jpg" alt=""/><br/>
+<img src="media/14955929300450/14961936868967.jpg" alt=""/><br/>
+<img src="media/14955929300450/14961937240927.jpg" alt=""/><br/>
+其中主要关注的就是:include/,src/和tools/,三个目录,需要分析的代码都包含在这里面.</p>
+
+<p>在阅读代码时,如何快速追踪某个关键词?传统的方法是打开某个文件,之后用查找命令来查找关键词.<br/>
+这了我们介绍另一种方法,利用<code>grep</code>命令:</p>
+
+<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;REGISTER_LAYER_CREATOR&quot; *
+</code></pre>
+
+<p><img src="media/14955929300450/14955931415464.jpg" alt=""/><br/>
+我们可以看到,日志输出了很多文件.这种方法无需分别打开每个文件,也能直观的显示了所有包含这个宏的文件名和行号.</p>
+
+<p>这里我们用<code>grep</code>命令来搜索一个宏调用:<code>REGISTER_LAYER_CREATOR</code>,<br/>
+命令行参数解释为:</p>
+
+<blockquote>
+<p>-n  ---显示行号,便于定位<br/>
+-H  ---显示文件名,便与定位<br/>
+-R  ---递归查找每个子目录,适合工程较大,分多个目录存放的场景</p>
+</blockquote>
+
+<p>利用这种方法可以很容易的在caffe源码中定位很多内容.</p>
+
+<h2 id="toc_0">卷基层</h2>
+
+<p>这里我们假定卷积层有<code>L</code>个输出通道和<code>K</code>个输入通道,于是需要有<code>LK,L=50,K=20</code>个卷积核实现通道数目的转换.这里我们假定卷集核大小为<code>I*J = 5*5</code>,每个输出通道的特征图大小为<code>M*N = 8*8</code>,则该层每个样本做一次前向传播时卷积层计算量为:<br/>
+<code>Calculations(MAC) = I*J*M*N*K*L = 5*5*8*8*50*20=1600000MAC</code><br/>
+实际中使送入一批样本(batch),所以我们这里还需要计算量乘上批量尺寸.</p>
+
+<p>我们这里卷积层的学习参数量为:<br/>
+<code>Params = I*J*K*L = 25000</code><br/>
+所以计算量-参数量之比为<code>CPR=Calculations/Params = M*N = 64</code><br/>
+<font color=red><strong>所以我们得出结论是:卷基层的输出特征图尺寸越大,CPR值越大,参数重复利用率越高.,若一次性输入一批数据(B个样本),则CPR值可再提高B倍.</strong></font></p>
+
+<h2 id="toc_1">全连接层</h2>
+
+<p>早在卷积神经网络出现之前,最早的深度学习网络计算类型都是全连接形式的.如下所示.<br/>
+<img src="media/14955929300450/14961962825939.jpg" alt=""/><br/>
+每个节点与相邻层的所有节点都有连接关系,这是全连接层名称的由来.</p>
+
+<p>全连接层的主要计算类型为矩阵-向量乘(GEMV).假设输入节点组成的向量为x,维度为D,输出节点组成的向量为y,维度为V,则全连接层计算可以表示为:<br/>
+\[y=Wx\]<br/>
+其中,W为<code>V*D</code>维权值矩阵.</p>
+
+<p>我们分析全连接层的参数:<br/>
+<img src="media/14955929300450/14961986814721.jpg" alt=""/></p>
+
+<p><img src="media/14955929300450/14961986616938.jpg" alt=""/></p>
+
+<p>得出输出<code>V=500</code>,输入<code>D=50*4*4 = 800</code>(其中50是输入数量,4*4位图的尺寸)</p>
+
+<p>则全连接层单样本前向传播计算量为:<br/>
+\[<br/>
+CalculationsMAC = V*D<br/>
+                = 800 * 500<br/>
+                = 400000<br/>
+\]<br/>
+参数统计量为:<br/>
+\[<br/>
+Params = V*D<br/>
+       = 800 * 500<br/>
+       = 400000<br/>
+\]<br/>
+所以CPR值为1</p>
+
+<p>所以得出结论,全连接层的CPR值始终为1,与输入,输出维度无关.所以单样本前向向传播计算时,权值重复利用率很低.<br/>
+    我们将一批(B个)样本逐列拼接成矩阵X,一次性通过全连接层,得到一批输出向量构成的矩阵Y,称作批处理(矩阵-矩阵乘计算GEMM):<br/>
+    \[<br/>
+    Y=WX<br/>
+    \]<br/>
+这样全连接层前向计算量提高了B倍,而参数量不变,因此CPR提高了B倍.</p>
+
+<p>与卷积层相比，全连接层参数量是其16倍，而计算量只有其25%.如果输出特征图尺寸相同<code>（M*V = V)</code>，卷积层的CPR值为全连接层的<code>M*N</code>倍。也就是说，卷积层在输出特征图维度实现了<mark>权值共享</mark>。这是降低参数量的重要举措。与此同吋，卷枳层<mark>局部连接</mark>特性 (相比全连接）也大幅减少了参数量,这使得CNN网络中前几层卷积层参数量占比小，计算量占比大；而后几层全连接层参数量占比大，计算量占比小。大多数CNN模型都符合这个特点。<font color=red><strong>因此我们在进行计算加速优化时,重点放在卷积层；而在进行参数优化、权值剪裁时，重点放在全连接层，</strong></font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/24</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%E4%BB%A3%E7%A0%81%E6%A2%B3%E7%90%86.html'>Caffe代码梳理</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14955245049549.html">
                 
                   <h1>运行caffe框架中的cifar10样例</h1>
@@ -2358,1443 +3015,6 @@ print struct.unpack(&#39;&gt;IH&#39;,&#39;\xf0\xf0\xf0\xf0\x80\x80&#39;)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14955000885655.html">
-                
-                  <h1>Base64</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">练习:</a>
-</li>
-<li>
-<a href="#toc_1">小结</a>
-</li>
-</ul>
-
-
-<p>Base64是一种用64个字符来表示任意二进制数据的方法。</p>
-
-<p>用记事本打开<code>exe、jpg、pdf</code>这些文件时，我们都会看到一大堆乱码，因为二进制文件包含很多无法显示和打印的字符，所以，如果要让记事本这样的文本处理软件能处理二进制数据，就需要一个二进制到字符串的转换方法。Base64是一种最常见的二进制编码方法。</p>
-
-<p>Base64的原理很简单，首先，准备一个包含64个字符的数组：</p>
-
-<pre><code>[&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, ... &#39;a&#39;, &#39;b&#39;, &#39;c&#39;, ... &#39;0&#39;, &#39;1&#39;, ... &#39;+&#39;, &#39;/&#39;]
-</code></pre>
-
-<p>然后，对二进制数据进行处理，每3个字节一组，一共是<code>3x8=24bit</code>，划为4组，每组正好6个bit：<img src="media/14955000885655/14955010424104.jpg" alt=""/></p>
-
-<p>这样我们得到4个数字作为索引，然后查表，获得相应的4个字符，就是编码后的字符串。</p>
-
-<p>所以，Base64编码会把3字节的二进制数据编码为4字节的文本数据，长度增加33%，好处是编码后的文本数据可以在邮件正文、网页等直接显示。</p>
-
-<p>如果要编码的二进制数据不是3的倍数，最后会剩下1个或2个字节怎么办？Base64用<code>\x00</code>字节在末尾补足后，再在编码的末尾加上1个或2个<code>=</code>号，表示补了多少字节，解码的时候，会自动去掉。</p>
-
-<p>Python内置的<code>base64</code>可以直接进行base64的编解码：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-import base64
-print base64.b64encode(&#39;binary\x00string&#39;)
-print base64.b64decode(&#39;YmluYXJ5AHN0cmluZw==&#39;)
-</code></pre>
-
-<p><img src="media/14955000885655/14955014556004.jpg" alt=""/></p>
-
-<p>由于标准的Base64编码后可能出现字符<code>+</code>和<code>/</code>，在URL中就不能直接作为参数，所以又有一种&quot;url safe&quot;的base64编码，其实就是把字符<code>+</code>和<code>/</code>分别变成<code>-</code>和<code>_</code>：<br/>
-<img src="media/14955000885655/14955018446875.jpg" alt=""/><br/>
-还可以自己定义64个字符的排列顺序，这样就可以自定义Base64编码，不过，通常情况下完全没有必要。</p>
-
-<p>Base64是一种通过查表的编码方法，不能用于加密，即使使用自定义的编码表也不行。</p>
-
-<p>Base64适用于小段内容的编码，比如数字证书签名、Cookie的内容等。</p>
-
-<p>由于<code>=</code>字符也可能出现在Base64编码中，但<code>=</code>用在URL、Cookie里面会造成歧义，所以，很多Base64编码后会把<code>=</code>去掉：</p>
-
-<pre><code># 标准Base64:
-&#39;abcd&#39; -&gt; &#39;YWJjZA==&#39;
-# 自动去掉=:
-&#39;abcd&#39; -&gt; &#39;YWJjZA&#39;
-</code></pre>
-
-<p>去掉=后怎么解码呢？因为Base64是把3个字节变为4个字节，所以，Base64编码的长度永远是4的倍数，因此，需要加上=把Base64字符串的长度变为4的倍数，就可以正常解码了。</p>
-
-<h2 id="toc_0">练习:</h2>
-
-<p>请写一个能去掉<code>=</code>的base64解码函数:</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-import base64
-def safe_b64decode(str):
-    num = len(str)%4
-    if num==0:
-        return base64.b64decode(str)
-    else :
-        for x in range(num):
-             str = str + &#39;=&#39;
-        return str 
-print base64.b64decode(&#39;YWJjZA==&#39;)
-#print base64.b64decode(&#39;YWJjZA&#39;)
-print safe_b64decode(&#39;YWJjZA&#39;)
-</code></pre>
-
-<p><img src="media/14955000885655/14955026953083.jpg" alt=""/></p>
-
-<h2 id="toc_1">小结</h2>
-
-<p>Base64是一种任意二进制到文本字符串的编码方法，常用于在URL、Cookie、网页中传输少量二进制数据。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14948310433460.html">
-                
-                  <h1>下学期英语课后翻译总结</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>据说这些已经被收集的纸条大约有两百万份，粗略分类后捆绑到一起，这些纸条无疑布满灰尘(并且起线头)，有的甚至已经卷曲发黄，还有的因为年久儿破碎。</p>
-
-<p>问题之一是：志愿阅读者对于所谓“普通词语”的热情关注向来就不高；他们总是受到某种诱惑力的吸引，寄来一些令人感兴趣的词汇的引语，而不是日常词汇的引语。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/15</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='English%20Study.html'>English Study</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14948283904445.html">
-                
-                  <h1>在RN中利用原生Document Interaction Controller来预览和打开文档</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在react-native开发中有一个功能需求为，打开之前已经下载到Documents中的文件。一开始本想用webview来加载文件。后来发现有<code>UIDocumentInteractionController</code>这个api来更好的完成这个功能。</p>
-
-<p>首先在RN引用的类中加入<code>UIDocumentInteractionControllerDelegate</code>我们要用到这个来呈现预览视图：</p>
-
-<p>NativeUtil.h</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-#import &quot;RCTBridgeModule.h&quot;
-#import &quot;UIView+React.h&quot;       //要引入这个头文件，在rn中创建和加载原声视图
-
-
-@interface NativeUtil : NSObject &lt;RCTBridgeModule,UIDocumentInteractionControllerDelegate&gt;
-
-@end
-</code></pre>
-
-<p>在NativeUtil.m中实现该委托。定义一个暴露给RN的方法，在js中调用：</p>
-
-<pre><code class="language-objc">RCT_EXPORT_METHOD(ShowFileChooser: (RCTResponseSenderBlock)callback){
-  
-    NSString *filePath = @&quot;ceshi007&quot;;           callback(@[[NSNull null],filePath]);    //测试callback，从native向rn传值。
-
-
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);           //获取应用本沙盒内的目录。
-    NSString *documentpath = paths[0];      //获取document的路径
-    NSString *fileName = [documentpath stringByAppendingPathComponent:@&quot;Screenshot_2016-12-15-21-29-07-50.png&quot;];            //指定上述图片的路径。
-  NSURL *fileURL = [NSURL fileURLWithPath:fileName];
-  dispatch_async(dispatch_get_main_queue(), ^{              //运行主线程来加载界面，并初始化UIDocumentInteractionController
-    UIDocumentInteractionController *documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:fileURL];
-    documentInteractionController.delegate =self ;
-    [documentInteractionController presentPreviewAnimated:YES];             //present出来文件的预览界面。
-  });
-  
-}
-</code></pre>
-
-<p>之后定义<code>(UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller</code>方法，要加载出来预览的界面，上述方法必须实现，且返回一个当前的页面的ViewController。用于作为预览视图的父ViewController来弹出modal。</p>
-
-<pre><code class="language-objc">- (UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller{
-  UIViewController *newVC =[self getPresentedViewController];  //获取当前屏幕中present出来的viewcontroller。
-   return newVC;
-};
-</code></pre>
-
-<p>这里我们是在一个非视图类创建并在加载一个视图，所以我们要先获取到当前界面的<code>ViewController</code>，将被展示的<code>view</code>加到当前<code>view</code>的子视图，或用当前view <code>presentViewController</code>，或<code>pushViewContrller</code>。这里我从网上找到了两个方法：</p>
-
-<pre><code class="language-objc">//获取当前屏幕显示的viewcontroller
-- (UIViewController *)getCurrentVC  
-{  
-    UIViewController *result = nil;  
-      
-    UIWindow * window = [[UIApplication sharedApplication] keyWindow];  
-    if (window.windowLevel != UIWindowLevelNormal)  
-    {  
-        NSArray *windows = [[UIApplication sharedApplication] windows];  
-        for(UIWindow * tmpWin in windows)  
-        {  
-            if (tmpWin.windowLevel == UIWindowLevelNormal)  
-            {  
-                window = tmpWin;  
-                break;  
-            }  
-        }  
-    }  
-      
-    UIView *frontView = [[window subviews] objectAtIndex:0];  
-    id nextResponder = [frontView nextResponder];  
-      
-    if ([nextResponder isKindOfClass:[UIViewController class]])  
-        result = nextResponder;  
-    else  
-        result = window.rootViewController;  
-      
-    return result;  
-} 
-</code></pre>
-
-<pre><code class="language-objc">//获取当前屏幕中present出来的viewcontroller
-- (UIViewController *)getPresentedViewController  
-{  
-    UIViewController *appRootVC = [UIApplication sharedApplication].keyWindow.rootViewController;  
-    UIViewController *topVC = appRootVC;  
-    if (topVC.presentedViewController) {  
-        topVC = topVC.presentedViewController;  
-    }  
-      
-    return topVC;  
-}
-</code></pre>
-
-<blockquote>
-<p>在RN中，使用modal组件之后，弹出的modal视图的viewcontroller相当于present出来的viewcontroller.</p>
-</blockquote>
-
-<p>之后使用<code>[self getPresentedViewController]</code>就可以获得<code>viewcontroller</code>来加载视图。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/15</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14946429015704.html">
-                
-                  <h1>caffe框架运行手写体数字识别例子（MNIST）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>关于caffe环境的搭建暂时不做讨论，之后有时间整理一下（mac系统上cpu-only的caffe环境搭建）。</p>
-
-<h2 id="toc_0">LeNet-5模型描述</h2>
-
-<p>caffe框架中给的LeNet-5模型与原版有所不同，其中将Sigmoid激活函数换成了ReLu，它的描述文件为<code>examples/mnist/lenet_train_test.prototxt</code><br/>
-，它的内容主要为：</p>
-
-<pre><code>name: &quot;LeNet&quot;           //网络（Net）的名称为LeNet
-layer {                 //定义一个层（Layer）
-  name: &quot;mnist&quot;         //层的名称为mnist
-  type: &quot;Data&quot;          //层的类型为数据层
-  top: &quot;data&quot;           //层的输出blob有两个：data和label
-  top: &quot;label&quot;
-  include {
-    phase: TRAIN        //表明该层参数只在训练阶段有效
-  }
-  transform_param {
-    scale: 0.00390625   //数据变换使用的数据缩放因子
-  }
-  data_param {          //数据层参数
-    source: &quot;examples/mnist/mnist_train_lmdb&quot;       //LMDB的路径
-    batch_size: 64      //批量数目，一次性读取64张图
-    backend: LMDB       //数据格式为LMDB
-  }
-}
-layer {                 //一个新的数据层，名字也叫mnist，输出blob也是data和Label，但是这里定义的参数只在分类阶段有效
-  name: &quot;mnist&quot;
-  type: &quot;Data&quot;
-  top: &quot;data&quot;
-  top: &quot;label&quot;
-  include {
-    phase: TEST         //表明只在测试分类阶段有效
-  }
-  transform_param {
-    scale: 0.00390625
-  }
-  data_param {
-    source: &quot;examples/mnist/mnist_test_lmdb&quot;
-    batch_size: 100
-    backend: LMDB
-  }
-}
-layer {
-  name: &quot;conv1&quot;         //定义一个新的卷积层conv1，输入blob为data，输出blob为conv1
-  type: &quot;Convolution&quot;
-  bottom: &quot;data&quot;
-  top: &quot;conv1&quot;
-  param {
-    lr_mult: 1          //权值学习速率倍乘因子，1蓓表示与全局参数一致
-  }
-  param {
-    lr_mult: 2          //bias学习速率倍乘因子，是全局参数的两倍
-  }
-  convolution_param {   //卷积计算参数
-    num_output: 20      //输出feature map数目为20
-    kernel_size: 5      //卷积核尺寸，5*5
-    stride: 1           //卷积输出跳跃间隔，1表示连续输出，无跳跃
-    weight_filler {     //权值使用Xavier填充器
-      type: &quot;xavier&quot;
-    }
-    bias_filler {       //bias使用常熟填充器，默认为0
-      type: &quot;constant&quot;
-    }
-  }
-}
-layer {                 //定义新的下采样层pool1，输入blob为conv1，输出blob为pool1
-  name: &quot;pool1&quot;
-  type: &quot;Pooling&quot;
-  bottom: &quot;conv1&quot;
-  top: &quot;pool1&quot;
-  pooling_param {       //下采样参数
-    pool: MAX           //使用最大值下采样方法
-    kernel_size: 2      //下采样窗口尺寸为2*2
-    stride: 2           //下采样输出跳跃间隔2*2
-  }
-}   
-layer {                 //新的卷积层，和conv1类似
-  name: &quot;conv2&quot;
-  type: &quot;Convolution&quot;
-  bottom: &quot;pool1&quot;
-  top: &quot;conv2&quot;
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  convolution_param {
-    num_output: 50
-    kernel_size: 5
-    stride: 1
-    weight_filler {
-      type: &quot;xavier&quot;
-    }
-    bias_filler {
-      type: &quot;constant&quot;
-    }
-  }
-}
-layer {             //新的下采样层，和pool1类似
-  name: &quot;pool2&quot;
-  type: &quot;Pooling&quot;
-  bottom: &quot;conv2&quot;
-  top: &quot;pool2&quot;
-  pooling_param {
-    pool: MAX
-    kernel_size: 2
-    stride: 2
-  }
-}
-layer {                 //新的全连接层，输入blob为pool2，输出blob为ip1
-  name: &quot;ip1&quot;
-  type: &quot;InnerProduct&quot;
-  bottom: &quot;pool2&quot;
-  top: &quot;ip1&quot;
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  inner_product_param {     //全连接层参数
-    num_output: 500         //该层输出元素个数为500
-    weight_filler {
-      type: &quot;xavier&quot;
-    }
-    bias_filler {
-      type: &quot;constant&quot;
-    }
-  }
-}
-layer {             //新的非线性层，用ReLU方法
-  name: &quot;relu1&quot;
-  type: &quot;ReLU&quot;
-  bottom: &quot;ip1&quot;
-  top: &quot;ip1&quot;
-}
-layer {
-  name: &quot;ip2&quot;
-  type: &quot;InnerProduct&quot;
-  bottom: &quot;ip1&quot;
-  top: &quot;ip2&quot;
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  inner_product_param {
-    num_output: 10
-    weight_filler {
-      type: &quot;xavier&quot;
-    }
-    bias_filler {
-      type: &quot;constant&quot;
-    }
-  }
-}
-layer {             //分类准确率层，输入blob为ip2和Label，输出blob为accuracy，该层用于计算分类准确率
-  name: &quot;accuracy&quot;
-  type: &quot;Accuracy&quot;
-  bottom: &quot;ip2&quot;
-  bottom: &quot;label&quot;
-  top: &quot;accuracy&quot;
-  include {
-    phase: TEST
-  }
-}
-layer {             //损失层，损失函数SoftmaxLoss，输入blob为ip2和label，输出blob为loss
-  name: &quot;loss&quot;
-  type: &quot;SoftmaxWithLoss&quot;
-  bottom: &quot;ip2&quot;
-  bottom: &quot;label&quot;
-  top: &quot;loss&quot;
-}
-
-</code></pre>
-
-<p>LeNet模型原图为：<br/>
-<img src="media/14946429015704/14946445265310.jpg" alt=""/></p>
-
-<p><img src="media/14946429015704/14946445430850.jpg" alt=""/></p>
-
-<h2 id="toc_1">训练超参数：</h2>
-
-<p>上面已近给出了LeNet模型中的网络结构图和一些参数定义，下面我们正式来训练，这是一个分类准确率可以达到99%以上的模型。</p>
-
-<p>首先进入caffe所在目录：<br/>
-执行：<code>examples/mnist/train_lenet.sh</code></p>
-
-<p><code>train_lenet.sh</code>的代码为：</p>
-
-<pre><code>#!/usr/bin/env sh
-set -e          #暂时不知道具体作用
-
-./build/tools/caffe train --solver=examples/mnist/lenet_solver.prototxt $@
-
-</code></pre>
-
-<p>这里调用了之前编译好的<code>build/tools/caffe.bin</code>二进制文件，参数为：--<code>solver=examples/mnist/lenet_solver.prototxt $@</code>指定了训练超参数文件，内容如下：</p>
-
-<pre><code class="language-py"># The train/test net protocol buffer definition
-net: &quot;examples/mnist/lenet_train_test.prototxt&quot;
-# test_iter specifies how many forward passes the test should carry out.
-# In the case of MNIST, we have test batch size 100 and 100 test iterations,
-# covering the full 10,000 testing images.
-test_iter: 100
-# Carry out testing every 500 training iterations.（训练时每迭代500次，进行一次预测）
-test_interval: 500
-# The base learning rate, momentum and the weight decay of the network.（网络的基础学习速率，冲量和衰减量）
-base_lr: 0.01
-momentum: 0.9
-weight_decay: 0.0005
-# The learning rate policy（学习速率的衰减策略）
-lr_policy: &quot;inv&quot;
-gamma: 0.0001
-power: 0.75
-# Display every 100 iterations（每100次迭代，在屏幕上打印一次运行log）
-display: 100
-# The maximum number of iterations
-max_iter: 10000
-# snapshot intermediate results（每5000次迭代打印一次快照）
-snapshot: 5000
-snapshot_prefix: &quot;examples/mnist/lenet&quot;
-# solver mode: CPU or GPU（求解模式为CPU模式，因为mac没有N卡）
-solver_mode: CPU
-</code></pre>
-
-<h2 id="toc_2">训练日志</h2>
-
-<p>执行上面<code>examples/mnist/train_lenet.sh</code>文件后会产生如下的日志输出：</p>
-
-<pre><code>//使用cpu模式运行
-I0513 11:18:42.330993 3659862976 caffe.cpp:211] Use CPU.
-I0513 11:18:42.331964 3659862976 solver.cpp:44] Initializing solver from parameters:
-//打印训练超参数文件lenet_solver.prototxt中经过解析的内容
-test_iter: 100
-test_interval: 500
-base_lr: 0.01
-display: 100
-max_iter: 10000
-lr_policy: &quot;inv&quot;
-gamma: 0.0001
-power: 0.75
-momentum: 0.9
-weight_decay: 0.0005
-snapshot: 5000
-snapshot_prefix: &quot;examples/mnist/lenet&quot;
-solver_mode: CPU
-net: &quot;examples/mnist/lenet_train_test.prototxt&quot;
-train_state {
-  level: 0
-  stage: &quot;&quot;
-}
-I0513 11:18:42.332221 3659862976 solver.cpp:87] Creating training net from net file: examples/mnist/lenet_train_test.prototxt
-//解析CNN网络描述文件中的网络参数，创建训练网络
-I0513 11:18:42.332438 3659862976 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer mnist
-I0513 11:18:42.332453 3659862976 net.cpp:294] The NetState phase (0) differed from the phase (1) specified by a rule in layer accuracy
-I0513 11:18:42.332459 3659862976 net.cpp:51] Initializing net from parameters:
-//打印训练网路参数描述
-name: &quot;LeNet&quot;
-state {
-  phase: TRAIN
-  level: 0
-  stage: &quot;&quot;
-}
-layer {
-  name: &quot;mnist&quot;
-  type: &quot;Data&quot;
-  top: &quot;data&quot;
-  top: &quot;label&quot;
-  include {
-    phase: TRAIN
-  }
-  transform_param {
-    scale: 0.00390625
-  }
-  data_param {
-    source: &quot;examples/mnist/mnist_train_lmdb&quot;
-    batch_size: 64
-    backend: LMDB
-  }
-}
-//........中间省略
-layer {
-  name: &quot;loss&quot;
-  type: &quot;SoftmaxWithLoss&quot;
-  bottom: &quot;ip2&quot;
-  bottom: &quot;label&quot;
-  top: &quot;loss&quot;
-}
-I0513 11:18:42.332698 3659862976 layer_factory.hpp:77] Creating layer mnist
-I0513 11:18:42.332906 3659862976 db_lmdb.cpp:35] Opened lmdb examples/mnist/mnist_train_lmdb
-I0513 11:18:42.332963 3659862976 net.cpp:84] Creating Layer mnist
-//产生两个输出，data为图片数据，label为标签数据
-I0513 11:18:42.332970 3659862976 net.cpp:380] mnist -&gt; data
-I0513 11:18:42.332989 3659862976 net.cpp:380] mnist -&gt; label
-//之后打开了训练集LMDB，data为四维数组，又称blob，尺寸为64,1,28,28
-I0513 11:18:42.333026 3659862976 data_layer.cpp:45] output data size: 64,1,28,28
-I0513 11:18:42.337728 3659862976 net.cpp:122] Setting up mnist
-I0513 11:18:42.337738 3659862976 net.cpp:129] Top shape: 64 1 28 28 (50176)
-I0513 11:18:42.337759 3659862976 net.cpp:129] Top shape: 64 (64)
-//统计占用内存，会逐层累加
-I0513 11:18:42.337762 3659862976 net.cpp:137] Memory required for data: 200960
-//盖一楼，conv1
-I0513 11:18:42.337769 3659862976 layer_factory.hpp:77] Creating layer conv1
-I0513 11:18:42.337776 3659862976 net.cpp:84] Creating Layer conv1
-//conv1需要一个输入data（来自上一层mnist），产生一个输出conv1(送入下一层)
-I0513 11:18:42.337780 3659862976 net.cpp:406] conv1 &lt;- data
-I0513 11:18:42.337785 3659862976 net.cpp:380] conv1 -&gt; conv1
-I0513 11:18:42.337836 3659862976 net.cpp:122] Setting up conv1
-//conv1的输出尺寸为（64,20,24,24）
-I0513 11:18:42.337842 3659862976 net.cpp:129] Top shape: 64 20 24 24 (737280)
-//统计内存逐层累加
-I0513 11:18:42.337847 3659862976 net.cpp:137] Memory required for data: 3150080
-I0513 11:18:42.337853 3659862976 layer_factory.hpp:77] Creating layer pool1
-//中间层创建类似
-I0513 11:18:42.337877 3659862976 net.cpp:84] Creating Layer pool1
-I0513 11:18:42.337882 3659862976 net.cpp:406] pool1 &lt;- conv1
-I0513 11:18:42.337887 3659862976 net.cpp:380] pool1 -&gt; pool1
-I0513 11:18:42.337895 3659862976 net.cpp:122] Setting up pool1
-I0513 11:18:42.337899 3659862976 net.cpp:129] Top shape: 64 20 12 12 (184320)
-I0513 11:18:42.337904 3659862976 net.cpp:137] Memory required for data: 3887360
-I0513 11:18:42.337908 3659862976 layer_factory.hpp:77] Creating layer conv2
-I0513 11:18:42.337913 3659862976 net.cpp:84] Creating Layer conv2
-I0513 11:18:42.337916 3659862976 net.cpp:406] conv2 &lt;- pool1
-I0513 11:18:42.337921 3659862976 net.cpp:380] conv2 -&gt; conv2
-I0513 11:18:42.338141 3659862976 net.cpp:122] Setting up conv2
-I0513 11:18:42.338146 3659862976 net.cpp:129] Top shape: 64 50 8 8 (204800)
-I0513 11:18:42.338162 3659862976 net.cpp:137] Memory required for data: 4706560
-I0513 11:18:42.338167 3659862976 layer_factory.hpp:77] Creating layer pool2
-I0513 11:18:42.338174 3659862976 net.cpp:84] Creating Layer pool2
-I0513 11:18:42.338178 3659862976 net.cpp:406] pool2 &lt;- conv2
-I0513 11:18:42.338182 3659862976 net.cpp:380] pool2 -&gt; pool2
-I0513 11:18:42.338210 3659862976 net.cpp:122] Setting up pool2
-I0513 11:18:42.338215 3659862976 net.cpp:129] Top shape: 64 50 4 4 (51200)
-I0513 11:18:42.338220 3659862976 net.cpp:137] Memory required for data: 4911360
-I0513 11:18:42.338224 3659862976 layer_factory.hpp:77] Creating layer ip1
-I0513 11:18:42.338232 3659862976 net.cpp:84] Creating Layer ip1
-I0513 11:18:42.338235 3659862976 net.cpp:406] ip1 &lt;- pool2
-I0513 11:18:42.338240 3659862976 net.cpp:380] ip1 -&gt; ip1
-I0513 11:18:42.341404 3659862976 net.cpp:122] Setting up ip1
-I0513 11:18:42.341413 3659862976 net.cpp:129] Top shape: 64 500 (32000)
-I0513 11:18:42.341418 3659862976 net.cpp:137] Memory required for data: 5039360
-I0513 11:18:42.341424 3659862976 layer_factory.hpp:77] Creating layer relu1
-I0513 11:18:42.341433 3659862976 net.cpp:84] Creating Layer relu1
-I0513 11:18:42.341435 3659862976 net.cpp:406] relu1 &lt;- ip1
-I0513 11:18:42.341440 3659862976 net.cpp:367] relu1 -&gt; ip1 (in-place)
-I0513 11:18:42.341444 3659862976 net.cpp:122] Setting up relu1
-I0513 11:18:42.341449 3659862976 net.cpp:129] Top shape: 64 500 (32000)
-I0513 11:18:42.341451 3659862976 net.cpp:137] Memory required for data: 5167360
-I0513 11:18:42.341455 3659862976 layer_factory.hpp:77] Creating layer ip2
-I0513 11:18:42.341470 3659862976 net.cpp:84] Creating Layer ip2
-I0513 11:18:42.341473 3659862976 net.cpp:406] ip2 &lt;- ip1
-I0513 11:18:42.341478 3659862976 net.cpp:380] ip2 -&gt; ip2
-I0513 11:18:42.341531 3659862976 net.cpp:122] Setting up ip2
-I0513 11:18:42.341536 3659862976 net.cpp:129] Top shape: 64 10 (640)
-I0513 11:18:42.341539 3659862976 net.cpp:137] Memory required for data: 5169920
-//盖最后一层loss
-I0513 11:18:42.341544 3659862976 layer_factory.hpp:77] Creating layer loss
-I0513 11:18:42.341550 3659862976 net.cpp:84] Creating Layer loss
-//该层需要两个输入ip2和label，产生一个输出loss
-I0513 11:18:42.341554 3659862976 net.cpp:406] loss &lt;- ip2
-I0513 11:18:42.341557 3659862976 net.cpp:406] loss &lt;- label
-I0513 11:18:42.341563 3659862976 net.cpp:380] loss -&gt; loss
-I0513 11:18:42.341572 3659862976 layer_factory.hpp:77] Creating layer loss
-I0513 11:18:42.341583 3659862976 net.cpp:122] Setting up loss
-//输出loss尺寸为1，loss weight参数为1
-I0513 11:18:42.341586 3659862976 net.cpp:129] Top shape: (1)
-I0513 11:18:42.341590 3659862976 net.cpp:132]     with loss weight 1
-I0513 11:18:42.341598 3659862976 net.cpp:137] Memory required for data: 5169924
-//从后往前统计哪些层需要做反向传播计算（BP）
-I0513 11:18:42.341601 3659862976 net.cpp:198] loss needs backward computation.
-I0513 11:18:42.341606 3659862976 net.cpp:198] ip2 needs backward computation.
-I0513 11:18:42.341609 3659862976 net.cpp:198] relu1 needs backward computation.
-I0513 11:18:42.341614 3659862976 net.cpp:198] ip1 needs backward computation.
-I0513 11:18:42.341616 3659862976 net.cpp:198] pool2 needs backward computation.
-I0513 11:18:42.341620 3659862976 net.cpp:198] conv2 needs backward computation.
-I0513 11:18:42.341624 3659862976 net.cpp:198] pool1 needs backward computation.
-I0513 11:18:42.341627 3659862976 net.cpp:198] conv1 needs backward computation.
-I0513 11:18:42.341631 3659862976 net.cpp:200] mnist does not need backward computation.
-I0513 11:18:42.341655 3659862976 net.cpp:242] This network produces output loss
-//盖楼完毕
-I0513 11:18:42.341662 3659862976 net.cpp:255] Network initialization done.
-//还需要创建测试网络，在盖一次楼
-I0513 11:18:42.341949 3659862976 solver.cpp:172] Creating test net (#0) specified by net file: examples/mnist/lenet_train_test.prototxt
-I0513 11:18:42.341986 3659862976 net.cpp:294] The NetState phase (1) differed from the phase (0) specified by a rule in layer mnist
-I0513 11:18:42.341996 3659862976 net.cpp:51] Initializing net 
-from parameters:
-//类似于第一座楼的情况，只是地基mnist改了一下lmdb源和输出尺寸，顶楼加了一个accuracy阁楼
-name: &quot;LeNet&quot;
-state {
-  phase: TEST
-}
-layer {
-  name: &quot;mnist&quot;
-  type: &quot;Data&quot;
-  top: &quot;data&quot;
-  top: &quot;label&quot;
-  include {
-    phase: TEST
-  }
-  transform_param {
-    scale: 0.00390625
-  }
-  data_param {
-    source: &quot;examples/mnist/mnist_test_lmdb&quot;
-    batch_size: 100
-    backend: LMDB
-  }
-}
-
-//....中间重复，不表
-layer {
-  name: &quot;accuracy&quot;
-  type: &quot;Accuracy&quot;
-  bottom: &quot;ip2&quot;
-  bottom: &quot;label&quot;
-  top: &quot;accuracy&quot;
-  include {
-    phase: TEST
-  }
-}
-layer {
-  name: &quot;loss&quot;
-  type: &quot;SoftmaxWithLoss&quot;
-  bottom: &quot;ip2&quot;
-  bottom: &quot;label&quot;
-  top: &quot;loss&quot;
-}
-//具体盖楼过程与训练网络类似
-I0513 11:18:42.342216 3659862976 layer_factory.hpp:77] Creating layer mnist
-I0513 11:18:42.342300 3659862976 db_lmdb.cpp:35] Opened lmdb examples/mnist/mnist_test_lmdb
-I0513 11:18:42.342319 3659862976 net.cpp:84] Creating Layer mnist
-I0513 11:18:42.342329 3659862976 net.cpp:380] mnist -&gt; data
-I0513 11:18:42.342335 3659862976 net.cpp:380] mnist -&gt; label
-I0513 11:18:42.342345 3659862976 data_layer.cpp:45] output data size: 100,1,28,28
-I0513 11:18:42.343029 3659862976 net.cpp:122] Setting up mnist
-I0513 11:18:42.343037 3659862976 net.cpp:129] Top shape: 100 1 28 28 (78400)
-I0513 11:18:42.343057 3659862976 net.cpp:129] Top shape: 100 (100)
-I0513 11:18:42.343061 3659862976 net.cpp:137] Memory required for data: 314000
-I0513 11:18:42.343065 3659862976 layer_factory.hpp:77] Creating layer label_mnist_1_split
-I0513 11:18:42.343073 3659862976 net.cpp:84] Creating Layer label_mnist_1_split
-I0513 11:18:42.343077 3659862976 net.cpp:406] label_mnist_1_split &lt;- label
-I0513 11:18:42.343082 3659862976 net.cpp:380] label_mnist_1_split -&gt; label_mnist_1_split_0
-I0513 11:18:42.343087 3659862976 net.cpp:380] label_mnist_1_split -&gt; label_mnist_1_split_1
-I0513 11:18:42.343093 3659862976 net.cpp:122] Setting up label_mnist_1_split
-I0513 11:18:42.343097 3659862976 net.cpp:129] Top shape: 100 (100)
-I0513 11:18:42.343101 3659862976 net.cpp:129] Top shape: 100 (100)
-I0513 11:18:42.343106 3659862976 net.cpp:137] Memory required for data: 314800
-I0513 11:18:42.343109 3659862976 layer_factory.hpp:77] Creating layer conv1
-I0513 11:18:42.343137 3659862976 net.cpp:84] Creating Layer conv1
-I0513 11:18:42.343144 3659862976 net.cpp:406] conv1 &lt;- data
-I0513 11:18:42.343152 3659862976 net.cpp:380] conv1 -&gt; conv1
-I0513 11:18:42.343175 3659862976 net.cpp:122] Setting up conv1
-I0513 11:18:42.343181 3659862976 net.cpp:129] Top shape: 100 20 24 24 (1152000)
-I0513 11:18:42.343186 3659862976 net.cpp:137] Memory required for data: 4922800
-I0513 11:18:42.343196 3659862976 layer_factory.hpp:77] Creating layer pool1
-I0513 11:18:42.343206 3659862976 net.cpp:84] Creating Layer pool1
-I0513 11:18:42.343214 3659862976 net.cpp:406] pool1 &lt;- conv1
-I0513 11:18:42.343219 3659862976 net.cpp:380] pool1 -&gt; pool1
-I0513 11:18:42.343228 3659862976 net.cpp:122] Setting up pool1
-I0513 11:18:42.343232 3659862976 net.cpp:129] Top shape: 100 20 12 12 (288000)
-I0513 11:18:42.343236 3659862976 net.cpp:137] Memory required for data: 6074800
-I0513 11:18:42.343240 3659862976 layer_factory.hpp:77] Creating layer conv2
-I0513 11:18:42.343245 3659862976 net.cpp:84] Creating Layer conv2
-I0513 11:18:42.343250 3659862976 net.cpp:406] conv2 &lt;- pool1
-I0513 11:18:42.343253 3659862976 net.cpp:380] conv2 -&gt; conv2
-I0513 11:18:42.343482 3659862976 net.cpp:122] Setting up conv2
-I0513 11:18:42.343488 3659862976 net.cpp:129] Top shape: 100 50 8 8 (320000)
-I0513 11:18:42.343503 3659862976 net.cpp:137] Memory required for data: 7354800
-I0513 11:18:42.343509 3659862976 layer_factory.hpp:77] Creating layer pool2
-I0513 11:18:42.343513 3659862976 net.cpp:84] Creating Layer pool2
-I0513 11:18:42.343518 3659862976 net.cpp:406] pool2 &lt;- conv2
-I0513 11:18:42.343521 3659862976 net.cpp:380] pool2 -&gt; pool2
-I0513 11:18:42.343526 3659862976 net.cpp:122] Setting up pool2
-I0513 11:18:42.343530 3659862976 net.cpp:129] Top shape: 100 50 4 4 (80000)
-I0513 11:18:42.343534 3659862976 net.cpp:137] Memory required for data: 7674800
-I0513 11:18:42.343538 3659862976 layer_factory.hpp:77] Creating layer ip1
-I0513 11:18:42.343564 3659862976 net.cpp:84] Creating Layer ip1
-I0513 11:18:42.343569 3659862976 net.cpp:406] ip1 &lt;- pool2
-I0513 11:18:42.343575 3659862976 net.cpp:380] ip1 -&gt; ip1
-I0513 11:18:42.346873 3659862976 net.cpp:122] Setting up ip1
-I0513 11:18:42.346884 3659862976 net.cpp:129] Top shape: 100 500 (50000)
-I0513 11:18:42.346889 3659862976 net.cpp:137] Memory required for data: 7874800
-I0513 11:18:42.346895 3659862976 layer_factory.hpp:77] Creating layer relu1
-I0513 11:18:42.346901 3659862976 net.cpp:84] Creating Layer relu1
-I0513 11:18:42.346905 3659862976 net.cpp:406] relu1 &lt;- ip1
-I0513 11:18:42.346909 3659862976 net.cpp:367] relu1 -&gt; ip1 (in-place)
-I0513 11:18:42.346915 3659862976 net.cpp:122] Setting up relu1
-I0513 11:18:42.346917 3659862976 net.cpp:129] Top shape: 100 500 (50000)
-I0513 11:18:42.346921 3659862976 net.cpp:137] Memory required for data: 8074800
-I0513 11:18:42.346925 3659862976 layer_factory.hpp:77] Creating layer ip2
-I0513 11:18:42.346931 3659862976 net.cpp:84] Creating Layer ip2
-I0513 11:18:42.346935 3659862976 net.cpp:406] ip2 &lt;- ip1
-I0513 11:18:42.346938 3659862976 net.cpp:380] ip2 -&gt; ip2
-I0513 11:18:42.346987 3659862976 net.cpp:122] Setting up ip2
-I0513 11:18:42.346992 3659862976 net.cpp:129] Top shape: 100 10 (1000)
-I0513 11:18:42.346997 3659862976 net.cpp:137] Memory required for data: 8078800
-//注意这里，ip2_ip2_0_split在网络描述中没有显示给出，是caffe解析后自动加上的
-I0513 11:18:42.347002 3659862976 layer_factory.hpp:77] Creating layer ip2_ip2_0_split
-I0513 11:18:42.347007 3659862976 net.cpp:84] Creating Layer ip2_ip2_0_split
-//ip2_ip2_0_split接受一个输入ip2，产生两个输出ip2_ip2_0_split_0和ip2_ip2_0_split_1，是复制关系
-I0513 11:18:42.347010 3659862976 net.cpp:406] ip2_ip2_0_split &lt;- ip2
-I0513 11:18:42.347014 3659862976 net.cpp:380] ip2_ip2_0_split -&gt; ip2_ip2_0_split_0
-I0513 11:18:42.347019 3659862976 net.cpp:380] ip2_ip2_0_split -&gt; ip2_ip2_0_split_1
-I0513 11:18:42.347024 3659862976 net.cpp:122] Setting up ip2_ip2_0_split
-I0513 11:18:42.347028 3659862976 net.cpp:129] Top shape: 100 10 (1000)
-I0513 11:18:42.347033 3659862976 net.cpp:129] Top shape: 100 10 (1000)
-I0513 11:18:42.347036 3659862976 net.cpp:137] Memory required for data: 8086800
-//ip2_ip2_0_split_0给了accuracy层
-I0513 11:18:42.347039 3659862976 layer_factory.hpp:77] Creating layer accuracy
-I0513 11:18:42.347069 3659862976 net.cpp:84] Creating Layer accuracy
-I0513 11:18:42.347074 3659862976 net.cpp:406] accuracy &lt;- ip2_ip2_0_split_0
-I0513 11:18:42.347077 3659862976 net.cpp:406] accuracy &lt;- label_mnist_1_split_0
-I0513 11:18:42.347082 3659862976 net.cpp:380] accuracy -&gt; accuracy
-I0513 11:18:42.347088 3659862976 net.cpp:122] Setting up accuracy
-//accuracy层输出尺寸为1，即分类准确率
-I0513 11:18:42.347091 3659862976 net.cpp:129] Top shape: (1)
-I0513 11:18:42.347095 3659862976 net.cpp:137] Memory required for data: 8086804
-//ip2_ip2_0_split_1给了loss层
-I0513 11:18:42.347100 3659862976 layer_factory.hpp:77] Creating layer loss
-I0513 11:18:42.347103 3659862976 net.cpp:84] Creating Layer loss
-I0513 11:18:42.347107 3659862976 net.cpp:406] loss &lt;- ip2_ip2_0_split_1
-I0513 11:18:42.347111 3659862976 net.cpp:406] loss &lt;- label_mnist_1_split_1
-I0513 11:18:42.347115 3659862976 net.cpp:380] loss -&gt; loss
-I0513 11:18:42.347121 3659862976 layer_factory.hpp:77] Creating layer loss
-I0513 11:18:42.347131 3659862976 net.cpp:122] Setting up loss
-I0513 11:18:42.347133 3659862976 net.cpp:129] Top shape: (1)
-I0513 11:18:42.347137 3659862976 net.cpp:132]     with loss weight 1
-I0513 11:18:42.347143 3659862976 net.cpp:137] Memory required for data: 8086808
-I0513 11:18:42.347147 3659862976 net.cpp:198] loss needs backward computation.
-I0513 11:18:42.347151 3659862976 net.cpp:200] accuracy does not need backward computation.
-I0513 11:18:42.347156 3659862976 net.cpp:198] ip2_ip2_0_split needs backward computation.
-I0513 11:18:42.347159 3659862976 net.cpp:198] ip2 needs backward computation.
-I0513 11:18:42.347162 3659862976 net.cpp:198] relu1 needs backward computation.
-I0513 11:18:42.347167 3659862976 net.cpp:198] ip1 needs backward computation.
-I0513 11:18:42.347169 3659862976 net.cpp:198] pool2 needs backward computation.
-I0513 11:18:42.347173 3659862976 net.cpp:198] conv2 needs backward computation.
-I0513 11:18:42.347177 3659862976 net.cpp:198] pool1 needs backward computation.
-I0513 11:18:42.347180 3659862976 net.cpp:198] conv1 needs backward computation.
-I0513 11:18:42.347184 3659862976 net.cpp:200] label_mnist_1_split does not need backward computation.
-I0513 11:18:42.347189 3659862976 net.cpp:200] mnist does not need backward computation.
-I0513 11:18:42.347193 3659862976 net.cpp:242] This network produces output accuracy
-I0513 11:18:42.347196 3659862976 net.cpp:242] This network produces output loss
-//第二座楼盖好了
-I0513 11:18:42.347203 3659862976 net.cpp:255] Network initialization done.
-//装修方案确定了
-I0513 11:18:42.347247 3659862976 solver.cpp:56] Solver scaffolding done.
-//开始装修
-I0513 11:18:42.347271 3659862976 caffe.cpp:248] Starting Optimization
-I0513 11:18:42.347275 3659862976 solver.cpp:272] Solving LeNet
-I0513 11:18:42.347278 3659862976 solver.cpp:273] Learning Rate Policy: inv
-//先测试一次，得到出事分类准确率和损失
-I0513 11:18:42.348048 3659862976 solver.cpp:330] Iteration 0, Testing net (#0)
-I0513 11:18:44.611253 57593856 data_layer.cpp:73] Restarting data prefetching from start.
-I0513 11:18:44.703907 3659862976 solver.cpp:397]     Test net output #0: accuracy = 0.077
-I0513 11:18:44.703938 3659862976 solver.cpp:397]     Test net output #1: loss = 2.41516 (* 1 = 2.41516 loss)
-//现在分类效果肯定很差，准确率只有0.077，损失值约为2.3
-I0513 11:18:44.741230 3659862976 solver.cpp:218] Iteration 0 (0 iter/s, 2.393s/100 iters), loss = 2.42047
-//0次迭代后，依旧很差，训练网络没有accuracy输出，只有loss输出
-I0513 11:18:44.741261 3659862976 solver.cpp:237]     Train net output #0: loss = 2.42047 (* 1 = 2.42047 loss)
-I0513 11:18:44.741287 3659862976 sgd_solver.cpp:105] Iteration 0, lr = 0.01
-//迭代100次之后，效果就出来了，loss已经降到0.21（之前是2.42）
-I0513 11:18:47.874459 3659862976 solver.cpp:218] Iteration 100 (31.9183 iter/s, 3.133s/100 iters), loss = 0.215375
-I0513 11:18:47.874493 3659862976 solver.cpp:237]     Train net output #0: loss = 0.215375 (* 1 = 0.215375 loss)
-I0513 11:18:47.874500 3659862976 sgd_solver.cpp:105] Iteration 100, lr = 0.00992565
-I0513 11:18:50.998973 3659862976 solver.cpp:218] Iteration 200 (32.0102 iter/s, 3.124s/100 iters), loss = 0.144389
-I0513 11:18:50.999003 3659862976 solver.cpp:237]     Train net output #0: loss = 0.144389 (* 1 = 0.144389 loss)
-I0513 11:18:50.999011 3659862976 sgd_solver.cpp:105] Iteration 200, lr = 0.00985258
-I0513 11:18:54.100409 3659862976 solver.cpp:218] Iteration 300 (32.2477 iter/s, 3.101s/100 iters), loss = 0.192488
-I0513 11:18:54.100476 3659862976 solver.cpp:237]     Train net output #0: loss = 0.192488 (* 1 = 0.192488 loss)
-I0513 11:18:54.100483 3659862976 sgd_solver.cpp:105] Iteration 300, lr = 0.00978075
-I0513 11:18:57.210686 3659862976 solver.cpp:218] Iteration 400 (32.1543 iter/s, 3.11s/100 iters), loss = 0.0663644
-I0513 11:18:57.210728 3659862976 solver.cpp:237]     Train net output #0: loss = 0.0663644 (* 1 = 0.0663644 loss)
-I0513 11:18:57.210737 3659862976 sgd_solver.cpp:105] Iteration 400, lr = 0.00971013
-//迭代500次之后，进行一次测试。
-I0513 11:19:00.279249 3659862976 solver.cpp:330] Iteration 500, Testing net (#0)
-I0513 11:19:02.608597 57593856 data_layer.cpp:73] Restarting data prefetching from start.
-//发现准确度accuracy已经显著提升到0.9744了，loss为0.08
-I0513 11:19:02.703658 3659862976 solver.cpp:397]     Test net output #0: accuracy = 0.9744
-I0513 11:19:02.703694 3659862976 solver.cpp:397]     Test net output #1: loss = 0.0836155 (* 1 = 0.0836155 loss)
-I0513 11:19:02.735476 3659862976 solver.cpp:218] Iteration 500 (18.1028 iter/s, 5.524s/100 iters), loss = 0.0916289
-I0513 11:19:02.735512 3659862976 solver.cpp:237]     Train net output #0: loss = 0.0916288 (* 1 = 0.0916288 loss)
-I0513 11:19:02.735520 3659862976 sgd_solver.cpp:105] Iteration 500, lr = 0.00964069
-I0513 11:19:05.931562 3659862976 solver.cpp:218] Iteration 600 (31.2891 iter/s, 3.196s/100 iters), loss = 0.0844364
-I0513 11:19:05.931597 3659862976 solver.cpp:237]     Train net output #0: loss = 0.0844363 (* 1 = 0.0844363 loss)
-I0513 11:19:05.931604 3659862976 sgd_solver.cpp:105] Iteration 600, lr = 0.0095724
-I0513 11:19:09.116649 3659862976 solver.cpp:218] Iteration 700 (31.3972 iter/s, 3.185s/100 iters), loss = 0.134004
-I0513 11:19:09.116684 3659862976 solver.cpp:237]     Train net output #0: loss = 0.134004 (* 1 = 0.134004 loss)
-I0513 11:19:09.116691 3659862976 sgd_solver.cpp:105] Iteration 700, lr = 0.00950522
-//中间是训练过程。。。。。。
-I0513 11:22:17.536756 3659862976 solver.cpp:218] Iteration 4800 (19.3311 iter/s, 5.173s/100 iters), loss = 0.0179583
-I0513 11:22:17.536806 3659862976 solver.cpp:237]     Train net output #0: loss = 0.0179581 (* 1 = 0.0179581 loss)
-I0513 11:22:17.536818 3659862976 sgd_solver.cpp:105] Iteration 4800, lr = 0.00745253
-I0513 11:22:22.731861 3659862976 solver.cpp:218] Iteration 4900 (19.2493 iter/s, 5.195s/100 iters), loss = 0.00556874
-I0513 11:22:22.731927 3659862976 solver.cpp:237]     Train net output #0: loss = 0.00556857 (* 1 = 0.00556857 loss)
-I0513 11:22:22.731940 3659862976 sgd_solver.cpp:105] Iteration 4900, lr = 0.00741498
-//每迭代到5000次之后，打印一次快照，保存lenet_iter_5000.caffemodel和lenet_iter_5000.solverstate
-I0513 11:22:28.143353 3659862976 solver.cpp:447] Snapshotting to binary proto file examples/mnist/lenet_iter_5000.caffemodel
-I0513 11:22:28.167670 3659862976 sgd_solver.cpp:273] Snapshotting solver state to binary proto file examples/mnist/lenet_iter_5000.solverstate
-I0513 11:22:28.171842 3659862976 solver.cpp:330] Iteration 5000, Testing net (#0)
-I0513 11:22:32.514833 57593856 data_layer.cpp:73] Restarting data prefetching from start.
-I0513 11:22:32.699314 3659862976 solver.cpp:397]     Test net output #0: accuracy = 0.9888
-I0513 11:22:32.699359 3659862976 solver.cpp:397]     Test net output #1: loss = 0.0334435 (* 1 = 0.0334435 loss)
-I0513 11:22:32.754936 3659862976 solver.cpp:218] Iteration 5000 (9.97705 iter/s, 10.023s/100 iters), loss = 0.0241056
-I0513 11:22:32.754987 3659862976 solver.cpp:237]     Train net output #0: loss = 0.0241055 (* 1 = 0.0241055 loss)
-I0513 11:22:32.754999 3659862976 sgd_solver.cpp:105] Iteration 5000, lr = 0.00737788
-//中间继续训练。。。。。
-I0513 11:26:53.808578 3659862976 solver.cpp:218] Iteration 9900 (21.097 iter/s, 4.74s/100 iters), loss = 0.00466773
-I0513 11:26:53.808624 3659862976 solver.cpp:237]     Train net output #0: loss = 0.00466757 (* 1 = 0.00466757 loss)
-I0513 11:26:53.808635 3659862976 sgd_solver.cpp:105] Iteration 9900, lr = 0.00596843
-//最后一次打印快照
-I0513 11:26:58.671659 3659862976 solver.cpp:447] Snapshotting to binary proto file examples/mnist/lenet_iter_10000.caffemodel
-I0513 11:26:58.688323 3659862976 sgd_solver.cpp:273] Snapshotting solver state to binary proto file examples/mnist/lenet_iter_10000.solverstate
-I0513 11:26:58.715297 3659862976 solver.cpp:310] Iteration 10000, loss = 0.00293942
-I0513 11:26:58.715337 3659862976 solver.cpp:330] Iteration 10000, Testing net (#0)
-I0513 11:27:02.099313 57593856 data_layer.cpp:73] Restarting data prefetching from start.
-//最终分类准确率为99%
-I0513 11:27:02.230465 3659862976 solver.cpp:397]     Test net output #0: accuracy = 0.991
-//最终loss值为0.03
-I0513 11:27:02.230509 3659862976 solver.cpp:397]     Test net output #1: loss = 0.0304018 (* 1 = 0.0304018 loss)
-I0513 11:27:02.230518 3659862976 solver.cpp:315] Optimization Done.
-I0513 11:27:02.230525 3659862976 caffe.cpp:259] Optimization Done.
-//装修结束
-</code></pre>
-
-<h2 id="toc_3">用训练好的模型对数据进行预测</h2>
-
-<p>从上面的输出结果可以看到最终训练的模型权值存在lenet_iter_10000.caffemodal中，之后可以对测试数据集进行预测。运行如下命令就可以了：</p>
-
-<pre><code>➜  caffe git:(master) ✗ ./build/tools/caffe.bin test \
--model examples/mnist/lenet_train_test.prototxt \
--weights examples/mnist/lenet_iter_10000.caffemodel \
-    -iterations 100
-</code></pre>
-
-<p>上述命令解释：<br/>
-./build/tools/caffe.bin test，表示只做预测（前向传播急速那），不进行参数更新（BP反向传播计算）</p>
-
-<p>-model examples/mnist/lenet_train_test.prototxt ，指定模型描述文本文件</p>
-
-<p>-weights examples/mnist/lenet_iter_10000.caffemodel ，指定模型预先训练好的权值文件<br/>
--iterations 100 ， 指定测试迭代次数。参与测试的样例数目为（iterations*batch_size）,batch_size在model prototxt中设定，为100时刚好覆盖全部10000个测试样本。</p>
-
-<p>我们运行上述命令得到：</p>
-
-<pre><code>I0513 11:37:08.827889 3659862976 caffe.cpp:284] Use CPU.
-I0513 11:37:08.830747 3659862976 net.cpp:294] The NetState phase (1) differed from the phase (0) specified by a rule in layer mnist
-I0513 11:37:08.830780 3659862976 net.cpp:51] Initializing net from parameters:
-name: &quot;LeNet&quot;
-state {
-  phase: TEST
-  level: 0
-  stage: &quot;&quot;
-}
-layer {
-  name: &quot;mnist&quot;
-  type: &quot;Data&quot;
-  top: &quot;data&quot;
-  top: &quot;label&quot;
-  include {
-    phase: TEST
-  }
-  transform_param {
-    scale: 0.00390625
-  }
-  data_param {
-    source: &quot;examples/mnist/mnist_test_lmdb&quot;
-    batch_size: 100
-    backend: LMDB
-  }
-}
-layer {
-  name: &quot;conv1&quot;
-  type: &quot;Convolution&quot;
-  bottom: &quot;data&quot;
-  top: &quot;conv1&quot;
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  convolution_param {
-    num_output: 20
-    kernel_size: 5
-    stride: 1
-    weight_filler {
-      type: &quot;xavier&quot;
-    }
-    bias_filler {
-      type: &quot;constant&quot;
-    }
-  }
-}
-layer {
-  name: &quot;pool1&quot;
-  type: &quot;Pooling&quot;
-  bottom: &quot;conv1&quot;
-  top: &quot;pool1&quot;
-  pooling_param {
-    pool: MAX
-    kernel_size: 2
-    stride: 2
-  }
-}
-layer {
-  name: &quot;conv2&quot;
-  type: &quot;Convolution&quot;
-  bottom: &quot;pool1&quot;
-  top: &quot;conv2&quot;
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  convolution_param {
-    num_output: 50
-    kernel_size: 5
-    stride: 1
-    weight_filler {
-      type: &quot;xavier&quot;
-    }
-    bias_filler {
-      type: &quot;constant&quot;
-    }
-  }
-}
-layer {
-  name: &quot;pool2&quot;
-  type: &quot;Pooling&quot;
-  bottom: &quot;conv2&quot;
-  top: &quot;pool2&quot;
-  pooling_param {
-    pool: MAX
-    kernel_size: 2
-    stride: 2
-  }
-}
-layer {
-  name: &quot;ip1&quot;
-  type: &quot;InnerProduct&quot;
-  bottom: &quot;pool2&quot;
-  top: &quot;ip1&quot;
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  inner_product_param {
-    num_output: 500
-    weight_filler {
-      type: &quot;xavier&quot;
-    }
-    bias_filler {
-      type: &quot;constant&quot;
-    }
-  }
-}
-layer {
-  name: &quot;relu1&quot;
-  type: &quot;ReLU&quot;
-  bottom: &quot;ip1&quot;
-  top: &quot;ip1&quot;
-}
-layer {
-  name: &quot;ip2&quot;
-  type: &quot;InnerProduct&quot;
-  bottom: &quot;ip1&quot;
-  top: &quot;ip2&quot;
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  inner_product_param {
-    num_output: 10
-    weight_filler {
-      type: &quot;xavier&quot;
-    }
-    bias_filler {
-      type: &quot;constant&quot;
-    }
-  }
-}
-layer {
-  name: &quot;accuracy&quot;
-  type: &quot;Accuracy&quot;
-  bottom: &quot;ip2&quot;
-  bottom: &quot;label&quot;
-  top: &quot;accuracy&quot;
-  include {
-    phase: TEST
-  }
-}
-layer {
-  name: &quot;loss&quot;
-  type: &quot;SoftmaxWithLoss&quot;
-  bottom: &quot;ip2&quot;
-  bottom: &quot;label&quot;
-  top: &quot;loss&quot;
-}
-I0513 11:37:08.831130 3659862976 layer_factory.hpp:77] Creating layer mnist
-I0513 11:37:08.831360 3659862976 db_lmdb.cpp:35] Opened lmdb examples/mnist/mnist_test_lmdb
-I0513 11:37:08.831418 3659862976 net.cpp:84] Creating Layer mnist
-I0513 11:37:08.831425 3659862976 net.cpp:380] mnist -&gt; data
-I0513 11:37:08.831444 3659862976 net.cpp:380] mnist -&gt; label
-I0513 11:37:08.831480 3659862976 data_layer.cpp:45] output data size: 100,1,28,28
-I0513 11:37:08.836457 3659862976 net.cpp:122] Setting up mnist
-I0513 11:37:08.836468 3659862976 net.cpp:129] Top shape: 100 1 28 28 (78400)
-I0513 11:37:08.836488 3659862976 net.cpp:129] Top shape: 100 (100)
-I0513 11:37:08.836491 3659862976 net.cpp:137] Memory required for data: 314000
-I0513 11:37:08.836498 3659862976 layer_factory.hpp:77] Creating layer label_mnist_1_split
-I0513 11:37:08.836505 3659862976 net.cpp:84] Creating Layer label_mnist_1_split
-I0513 11:37:08.836509 3659862976 net.cpp:406] label_mnist_1_split &lt;- label
-I0513 11:37:08.836513 3659862976 net.cpp:380] label_mnist_1_split -&gt; label_mnist_1_split_0
-I0513 11:37:08.836519 3659862976 net.cpp:380] label_mnist_1_split -&gt; label_mnist_1_split_1
-I0513 11:37:08.836525 3659862976 net.cpp:122] Setting up label_mnist_1_split
-I0513 11:37:08.836529 3659862976 net.cpp:129] Top shape: 100 (100)
-I0513 11:37:08.836534 3659862976 net.cpp:129] Top shape: 100 (100)
-I0513 11:37:08.836539 3659862976 net.cpp:137] Memory required for data: 314800
-I0513 11:37:08.836542 3659862976 layer_factory.hpp:77] Creating layer conv1
-I0513 11:37:08.836550 3659862976 net.cpp:84] Creating Layer conv1
-I0513 11:37:08.836555 3659862976 net.cpp:406] conv1 &lt;- data
-I0513 11:37:08.836558 3659862976 net.cpp:380] conv1 -&gt; conv1
-I0513 11:37:08.836611 3659862976 net.cpp:122] Setting up conv1
-I0513 11:37:08.836616 3659862976 net.cpp:129] Top shape: 100 20 24 24 (1152000)
-I0513 11:37:08.836639 3659862976 net.cpp:137] Memory required for data: 4922800
-I0513 11:37:08.836648 3659862976 layer_factory.hpp:77] Creating layer pool1
-I0513 11:37:08.836653 3659862976 net.cpp:84] Creating Layer pool1
-I0513 11:37:08.836658 3659862976 net.cpp:406] pool1 &lt;- conv1
-I0513 11:37:08.836661 3659862976 net.cpp:380] pool1 -&gt; pool1
-I0513 11:37:08.836671 3659862976 net.cpp:122] Setting up pool1
-I0513 11:37:08.836675 3659862976 net.cpp:129] Top shape: 100 20 12 12 (288000)
-I0513 11:37:08.836680 3659862976 net.cpp:137] Memory required for data: 6074800
-I0513 11:37:08.836683 3659862976 layer_factory.hpp:77] Creating layer conv2
-I0513 11:37:08.836691 3659862976 net.cpp:84] Creating Layer conv2
-I0513 11:37:08.836695 3659862976 net.cpp:406] conv2 &lt;- pool1
-I0513 11:37:08.836700 3659862976 net.cpp:380] conv2 -&gt; conv2
-I0513 11:37:08.836917 3659862976 net.cpp:122] Setting up conv2
-I0513 11:37:08.836923 3659862976 net.cpp:129] Top shape: 100 50 8 8 (320000)
-I0513 11:37:08.836971 3659862976 net.cpp:137] Memory required for data: 7354800
-I0513 11:37:08.837033 3659862976 layer_factory.hpp:77] Creating layer pool2
-I0513 11:37:08.837041 3659862976 net.cpp:84] Creating Layer pool2
-I0513 11:37:08.837045 3659862976 net.cpp:406] pool2 &lt;- conv2
-I0513 11:37:08.837049 3659862976 net.cpp:380] pool2 -&gt; pool2
-I0513 11:37:08.837059 3659862976 net.cpp:122] Setting up pool2
-I0513 11:37:08.837062 3659862976 net.cpp:129] Top shape: 100 50 4 4 (80000)
-I0513 11:37:08.837067 3659862976 net.cpp:137] Memory required for data: 7674800
-I0513 11:37:08.837070 3659862976 layer_factory.hpp:77] Creating layer ip1
-I0513 11:37:08.837076 3659862976 net.cpp:84] Creating Layer ip1
-I0513 11:37:08.837080 3659862976 net.cpp:406] ip1 &lt;- pool2
-I0513 11:37:08.837085 3659862976 net.cpp:380] ip1 -&gt; ip1
-I0513 11:37:08.840445 3659862976 net.cpp:122] Setting up ip1
-I0513 11:37:08.840461 3659862976 net.cpp:129] Top shape: 100 500 (50000)
-I0513 11:37:08.840467 3659862976 net.cpp:137] Memory required for data: 7874800
-I0513 11:37:08.840476 3659862976 layer_factory.hpp:77] Creating layer relu1
-I0513 11:37:08.840487 3659862976 net.cpp:84] Creating Layer relu1
-I0513 11:37:08.840492 3659862976 net.cpp:406] relu1 &lt;- ip1
-I0513 11:37:08.840497 3659862976 net.cpp:367] relu1 -&gt; ip1 (in-place)
-I0513 11:37:08.840504 3659862976 net.cpp:122] Setting up relu1
-I0513 11:37:08.840507 3659862976 net.cpp:129] Top shape: 100 500 (50000)
-I0513 11:37:08.840512 3659862976 net.cpp:137] Memory required for data: 8074800
-I0513 11:37:08.840517 3659862976 layer_factory.hpp:77] Creating layer ip2
-I0513 11:37:08.840523 3659862976 net.cpp:84] Creating Layer ip2
-I0513 11:37:08.840528 3659862976 net.cpp:406] ip2 &lt;- ip1
-I0513 11:37:08.840533 3659862976 net.cpp:380] ip2 -&gt; ip2
-I0513 11:37:08.840591 3659862976 net.cpp:122] Setting up ip2
-I0513 11:37:08.840597 3659862976 net.cpp:129] Top shape: 100 10 (1000)
-I0513 11:37:08.840601 3659862976 net.cpp:137] Memory required for data: 8078800
-I0513 11:37:08.840606 3659862976 layer_factory.hpp:77] Creating layer ip2_ip2_0_split
-I0513 11:37:08.840612 3659862976 net.cpp:84] Creating Layer ip2_ip2_0_split
-I0513 11:37:08.840616 3659862976 net.cpp:406] ip2_ip2_0_split &lt;- ip2
-I0513 11:37:08.840623 3659862976 net.cpp:380] ip2_ip2_0_split -&gt; ip2_ip2_0_split_0
-I0513 11:37:08.840631 3659862976 net.cpp:380] ip2_ip2_0_split -&gt; ip2_ip2_0_split_1
-I0513 11:37:08.840637 3659862976 net.cpp:122] Setting up ip2_ip2_0_split
-I0513 11:37:08.840641 3659862976 net.cpp:129] Top shape: 100 10 (1000)
-I0513 11:37:08.840646 3659862976 net.cpp:129] Top shape: 100 10 (1000)
-I0513 11:37:08.840649 3659862976 net.cpp:137] Memory required for data: 8086800
-I0513 11:37:08.840653 3659862976 layer_factory.hpp:77] Creating layer accuracy
-I0513 11:37:08.840659 3659862976 net.cpp:84] Creating Layer accuracy
-I0513 11:37:08.840663 3659862976 net.cpp:406] accuracy &lt;- ip2_ip2_0_split_0
-I0513 11:37:08.840668 3659862976 net.cpp:406] accuracy &lt;- label_mnist_1_split_0
-I0513 11:37:08.840672 3659862976 net.cpp:380] accuracy -&gt; accuracy
-I0513 11:37:08.840678 3659862976 net.cpp:122] Setting up accuracy
-I0513 11:37:08.840708 3659862976 net.cpp:129] Top shape: (1)
-I0513 11:37:08.840714 3659862976 net.cpp:137] Memory required for data: 8086804
-I0513 11:37:08.840718 3659862976 layer_factory.hpp:77] Creating layer loss
-I0513 11:37:08.840724 3659862976 net.cpp:84] Creating Layer loss
-I0513 11:37:08.840728 3659862976 net.cpp:406] loss &lt;- ip2_ip2_0_split_1
-I0513 11:37:08.840733 3659862976 net.cpp:406] loss &lt;- label_mnist_1_split_1
-I0513 11:37:08.840737 3659862976 net.cpp:380] loss -&gt; loss
-I0513 11:37:08.840746 3659862976 layer_factory.hpp:77] Creating layer loss
-I0513 11:37:08.840759 3659862976 net.cpp:122] Setting up loss
-I0513 11:37:08.840762 3659862976 net.cpp:129] Top shape: (1)
-I0513 11:37:08.840767 3659862976 net.cpp:132]     with loss weight 1
-I0513 11:37:08.840776 3659862976 net.cpp:137] Memory required for data: 8086808
-I0513 11:37:08.840780 3659862976 net.cpp:198] loss needs backward computation.
-I0513 11:37:08.840785 3659862976 net.cpp:200] accuracy does not need backward computation.
-I0513 11:37:08.840790 3659862976 net.cpp:198] ip2_ip2_0_split needs backward computation.
-I0513 11:37:08.840793 3659862976 net.cpp:198] ip2 needs backward computation.
-I0513 11:37:08.840798 3659862976 net.cpp:198] relu1 needs backward computation.
-I0513 11:37:08.840802 3659862976 net.cpp:198] ip1 needs backward computation.
-I0513 11:37:08.840806 3659862976 net.cpp:198] pool2 needs backward computation.
-I0513 11:37:08.840811 3659862976 net.cpp:198] conv2 needs backward computation.
-I0513 11:37:08.840814 3659862976 net.cpp:198] pool1 needs backward computation.
-I0513 11:37:08.840818 3659862976 net.cpp:198] conv1 needs backward computation.
-I0513 11:37:08.840822 3659862976 net.cpp:200] label_mnist_1_split does not need backward computation.
-I0513 11:37:08.840827 3659862976 net.cpp:200] mnist does not need backward computation.
-I0513 11:37:08.840831 3659862976 net.cpp:242] This network produces output accuracy
-I0513 11:37:08.840836 3659862976 net.cpp:242] This network produces output loss
-I0513 11:37:08.840843 3659862976 net.cpp:255] Network initialization done.
-I0513 11:37:08.843325 3659862976 caffe.cpp:290] Running for 100 iterations.
-I0513 11:37:08.871536 3659862976 caffe.cpp:313] Batch 0, accuracy = 1
-I0513 11:37:08.871567 3659862976 caffe.cpp:313] Batch 0, loss = 0.0085843
-I0513 11:37:08.894382 3659862976 caffe.cpp:313] Batch 1, accuracy = 1
-I0513 11:37:08.894414 3659862976 caffe.cpp:313] Batch 1, loss = 0.00573037
-I0513 11:37:08.918002 3659862976 caffe.cpp:313] Batch 2, accuracy = 0.99
-I0513 11:37:08.918031 3659862976 caffe.cpp:313] Batch 2, loss = 0.0333053
-I0513 11:37:08.943091 3659862976 caffe.cpp:313] Batch 3, accuracy = 0.99
-I0513 11:37:08.943127 3659862976 caffe.cpp:313] Batch 3, loss = 0.0271862
-I0513 11:37:08.967147 3659862976 caffe.cpp:313] Batch 4, accuracy = 0.99
-I0513 11:37:08.967177 3659862976 caffe.cpp:313] Batch 4, loss = 0.0571239
-I0513 11:37:08.989929 3659862976 caffe.cpp:313] Batch 5, accuracy = 0.99
-I0513 11:37:08.989961 3659862976 caffe.cpp:313] Batch 5, loss = 0.0569953
-I0513 11:37:09.015426 3659862976 caffe.cpp:313] Batch 6, accuracy = 0.98
-I0513 11:37:09.015463 3659862976 caffe.cpp:313] Batch 6, loss = 0.0698283
-I0513 11:37:09.039398 3659862976 caffe.cpp:313] Batch 7, accuracy = 0.99
-I0513 11:37:09.039432 3659862976 caffe.cpp:313] Batch 7, loss = 0.0349087
-I0513 11:37:09.063937 3659862976 caffe.cpp:313] Batch 8, accuracy = 1
-I0513 11:37:09.063967 3659862976 caffe.cpp:313] Batch 8, loss = 0.0115442
-I0513 11:37:09.086630 3659862976 caffe.cpp:313] Batch 9, accuracy = 0.99
-I0513 11:37:09.086663 3659862976 caffe.cpp:313] Batch 9, loss = 0.0361095
-I0513 11:37:09.111706 3659862976 caffe.cpp:313] Batch 10, accuracy = 0.98
-I0513 11:37:09.111735 3659862976 caffe.cpp:313] Batch 10, loss = 0.0702643
-I0513 11:37:09.135445 3659862976 caffe.cpp:313] Batch 11, accuracy = 0.97
-I0513 11:37:09.135478 3659862976 caffe.cpp:313] Batch 11, loss = 0.0508112
-I0513 11:37:09.159065 3659862976 caffe.cpp:313] Batch 12, accuracy = 0.95
-I0513 11:37:09.159097 3659862976 caffe.cpp:313] Batch 12, loss = 0.148118
-I0513 11:37:09.181542 3659862976 caffe.cpp:313] Batch 13, accuracy = 0.98
-I0513 11:37:09.181607 3659862976 caffe.cpp:313] Batch 13, loss = 0.036772
-I0513 11:37:09.205440 3659862976 caffe.cpp:313] Batch 14, accuracy = 1
-I0513 11:37:09.205476 3659862976 caffe.cpp:313] Batch 14, loss = 0.00694412
-I0513 11:37:09.228198 3659862976 caffe.cpp:313] Batch 15, accuracy = 0.99
-I0513 11:37:09.228229 3659862976 caffe.cpp:313] Batch 15, loss = 0.0389514
-I0513 11:37:09.251550 3659862976 caffe.cpp:313] Batch 16, accuracy = 0.98
-I0513 11:37:09.251581 3659862976 caffe.cpp:313] Batch 16, loss = 0.0298825
-I0513 11:37:09.275153 3659862976 caffe.cpp:313] Batch 17, accuracy = 1
-I0513 11:37:09.275182 3659862976 caffe.cpp:313] Batch 17, loss = 0.0170967
-I0513 11:37:09.298004 3659862976 caffe.cpp:313] Batch 18, accuracy = 0.99
-I0513 11:37:09.298035 3659862976 caffe.cpp:313] Batch 18, loss = 0.0189575
-I0513 11:37:09.321348 3659862976 caffe.cpp:313] Batch 19, accuracy = 0.99
-I0513 11:37:09.321379 3659862976 caffe.cpp:313] Batch 19, loss = 0.0455956
-I0513 11:37:09.344025 3659862976 caffe.cpp:313] Batch 20, accuracy = 0.98
-I0513 11:37:09.344058 3659862976 caffe.cpp:313] Batch 20, loss = 0.108723
-I0513 11:37:09.368069 3659862976 caffe.cpp:313] Batch 21, accuracy = 0.98
-I0513 11:37:09.368101 3659862976 caffe.cpp:313] Batch 21, loss = 0.0780955
-I0513 11:37:09.390791 3659862976 caffe.cpp:313] Batch 22, accuracy = 0.99
-I0513 11:37:09.390823 3659862976 caffe.cpp:313] Batch 22, loss = 0.0368689
-I0513 11:37:09.414577 3659862976 caffe.cpp:313] Batch 23, accuracy = 0.97
-I0513 11:37:09.414621 3659862976 caffe.cpp:313] Batch 23, loss = 0.0296016
-I0513 11:37:09.437597 3659862976 caffe.cpp:313] Batch 24, accuracy = 0.97
-I0513 11:37:09.437628 3659862976 caffe.cpp:313] Batch 24, loss = 0.0589915
-I0513 11:37:09.460636 3659862976 caffe.cpp:313] Batch 25, accuracy = 0.99
-I0513 11:37:09.460669 3659862976 caffe.cpp:313] Batch 25, loss = 0.0754509
-I0513 11:37:09.483229 3659862976 caffe.cpp:313] Batch 26, accuracy = 0.99
-I0513 11:37:09.483261 3659862976 caffe.cpp:313] Batch 26, loss = 0.118656
-I0513 11:37:09.508059 3659862976 caffe.cpp:313] Batch 27, accuracy = 0.98
-I0513 11:37:09.508092 3659862976 caffe.cpp:313] Batch 27, loss = 0.0222734
-I0513 11:37:09.530911 3659862976 caffe.cpp:313] Batch 28, accuracy = 0.99
-I0513 11:37:09.530943 3659862976 caffe.cpp:313] Batch 28, loss = 0.0315118
-I0513 11:37:09.555687 3659862976 caffe.cpp:313] Batch 29, accuracy = 0.97
-I0513 11:37:09.555721 3659862976 caffe.cpp:313] Batch 29, loss = 0.129427
-I0513 11:37:09.579476 3659862976 caffe.cpp:313] Batch 30, accuracy = 1
-I0513 11:37:09.579507 3659862976 caffe.cpp:313] Batch 30, loss = 0.0196561
-I0513 11:37:09.602957 3659862976 caffe.cpp:313] Batch 31, accuracy = 1
-I0513 11:37:09.602993 3659862976 caffe.cpp:313] Batch 31, loss = 0.00242798
-I0513 11:37:09.626893 3659862976 caffe.cpp:313] Batch 32, accuracy = 0.99
-I0513 11:37:09.626924 3659862976 caffe.cpp:313] Batch 32, loss = 0.0169622
-I0513 11:37:09.650236 3659862976 caffe.cpp:313] Batch 33, accuracy = 1
-I0513 11:37:09.650270 3659862976 caffe.cpp:313] Batch 33, loss = 0.00425847
-I0513 11:37:09.673212 3659862976 caffe.cpp:313] Batch 34, accuracy = 0.99
-I0513 11:37:09.673243 3659862976 caffe.cpp:313] Batch 34, loss = 0.0726783
-I0513 11:37:09.696039 3659862976 caffe.cpp:313] Batch 35, accuracy = 0.95
-I0513 11:37:09.696071 3659862976 caffe.cpp:313] Batch 35, loss = 0.173234
-I0513 11:37:09.719209 3659862976 caffe.cpp:313] Batch 36, accuracy = 1
-I0513 11:37:09.719241 3659862976 caffe.cpp:313] Batch 36, loss = 0.0126433
-I0513 11:37:09.741852 3659862976 caffe.cpp:313] Batch 37, accuracy = 0.99
-I0513 11:37:09.741884 3659862976 caffe.cpp:313] Batch 37, loss = 0.0380185
-I0513 11:37:09.766039 3659862976 caffe.cpp:313] Batch 38, accuracy = 1
-I0513 11:37:09.766072 3659862976 caffe.cpp:313] Batch 38, loss = 0.0161337
-I0513 11:37:09.788811 3659862976 caffe.cpp:313] Batch 39, accuracy = 0.98
-I0513 11:37:09.788844 3659862976 caffe.cpp:313] Batch 39, loss = 0.0317039
-I0513 11:37:09.812556 3659862976 caffe.cpp:313] Batch 40, accuracy = 1
-I0513 11:37:09.812587 3659862976 caffe.cpp:313] Batch 40, loss = 0.0283054
-I0513 11:37:09.835418 3659862976 caffe.cpp:313] Batch 41, accuracy = 0.98
-I0513 11:37:09.835450 3659862976 caffe.cpp:313] Batch 41, loss = 0.0595546
-I0513 11:37:09.858765 3659862976 caffe.cpp:313] Batch 42, accuracy = 0.98
-I0513 11:37:09.858793 3659862976 caffe.cpp:313] Batch 42, loss = 0.033258
-I0513 11:37:09.881479 3659862976 caffe.cpp:313] Batch 43, accuracy = 1
-I0513 11:37:09.881510 3659862976 caffe.cpp:313] Batch 43, loss = 0.00560485
-I0513 11:37:09.906558 3659862976 caffe.cpp:313] Batch 44, accuracy = 1
-I0513 11:37:09.906590 3659862976 caffe.cpp:313] Batch 44, loss = 0.0164246
-I0513 11:37:09.932261 3659862976 caffe.cpp:313] Batch 45, accuracy = 0.99
-I0513 11:37:09.932294 3659862976 caffe.cpp:313] Batch 45, loss = 0.047733
-I0513 11:37:09.957159 3659862976 caffe.cpp:313] Batch 46, accuracy = 1
-I0513 11:37:09.957190 3659862976 caffe.cpp:313] Batch 46, loss = 0.00406718
-I0513 11:37:09.979852 3659862976 caffe.cpp:313] Batch 47, accuracy = 0.99
-I0513 11:37:09.979883 3659862976 caffe.cpp:313] Batch 47, loss = 0.0176224
-I0513 11:37:10.003631 3659862976 caffe.cpp:313] Batch 48, accuracy = 0.95
-I0513 11:37:10.003666 3659862976 caffe.cpp:313] Batch 48, loss = 0.0918992
-I0513 11:37:10.027333 3659862976 caffe.cpp:313] Batch 49, accuracy = 1
-I0513 11:37:10.027365 3659862976 caffe.cpp:313] Batch 49, loss = 0.00535747
-I0513 11:37:10.050904 3659862976 caffe.cpp:313] Batch 50, accuracy = 1
-I0513 11:37:10.050935 3659862976 caffe.cpp:313] Batch 50, loss = 0.000293352
-I0513 11:37:10.076280 3659862976 caffe.cpp:313] Batch 51, accuracy = 1
-I0513 11:37:10.076314 3659862976 caffe.cpp:313] Batch 51, loss = 0.00675426
-I0513 11:37:10.099964 3659862976 caffe.cpp:313] Batch 52, accuracy = 1
-I0513 11:37:10.099993 3659862976 caffe.cpp:313] Batch 52, loss = 0.0113504
-I0513 11:37:10.123363 3659862976 caffe.cpp:313] Batch 53, accuracy = 1
-I0513 11:37:10.123394 3659862976 caffe.cpp:313] Batch 53, loss = 0.00080642
-I0513 11:37:10.146338 3659862976 caffe.cpp:313] Batch 54, accuracy = 1
-I0513 11:37:10.146368 3659862976 caffe.cpp:313] Batch 54, loss = 0.0119724
-I0513 11:37:10.170075 3659862976 caffe.cpp:313] Batch 55, accuracy = 1
-I0513 11:37:10.170106 3659862976 caffe.cpp:313] Batch 55, loss = 9.95353e-05
-I0513 11:37:10.192754 3659862976 caffe.cpp:313] Batch 56, accuracy = 1
-I0513 11:37:10.192785 3659862976 caffe.cpp:313] Batch 56, loss = 0.00792123
-I0513 11:37:10.215930 3659862976 caffe.cpp:313] Batch 57, accuracy = 1
-I0513 11:37:10.215963 3659862976 caffe.cpp:313] Batch 57, loss = 0.0106224
-I0513 11:37:10.238731 3659862976 caffe.cpp:313] Batch 58, accuracy = 1
-I0513 11:37:10.238765 3659862976 caffe.cpp:313] Batch 58, loss = 0.00865888
-I0513 11:37:10.261700 3659862976 caffe.cpp:313] Batch 59, accuracy = 0.98
-I0513 11:37:10.261731 3659862976 caffe.cpp:313] Batch 59, loss = 0.0758659
-I0513 11:37:10.284554 3659862976 caffe.cpp:313] Batch 60, accuracy = 1
-I0513 11:37:10.284585 3659862976 caffe.cpp:313] Batch 60, loss = 0.00406362
-I0513 11:37:10.310072 3659862976 caffe.cpp:313] Batch 61, accuracy = 1
-I0513 11:37:10.310102 3659862976 caffe.cpp:313] Batch 61, loss = 0.00472714
-I0513 11:37:10.332813 3659862976 caffe.cpp:313] Batch 62, accuracy = 1
-I0513 11:37:10.332845 3659862976 caffe.cpp:313] Batch 62, loss = 0.00013836
-I0513 11:37:10.356101 3659862976 caffe.cpp:313] Batch 63, accuracy = 1
-I0513 11:37:10.356132 3659862976 caffe.cpp:313] Batch 63, loss = 0.000318341
-I0513 11:37:10.378556 3659862976 caffe.cpp:313] Batch 64, accuracy = 1
-I0513 11:37:10.378587 3659862976 caffe.cpp:313] Batch 64, loss = 0.000235923
-I0513 11:37:10.402688 3659862976 caffe.cpp:313] Batch 65, accuracy = 0.94
-I0513 11:37:10.402724 3659862976 caffe.cpp:313] Batch 65, loss = 0.174556
-I0513 11:37:10.426704 3659862976 caffe.cpp:313] Batch 66, accuracy = 0.98
-I0513 11:37:10.426736 3659862976 caffe.cpp:313] Batch 66, loss = 0.0710799
-I0513 11:37:10.450608 3659862976 caffe.cpp:313] Batch 67, accuracy = 0.99
-I0513 11:37:10.450641 3659862976 caffe.cpp:313] Batch 67, loss = 0.0471492
-I0513 11:37:10.474786 3659862976 caffe.cpp:313] Batch 68, accuracy = 1
-I0513 11:37:10.474853 3659862976 caffe.cpp:313] Batch 68, loss = 0.00714237
-I0513 11:37:10.497565 3659862976 caffe.cpp:313] Batch 69, accuracy = 1
-I0513 11:37:10.497596 3659862976 caffe.cpp:313] Batch 69, loss = 0.00141993
-I0513 11:37:10.520592 3659862976 caffe.cpp:313] Batch 70, accuracy = 1
-I0513 11:37:10.520623 3659862976 caffe.cpp:313] Batch 70, loss = 0.00206052
-I0513 11:37:10.543385 3659862976 caffe.cpp:313] Batch 71, accuracy = 1
-I0513 11:37:10.543418 3659862976 caffe.cpp:313] Batch 71, loss = 0.000801532
-I0513 11:37:10.567934 3659862976 caffe.cpp:313] Batch 72, accuracy = 0.99
-I0513 11:37:10.567965 3659862976 caffe.cpp:313] Batch 72, loss = 0.0175235
-I0513 11:37:10.591750 3659862976 caffe.cpp:313] Batch 73, accuracy = 1
-I0513 11:37:10.591784 3659862976 caffe.cpp:313] Batch 73, loss = 0.000181734
-I0513 11:37:10.617092 3659862976 caffe.cpp:313] Batch 74, accuracy = 1
-I0513 11:37:10.617122 3659862976 caffe.cpp:313] Batch 74, loss = 0.00376508
-I0513 11:37:10.639822 3659862976 caffe.cpp:313] Batch 75, accuracy = 1
-I0513 11:37:10.639853 3659862976 caffe.cpp:313] Batch 75, loss = 0.00211647
-I0513 11:37:10.664058 3659862976 caffe.cpp:313] Batch 76, accuracy = 1
-I0513 11:37:10.664090 3659862976 caffe.cpp:313] Batch 76, loss = 0.000218412
-I0513 11:37:10.686815 3659862976 caffe.cpp:313] Batch 77, accuracy = 1
-I0513 11:37:10.686847 3659862976 caffe.cpp:313] Batch 77, loss = 0.000203503
-I0513 11:37:10.710923 3659862976 caffe.cpp:313] Batch 78, accuracy = 1
-I0513 11:37:10.710953 3659862976 caffe.cpp:313] Batch 78, loss = 0.0013391
-I0513 11:37:10.733860 3659862976 caffe.cpp:313] Batch 79, accuracy = 1
-I0513 11:37:10.733891 3659862976 caffe.cpp:313] Batch 79, loss = 0.00335708
-I0513 11:37:10.758643 3659862976 caffe.cpp:313] Batch 80, accuracy = 0.99
-I0513 11:37:10.758677 3659862976 caffe.cpp:313] Batch 80, loss = 0.0256179
-I0513 11:37:10.781409 3659862976 caffe.cpp:313] Batch 81, accuracy = 1
-I0513 11:37:10.781440 3659862976 caffe.cpp:313] Batch 81, loss = 0.0023732
-I0513 11:37:10.805886 3659862976 caffe.cpp:313] Batch 82, accuracy = 0.99
-I0513 11:37:10.805920 3659862976 caffe.cpp:313] Batch 82, loss = 0.0162458
-I0513 11:37:10.828743 3659862976 caffe.cpp:313] Batch 83, accuracy = 1
-I0513 11:37:10.828775 3659862976 caffe.cpp:313] Batch 83, loss = 0.00678432
-I0513 11:37:10.852507 3659862976 caffe.cpp:313] Batch 84, accuracy = 0.99
-I0513 11:37:10.852538 3659862976 caffe.cpp:313] Batch 84, loss = 0.0189542
-I0513 11:37:10.875788 3659862976 caffe.cpp:313] Batch 85, accuracy = 0.99
-I0513 11:37:10.875819 3659862976 caffe.cpp:313] Batch 85, loss = 0.0198986
-I0513 11:37:10.899011 3659862976 caffe.cpp:313] Batch 86, accuracy = 1
-I0513 11:37:10.899040 3659862976 caffe.cpp:313] Batch 86, loss = 0.000146087
-I0513 11:37:10.921692 3659862976 caffe.cpp:313] Batch 87, accuracy = 1
-I0513 11:37:10.921723 3659862976 caffe.cpp:313] Batch 87, loss = 0.000129989
-I0513 11:37:10.944453 3659862976 caffe.cpp:313] Batch 88, accuracy = 1
-I0513 11:37:10.944484 3659862976 caffe.cpp:313] Batch 88, loss = 4.1275e-05
-I0513 11:37:10.968449 3659862976 caffe.cpp:313] Batch 89, accuracy = 1
-I0513 11:37:10.968482 3659862976 caffe.cpp:313] Batch 89, loss = 4.4345e-05
-I0513 11:37:10.994932 3659862976 caffe.cpp:313] Batch 90, accuracy = 0.97
-I0513 11:37:10.994962 3659862976 caffe.cpp:313] Batch 90, loss = 0.0680957
-I0513 11:37:11.018280 3659862976 caffe.cpp:313] Batch 91, accuracy = 1
-I0513 11:37:11.018312 3659862976 caffe.cpp:313] Batch 91, loss = 2.29651e-05
-I0513 11:37:11.044423 3659862976 caffe.cpp:313] Batch 92, accuracy = 1
-I0513 11:37:11.044457 3659862976 caffe.cpp:313] Batch 92, loss = 0.000162702
-I0513 11:37:11.068132 3659862976 caffe.cpp:313] Batch 93, accuracy = 1
-I0513 11:37:11.068163 3659862976 caffe.cpp:313] Batch 93, loss = 0.000582345
-I0513 11:37:11.090775 3659862976 caffe.cpp:313] Batch 94, accuracy = 1
-I0513 11:37:11.090806 3659862976 caffe.cpp:313] Batch 94, loss = 0.000352066
-I0513 11:37:11.115216 3659862976 caffe.cpp:313] Batch 95, accuracy = 1
-I0513 11:37:11.115247 3659862976 caffe.cpp:313] Batch 95, loss = 0.00453322
-I0513 11:37:11.115762 84811776 data_layer.cpp:73] Restarting data prefetching from start.
-I0513 11:37:11.137984 3659862976 caffe.cpp:313] Batch 96, accuracy = 0.97
-I0513 11:37:11.138017 3659862976 caffe.cpp:313] Batch 96, loss = 0.0792528
-I0513 11:37:11.162164 3659862976 caffe.cpp:313] Batch 97, accuracy = 0.98
-I0513 11:37:11.162194 3659862976 caffe.cpp:313] Batch 97, loss = 0.106678
-I0513 11:37:11.184717 3659862976 caffe.cpp:313] Batch 98, accuracy = 1
-I0513 11:37:11.184751 3659862976 caffe.cpp:313] Batch 98, loss = 0.0035934
-I0513 11:37:11.208353 3659862976 caffe.cpp:313] Batch 99, accuracy = 0.99
-I0513 11:37:11.208385 3659862976 caffe.cpp:313] Batch 99, loss = 0.0180797
-I0513 11:37:11.208390 3659862976 caffe.cpp:318] Loss: 0.0304018
-I0513 11:37:11.208411 3659862976 caffe.cpp:330] accuracy = 0.991
-I0513 11:37:11.208425 3659862976 caffe.cpp:330] loss = 0.0304018 (* 1 = 0.0304018 loss)
-</code></pre>
-
-<p>最后accuracy为0.991，loss为0.03</p>
-
-<h2 id="toc_4">总结</h2>
-
-<p>通过上述内容,我们可以初步了解一个完整的深度学习系统最核心的两个方面:<strong>数据和模型</strong>.数据是带标签的图片集,分训练集和测试集;模型是描述CNN结构的有向无环图(DAG),表示对原始数据的处理方式.</p>
-
-<p><font color=red>Caffe并不直接处理原始数据,由预处理程序将原始数据存储为<code>LMDB</code>格式,来保持较高的IO效率.模型通常用ProtoBuffer文本格式表述,训练结果保存为ProtoBuffer二进制文件或HDF5格式文件.</font><strong>深度学习的过程就是利用训练数据对模型进行训练,将数据中蕴藏的大量信息通过机器学习算法不断收集到模型中,利用训练好的模型对现实世界中相似数据进行特定处理(如分类,识别,检测,定位).</strong></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
-          				  
-          					    <span class="posted-in"><a href='%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86.html'>基础知识</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -3878,31 +3098,31 @@ I0513 11:37:11.208425 3659862976 caffe.cpp:330] loss = 0.0304018 (* 1 = 0.030401
 	      
 		      
 			      <li class="post">
+			        <a href="15045090813380.html">第三十九条 用handler块降低代码分散程度</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15044922241087.html">第三十八条 为常用的块类型创建typedef</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15043212815193.html">第三十七条 理解“块”这一概念</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15043134527493.html">通过协议提供匿名方法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15042539845357.html">KVO的简单实现</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15042325338088.html">第27条 使用“class-continuation分类”隐藏实现细节</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15042285213204.html">第26条 不要在分类中声明属性</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15042274785369.html">第25条 总是为第三方类的分类名称加前缀</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15041689865677.html">指针问题</a>
 			      </li>
 		     
 		  

@@ -113,6 +113,427 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15045090813380.html">
+                
+                  <h1>第三十九条 用handler块降低代码分散程度</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>iOS中我们经常采用异步执行任务的方式，来避免主线程的阻塞。因为<code>“系统监控器”（system watchdog)</code>在发现某个应用程序的主线程已经阻塞了一段时间之后，就会令其终止。导致程序崩溃。</p>
+
+<p>但是异步方法执行任务后，需要以某种手段来通知相关代码。实现这一功能有很多方法，常用的技巧是设计一个委托协议，令关注此事件的对象遵从该协议。对象成为<code>delegate</code>之后，就可以在相关事件发生时（例如某个异步任务执行完毕时）得到通知了。例如：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@class EOCNetworkFetcher;
+@protocol EOCNetworkFetcherDelegate &lt;NSObject&gt;
+-(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher 
+    didFinishWithData:(NSData*)data;
+@end
+
+@interface EOCNetworkFetcher : NSObject 
+@property (nonatomic, weak) id &lt;EOCNetworkFetcherDelegate&gt; delegate; 
+-(id)initWithURL:(NSURL*)url;
+-(void)start;
+@end
+</code></pre>
+
+<p>其它类可以像下面这样来使用：</p>
+
+<pre><code class="language-objc">-(void)fetchFooData {
+    NSURL *url = [[NSURL alloc] initWithString:
+                    @&quot;http: //www.example.com/foo.dat&quot;]; 
+    EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url]; 
+    fetcher.delegate = self;
+    [fetcher start];
+}
+
+-(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher didFinishWithData:(NSData*)data
+{
+    _fetchedFooData = data;
+}
+</code></pre>
+
+<p>上面在<code>EOCNetworkFetcher</code>类中声明了一个协议，协议中有一个方法用于通知对象已获取完数据。</p>
+
+<p>之后想要获取到通知的对象遵守该协议，成为它的委托对象。这样在执行完<code>start</code>方法之后，<code>EOCNetworkFetcher</code>会调用委托对象所遵守的协议方法，让委托对象获取收到的数据（也就是通知它）。</p>
+
+<p>上面这种做法没有错误，确实可行。但是如果我们改用块来写的话，代码会更清晰。就是把<code>completion handler</code>定义为块类型，将其当作参数直接传给<code>start</code>方法:</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+typedef void(^EOCNetworkFetcherCompletionHandler)(NSData *data);
+@interface EOCNetworkFetcher : NSObject 
+-(id)initWithURL:(NSURL*)url;
+-(void)startWithCompletionHandler:
+            (EOCNetworkFetcherCompletionHandler)handler;
+@end
+</code></pre>
+
+<p>这和使用委托协议很想，不过多了个好处，就是可以在调用<code>start</code>方法时直接以内联形式 定义<code>completion handler</code>,以此方式来使用<code>“网络数据获取器”（network fetcher)</code>,可以令代码比原先易懂很多。例如，下面这个类就以块的形式来定义<code>completion handler</code>,并以此为参数调用<code>API</code>:</p>
+
+<pre><code class="language-objc">-(void)fetchFooData {
+NSURL *url = [[NSURL alloc] initWithString:
+@&quot;http://www.example.com/foo.dat&quot;]; 
+EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
+[fetcher startWithCompletionHandler:^(NSData *data){ 
+    _fetchedFooData = data;
+})；
+</code></pre>
+
+<p>与使用委托模式的代码相比，用块写出来的代码显然更为整洁。异步任务执行完毕后所需运行的业务逻辑，和启动异步任务所用的代码放在了一起。而且，由于块声明在创建获取器的范围里，所以它可以访问此范围内的全部变量。</p>
+
+<p>这种写法其实最重要的用途是处理错误。现在很多基于块的<code>API</code>都使用块来处理错误，可以分别用两个处理程序来处理操作失败的情况和操作成功的情况。也可以把处理失败情况所需的代码，与处理正常情况所用的代码，都封装到同一个<code>completion handler</code>块里,我们建议使用后者，因为苹果公司也是这样设计<code>API</code>的。我们举例来说：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@class EOCNetworkFetcher;
+typedef void(^EOCNetworkFetcherCompletionHandler) 
+                                (NSData *data, NSError *error);
+
+@interface EOCNetworkFetcher : NSObject
+-(id)initWithURL:(NSURL*)url;
+-(void)startWithCompletionHandler:
+                (EOCNetworkFetcherCompletionHandler)completion;
+@end
+</code></pre>
+
+<p>此种API的调用方式如下:</p>
+
+<pre><code class="language-objc">EOCNetworkFetcher *fetcher =
+        [[EOCNetworkFetcher alloc] initWithURL:url]; 
+[fetcher startWithCompletionHander:
+    ^(NSData *data, NSError *error){ 
+    if (error) {
+        //Handle failure 
+    }else {
+        // Handle success
+    }
+}];
+</code></pre>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>在创建对象时，可以使用内联的<code>handler</code>块将相关业务逻辑一并声明。</li>
+<li>在有多个实例需要监控时，如果采用委托模式，那么经常需要根据传入的对象来切 换，而若改用<code>handler</code>块来实现，则可直接将块与相关对象放在一起。</li>
+<li>设计API时如果用到了<code>handler</code>块，那么可以增加一个参数，使调用者可通过此参数来决定应该把块安排在哪个队列上执行。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15044922241087.html">
+                
+                  <h1>第三十八条 为常用的块类型创建typedef</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我们在定义一个块时，语法是这样的：</p>
+
+<pre><code class="language-objc">int^(variableName)(BOOL flag,int value) = ^(BOOL flag, int value){
+    //Implemention
+    return someInt;
+}
+</code></pre>
+
+<p>此块接受两个类型分别为<code>BOOL</code>及<code>int</code>的参数，并返回类型为<code>int</code>的值。并且把它赋给了一个变量。</p>
+
+<p>与其他类型的变量不同，在定义块变量时，要把变量名放在类型之中，而不要放在右侧。这种语法非常难记，也非常难读。<strong><font color=red>鉴于此，我们应该为常用的块类型起个别名，</font></strong>尤其是打算把代码发布成API供他人使用时，更应这样做。开发者可以起个更为易读的名字来表示块的用途，而把块的类型隐藏在其后面。例如：</p>
+
+<pre><code class="language-objc">//定义
+typedef int(^EOCSomeBlock)(BOOL flag, int value);
+</code></pre>
+
+<p>声明变量时，要把名称放在类型中间，并在前面加上<code>“^”</code>符号，而定义新类型时也得这么做。上面这条语句向系统中新增了一个名为<code>EOCSomeBlock</code>的类型。此后，不用再以复杂的块类型来创建变量了，直接使用新类型即可：</p>
+
+<pre><code class="language-objc">EOCSomeBlock block = ^(BOOL flag, int value){
+    // Implementation
+};
+</code></pre>
+
+<p><strong><mark>这次代码读起来就顺畅多了：与定义其他变量时一样，变量类型在左边，变量名在右边。</mark></strong></p>
+
+<p>我们可以利用这个将使用块的API做的简单易用些，例如：</p>
+
+<pre><code class="language-objc">-(void)startWithCompletionHandler:
+            (void(^)(NSData *data, NSError *error))completion;
+</code></pre>
+
+<p>上面代码接受了一个块作为参数，所以我们可以用上面定义块的方法来改写它：</p>
+
+<pre><code class="language-objc">typedef void(^EOCCompletionHandler)(NSData *data, NSError *error);
+
+-(void)startWithCompletionHandler: (EOCCompletionHandler)completion;
+</code></pre>
+
+<p>现在参数看上去就简单多了，而且易于理解。</p>
+
+<p>我们在定义块的时候要注意，最好在使用块类型的类中定义这些<code>typedef</code>，而且还应该把这个类的名字加在由<code>typedef</code>所定义的新类型名前面，这样可以阐明块的用途。还可以用<code>typedef</code>给同一个块签名类型创建数个别名。在这件事上，多多益善。因为，开发者看到类型的别名以及签名中的参数之后，可以很容易的理解类型的用途。</p>
+
+<p>与此相似，如果有好几个类都要执行相似但各有区别的异步任务，而这几个类又不 能放人同一个继承体系，那么，每个类就应该有自己的<code>completion handler</code>类型。这几个<code>completion handler</code>的签名也许完全相同，但最好还是在每个类里都各自定义一个别名，而不 要共用同一个名称。反之，若这些类能纳人同一个继承中，则应该将类型定义语句放在超类中，以供各子类使用。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>以<code>typedef</code>重新定义块类型，可令块变量用起来更加简单。</li>
+<li>定义新类型时应遵从现有的命名习惯，勿使其名称与别的类型相冲突。</li>
+<li>不妨为同一个块签名定义多个类型别名。如果要重构的代码使用了块类型的某个别名，那么只需修改相应<code>typedef</code>中的块签名即可，无须改动其他<code>typedef</code>。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15043212815193.html">
+                
+                  <h1>第三十七条 理解“块”这一概念</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>首先，块与函数类似，只不过是直接定义在另一个函数里的，和定义它的那个函数共享同一 个范围内的东西。块用<code>“^”</code>符号来表示，后面跟着一对花括号，括号里面是块的实现代码。 例如，下面就是个简单的块：</p>
+
+<pre><code class="language-objc">^{
+    //Block implementation here
+}
+</code></pre>
+
+<p>块其实就是个值，而且自有其相关类型。与<code>int</code>、<code>float</code>或<code>Objective-C</code>对象一样，也可以把块赋给变量,然后像使用其他变量那样使用它。块类型的语法与函数指针近似。下面列出的这个块很简单，没有参数，也不返回值：</p>
+
+<pre><code class="language-objc">void (^someBlock) () = A {
+    //Block implementation here
+}；
+</code></pre>
+
+<p>这段代码定义了一个名为<code>someBlock</code>的变量。由于变量名写在正中间，所以看上去也许 =有点怪，不过一旦理解了语法，很容易就能读懂。块类型的语法结构如下：</p>
+
+<pre><code class="language-objc">return_type (^block_name)(parameters)
+</code></pre>
+
+<p>我们来举个例子，下面这种写法所定义的块，返回<code>int</code>值，并且接受两个<code>int</code>做参数：</p>
+
+<pre><code class="language-objc">int (^addBlock) (int a, int b) = ^(int a, int b){
+     return a + b;
+};
+</code></pre>
+
+<p>定义好之后，就可以像函数那样使用了。比方说，<code>addBlock</code>块可以这样用:</p>
+
+<pre><code class="language-objc">int add = addBlock (2, 5) ;  //&lt; add = 12
+</code></pre>
+
+<p>块的强大之处是：在声明它的范围里，所有变量都可以为其所捕获。这也就是说，那个范围里的全部变量，在块里依然可用。比如，下面这段代码所定义的块，就使用了块以外的变量：</p>
+
+<pre><code class="language-objc">int additional = 5;
+int (^addBlock) (int a, int b) = ^(int a, int b){ 
+    return a + b + additional;
+};
+
+int add = addBlock (2, 5);  //&lt; add = 12
+</code></pre>
+
+<p>默认情况下，为块所捕获的变量，是不可以在块里修改的。在本例中，假如块内的代码改动了<code>additional</code>变量的值，那么编译器就会报错。不过，声明变量的时候可以加上<code>__block</code> 修饰符，这样就可以在块内修改了。</p>
+
+<p>例如：</p>
+
+<pre><code class="language-objc">__block int additional = 5;
+int (^addBlock) (int a, int b) = ^(int a, int b){   
+    additional++;
+    return a + b + additional;
+};
+
+int add = addBlock (2, 5);  //&lt; add = 13
+</code></pre>
+
+<p>块的另一个用法是<code>“内联块”（inline block）</code>，例如：</p>
+
+<pre><code class="language-objc">NSArray *array = @[@0, @1, @2, @3, @4, @5];
+_block NSInteger count = 0;
+[array enumerateObjectsUsingBlock:
+    ^(NSNumber *number, NSUInteger idx, BOOL *stop){
+        if([number compare:@2] == NSOrderedAscending) { 
+        count++;
+    }
+}];
+//count = 2
+</code></pre>
+
+<p>这段范例代码也演示了<code>“内联块”（inline block)</code>的用法。传给<code>“numerateObjectsUsingBlock:”</code>方法的块并未先賦给局部变量,而是直接内联在函数调用里了。</p>
+
+<p>然后我们在声明和使用块的时候，要注意它的作用范围。定义块的时候，其所占的内存区域是分配在栈中的。这就是说，块只在定义它的那个范围内有效。比如下面这个：</p>
+
+<pre><code class="language-objc">void(^block)();
+if ( /* some condition */ ){
+    block = ^{
+        NSLog(@&quot;Block A&quot;);
+    };
+} else {
+    block = ^{
+        NSLog(@&quot;Block B&quot;);
+    };
+}
+block();
+</code></pre>
+
+<p>定义在<code>if</code>及<code>else</code>语句中的两个块都分配在栈内存中。编译器会给每个块分配好栈内存, 然而等离开了相应的范围之后，编译器有可能把分配给块的内存覆写掉。于是，这两个块只 能保证在对应的<code>if</code>或<code>else</code>语句范围内有效。这样写出来的代码可以编译，但是运行起来时而正确，时而错误。若编译器未覆写待执行的块，则程序照常运行，若覆写，则程序崩溃。</p>
+
+<p>我们为了解决这个问题可以给块对象发送<code>copy</code>消息以拷贝之。这样的话，就可以把块从栈复制到堆了。</p>
+
+<p>拷贝后的块，可以在定义它的那个范围之外使用。而且，一旦复制到堆上，块就成了带引用计数的对象了。后续的复制操作都不会真的执行复制，只是递增块对象的引用计数。如果不再使用这个块，那就应将其释放，在ARC环境下会自动释放。</p>
+
+<p>改动后跟下面一样：</p>
+
+<pre><code class="language-objc">void (^block)();
+if (/* some condition */ ){ 
+    block = [^{
+        NSLog(@,fBlock Aw);
+    } copy];
+} else {
+    block = [^{
+        NSLog(@&quot;Block B&quot;);
+    } copy];
+}
+block();
+</code></pre>
+
+<p>除了“桟块”和“堆块”之外，还有一类块叫做<strong><mark>“全局块”（global block)</mark></strong>。这种块不会捕捉任何状态（比如外围的变量等)，运行时也无须有状态来参与。块所使用的整个内存区域，在编译期已经完全确定了，因此，全局块可以声明在全局内存里，而不需要在每次用到 的时候于栈中创建。另外，全局块的拷贝操作是个空操作，因为全局块决不可能为系统所回收。这种块实际上相当于单例。下面就是个全局块：</p>
+
+<pre><code class="language-objc">void (^block)() = ^{
+    NSLog(@&quot;This is a block&quot;);
+};
+</code></pre>
+
+<p><mark>由于运行该块所需的全部信息都能在编译期确定，所以可把它做成全局块。</mark>这完全是种优化技术：若把如此简单的块当成复杂的块来处理，那就会在复制及丢弃该块时执行一些无谓的操作。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>块是<code>C、C++、Objective-C</code>中的词法闭包。</li>
+<li>块可接受参数，也可返回值。</li>
+<li>块可以分配在栈或堆上，也可以是全局的。分配在栈上的块可拷贝到堆里，这样的话，就和标准的<code>Objective-C</code>对象一样，具备引用计数了。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15043134527493.html">
+                
+                  <h1>通过协议提供匿名方法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>协议定义了一系列方法，遵从此协议的对象应该实现它们（如果这些方法不是可选的, 那么就必须实现)。于是，我们可以用协议把自己所写的<code>API</code>之中的实现细节隐藏起来，将返回的对象设计为遵从此协议的纯<code>id</code>类型。</p>
+
+<p>这样的话，想要隐藏的类名就不会出现在<code>API</code>之中了。若是接口背后有多个不同的实现类，而你又不想指明具体使用哪个类，那么可以考虑用这个办法——因为有时候这些类可能会变，有时候它们又无法容纳于标准的类继承体系中，因而不能以某个公共基类来统一表示。</p>
+
+<p>此概念经常称为<code>“匿名对象&quot;(anonymous object)</code>，这与其他语言中的“匿名对象”不同，在那些语言中，该词是指以内联形式所创建出来的无名类，而此词在<code>Objective-C</code>中则不是这个意思。</p>
+
+<p>我们之前说的委托与数据源对象，就用到了这个方法。例如在定义“受委托者（delegate）”属性时：</p>
+
+<pre><code class="language-objc">@property {nonatomic, weak) id &lt;EOCDelegate&gt; delegate;
+
+</code></pre>
+
+<p>由于该属性的类型是<code>id&lt;EOCDelegate&gt;</code>,所以实际上任何类的对象都能充当这一属性, 即便该类不继承自<code>NSObject</code>也可以，只要遵循<code>EOCDelegate</code>协议就行。对于具备此属性的类来说，<code>delegate</code>就是“匿名的”（ammymous)。如有需要，可在运行期査出此对象所属的类型（参见第14条）。然而这样做不太好，因为指定属性类型时所写的那个<code>EOCDelegate</code>契约已经表明此对象的具体类型无关紧要了。</p>
+
+<p>当然还有其它的用法，这里我们就不举例了。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>协议可在某种程度上提供匿名类型。具体的对象类型可以淡化成遵从某协议的<code>id</code>类型，协议里规定了对象所应实现的方法。</li>
+<li>使用匿名对象来隐藏类型名称（或类名）。</li>
+<li>如果具体类型不重要，重要的是对象能够响应（定义在协议里的）特定方法，那么可使用匿名对象来表示。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15042539845357.html">
                 
                   <h1>KVO的简单实现</h1>
@@ -490,306 +911,6 @@ class SomeCppClass;
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15042285213204.html">
-                
-                  <h1>第26条 不要在分类中声明属性</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>属性是封装数据的方式（参见第6条)。尽管从技术上说，分类里也可以声明属性，但这种做法还是要尽量避免。</p>
-
-<p>原因在于，除了<code>“class-continuation分类”</code>（参见第27条）之外，其他分类都无法向类中新增实例变量，因此，它们无法把实现属性所需的实例变量合成出来。如果我们在分类中声明了一个<code>friends</code>属性。会提示我们</p>
-
-<blockquote>
-<p>warning: property  &#39;friends&#39; requires method &#39;friends&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
-
-<p>warning: property &#39;friends&#39; requires method &#39;setFriends:&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
-</blockquote>
-
-<p>说明系统没有为我们自动合成属性的<code>set</code>和<code>get</code>方法。我们要自己在分类中去实现，可以把存取方法声明为<code>@dynamic</code>, 也就是说，这些方法等到运行期再提供，编译器目前是看不见的。如果决定使用消息转发机制（参见第12条）在运行期拦截方法调用，并提供其实现，那么或许可以采用这种做法。</p>
-
-<p>当然我们也可以使用关联对象的方法。<strong><mark>但是还是不建议我们在分类中定义封装数据的属性。</mark></strong></p>
-
-<p>正确做法是把所有属性都定义在主接口里。类所封装的全部数据都应该定义在主接口中，这里是唯一能够定义实例变量(也就是数据）的地方。而属性只是定义实例变量及相关存取方法所用的“语法糖”，所以也应遵循同实例变量一样的规则。<mark>至于分类机制,则应将其理解为一种手段，目标在于扩展类的功能，而非封装数据。</mark></p>
-
-<p>但是有时候，只读属性（readonly）可以在分类中使用，但是我们要手动实现它的<code>get</code>方法。当然我们不建议搞特殊。最好还是在主接口中声明。然后在分类中声明一个获取方法，来获取数据。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>把封装数据所用的全部属性都定义在主接口里。</li>
-<li>在<code>“class-contimiation分类”</code>之外的其他分类中，可以定义存取方法，但尽量不要定义属性。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15042274785369.html">
-                
-                  <h1>第25条 总是为第三方类的分类名称加前缀</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>分类机制通常用于向无源码的既有类中新增功能。这个特性极为强大，但在使用时也很容易忽视其中可能产生的问题。</p>
-
-<p>我们在分类中添加方法，系统在运行期时会将分类中的方法加入类中。运行期系统会把分类中所实现的每个方法都加入类的方法列表中。<strong><font color=red>如果类中本来就有此方法，而分类又实现了一次，那么分类中的方法会覆盖原来那一份实现代码。实际上可能会发生很多次榭盖，比如某个分类中的方法覆盖了“主实现”中的相关方法，而另外一个分类 中的方法又覆盖了这个分类中的方法。多次覆盖的结果以最后一个分类为准。</font></strong></p>
-
-<p>所以我们为了解决此问题，一般做法是：<strong><font color=red>以命名空间来区别各个分类的名称与其中所定义的方法。</font></strong>我们这里的命名空间只是在相关名称前都加上公用的前缀。</p>
-
-<p>所以我们举例来说就是这样的：</p>
-
-<pre><code class="language-objc">@interface NSString (ABC_HTTP)
-//Encode a string with URL encoding 
--(NSString*) abc_urlEncodedStiring;
-
-// Decode a URL ©ncodeci string
--(NSString*) abc_urlDecodedString;
-@end
-</code></pre>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>向第三方类中添加分类时，总应给其名称加上你专用的前缀。</li>
-<li>向第三方类中添加分类时，总应给其中的方法名加上你专用的前缀。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15041689865677.html">
-                
-                  <h1>指针问题</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<pre><code>#include &lt;stdio.h&gt;  
-   
-int main() {  
-      
-    int num = 10;  
-    int *p1 = &amp;num//p1存储num的地址  
-    int **p2 = &amp;p1;//p2存储p1的地址  
-    int ***p3 = &amp;p2;//p3存储p2的地址  
-      
-    *p1 = 100;//*p1取出num变量  
-    **p2 = 200;//**p2取出num变量  
-    ***p3 = 300;//***p3也是取出num变量  
-    printf(&quot;num = %d\n&quot;,num);  
-    printf(&quot;num = %d\n&quot;,***p3);  
-      
-    return 0;  
-}  
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/31</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15041475233104.html">
-                
-                  <h1>消息转发机制的简单实现</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">第一种</h2>
-
-<p>首先我们来实现这两个方法：<br/><br/>
-+(BOOL)resolveInstanceMethod:    (SEL)sel</p>
-
-<p>+(BOOL)resolveClassMethod:(SEL)sel</p>
-
-<p>这两个方法用于方法的动态解析，当一个对象执行一个方法时，发现没有找到所对应的实现。这是就要靠上面的方法来动态添加实现了</p>
-
-<p>举例来说：</p>
-
-<pre><code class="language-objc">//
-//  Person.h
-//  消息转发
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface Person : NSObject
-//接口中声明一个方法
--(void)run;
-
-@end
-
-//
-//  Person.m
-//  消息转发
-
-
-#import &quot;Person.h&quot;
-#import &lt;objc/runtime.h&gt;
-@implementation Person //在部署的时候我们没有实现接口中声明的run方法
-
-
-//编写C函数实现代码
-void addrun (id self, SEL _cmd){
-    NSLog(@&quot;%@　%s&quot;,self,sel_getName(_cmd));
-}
-
-+(BOOL)resolveInstanceMethod:(SEL)sel{
-    if (sel ==@selector(run)) {
-    //如果响应run方法，我们动态将上面实现的addrun方法添加到当前类中。
-        class_addMethod(self, sel, (IMP)addrun, &quot;v@:&quot;);
-    }
-    
-    return [super resolveInstanceMethod:sel];
-}
-
-@end
-
-//  main.m
-//  消息转发
-
-
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;Person.h&quot;
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-    //执行代码
-        Person *man = [Person new];
-        [man run];
-    }
-    return 0;
-}
-</code></pre>
-
-<p>结果为：<img src="media/15041475233104/15041480973843.jpg" alt=""/><br/>
-说明执行了我们添加的那个方法，而并没有报错。</p>
-
-<h2 id="toc_1">第二种</h2>
-
-<p>我们可以动态的向类中添加方法来解决无选择子的问题，我们也可以选择转换接受者来选择可以处理该选择子的对象。</p>
-
-<p>首先当我们，没有处理第一种方法的时候，运行期系统会给我们第二个机会，询问是否有备用的接受者。我们就要实现<code>orwardingTargetForSelector</code>了</p>
-
-<p>我们举例来看：</p>
-
-<p>首先我们先创建一个新类Car，并且创建一个<code>run</code>方法：</p>
-
-<p><img src="media/15041475233104/15041487720558.jpg" alt=""/></p>
-
-<p>然后在Person.m中，不对<code>resolveInstanceMethod</code>进行任何处理，在<code>forwardingTargetForSelector</code>中返回一个<code>Car</code>实例：<br/>
-<img src="media/15041475233104/15041488721835.jpg" alt=""/></p>
-
-<p>然后继续执行<code>main.m</code>文件，运行为：<br/>
-<img src="media/15041475233104/15041489461207.jpg" alt=""/></p>
-
-<p>说明系统已经将所要实现方法的对象转换为<code>Car</code>的实例对象。</p>
-
-<h2 id="toc_2">第三种</h2>
-
-<p>如果前两种我们都没有实现的话，就会进入第三种，执行完整的消息转发机制。</p>
-
-<p>就会调用两个方法<code>methodSignatureForSelector</code>和<code>forwardInvocation</code></p>
-
-<p><code>methodSignatureForSelector</code>方法用来指定方法签名，返回<code>nil</code>表示不处理，否则会进入下一步调用<code>forwardInvocation</code>方法。其中这个签名就是给<code>forwardInvocation</code>中的参数<code>NSInvocation</code>调用的。</p>
-
-<p><img src="media/15041475233104/15041604848181.jpg" alt=""/></p>
-
-<p>开头我们要找的错误<code>unrecognized selector sent to instance</code>原因，原来就是因为<code>methodSignatureForSelector</code>这个方法中，由于没有找到<code>run</code>对应的实现方法，所以返回了一个空的方法签名，最终导致程序报错崩溃。</p>
-
-<p>所以我们需要做的是自己新建方法签名，再在<code>forwardInvocation</code>中用你要转发的那个对象调用这个对应的签名，这样也实现了消息转发。</p>
-
-<p>关于生成签名的类型<code>&quot;v@:&quot;</code>解释一下。每一个方法会默认隐藏两个参数，<code>self</code>、<code>_cmd</code>，<code>self</code>代表方法调用者，<code>_cmd</code>代表这个方法的<code>SEL</code>，签名类型就是用来描述这个方法的返回值、参数的，<code>v</code>代表返回值为<code>void</code>，<code>@</code>表示<code>self</code>，<code>:</code>表示<code>_cmd</code>。</p>
-
-<p><strong>所以第二个和第三个字符必须是<code>“@:”</code> ，第一个字符是返回类型.</strong></p>
-
-<p><strong>具体的可以看一下了解</strong>：<a href="https://developer.apple.com/library/etc/redirect/xcode/content/1189/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100">Type Encodeing</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/31</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -873,31 +994,31 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
+			        <a href="15045090813380.html">第三十九条 用handler块降低代码分散程度</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15044922241087.html">第三十八条 为常用的块类型创建typedef</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15043212815193.html">第三十七条 理解“块”这一概念</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15043134527493.html">通过协议提供匿名方法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15042539845357.html">KVO的简单实现</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15042325338088.html">第27条 使用“class-continuation分类”隐藏实现细节</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15042285213204.html">第26条 不要在分类中声明属性</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15042274785369.html">第25条 总是为第三方类的分类名称加前缀</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15041689865677.html">指针问题</a>
 			      </li>
 		     
 		  
