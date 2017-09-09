@@ -1,0 +1,468 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  第四十一条 多用派发队列，少用同步锁 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>第四十一条 多用派发队列，少用同步锁</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/9/9</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>在<code>OC</code>中，如果有多个线程要执行同一份代码，那么有时可能会出问题。这种情况下，通常要使用锁来实现某种同步机制。在<code>GCD</code>出现之前，有两种办法，第一种是采用内置的<code>“同步块”（synchronization block)</code>:</p>
+
+<pre><code class="language-objc">-(void)synchronizedMethod {
+    @synchronized(self) {
+    //Safe
+    }
+}
+</code></pre>
+
+<p>这种写法会根据给定的对象，自动创建一个锁，并等待块中的代码执行完毕。执行到这段代码结尾处，锁就释放了。在本例中，同步行为所针对的对象是<code>self</code>。这么写通常没错，因为它可以保证每个对象实例都能不受干扰地运行其<code>synchronizedMethod</code>方法。然而，滥用 <code>@SynChronized(self)</code>则会降低代码效率，因为共用同一个锁的那些同步块，都必须按顺序执行。若是在<code>self</code>对象上频繁加锁，那么程序可能要等另一段与此无关的代码执行完毕，才能继续执行当前代码，这样做其实并没有必要。</p>
+
+<p>另一种加锁的办法是<code>NSLock</code>对象：</p>
+
+<pre><code class="language-objc">_lock = [[NSLockalloc] init];
+
+-(void)synchronizedMethod {
+    [_lock lock];
+    //Safe
+    [_lock unlock];
+}
+</code></pre>
+
+<p>也可以使用<code>NSRecursiveLock</code>这种<code>“递归锁’（recursive lock)</code>，线程能够多次持有该锁，而不会出现<code>死锁(deadlock)</code>现象。</p>
+
+<p>虽然上面两种方法可以用，但是也有一些缺陷，比如：在某些情况下，同步快会导致死锁，另外，效率不是很高。而如果直接使用锁对象的话，一旦遇到死锁，就会非常麻烦。</p>
+
+<p><strong>所以我们一般使用GCD来替代，它的优点就是可以简单，高效的为代码加锁</strong>。属性因为需要经常性的同步，所以当要线程安全的时候，加上<code>“atomic”</code>特质来修饰属性。</p>
+
+<p>但是如果我们想要自己实现属性访问方法时，可以：</p>
+
+<pre><code class="language-objc">-(NSString*)someString {
+    @synchronized(self) {
+        return _someString;
+    }
+}
+-(void)setSomeString:(NSString*)someString { 
+    @synchronized(self) {
+        _someString = someString;
+    }
+}
+</code></pre>
+
+<p>但是滥用<code>@synchronized(self)</code>会很危险，因为所有同步块都会彼此抢夺同一个锁。要是有很多个属性都这么写的话，那么每个属性的同步块都要等其他所有同步块执行完毕才能执行，这也许并不是开发者想要的效果。我们只是想令每个属性各自独立地同步。</p>
+
+<p><strong><em>而且上述做法并不是绝对的线程安全。因为在两次访问操作之间，其他线程可能会写入新的属性值。</em></strong></p>
+
+<p>这里我们使用<code>“串行同步队列”（serial synchronization queue)</code>。将读取操作及写入操作都安排在同一个队列里，即可保证数据同步。：</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_queue_create(&quot;com.effectiveobjectivec.syncQueue&quot;, NULL);
+
+-(NSString*)someString {
+    _block NSString *localSomeString;
+    dispatch_sync(_syncQueue, ^{
+        localSomeString = _someString;
+    })；
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+    dispatch_sync(_syncQueue,^{
+        _someString = someString;
+    });
+}
+</code></pre>
+
+<p>此模式的思路是：把设置操作与获取操作都安排在序列化的队列里执行（串行同步队列并不会拓展新的线程），这样的话，所有针对属性的访问操作就都同步了。（关于GCD的串行队列/并发队列与iOS多线程这里不详细讲解了，后续深入探讨）。</p>
+
+<p>多个获取方法可以并发执行，而获取方法与设置方法之间不能并发执行，利用这个特点，还能写出更快一些的代码来。此时正可以体现出<code>GCD</code>写法的好处。用同步块或锁对象，是无法轻易实现出下面这种方案的。这次不用串行队列，而改用<code>并发队列（concurrentquene)</code>:</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+
+-(NSString*}someString {
+    __block NSString *localSomeString; 
+    dispatch_sync( _syncQueue, ^{
+        localSomeString = _someString;
+    })； 
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+        dispatch_async(syncQueue, ^{
+        _someString = someScring;
+    });
+}
+</code></pre>
+
+<p>光是上面这些代码还不够，所有读取操作与写入操作都会在同一个队列上执行，不过由于是并发队列，所以读取与写人操作可以随时执行。而我们恰恰不想让这些操作随意执行。这就要用到<code>栅栏（barrier)</code>，是<code>GCD</code>中的一个功能：</p>
+
+<pre><code class="language-objc">void dispatch_barrier_async(dispatch_queue_t queue,
+                            dispatch_block_t block);
+void dispatch_barrier_sync(dispatch_queue_t queue,
+                            dispatch_block_t block);
+</code></pre>
+
+<p><strong><font color=red>在队列中，栅栏块必须单独执行，不能与其他块并行。这只对并发队列有意义，因为串行队列中的块总是按顺序逐个来执行的。并发队列如果发现接下来要处理的块是个栅栏块 (barrier block)，那么就一直要等当前所有并发块都执行完毕，才会单独执行这个栅栏块。待栅栏块执行过后，再按正常方式继续向下处理。</font></strong></p>
+
+<p>在本例中，可以用栅栏块来实现属性的设置方法。在设置方法中使用了栅栏块之后，对属性的读取操作依然可以并发执行，但是写人操作却必须单独执行了。例如：</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+
+-(NSString*}someString {
+    __block NSString *localSomeString; 
+    dispatch_sync( _syncQueue, ^{
+        localSomeString = _someString;
+    })； 
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+        dispatch_barrier_async(syncQueue, ^{
+        _someString = someScring;
+    });
+}
+</code></pre>
+
+<p><strong>执行的顺序如图所示：</strong><br/>
+<img src="media/15049238737460/15049413869385.jpg" alt=""/></p>
+
+<p>测试一下性能，你就会发现，这种做法肯定比使用串行队列要快。注意，设置函数也可以改用同步的<code>栅栏块(synchronous barrier)</code>来实现，那样做可能会更髙效，其原因刚才已经 解释过了。<strong><font color=red>最好还是测一测每种做法的性能，然后从中选出最适合当前场景的方案</font></strong>。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>派发队列可用来表述<code>同步语义（synchronization semantic)</code>,这种做法要比使用<code>@synchronized块</code>或<code>NSLock</code>对象更简单。</li>
+<li>将同步与异步派发结合起来，可以实现与普通加锁机制一样的同步行为，而这么做却不会阻塞执行异步派发的线程。</li>
+<li>使用同步队列及栅栏块，可以令同步行为更加髙效。</li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15045739362959.html" 
+          title="Next Post: 第四十条 用块引用其所属对象时不要出现保留环">第四十条 用块引用其所属对象时不要出现保留环 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15045739362959.html">第四十条 用块引用其所属对象时不要出现保留环</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15045090813380.html">第三十九条 用handler块降低代码分散程度</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15044922241087.html">第三十八条 为常用的块类型创建typedef</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15043212815193.html">第三十七条 理解“块”这一概念</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

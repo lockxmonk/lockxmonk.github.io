@@ -113,6 +113,261 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15042325338088.html">
+                
+                  <h1>第27条 使用“class-continuation分类”隐藏实现细节</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">第一种用途</h2>
+
+<p>类中经常会包含一些无须对外公布的方法及实例变最。其实这些内容也可以对外公布, 并且写明其为私有，开发者不应依赖它们。但是<code>OC</code>的动态性，使得不可能实现真正的私有方法或私有实例变量。</p>
+
+<p>但是我们最好还是只把确实需要对外公布的那部分内容公开。那么，这种不需对外公布但却应该具有的方法及实例变量应该怎么写呢？此时，这个特殊的<code>“class-continuation分类”</code>就派上用场了。</p>
+
+<p><font color=red><strong>“class-continuation分类”和普通的分类不同，它必须定义在其所接续的那个类的实现文件里。</strong></font></p>
+
+<p>例如：</p>
+
+<pre><code class="language-objc">//EOCPerson.m
+@interface EOCPerson () {
+    NSString * _anInstanceVariable;
+}
+// Method declarations here 
+@end
+@implementation EOCPerson {
+    int _anotherInstanceVariable;
+}
+// Method implementations here 
+@end
+</code></pre>
+
+<p>我们这样定义的目的是将这些方法或者实例变量隐藏起来，只供本类使用。即便在公共接口里将其标注为private,也还是会泄漏实现细节。</p>
+
+<p>例如有个绝密的类，不想给其他人知道。 假设你所写的某个类拥有那个绝密类的实例，而这个实例变量又声明在公共接口里面：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+@class EOCSuperSecretClass;
+
+@interface EOCClass : NSObject {
+@private
+    EOCSuperSecretClass *_secretInstance;
+@end
+</code></pre>
+
+<p>这样别人就会知道有一个叫<code>EOCSuperSecretClass</code>的类了。</p>
+
+<p>所以我们通常应该这样：</p>
+
+<pre><code class="language-objc">// EOCClass.h
+#import &lt;Foundation/Foundation.h&gt;
+@interface EOCClass : NSObject 
+@end
+
+// EOCClass .m 
+#import &quot;EOCClass.h&quot;
+#import &quot;EOCSuperSecretClass.h&quot;
+@interface EOCClass ()  {
+    EOCSuperSecretClass *_secretInstance;
+@end
+
+@implementation EOCClass
+// Methods here
+@end
+</code></pre>
+
+<h2 id="toc_1">第二种用途</h2>
+
+<p>编写<code>Objective-C++</code>代码时 <code>“class-continuation分类”</code>也很有用。<code>Objective-C++</code>是 <code>OC</code>与<code>C++</code>的混合体，其代码可以用这两种语言来编写。由于兼容性原因，游戏后 端一般用<code>C++</code>来写。另外，有时候要使用的第三方库可能只有<code>C++</code>绑定，此时也必须使用 <code>C++</code>来编码。在这些情况下，使用<code>&quot;class-continuation分类&quot;</code>会很方便。假设某个类打算这样写：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt; 
+#include &quot;SomeCppClass.h&quot; 
+@interface EOCClass : NSObject { 
+@private
+    SomeCppClass _cppClass;
+@end
+</code></pre>
+
+<p>该类的实现文件可能叫做<code>EOCClass.mm</code>,其中<code>.mm</code>扩展名表示编译器应该将此文件按<code>Objective-C++</code>来编译，否则，就无法正确引人<code>SomeCppClass.h</code>了。然而请注意，名为<code>SomeCppClass</code>的这个<code>C++</code>类必须完全引入，因为编译器要完整地解析其定义方能得知<code>_cppClass</code>实例变量的大小。于是，只要是包含<code>EOCClass.h</code>的类，都必须编译为 <code>Objective-C++</code>才行，因为它们都引入了<code>SomeCppClass</code>类的头文件。这很快就会失控，最终 导致整个应用程序全部都要编译为ObjeCtive-C++。这样显然会增加编码的负担。</p>
+
+<p>也许我们会想用前向声明来避免导入<code>SomeCppClass.h</code>,比如：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt; 
+
+class SomeCppClass;
+
+@interface EOCClass : NSObject { 
+@private
+    SomeCppClass *_cppClass;
+@end
+</code></pre>
+
+<p>现在实例变量必须是指针，若不是，则编译器无法得知其大小，从而会报错。但所有指针的大小确实都是固定的，于是编译器只需知道其所指的类型即可。</p>
+
+<p>虽然我们这样做没有<code>#include &quot;SomeCppClass.h&quot;</code>但是我们前向声明该类时所用的<code>class</code>关键字还是<code>C++</code>下的关键字，所以仍然需要按照<code>OC</code>来编译才行。</p>
+
+<p>我们这里的解决方法还是一样，既然变量是<code>private</code>的，我们还是可以将它在<code>“class-continuation分类”</code>声明，改写成：</p>
+
+<pre><code class="language-objc">// EOCClass. h
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface EOCClass : NSObject
+
+
+// EOCClass.mm 
+#import &quot;EOCClass.h&quot;
+#include &quot;SomeCppClass.h&quot;
+
+@interface EOCClass ()  {
+    SomeCppClass _cppClass;
+}
+@end
+
+@implementation EOCClass 
+@end
+</code></pre>
+
+<p>改写后的<code>EOCClass</code>类，其头文件里就没有<code>C++</code>代码了，使用头文件的人甚至意识不到其底层实现代码中混有<code>C++</code>成分。某些系统库用到了这种模式，比如网页浏览器框架<code>WebKit</code>,其大部分代码都以<code>C++</code>编写，然而对外展示出来的却是一套整洁的<code>Objective-C</code>接口。<code>CoreAnimation</code>里面也用到了此模式，它的许多后端代码都用<code>C++</code>写成，但对外公布的却是一套纯<code>Objective-C</code>接口。</p>
+
+<h2 id="toc_2">第三种用法</h2>
+
+<p>就是将<code>public</code>接口中声明为“只读”的 属性扩展为“可读写”，以便在类的内部设置其值。</p>
+
+<p>例如：</p>
+
+<pre><code class="language-objc">// .h文件
+#import &lt;Foundation/Foundation.h&gt;
+@interface EOCPerson : NSObject
+
+@property (nonatomic, copy, readonly) NSString *firstName; 
+@property (nonatomic, copy, readonly) NSString *lastName;
+
+-(id) initWithFirstName : (NSString*) firstName
+                lastName: (NSString*) lastName;
+
+@end
+
+</code></pre>
+
+<p>我们一般会在<code>“class-continuaticm分类”</code>中把这两个属性扩展为“可读写”：</p>
+
+<pre><code class="language-objc">@interface EOCPerson ()
+@property (nonatomic, copy, readwrite) NSString *firstName;
+@property (nonatomic, copy, readwrite) NSString *lastName;
+
+-(void)p_privateMethod;
+@end
+</code></pre>
+
+<p>只需要用上面几行代码就行了。现在<code>EOCPerson</code>的实现代码可以随意调用<code>“setFirstName:”</code>或<code>“setLastName:”</code>这两个设置方法，也可以用“点语法”来设置属性。这样做很有用，既能令外界无法修改对象，又能在其内部按照需要管理其数据。</p>
+
+<p>只会在类的实现代码中用到的私有方法也可以声明在<code>“class-continuation分类”</code>中。这么做比较合适，因为它描述了那些只在类实现代码中才会使用的方法。上述的私有方法加上了<code>p_</code>前缀。</p>
+
+<h2 id="toc_3">第四种用法</h2>
+
+<p>当我们想要把对象所遵守的协议视为私有，就可以在<code>“class-continuation分类”</code>中声明。例如：</p>
+
+<pre><code class="language-objc">#import &quot;EOCPerson•h&quot;
+#import &quot;EOCSecretDelegate.h&quot;
+@interface EOCPerson () &lt;EOCSecretDelegate&gt; 
+@end
+@implementation EOCPerson
+    /*.....*/
+@end
+</code></pre>
+
+<h2 id="toc_4">要点</h2>
+
+<ul>
+<li><p>通过<code>“class-continuation分类”</code>向类中新增实例变量。</p></li>
+<li><p>如果某属性在主接口中声明为“只读”，而类的内部又要用设置方法修改此属性，那么就在<code>“class-continuation分类”</code>中将其扩展为“可读写”</p></li>
+<li><p>把私有方法的原型声明在<code>“class-continuation分类”</code>里面。</p></li>
+<li><p>若想使类所遵循的协议不为人所知，则可于<code>“class-continuation分类”</code>中声明。 </p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15042285213204.html">
+                
+                  <h1>第26条 不要在分类中声明属性</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>属性是封装数据的方式（参见第6条)。尽管从技术上说，分类里也可以声明属性，但这种做法还是要尽量避免。</p>
+
+<p>原因在于，除了<code>“class-continuation分类”</code>（参见第27条）之外，其他分类都无法向类中新增实例变量，因此，它们无法把实现属性所需的实例变量合成出来。如果我们在分类中声明了一个<code>friends</code>属性。会提示我们</p>
+
+<blockquote>
+<p>warning: property  &#39;friends&#39; requires method &#39;friends&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
+
+<p>warning: property &#39;friends&#39; requires method &#39;setFriends:&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
+</blockquote>
+
+<p>说明系统没有为我们自动合成属性的<code>set</code>和<code>get</code>方法。我们要自己在分类中去实现，可以把存取方法声明为<code>@dynamic</code>, 也就是说，这些方法等到运行期再提供，编译器目前是看不见的。如果决定使用消息转发机制（参见第12条）在运行期拦截方法调用，并提供其实现，那么或许可以采用这种做法。</p>
+
+<p>当然我们也可以使用关联对象的方法。<strong><mark>但是还是不建议我们在分类中定义封装数据的属性。</mark></strong></p>
+
+<p>正确做法是把所有属性都定义在主接口里。类所封装的全部数据都应该定义在主接口中，这里是唯一能够定义实例变量(也就是数据）的地方。而属性只是定义实例变量及相关存取方法所用的“语法糖”，所以也应遵循同实例变量一样的规则。<mark>至于分类机制,则应将其理解为一种手段，目标在于扩展类的功能，而非封装数据。</mark></p>
+
+<p>但是有时候，只读属性（readonly）可以在分类中使用，但是我们要手动实现它的<code>get</code>方法。当然我们不建议搞特殊。最好还是在主接口中声明。然后在分类中声明一个获取方法，来获取数据。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>把封装数据所用的全部属性都定义在主接口里。</li>
+<li>在<code>“class-contimiation分类”</code>之外的其他分类中，可以定义存取方法，但尽量不要定义属性。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15042274785369.html">
                 
                   <h1>第25条 总是为第三方类的分类名称加前缀</h1>
@@ -615,160 +870,6 @@ if ([_delegate respondsToSelector:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15038851180831.html">
-                
-                  <h1>第二十一条 理解Objective-C的错误模型</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><code>Objective-C</code>语言不例外的也有“异常”（exception)机制，但是与其它语言肯定存在差异。我们要重新学习一下。</p>
-
-<p>首先就是，<code>“自动引用计数”（Automatic ReferenceCounting, ARC)</code>在默认情况下不是<code>“异常安全的&quot;（exception safe)</code>。具体来说，这意味着：如果抛出异常，那么本应在作用域末尾释放的对象现在却不会自动释放了。<strong><font color=red>如果想生成“异常安全”的代码，可以通过设置编译器的标志来实现，不过这将引入一些额外代码，在不抛出异常时，也照样要执行这部分代码。</font></strong>需要打开的编译器标志叫做<code>-fobjc-arc-exceptions</code>。</p>
-
-<p>但是我们应该注意，<mark>Objective-C语言只有在极其罕见的情况下拋出异常，异常拋出之后，无须考虑恢复问题，而且应用程序此时也应该退出。</mark>这就是说，不用再编写复杂的“异常安全”代码了。</p>
-
-<p>异常只应该用于极其严重的错误，比如说，你编写了某个抽象基类，它的正确用法是先从中继承一个子类，然后使用这个子类。在这种情况下，如果有人直接使用了这个抽象基类，那么可以考虑抛出异常。</p>
-
-<p>与其他语言不同，Objective-C中没办法将某个类标识为“抽象 类”。要想达成类似效果，最好的办法是在那些子类必须覆写的超类方法里抛出异常。这样的话，只要有人直接创建抽象基类的实例并使用它，即会拋出异常：</p>
-
-<pre><code class="language-objc">-(void)mustOverrideMethod {
-NSString *reason = [NSStringstringWithFormat: 
-                    @&quot;%@ must be overridden&quot;,
-                    NSStringFromSelector(_cmd)];
-@throw [NSException
-    exceptionWithName:NSInternalInconsistencyException 
-    reason:reason 
-    userInfo：nil];
-}
-</code></pre>
-
-<p>既然异常只用于处理严重错误（fatal error,致命错误)，那么对其他错误怎么办呢？在出 现“不那么严重的错误&quot;（nonfatal error,非致命错误）时，Objective-C语言所用的编程范式为: 令方法返回<code>nil/0</code>,或是使用<code>NSError</code>，以表明其中有错误发生。例如，如果初始化方法无法根据传入的参数来初始化当前实例，那么就可以令其返回nil/0:</p>
-
-<pre><code class="language-objc">-(id)initWithValue:(id)value { 
-    if ((self = [super init])){
-        if ( /* Value means instance can11 be created */ ) { 
-        self = nil;
-     } else {
-        // Initialize instance
-        }
-     }
-    return self;
-}
-</code></pre>
-
-<p>在这种情况下，如果<code>if</code>语句发现无法用传人的参数值来初始化当前实例（比如这个方法 要求传入的value参数必须是<code>non-nil</code>的)，那么就把<code>self</code>设置成<code>nil</code>,这样的话，整个方法的 返回值也就是<code>nil</code>了。调用者发现初始化方法并没有把实例创建好，于是便可确定其中发生了错误。</p>
-
-<p><code>NSError</code>的用法更加灵活，因为经由此对象，我们可以把导致错误的原因回报给调用者。 <code>NSError</code>对象里封装了三条信息：</p>
-
-<ul>
-<li><p><strong>Error domain(错误范围，其类型为字符串）</strong><br/>
-错误发生的范围。也就是产生错误的根源，通常用一个特有的全局变量来定义。比方说，<code>“处理URL的子系统”（URL-handling subsystem)</code>在从URL中解析或取得数据时如果出错了，那么就会使用<code>NSURLErrorDomain</code>来表示错误范围。</p></li>
-<li><p><strong>Error code(错误码，其类型为整数）</strong><br/>
-独有的错误代码，用以指明在某个范围内具体发生了何种错误。某个特定范围内可能会发生一系列相关错误，这些错误情况通常采用<code>enum</code>来定义。例如，当<code>HTTP</code>请求出错时，可能会把<code>HTTP</code>状态码设为错误码。</p></li>
-<li><p><strong>Uesr info(用户信息，其类型为字典）</strong><br/>
-有关此错误的额外信息，其中或许包含一段“<code>本地化的描述”（localized description)</code>, 或许还含有导致该错误发生的另外一个错误，经由此种信息，可将相关错误串成一条 <code>“错误链”（chain of errors)</code>。</p></li>
-</ul>
-
-<p>NSError的一种常见用法是，经由方法的“输出参数”返回给调用者。比如像这样：</p>
-
-<pre><code class="language-objc">-(BOOL)doSomething: (NSError**)error
-</code></pre>
-
-<p>用例为：</p>
-
-<pre><code class="language-objc">NSError *error = nil;
-BOOL ret = [object doSomething:&amp;error];
-    if (error) {
-//There was an error
-}
-</code></pre>
-
-<p>也可以通过委托协议来传递此错误。有错误发生时，当前对象会把错误信息经由协议中的某个方法传给其<code>委托对象（delegate)</code>。这里不做过多说明。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>只有发生了可使整个应用程序崩溃的严重错误时，才应使用异常。</li>
-<li>在错误不那么严重的情况下，可以指派“委托方法”（delegate method)来处理错误，也可以把错误信息放在<code>NSError</code>对象里，经由“输出参数”返回给调用者。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15038831182450.html">
-                
-                  <h1>第二十条 为私有方法名加上前缀</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>一个类所做的事情，通常要比外面看到的更多。编写类的实现代码时，我们经常要编写在内部使用的方法。<strong><font color=red>这里我们要注意，一定要为这种内部实现的方法加上前缀，这有助于调试，有利于区分私有方法和公共方法。区分私有和公共方法，主要是为了方便修改内部的私有方法和相关实现代码，防止随意修改公共API。</font></strong></p>
-
-<p>我通常在私有方法前面加上<code>“_p”</code>，例如：</p>
-
-<pre><code class="language-objc">
--(void)p_privateMethod{
-    /*.....*/
-}
-</code></pre>
-
-<p>我们之所以要加上前缀，是因为OC不像java和c++语言可以在前面将方法声明为私有。每个对象都可以响应任何方法(由于其强大的动态特性造成的)。</p>
-
-<p>加前缀的时候要避免只用一个<code>“_”</code>，<strong><font color=red>因为苹果公司在自己的类中就是这么做的，所以我们要避开这种方式，防止造成继承一个类的时候，子类无意间覆写了父类的方法。</font></strong></p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>给私有方法的名称加上前缀，这样可以很容易地将其同公共方法区分开。</li>
-<li>不要单用一个下划线做私有方法的前缀，因为这种做法是预留给苹果公司用的。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -852,6 +953,18 @@ BOOL ret = [object doSomething:&amp;error];
 	      
 		      
 			      <li class="post">
+			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15045739362959.html">第四十条 用块引用其所属对象时不要出现保留环</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15045090813380.html">第三十九条 用handler块降低代码分散程度</a>
 			      </li>
 		     
@@ -865,18 +978,6 @@ BOOL ret = [object doSomething:&amp;error];
 		      
 			      <li class="post">
 			        <a href="15043212815193.html">第三十七条 理解“块”这一概念</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15043134527493.html">通过协议提供匿名方法</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15042539845357.html">KVO的简单实现</a>
 			      </li>
 		     
 		  

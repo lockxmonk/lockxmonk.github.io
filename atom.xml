@@ -4,13 +4,279 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-09-04T11:20:54+08:00</updated>
+  <updated>2017-09-04T16:57:03+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[第四十一条 多用派发队列，少用同步锁]]></title>
+    <link href="https://lockxmonk.github.io/15049238737460.html"/>
+    <updated>2017-09-09T10:24:33+08:00</updated>
+    <id>https://lockxmonk.github.io/15049238737460.html</id>
+    <content type="html"><![CDATA[
+<p>在<code>OC</code>中，如果有多个线程要执行同一份代码，那么有时可能会出问题。这种情况下，通常要使用锁来实现某种同步机制。在<code>GCD</code>出现之前，有两种办法，第一种是采用内置的<code>“同步块”（synchronization block)</code>:</p>
+
+<pre><code class="language-objc">-(void)synchronizedMethod {
+    @synchronized(self) {
+    //Safe
+    }
+}
+</code></pre>
+
+<p>这种写法会根据给定的对象，自动创建一个锁，并等待块中的代码执行完毕。执行到这段代码结尾处，锁就释放了。在本例中，同步行为所针对的对象是<code>self</code>。这么写通常没错，因为它可以保证每个对象实例都能不受干扰地运行其<code>synchronizedMethod</code>方法。然而，滥用 <code>@SynChronized(self)</code>则会降低代码效率，因为共用同一个锁的那些同步块，都必须按顺序执行。若是在<code>self</code>对象上频繁加锁，那么程序可能要等另一段与此无关的代码执行完毕，才能继续执行当前代码，这样做其实并没有必要。</p>
+
+<p>另一种加锁的办法是<code>NSLock</code>对象：</p>
+
+<pre><code class="language-objc">_lock = [[NSLockalloc] init];
+
+-(void)synchronizedMethod {
+    [_lock lock];
+    //Safe
+    [_lock unlock];
+}
+</code></pre>
+
+<p>也可以使用<code>NSRecursiveLock</code>这种<code>“递归锁’（recursive lock)</code>，线程能够多次持有该锁，而不会出现<code>死锁(deadlock)</code>现象。</p>
+
+<p>虽然上面两种方法可以用，但是也有一些缺陷，比如：在某些情况下，同步快会导致死锁，另外，效率不是很高。而如果直接使用锁对象的话，一旦遇到死锁，就会非常麻烦。</p>
+
+<p><strong>所以我们一般使用GCD来替代，它的优点就是可以简单，高效的为代码加锁</strong>。属性因为需要经常性的同步，所以当要线程安全的时候，加上<code>“atomic”</code>特质来修饰属性。</p>
+
+<p>但是如果我们想要自己实现属性访问方法时，可以：</p>
+
+<pre><code class="language-objc">-(NSString*)someString {
+    @synchronized(self) {
+        return _someString;
+    }
+}
+-(void)setSomeString:(NSString*)someString { 
+    @synchronized(self) {
+        _someString = someString;
+    }
+}
+</code></pre>
+
+<p>但是滥用<code>@synchronized(self)</code>会很危险，因为所有同步块都会彼此抢夺同一个锁。要是有很多个属性都这么写的话，那么每个属性的同步块都要等其他所有同步块执行完毕才能执行，这也许并不是开发者想要的效果。我们只是想令每个属性各自独立地同步。</p>
+
+<p><strong><em>而且上述做法并不是绝对的线程安全。因为在两次访问操作之间，其他线程可能会写入新的属性值。</em></strong></p>
+
+<p>这里我们使用<code>“串行同步队列”（serial synchronization queue)</code>。将读取操作及写入操作都安排在同一个队列里，即可保证数据同步。：</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_queue_create(&quot;com.effectiveobjectivec.syncQueue&quot;, NULL);
+
+-(NSString*)someString {
+    _block NSString *localSomeString;
+    dispatch_sync(_syncQueue, ^{
+        localSomeString = _someString;
+    })；
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+    dispatch_sync(_syncQueue,^{
+        _someString = someString;
+    });
+}
+</code></pre>
+
+<p>此模式的思路是：把设置操作与获取操作都安排在序列化的队列里执行（串行同步队列并不会拓展新的线程），这样的话，所有针对属性的访问操作就都同步了。（关于GCD的串行队列/并发队列与iOS多线程这里不详细讲解了，后续深入探讨）。</p>
+
+<p>多个获取方法可以并发执行，而获取方法与设置方法之间不能并发执行，利用这个特点，还能写出更快一些的代码来。此时正可以体现出<code>GCD</code>写法的好处。用同步块或锁对象，是无法轻易实现出下面这种方案的。这次不用串行队列，而改用<code>并发队列（concurrentquene)</code>:</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+
+-(NSString*}someString {
+    __block NSString *localSomeString; 
+    dispatch_sync( _syncQueue, ^{
+        localSomeString = _someString;
+    })； 
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+        dispatch_async(syncQueue, ^{
+        _someString = someScring;
+    });
+}
+</code></pre>
+
+<p>光是上面这些代码还不够，所有读取操作与写入操作都会在同一个队列上执行，不过由于是并发队列，所以读取与写人操作可以随时执行。而我们恰恰不想让这些操作随意执行。这就要用到<code>栅栏（barrier)</code>，是<code>GCD</code>中的一个功能：</p>
+
+<pre><code class="language-objc">void dispatch_barrier_async(dispatch_queue_t queue,
+                            dispatch_block_t block);
+void dispatch_barrier_sync(dispatch_queue_t queue,
+                            dispatch_block_t block);
+</code></pre>
+
+<p><strong><font color=red>在队列中，栅栏块必须单独执行，不能与其他块并行。这只对并发队列有意义，因为串行队列中的块总是按顺序逐个来执行的。并发队列如果发现接下来要处理的块是个栅栏块 (barrier block)，那么就一直要等当前所有并发块都执行完毕，才会单独执行这个栅栏块。待栅栏块执行过后，再按正常方式继续向下处理。</font></strong></p>
+
+<p>在本例中，可以用栅栏块来实现属性的设置方法。在设置方法中使用了栅栏块之后，对属性的读取操作依然可以并发执行，但是写人操作却必须单独执行了。例如：</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+
+-(NSString*}someString {
+    __block NSString *localSomeString; 
+    dispatch_sync( _syncQueue, ^{
+        localSomeString = _someString;
+    })； 
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+        dispatch_barrier_async(syncQueue, ^{
+        _someString = someScring;
+    });
+}
+</code></pre>
+
+<p><strong>执行的顺序如图所示：</strong><br/>
+<img src="media/15049238737460/15049413869385.jpg" alt=""/></p>
+
+<p>测试一下性能，你就会发现，这种做法肯定比使用串行队列要快。注意，设置函数也可以改用同步的<code>栅栏块(synchronous barrier)</code>来实现，那样做可能会更髙效，其原因刚才已经 解释过了。<strong><font color=red>最好还是测一测每种做法的性能，然后从中选出最适合当前场景的方案</font></strong>。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>派发队列可用来表述<code>同步语义（synchronization semantic)</code>,这种做法要比使用<code>@synchronized块</code>或<code>NSLock</code>对象更简单。</li>
+<li>将同步与异步派发结合起来，可以实现与普通加锁机制一样的同步行为，而这么做却不会阻塞执行异步派发的线程。</li>
+<li>使用同步队列及栅栏块，可以令同步行为更加髙效。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[第四十条 用块引用其所属对象时不要出现保留环]]></title>
+    <link href="https://lockxmonk.github.io/15045739362959.html"/>
+    <updated>2017-09-05T09:12:16+08:00</updated>
+    <id>https://lockxmonk.github.io/15045739362959.html</id>
+    <content type="html"><![CDATA[
+<p>我们使用块的时候，如果不仔细思索，很容易出现“保留环”，我们来举个例子，下面这个类就提供了一套接口，调用者可由此从某个URL中下载数据。在启动获取器时，可设置 <code>completion handler</code>,这个块会在下载结束之后以回调方式执行。为了能在下载完成后通过<code>p_requestCompleted</code>方法执行调用者所指定的块，这段代码需要把<code>completion handler</code>保存到实例变量里面。</p>
+
+<pre><code class="language-objc">// EOCNetwor kFetcher. h
+#import &lt;Foundation/Foundation.h&gt;
+typedef void(^EOCNetworkFetcherCompletionHandler) (NSData *data);
+
+@interface EOCNetworkFetcher : NSObject 
+@property (nonatomic, strong, readonly) NSURL *url;
+-(id)initWithURL:(NSURL^)url;
+-(void)startWithCompletionHandler:(EOCNetworkFetcherCompletionHandler)completion;
+
+
+
+// EOCNetworkFetcher.m
+#import &quot;EOCNetworkFetcher.h&quot;
+@interface EOCNetworkFetcher ()
+@property(nonatomic, strong, readwrite) NSURL *url;
+@property(nonatomic, copy) EOCNetworkFetcherCompletionHandler completionHandler; (nonatomic, strong) NSData *downloadedData;
+@implementation EOCNetworkFetcher
+
+-(id)initWithURL:(NSURL*)url {
+    if ((self = [super init])) {
+        _url = url;
+    }
+    return sel£;
+}
+
+-(void)startWithCompletionHandler:
+        (EOCNetworkFetcherCompletionHandlei) completion
+{
+    self.completionHandler = completion;
+    //Start the request
+    // Request sets downloadedData property
+    //When request is finished, p_requestCompleted is called
+}
+
+-(void)p_requestCompleted { 
+    if (_completionHandler){ 
+    _completionHandler(_downloadedData);
+    }
+}
+@end
+</code></pre>
+
+<p>某个类可能会创建这种网络数据获取器对象，并用其从<code>URL</code>中下载数据：</p>
+
+<pre><code class="language-objc">@implemantation EOCClass {
+    EOCNetworkFetcher *_networkFetcher;
+    NSData *_fetchedData;
+}
+-(void)downloadData {
+    NSURL *url = [[NSURL alloc] initWithString:
+                    @&quot;http://www.example.com/something.dat&quot;];
+    _networkFetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
+    [_networkFetcher startWithCompletionHandler:^(NSData *data){
+        NSLog (@&quot;Request URL %@ finished&quot;, _networkFetcher.url);
+        _fetchedData = data;
+    }]；
+}
+@end
+</code></pre>
+
+<p>这段代码没有什么问题，但是<strong><font color=red>里面有一个隐蔽的保留环</font></strong>，因为<code>completion handler</code>块要设置<code>_fetchedData</code>实例变量,所以它必须捕获<code>self</code>变量（变量捕获问题详见第37条。这就是说，<code>handler</code>块保留了创建网络数据获取器的那个<code>EOCClass</code>实例。而<code>EOCClass</code>实例则通过<code>strong</code>实例变量保留了获取器，最后，获取器对象又保留了<code>handler</code>块。</p>
+
+<p>如下图所示：<br/>
+<img src="media/15045739362959/15045760282053.jpg" alt=""/></p>
+
+<p>要打破保留环也很容易：要么令<code>_networkFetcher</code>实例变量不再引用获取器，要么令获取器的<code>completionHaiidler</code>属性不再持有<code>handler</code>块。在网络数据获取器这个例子中，应该等 <code>completion handler</code>块执行完毕后，再去打破保留环，以便使获取器对象在<code>handler</code>块执行期间保持存活状态。比方说，<code>completion handler</code>块的代码可以这么修改：</p>
+
+<pre><code class="language-objc">[_networkFetcher startWithCompletionHandler:^(NSData *data){
+        NSLog (@&quot;Request URL %@ finished&quot;, _networkFetcher.url);
+        _fetchedData = data;
+        _networkFetcher = nil;
+    }]；
+</code></pre>
+
+<p>如果设计<code>API</code>时用到了<code>completion handler</code>这样的同调块，那么很容易形成保留环，所以必须意识到这个重要问题。一般只要适时的清理环中的某个引用即可。</p>
+
+<p>但是上例如果不执行<code>completion handler</code>，那么保留环就无法打破，于是内存就会泄漏。</p>
+
+<p>所以我们使调用<code>API</code>的那段代码无须在执行期间保留指向网络数据获取器的引用，而是设定一套机制，令获取器对象自己设法保持存活。要想保持存活，获取器对象可以 在启动任务时把自己加到全局的<code>collection</code>中（比如用<code>set</code>来实现这个<code>collection</code>),待任务完成后，再移除。</p>
+
+<p>所以我们改写一下：</p>
+
+<pre><code class="language-objc">-(void)downloadData {
+    NSURL *url = [[NSURL alloc] initWithString:
+                    @&quot;http://www.example.com/something.dat&quot;];
+    EOCNetworkFetcher *networkFetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
+    [networkFetcher startWithCompletionHandler:^(NSData *data){
+        NSLog (@&quot;Request URL %@ finished&quot;, networkFetcher.url);
+        _fetchedData = data;
+    }]；
+}
+</code></pre>
+
+<p>大部分网络通信库都采用这种办法，因为假如令调用者自己来将获取器对象保持存活的话，他们会觉得麻烦。<code>Twitter</code>框架的<code>TWRequest</code>对象也用这个办法。</p>
+
+<p>但是上面这个例子仍然有保留环，<code>completion handler</code>块会通过获取器对象来引用其中的<code>URL</code>,之后获取器会反过来经由<code>CompletionHandler</code>属性保留这个块。我们把块保留在属性里的目的是想稍后来使用这个块。所以一旦我们运行过<code>completion handler</code>之后就可以将它释放了。我们消除保留环可以按照下面修改：</p>
+
+<pre><code class="language-objc">-(void)p_requestCompleted { 
+    if (_completionHandler){ 
+        _completionHandler(_downloadedData);
+    }
+    self.completionHandler = nil;
+}
+</code></pre>
+
+<p>这样只要下载请求执行完毕，保留环就解除了。</p>
+
+<p>请注意，之所以要在<code>start</code>方法中把<code>completion handler</code>作为参数传进去，这也是一条重要原因。假如把<code>completion handler</code>暴露为获取器对象的公共属性，那么就不便在执行完下载请求之后直接将其淸理掉了，因为既然已经把<code>handler</code>作为属性公布了，那就意味着调用者可以自由使用它，若是此时又在内部将其清理掉的话，则会破坏<code>“封装语义” (encapsulation semantic)</code>。</p>
+
+<p><font color=red>这两种保留环都很容易发生。使用块来编程时，一不小心就会出现这种<code>bug</code>,反过来说，只要小心谨慎，这种问题也很容易解决。关键在于，要想清楚块可能会捕获并保留哪些对象。如果这些对象又直接或间接保留了块，那么就要考虑怎样在适当的时机解除保留环。</font></p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>如果块所捕获的对象直接或间接地保留了块本身，那么就得当心保留环问题。</li>
+<li>一定要找个适当的时机解除保留环，而不能把责任推给API的调用者。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[第三十九条 用handler块降低代码分散程度]]></title>
@@ -1634,244 +1900,6 @@ NSString *newText =
 <li>方法名要言简意赅，从左至右读起来要像个日常用语中的句子才好。</li>
 <li>方法名里不要使用缩略后的类型名称。</li>
 <li>给方法起名时的第一要务就是确保其风格与你自己的代码或所要集成的框架相符。</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第十八条 尽量使用不可变对象]]></title>
-    <link href="https://lockxmonk.github.io/15037148888105.html"/>
-    <updated>2017-08-26T10:34:48+08:00</updated>
-    <id>https://lockxmonk.github.io/15037148888105.html</id>
-    <content type="html"><![CDATA[
-<p>我们在设计类的时候，运用属性来封装数据。并且使用属性时候，<strong>可以将属性直接设置为“只读”（read-only）</strong>。默认情况下是“可读也可写”的。</p>
-
-<p>不过，一般情况下我们要建模的数据未必需要改变。比方说，某数据所表示的对象源自一项只读的网络服务(web service),里面可能包含一系列需要显示在地图上的相关点，像这种对象就没必要改变其内容。即使修改了，新数据也不会推送回服务器.</p>
-
-<p>而且如果把可变对象（mutable object)放入<code>collection</code>之后又修改其内容，那么很容易就会破坏<code>set</code>的内部数据结构，使其失去固有的语义。</p>
-
-<p>我们来举例：</p>
-
-<p>为了将<code>EOCPointOflnterest</code>做成不可变的类，需要把所有属性都声明为<code>readonly</code>:</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-@interface EOCPointOfInterest : NSObject
-@property (nonatomic, copy, readonly) NSString *identifier; 
-@property (nonatomic, copy, readonly) NSString* title;
-@property (nonatomic, assign, readonly) float latitude; 
-@property (nonatomic, assign, readonly) float longitude;
--(id) initWithldentifier: (NSString*) identifier 
-                   title:(NSString*)title 
-                   latitude: (float) latitude 
-                   longitude: (float) longitude;
-@end
-
-</code></pre>
-
-<p>这样后如果有人想要改变属性值，那么编译时就会报错。对象中的属性值可以读出，但是无法写入，这就能保证<code>EOCPointOfluterest</code>中的各个数据之间总是相互协调的。</p>
-
-<p>但是我们有时想要修改封装在对象内部的数据，不想令这些数据为外人所改动。这种情况下，通常做法是在对象内部将<code>readonly</code>属性重新声明为<code>readwrite</code>。当然，如果该属性是nonatomic 的，那么这样做可能会产生“竞争条件”（racecondition)。在对象内部写人某属性时，对象外的 观察者也许正读取该属性。若想避免此问题，我们可以在必要时通过<mark>“派发队列&quot;（dispatchqueue）等手段，将(包括对象内部的）所有数据存取操作都设为同步操作</mark>。<strong><font color=red>将属性在对象内部重新声明为<code>readwrite</code>这一操作可于<code>“class-continuation分类”</code>中完成，在公共接口中声明的属性可于此处重新声明，属性的其他特质必须保持不变，而<code>readonly</code>可扩展为<code>readwrite</code>。</font></strong></p>
-
-<p>其 <code>“class-continuation分类”</code>可以这样写：</p>
-
-<pre><code class="language-objc">// .m文件中
-#import &quot;EOCPointOfInterest.h&quot;
-
-@interface EOCPointOfInterest : NSObject
-@property (nonatomic, copy, readwrite) NSString *identifier; 
-@property (nonatomic, copy, readwrite) NSString* title;
-@property (nonatomic, assign, readwrite) float latitude; 
-@property (nonatomic, assign, readwrite) float longitude;
-
-@implementation EOCPointOfInterest
-
-/* ... */
-
-@end
-</code></pre>
-
-<p>现在，只能于<code>EOCPoimOflnterest</code>实现代码内部设置这些属性值了。但是我们其实可以同构KVC键值编码来设置这些属性值。不过，这样显然违背了我们的本意，绕过了提供的API。不推荐这种做法。</p>
-
-<p>我们定义类公共的API时，<strong><font color=red>要注意一件事情：对象里表示各种collection的那些属性究竞应该设成可变的，还是不可变的。</font></strong>例如，我们用某个类来表示个人信息，该类里还存放了一些引用，指向此人的诸位朋友。你可能想把这个人的全部朋友都放在一个“列表&quot;（list)里，并将其做成属性。假如开发者可以添加或删除此人的朋友，那么这个属性就需要用可变的<code>set</code>来实现。在这种情况下，通常应该提供一个<code>readonly</code>属性供外界使用，该属性将返回不可变的<code>set</code>, 而此<code>set</code>则是内部那个可变<code>set</code>的一份拷贝。比方说，下面这段代码就能够实现出这样一个类：</p>
-
-<pre><code class="language-objc">// EOCPerson.h
-#import &lt;Foundation/Foundation•h&gt;
-@interface EOCPerson : NSObject
-@property (nonatomic, copy, readonly) NSString *firstName; 
-@property (nonatomic, copy, readonly) NSString *lastName; 
-@property (nonatomic, strong, readonly) NSSet *friends;
--(id)initWithFirstName:(NSString*)firstName
-          andLastName:(NSString*)lastName;
--(void)addFriend:(EOCPerson*)person;
--(void)removeFriend:(EOCPerson*)person;
-
-@end
-
-// EOCPerson.m #import &quot;EOCPerson•!!
-@interface EOCPerson ()
-@property (nonatomic, copy, readwrite) NSString *firstName; 
-@property (nonatomic, copy, readwrite) NSString *lastName;
-@end
-@implementation EOCPerson {
-    NSMutableSet *_internalFriends;
-}
-
--(NSSet*)friends {
-    return [_internalFriends copy];
-}
--(void)addFriend:(EOCPerson*)person {
-    [_internalFriends addObject:person];
-} 
-
--(void)removeFriend:(EOCPerson*)person {
-    [_internalFriends removeObjectrperson];
-}
-
--(id)initWithFirstName: (NSString*)firstName andLastName:(NSString*)lastName { 
-    if ((self = [super init】））{
-         _firstName = firstName;
-         _lastName = lastName;
-         _internalFriends = [NSMutableSet new];
-    }
-    return self;
-}
-
-@end
-
-</code></pre>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>尽量创建不可变的对象。</li>
-<li>若某属性仅可于对象内部修改，则在<code>“class-continuation分类”</code>中将其由<code>readonly</code>属性扩展为<code>readwrite</code>属性</li>
-<li>不要把可变的<code>collection</code>作为属性公开，而应提供相关方法，以此修改对象中的可变<code>collection</code>。</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第十七条 实现description方法]]></title>
-    <link href="https://lockxmonk.github.io/15037100500253.html"/>
-    <updated>2017-08-26T09:14:10+08:00</updated>
-    <id>https://lockxmonk.github.io/15037100500253.html</id>
-    <content type="html"><![CDATA[
-<p>调试程序时，我们一般要将对象的属性<code>NSLog</code>出来：</p>
-
-<pre><code class="language-objc">NSLog(@&quot;object = %@&quot;,object);
-</code></pre>
-
-<p>如果我们输出的对象是数组，或者字典和其它数据是可以将数据打印出来。但是如果打印的是自定义的类，那么输出的对象就类似于：</p>
-
-<pre><code class="language-objc">object = &lt;EOCPerson:0x7fd9a1600600&gt;
-</code></pre>
-
-<p>上面这种信息很不实用，所以我们要在自己的类里覆写<code>description</code>方法，否则打印信息时就会调用<code>NSObject</code>类所实现的默认方法。此方法定义在<code>NSObject</code>协议里，不过<code>NSObject</code>类也实现了它。</p>
-
-<p>想输出更为有用的信息也很简单，只需覆写<code>description</code>方法并将描述此对象的字符串 返回即可。例如，有下面这个代表个人信息的类：</p>
-
-<pre><code class="language-objc">//EOCPerson.h
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface EOCPerson : NSObject
-
-@property(nonatomic, readonly, copy)NSString *firstname;
-@property (nonatomic, copy, readonly) NSString *lastName;
-
--(id) initWithFirstName: (NSString*) firstName lastName:(NSString*) lastName;
-
-@end
-
-//EOCPerson.m
-#import &quot;EOCPerson.h&quot;
-
-@implementation EOCPerson
-
--(id)initWithFirstName:(NSString *)firstName lastName:(NSString *)lastName{
-    if ((self = [super init])) {
-        _firstname = [firstName copy];
-        _lastName = [lastName copy];
-    }
-    return self;
-}
-//description方法
--(NSString*)description{
-
-    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , \&quot;%@ %@\&quot;&gt;&quot; , [self class], self ,_firstname ,_lastName ];
-}
-
-@end
-
-
-</code></pre>
-
-<p>那么输出就是：</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-#import &quot;EOCPerson.h&quot;
-
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        EOCPerson *person = [[EOCPerson alloc] initWithFirstName:@&quot;Liang&quot; lastName:@&quot;Zhonghao&quot;];
-        NSLog(@&quot;Person = %@&quot; , person);
-    }
-    return 0;
-}
-
-</code></pre>
-
-<p><img src="media/15037100500253/15037119639541.jpg" alt=""/></p>
-
-<blockquote>
-<p><strong>建议：在新实现的 description方法中，也应该像默认的实现那样，打印出类的名字和指针地址，因为这些内容 有时也许会用到。</strong></p>
-</blockquote>
-
-<p>我们也可以借助字典类型的<code>description</code>方法来将打印何种信息标识出来：</p>
-
-<pre><code class="language-objc">
--(NSString*)description{
-    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , 
-    [self class],
-     self, 
-     @{@&quot;firstname&quot;:_firstname,
-       @&quot;lastname&quot;:_lastName}];
-}
-</code></pre>
-
-<p>输出为：<br/>
-<img src="media/15037100500253/15037132520686.jpg" alt=""/></p>
-
-<p><code>NSObject</code>协议中还有个方法要注意，那就是<code>debugDescription</code>,此方法的用意与 <code>description</code>非常相似。二者区别在于，<code>debugDescription</code>方法是开发者在调试器（debugger) 中以控制台命令打印对象时才调用的。在<code>NSObject</code>类的默认实现中，此方法只是直接调用了<code>description</code>。我们还拿上个例子来说明：</p>
-
-<p><img src="media/15037100500253/15037137809556.jpg" alt=""/></p>
-
-<p>我们在NSLog下面打一个断点，进入调试模式，之后向调试控制台里输入命令。LLDB的“po”命令 可以完成对象打印（print-object)工作，其输出如下：<br/>
-<img src="media/15037100500253/15037138780545.jpg" alt=""/></p>
-
-<p>当然我们可以把人名放在<code>EOCPerson</code>对象的普通描述信息中，而把更详尽的内容放在调试所用的描述信息里：</p>
-
-<pre><code class="language-objc">-(NSString*)description{
-    return [NSString stringWithFormat:@&quot;%@ : %@&gt;&quot; , _firstname ,_lastName ];
-}
-
--(NSString*)debugDescription{
-    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , [self class], self , @{@&quot;firstname&quot;:_firstname,@&quot;lastname&quot;:_lastName}];
-}
-
-</code></pre>
-
-<p>运行之后如下：<br/>
-<img src="media/15037100500253/15037141337080.jpg" alt=""/></p>
-
-<p>你可能不想把类名与指针地址这种额外内容放在普通的描述信息里，但是却希望调试的 时候能够很方便地看到它们，在此情况下，就可以使用这种输出方式来实现。Foundation框架的<code>NSArray</code>类就是这么做的.</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>实现<code>description</code>方法返回一个有意义的字符串，用以描述该实例。</li>
-<li>若想在调试时打印出更详尽的对象描述信息，则应实现<code>debugDescription</code>方法。</li>
 </ul>
 
 ]]></content>

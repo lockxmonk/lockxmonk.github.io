@@ -1,0 +1,463 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  第四十条 用块引用其所属对象时不要出现保留环 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>第四十条 用块引用其所属对象时不要出现保留环</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/9/5</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>我们使用块的时候，如果不仔细思索，很容易出现“保留环”，我们来举个例子，下面这个类就提供了一套接口，调用者可由此从某个URL中下载数据。在启动获取器时，可设置 <code>completion handler</code>,这个块会在下载结束之后以回调方式执行。为了能在下载完成后通过<code>p_requestCompleted</code>方法执行调用者所指定的块，这段代码需要把<code>completion handler</code>保存到实例变量里面。</p>
+
+<pre><code class="language-objc">// EOCNetwor kFetcher. h
+#import &lt;Foundation/Foundation.h&gt;
+typedef void(^EOCNetworkFetcherCompletionHandler) (NSData *data);
+
+@interface EOCNetworkFetcher : NSObject 
+@property (nonatomic, strong, readonly) NSURL *url;
+-(id)initWithURL:(NSURL^)url;
+-(void)startWithCompletionHandler:(EOCNetworkFetcherCompletionHandler)completion;
+
+
+
+// EOCNetworkFetcher.m
+#import &quot;EOCNetworkFetcher.h&quot;
+@interface EOCNetworkFetcher ()
+@property(nonatomic, strong, readwrite) NSURL *url;
+@property(nonatomic, copy) EOCNetworkFetcherCompletionHandler completionHandler; (nonatomic, strong) NSData *downloadedData;
+@implementation EOCNetworkFetcher
+
+-(id)initWithURL:(NSURL*)url {
+    if ((self = [super init])) {
+        _url = url;
+    }
+    return sel£;
+}
+
+-(void)startWithCompletionHandler:
+        (EOCNetworkFetcherCompletionHandlei) completion
+{
+    self.completionHandler = completion;
+    //Start the request
+    // Request sets downloadedData property
+    //When request is finished, p_requestCompleted is called
+}
+
+-(void)p_requestCompleted { 
+    if (_completionHandler){ 
+    _completionHandler(_downloadedData);
+    }
+}
+@end
+</code></pre>
+
+<p>某个类可能会创建这种网络数据获取器对象，并用其从<code>URL</code>中下载数据：</p>
+
+<pre><code class="language-objc">@implemantation EOCClass {
+    EOCNetworkFetcher *_networkFetcher;
+    NSData *_fetchedData;
+}
+-(void)downloadData {
+    NSURL *url = [[NSURL alloc] initWithString:
+                    @&quot;http://www.example.com/something.dat&quot;];
+    _networkFetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
+    [_networkFetcher startWithCompletionHandler:^(NSData *data){
+        NSLog (@&quot;Request URL %@ finished&quot;, _networkFetcher.url);
+        _fetchedData = data;
+    }]；
+}
+@end
+</code></pre>
+
+<p>这段代码没有什么问题，但是<strong><font color=red>里面有一个隐蔽的保留环</font></strong>，因为<code>completion handler</code>块要设置<code>_fetchedData</code>实例变量,所以它必须捕获<code>self</code>变量（变量捕获问题详见第37条。这就是说，<code>handler</code>块保留了创建网络数据获取器的那个<code>EOCClass</code>实例。而<code>EOCClass</code>实例则通过<code>strong</code>实例变量保留了获取器，最后，获取器对象又保留了<code>handler</code>块。</p>
+
+<p>如下图所示：<br/>
+<img src="media/15045739362959/15045760282053.jpg" alt=""/></p>
+
+<p>要打破保留环也很容易：要么令<code>_networkFetcher</code>实例变量不再引用获取器，要么令获取器的<code>completionHaiidler</code>属性不再持有<code>handler</code>块。在网络数据获取器这个例子中，应该等 <code>completion handler</code>块执行完毕后，再去打破保留环，以便使获取器对象在<code>handler</code>块执行期间保持存活状态。比方说，<code>completion handler</code>块的代码可以这么修改：</p>
+
+<pre><code class="language-objc">[_networkFetcher startWithCompletionHandler:^(NSData *data){
+        NSLog (@&quot;Request URL %@ finished&quot;, _networkFetcher.url);
+        _fetchedData = data;
+        _networkFetcher = nil;
+    }]；
+</code></pre>
+
+<p>如果设计<code>API</code>时用到了<code>completion handler</code>这样的同调块，那么很容易形成保留环，所以必须意识到这个重要问题。一般只要适时的清理环中的某个引用即可。</p>
+
+<p>但是上例如果不执行<code>completion handler</code>，那么保留环就无法打破，于是内存就会泄漏。</p>
+
+<p>所以我们使调用<code>API</code>的那段代码无须在执行期间保留指向网络数据获取器的引用，而是设定一套机制，令获取器对象自己设法保持存活。要想保持存活，获取器对象可以 在启动任务时把自己加到全局的<code>collection</code>中（比如用<code>set</code>来实现这个<code>collection</code>),待任务完成后，再移除。</p>
+
+<p>所以我们改写一下：</p>
+
+<pre><code class="language-objc">-(void)downloadData {
+    NSURL *url = [[NSURL alloc] initWithString:
+                    @&quot;http://www.example.com/something.dat&quot;];
+    EOCNetworkFetcher *networkFetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
+    [networkFetcher startWithCompletionHandler:^(NSData *data){
+        NSLog (@&quot;Request URL %@ finished&quot;, networkFetcher.url);
+        _fetchedData = data;
+    }]；
+}
+</code></pre>
+
+<p>大部分网络通信库都采用这种办法，因为假如令调用者自己来将获取器对象保持存活的话，他们会觉得麻烦。<code>Twitter</code>框架的<code>TWRequest</code>对象也用这个办法。</p>
+
+<p>但是上面这个例子仍然有保留环，<code>completion handler</code>块会通过获取器对象来引用其中的<code>URL</code>,之后获取器会反过来经由<code>CompletionHandler</code>属性保留这个块。我们把块保留在属性里的目的是想稍后来使用这个块。所以一旦我们运行过<code>completion handler</code>之后就可以将它释放了。我们消除保留环可以按照下面修改：</p>
+
+<pre><code class="language-objc">-(void)p_requestCompleted { 
+    if (_completionHandler){ 
+        _completionHandler(_downloadedData);
+    }
+    self.completionHandler = nil;
+}
+</code></pre>
+
+<p>这样只要下载请求执行完毕，保留环就解除了。</p>
+
+<p>请注意，之所以要在<code>start</code>方法中把<code>completion handler</code>作为参数传进去，这也是一条重要原因。假如把<code>completion handler</code>暴露为获取器对象的公共属性，那么就不便在执行完下载请求之后直接将其淸理掉了，因为既然已经把<code>handler</code>作为属性公布了，那就意味着调用者可以自由使用它，若是此时又在内部将其清理掉的话，则会破坏<code>“封装语义” (encapsulation semantic)</code>。</p>
+
+<p><font color=red>这两种保留环都很容易发生。使用块来编程时，一不小心就会出现这种<code>bug</code>,反过来说，只要小心谨慎，这种问题也很容易解决。关键在于，要想清楚块可能会捕获并保留哪些对象。如果这些对象又直接或间接保留了块，那么就要考虑怎样在适当的时机解除保留环。</font></p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>如果块所捕获的对象直接或间接地保留了块本身，那么就得当心保留环问题。</li>
+<li>一定要找个适当的时机解除保留环，而不能把责任推给API的调用者。</li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15049238737460.html" 
+          title="Previous Post: 第四十一条 多用派发队列，少用同步锁">&laquo; 第四十一条 多用派发队列，少用同步锁</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15045090813380.html" 
+          title="Next Post: 第三十九条 用handler块降低代码分散程度">第三十九条 用handler块降低代码分散程度 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15045739362959.html">第四十条 用块引用其所属对象时不要出现保留环</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15045090813380.html">第三十九条 用handler块降低代码分散程度</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15044922241087.html">第三十八条 为常用的块类型创建typedef</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15043212815193.html">第三十七条 理解“块”这一概念</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

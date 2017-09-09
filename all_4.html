@@ -113,6 +113,297 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15035622628066.html">
+                
+                  <h1>第十四条 理解"类对象"的用意</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>OC是一个极其动态的语言,那么运行期时,如何知道某个对象的类型呢? <mark>对象类型并非在编译期就绑定好了，而是要在运行期査找</mark>。而 且，还有个特殊的类型叫做id,它能指代任意的Objective-C对象类型。一般情况下，应该指明消息接收者的具体类型，这样的话，如果向其发送了无法解读的消息，那么编译器就会产生警告信息。而类型为<code>id</code>的对象则不然，编译器假定它能响应所有消息。</p>
+
+<p>“在运行期检视对象类型”这一操作也叫做<code>“类型信息査询”（introspection, “内省”）</code>，这 个强大而有用的特性内置于<code>Foundation</code>框架的<code>NSObject</code>协议里，凡是由公共根类（common root class，即NSObject与NSProxy)继承而来的对象都要遵从此协议。在程序中不要直接比较对象所属的类，明智的做法是调用“类型信息査询方法”</p>
+
+<p>我们先来了解Objective-C对象的本质:</p>
+
+<p><font color=red>每个Objective-C对象实例都是指向某块内存数据的指针。</font>所以在声明变量时，类型后面要跟一个字符：</p>
+
+<pre><code class="language-objc">NSString *pointerVariable = @&quot;Some string&quot;;
+</code></pre>
+
+<p>对于通用的对象类型id,由于其本身已经是指针了，所以我们能够这样写：</p>
+
+<pre><code class="language-objc">id genericTypedString = @&quot;Some string&quot;;
+</code></pre>
+
+<p>上面这种定义方式与用<code>NSString*</code>来定义相比，其语法意义相同。唯一区别在于，如果声明时指定了具体类型，那么在该类实例上调用其所没有的方法时，编译器会探知此情况,并发出警告信息。</p>
+
+<p>描述Objective-C对象所用的数据结构定义在运行期程序库的头文件里，<code>id</code>类型本身也<br/>
+在定义在这里：</p>
+
+<pre><code class="language-objc">typedef struct objc_object {
+    Class isa;
+} *id;
+</code></pre>
+
+<p><mark>由此可见，每个对象结构体的首个成员是<code>Class</code>类的变量。该变量定义了对象所属的类, 通常称为<code>“is a”</code>指针。例如，刚才的例子中所用的对象“是一个”（is a) NSString,所以其<code>“is a”</code>指针就指向<code>NSString</code>。</mark></p>
+
+<p><code>Class</code>对象也定义在运行期程序库的头文件中：</p>
+
+<pre><code class="language-objc">typedef struct objc_class *Class;
+struct objc_class {
+    Class isa;
+    Class super_class;
+    const char *name;
+    long version;
+    long info;
+    long instance_size;
+    struct objc_ivar_list *ivars;
+    struct objc_method_list **methodLists;
+    struct objc_cache *cache;
+    struct objc_protocol list *protocols;
+)；
+</code></pre>
+
+<p>此结构体存放类的<code>“元数据&quot;（metadata)</code>,例如类的实例实现了几个方法，具备多少个实例变量等信息。此结构体的首个变量也是<code>isa</code>指针，这说明<code>Class</code>本身亦为Objective-C对象。<font color=red> <strong>结构体里还有个变量叫做<code>superclass</code>,它定义了本类的超类。类对象所属的类型（也就是isa 指针所指向的类型）是另外一个类，叫做“元类&quot;（metaclass)，用来表述类对象本身所具备的元数据。“类方法”就定义于此处，因为这些方法可以理解成类对象的实例方法。</strong></font><mark>每个类仅有一个“类对象”，而每个“类对象”仅有一个与之相关的“元类”。</mark></p>
+
+<p>假设有个名为<code>SomeClass</code>的子类从<code>NSObject</code>中继承而来，则其继承体系如图所示。</p>
+
+<p><img src="media/15035622628066/15035642742167.jpg" alt=""/></p>
+
+<p><font color=red><strong>superclass 指针确立了继承关系，而 isa 指针描述了实例所属的类。</strong></font>通过这张布局关系图即可执行“类型信息査询”。我们可以査出对象是否能响应某个选择子，是否遵从某项协议，并且能看出此对象位于“类继承体系”（class hierarchy)的哪一部分。</p>
+
+<h2 id="toc_0">在类继承体系中查询类型信息</h2>
+
+<p>可以用类信息査询方法来检视类继承体系。<code>“isMemberOfClass:”</code>能够判断出对象是否为某个特定类的实例，而<code>“isKindOfClass:”</code>则能够判断出对象是否为某类或其派生类的实例,例如：</p>
+
+<pre><code class="language-objc">NSMutableDictionary *dict = [NSMutableDictionary new];
+[diet isMemberOfClass: [NSDictionary class] ] ; ///&lt; NO 
+[diet isMemberOfClass:[NSMutableDictionary class】】； ///&lt; YES 
+[diet isKindOfClass: [NSDictionary class】];///&lt; YES 
+[diet isKindOfClass2 [NSArray class]]; ///&lt; NO
+</code></pre>
+
+<p>像这样的类型信息査询方法使用isa指针获取对象所属的类，然后通过superclass指针 在继承体系中游走。由于对象是动态的，所以此特性显得极为重要。Objective-C与你可能熟 悉的其他语言不同，在此语言中，必须査询类型信息，方能完全了解对象的真实类型。</p>
+
+<p>由于Objective-C使用“动态类型系统&quot;（dynamic typing)，所以用于査询对象所属类的类 型信息査询功能非常有用。从<code>collection</code>中获取对象时，通常会査询类型信息，这些对象不 是“强类型的”（strongly typed),把它们从<code>collection</code>中取出来时，其类型通常是<code>id</code>。如果想 知道具体类型，那就可以使用类型信息査询方法。例如，想根据数组中存储的对象生成以逗 号分隔的字符串（comma-separated string),并将其存至文本文件，就可以使用下列代码：</p>
+
+<pre><code class="language-objc">-(NSString*)commaSeparatedStringFromObjects:(NSArray*)array {
+    NSMutablestring *string = [NSMutableStringnew]; 
+    for (id object in array) {
+        if ([object isKindOfClass:[NSStringclass]]) {
+            [string appendFormat:@&quot;%@,&quot;, object];
+        }else if ([object isKindOfClass:[NSNumberclass]）{
+            [string appendFormat:@&quot;%d&quot;, [object intValue]]；
+        } else if ([object isKindOfClass:[NSDataclass]])    {
+            NSString *base64Encoded = /* base64 encoded data */;
+            [string appendFormat: @&quot;%@&quot;, base64Encoded];
+        } else {
+              //Type not supported
+        }
+    }   
+    return string;
+}
+</code></pre>
+
+<p><mark>我们应该尽量使用类型信息査询方法，而不应该直接比较两个类对象是否等同(例如<code>if([object class] == [EOCSomeClass class])</code>)</mark>，因为前者可以正确处理那些使用了消息传递机制（参见第12条）的对象。比方 说，某个对象可能会把其收到的所有选择子都转发给另外一个对象。这样的对象叫做“代理” (proxy)，此种对象均以<code>NSProxy</code>为根类。</p>
+
+<p>通常情况下，如果在此种代理对象上调用class方法，那么返回的是代理对象本身（此类 是NSProxy的子类)，而非接受的代理的对象所属的类。然而，若是改用“isKindOfClass:” 这样的类型信息査询方法，那么代理对象就会把这条消息转给“接受代理的对象”（proxied object)。<font color=red>也就是说，这条消息的返回值与直接在接受代理的对象上面査询其类型所得的结果 相同。因此，这样査出来的类对象与通过class方法所返回的那个类对象不同，class方法所返回的类表示发起代理的对象，而非接受代理的对象。</font></p>
+
+<h2 id="toc_1">要点</h2>
+
+<ul>
+<li>每个实例都有一个指向Class对象的指针，用以表明其类型，而这些Class对象则构成了类的继承体系。</li>
+<li>如果对象类型无法在编译期确定，那么就应该使用类型信息査询方法来探知。</li>
+<li>尽量使用类型信息査询方法来确定对象类型，而不要直接比较类对象，因为某些对象可能实现了消息转发功能。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/24</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15034774413129.html">
+                
+                  <h1>第十三条 用"方法调配技术"调试"黑盒方法"</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>因为OC可以在运行期解析 一个对象究竟调用何种方法,所以我们也可以在运行期改变相对应的方法. </p>
+
+<p><font color=red>因为与给定的选择子名称相对应的方法也可以在运行期改变.所以若能善用此特性，则可发挥出巨大优势，因为我们既不需要源代码，也不需要通过继承子类来覆写方法就能改变这个类本身的功能。这样一来，新功能将在本类的所有实例中生效，而不是仅限于覆写了相关方法的那些子类实例。此方案经常称为<mark>“方法调配”（method swizzling)</mark> e</font></p>
+
+<p>类的方法列表会把选择子的名称映射到相关的方法实现之上，使得“动态消息派发系统” 能够据此找到应该调用的方法。这些方法均以函数指针的形式来表示，这种指针叫做<code>IMP</code>, 其原型如下：</p>
+
+<pre><code class="language-objc">
+id (*IMP)(id, SEL ,...)
+
+</code></pre>
+
+<p>我们用NSString类来举例,下图表示<code>lowercaseString、uppercaseString、capitalizedString</code>方法映射到了不同的<code>IMP</code>上.</p>
+
+<p><img src="media/15034774413129/15034784608780.jpg" alt=""/></p>
+
+<p>OC运行期系统,提供有方法来操作这个映射表.我们可以向这个表中,<strong>新增选择子,改变选择子所对应的方法实现,交换两个选择子所映射的指针</strong>.类似下图:<br/>
+<img src="media/15034774413129/15034786156175.jpg" alt=""/></p>
+
+<p>新表中,多了一个<code>newSelector</code>选择子,并且其他方法的实现也互换了.上述修改均无须编写子类，只是修改了“方法表”的布局.</p>
+
+<p>下面我们来讨论如何互换两个方法的实现:</p>
+
+<p>想要互换两个方法的实现可以,有下列函数:</p>
+
+<pre><code class="language-objc">//互换m1和m2的实现
+void method_exchangeImplementations(Method m1, Method m2)
+
+</code></pre>
+
+<p>m1和m2的方法实现可以通过下面方法实现:</p>
+
+<pre><code class="language-objc">
+Method class_getInstanceMethod(Class aClass, SEL aSelector)
+
+</code></pre>
+
+<p>此函数根据给定的选择从类中取出与之相关的方法。</p>
+
+<p>下面我们完整的举一个例子,来演示交换前面提到的<code>lowercaseString</code> 与 <code>uppercaseString</code>方法实现:</p>
+
+<pre><code class="language-objc">
+Method originalMethod =
+    class_getInstanceMethod([NSStringclass],
+                            @selector(lowercaseString));
+Method swappedMethod =
+    class_getInstanceMethod([NSStringclass],
+                            @selector(uppercaseString)); 
+                            method_exchangeImplementations(originalMethod,swappedMethod);
+
+</code></pre>
+
+<p>从现在开始,如果在NSString实例上调用<code>lowercaseString</code>,那么执行的将是<code>uppercaseString</code>,反之亦然:</p>
+
+<pre><code class="language-objc">
+NSString *string = @&quot;This iS tHe StRiNg&quot;;
+NSString *lowercaseString = [string lowercaseString];
+NSLog(&quot;lowercaseString = %@&quot;, lowercaseString);
+// Output: lowercaseString = THIS IS THE STRING
+
+
+NSString *uppercaseString - [string uppercaseString】；
+NSLog (@&quot;uppercaseString = %@&quot;, uppercaseString);
+// Output: uppercaseString = this is the string
+
+</code></pre>
+
+<p>刚才向大家演示了如何交换两个方法实现，然而在实际应用中，像这样直接交换两 个方法实现的，意义并不大。因为<code>lowercaseString</code>与<code>uppercaseString</code>这两个方法已经各自实现得很好，没必要再交换了。但是，可以通过这一手段来为既有的方法实现增添新功能。<font color=red>比方说，想要在调用<code>lowercaseString</code>时记录某些信息，这时就可以通过交换方法实现来达成此目标。我们新编写一个方法，在此方法中实现所需的附加功能，并调用原有实现</font>。</p>
+
+<p>新方法可以添加至NSString的一个&quot;分类(category)&quot;中:</p>
+
+<pre><code class="language-objc">
+@interface NSString (EOCMyAdditions)
+
+-(NSString*)eoc_myLowercaseString;
+
+@end
+
+</code></pre>
+
+<p>上面的新方法将与原有的方法互换,如下图所示:</p>
+
+<p><img src="media/15034774413129/15034869016993.jpg" alt=""/></p>
+
+<p>新方法的实现代码可以这样写:</p>
+
+<pre><code class="language-objc">
+0implementation NSString (EOCMyAdditions)
+
+-(NSString*)eoc_myLowercaseString {
+    NSString *lowercase = [self eoc_myLowercaseString];
+    NSLog (@&quot;%@ =&gt; %@&quot;, self, lowercase); 
+    return lowercase;
+)
+@end
+
+</code></pre>
+
+<p>这段代码看上去好像会陷人递归调用的<strong>死循环</strong>，<mark><strong>不过大家要记住，此方法是准备和 lowercaseString方法互换的。所以，在运行期，eoc_myLowercaseString选择子实际上对应于原有的lowercaseString方法实现</strong>。</mark>最后，通过下列代码来交换这两个方法实现：</p>
+
+<pre><code class="language-objc">Method originalMethod =
+    class_getInstanceMethod([NSString class],
+                            @selector(lowercaseString)〉；
+Method swappedMethod =
+    class_getInstanceMethod([NSString class]f
+                            @selector(eoc_myLowercaseString)); 
+                            method_exchangeImplementations(originalMethod , swappedMethod);
+
+</code></pre>
+
+<p>之后我们只要如下执行就会发现:</p>
+
+<pre><code class="language-objc">
+NSString *string = @&quot;ThIs iS tHe StRiNg&quot;;
+NSString *lowercaseString = [string lowercaseString];
+//输出了下面这行
+// Output: This iS tHe StRiNg =&gt; this is the string
+
+</code></pre>
+
+<blockquote>
+<p><strong>通过此方案，开发者可以为那些“完全不知道其具体实现的&quot;（completely opaque, “完全 不透明的”）黑盒方法增加日志记录功能，这非常有助于程序调试。然而，此做法只在调试程序时有用。很少有人在调试程序之外的场合用上述“方法调配技术”来永久改动某个类的功能。不能仅仅因为Objective-C语言里有这个特性就一定要用它。若是滥用，反而会令代码变得不易读懂且难于维护。</strong></p>
+</blockquote>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li><p>在运行期，可以向类中新增或替换选择子所对应的方法实现。</p></li>
+<li><p>使用另一份实现来替换原有的方法实现，这道工序叫做“方法调配”，开发者常用此技术向原有实现中添加新功能。</p></li>
+<li><p>一般来说，只有调试程序的时候才需要在运行期修改方法实现，这种做法不宜滥用。</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15033908572762.html">
                 
                   <h1>第十二条 消息转发机制(Message forwarding)</h1>
@@ -629,511 +920,6 @@ L(W)=\frac{1}{|{D}|}\sum^{|D|}_{i}{f_w(X^{(i)}) + \lambda{r}(W)}<br/>
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14992368546707.html">
-                
-                  <h1>第10条:在既有类中使用关联对象存放自定义数据</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>有时需要在对象中存放相关信息。这时我们通常会从对象所属的类中继承一个子类，然后改用这个子类对象。然而并非所有情况下都能这么做，<mark>有时候类的实例可能是由某种机制所创建的，而开发者无法令这种机制创建出自己所写的子类实例</mark>。</p>
-
-<p><code>Objective-C</code>中有一项强大的特性可以解决此问题，这就是<code>“关联对象&quot;（Associated Object)</code>。</p>
-
-<p>可以给某对象关联许多其他对象，这些对象通过“键”来区分.存储对象值的时候，可以指明“存储策略”（storage policy),用以维护相应的“内存管理语义”。存储策略由名为<code>Objc_ASSOCiationPolicy</code>的枚举所定义，下表列出了该枚举的取值，同时还列出了与之等效属性：假如关联对象成为了属性，那么它就会具备对应的语义（第6条详解了“属性”这个概念).</p>
-
-<table>
-<thead>
-<tr>
-<th>关联类型</th>
-<th>等效的@property属性</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>OBJC_ASSOCIATION_ASSIGN</td>
-<td>assign</td>
-</tr>
-<tr>
-<td>OBJC_ASSOCIATION_RETAIN_NONATOMIC</td>
-<td>nonatomic, retain</td>
-</tr>
-<tr>
-<td>OBJC_ASSOCIATION_COPY_NONATOMIC</td>
-<td>nonatomic, copy</td>
-</tr>
-<tr>
-<td>OBJC_ASSOCIATION_RETAIN</td>
-<td>retain</td>
-</tr>
-<tr>
-<td>OBJC_ASSOCIATION_COPY</td>
-<td>copy</td>
-</tr>
-</tbody>
-</table>
-
-<p>下列方法可以管理关联对象：</p>
-
-<ul>
-<li><p>void objc_setAssociatedObject ( id object, void*key, id value, objc AssociationPolicypolicy)<br/>
-此方法以给定的键和策略为某对象设置关联对象值。</p></li>
-<li><p>id objc_getAssociatedObject(id object, void*key)<br/>
-此方法根据给定的键从某对象中获取相应的关联对象值。</p></li>
-<li><p>void objc removeAssociatedObjects(id object)<br/>
-此方法移除指定对象的全部关联对象。</p></li>
-</ul>
-
-<p>我们可以把某对象想象成<code>NSDictionary</code>,把关联到该对象的值理解为字典中的条目,于是，存取关联对象的值就相当于在NSDictionary对象上调用<code>[object setObject:value forKey:key]</code>与<code>[object objectForKey:key]</code>方法。然而两者之间有个重要差别：设置关联对象时用的键（key)是个&quot;不透明的指针&quot;(opaque pointer)”。如果在两个键上调用<code>“isEqual:”</code>方法的返回值是<code>YES</code>,那么<code>NSDictionary</code>就认为二者相等；然而在设置关联对象值时，若想令两个键匹配到同一个值，则二者必须是完全相同的指针才行。鉴于此，<font color=red>在设置关联对象值时，通常使用<mark>静态全局变量做键</mark></font>。</p>
-
-<h2 id="toc_0">关联对象用法举例</h2>
-
-<p>开发iOS时经常用到<code>UIAlertView</code>类，该类提供了一种标准视图，可向用户展示警告信息.当用户按下按钮关闭该视图时,需要用委托协议（delegate protocol)来处理此动作，但是，要想设置好这个委托机制，就得把创建警告视图和处理按钮动作的代码分开。由于代码分作两块，所以读起来有点乱。比方说，我们在使用<code>UIAlertView</code>时，一般都会这么写：</p>
-
-<pre><code class="language-objc">-(void)askUserAQuestion{
-    UIAlertView *alert = [[UIAlertView alloc]
-                            initWithTitle:@&quot;Question&quot;
-                                  message:@&quot;What do you want to do?&quot;
-                                 delegate:self
-                        cancelButtonTitle:@&quot;Cancel&quot;
-                        otherButtonTitles:@&quot;Continue&quot;, nil]；
-        [alert show];
-}
-
-// UIAlertViewDelegate protocol method
--(void)alertView:(UIAlertView *)alertView
-        clickedButtonAtlndex:(NSInteger)buttonIndex
-{
-    if (buttonlndex == 0) {
-        [self doCancel];
-    } else {
-        [self doContinue];
-    }
-}
-
-</code></pre>
-
-<p><font color=red>如果想在同一个类里处理多个警告信息视图，那么代码就会变得更为复杂，我们必须在 <code>delegate</code>方法中检査传人的<code>alertView</code>参数，并据此选用相应的逻辑。要是能在创建警告视图的时候直接把处理每个按钮的逻辑都写好，那就简单多了。这可以通过关联对象来做。创建完警告视图之后，设定一个与之关联的&quot;块&quot;(block)，等到执行<code>delegate</code>方法时再将其读出来。</font>此方案的实现代码如下：</p>
-
-<pre><code class="language-objc">
-#import &lt;objc/runtime.h&gt;
-
-static void *EOCMyAlertViewKey = &quot;EOCMyAlertViewKey&quot;;
-
--(void)askUserAQuestion {
-    UIAlertView *alert = [[UIAlertViewalloc]
-                            initWithTitle:@&quot;Question&quot;
-                                  message: @&quot;What do you want to do?&quot;
-                                 delegate:self
-                        cancelButtonTitle: @&quot;Cancel&quot;,
-                        otherButtonTitles: @&quot;Continue&quot;, nil];
-        void (^block)(NSInteger) = ^(NSInteger buttonIndex){
-            if (buttonlndex == 0) {
-                [self doCancel];
-            }else {
-                [self doContinue];
-            }
-        };
-        objc_setAssociatedObject(alert,
-                                 EOCMyAlertViewKey,
-                                 block,
-                                 OBJC_ASSOCIATION_COPY);
-        [alert show];
-}
-
-// UIAlertViewDelegate protocol method
--(void)alertView:(UIAlertView*)alertView
-       clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    void (^block)(NSInteger)=
-        objc_getAssociatedObject(alertView, EOCMyAlertViewKey);
-    block(buttonIndex);
-}
-
-
-</code></pre>
-
-<p>以这种方式改写之后，创建警告视图与处理操作结果的代码都放在一起了，这样比原来更易读慷，因为我们无须在两部分代码之间来回游走，即可明白警告视图的用处。但是,采用该方案时需注意：块可能要捕获(capture)某些变量，这也许会造成“保留环”（retain cycle)。第40条详述了此问题。</p>
-
-<p><mark>正如大家所见，这种做法很有用，但是只应该在其他办法行不通时才去考虑用它。若是<br/>
-滥用，则很快就会令代码失控，使其难于调试。</mark>“保留环”产生的原因很难査明，因为关联对象之间的关系并没有正式的定义（formal definition)，其内存管理语义是在关联的时候才定义的，而不是在接口中预先定好的。使用这种写法时要小心，不能仅仅因为某处可以用该写法就一定要用它。想创建这种<code>UIAlertView</code>还有个办法，那就是从中继承子类，把块保存为子类中的属性。笔者认为：若是需要多次用到alert视图，那么这种做法比使用关联对象要好。</p>
-
-<h2 id="toc_1">要点</h2>
-
-<ul>
-<li>可以通过&quot;关联对象&quot;机制来把两个对象连起来</li>
-<li>定义关联对象时可指定内存管理语义，用以模仿定义属性时所采用的“拥有关系”与“非拥有关系”。</li>
-<li>只有在其他做法不可行时才应选用关联对象，因为这种做法通常会引入难于査找的bug。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/7/5</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14992160809956.html">
-                
-                  <h1>SoftmaxWithLossLayer的实现</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我们找到<code>SoftmaxWithLossLayer.hpp</code>文件查看声明,如下:</p>
-
-<pre><code class="language-c++">
-//将实数预测向量通过Softmax计算获得每个类别的概率分布
-//这个类比单独SoftmaxLayer + MultinomialLogisticLossLayer在梯度数值计算上更加稳定
-//Test阶段，这个层可以直接用SoftmaxLayer代替
-/**
- *输入Blob 1为预测结果，形状为N x K x 1 x 1，K为总类别数目，N为批量数。取值范围为（-Inf, Inf)，
- *表示每个类别获得的分类score,值越大说明输入图像与该类别越接近
- *输入Blob 2为真实标签，形状为N x 1 x 1 x 1
- *输出Blob为计算得到的交叉熵分类损失E，形状为1 x 1 x 1 x 1
-**/
-template &lt;typename Dtype&gt;
-class SoftmaxWithLossLayer : public LossLayer&lt;Dtype&gt; {
- public:
-   /**
-    * @param param provides LossParameter loss_param, with options:
-    *  - ignore_label (optional)
-    *    Specify a label value that should be ignored when computing the loss.
-    *  - normalize (optional, default true)
-    *    If true, the loss is normalized by the number of (nonignored) labels
-    *    present; otherwise the loss is simply summed over spatial locations.
-    */
-    explicit SoftmaxWithLossLayer(const LayerParameter&amp; param)
-      : LossLayer&lt;Dtype&gt;(param) {}
-  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual inline const char* type() const { return &quot;SoftmaxWithLoss&quot;; }
-  virtual inline int ExactNumTopBlobs() const { return -1; }
-  virtual inline int MinTopBlobs() const { return 1; }
-  virtual inline int MaxTopBlobs() const { return 2; }
-
- protected:
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-      
-/**
-   * @brief Computes the softmax loss error gradient w.r.t. the predictions.
-   *
-   * Gradients cannot be computed with respect to the label inputs (bottom[1]),
-   * so this method ignores bottom[1] and requires !propagate_down[1], crashing
-   * if propagate_down[1] is set.
-   *
-   * @param top output Blob vector (length 1), providing the error gradient with
-   *      respect to the outputs
-   *   -# @f$ (1 \times 1 \times 1 \times 1) @f$
-   *      This Blob&#39;s diff will simply contain the loss_weight* @f$ \lambda @f$,
-   *      as @f$ \lambda @f$ is the coefficient of this layer&#39;s output
-   *      @f$\ell_i@f$ in the overall Net loss
-   *      @f$ E = \lambda_i \ell_i + \mbox{other loss terms}@f$; hence
-   *      @f$ \frac{\partial E}{\partial \ell_i} = \lambda_i @f$.
-   *      (*Assuming that this top Blob is not used as a bottom (input) by any
-   *      other layer of the Net.)
-   * @param propagate_down see Layer::Backward.
-   *      propagate_down[1] must be false as we can&#39;t compute gradients with
-   *      respect to the labels.
-   * @param bottom input Blob vector (length 2)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the predictions @f$ x @f$; Backward computes diff
-   *      @f$ \frac{\partial E}{\partial x} @f$
-   *   -# @f$ (N \times 1 \times 1 \times 1) @f$
-   *      the labels -- ignored as we can&#39;t compute their error gradients
-   */
-  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-      
-/// Read the normalization mode parameter and compute the normalizer based
-  /// on the blob size.  If normalization_mode is VALID, the count of valid
-  /// outputs will be read from valid_count, unless it is -1 in which case
-  /// all outputs are assumed to be valid.
-  virtual Dtype get_normalizer(
-      LossParameter_NormalizationMode normalization_mode, int valid_count);
-
-  /// The internal SoftmaxLayer used to map predictions to a distribution.(内置一个SoftmaxLayer对象)
-  shared_ptr&lt;Layer&lt;Dtype&gt; &gt; softmax_layer_;
-  /// prob stores the output probability predictions from the SoftmaxLayer.
-  Blob&lt;Dtype&gt; prob_;
-  /// bottom vector holder used in call to the underlying SoftmaxLayer::Forward
-  vector&lt;Blob&lt;Dtype&gt;*&gt; softmax_bottom_vec_;
-  /// top vector holder used in call to the underlying SoftmaxLayer::Forward
-  vector&lt;Blob&lt;Dtype&gt;*&gt; softmax_top_vec_;
-  /// Whether to ignore instances with a certain label.
-  bool has_ignore_label_;
-  /// The label indicating that an instance should be ignored.
-  int ignore_label_;
-  /// How to normalize the output loss.
-  LossParameter_NormalizationMode normalization_;
-
-  int softmax_axis_, outer_num_, inner_num_;
-};
-
-</code></pre>
-
-<p>之后我们来看实现的<code>.cpp</code>文件:</p>
-
-<p>第一个是SetUp函数.<br/>
-```c++</p>
-
-<p>template <typename Dtype><br/>
-void SoftmaxWithLossLayer<Dtype>::LayerSetUp(<br/>
-    const vector<Blob<Dtype><em>&gt;&amp; bottom, const vector<Blob<Dtype></em>&gt;&amp; top) {<br/>
-  LossLayer<Dtype>::LayerSetUp(bottom, top);<br/>
-  //创建时动态修改本层的LayerParameter参数，适应SoftmaxLayer<br/>
-  LayerParameter softmax_param(this-&gt;layer_param_);<br/>
-  softmax_param.set_type(&quot;Softmax&quot;);<br/>
-  softmax_layer_ = LayerRegistry<Dtype>::CreateLayer(softmax_param);<br/>
-  softmax_bottom_vec_.clear();<br/>
-  softmax_bottom_vec_.push_back(bottom[0]);<br/>
-  softmax_top_vec_.clear();<br/>
-  softmax_top_vec_.push_back(&amp;prob_);<br/>
-  softmax_layer_-&gt;SetUp(softmax_bottom_vec_, softmax_top_vec_);</p>
-
-<p>has_ignore_label_ =<br/>
-    this-&gt;layer_param_.loss_param().has_ignore_label();<br/>
-  if (has_ignore_label_) {<br/>
-    ignore_label_ = this-&gt;layer_param_.loss_param().ignore_label();<br/>
-  }<br/>
-  if (!this-&gt;layer_param_.loss_param().has_normalization() &amp;&amp;<br/>
-      this-&gt;layer_param_.loss_param().has_normalize()) {<br/>
-    normalization_ = this-&gt;layer_param_.loss_param().normalize() ?<br/>
-                     LossParameter_NormalizationMode_VALID :<br/>
-                     LossParameter_NormalizationMode_BATCH_SIZE;<br/>
-  } else {<br/>
-    normalization_ = this-&gt;layer_param_.loss_param().normalization();<br/>
-  }<br/>
-}</p>
-
-<pre><code>可见，在SetUp阶段，创建了内部SoftmaxLayer对象并配置了其输入/输出Blob，然后调用该对象的SetUp函数。
-
-
-下面看看`SoftmaxWithLossLayer`的前向传播函数：
-
-```c++
-
-template &lt;typename Dtype&gt;
-void SoftmaxWithLossLayer&lt;Dtype&gt;::Forward_cpu(
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  // The forward pass computes the softmax prob values.(内部SoftmaxLayer的前向传播计算)
-  softmax_layer_-&gt;Forward(softmax_bottom_vec_, softmax_top_vec_);
-  //获得概率密度
-  const Dtype* prob_data = prob_.cpu_data();
-  //获得标签值
-  const Dtype* label = bottom[1]-&gt;cpu_data();
-  int dim = prob_.count() / outer_num_;
-  int count = 0;
-  Dtype loss = 0;
-  for (int i = 0; i &lt; outer_num_; ++i) {
-    for (int j = 0; j &lt; inner_num_; j++) {
-      const int label_value = static_cast&lt;int&gt;(label[i * inner_num_ + j]);
-      if (has_ignore_label_ &amp;&amp; label_value == ignore_label_) {
-        continue;
-      }
-      DCHECK_GE(label_value, 0);
-      DCHECK_LT(label_value, prob_.shape(softmax_axis_));
-      //计算损失函数-log(prob[label])
-      loss -= log(std::max(prob_data[i * dim + label_value * inner_num_ + j],
-                           Dtype(FLT_MIN)));
-      ++count;
-    }
-  }
-  //设置输出Blob值
-  top[0]-&gt;mutable_cpu_data()[0] = loss / get_normalizer(normalization_, count);
-  if (top.size() == 2) {
-    top[1]-&gt;ShareData(prob_);
-  }
-}
-
-
-</code></pre>
-
-<p>可见通过内部<code>SoftmaxLayer</code>对象非常简洁。我们再看一下 Backward计算:</p>
-
-<pre><code class="language-c++">
-template &lt;typename Dtype&gt;
-void SoftmaxWithLossLayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-    const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
-  if (propagate_down[1]) {
-   //label输入Blob不做反向传播
-    LOG(FATAL) &lt;&lt; this-&gt;type()
-               &lt;&lt; &quot; Layer cannot backpropagate to label inputs.&quot;;
-  }
-  if (propagate_down[0]) {
-    Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
-    const Dtype* prob_data = prob_.cpu_data();
-    //将概率密度拷贝输入Blob的diff域
-    caffe_copy(prob_.count(), prob_data, bottom_diff);
-    const Dtype* label = bottom[1]-&gt;cpu_data();
-    int dim = prob_.count() / outer_num_;
-    int count = 0;
-    for (int i = 0; i &lt; outer_num_; ++i) {
-      for (int j = 0; j &lt; inner_num_; ++j) {
-        const int label_value = static_cast&lt;int&gt;(label[i * inner_num_ + j]);
-        if (has_ignore_label_ &amp;&amp; label_value == ignore_label_) {
-          for (int c = 0; c &lt; bottom[0]-&gt;shape(softmax_axis_); ++c) {
-            bottom_diff[i * dim + c * inner_num_ + j] = 0;
-          }
-        } else {
-        //在输入Blob的diff域，计算当前槪率密度与理想概率密度(label 对应类别概率为1,其他类别 概肀为0)之差，实现误差反向传播
-          bottom_diff[i * dim + label_value * inner_num_ + j] -= 1;
-          ++count;
-        }
-      }
-    }
-    // Scale gradient(适当的缩放)
-    Dtype loss_weight = top[0]-&gt;cpu_diff()[0] /
-                        get_normalizer(normalization_, count);
-    caffe_scal(prob_.count(), loss_weight, bottom_diff);
-  }
-}
-</code></pre>
-
-<p>通过对Caffe损失层的研究，我们了解到，前向传播阶段数据逐层传播，到损失层计算预测概率密度和损失函数；而反向传播阶段则从损失层开始，由预测概率密度与理想概率密度(这就是有监督学习的佐证)<strong>差值</strong>得到误差（diff),然后将由下一节内容逐层反向传播。我们已经知道一个Blob是由data和diff两部分构成的，如果说数据读取层是data之源，那么损失层就是diff之源。</p>
-
-<h2 id="toc_0">反向传播的实现</h2>
-
-<p>Caffe Net数据结构中的&#39;Backward函数具体的声明和实现文件为<code>net.hpp</code>和<code>net.cpp</code>:</p>
-
-<pre><code class="language-c++">//从第start层反向传播到达第end层
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::BackwardFromTo(int start, int end) {
-  CHECK_GE(end, 0);
-  CHECK_LT(start, layers_.size());
-  for (int i = start; i &gt;= end; --i) {
-    for (int c = 0; c &lt; before_backward_.size(); ++c) {
-      before_backward_[c]-&gt;run(i);
-    }
-    if (layer_need_backward_[i]) {
-    //遍历每个居，调用相应的Backward函数
-      layers_[i]-&gt;Backward(
-          top_vecs_[i], bottom_need_backward_[i], bottom_vecs_[i]);
-      if (debug_info_) { BackwardDebugInfo(i); }
-    }
-    for (int c = 0; c &lt; after_backward_.size(); ++c) {
-      after_backward_[c]-&gt;run(i);
-    }
-  }
-}
-
-//从第start层幵始到第一层的反向传播过程
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::BackwardFrom(int start) {
-  BackwardFromTo(start, 0);
-}
-
-//从最后一层开始到第end层的反向传播过程
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::BackwardTo(int end) {
-  BackwardFromTo(layers_.size() - 1, end);
-}
-
-//整个网络的反向传播过程
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::Backward() {
-  BackwardFromTo(layers_.size() - 1, 0);
-  if (debug_info_) {
-  //如果打幵了调试信息开关(在prototxt中设定），则计算所有权值的data/diff的L1、L2范数，监控其变化情况，避免发散
-    Dtype asum_data = 0, asum_diff = 0, sumsq_data = 0, sumsq_diff = 0;
-    for (int i = 0; i &lt; learnable_params_.size(); ++i) {
-      asum_data += learnable_params_[i]-&gt;asum_data();
-      asum_diff += learnable_params_[i]-&gt;asum_diff();
-      sumsq_data += learnable_params_[i]-&gt;sumsq_data();
-      sumsq_diff += learnable_params_[i]-&gt;sumsq_diff();
-    }
-    const Dtype l2norm_data = std::sqrt(sumsq_data);
-    const Dtype l2norm_diff = std::sqrt(sumsq_diff);
-    LOG(ERROR) &lt;&lt; &quot;    [Backward] All net params (data, diff): &quot;
-               &lt;&lt; &quot;L1 norm = (&quot; &lt;&lt; asum_data &lt;&lt; &quot;, &quot; &lt;&lt; asum_diff &lt;&lt; &quot;); &quot;
-               &lt;&lt; &quot;L2 norm = (&quot; &lt;&lt; l2norm_data &lt;&lt; &quot;, &quot; &lt;&lt; l2norm_diff &lt;&lt; &quot;)&quot;;
-  }
-}
-
-//更新权值函数，在反向传播结束后调用
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::Update() {
-  for (int i = 0; i &lt; learnable_params_.size(); ++i) {
-  //调用内部Blob的Update()函数，具体计算为data = data - diff
-    learnable_params_[i]-&gt;Update();
-  }
-}
-
-//权值diff清零
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::ClearParamDiffs() {
-  for (int i = 0; i &lt; learnable_params_.size(); ++i) {
-    Blob&lt;Dtype&gt;* blob = learnable_params_[i];
-    switch (Caffe::mode()) {
-    case Caffe::CPU:
-      caffe_set(blob-&gt;count(), static_cast&lt;Dtype&gt;(0),
-                blob-&gt;mutable_cpu_diff());
-      break;
-    case Caffe::GPU:
-#ifndef CPU_ONLY
-      caffe_gpu_set(blob-&gt;count(), static_cast&lt;Dtype&gt;(0),
-                    blob-&gt;mutable_gpu_diff());
-#else
-      NO_GPU;
-#endif
-      break;
-    }
-  }
-}
-
-</code></pre>
-
-<p>到此,caffe基本的backward反向传播过程就清楚了,这样对于设计更复杂的有监督学习算法具有指导意义。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/7/5</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Caffe%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe反向传播计算</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1217,6 +1003,18 @@ void Net&lt;Dtype&gt;::ClearParamDiffs() {
 	      
 		      
 			      <li class="post">
+			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15045739362959.html">第四十条 用块引用其所属对象时不要出现保留环</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15045090813380.html">第三十九条 用handler块降低代码分散程度</a>
 			      </li>
 		     
@@ -1230,18 +1028,6 @@ void Net&lt;Dtype&gt;::ClearParamDiffs() {
 		      
 			      <li class="post">
 			        <a href="15043212815193.html">第三十七条 理解“块”这一概念</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15043134527493.html">通过协议提供匿名方法</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15042539845357.html">KVO的简单实现</a>
 			      </li>
 		     
 		  
