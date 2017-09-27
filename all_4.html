@@ -113,6 +113,50 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15036306506140.html">
+                
+                  <h1>第十五条 用前缀避免命名空间冲突</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>oc与其他语言一个主要区别是没有那种内置的命名空间(namespace)机制. <mark>所以我们在编码时一定要注意命名冲突,尤其是潜在的命名冲突.</mark></p>
+
+<p>我们在创建应用程序时一定要注意,使用Cocoa创建应用程序时一定要注意,<strong><font color=red>Apple宣称保留使用&quot;两个字母前缀&quot;的权利</font></strong>,也就是说选用的前缀应该都是<strong><font color=red>三个字母</font></strong>.</p>
+
+<p>我们尤其应该注意,当你使用的一个三方库引入了一个你之前引入过的三方库.如果引入的这两个库的作者都没有给自己的库加前缀,那么应用程序很容易出现重复符号错误.</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li><p>选择与你公司,应用程序或二者有关联的名称作为类名的前缀,并在所有代码中均使用这一前缀.</p></li>
+<li><p>若自己所开发的程序库用到了第三方库,则应该为其中的名称加上前缀.</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/25</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15035622628066.html">
                 
                   <h1>第十四条 理解"类对象"的用意</h1>
@@ -820,106 +864,6 @@ id returnValue = objc_msgSend(someObject,
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14993030681229.html">
-                
-                  <h1>Caffe最优化求解过程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">求解器是什么</a>
-</li>
-<li>
-<a href="#toc_1">求解器是如何实现的</a>
-<ul>
-<li>
-<a href="#toc_2">算法描述</a>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>将前面几天讲述的不同Layer组合起来就可以构建起完整的<code>CNN/DNN</code>。今天将从Caffe的Solver类入手，对Caffe训练时的流程做深入分析，也就是看Caffe实际是如何“动”起来的。</p>
-
-<h2 id="toc_0">求解器是什么</h2>
-
-<p>从前两天内容我们学习到，Net己经完成部分学习任务（数据前向传播、误差反向传播),<mark>而CNN剩下有监督的优化过程、利用每层的梯度生成权值增量则由求解器(Solver)负责.</mark></p>
-
-<p>求解器负责对模型优化,它的KPI(Key Performance Indicator,关键绩效指你，某公司常用的一种员工绩效评定方式）就是让损失函数达到全局最小。</p>
-
-<p>求解器的特性如下:</p>
-
-<ul>
-<li>负责记录优化过程，创建用于学习的训练网络和用于评估学习效果的测试网络。</li>
-<li>调用Forward\(\rightarrow\)调用Backward\(\rightarrow\)更新权值，反复迭代优化模型。</li>
-<li>周期性的评估测试网络</li>
-<li>在优化过程中为模型,求解器状态打快照.</li>
-</ul>
-
-<p>为了让权值从初始化状态向着更好的模型前进，求解器在每次迭代中做了如下事情：</p>
-
-<ul>
-<li>调用Net的前向传播函数来计算输出和损失函数。</li>
-<li>调用Net的反向传播函数来计算梯度。</li>
-<li>根据求解器方法,将梯度转换为权值增量</li>
-<li>根据学习速率、历史权值、所用方法更新求解器状态。</li>
-</ul>
-
-<h2 id="toc_1">求解器是如何实现的</h2>
-
-<p>在卷积神经网络中,有两种类型的层需要学习:卷积层和全连接层（统称权值层，因为它们都有<code>weight</code>参数）。<mark>在设计求解器时，学习速率参数的设置也是针对这两个层的</mark>。</p>
-
-<p>在caffe中我们要适当把握度,控制收敛的参数---学习速率.</p>
-
-<p>我们来具体看一下Caffe是如何对权值学习做到“不偏不倚”的。</p>
-
-<h3 id="toc_2">算法描述</h3>
-
-<p>Caffe中的求解器有以下几种:</p>
-
-<ul>
-<li>随机梯度下降法（Stochastic Gradient Descent, SGD),最常用的一种</li>
-<li>AdaDelta</li>
-<li>自适应梯度法（Adaptive Gradient, ADAGRAD)</li>
-<li>Adam</li>
-<li>Nesterov加速梯度法（Nesterov’s Accelerated Gradient, NAG)</li>
-<li>RMSprop</li>
-</ul>
-
-<p><mark>求解器方法重点是最小化损失函数的全局优化问题</mark>,对于数据集D,优化目标是在全数据集D上损失函数平均值：<br/>
-\[<br/>
-L(W)=\frac{1}{|{D}|}\sum^{|D|}_{i}{f_w(X^{(i)}) + \lambda{r}(W)}<br/>
-\]</p>
-
-<p>其中，\(f_w(X^{(i)})\)是在数据实例\(X^{(i)\)上的损失函数，\(r(W)\)为规整项，\(\lambda\)为规整项的权重。数据集\(D\)可能非常大，工程上一般在每次迭代中使用这个目标函数的随机逼近，即小批量数据\(N&lt;&lt;|D|\)个数据实例:</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/7/6</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Caffe%E6%9C%80%E4%BC%98%E5%8C%96%E6%B1%82%E8%A7%A3%E8%BF%87%E7%A8%8B.html'>Caffe最优化求解过程</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1003,6 +947,12 @@ L(W)=\frac{1}{|{D}|}\sum^{|D|}_{i}{f_w(X^{(i)}) + \lambda{r}(W)}<br/>
 	      
 		      
 			      <li class="post">
+			        <a href="15050942669581.html">第四十二条 多用GCD，少用performSelector系列方法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
 			      </li>
 		     
@@ -1022,12 +972,6 @@ L(W)=\frac{1}{|{D}|}\sum^{|D|}_{i}{f_w(X^{(i)}) + \lambda{r}(W)}<br/>
 		      
 			      <li class="post">
 			        <a href="15044922241087.html">第三十八条 为常用的块类型创建typedef</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15043212815193.html">第三十七条 理解“块”这一概念</a>
 			      </li>
 		     
 		  

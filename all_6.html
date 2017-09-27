@@ -113,6 +113,103 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14990441879389.html">
+                
+                  <h1>Net Forward实现</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>掌握了上次Net的初始化代码以及方法,我们下面来看一下他的<code>Forward</code>代码:</p>
+
+<pre><code class="language-c++">
+template &lt;typename Dtype&gt;
+Dtype Net&lt;Dtype&gt;::ForwardFromTo(int start, int end) {
+//计算从第start到end层的前向传播过程
+  CHECK_GE(start, 0);
+  CHECK_LT(end, layers_.size());
+  Dtype loss = 0;
+  for (int i = start; i &lt;= end; ++i) {
+    for (int c = 0; c &lt; before_forward_.size(); ++c) {
+      before_forward_[c]-&gt;run(i);
+    }
+// LOG(ERROR) &lt;&lt; &quot;Forwarding &quot; &lt;&lt;layer_names_[i];
+// 调用每个Layer的Forward()函数，得到每层loss
+    Dtype layer_loss = layers_[i]-&gt;Forward(bottom_vecs_[i], top_vecs_[i]);
+    loss += layer_loss;
+    if (debug_info_) { ForwardDebugInfo(i); }
+    for (int c = 0; c &lt; after_forward_.size(); ++c) {
+      after_forward_[c]-&gt;run(i);
+    }
+  }
+  //返回loss值
+  return loss;
+}
+
+template &lt;typename Dtype&gt;
+Dtype Net&lt;Dtype&gt;::ForwardFrom(int start) {
+//计算从start开始到最后一层的前向传播过程
+  return ForwardFromTo(start, layers_.size() - 1);
+}
+
+template &lt;typename Dtype&gt;
+Dtype Net&lt;Dtype&gt;::ForwardTo(int end) {
+//计算从第1层到第end层的前向传播过程
+  return ForwardFromTo(0, end);
+}
+
+template &lt;typename Dtype&gt;
+const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Net&lt;Dtype&gt;::Forward(Dtype* loss) {
+//计算整个网络前向传播过程,返回损失值(可选)和网络输出Blob
+  if (loss != NULL) {
+    *loss = ForwardFromTo(0, layers_.size() - 1);
+  } else {
+    ForwardFromTo(0, layers_.size() - 1);
+  }
+  return net_output_blobs_;
+}
+
+template &lt;typename Dtype&gt;
+const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Net&lt;Dtype&gt;::Forward(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt; &amp; bottom, Dtype* loss) {
+    //接受输入Blob作为Net输入，计算前向传播,得到损失值（可选）和网络输出Blob
+  LOG_EVERY_N(WARNING, 1000) &lt;&lt; &quot;DEPRECATED: Forward(bottom, loss) &quot;
+      &lt;&lt; &quot;will be removed in a future version. Use Forward(loss).&quot;;
+  // Copy bottom to net bottoms(直接将输入Blob拷贝到net_input_blobs_中)
+  for (int i = 0; i &lt; bottom.size(); ++i) {
+    net_input_blobs_[i]-&gt;CopyFrom(*bottom[i]);
+  }
+  return Forward(loss);
+}
+
+</code></pre>
+
+<p>到这里 我们就初步了解了所有的前向传波函数,应该能够在脑海中形成DAG数据流动图,后面学习反向传播过程.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/7/3</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe前向传播计算</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14988713979681.html">
                 
                   <h1>Net初始化时的三个登记注册函数</h1>
@@ -1463,122 +1560,6 @@ examples/images/mouse.png   //输入待分类图像
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14985505390356.html">
-                
-                  <h1>使用SQLite</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>SQLite是一种嵌入式数据库，它的数据库就是一个文件。由于SQLite本身是C写的，而且体积很小，所以，经常被集成到各种应用程序中，甚至在iOS和Android的App中都可以集成。</p>
-
-<p>Python就内置了SQLite3，所以，在Python中使用SQLite，不需要安装任何东西，直接使用。</p>
-
-<p>在使用SQLite前，我们先要搞清楚几个概念：</p>
-
-<ol>
-<li><p>表是数据库中存放关系数据的集合，一个数据库里面通常都包含多个表，比如学生的表，班级的表，学校的表，等等。表和表之间通过外键关联。</p></li>
-<li><p>要操作关系数据库，首先需要连接到数据库，一个数据库连接称为Connection；</p></li>
-<li><p>连接到数据库后，需要打开游标，称之为Cursor，通过Cursor执行SQL语句，然后，获得执行结果。</p></li>
-<li><p>Python定义了一套操作数据库的API接口，任何数据库要连接到Python，只需要提供符合Python标准的数据库驱动即可。</p></li>
-</ol>
-
-<p>由于SQLite的驱动内置在Python标准库中，所以我们可以直接来操作SQLite数据库。</p>
-
-<p>我们在Python交互式命令行实践一下：</p>
-
-<pre><code class="language-python">
-# 导入SQLite驱动:
-&gt;&gt;&gt; import sqlite3
-
-# 连接到SQLite数据库
-# 数据库文件是test.db
-# 如果文件不存在，会自动在当前目录创建:
-&gt;&gt;&gt; conn = sqlite3.connect(&#39;test.db&#39;)
-# 创建一个Cursor:
-&gt;&gt;&gt; cursor = conn.cursor()
-# 执行一条SQL语句，创建user表:
-&gt;&gt;&gt; cursor.execute(&#39;create table user (id varchar(20) primary key, name varchar(20))&#39;)
-&lt;sqlite3.Cursor object at 0x104082490&gt;
-# 继续执行一条SQL语句，插入一条记录:
-&gt;&gt;&gt; cursor.execute(&#39;insert into user (id, name) values (\&#39;1\&#39; , \&#39;Michale\&#39;)&#39;)
-&lt;sqlite3.Cursor object at 0x104082490&gt;
-# 通过rowcount获得插入的行数:
-&gt;&gt;&gt; cursor.rowcount
-1
-# 关闭Cursor:
-&gt;&gt;&gt; cursor.close()
-# 提交事务:
-&gt;&gt;&gt; conn.commit()
-# 关闭Connection:
-&gt;&gt;&gt; conn.close()
-
-</code></pre>
-
-<p>创建和插入表数据后,我们来查询:</p>
-
-<pre><code class="language-python">
-&gt;&gt;&gt; conn = sqlite3.connect(&#39;test.db&#39;)
-&gt;&gt;&gt; cursor = conn.cursor()
-# 执行查询语句:
-&gt;&gt;&gt; cursor.execute(&#39;select * from user where id = ? &#39;, (&#39;1&#39;,))
-&lt;sqlite3.Cursor object at 0x104082500&gt;
-# 获得查询结果集:
-&gt;&gt;&gt; values = cursor.fetchall()
-&gt;&gt;&gt; values
-[(u&#39;1&#39;, u&#39;Michale&#39;)]
-&gt;&gt;&gt; cursor.close()
-&gt;&gt;&gt; conn.close()
-</code></pre>
-
-<p><font color=red><strong>注意事项</strong></font></p>
-
-<ol>
-<li><p>使用Python的DB-API时，只要搞清楚Connection和Cursor对象，打开后一定记得关闭，就可以放心地使用。</p></li>
-<li><p>使用Cursor对象执行<code>insert</code>，<code>update</code>，<code>delete</code>语句时，执行结果由<code>rowcount</code>返回影响的行数，就可以拿到执行结果。</p></li>
-<li><p>使用Cursor对象执行<code>select</code>语句时，通过<code>featchall()</code>可以拿到结果集。结果集是一个<code>list</code>，每个元素都是一个<code>tuple</code>，对应一行记录。</p></li>
-<li><p>如果SQL语句带有参数，那么需要把参数按照位置传递给<code>execute()</code>方法，有几个<code>?</code>占位符就必须对应几个参数，例如：</p></li>
-</ol>
-
-<pre><code class="language-py">
-cursor.execute(&#39;select * from user where name=? and pwd=?&#39;, (&#39;abc&#39;, &#39;123456&#39;))
-
-</code></pre>
-
-<p>SQLite支持常见的标准SQL语句以及几种常见的数据类型。具体文档请参阅SQLite官方网站。</p>
-
-<h2 id="toc_0">小结</h2>
-
-<p>在Python中操作数据库时，要先导入数据库对应的驱动，然后，通过Connection对象和Cursor对象操作数据。</p>
-
-<p>要确保打开的Connection对象和Cursor对象都正确地被关闭，否则，资源就会泄露。</p>
-
-<p>如何才能确保出错的情况下也关闭掉Connection对象和Cursor对象呢？请回忆<code>try:...except:...finally:...</code>的用法。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1662,6 +1643,12 @@ cursor.execute(&#39;select * from user where name=? and pwd=?&#39;, (&#39;abc&#3
 	      
 		      
 			      <li class="post">
+			        <a href="15050942669581.html">第四十二条 多用GCD，少用performSelector系列方法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
 			      </li>
 		     
@@ -1681,12 +1668,6 @@ cursor.execute(&#39;select * from user where name=? and pwd=?&#39;, (&#39;abc&#3
 		      
 			      <li class="post">
 			        <a href="15044922241087.html">第三十八条 为常用的块类型创建typedef</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15043212815193.html">第三十七条 理解“块”这一概念</a>
 			      </li>
 		     
 		  

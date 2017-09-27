@@ -113,6 +113,61 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15043134527493.html">
+                
+                  <h1>通过协议提供匿名方法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>协议定义了一系列方法，遵从此协议的对象应该实现它们（如果这些方法不是可选的, 那么就必须实现)。于是，我们可以用协议把自己所写的<code>API</code>之中的实现细节隐藏起来，将返回的对象设计为遵从此协议的纯<code>id</code>类型。</p>
+
+<p>这样的话，想要隐藏的类名就不会出现在<code>API</code>之中了。若是接口背后有多个不同的实现类，而你又不想指明具体使用哪个类，那么可以考虑用这个办法——因为有时候这些类可能会变，有时候它们又无法容纳于标准的类继承体系中，因而不能以某个公共基类来统一表示。</p>
+
+<p>此概念经常称为<code>“匿名对象&quot;(anonymous object)</code>，这与其他语言中的“匿名对象”不同，在那些语言中，该词是指以内联形式所创建出来的无名类，而此词在<code>Objective-C</code>中则不是这个意思。</p>
+
+<p>我们之前说的委托与数据源对象，就用到了这个方法。例如在定义“受委托者（delegate）”属性时：</p>
+
+<pre><code class="language-objc">@property {nonatomic, weak) id &lt;EOCDelegate&gt; delegate;
+
+</code></pre>
+
+<p>由于该属性的类型是<code>id&lt;EOCDelegate&gt;</code>,所以实际上任何类的对象都能充当这一属性, 即便该类不继承自<code>NSObject</code>也可以，只要遵循<code>EOCDelegate</code>协议就行。对于具备此属性的类来说，<code>delegate</code>就是“匿名的”（ammymous)。如有需要，可在运行期査出此对象所属的类型（参见第14条）。然而这样做不太好，因为指定属性类型时所写的那个<code>EOCDelegate</code>契约已经表明此对象的具体类型无关紧要了。</p>
+
+<p>当然还有其它的用法，这里我们就不举例了。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>协议可在某种程度上提供匿名类型。具体的对象类型可以淡化成遵从某协议的<code>id</code>类型，协议里规定了对象所应实现的方法。</li>
+<li>使用匿名对象来隐藏类型名称（或类名）。</li>
+<li>如果具体类型不重要，重要的是对象能够响应（定义在协议里的）特定方法，那么可使用匿名对象来表示。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15042539845357.html">
                 
                   <h1>KVO的简单实现</h1>
@@ -651,145 +706,6 @@ int main() {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15041475233104.html">
-                
-                  <h1>消息转发机制的简单实现</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">第一种</h2>
-
-<p>首先我们来实现这两个方法：<br/><br/>
-+(BOOL)resolveInstanceMethod:    (SEL)sel</p>
-
-<p>+(BOOL)resolveClassMethod:(SEL)sel</p>
-
-<p>这两个方法用于方法的动态解析，当一个对象执行一个方法时，发现没有找到所对应的实现。这是就要靠上面的方法来动态添加实现了</p>
-
-<p>举例来说：</p>
-
-<pre><code class="language-objc">//
-//  Person.h
-//  消息转发
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface Person : NSObject
-//接口中声明一个方法
--(void)run;
-
-@end
-
-//
-//  Person.m
-//  消息转发
-
-
-#import &quot;Person.h&quot;
-#import &lt;objc/runtime.h&gt;
-@implementation Person //在部署的时候我们没有实现接口中声明的run方法
-
-
-//编写C函数实现代码
-void addrun (id self, SEL _cmd){
-    NSLog(@&quot;%@　%s&quot;,self,sel_getName(_cmd));
-}
-
-+(BOOL)resolveInstanceMethod:(SEL)sel{
-    if (sel ==@selector(run)) {
-    //如果响应run方法，我们动态将上面实现的addrun方法添加到当前类中。
-        class_addMethod(self, sel, (IMP)addrun, &quot;v@:&quot;);
-    }
-    
-    return [super resolveInstanceMethod:sel];
-}
-
-@end
-
-//  main.m
-//  消息转发
-
-
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;Person.h&quot;
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-    //执行代码
-        Person *man = [Person new];
-        [man run];
-    }
-    return 0;
-}
-</code></pre>
-
-<p>结果为：<img src="media/15041475233104/15041480973843.jpg" alt=""/><br/>
-说明执行了我们添加的那个方法，而并没有报错。</p>
-
-<h2 id="toc_1">第二种</h2>
-
-<p>我们可以动态的向类中添加方法来解决无选择子的问题，我们也可以选择转换接受者来选择可以处理该选择子的对象。</p>
-
-<p>首先当我们，没有处理第一种方法的时候，运行期系统会给我们第二个机会，询问是否有备用的接受者。我们就要实现<code>orwardingTargetForSelector</code>了</p>
-
-<p>我们举例来看：</p>
-
-<p>首先我们先创建一个新类Car，并且创建一个<code>run</code>方法：</p>
-
-<p><img src="media/15041475233104/15041487720558.jpg" alt=""/></p>
-
-<p>然后在Person.m中，不对<code>resolveInstanceMethod</code>进行任何处理，在<code>forwardingTargetForSelector</code>中返回一个<code>Car</code>实例：<br/>
-<img src="media/15041475233104/15041488721835.jpg" alt=""/></p>
-
-<p>然后继续执行<code>main.m</code>文件，运行为：<br/>
-<img src="media/15041475233104/15041489461207.jpg" alt=""/></p>
-
-<p>说明系统已经将所要实现方法的对象转换为<code>Car</code>的实例对象。</p>
-
-<h2 id="toc_2">第三种</h2>
-
-<p>如果前两种我们都没有实现的话，就会进入第三种，执行完整的消息转发机制。</p>
-
-<p>就会调用两个方法<code>methodSignatureForSelector</code>和<code>forwardInvocation</code></p>
-
-<p><code>methodSignatureForSelector</code>方法用来指定方法签名，返回<code>nil</code>表示不处理，否则会进入下一步调用<code>forwardInvocation</code>方法。其中这个签名就是给<code>forwardInvocation</code>中的参数<code>NSInvocation</code>调用的。</p>
-
-<p><img src="media/15041475233104/15041604848181.jpg" alt=""/></p>
-
-<p>开头我们要找的错误<code>unrecognized selector sent to instance</code>原因，原来就是因为<code>methodSignatureForSelector</code>这个方法中，由于没有找到<code>run</code>对应的实现方法，所以返回了一个空的方法签名，最终导致程序报错崩溃。</p>
-
-<p>所以我们需要做的是自己新建方法签名，再在<code>forwardInvocation</code>中用你要转发的那个对象调用这个对应的签名，这样也实现了消息转发。</p>
-
-<p>关于生成签名的类型<code>&quot;v@:&quot;</code>解释一下。每一个方法会默认隐藏两个参数，<code>self</code>、<code>_cmd</code>，<code>self</code>代表方法调用者，<code>_cmd</code>代表这个方法的<code>SEL</code>，签名类型就是用来描述这个方法的返回值、参数的，<code>v</code>代表返回值为<code>void</code>，<code>@</code>表示<code>self</code>，<code>:</code>表示<code>_cmd</code>。</p>
-
-<p><strong>所以第二个和第三个字符必须是<code>“@:”</code> ，第一个字符是返回类型.</strong></p>
-
-<p><strong>具体的可以看一下了解</strong>：<a href="https://developer.apple.com/library/etc/redirect/xcode/content/1189/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100">Type Encodeing</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/31</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -873,6 +789,12 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
+			        <a href="15050942669581.html">第四十二条 多用GCD，少用performSelector系列方法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
 			      </li>
 		     
@@ -892,12 +814,6 @@ int main(int argc, const char * argv[]) {
 		      
 			      <li class="post">
 			        <a href="15044922241087.html">第三十八条 为常用的块类型创建typedef</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15043212815193.html">第三十七条 理解“块”这一概念</a>
 			      </li>
 		     
 		  

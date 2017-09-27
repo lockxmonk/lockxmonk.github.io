@@ -4,13 +4,89 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-09-04T16:57:03+08:00</updated>
+  <updated>2017-09-09T15:38:22+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[第四十二条 多用GCD，少用performSelector系列方法]]></title>
+    <link href="https://lockxmonk.github.io/15050942669581.html"/>
+    <updated>2017-09-11T09:44:26+08:00</updated>
+    <id>https://lockxmonk.github.io/15050942669581.html</id>
+    <content type="html"><![CDATA[
+<p><code>Objective-C</code>本质上是一门非常动态的语言（参见第11条)，<code>NSObject</code>定义了几个方法, <mark>令开发者可以随意调用任何方法。这几个方法可以推迟执行方法调用，也可以指定运行方法所用的线程。</mark>这些功能原来很有用，但是在出现了<code>GCD</code>之后，这些功能就尽量不要使用了，尽量用<code>GCD</code>来取代他们。</p>
+
+<p>其中他们又如下几个方法：</p>
+
+<pre><code class="language-objc">-(id)performSelector : (SEL) selector
+//可以传两个参数
+-(id)performSelector : (SEL) selector
+           withObject:（id）objectA
+           withObject:（id）objectB
+//传一个参数
+-(id)performSelector : (SEL) selector
+           withObject:（id）object
+</code></pre>
+
+<p>具体用法如：</p>
+
+<pre><code class="language-objc">[object performSelector: @selector(selectorName)];
+
+[object performSelector: @selector(setValue:)
+             withObject: newValue];
+</code></pre>
+
+<p>上面的用法，会有很多局限，比如在<code>ARC</code>下，会发出警告表示：<code>也许会内存泄露</code>，这是因为编译器并不知道将要的选择子是什么，因此，也就不了解其方法签名及返回值，甚至连是否有返回值都不清楚，而且由于编译器不知道方法名，所以就没办法运用<code>ARC</code>的内存管麵则来判定返回值是不是该释放。鉴于此，<code>ARC</code>采用了比较谨慎的做法，就是不添加释放操作。然而这么<br/>
+做可能导致内存泄漏，因为方法在返回对象时可能已经将其保留了。</p>
+
+<p>另一个局限性是：返回值只能是<code>void</code>或对象类型。尽管所要执行的 选择子也可以返回<code>void</code>，但是<code>performSelector</code>方法的返回值类型毕竟是<code>id</code>。如果想返回整数或浮点数等类型的值，那么就需要执行一些复杂的转换操作了，而这种转换很容易出错。</p>
+
+<p>第三个局限是：这个方法最多只能传递两个参数，当选择子得到参数超过两个时，只能运用字典来传送数据（但是容易增加开销和造成bug）。</p>
+
+<p>所以我们的解决方法是：我们使用<code>块</code>来代替，并且<code>performSelector</code>系列方法都可以使用<code>GCD</code>机制使用块来实现。我们来举几个例子说明：</p>
+
+<p>如果我们想要延后执行某个任务：</p>
+
+<pre><code class="language-objc">//Using performSelector:withObjectrafterDelay: 
+[self performSelector:@selector(doSomething)
+           withObject:nil 
+           afterDelay:5.0];
+
+//Using dispatch_after
+dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, (int64 t)(5.0 * NSEC PER SEC));
+
+dispatch_after(time, dispatch_get_main—queue(), ^(void){
+     [self doSomething];
+})；
+</code></pre>
+
+<p>后者想要在主线程执行某个任务：</p>
+
+<pre><code class="language-objc">// Using performSelectorOnMainThread: withObject .-waitUntilDone :
+[self performSelectorOnMainThread:@selector(doSomething)
+                      withObject:nil 
+                      waitUntilDone:NO];
+//Using dispatch_async
+// (or if waitUntilDone is YES, then dispatchasync) 
+dispatch_async(dispatch_get_main_queue(), ^{
+        [self doSomething];
+});
+</code></pre>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li><code>performSelector</code>系列方法在内存管理方面容易有疏失。它无法确定将要执行的选择子具体是什么，因而<code>ARC</code>编译器也就无法插入适当的内存管理方法。</li>
+<li><code>performSelector</code>系列方法所能处理的选择子太过局限了，选择子的返回值类型及发送给方法的参数个数都受到限制。</li>
+<li>如果想把任务放在另一个线程上执行，那么最好不要用<code>performSelector</code>系列方法，而是应该把任务封装到块里，然后调用大中枢派发机制的相关方法来实现。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[第四十一条 多用派发队列，少用同步锁]]></title>
@@ -1829,77 +1905,6 @@ BOOL ret = [object doSomething:&amp;error];
 <ul>
 <li>给私有方法的名称加上前缀，这样可以很容易地将其同公共方法区分开。</li>
 <li>不要单用一个下划线做私有方法的前缀，因为这种做法是预留给苹果公司用的。</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第十九条 使用清晰而协调的命名方式]]></title>
-    <link href="https://lockxmonk.github.io/15037310867483.html"/>
-    <updated>2017-08-26T15:04:46+08:00</updated>
-    <id>https://lockxmonk.github.io/15037310867483.html</id>
-    <content type="html"><![CDATA[
-<p>我们在使用OC的时候，发现这门语言很繁琐，代码中一般有<code>“in“，”for”，“with”</code>等介词，其他编程语言则很少使用这些他们认为多余的字眼。以下面代码为例子：</p>
-
-<pre><code class="language-objc">NSString *text = @&quot;The quick brown fox jumped over the lazy dog&quot;;
-NSString *newText =
-[text stringByReplacingOccurrencesOfString: @&quot;fox&quot;,
-                                withString:@&quot;cat&quot;];
-</code></pre>
-
-<p>但是，<code>Objective-C</code>的命名方式虽然长一点，但是却非常淸晰。</p>
-
-<p><strong><font color=red>方法与变量名使用了“驼峰式大小写命名法&quot;（camel casing)——以小写字母开头，其后每个单词首字母大写。类名也用驼峰命名法，不过其首字母要大写，而且前面通常还有两三个前缀字母。</font></strong></p>
-
-<h2 id="toc_0">方法命名</h2>
-
-<p>方法名很长对冉繁琐，但是易于阅读，理解其中的意思。但是如果过长会起到反效果。例如：</p>
-
-<pre><code class="language-objc">-(EOCRectangle*)union:(EOCRectangle*)rectangle // Unclear 
--(float) calculateTheArea // Too verbose
-
-//应该改成
--(EOCRectangle*)unionRectangle:(EOCRectangle*)rectangle 
--(float) area
-</code></pre>
-
-<p><strong>给方法命名时的注意事项可总结成下面几条规则：</strong></p>
-
-<blockquote>
-<ul>
-<li>如果方法的返回值是新创建的，那么方法名的首个词应是返回值的类型，除非前面还 有修饰语，例如<code>localizedString</code>。属性的存取方法不遵循这种命名方式，因为一般认 为这些方法不会创建新对象，即便有时返回内部对象的一份拷贝，我们也认为那相当 于原有的对象。这些存取方法应该按照其所对应的属性来命名。</li>
-<li>应该把表示参数类型的名词放在参数前面。</li>
-<li>如果方法要在当前对象上执行操作，那么就应该包含动词；若执行操作时还需要参数, 则应该在动词后面加上一个或多个名词。</li>
-<li>不要使用str这种简称，应该用string这样的全称。</li>
-<li>Boolean属性应加is前缀。如果某方法返回非属性的Boolean值，那么应该根据其功 能，选用has或is当前缀。</li>
-<li>将get这个前缀留给那些借由“输出参数”来保存返回值的方法，比如说，把返回值 填充到“C语言式数组”（C_style array)里的那种方法就可以使用这个词做前缀。</li>
-</ul>
-</blockquote>
-
-<h2 id="toc_1">类与协议的命名</h2>
-
-<p>应该为类与协议的名称加上前缀，以避免命名空间冲突（参见第15条)，而且应该像给 方法起名时那样把词句组织好，使其从左至右读起来较为通顺。例如，在<code>NSArray</code>的子类中，有一个用于表示可变数组的类，叫做<code>NSMutableArray</code>, <code>mutable</code>这个词放在<code>array</code>前面, 用以表明这是一种特殊的<code>array</code>(数组）。</p>
-
-<p>例如iOS的UI库UIKit，其中协议与类的命名惯例为：</p>
-
-<ul>
-<li>UIView    (类)</li>
-<li>UIViewController（类）</li>
-<li>UITableView （类）</li>
-<li>UITableViewController（类）</li>
-<li>UITableViewDelegate（协议）</li>
-</ul>
-
-<p>最重要的一点就是，命名方式应该协调一致。</p>
-
-<h2 id="toc_2">要点</h2>
-
-<ul>
-<li>起名时应遵从标准的Objective-C命名规范，这样创建出来的接口更容易为开发者所理解。</li>
-<li>方法名要言简意赅，从左至右读起来要像个日常用语中的句子才好。</li>
-<li>方法名里不要使用缩略后的类型名称。</li>
-<li>给方法起名时的第一要务就是确保其风格与你自己的代码或所要集成的框架相符。</li>
 </ul>
 
 ]]></content>

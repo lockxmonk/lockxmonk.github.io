@@ -113,6 +113,168 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14992368546707.html">
+                
+                  <h1>第10条:在既有类中使用关联对象存放自定义数据</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>有时需要在对象中存放相关信息。这时我们通常会从对象所属的类中继承一个子类，然后改用这个子类对象。然而并非所有情况下都能这么做，<mark>有时候类的实例可能是由某种机制所创建的，而开发者无法令这种机制创建出自己所写的子类实例</mark>。</p>
+
+<p><code>Objective-C</code>中有一项强大的特性可以解决此问题，这就是<code>“关联对象&quot;（Associated Object)</code>。</p>
+
+<p>可以给某对象关联许多其他对象，这些对象通过“键”来区分.存储对象值的时候，可以指明“存储策略”（storage policy),用以维护相应的“内存管理语义”。存储策略由名为<code>Objc_ASSOCiationPolicy</code>的枚举所定义，下表列出了该枚举的取值，同时还列出了与之等效属性：假如关联对象成为了属性，那么它就会具备对应的语义（第6条详解了“属性”这个概念).</p>
+
+<table>
+<thead>
+<tr>
+<th>关联类型</th>
+<th>等效的@property属性</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>OBJC_ASSOCIATION_ASSIGN</td>
+<td>assign</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_RETAIN_NONATOMIC</td>
+<td>nonatomic, retain</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_COPY_NONATOMIC</td>
+<td>nonatomic, copy</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_RETAIN</td>
+<td>retain</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_COPY</td>
+<td>copy</td>
+</tr>
+</tbody>
+</table>
+
+<p>下列方法可以管理关联对象：</p>
+
+<ul>
+<li><p>void objc_setAssociatedObject ( id object, void*key, id value, objc AssociationPolicypolicy)<br/>
+此方法以给定的键和策略为某对象设置关联对象值。</p></li>
+<li><p>id objc_getAssociatedObject(id object, void*key)<br/>
+此方法根据给定的键从某对象中获取相应的关联对象值。</p></li>
+<li><p>void objc removeAssociatedObjects(id object)<br/>
+此方法移除指定对象的全部关联对象。</p></li>
+</ul>
+
+<p>我们可以把某对象想象成<code>NSDictionary</code>,把关联到该对象的值理解为字典中的条目,于是，存取关联对象的值就相当于在NSDictionary对象上调用<code>[object setObject:value forKey:key]</code>与<code>[object objectForKey:key]</code>方法。然而两者之间有个重要差别：设置关联对象时用的键（key)是个&quot;不透明的指针&quot;(opaque pointer)”。如果在两个键上调用<code>“isEqual:”</code>方法的返回值是<code>YES</code>,那么<code>NSDictionary</code>就认为二者相等；然而在设置关联对象值时，若想令两个键匹配到同一个值，则二者必须是完全相同的指针才行。鉴于此，<font color=red>在设置关联对象值时，通常使用<mark>静态全局变量做键</mark></font>。</p>
+
+<h2 id="toc_0">关联对象用法举例</h2>
+
+<p>开发iOS时经常用到<code>UIAlertView</code>类，该类提供了一种标准视图，可向用户展示警告信息.当用户按下按钮关闭该视图时,需要用委托协议（delegate protocol)来处理此动作，但是，要想设置好这个委托机制，就得把创建警告视图和处理按钮动作的代码分开。由于代码分作两块，所以读起来有点乱。比方说，我们在使用<code>UIAlertView</code>时，一般都会这么写：</p>
+
+<pre><code class="language-objc">-(void)askUserAQuestion{
+    UIAlertView *alert = [[UIAlertView alloc]
+                            initWithTitle:@&quot;Question&quot;
+                                  message:@&quot;What do you want to do?&quot;
+                                 delegate:self
+                        cancelButtonTitle:@&quot;Cancel&quot;
+                        otherButtonTitles:@&quot;Continue&quot;, nil]；
+        [alert show];
+}
+
+// UIAlertViewDelegate protocol method
+-(void)alertView:(UIAlertView *)alertView
+        clickedButtonAtlndex:(NSInteger)buttonIndex
+{
+    if (buttonlndex == 0) {
+        [self doCancel];
+    } else {
+        [self doContinue];
+    }
+}
+
+</code></pre>
+
+<p><font color=red>如果想在同一个类里处理多个警告信息视图，那么代码就会变得更为复杂，我们必须在 <code>delegate</code>方法中检査传人的<code>alertView</code>参数，并据此选用相应的逻辑。要是能在创建警告视图的时候直接把处理每个按钮的逻辑都写好，那就简单多了。这可以通过关联对象来做。创建完警告视图之后，设定一个与之关联的&quot;块&quot;(block)，等到执行<code>delegate</code>方法时再将其读出来。</font>此方案的实现代码如下：</p>
+
+<pre><code class="language-objc">
+#import &lt;objc/runtime.h&gt;
+
+static void *EOCMyAlertViewKey = &quot;EOCMyAlertViewKey&quot;;
+
+-(void)askUserAQuestion {
+    UIAlertView *alert = [[UIAlertViewalloc]
+                            initWithTitle:@&quot;Question&quot;
+                                  message: @&quot;What do you want to do?&quot;
+                                 delegate:self
+                        cancelButtonTitle: @&quot;Cancel&quot;,
+                        otherButtonTitles: @&quot;Continue&quot;, nil];
+        void (^block)(NSInteger) = ^(NSInteger buttonIndex){
+            if (buttonlndex == 0) {
+                [self doCancel];
+            }else {
+                [self doContinue];
+            }
+        };
+        objc_setAssociatedObject(alert,
+                                 EOCMyAlertViewKey,
+                                 block,
+                                 OBJC_ASSOCIATION_COPY);
+        [alert show];
+}
+
+// UIAlertViewDelegate protocol method
+-(void)alertView:(UIAlertView*)alertView
+       clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    void (^block)(NSInteger)=
+        objc_getAssociatedObject(alertView, EOCMyAlertViewKey);
+    block(buttonIndex);
+}
+
+
+</code></pre>
+
+<p>以这种方式改写之后，创建警告视图与处理操作结果的代码都放在一起了，这样比原来更易读慷，因为我们无须在两部分代码之间来回游走，即可明白警告视图的用处。但是,采用该方案时需注意：块可能要捕获(capture)某些变量，这也许会造成“保留环”（retain cycle)。第40条详述了此问题。</p>
+
+<p><mark>正如大家所见，这种做法很有用，但是只应该在其他办法行不通时才去考虑用它。若是<br/>
+滥用，则很快就会令代码失控，使其难于调试。</mark>“保留环”产生的原因很难査明，因为关联对象之间的关系并没有正式的定义（formal definition)，其内存管理语义是在关联的时候才定义的，而不是在接口中预先定好的。使用这种写法时要小心，不能仅仅因为某处可以用该写法就一定要用它。想创建这种<code>UIAlertView</code>还有个办法，那就是从中继承子类，把块保存为子类中的属性。笔者认为：若是需要多次用到alert视图，那么这种做法比使用关联对象要好。</p>
+
+<h2 id="toc_1">要点</h2>
+
+<ul>
+<li>可以通过&quot;关联对象&quot;机制来把两个对象连起来</li>
+<li>定义关联对象时可指定内存管理语义，用以模仿定义属性时所采用的“拥有关系”与“非拥有关系”。</li>
+<li>只有在其他做法不可行时才应选用关联对象，因为这种做法通常会引入难于査找的bug。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/7/5</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14991530470817.html">
                 
                   <h1>第九条 以"类族模式"隐藏实现细节</h1>
@@ -987,99 +1149,6 @@ switch (currentState) {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14842935189837.html">
-                
-                  <h1>第4条：多用类型常量，少用#define预处理指令</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>对于一般掌握了Objective-C和C语言的人，也许会用这种方法来定义一个类似动画的时间常量：</p>
-
-<pre><code>#define ANIMATION_DURATION = 0.3
-</code></pre>
-
-<p>上述预处理指令会吧源代码中的ANIMATION_DURATION字符串替换为0.3。<br/>
-在OC中我们常常用更好的方法来定义，比方说，下面这行代码定义了一个类型为NSTimeInterval的常量：</p>
-
-<pre><code>static const NSTimeInterval KAnimationDuration = 0.3；
-</code></pre>
-
-<p>要注意的是此方式定义的常量包含类型信息，其好处就是清楚的描述了常量的含义，有助于编写开发文档。</p>
-
-<p>还要注意常量的名称。常用的命名法是：若常量局限于某“编译单元（也就是实现文件之内，implementation）”,一般在前面加上字母k；若长亮在类之外课件，则通常以类名为前缀。之后将会更加详细的说命名问题。</p>
-
-<p>定义常量的位置很重要。我们总是很喜欢在头文件里声明预处理命令，这样是很糟糕的。例如，ANIMATION_DURATION这个常量名就不应该在头文件中，因为所有引入了这份头文件的其他文件中都会出现这个名字。static const定义的常量也不应该出现在头文件中。因为OC没有命名空间这一概念，所以那样做就等于声明了一个名字叫kANIMATIONDURATION的全局变量。此名称应该加上前缀，以表明其所属的类，例如可以改为EOCViewClassAnimationDuration。</p>
-
-<p>如果不打算去公开某个常量，则应该将其定义为在使用该常量的实现文件中，比如说，要开发一个使用UIKit框架的iOS应用程序，其中UIView子类中含有表示动画播放时间的常量，那么可以这样写：</p>
-
-<pre><code>//EOCAnimatedView.h
-#import &lt;UIKit/UIKit.h&gt;
-@interface EOCAnimatedView:UIView
--(void)animate;
-@end
-
-//EOCAnimatedView.m
-#import EOCAnimatedView.h
-
-static const NSTimeInterval kAnimationDuration  = 0.3;
-
-@implemention EOCAnimatedView
-
--(void)animate{
-  [UIViewanimateWithDuration:KAnimationDuration 
-                    animate:^(){
-                        //Perform animations
-                    }]
-}
-</code></pre>
-
-<p>变量一定要同时用static和const来声明。如果试图修改const所声明的变量，编译器会报错。static修饰符意味着该变量仅仅在定义此变量的便一单元中可见。编译器每收到一个编译单元，就会输出一份目标文件。在OC中“编译单元”一词 通常指每个类的实现文件（以.m为后缀名）其作用域仅限于由EOCAnimatedView.m所生成的目标文件中。假如声明此变量时不加static,则编译器会为它创建一个“外部符号”(external symbol)。此时,若是另一个编译单元中也声 明了同名变量，那么编译器就拋出一条错误消息。</p>
-
-<p>有时候需要对外公开某个常量，想要接受常值变量的注册者不需要知道实际的字符串值，只需要以常值变量来注册自己想要接受的通知就可以</p>
-
-<p>此类常量应该放在“全局变量表”中，以便可以在定义该常量的编译单元之外使用。因此可以这样的来定义：</p>
-
-<pre><code>// in the header file
-extern NSString *const EOCStringConstant;
-
-//in the implementation
-NSString *const EOCStringConstant = @&quot;value&quot;;
-</code></pre>
-
-<p>这个常量在头文件中声明，在实现文件里面定义。这类常量只能定义一次。</p>
-
-<p>这样定义常量要优于#define，一旦在.m文件中定义好全局常量后，可以随处使用。</p>
-
-<p><strong>要点</strong><br/>
-* 不要用预处理指令定义常量，这样定义出来的常量不包含类型信息，编译器只是会在编译之前执行查找与替换操作。即使有人重新定义了常量值，编译器也不会产生警告信息。<br/>
-* 在实现文件中使用static const来定义“只在编译单元内可见的常量”。由于此类常量不在全局符号表中，所以无需为其名称添加前缀。<br/>
-* 再投问价那种使用extern来声明全局变量，并且在相关的实现文件中定义其值。这种常量要出现在全局符号表中，所以其名称应该加以区隔，通常用与之有关的类名做前缀。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/1/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E7%86%9F%E6%82%89oc.html'>第一章 熟悉oc</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1163,6 +1232,12 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
 	      
 		      
 			      <li class="post">
+			        <a href="15050942669581.html">第四十二条 多用GCD，少用performSelector系列方法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
 			      </li>
 		     
@@ -1182,12 +1257,6 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
 		      
 			      <li class="post">
 			        <a href="15044922241087.html">第三十八条 为常用的块类型创建typedef</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15043212815193.html">第三十七条 理解“块”这一概念</a>
 			      </li>
 		     
 		  
