@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  重新利用boot camp安装win10 - LZH007
+  第四十五条：使用dispatch_once来执行只需运行一次的代码 - LZH007
   
   </title>
   
@@ -113,14 +113,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>重新利用boot camp安装win10</h1>
+          <h1>第四十五条：使用dispatch_once来执行只需运行一次的代码</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/6/14</span>
+          <span class="date">2017/9/28</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='MAC%20OS.html'>MAC OS</a></span>
+              <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
            
          
           <span class="comments">
@@ -133,18 +133,53 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>由于原来给win10分的磁盘容量太小,而mac又不能在后续动态给win分区增加磁盘容量,所以只能重新安装分区了.</p>
+      <p>单例模式顾名思义，就是一个类一般只会同时存在一个实例，常见的实现方式为在类中编写名为<code>sharedInstance</code>的类方法。例如：</p>
 
-<ol>
-<li>打开mac系统工具中的磁盘<code>磁盘工具</code>选择总的磁盘,点击上方的<code>分区</code>按钮,将系统中其它分区删掉(通过点击饼图中的对应区域,点击下方的<code>-</code>号),就可以将分区删掉,合并到mac系统磁盘.其他分区比如之前安装win产生的<code>OSXRESERVED Partition</code> </li>
-<li>打开bootcamp,点击恢复按钮,将之前的win系统抹掉,之后就会发现,你的mac系统磁盘变回来了.</li>
-<li>重启一下,之后打开bootcamp,点击下方的<code>继续</code>按钮,选择系统iso镜像,为win系统选择分区大小(这回分多些😓).</li>
-<li>点击确定,等待下载Windows支持软件.
-<img src="media/14974276192148/14974281373736.jpg" alt=""/></li>
-<li>安装之后,在OSRESEVER分区中,的bootcamp文件夹中打开安装驱动的程序.</li>
-</ol>
+<pre><code class="language-objc">+(id)sharedImstance{
+    static EOCClass *sharedlnstance = nil;
+        @synchronized(self){
+            if (!sharedlnstance) {
+                sharedlnstance = [[self alloc] init];
+            }
+    }
+    return sharedlnstance;
+}
+</code></pre>
 
-<p>到此win10 应该就安装好了~</p>
+<p>该方法只会返回全类共用的单例实例，而不会在每次调用时都创建新的实例。</p>
+
+<p>为保证线程安全，上述代码将创建单例实例的代码包裹在同步块里。</p>
+
+<p>GCD中的一个函数可以更简单的执行这种只需执行一次的代码。为：</p>
+
+<pre><code class="language-objc">void dispatch_once (dispatch_once_t *token,
+                    dispatch_block_t block);
+</code></pre>
+
+<p>此函数接受类型为的<code>dispatch_once_t</code>的特殊参数<code>token</code>，此外还接受块参数，在块里面执行我们所需要运行一次的代码。对于给定的<code>token</code>来说，该函数保证相关的块必定会执行，且仅执行一次。首次调用该函数时，必然会执行块中的代码，最重要的一点在于，此操作完全是线程安全的。<strong><font color=red>请注意，对于只需执行一次的块来说，每次凋用函数时传入的标记都必须完全相同。因此，开发 者通常将标记变量声明在<code>static</code>或<code>global</code>作用域里。</font></strong></p>
+
+<p>将上面的代码改为<code>dispatch_once</code>来执行，就可以换为：</p>
+
+<pre><code class="language-objc">+ (id)sharedInstance {
+    static EOCClass ^sharedInstance = nil； 
+    static dispatch_once_t onceToken;
+    dispatch_once(&amp;onceToken, ^{
+        sharedlnstance = [[self alloc] initJ;
+    })；
+    return sharedInstance;
+}
+</code></pre>
+
+<p>使用<code>dispatch_once</code>可以简化代码并且彻底保证线程安全，开发者根本无须担心加锁或同步。所有问题都由<code>GCD</code>在底层处理。</p>
+
+<p>相比于同步机制的繁琐，<code>dispatch_once</code>更高效，此函数采用“原子访问”（atomic access)来査询<code>token</code>，以判断其所对应的代码原来是否已经执行过。速度一般是同步机制的两倍。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>经常需要编写“只需执行一次的线程安全代码”（thread-safe single-code execution)。通过GCD所提供的<code>dispatch_once</code>函数，很容易就能实现此功能。</li>
+<li>标记应该声明在<code>static</code>或<code>global</code>作用域中，这样的话，在把只需执行一次的块传给<code>dispatch once</code>函数时，传进去的标记也是相同的。</li>
+</ul>
 
 
     
@@ -155,16 +190,13 @@
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14974281629389.html" 
-          title="Previous Post: 怎样移除OSXRESERVED分区(如果BootCamp Assistant在安装之后没有成功删除这个分区)">&laquo; 怎样移除OSXRESERVED分区(如果BootCamp Assistant在安装之后没有成功删除这个分区)</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14970763342670.html" 
-          title="Next Post: caffe数据结构描述">caffe数据结构描述 &raquo;</a>
+          <a  href="15055441842255.html" 
+          title="Next Post: 第四十三条 掌握GCD和操作队列（NSOperation）的使用时机">第四十三条 掌握GCD和操作队列（NSOperation）的使用时机 &raquo;</a>
       
       </p>
         </div>
