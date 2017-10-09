@@ -4,13 +4,102 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-09-11T10:33:21+08:00</updated>
+  <updated>2017-09-28T14:52:45+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[第三十四条 ： 以“自动释放池降低内存峰值”]]></title>
+    <link href="https://lockxmonk.github.io/15075183660097.html"/>
+    <updated>2017-10-09T11:06:06+08:00</updated>
+    <id>https://lockxmonk.github.io/15075183660097.html</id>
+    <content type="html"><![CDATA[
+<p>在<code>Objective-C</code>的引用计数架构中，有一项特性叫做<code>“自动释放池”(autoreleasepool)</code>。释放对象有两种方式：一种是 调用<code>release</code>方法，使其保留计数立即递减；<strong><font color=red>另一种是调用<code>autorelease</code>方法，将其加人“自动 释放池”中。自动释放池用于存放那些需要在稍后某个时刻释放的对象。<code>清空（drain)</code>自动释放池时，系统会向其中的对象发送<code>release</code>消息。</font></strong></p>
+
+<p>创建自动释放池的语句为：</p>
+
+<pre><code class="language-objc">@autoreleasepool{
+    // ....
+}
+</code></pre>
+
+<p>我们来看下面这个例子：</p>
+
+<pre><code class="language-objc">@autoreleasepool {
+    NSString *string = [NSString stringWithFormat: @&quot;1 = %i&quot;, 1]; 
+    @autoreleasepool {
+        NSNumber *number = [NSNumber numberWithlnt:1];
+        }
+}
+</code></pre>
+
+<p>上面这个例子展示了基本的用法，自动释放池于左花括号处创建, 并于对应的右花括号处自动清空。位于自动释放池范围内的对象，将在此范围末尾处收到<code>release</code>消息。自动释放池可以嵌套。系统在自动释放对象时，会把它放到最内层的池里。</p>
+
+<p><code>autoreleasepool</code>的常见用法为降低程序的内存峰值，比如下面这个代码：</p>
+
+<pre><code class="language-objc">NSArray *databaseRecords = /* ... */;
+NSMutableArray *people = [NSMutableArray new];
+for (NSDictionary *record in databaseRecords) {
+    EOCPerson *person = [[EOCPerson alloc] initWithRecord:record];
+    [people addObject:person];
+}
+</code></pre>
+
+<p>上述代码，因为<code>for</code>语句会不断的创建<code>person</code>对象，造成应用程序内存不断上涨，在执行完<code>for</code>语句后又会将所有临时对象都释放，造成内存的突然上涨与下降。这些临时对象本可以提前回收的，所以我们应该这么写：</p>
+
+<pre><code class="language-objc">NSArray *databaseRecords = /* ... */;
+NSMutableArray *people = [NSMutableArray new];
+for (NSDictionary *record in databaseRecords) {
+    @autoreleasepool{
+        EOCPerson *person = [[EOCPerson alloc] initWithRecord:record];
+        [people addObject:person];
+    }
+}
+</code></pre>
+
+<p>加上这个自动释放池之后，应用程序在执行循环时的内存峰值就会降低，不再像原来那么高了。<code>内存峰值(high-memory waterline)</code>是指应用程序在某个特定时段内的<code>最大内存用量 (highest memory footprint)</code>。新增的自动释放池块可以减少这个峰值，因为系统会在块的末尾把某些对象回收掉。而刚才提到的那种临时对象，就在回收之列。</p>
+
+<p>自动释放池机制就像<code>“栈”（stack)</code> 一样。系统创建好自动释放池之后，就将其推入栈中, 而清空自动释放池，则相当于将其从栈中弹出。在对象上执行自动释放操作，就等于将其放入栈顶的那个池里。</p>
+
+<p>现在我们创建一个iOS程序之后，系统会默认有一个<code>main.m文件</code>其中有代码：</p>
+
+<pre><code class="language-objc">#import &lt;UIKit/UIKit.h&gt;
+#import &quot;AppDelegate.h&quot;
+
+int main(int argc, char * argv[]) {
+    @autoreleasepool {
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+    }
+}
+</code></pre>
+
+<p>我们用自动释放池来包裹应用程序的<code>主入口点（main application entry point)</code>，除了上述主动添加了一个释放池，我们一般不需要主动添加，系统创建的线程一般默认都有自动释放池。</p>
+
+<p><code>@autordeaSepool</code>语法还有个好处：每个自动释放池均有其范围，可以避免无意间误用了那些在清空池后已为系统所回收的对象。例如：</p>
+
+<pre><code class="language-objc">@autoreleasepool {
+    id object = [self createObject];
+}
+[self useObject:object];
+
+</code></pre>
+
+<p>上述代码无法编译，因为<code>object</code>变量出了自动释放池块的外围后就不可用了（已经被释放），所以在调用<code>“useObject:”</code>方法时不能用它做参数。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>自动释放池排布在栈中，对象收到<code>autorelease</code>消息后，系统将其放入最顶端的池里。 </li>
+<li>合理运用自动释放池，可降低应用程序的内存峰值。</li>
+<li><code>@autoreleasepool</code>这种新式写法能创建出更为轻便的自动释放池。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[第四十五条：使用dispatch_once来执行只需运行一次的代码]]></title>
@@ -1790,114 +1879,6 @@ if ([_delegate respondsToSelector:
 <li>复制对象时需决定采用浅拷贝还是深拷贝，一般情况下应该尽量执行浅拷贝。</li>
 <li>如果你所写的对象需要深拷贝，那么可考虑新增一个专门执行深拷贝的方法。</li>
 </ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[iOS 中协议和委托传值的用法]]></title>
-    <link href="https://lockxmonk.github.io/15038893459243.html"/>
-    <updated>2017-08-28T11:02:25+08:00</updated>
-    <id>https://lockxmonk.github.io/15038893459243.html</id>
-    <content type="html"><![CDATA[
-<p>虽然之前一直听过和看过委托模式，但是并没有实际的操作。这次来实现一个简单的委托样例。来加深自己的了解。</p>
-
-<p>项目目录结构为：<br/>
-<img src="media/15038893459243/15039018875452.jpg" alt=""/></p>
-
-<p>首先我们创建一个协议：<code>ProtocolA</code></p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-@protocol ProtocolA &lt;NSObject&gt;
-
-@required
-
--(void)sendValue:(NSString*)str;
-
-
-@end
-</code></pre>
-
-<p>其中有一个方法<code>sendValue:</code>，由于加上了<code>@required</code>前缀，所以这个方法时必须实现的。如果想要一个方法是可选则实现与否，则要加上<code>@optional</code>。</p>
-
-<p>之后我们创建一个类<code>ClassA</code>：</p>
-
-<pre><code class="language-objc">//该类遵循ProtocolA，并且实现了它的方法
-
-//ClassA.h
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;ProtocolA.h&quot;
-
-@interface ClassA : NSObject&lt;ProtocolA&gt;
-
-@end
-
-//ClassA.m
-#import &quot;ClassA.h&quot;
-
-@implementation ClassA
-
--(void)sendValue:(NSString *)str{
-    NSLog(@&quot;我是传过来的值：%@&quot; , str);
-}
-
-@end
-
-</code></pre>
-
-<p>写到这里，我们大概可以猜到，我们想让<code>ClassA</code>的实例来接受一个委托实现<code>ProtocolA</code>中的方法。</p>
-
-<p>所以我们这里继续创建一个<code>ClassB</code>，让它来发出一个委托，让<code>ClassA</code>代替它实现。</p>
-
-<pre><code class="language-objc">//ClassB.h
-
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;ClassA.h&quot;
-
-@interface ClassB : NSObject
-//这里我们创建了一个delegate对象，用于设置委托对象。
-@property(weak,nonatomic) id&lt;ProtocolA&gt; delegate;
-//创建一个方法来执行委托操作
--(void)dowork;
-
-@end
-
-//ClassB.m
-
-#import &quot;ClassB.h&quot;
-
-@implementation ClassB
-
-//创建a的实例，将a设置为接受委托的对象。
--(void)dowork{
-    ClassA *a = [ClassA new];
-    self.delegate = a;
-    //当响应了委托方法时，执行sendValue：
-    if ([self.delegate respondsToSelector:@selector(sendValue:)]) { // 如果协议响应了sendValue:方法
-        [self.delegate sendValue:@&quot;Hello&quot;]; // 通知执行协议方法
-    }
-}
-
-@end
-</code></pre>
-
-<p>最后在<code>main.m</code>中，执行：</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-#import &quot;ClassB.h&quot;
-
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        ClassB *b = [ClassB new];
-        [b dowork];
-    }
-    return 0;
-}
-</code></pre>
-
-<p><strong>运行结果为：</strong><br/>
-<img src="media/15038893459243/15039016722409.jpg" alt=""/></p>
 
 ]]></content>
   </entry>

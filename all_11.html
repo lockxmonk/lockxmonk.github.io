@@ -113,6 +113,117 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14955000885655.html">
+                
+                  <h1>Base64</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">练习:</a>
+</li>
+<li>
+<a href="#toc_1">小结</a>
+</li>
+</ul>
+
+
+<p>Base64是一种用64个字符来表示任意二进制数据的方法。</p>
+
+<p>用记事本打开<code>exe、jpg、pdf</code>这些文件时，我们都会看到一大堆乱码，因为二进制文件包含很多无法显示和打印的字符，所以，如果要让记事本这样的文本处理软件能处理二进制数据，就需要一个二进制到字符串的转换方法。Base64是一种最常见的二进制编码方法。</p>
+
+<p>Base64的原理很简单，首先，准备一个包含64个字符的数组：</p>
+
+<pre><code>[&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, ... &#39;a&#39;, &#39;b&#39;, &#39;c&#39;, ... &#39;0&#39;, &#39;1&#39;, ... &#39;+&#39;, &#39;/&#39;]
+</code></pre>
+
+<p>然后，对二进制数据进行处理，每3个字节一组，一共是<code>3x8=24bit</code>，划为4组，每组正好6个bit：<img src="media/14955000885655/14955010424104.jpg" alt=""/></p>
+
+<p>这样我们得到4个数字作为索引，然后查表，获得相应的4个字符，就是编码后的字符串。</p>
+
+<p>所以，Base64编码会把3字节的二进制数据编码为4字节的文本数据，长度增加33%，好处是编码后的文本数据可以在邮件正文、网页等直接显示。</p>
+
+<p>如果要编码的二进制数据不是3的倍数，最后会剩下1个或2个字节怎么办？Base64用<code>\x00</code>字节在末尾补足后，再在编码的末尾加上1个或2个<code>=</code>号，表示补了多少字节，解码的时候，会自动去掉。</p>
+
+<p>Python内置的<code>base64</code>可以直接进行base64的编解码：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+import base64
+print base64.b64encode(&#39;binary\x00string&#39;)
+print base64.b64decode(&#39;YmluYXJ5AHN0cmluZw==&#39;)
+</code></pre>
+
+<p><img src="media/14955000885655/14955014556004.jpg" alt=""/></p>
+
+<p>由于标准的Base64编码后可能出现字符<code>+</code>和<code>/</code>，在URL中就不能直接作为参数，所以又有一种&quot;url safe&quot;的base64编码，其实就是把字符<code>+</code>和<code>/</code>分别变成<code>-</code>和<code>_</code>：<br/>
+<img src="media/14955000885655/14955018446875.jpg" alt=""/><br/>
+还可以自己定义64个字符的排列顺序，这样就可以自定义Base64编码，不过，通常情况下完全没有必要。</p>
+
+<p>Base64是一种通过查表的编码方法，不能用于加密，即使使用自定义的编码表也不行。</p>
+
+<p>Base64适用于小段内容的编码，比如数字证书签名、Cookie的内容等。</p>
+
+<p>由于<code>=</code>字符也可能出现在Base64编码中，但<code>=</code>用在URL、Cookie里面会造成歧义，所以，很多Base64编码后会把<code>=</code>去掉：</p>
+
+<pre><code># 标准Base64:
+&#39;abcd&#39; -&gt; &#39;YWJjZA==&#39;
+# 自动去掉=:
+&#39;abcd&#39; -&gt; &#39;YWJjZA&#39;
+</code></pre>
+
+<p>去掉=后怎么解码呢？因为Base64是把3个字节变为4个字节，所以，Base64编码的长度永远是4的倍数，因此，需要加上=把Base64字符串的长度变为4的倍数，就可以正常解码了。</p>
+
+<h2 id="toc_0">练习:</h2>
+
+<p>请写一个能去掉<code>=</code>的base64解码函数:</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+import base64
+def safe_b64decode(str):
+    num = len(str)%4
+    if num==0:
+        return base64.b64decode(str)
+    else :
+        for x in range(num):
+             str = str + &#39;=&#39;
+        return str 
+print base64.b64decode(&#39;YWJjZA==&#39;)
+#print base64.b64decode(&#39;YWJjZA&#39;)
+print safe_b64decode(&#39;YWJjZA&#39;)
+</code></pre>
+
+<p><img src="media/14955000885655/14955026953083.jpg" alt=""/></p>
+
+<h2 id="toc_1">小结</h2>
+
+<p>Base64是一种任意二进制到文本字符串的编码方法，常用于在URL、Cookie、网页中传输少量二进制数据。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14948310433460.html">
                 
                   <h1>下学期英语课后翻译总结</h1>
@@ -1709,151 +1820,6 @@ print c
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14939712159345.html">
-                
-                  <h1>正则表达式</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>字符串是编程时涉及到的最多的一种数据结构，对字符串进行操作的需求几乎无处不在。比如判断一个字符串是否是合法的Email地址，虽然可以编程提取<code>@</code>前后的子串，再分别判断是否是单词和域名，但这样做不但麻烦，而且代码难以复用。</p>
-
-<p>正则表达式是一种用来匹配字符串的强有力的武器。它的设计思想是用一种描述性的语言来给字符串定义一个规则，凡是符合规则的字符串，我们就认为它“匹配”了，否则，该字符串就是不合法的。</p>
-
-<p>所以我们判断一个字符串是否是合法的Email的方法是：</p>
-
-<ol>
-<li><p>创建一个匹配Email的正则表达式；</p></li>
-<li><p>用该正则表达式去匹配用户的输入来判断是否合法。</p></li>
-</ol>
-
-<p>因为正则表达式也是用字符串表示的，所以，我们要首先了解如何用字符来描述字符。</p>
-
-<p>在正则表达式中，如果直接给出字符，就是精确匹配。用<code>\d</code>可以匹配一个数字，<code>\w</code>可以匹配一个字母或数字，所以：</p>
-
-<ul>
-<li><p><code>&#39;00\d&#39;</code>可以匹配<code>&#39;007&#39;</code>，但无法匹配<code>&#39;00A&#39;</code>；</p></li>
-<li><p><code>&#39;\d\d\d&#39;</code>可以匹配<code>&#39;010&#39;</code>；</p></li>
-<li><p><code>&#39;\w\w\d&#39;</code>可以匹配<code>&#39;py3&#39;</code>；</p></li>
-</ul>
-
-<p><code>.</code><strong>可以匹配任意字符</strong>，所以：</p>
-
-<ul>
-<li><code>&#39;py.&#39;</code>可以匹配<code>&#39;pyc&#39;</code>、<code>&#39;pyo&#39;</code>、<code>&#39;py!&#39;</code>等等。</li>
-</ul>
-
-<p>要匹配变长的字符，在正则表达式中，用<code>*</code>表示任意个字符（包括0个），用<code>+</code>表示至少一个字符，用<code>?</code>表示0个或1个字符，用<code>{n}</code>表示n个字符，用<code>{n,m}</code>表示n-m个字符：</p>
-
-<p>来看一个复杂的例子：<code>\d{3}\s+\d{3,8}</code>。</p>
-
-<p>我们来从左到右解读一下：</p>
-
-<ol>
-<li><p><code>\d{3}</code>表示匹配3个数字，例如<code>&#39;010&#39;</code>；</p></li>
-<li><p><code>\s</code>可以匹配一个空格（也包括Tab等空白符），所以<code>\s+</code>表示至少有一个空格，例如匹配<code>&#39; &#39;，&#39; &#39;</code>等；</p></li>
-<li><p><code>\d{3,8}</code>表示3-8个数字，例如<code>&#39;1234567&#39;</code>。</p></li>
-</ol>
-
-<p>综合起来，上面的正则表达式可以匹配以任意个空格隔开的带区号的电话号码。</p>
-
-<p>如果要匹配<code>&#39;010-12345&#39;</code>这样的号码呢？由于<code>&#39;-&#39;</code>是特殊字符，在正则表达式中，要用<code>&#39;\&#39;</code>转义，所以，上面的正则是<code>\d{3}\-\d{3,8}</code>。</p>
-
-<p>但是，仍然无法匹配<code>&#39;010 - 12345&#39;</code>，因为带有空格。所以我们需要更复杂的匹配方式。</p>
-
-<h2 id="toc_0">进阶</h2>
-
-<p>要做更精确地匹配，可以用<code>[]</code>表示范围，比如：</p>
-
-<ul>
-<li><p><code>[0-9a-zA-Z\_]</code>可以匹配一个数字、字母或者下划线；</p></li>
-<li><p><code>[0-9a-zA-Z\_]+</code>可以匹配至少由一个数字、字母或者下划线组成的字符串，比如<code>&#39;a100&#39;，&#39;0_Z&#39;，&#39;Py3000&#39;</code>等等；</p></li>
-<li><p><code>[a-zA-Z\_][0-9a-zA-Z\_]*</code>可以匹配由字母或下划线开头，后接任意个由一个数字、字母或者下划线组成的字符串，也就是Python合法的变量；</p></li>
-<li><p><code>[a-zA-Z\_][0-9a-zA-Z\_]{0, 19}</code>更精确地限制了变量的长度是1-20个字符（前面1个字符+后面最多19个字符）。</p></li>
-</ul>
-
-<p><code>A|B</code>可以匹配A或B，所以<code>(P|p)ython</code>可以匹配<code>&#39;Python&#39;</code>或者<code>&#39;python&#39;</code>。</p>
-
-<p><code>^</code>表示行的开头，<code>^\d</code>表示必须以数字开头。</p>
-
-<p><code>$</code>表示行的结束，<code>\d$</code>表示必须以数字结束。</p>
-
-<p>你可能注意到了，<code>py</code>也可以匹配&#39;python&#39;，但是加上<code>^py$</code>就变成了整行匹配，就只能匹配<code>&#39;py&#39;</code>了。</p>
-
-<h2 id="toc_1">re模块</h2>
-
-<p>有了准备知识，我们就可以在Python中使用正则表达式了。Python提供<code>re</code>模块，包含所有正则表达式的功能。由于Python的字符串本身也用<code>\</code>转义，所以要特别注意：</p>
-
-<pre><code class="language-py">s = &#39;ABC\\-001&#39; # Python的字符串
-# 对应的正则表达式字符串变成：
-# &#39;ABC\-001&#39;
-</code></pre>
-
-<p>因此我们强烈建议使用Python的<code>r</code>前缀，就不用考虑转义的问题了：</p>
-
-<pre><code class="language-py">s = r&#39;ABC\-001&#39; # Python的字符串
-# 对应的正则表达式字符串不变：
-# &#39;ABC\-001&#39;
-</code></pre>
-
-<p>先看看如何判断正则表达式是否匹配：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*
-import re
-
-print re.match(r&#39;^\d{3}\-\d{3,8}$&#39;, &#39;010-12345&#39;)
-print re.match(r&#39;^\d{3}\-\d{3,8}$&#39;, &#39;010 12345&#39;)
-
-</code></pre>
-
-<p><code>match()</code>方法判断是否匹配，如果匹配成功，返回一个<code>Match</code>对象，否则返回<code>None</code>。<br/>
-<img src="media/14939712159345/14939732218646.jpg" alt=""/></p>
-
-<p>常见的判断方法就是：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*
-import re
-
-Spattern = r&#39;^\d{3}\-\d{3,8}$&#39;  #用户定义的正则表达式
-test = &#39;010-12345&#39;  #用户输入的字符串
-test2 = &#39;012 12345&#39;
-if re.match(Spattern , test):
-    print &#39;OK&#39;
-else:
-    print &#39;failed&#39;
-
-if re.match(Spattern , test2):
-    print &#39;OK&#39;
-else:
-    print &#39;failed&#39;
-</code></pre>
-
-<p><img src="media/14939712159345/14939734520573.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/5</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1937,6 +1903,12 @@ else:
 	      
 		      
 			      <li class="post">
+			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
 			      </li>
 		     
@@ -1956,12 +1928,6 @@ else:
 		      
 			      <li class="post">
 			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15045739362959.html">第四十条 用块引用其所属对象时不要出现保留环</a>
 			      </li>
 		     
 		  

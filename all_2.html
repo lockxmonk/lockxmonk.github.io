@@ -113,6 +113,62 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15042285213204.html">
+                
+                  <h1>第26条 不要在分类中声明属性</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>属性是封装数据的方式（参见第6条)。尽管从技术上说，分类里也可以声明属性，但这种做法还是要尽量避免。</p>
+
+<p>原因在于，除了<code>“class-continuation分类”</code>（参见第27条）之外，其他分类都无法向类中新增实例变量，因此，它们无法把实现属性所需的实例变量合成出来。如果我们在分类中声明了一个<code>friends</code>属性。会提示我们</p>
+
+<blockquote>
+<p>warning: property  &#39;friends&#39; requires method &#39;friends&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
+
+<p>warning: property &#39;friends&#39; requires method &#39;setFriends:&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
+</blockquote>
+
+<p>说明系统没有为我们自动合成属性的<code>set</code>和<code>get</code>方法。我们要自己在分类中去实现，可以把存取方法声明为<code>@dynamic</code>, 也就是说，这些方法等到运行期再提供，编译器目前是看不见的。如果决定使用消息转发机制（参见第12条）在运行期拦截方法调用，并提供其实现，那么或许可以采用这种做法。</p>
+
+<p>当然我们也可以使用关联对象的方法。<strong><mark>但是还是不建议我们在分类中定义封装数据的属性。</mark></strong></p>
+
+<p>正确做法是把所有属性都定义在主接口里。类所封装的全部数据都应该定义在主接口中，这里是唯一能够定义实例变量(也就是数据）的地方。而属性只是定义实例变量及相关存取方法所用的“语法糖”，所以也应遵循同实例变量一样的规则。<mark>至于分类机制,则应将其理解为一种手段，目标在于扩展类的功能，而非封装数据。</mark></p>
+
+<p>但是有时候，只读属性（readonly）可以在分类中使用，但是我们要手动实现它的<code>get</code>方法。当然我们不建议搞特殊。最好还是在主接口中声明。然后在分类中声明一个获取方法，来获取数据。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>把封装数据所用的全部属性都定义在主接口里。</li>
+<li>在<code>“class-contimiation分类”</code>之外的其他分类中，可以定义存取方法，但尽量不要定义属性。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15042274785369.html">
                 
                   <h1>第25条 总是为第三方类的分类名称加前缀</h1>
@@ -595,159 +651,6 @@ NSLog(@&quot;%.1f&quot;, money);
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15040539328891.html">
-                
-                  <h1>第23条：通过委托与数据源协议进行对象间通信</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Objective-C语言有一项特性叫做<code>“协议”（protocol)</code>，它与<code>Java的“接口&quot;（interface)类似</code>。 <code>Objective-C</code>不支持多重继承，因而我们把某个类应该实现的一系列方法定义在协议里面。<strong><mark>协议最为常见的用途是实现委托模式，不过也有其他用法。</mark></strong>理解并善用协议可令代码变得更易维护，因为协议这种方式能很好地描述接口。</p>
-
-<p><strong><font color=red><code>“分类”（Category)</code>也是<code>Objective-C</code>的一项重要语言特性。利用分类机制，我们无须继承子类即可直接为当前类添加方法，而在其他编程语言中，则需通过继承子类来实现。</font></strong>由于 <code>Objective-C</code>运行期系统是髙度动态的，所以才能支持这一特性，然而，其中也隐藏着一些陷阱，因此在使用分类之前，应该先理解它。</p>
-
-<p>OC中的通信方式有很多种，我们经常使用一种叫做<code>“委托模式”（Delegate pattem)</code>的编程设计模式来实现对象间的通信，<strong><font color=red>该模式的主旨是: 定义一套接口，某对象若想接受另一个对象的委托，则需遵从此接口，以便成为其“委托对象”（delegate)。而这“另一个对象”则可以给其委托对象回传一些信息，也可以在发生相关事件时通知委托对象。</font></strong></p>
-
-<p>此模式可将数据与业务逻辑解耦。比方说，用户界面里有个显示一系列数据所用的视图，那么，此视图只应包含显示数据所需的逻辑代码，而不应决定要显示何种数据以及数据之间如何交互等问题。<mark>视图对象的属性中，可以包含负责数据与事件处理的对象。这两种对象分别称为“数据源&quot;（data source)与“委托”（delegate)</mark>。</p>
-
-<p>我们来举个假设要编写一个从网上获取数据的类。此类也许要从远程服务器的某个资源里获取数据。那个远程服务器可能过很长时间才会应答，而在获取数据的过程中阻塞应用程序则是一种非常糟糕的做法。于是，在这种情况下，我们通常会使用委托模式：获取网络数据的类含有一个“委托对象”，在获取完数据之后，它会回调这个委托对象。</p>
-
-<p><code>EOCDataModel</code>对象就是<code>EOCNetworkFetcher</code>的委托对象。<code>EOCDataModel</code>请求<code>EOCNetworkFetcher</code> &quot;以异步方式执行一项任务&quot;（perform a task asynchronously),<code>EOCNetworkFetcher</code>在执行完这项任务之后，就会通知其委托对象，也就是<code>EOCDataModel</code>。<br/>
-<img src="media/15040539328891/15040737659871.jpg" alt=""/></p>
-
-<p>利用协议机制，很容易就能以<code>Objective-C</code>代码实现此模式。在图4-1所演示的这种情况 下，协议可以这样来定义：</p>
-
-<pre><code class="language-objc">@protocol EOCNetworkFetcherDelegate 
--(void)networkFetcher:(EOCNetworkFetcher*)fetcher 
-        didReceiveData:(NSData*)data;
--(void)networkFetcher:(EOCNetworkFetcher*)fetcher 
-     didFailWithError:(NSError*)error;
-@end
-</code></pre>
-
-<p><strong><font color=red>委托协议名通常是在相关类名后面加上Delegate一词，整个类名采用“驼峰法”来写。</font></strong> 以这种方式来命名委托协议的话，使用此代码的人很快就能理解其含义了。</p>
-
-<p>然后我们要在这个<code>EOCNetworkFetcher</code>中设置一个属性来存放其委托对象。接口可以写成这样：</p>
-
-<pre><code class="language-objc">@interface EOCNetworkFetcher : NSObject 
-@property (nonatomic, weak) id&lt;EOCNetworkFetcherDelegate&gt; delegate; 
-</code></pre>
-
-<p><strong><font color=red>一定要注意：这个属性需定义成<code>weak</code>,而非<code>strong</code>,因为两者之间必须为“非拥有关系” (nonowning relationship)。通常情况下，扮演<code>delegate</code>的那个对象也要持有本对象。所以我们要用weak来声明一种非拥有关系来避免“保留环”。</font></strong></p>
-
-<p><img src="media/15040539328891/15040757649151.jpg" alt=""/></p>
-
-<p>实现委托对象的办法是声明某个类遵从委托协议，然后把协议中想实现的那些方法在类 里实现出来。某类若要遵从委托协议，可以在其接口中声明，也可以在<code>“class-contimiation分类”</code>中声明。如果要向外界公布此类实现了某协议，那么就在接口中声明，而如果这个协议是个委托协议的话，那么通常只会在类的内部使用。所以说，这种情况一般都是在<code>“class-continuation分类”</code>里声明的：</p>
-
-<pre><code class="language-objc">@implementation EOCDataModel () &lt;EOCNetworkFetcherDelegate&gt; 
-@end
-@implementation EOCDataModel
--(void)networkFetcher:(EOCNetworkFetcher*)fetcher 
-        didReceiveData:(NSData*)data {
-/* Handle data */
-}
--(void)networkFetcher:(EOCNetworkFetcher*)fetcher 
-        didFailWithError:(NSError*)error {
-/* Handle error */
-}
-@and
-</code></pre>
-
-<p>之后要用委托对象来调用方法时，必须提前使用类型信息査询方法（参见第14条）判断这个委托对象能否响应相关选择子。以<code>EOCNetworkFetcher</code>为例，应该这样写：</p>
-
-<pre><code class="language-objc">NSData *data = /*data obtained from network */;
-if ([_delegate respondsToSelector:
-     @selector(networkFetcher:didReceiveData:)))
-{ 
-    [_delegate networkFetcher:self  didReceiveData:data];
-}
-</code></pre>
-
-<p>但是当方法变多了，我们就会频繁的来检查委托对象是否能够相应选择子，其实这个操作检测一次就可以了，<strong><font color=red>所以我们可以用“位段（bitfield)”数据类型将该方法响应能力缓存起来。</font></strong></p>
-
-<p>这是一项乏人问津的C语言特性，但在此处用起来却正合适。我们可以把结构体中某个字段所占用的二进制位个数设为特定的值。比如像这样：</p>
-
-<pre><code class="language-objc">struct data {
-    unsigned int fieldA : 8; 
-    unsigned int fieldB : 4; 
-    unsigned int fieldC : 2; 
-    unsigned int fieldD : 1;
-};
-</code></pre>
-
-<p>在结构体中，<code>fieldA</code>位段将占用8个二进制位，<code>fieldB</code>占用4个，<code>fieldC</code>占用两个，<code>fieldD</code>占用1个。于是，<code>fieldA</code>可以表示0至255之间的值，而<code>fieldD</code>则可以表示0或1这两个值。 我们举例子来说的话就是：</p>
-
-<pre><code class="language-objc">@interface EOCNetworkFetcher ()     {
-    struct {
-        unsigned int didReceiveData :   1;
-        unsigned int didFailWithError : 1;      
-        unsigned int didUpdateProgressTo : 1;
-        }_delegateFlags;
-</code></pre>
-
-<p>这个结构体用来缓存委托对象是否能响应特定的选择子。实现缓存功能所用的代码可以 写在<code>delegate</code>属性所对应的设置方法里：</p>
-
-<pre><code class="language-objc">-(void)setDelegate:(id&lt;EOCNetworkFetcherDelegate&gt;)delegate {
-    _delegate = delegate;   
-    
-    _delegateFlags.didReceiveData  = 
-        [delegate respondsToSelector:
-              @selector(networkFetcher:didReceiveData:)]; 
-    
-    _delegateFlags.didFailWithError =
-        [delegate respondsToSelector:
-              @selector(networkFetcher:didFailWithError:)]; 
-
-    _delegateFlags.didUpdateProgressTo =
-        [delegate respondsToSelector:
-              @selector(networkFetcher:didUpdateProgressTo:)];
-
-}
-</code></pre>
-
-<p>这样的话，每次调用<code>delegate</code>的相关方法之前，就不用检测委托对象是否能响应给定的选择子了，而是直接查询结构体里的标志：</p>
-
-<pre><code class="language-objc">if (_delegateFlags.didUpdateProgressTo) {
-    [_delegate networkFetcher:self
-          didUpdateProgressTo:currentProgress];
-}
-</code></pre>
-
-<p>在相关方法要调用很多次时，值得进行这种优化。而是否需要优化，则应依照具体代码来定。这就需要分析代码性能，并找出瓶颈，若发现执行速度需要改进，则可使用此技巧。如果要频繁通过数据源协议从数据源中获取多份相互独立的数据，那么这项优化技术极有可能会提高程序效率.</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>委托模式为对象提供了一套接口，使其可由此将相关事件告知其他对象。</li>
-<li>将委托对象应该支持的接口定义成协议，在协议中把可能需要处理的事件定义成方法。</li>
-<li>当某对象需要从另外一个对象中获取数据时，可以使用委托模式。这种情境下，该模式亦称“数据源协议”（data source protocal)。</li>
-<li>若有必要，可实现含有位段的结构体，将委托对象是否能响应相关协议方法这一信息 缓存至其中。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -831,6 +734,12 @@ if ([_delegate respondsToSelector:
 	      
 		      
 			      <li class="post">
+			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
 			      </li>
 		     
@@ -850,12 +759,6 @@ if ([_delegate respondsToSelector:
 		      
 			      <li class="post">
 			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15045739362959.html">第四十条 用块引用其所属对象时不要出现保留环</a>
 			      </li>
 		     
 		  

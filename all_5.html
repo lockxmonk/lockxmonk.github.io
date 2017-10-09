@@ -113,6 +113,255 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15033908572762.html">
+                
+                  <h1>第十二条 消息转发机制(Message forwarding)</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>第11条讲解了对象的消息传递机制，并强调了其重要性。第12条则要讲解另外一个重要的问题，就是对象在收到无法解读的消息之后会发生什么情况。若想令类能理解某条消息，我们必须以程序码实现出对应的方法才行。<font color=red><strong>但是，在编译期向类发送了其无法解读的消息并不会报错，因为在运行期可以继续向类中添加方法，所以编译器在编译时还无法确知类中到底会不会有某个方法实现。</strong></font>当对象接收到无法解读的消息后，就会启动<mark>“消息转发&quot;（message forwarding)机制</mark>，程序员可经由此过程告沂对象应该如何处理未知消息。</p>
+
+<p>消息转发分为两大阶段:</p>
+
+<ol>
+<li><p>先征询接收者，所属的类，看其是否能动态添加方法，以处理当前这个“未知的选择子&quot;（unknown selector),这叫做“动态方法解析”（dynamic method resolution)。</p></li>
+<li><p>涉及“完整的消息转发机制”（full forwarding mechanism)。如果运行期系统已经把第一阶段执行完了，那么接收者自己就无法再以动态新增方法的手段来响应包含该选择子的消息了。此时，运行期系统会请求接收者以其他手段来处理与消息相关的方法调用。这又细分为<strong>两小步</strong>。首先，请接收者看看有没有其他对象能处理这条消息。若有，则运行期系统会把消息转给那个对象，于是消息转发过程结束，一切如常。若没有“备援的接收者”（replacement receiver)，则启动完整的消息转发机制，运行期系统会把与消息有关的全部细节都封装到<code>NSInvocation</code>对象中，再给接收者最后一次机会，令其设法解决当前还未处理的这条消息。</p></li>
+</ol>
+
+<h2 id="toc_0">动态方法解析</h2>
+
+<p>对象在收到无法解读的消息后，首先将调用其所属类的下列类方法：</p>
+
+<pre><code class="language-objc">
++ (BOOL)resolvelnstanceMethod:(SEL)selector
+
+</code></pre>
+
+<p>该方法的参数就是那个未知的选择子，其返回值为<code>Boolean</code>类型，表示这个类是否能新增一个实例方法用以处理此选择子。在继续往下执行转发机制之前，本类有机会新增一个处理此选择子的方法。假如尚未实现的方法不是实例方法而是类方法，那么运行期系统就会调用另外一个方法，该方法与 <code>“resolvelnstanceMethod:”</code> 类似，叫做 <code>“resolveClassMethod:”</code>。使用这种办法的前提是：相关方法的实现代码已经写好，只等着运行的时候动态插在类里面就可以了。此方案常用来实现<code>@dynamic</code>属性（参见第6条)，比如说，要访问<code>CoreData</code>框架中<code>NSManagedObjects</code>对象的属性时就可以这么做，因为实现这些属性所需的存取方法在编译期就能确定。</p>
+
+<p>下列代码演示了如何用<code>“resolvelnstanceMethod:”</code>来实现<code>@dynamic</code>属性：</p>
+
+<pre><code class="language-objc">
+id autoDictionaryGetter(id self, SEL _cmd);
+void autoDictionarySetter(id selff SEL _cmd, id value);
++ (BOOL)resolvelnstanceMethod:(SEL)selector {
+    NSString *selectorString = NSStringFromSelector(selector);
+    if ( /* selector is from a ©dynamic property ★/ ){
+        if([selectorstring has Prefix: @&quot;set&quot;]){
+            class addMethod(self,
+                            selector,
+                            (IMP)autoDictionarySetter,
+                            &quot;v@ :@&quot;);
+    } else {
+        class_addMethod(self,
+                        selector,
+                        (IMP)autoDictionaryGetter,
+                        &quot;@ @:&quot;);
+        }              
+        return YES;
+    }
+return [super resolvelnstanceMethod:selector];
+
+}
+
+</code></pre>
+
+<h2 id="toc_1">备援接受者</h2>
+
+<p>当前接收者还有第二次机会能处理未知的选择子，在这一步中，运行期系统会问它：能不能把这条消息转给其他接收者来处理。与该步骤对应的处理方法如下：</p>
+
+<pre><code class="language-objc">
+-(id)forwardingTargetForSelector:(SEL)selector
+
+</code></pre>
+
+<p>方法参数代表未知的选择子，若当前接收者能找到备援对象，则将其返回，若找不到，就返回<code>nil</code>。通过此方案，我们可以用“组合”（composition)来模拟出“多重继承”（multiple inheritance)的某些特性。在一个对象内部，可能还有一系列其他对象，该对象可经由此方法将能够处理某选择子的相关内部对象返回，这样的话，在外界看来，好像是该对象亲自处理了这些消息似的。</p>
+
+<p><font color=red>请注意，我们无法操作经由这一步所转发的消息。若是想在发送给备援接收者之前先修改消息内容，那就得通过完整的消息转发机制来做了。</font></p>
+
+<h2 id="toc_2">完整的消息转发</h2>
+
+<p>如果转发算法已经来到这一步的话，那么唯一能做的就是启用完整的消息转发机制了。首先创建<code>NSInvocation</code>对象，把与尚未处理的那条消息有关的全部细节都封于其中。此对象包含选择子、目标（target)及参数。在触发NSIrwocation对象时，“消息派发系统”(message-dispatch system)将亲自出马，把消息指派给目标对象。<br/>
+此步骤会调用下列方法来转发消息：</p>
+
+<pre><code class="language-objc">
+-(void)forwardlnvocation:(NSInvocation*)invocation
+
+</code></pre>
+
+<p>这个方法可以实现得很简单：只需改变调用目标，使消息在新目标上得以调用即可。然<br/>
+而这样实现出来的方法与“备援接收者”方案所实现的方法等效，所以很少有人采用这么简<br/>
+单的实现方式。比较有用的实现方式为：在触发消息前，先以某种方式改变消息内容，比如追加另外一个参数，或是改换选择子，等等。</p>
+
+<p>实现此方法时，若发现某调用操作不应由本类处理，则需调用超类的同名方法。这样的话，继承体系中的每个类都有机会处理此调用请求，直至<code>NSObject</code>。如果最后调用了<code>NSObject</code>类的方法，那么该方法还会继而调用<code>“doesNotRecognizeSelector:”</code>以抛出异常，此异常表明选择子最终未能得到处理。</p>
+
+<h2 id="toc_3">消息转发全流程</h2>
+
+<p>下图展示了消息转发机制处理消息的各个步骤:<br/>
+<img src="media/15033908572762/15033988345236.jpg" alt=""/></p>
+
+<p><font color=red>接收者在每一步中均有机会处理消息。步骤越往后，处理消息的代价就越大。</font>最好能在第一步就处理完，这样的话，运行期系统就可以将此方法缓存起来了。如果这个类的实例稍后还收到同名选择子，那么根本无须启动消息转发流程。</p>
+
+<h2 id="toc_4">完整的示例</h2>
+
+<p>假设要编写一个类似于“字典”的对象，它里面可以容纳其他对象，只不过开发者要直接通过属性来存取其中的数据。这个类的设计思路是：由幵发者来添加属性定义，并将其声明为<code>@dynamic</code>，而类则会自动处理相关属性值的存放与获取操作。</p>
+
+<p>定义该类的接口为:</p>
+
+<pre><code class="language-objc">
+#import &lt;Foundation/Foundation.h&gt;
+@interface EOCAutoDictionary : NSObject
+@property (nonatomic, strong) NSNumber *number;
+@property (nonatomic, strong) NSDate *date;
+@property (nonatomic, strong)id qpaqueObject;
+
+@end
+
+</code></pre>
+
+<p>本例中，这些属性具体是什么其实无关紧要。笔者用了这么多种数据类型，只是想演示此 功能很有用。在类的内部，每个属性的值还是会存放在字典里，所以我们先在类中编写如下代码，并将属性声明为@dynamiC，这样的话，编译器就不会为其自动生成实例变量及存取方法了：</p>
+
+<pre><code class="language-objc">
+#import &quot;EOCAutoDictionary.h&quot;
+#import &lt;objc/runtime.h&gt;
+
+@interface EOCAutoDictionary ()
+
+@property (nonatomic, strong) NSMutableDictionary *backingstore;
+
+@end
+
+@implementation EOCAutoDictionary
+
+@dynamic string, number, date, opaqueObject;
+
+-(id)init {
+    if ( (self = [super init]}} {
+          _backingStore = [NSMutableDictionary new];
+}
+    return self;
+}
+
+</code></pre>
+
+<p>本例的关键在于<code>resolvelnstanceMethod:</code>方法的实现代码：</p>
+
+<pre><code class="language-objc">
++ (BOOL)resolvelnstanceMethod:(SEL)selector {
+    NSString *selectorstring = NSStringFromSelector(selector); 
+    if ([selectorstring hasPrefix: @&quot;set&quot;]){
+        class_addMethod(self,
+                        selector,
+                        (IMP)autoDictionarySetter
+                         &quot;v@:@&quot;);
+    } else {
+        class_addMethod(self,
+                        selector,
+                        (IMP)autoDictionaryGetter,
+                        &quot;@@:&quot;;)    
+    }
+    return YES;
+}
+@end
+
+</code></pre>
+
+<p>当开发者首次在<code>EOCAutoDictionary</code>实例上访问某个属性时，运行期系统还找不到 对应的选择子，因为所需的选择子既没有直接实现，也没有合成出来。现在假设要写入 <code>opaqueObject</code>属性，那么系统就会以<code>“setOpaqueObject:”</code>为选择子来调用上面这个方法。 同理，在读取该属性时，系统也会调用上述方法，只不过传入的选择子是<code>opaqueObject</code>。</p>
+
+<p><code>resolvelnslanceMethod</code>方法会判断选择子的前缀是否为set，以此分辨其是set选择子还是 get选择子。在这两种情况下，都要向类中新增一个处理该选择子所用的方法，这两个方 法分别以<code>autoDictionarySetter</code>及<code>autoDictionaryGetter</code>函数指针的形式出现。此时就用到<code>class_addMethod</code>方法，它可以向类中动态地添加方法，用以处理给定的选择子。第三个参 数为函数指针，指向待添加的方法。而最后一个参数则表示待添加方法的“类型编码”（type encoding)。在本例中，编码开头的字符表示方法的返回值类型，后续字符则表示其所接受的各个参数.</p>
+
+<p><code>getter</code>函数可以用下列代码实现:</p>
+
+<pre><code class="language-objc">
+id autoDictionaryGetter(id self, SEL _cmd) {
+    //Get the backing store from the object
+    EOCAutoDictionary *typedSelf = (EOCAutoDictionary^)self；
+    NSMutableDictionary *backingStore = typedSelf.backingStore;
+    //The key is simply the selector name 
+    NSString *key = NSStringFromSelector(_cmd);
+    // Return the value
+    return [backingStore objectForKey:key];
+}
+
+</code></pre>
+
+<p>而setter函数则可以这么写：</p>
+
+<pre><code class="language-objc">
+void autoDictionarySetter(id self, SEL _cmd, id value) {
+    //Get the backing store from the object
+    EOCAutoDictionary *typedSelf = (EOCAutoDictionary*)self；
+    NSMutableDictionary *backingStore = typedSelf.backingStore;
+
+    /** The selector will be for example, &quot;setOpaqueObject:&quot;
+    *   We need to remove the &quot;set&quot;，and lowercase the first
+    *   letter of the remainder.
+    */
+    
+    NSString *selectorstring = NSStringFromSelector(_cmd);
+    NSMutablestring *key = [selectorstring mutableCopy】；
+    // Remove the &quot; : &quot; at the end 
+    [key deleteCharactersInRange:NSMakeRange(key.length - 1, 1)];
+    // Remove the fsetf prefix
+    [key deleteCharactersInRange:NSMakeRange(0, 3)];
+    // Lowercase the first character
+    NSString *lowercaseFirstChar = [[key substringToIndex:1] lowercasestring];
+    [key replaceCharactersInRange:NSMakeRange(0 ,1) withString:lowercaseFirstChar];
+    if (value) {
+    [backingStore setObject:value forKey:key];
+    } else {
+    [backingStore removeObjectForKey:key];
+    }
+}
+
+</code></pre>
+
+<p>EOCAutoDictionary的用法很简单：</p>
+
+<pre><code class="language-objc">
+    EOCAutoDictionary *dict = [EOCAutoDictionarynew];
+    diet.date = [NSDatedateWithTimeIntervalSincel970:475372800];
+    NSLog (@&quot;diet .date = %@&quot; , dict.date);
+    // Output: diet.date = 1985-01-24 00:00:00 +0000
+
+</code></pre>
+
+<p>其他属性的访问方式与<code>date</code>类似，要想添加新属性，只需来定义，并将其声明为<code>@dynamic</code>即可。</p>
+
+<h2 id="toc_5">要点</h2>
+
+<ul>
+<li>若对象无法响应某个选择子，则进人消息转发流程。</li>
+<li>通过运行期的动态方法解析功能，我们可以在需要用到某个方法时再将其加入类中。 </li>
+<li>对象可以把其无法解读的某些选择子转交给其他对象来处理。</li>
+<li>经过上述两步之后，如果还是没办法处理选择子，那就启动完整的消息转发机制。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15033059328138.html">
                 
                   <h1>第十一条:理解Objc_msgSend的作用</h1>
@@ -885,167 +1134,6 @@ void Net&lt;Dtype&gt;::ClearParamDiffs() {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14991530470817.html">
-                
-                  <h1>第九条 以"类族模式"隐藏实现细节</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>&quot;类族&quot;(class cluster,也叫类簇)是一种很有用的模式(pattern),可以隐藏&quot;抽象基类&quot;(abstract base class)背后的实现细节.</p>
-
-<p>Objective-C的系统框架中普遍使用此模式。比如，iOS的用户界面框架（user interface framework) UIKit中就有一个名为<code>UIButton</code>的类。想创建按钮，需<br/>
-要调用下面这个“类方法”（class method):</p>
-
-<pre><code class="language-objc">+ (UIButton*)buttonWithType:(UIButtonType)type;
-
-</code></pre>
-
-<p>该方法所返回的对象，其类型取决于传入的按钮类型（button type)。然而，不管返回什么类型的对象，它们都继承自同一个基类：<code>UIButton</code>。这么做的意义在于：<strong>UIButton类的使用者无须关心创建出来的按钮具体属于哪个子类，也不用考虑按钮的绘制方式等实现细节。</strong>使用者只需明白如何创建按钮，如何设置像“标题”（title)这样的属性，如何增加触摸动作的目标对象等问题就好。</p>
-
-<p><font color=red>我们使用&quot;类簇&quot;,是为了可以灵活应对多个类，将它们的实现细节隐藏在抽象基类后面，以保持接口简洁。用户无须自己创建子类实例，只需调用基类方法来创建即可。</font></p>
-
-<h2 id="toc_0">创建类簇</h2>
-
-<p>我们现在来看一个样例学习创建类簇.假设有一个处理雇员的类，每个雇员都有“名字”和<br/>
-“薪水”这两个属性，管理者可以命令其执行日常工作。但是，各种雇员的工作内容却不同。经理在带领雇员做项目时，无须关心每个人如何完成其工作，仅需指示其开工即可。</p>
-
-<p>首先要定义抽象类:</p>
-
-<pre><code class="language-objc">typedef NS_ENUM(NSUInteger, EOCEmployeeType) {
-    EOCEmployeeTypeDeveloper,
-    EOCEmployeeTypeDesigner,
-    EOCEmployeeTypeFinance,
-}；
-
-@interface EOCEmployee : NSObject
-
-@property (copy) NSString *name;
-@property NSUInteger salary;
-
-// Helper for creating Employee objects
-+ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type;
-//Make Employees do their respective day1s work
-- (void)doADaysWork;
-
-@end
-
-@implementation EOCEmployee
-+ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type {
-    switch (type) {
-        case EOCEmployeeTypeDeveloper:
-            return [EOCEmployeeDeveloper new];
-            break;
-        case EOCEmployeeTypeDesigner:
-            return (EOCEmployeeDesigner new];
-            break;
-        case EOCEmployeeTypeFinance:
-            return (EOCEmployeeFinance new];
-            break;
-        }
-}
--(void)doADaysWork {
-    // Subclasses implement this.
-}
-
-@end 
-
-</code></pre>
-
-<p>每个&quot;实体子类&quot;（concrete subclass) 都从基类继承而来。例如:</p>
-
-<pre><code class="language-objc">
-@interface EOCEmployeeDeveloper : EOCEmployee
-@end
-
-@implementation EOCEmployeeDeveloper
-
--(void)doADaysWork {    
-    [self writeCode];
-}
-
-@end
-
-</code></pre>
-
-<p>在本例中，基类实现了一个“类方法”，该方法根据待创建的雇员类别分配好对应的雇员类实例。这种“工厂模式”（Factory pattern)是创建类族的办法之一。</p>
-
-<p>OC这门语言没有办法致命某个基类是&quot;抽象的&quot;(abstract).于是,开发者通常会在文档中写明类的用法。这种情况下，基类接口一般都没有名为init的成员方法，这暗<br/>
-示该类的实例也许不应该由用户直接创建。还有一种办法可以确保用户不会使用基类实例,<br/>
-那就是在基类的doADaysWork方法中拋出异常。然而这种做法相当极端，很少有人用。</p>
-
-<p>如果对象所属的类位于某个类族中，那么在査询其类型信息（introspection)时就要当心了（参见第14条)。你可能觉得自己创建了某个类的实例，然而实际上创建的却是其子类的实例。在 <code>Employee</code> 这个例子中，<code>[employee isMemberOfClass:[EOCEmployee class]]</code>似乎会返回YES，但实际上返回的却是NO,因为<code>employee</code>并非Employee类的实例，而是其某个子类的实例。</p>
-
-<h2 id="toc_1">Cocoa里的类簇</h2>
-
-<p>系统框架中有许多类族。大部分<code>collection</code>类都是某个类簇中的抽象基类,例如<code>NSArray</code>与其可变版本<code>NSMutableArray</code>。这样看来，实际上有两个抽象基类，一个用于不可变数组，另一个用于可变数组。尽管具备公共接口的类有两个，但仍然可以合起来算作一个类族(传统类簇模式中,通常只有一个类具备&quot;公共接口&quot;,就是抽象基类)。<strong>不可变的类定义了对所有数组都通用的方法，而可变的类则定义了那些只适用于可变数组的方法。</strong>两个类共属同一类族，这意味着二者在实现各自类型的数组时可以共用实现代码，此外，还能够把可变数组复制为不可变数组，反之亦然。</p>
-
-<p>像NSArray这样的类的背后其实是个类族（对于大部分collection类而言都是这样)，明白这一点很重要，否则就可能会写出下面这种代码：</p>
-
-<pre><code class="language-objc">
-id maybeAnArray = /* ••• */;
-if ([maybeAnArray class) == [NSArray class]) {
-&quot;Will never be hit
-}
-
-</code></pre>
-
-<p>你要是知道<strong>NSArray是个类族</strong>，那就会明白上述代码错在哪里：其中的<code>if</code>语句永远不可能为真。[maybeAnArray class]所返回的类绝不可能是NSArray类本身，因为由NSArray的初始化方法所返回的那个实例其类型是隐藏在类族公共接口（public facade)后面的某个内部类型（internal type)。</p>
-
-<p>不过，仍然有办法可以判断出某个实例所属的类是否位于类族之中。我们不用刚才那种写法，而是改用类型信息查询方法（introspectionmethod)。本书第14条解释了这些方法的用法。若想判断某对象是否位于类族中，<strong>不要直接检测两个“类对象”是否等同，而应该采用下列代码</strong>：</p>
-
-<pre><code class="language-objc">id maybeAnArray = /* ••• */;
-if ([maybeAnArray isKindOfClass:[NSArray class])) {
-    &quot;Will be hit&quot;
-}
-</code></pre>
-
-<p>我们经常需要向类族中新增实体子类，不过这么做的时候得留心。在Employee这个例子中，若是没有“工厂方法”（factory method)的源代码，那就无法向其中新增雇员类别了。然而对于Cocoa中NSArray这样的类族来说，还是有办法新增子类的，但是需要遵守几条规则。这几条规则如下。</p>
-
-<ul>
-<li><p>子类应该继承自类族中的抽象基类。<br/>
-若要编写NSArray类族的子类，则需令其继承自不可变数组的基类或可变数组的基类。</p></li>
-<li><p>子类应该定义自己的数据存储方式。<br/>
-开发者编写NSArray子类时，经常在这个问题上受阻。子类必须用一个实例变量来存放数组中的对象。这似乎与大家预想的不同，我们以为NSArray自己肯定会保存那些对象，所以在子类中就无须再存一份了。但是大家要记住，<mark>NSArray本身只不过是包在其他隐藏对象外面的壳，它仅仅定义了所有数组都需具备的一些接口。对于这个自定义的数组子类来说，可以用NSArray来保存其实例</mark>。</p></li>
-<li><p>子类应当覆写超类文档中指明需要覆写的方法。<br/>
-在每个抽象基类中，都有一些子类必须覆写的方法。比如说，想要编写NSArray的子<br/>
-类，就需要实现<code>count</code>及<code>“objectAtlndex:”</code>方法。像<code>lastObject</code>这种方法则无须实现，因为基类可以根据前两个方法实现出这个方法。</p></li>
-</ul>
-
-<p>在类族中实现子类时所需遵循的规范一般都会定义于基类的文档之中，编码前应该先看看.</p>
-
-<h2 id="toc_2">要点</h2>
-
-<ul>
-<li>类族模式可以把实现细节隐藏在一套简单的公共接口后面。</li>
-<li>系统框架中经常使用类族。</li>
-<li>从类族的公共抽象基类中继承子类时要当心，若有开发文档，则应首先阅读。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/7/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1129,6 +1217,12 @@ if ([maybeAnArray isKindOfClass:[NSArray class])) {
 	      
 		      
 			      <li class="post">
+			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
 			      </li>
 		     
@@ -1148,12 +1242,6 @@ if ([maybeAnArray isKindOfClass:[NSArray class])) {
 		      
 			      <li class="post">
 			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15045739362959.html">第四十条 用块引用其所属对象时不要出现保留环</a>
 			      </li>
 		     
 		  

@@ -113,6 +113,168 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15034774413129.html">
+                
+                  <h1>第十三条 用"方法调配技术"调试"黑盒方法"</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>因为OC可以在运行期解析 一个对象究竟调用何种方法,所以我们也可以在运行期改变相对应的方法. </p>
+
+<p><font color=red>因为与给定的选择子名称相对应的方法也可以在运行期改变.所以若能善用此特性，则可发挥出巨大优势，因为我们既不需要源代码，也不需要通过继承子类来覆写方法就能改变这个类本身的功能。这样一来，新功能将在本类的所有实例中生效，而不是仅限于覆写了相关方法的那些子类实例。此方案经常称为<mark>“方法调配”（method swizzling)</mark> e</font></p>
+
+<p>类的方法列表会把选择子的名称映射到相关的方法实现之上，使得“动态消息派发系统” 能够据此找到应该调用的方法。这些方法均以函数指针的形式来表示，这种指针叫做<code>IMP</code>, 其原型如下：</p>
+
+<pre><code class="language-objc">
+id (*IMP)(id, SEL ,...)
+
+</code></pre>
+
+<p>我们用NSString类来举例,下图表示<code>lowercaseString、uppercaseString、capitalizedString</code>方法映射到了不同的<code>IMP</code>上.</p>
+
+<p><img src="media/15034774413129/15034784608780.jpg" alt=""/></p>
+
+<p>OC运行期系统,提供有方法来操作这个映射表.我们可以向这个表中,<strong>新增选择子,改变选择子所对应的方法实现,交换两个选择子所映射的指针</strong>.类似下图:<br/>
+<img src="media/15034774413129/15034786156175.jpg" alt=""/></p>
+
+<p>新表中,多了一个<code>newSelector</code>选择子,并且其他方法的实现也互换了.上述修改均无须编写子类，只是修改了“方法表”的布局.</p>
+
+<p>下面我们来讨论如何互换两个方法的实现:</p>
+
+<p>想要互换两个方法的实现可以,有下列函数:</p>
+
+<pre><code class="language-objc">//互换m1和m2的实现
+void method_exchangeImplementations(Method m1, Method m2)
+
+</code></pre>
+
+<p>m1和m2的方法实现可以通过下面方法实现:</p>
+
+<pre><code class="language-objc">
+Method class_getInstanceMethod(Class aClass, SEL aSelector)
+
+</code></pre>
+
+<p>此函数根据给定的选择从类中取出与之相关的方法。</p>
+
+<p>下面我们完整的举一个例子,来演示交换前面提到的<code>lowercaseString</code> 与 <code>uppercaseString</code>方法实现:</p>
+
+<pre><code class="language-objc">
+Method originalMethod =
+    class_getInstanceMethod([NSStringclass],
+                            @selector(lowercaseString));
+Method swappedMethod =
+    class_getInstanceMethod([NSStringclass],
+                            @selector(uppercaseString)); 
+                            method_exchangeImplementations(originalMethod,swappedMethod);
+
+</code></pre>
+
+<p>从现在开始,如果在NSString实例上调用<code>lowercaseString</code>,那么执行的将是<code>uppercaseString</code>,反之亦然:</p>
+
+<pre><code class="language-objc">
+NSString *string = @&quot;This iS tHe StRiNg&quot;;
+NSString *lowercaseString = [string lowercaseString];
+NSLog(&quot;lowercaseString = %@&quot;, lowercaseString);
+// Output: lowercaseString = THIS IS THE STRING
+
+
+NSString *uppercaseString - [string uppercaseString】；
+NSLog (@&quot;uppercaseString = %@&quot;, uppercaseString);
+// Output: uppercaseString = this is the string
+
+</code></pre>
+
+<p>刚才向大家演示了如何交换两个方法实现，然而在实际应用中，像这样直接交换两 个方法实现的，意义并不大。因为<code>lowercaseString</code>与<code>uppercaseString</code>这两个方法已经各自实现得很好，没必要再交换了。但是，可以通过这一手段来为既有的方法实现增添新功能。<font color=red>比方说，想要在调用<code>lowercaseString</code>时记录某些信息，这时就可以通过交换方法实现来达成此目标。我们新编写一个方法，在此方法中实现所需的附加功能，并调用原有实现</font>。</p>
+
+<p>新方法可以添加至NSString的一个&quot;分类(category)&quot;中:</p>
+
+<pre><code class="language-objc">
+@interface NSString (EOCMyAdditions)
+
+-(NSString*)eoc_myLowercaseString;
+
+@end
+
+</code></pre>
+
+<p>上面的新方法将与原有的方法互换,如下图所示:</p>
+
+<p><img src="media/15034774413129/15034869016993.jpg" alt=""/></p>
+
+<p>新方法的实现代码可以这样写:</p>
+
+<pre><code class="language-objc">
+0implementation NSString (EOCMyAdditions)
+
+-(NSString*)eoc_myLowercaseString {
+    NSString *lowercase = [self eoc_myLowercaseString];
+    NSLog (@&quot;%@ =&gt; %@&quot;, self, lowercase); 
+    return lowercase;
+)
+@end
+
+</code></pre>
+
+<p>这段代码看上去好像会陷人递归调用的<strong>死循环</strong>，<mark><strong>不过大家要记住，此方法是准备和 lowercaseString方法互换的。所以，在运行期，eoc_myLowercaseString选择子实际上对应于原有的lowercaseString方法实现</strong>。</mark>最后，通过下列代码来交换这两个方法实现：</p>
+
+<pre><code class="language-objc">Method originalMethod =
+    class_getInstanceMethod([NSString class],
+                            @selector(lowercaseString)〉；
+Method swappedMethod =
+    class_getInstanceMethod([NSString class]f
+                            @selector(eoc_myLowercaseString)); 
+                            method_exchangeImplementations(originalMethod , swappedMethod);
+
+</code></pre>
+
+<p>之后我们只要如下执行就会发现:</p>
+
+<pre><code class="language-objc">
+NSString *string = @&quot;ThIs iS tHe StRiNg&quot;;
+NSString *lowercaseString = [string lowercaseString];
+//输出了下面这行
+// Output: This iS tHe StRiNg =&gt; this is the string
+
+</code></pre>
+
+<blockquote>
+<p><strong>通过此方案，开发者可以为那些“完全不知道其具体实现的&quot;（completely opaque, “完全 不透明的”）黑盒方法增加日志记录功能，这非常有助于程序调试。然而，此做法只在调试程序时有用。很少有人在调试程序之外的场合用上述“方法调配技术”来永久改动某个类的功能。不能仅仅因为Objective-C语言里有这个特性就一定要用它。若是滥用，反而会令代码变得不易读懂且难于维护。</strong></p>
+</blockquote>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li><p>在运行期，可以向类中新增或替换选择子所对应的方法实现。</p></li>
+<li><p>使用另一份实现来替换原有的方法实现，这道工序叫做“方法调配”，开发者常用此技术向原有实现中添加新功能。</p></li>
+<li><p>一般来说，只有调试程序的时候才需要在运行期修改方法实现，这种做法不宜滥用。</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15033908572762.html">
                 
                   <h1>第十二条 消息转发机制(Message forwarding)</h1>
@@ -987,142 +1149,6 @@ if (self == object) return YES;
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14988067800935.html">
-                
-                  <h1>第七条 在对象内部尽量直接访问实例变量</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在对象之外访问实例变量时，总是应该通过<strong>属性</strong>来做,然而在对象内部访问实例变量时,除了几种特殊情况之外，<font color=red><strong>强烈建议大家在读取实例变量的时候采用<mark>直接访问</mark>的形式，而在设置实例变量的时候通过属性来做</strong></font>。</p>
-
-<p>下面举个例子:</p>
-
-<pre><code class="language-objc">
-@interface EOCPerson : NSObject
-@property (nonatomic, copy) NSString *firstName;
-@property (nonatomic, copy) NSString *lastName;
-
-// Convenience for firstName + ” ” 十 lastName:
--(NSString*)fullName;
--(void)setFullName:(NSString*) fullName;
-@end
-
-</code></pre>
-
-<p><code>fullName与setFullName</code>这两个“便捷方法”可以这样来实现:</p>
-
-<pre><code class="language-objc">
--(NSString*)fullName {
-    return [NSString stringWithFormat: @&quot;%@ %@&quot;,
-            self.firstName, self.lastName];
-/** The following assumes all full names have exactly 2
-*   parts. The method could be rewritten to support more
-* exotic names.
-*/
--(void)setFullName: (NSString*)fullName {
-    NSArray *components = [fullName componentsSeparatedByString:@&quot; &quot;];
-
-    self.firstName = [components objectAtIndex: 0];
-    self.lastName = [components objectAtIndex:1];
-}
-
-</code></pre>
-
-<p>然后我们改写上面的例子:</p>
-
-<pre><code class="language-objc">
--(NSString*)fullName {
-    return [NSString stringWithFormat: @&quot;%@ %@&quot;,
-            _firstName, _lastName];
-
--(void)setFullName:(NSString*)fullName {
-        NSArray *components = [fullName componentsSeparatedByString:@&quot; &quot;];
-
-    _firstName = [components objectAtIndex: 0];
-    _lastName = [components objectAtIndex:1];
-}
-
-</code></pre>
-
-<p>这两种写法各有优点和缺点:</p>
-
-<ul>
-<li><p>由于不经过Objective-C的<strong>“方法派发” (method dispatch，之后第11条）</strong>步骤，所以直接访问实例变量的速度当然比较快。在这种情况下，编译器所生成的代码会直接访问保存对象实例变量的那块内存。</p></li>
-<li><p>直接访问实例变童时，不会调用其“设置方法”,这就绕过了为相关属性所定义的“内<br/>
-存管理语义”。比方说，如果在ARC下直接访问一个声明为copy的属性，那么并不<br/>
-会拷贝该属性，只会保留新值并释放旧值。</p></li>
-<li><p>如果直接访问实例变量，那么不会触发‘键值观测’（Key-Value Observing，KVO)通知。这样做是否会产生问题，还取决于具体的对象行为。</p></li>
-<li><p>通过属性来访问有助于排査与之相关的错误，因为可以给“获取方法”和/或“设置<br/>
-方法”中新增“断点&quot;（breakpoint),监控该属性的调用者及其访问时机。</p></li>
-</ul>
-
-<p>因为各有好处,这里我们就找一个折中方案:<mark>写入实例变量时，通过其“设置方法”来做</mark>，而在<mark>读取实例变量时，则直接访问之</mark>。此办法既能提高读取操作的速度，又能控制对属性的写入操作。之所以要通过“设置方法”来写人实例变量，其首要原因在于，这样做能够确保相关属性的“内存管理语义”得以贯彻。但是，选用这种做法时，需注意几个问题:</p>
-
-<p><strong>第一个要注意的地方就是</strong>，在初始化方法中应该如何设置属性值。这种情况下总是应<br/>
-该<mark>直接访问实例变量</mark>，因为子类可能会<strong>“覆写”（override)设置方法</strong>。假设<code>EOCPerson</code>有一个子类叫做<code>EOCSmithPerson</code>，这个子类专门表示那些姓“Smith”的人。该子类可能会覆写<code>lastName</code>属性所对应的设置方法：</p>
-
-<pre><code class="language-objc">
--(void)setLastName:(NSString*)lastName {
-    if (![lastName isEqualToString:@&quot;Smith&quot;]){
-      [NSException raise:NSInvalidArgumentException
-                  format:@&quot;Last name must be Smith&quot;];
-}
-    self.lastName = lastname; //这里没有直接访问,而是用的点语法.(最好直接访问)
-}
-
-</code></pre>
-
-<p>在基类<code>EOCPerson</code>的默认初始化方法中，可能会将姓氏设为空字符串。此时若是通过<br/>
-“设置方法”来做，那么<strong>调用的将会是子类的设置方法，从而拋出异常</strong>。但是，某些情况下却又必须在初始化方法中调用设置方法:如果待初始化的实例变量声明在超类中，而我们又无法在子类中直接访问此实例变量的话，那么就需要调用“设置方法”了。</p>
-
-<p><strong>第二个注意问题</strong>是<strong>&quot;惰性初始化&quot;（lazy initialization)</strong>。在这种情况下，必须通过“获取方法”来访问属性，否则，实例变量就永远不会初始化。比方说，<code>EOCPerson</code>类也许会用一个属性来表示人脑中的信息，这个属性所指代的对象相当复杂。由于此属性不常用,而且创建该属性的成本较高，所以，<mark>我们可能会在“获取方法”中对其执行惰性初始化</mark>:</p>
-
-<pre><code class="language-objc">
--(EOCBrain)brain {
-    if (!_brain) {
-        brain = [Brain new];    //若没有调用获取方法,这句话永远也不会执行,去初始化
-    }
-    return _brain;
-
-</code></pre>
-
-<p>若没有调用“获取方法”就直接访问实例变量，则会看到尚未设置好的<code>brain</code>,所以说,<br/>
-如果使用了“惰性初始化”技术，那么必须通过存取方法来访问<code>brain</code>属性。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li><p>在对象内部读取数据时,应该直接通过实例变量来读，而写入数据时，则应通过属性<br/>
-来写。</p></li>
-<li><p>在初始化方法及<code>dealloc</code>方法中，总是应该直接通过实例变量来读写数据。</p></li>
-<li><p>有时会使用惰性初始化技术配置某份数据,这种情况下，需要通过属性的&quot;获取方法&quot;来读取数据。</p></li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1206,6 +1232,12 @@ if (self == object) return YES;
 	      
 		      
 			      <li class="post">
+			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
 			      </li>
 		     
@@ -1225,12 +1257,6 @@ if (self == object) return YES;
 		      
 			      <li class="post">
 			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15045739362959.html">第四十条 用块引用其所属对象时不要出现保留环</a>
 			      </li>
 		     
 		  

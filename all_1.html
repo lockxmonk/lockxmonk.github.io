@@ -113,6 +113,136 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15045090813380.html">
+                
+                  <h1>第三十九条 用handler块降低代码分散程度</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>iOS中我们经常采用异步执行任务的方式，来避免主线程的阻塞。因为<code>“系统监控器”（system watchdog)</code>在发现某个应用程序的主线程已经阻塞了一段时间之后，就会令其终止。导致程序崩溃。</p>
+
+<p>但是异步方法执行任务后，需要以某种手段来通知相关代码。实现这一功能有很多方法，常用的技巧是设计一个委托协议，令关注此事件的对象遵从该协议。对象成为<code>delegate</code>之后，就可以在相关事件发生时（例如某个异步任务执行完毕时）得到通知了。例如：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@class EOCNetworkFetcher;
+@protocol EOCNetworkFetcherDelegate &lt;NSObject&gt;
+-(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher 
+    didFinishWithData:(NSData*)data;
+@end
+
+@interface EOCNetworkFetcher : NSObject 
+@property (nonatomic, weak) id &lt;EOCNetworkFetcherDelegate&gt; delegate; 
+-(id)initWithURL:(NSURL*)url;
+-(void)start;
+@end
+</code></pre>
+
+<p>其它类可以像下面这样来使用：</p>
+
+<pre><code class="language-objc">-(void)fetchFooData {
+    NSURL *url = [[NSURL alloc] initWithString:
+                    @&quot;http: //www.example.com/foo.dat&quot;]; 
+    EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url]; 
+    fetcher.delegate = self;
+    [fetcher start];
+}
+
+-(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher didFinishWithData:(NSData*)data
+{
+    _fetchedFooData = data;
+}
+</code></pre>
+
+<p>上面在<code>EOCNetworkFetcher</code>类中声明了一个协议，协议中有一个方法用于通知对象已获取完数据。</p>
+
+<p>之后想要获取到通知的对象遵守该协议，成为它的委托对象。这样在执行完<code>start</code>方法之后，<code>EOCNetworkFetcher</code>会调用委托对象所遵守的协议方法，让委托对象获取收到的数据（也就是通知它）。</p>
+
+<p>上面这种做法没有错误，确实可行。但是如果我们改用块来写的话，代码会更清晰。就是把<code>completion handler</code>定义为块类型，将其当作参数直接传给<code>start</code>方法:</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+typedef void(^EOCNetworkFetcherCompletionHandler)(NSData *data);
+@interface EOCNetworkFetcher : NSObject 
+-(id)initWithURL:(NSURL*)url;
+-(void)startWithCompletionHandler:
+            (EOCNetworkFetcherCompletionHandler)handler;
+@end
+</code></pre>
+
+<p>这和使用委托协议很想，不过多了个好处，就是可以在调用<code>start</code>方法时直接以内联形式 定义<code>completion handler</code>,以此方式来使用<code>“网络数据获取器”（network fetcher)</code>,可以令代码比原先易懂很多。例如，下面这个类就以块的形式来定义<code>completion handler</code>,并以此为参数调用<code>API</code>:</p>
+
+<pre><code class="language-objc">-(void)fetchFooData {
+NSURL *url = [[NSURL alloc] initWithString:
+@&quot;http://www.example.com/foo.dat&quot;]; 
+EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
+[fetcher startWithCompletionHandler:^(NSData *data){ 
+    _fetchedFooData = data;
+})；
+</code></pre>
+
+<p>与使用委托模式的代码相比，用块写出来的代码显然更为整洁。异步任务执行完毕后所需运行的业务逻辑，和启动异步任务所用的代码放在了一起。而且，由于块声明在创建获取器的范围里，所以它可以访问此范围内的全部变量。</p>
+
+<p>这种写法其实最重要的用途是处理错误。现在很多基于块的<code>API</code>都使用块来处理错误，可以分别用两个处理程序来处理操作失败的情况和操作成功的情况。也可以把处理失败情况所需的代码，与处理正常情况所用的代码，都封装到同一个<code>completion handler</code>块里,我们建议使用后者，因为苹果公司也是这样设计<code>API</code>的。我们举例来说：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@class EOCNetworkFetcher;
+typedef void(^EOCNetworkFetcherCompletionHandler) 
+                                (NSData *data, NSError *error);
+
+@interface EOCNetworkFetcher : NSObject
+-(id)initWithURL:(NSURL*)url;
+-(void)startWithCompletionHandler:
+                (EOCNetworkFetcherCompletionHandler)completion;
+@end
+</code></pre>
+
+<p>此种API的调用方式如下:</p>
+
+<pre><code class="language-objc">EOCNetworkFetcher *fetcher =
+        [[EOCNetworkFetcher alloc] initWithURL:url]; 
+[fetcher startWithCompletionHander:
+    ^(NSData *data, NSError *error){ 
+    if (error) {
+        //Handle failure 
+    }else {
+        // Handle success
+    }
+}];
+</code></pre>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>在创建对象时，可以使用内联的<code>handler</code>块将相关业务逻辑一并声明。</li>
+<li>在有多个实例需要监控时，如果采用委托模式，那么经常需要根据传入的对象来切 换，而若改用<code>handler</code>块来实现，则可直接将块与相关对象放在一起。</li>
+<li>设计API时如果用到了<code>handler</code>块，那么可以增加一个参数，使调用者可通过此参数来决定应该把块安排在哪个队列上执行。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15044922241087.html">
                 
                   <h1>第三十八条 为常用的块类型创建typedef</h1>
@@ -781,62 +911,6 @@ class SomeCppClass;
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15042285213204.html">
-                
-                  <h1>第26条 不要在分类中声明属性</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>属性是封装数据的方式（参见第6条)。尽管从技术上说，分类里也可以声明属性，但这种做法还是要尽量避免。</p>
-
-<p>原因在于，除了<code>“class-continuation分类”</code>（参见第27条）之外，其他分类都无法向类中新增实例变量，因此，它们无法把实现属性所需的实例变量合成出来。如果我们在分类中声明了一个<code>friends</code>属性。会提示我们</p>
-
-<blockquote>
-<p>warning: property  &#39;friends&#39; requires method &#39;friends&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
-
-<p>warning: property &#39;friends&#39; requires method &#39;setFriends:&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
-</blockquote>
-
-<p>说明系统没有为我们自动合成属性的<code>set</code>和<code>get</code>方法。我们要自己在分类中去实现，可以把存取方法声明为<code>@dynamic</code>, 也就是说，这些方法等到运行期再提供，编译器目前是看不见的。如果决定使用消息转发机制（参见第12条）在运行期拦截方法调用，并提供其实现，那么或许可以采用这种做法。</p>
-
-<p>当然我们也可以使用关联对象的方法。<strong><mark>但是还是不建议我们在分类中定义封装数据的属性。</mark></strong></p>
-
-<p>正确做法是把所有属性都定义在主接口里。类所封装的全部数据都应该定义在主接口中，这里是唯一能够定义实例变量(也就是数据）的地方。而属性只是定义实例变量及相关存取方法所用的“语法糖”，所以也应遵循同实例变量一样的规则。<mark>至于分类机制,则应将其理解为一种手段，目标在于扩展类的功能，而非封装数据。</mark></p>
-
-<p>但是有时候，只读属性（readonly）可以在分类中使用，但是我们要手动实现它的<code>get</code>方法。当然我们不建议搞特殊。最好还是在主接口中声明。然后在分类中声明一个获取方法，来获取数据。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>把封装数据所用的全部属性都定义在主接口里。</li>
-<li>在<code>“class-contimiation分类”</code>之外的其他分类中，可以定义存取方法，但尽量不要定义属性。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -920,6 +994,12 @@ class SomeCppClass;
 	      
 		      
 			      <li class="post">
+			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
 			      </li>
 		     
@@ -939,12 +1019,6 @@ class SomeCppClass;
 		      
 			      <li class="post">
 			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15045739362959.html">第四十条 用块引用其所属对象时不要出现保留环</a>
 			      </li>
 		     
 		  
