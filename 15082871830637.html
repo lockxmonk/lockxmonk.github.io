@@ -1,0 +1,507 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  使用Masonry框架来构造iOS布局 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>使用Masonry框架来构造iOS布局</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/10/18</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>之前一直都是在使用<code>storyboards</code>来创建iOS布局，突然某一天看到使用代码布局后，界面元素的清晰易懂，就迷上了。。。</p>
+
+<p>所以这次简单学习一下使用<code>Masonry</code>帮助构建<code>iOS</code>界面元素。</p>
+
+<p>在阅读了<code>Masonry</code>的<a href="https://github.com/SnapKit/Masonry">github</a>主页之后，学习并安装了框架。</p>
+
+<h2 id="toc_0">框架的安装</h2>
+
+<p>安装框架非常简单，我们只需要在<code>podfile</code>中加上下面一句：</p>
+
+<pre><code class="language-objc">pod &#39;Masonry&#39;
+</code></pre>
+
+<p>之后为了语法的缩写以及代码自动补全我们来创建<code>Code Snippets</code></p>
+
+<pre><code class="language-objc">mas_make -&gt; [&lt;#view#&gt; mas_makeConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
+
+mas_update -&gt; [&lt;#view#&gt; mas_updateConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
+
+mas_remake -&gt; [&lt;#view#&gt; mas_remakeConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
+</code></pre>
+
+<p>将上述语句放到<code>~/Library/Developer/Xcode/UserData/CodeSnippets</code>中，之后我们在写相关代码的时候就会有代码提示了。</p>
+
+<p>我们在要使用<code>Masonry</code>的文件要频繁的导入<code>&quot;Masonry.h&quot;</code>头文件，所以为了方便，我们创建一个<code>Supporting Files</code>文件夹，并在其中创建一个<code>prefix.pch</code>文件。文件内容为：</p>
+
+<pre><code class="language-objc">//
+//  MBMasonry-Prefix.pch
+
+#import &lt;Availability.h&gt;
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#ifndef __IPHONE_3_0
+#warning &quot;This project uses features only available in iOS SDK 3.0 and later.&quot;
+#endif
+
+#ifdef __OBJC__
+#import &lt;UIKit/UIKit.h&gt;
+#import &lt;Foundation/Foundation.h&gt;
+#import &lt;QuartzCore/QuartzCore.h&gt;
+
+//define this constant if you want to use Masonry without the &#39;mas_&#39; prefix
+// 只要添加了这个宏，就不用带mas_前缀
+#define MAS_SHORTHAND
+
+//define this constant if you want to enable auto-boxing for default syntax
+// 只要添加了这个宏，equalTo就等价于mas_equalTo
+#define MAS_SHORTHAND_GLOBALS
+//在这里导入头文件。
+#import &quot;Masonry.h&quot;
+
+#endif /* MBMasonry_Prefix_pch */
+
+</code></pre>
+
+<p>之后我们在使用的时候，就不用每个文件都导入一遍头文件了。</p>
+
+<h2 id="toc_1">使用方法</h2>
+
+<p>原声的iOS代码，对界面布局使用的是<code>NSLayoutAttribute</code>，用了<code>Masonry</code>后，我们使用封装好的<code>MASViewAttribute</code>。具体的属性等价关系如下图所示：<br/>
+<img src="media/15082871830637/15082883366505.jpg" alt=""/></p>
+
+<p>我们来举例说明一下，假入我们想要创建一个登陆界面。界面中要有<code>Name</code>和<code>Pass</code>两个<code>TextField</code>，并对应两个<code>Label</code>。</p>
+
+<p>那么我们可以按照如下方式来写：</p>
+
+<pre><code class="language-objc">//
+//  ViewController.m
+//  FirstRAC
+//
+//  Created by 梁中豪 on 2017/10/17.
+//  Copyright © 2017年 梁中豪. All rights reserved.
+//
+
+#import &quot;ViewController.h&quot;
+
+@interface ViewController ()
+@property(nonatomic,strong) UIView *login;
+@property(nonatomic,strong) UILabel *nameLabel;
+@property(nonatomic,strong) UILabel *passLabel;
+@property(nonatomic,strong) UITextField *name;
+@property(nonatomic,strong) UITextField *pass;
+
+
+@end
+
+@implementation ViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.login = [[UIView alloc] initWithFrame:CGRectZero];
+    
+    _name = [[UITextField alloc] init];
+    _name.borderStyle = UIFontWeightBold;
+    _name.font = [UIFont systemFontOfSize:15];
+    _name.placeholder = @&quot;Enter Name&quot;;
+    [_login addSubview:_name];
+    
+    _pass = [[UITextField alloc] init];
+    _pass.borderStyle = UIFontWeightBold;
+    _pass.font = [UIFont systemFontOfSize:15];
+    _pass.placeholder = @&quot;Enter Pass&quot;;
+    [_login addSubview:_pass];
+    
+    _nameLabel = [[UILabel alloc] init];
+    _nameLabel.backgroundColor = UIColor.whiteColor;
+    _nameLabel.font = [UIFont systemFontOfSize:14.0];
+    _nameLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+    _nameLabel.text = @&quot;Name&quot;;
+    [_login addSubview:_nameLabel];
+    
+    _passLabel = [[UILabel alloc] init];
+    _passLabel.backgroundColor = UIColor.whiteColor;
+    _passLabel.font = [UIFont systemFontOfSize:14.0];
+    _passLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+    _passLabel.text = @&quot;Pass&quot;;
+    [_login addSubview:_passLabel];
+    [self.view addSubview:_login];
+    [self buildElem];
+}
+
+//为所创建的控件，创建约束
+- (void)buildElem{
+    [_login mas_makeConstraints:^(MASConstraintMaker *make){
+        make.left.right.and.bottom.equalTo(self.view);
+        make.top.equalTo(self.mas_topLayoutGuide);
+    }];
+    [_nameLabel mas_makeConstraints:^(MASConstraintMaker *make){
+        make.top.equalTo(_login.top);
+        make.height.equalTo(@20);
+        make.left.equalTo(_login.left).with.offset(20);
+    }];
+    [_passLabel mas_makeConstraints:^(MASConstraintMaker *make){
+        make.top.equalTo(_nameLabel.bottom).with.offset(10);
+        make.centerX.equalTo(_nameLabel.centerX);
+        make.height.equalTo(@20);
+    }];
+    [_name mas_makeConstraints:^(MASConstraintMaker *make){
+        make.left.equalTo(_nameLabel.right).with.offset(5);
+        make.centerY.equalTo(_nameLabel.centerY);
+        make.height.equalTo(@20);
+    }];
+    [_pass mas_makeConstraints:^(MASConstraintMaker *make){
+        make.left.equalTo(_passLabel.right).with.offset(5);
+        make.centerY.equalTo(_passLabel.centerY);
+        make.height.equalTo(@20);
+    }];
+
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end
+
+</code></pre>
+
+<p>从上面可以看到，我们为元素创建了约束。当然这只是基本的方法。还有更多的<code>API</code>接口可以使用。我们这里就不在过多说明了。</p>
+
+<p>大概知道上面的用法，我们就可以开心的撸代码写界面去了。<br/>
+:smile:smile:smile:smile:smile:smile:smile:</p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15082052235459.html" 
+          title="Next Post: ReactiveCocoa初步了解">ReactiveCocoa初步了解 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15082871830637.html">使用Masonry框架来构造iOS布局</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15082052235459.html">ReactiveCocoa初步了解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15077122789332.html">多用块枚举，与快速遍历少用for循环</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

@@ -113,6 +113,62 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15042285213204.html">
+                
+                  <h1>第26条 不要在分类中声明属性</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>属性是封装数据的方式（参见第6条)。尽管从技术上说，分类里也可以声明属性，但这种做法还是要尽量避免。</p>
+
+<p>原因在于，除了<code>“class-continuation分类”</code>（参见第27条）之外，其他分类都无法向类中新增实例变量，因此，它们无法把实现属性所需的实例变量合成出来。如果我们在分类中声明了一个<code>friends</code>属性。会提示我们</p>
+
+<blockquote>
+<p>warning: property  &#39;friends&#39; requires method &#39;friends&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
+
+<p>warning: property &#39;friends&#39; requires method &#39;setFriends:&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
+</blockquote>
+
+<p>说明系统没有为我们自动合成属性的<code>set</code>和<code>get</code>方法。我们要自己在分类中去实现，可以把存取方法声明为<code>@dynamic</code>, 也就是说，这些方法等到运行期再提供，编译器目前是看不见的。如果决定使用消息转发机制（参见第12条）在运行期拦截方法调用，并提供其实现，那么或许可以采用这种做法。</p>
+
+<p>当然我们也可以使用关联对象的方法。<strong><mark>但是还是不建议我们在分类中定义封装数据的属性。</mark></strong></p>
+
+<p>正确做法是把所有属性都定义在主接口里。类所封装的全部数据都应该定义在主接口中，这里是唯一能够定义实例变量(也就是数据）的地方。而属性只是定义实例变量及相关存取方法所用的“语法糖”，所以也应遵循同实例变量一样的规则。<mark>至于分类机制,则应将其理解为一种手段，目标在于扩展类的功能，而非封装数据。</mark></p>
+
+<p>但是有时候，只读属性（readonly）可以在分类中使用，但是我们要手动实现它的<code>get</code>方法。当然我们不建议搞特殊。最好还是在主接口中声明。然后在分类中声明一个获取方法，来获取数据。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>把封装数据所用的全部属性都定义在主接口里。</li>
+<li>在<code>“class-contimiation分类”</code>之外的其他分类中，可以定义存取方法，但尽量不要定义属性。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15042274785369.html">
                 
                   <h1>第25条 总是为第三方类的分类名称加前缀</h1>
@@ -717,58 +773,6 @@ BOOL ret = [object doSomething:&amp;error];
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15038831182450.html">
-                
-                  <h1>第二十条 为私有方法名加上前缀</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>一个类所做的事情，通常要比外面看到的更多。编写类的实现代码时，我们经常要编写在内部使用的方法。<strong><font color=red>这里我们要注意，一定要为这种内部实现的方法加上前缀，这有助于调试，有利于区分私有方法和公共方法。区分私有和公共方法，主要是为了方便修改内部的私有方法和相关实现代码，防止随意修改公共API。</font></strong></p>
-
-<p>我通常在私有方法前面加上<code>“_p”</code>，例如：</p>
-
-<pre><code class="language-objc">
--(void)p_privateMethod{
-    /*.....*/
-}
-</code></pre>
-
-<p>我们之所以要加上前缀，是因为OC不像java和c++语言可以在前面将方法声明为私有。每个对象都可以响应任何方法(由于其强大的动态特性造成的)。</p>
-
-<p>加前缀的时候要避免只用一个<code>“_”</code>，<strong><font color=red>因为苹果公司在自己的类中就是这么做的，所以我们要避开这种方式，防止造成继承一个类的时候，子类无意间覆写了父类的方法。</font></strong></p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>给私有方法的名称加上前缀，这样可以很容易地将其同公共方法区分开。</li>
-<li>不要单用一个下划线做私有方法的前缀，因为这种做法是预留给苹果公司用的。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -852,6 +856,24 @@ BOOL ret = [object doSomething:&amp;error];
 	      
 		      
 			      <li class="post">
+			        <a href="15082871830637.html">使用Masonry框架来构造iOS布局</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15082052235459.html">ReactiveCocoa初步了解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15077122789332.html">多用块枚举，与快速遍历少用for循环</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
 			      </li>
 		     
@@ -859,24 +881,6 @@ BOOL ret = [object doSomething:&amp;error];
 		      
 			      <li class="post">
 			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15055441842255.html">第四十三条 掌握GCD和操作队列（NSOperation）的使用时机</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15050942669581.html">第四十二条 多用GCD，少用performSelector系列方法</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
 			      </li>
 		     
 		  

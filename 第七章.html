@@ -1,0 +1,514 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  第七章 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+	$(function(){
+		$('#menu_item_index').addClass('is_active');
+	});
+</script>
+<div class="row">
+	<div class="large-8 medium-8 columns">
+		<div class="markdown-body home-categories">
+		
+			<div class="article">
+                <a class="clearlink" href="15077122789332.html">
+                
+                  <h1>多用块枚举，与快速遍历少用for循环</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">快速遍历</a>
+</li>
+<li>
+<a href="#toc_1">基于块的遍历</a>
+</li>
+<li>
+<a href="#toc_2">要点</a>
+</li>
+</ul>
+
+
+<p>我们在编程时，经常会需要遍历某个<code>collection</code>，例如<code>NSArrary，NSDictionary，NSSet</code>等。</p>
+
+<p>我们经常使用<code>for</code>循坏来遍历，这样对于数组来说还好，但是根据定义，字典与<code>set</code>都是<code>“无序的&quot;（imoniered)</code>，<em><mark>所以无法根据特定的整数下标来直接访问其中的值</mark></em>。于是，就需要先获取字典里的所有键或是<code>set</code>里的所有对象，这两种情况下，都可以在获取到的有序数组上遍历，以便借此访问原字典及原<code>set</code>中的值。</p>
+
+<p>但是创建这个附加数组会有额外开销，而且还会多创建一个数组对象，它会保留<code>collection</code>中的所有元素对象。 当然了，释放数组时这些附加对象也要释放，可是要调用本来不需执行的方法。其他各种遍 历方式都无须创建这种中介数组。</p>
+
+<p>例如：</p>
+
+<pre><code class="language-objc">// Dictionary
+NSDictionary *aDictionary = /* .... */;
+NSArray *keys = [aDictionary allKeys]; 
+for (int i = 0; i &lt; keys.count; i++) { 
+    id key = keys[i]; 
+    id value = aDictionary[key];
+    //Do something with &#39;key&#39; and &#39;value&#39;
+}
+
+//Set
+NSSet *aSet = /* ... */;
+NSArray *objects = [aSet allObjects]; 
+for (int i = 0; i &lt; objects.count; i++)
+{ 
+    id object = objects [i];
+    //Do something with &#39;object&#39;
+} 
+</code></pre>
+
+<p>上述代码实现遍历比较麻烦，所以我们推荐使用快速遍历与块循环。</p>
+
+<h2 id="toc_0">快速遍历</h2>
+
+<p>快速遍历是<code>OC 2.0</code>所引入的一个新功能。它语法更简洁，它为<code>for</code>循环开设了<code>in</code>关键字。这个关键字大幅简化了遍历<code>collection</code>所需的语法，比方说要遍历数组，就可以这么写：</p>
+
+<pre><code class="language-objc">NSArray *anArray = /* ••• */; 
+for (id object in anArray) {
+    //Do something with &#39;object&#39;
+}
+</code></pre>
+
+<p>这样写简单多了。如果某个类的对象支持快速遍历，那么就可以宣称自己遵从名为 <code>NSFastEmimeraticm</code>的协议，从而令开发者可以采用此语法来迭代该对象。</p>
+
+<p>遍历字典与set为：</p>
+
+<pre><code class="language-objc">// Dictionary
+NSDictionary *aDictionary = /* ... */; 
+for (id key in aDictionary) {
+    id value = aDictionary[key];
+    //Do something with &#39;key&#39; and &#39;value&#39;
+}
+
+//Set
+NSSet *aSet = /* ... */; 
+for (id object in aSet) {
+    //Do something with &#39;object&#39;
+}
+</code></pre>
+
+<p>由于<code>NSEnumerator</code>对象也实现了 <code>NSFastEnumeration</code>协议，所以能用来执行反向遍历。 若要反向遍历数组，可采用下面这种写法：</p>
+
+<pre><code class="language-objc">NSArray *anArray = /* ... */;
+for (id object in [anArray reverseObjectEnumerator]){
+    //Do something with &#39;object&#39;
+}
+</code></pre>
+
+<p><strong><font color=red>在目前所介绍的遍历方式中，这种办法是语法最简单且效率最髙的，然而如果在遍历字典时需要同时获取键与值，那么会多出来一步。而且，与传统的<code>for</code>循环不同，这种遍历方式无法轻松获取当前遍历操作所针对的下标。遍历时通常会用到这个下标，比如很多算法都需要它。</font></strong></p>
+
+<h2 id="toc_1">基于块的遍历</h2>
+
+<p>在当前的<code>Objective-C</code>语言中，最新引人的一种做法就是基于块来遍历。<code>NSArray</code>中定义了下面这个方法，它可以实现最基本的遍历功能：</p>
+
+<pre><code class="language-objc">-(void)enumerateObjectsUsingBlock:
+        (void(^)(id object, NSUInteger idx, BOOL *stop))block
+</code></pre>
+
+<p>此之外，还有一系列类似的遍历方法，它们可以接受各种选项，以控制遍历操作，稍后将会讨论那些方法。</p>
+
+<p>在遍历数组及<code>set</code>时，每次迭代都要执行由<code>block</code>参数所传人的块，<strong><font color=red>在遍历数组及set时，每次迭代都要执行由block参数所传人的块，这个块有三个参数， 分别是当前迭代所针对的对象、所针对的下标，以及指向布尔值的指针。前两个参数的含义不言而喻。而通过第三个参数所提供的机制，开发者可以终止遍历操作。</font></strong> </p>
+
+<p>例如，下面这段代码用此方法来遍历数组：</p>
+
+<pre><code class="language-objc">NSArray *anArray = /* ... */;
+[anArray enumerateObjectsUsingBlock:
+        ^(id object, NSUInteger id, BOOL *stop){
+    //Do something with &#39;object&#39; 
+    if (shouldStop) {
+        *stop = YES;
+}
+</code></pre>
+
+<p>这种写法稍微多了几行代码，不过依然明晰，而且遍历时既能获取对象，也能知道其下标。此方法还提供了一种优雅的机制，用于终止遍历操作，开发者可以通过设定<code>stop</code>变最值来实现，当然，使用<code>for</code>等遍历方式时，也可以通过<code>break</code>来终止循环，那样做也很好。</p>
+
+<p>此方式不仅可用来遍历数组。<code>NSSet</code>里面也有同样的块枚举方法，<code>NSDictionary</code>也是这样, 只是略有不同：</p>
+
+<pre><code class="language-objc">-(void)enumerateKeysAndObjectsUsingBlock:
+        (void(^)(id key, id object, BOOL *stop))block
+</code></pre>
+
+<p>因此，遍历字典与<code>set</code>也同样简单：</p>
+
+<pre><code class="language-objc">// Dictionary
+NSDictionary *aDictionary = /* ... */;
+[aDietionary enumerateKeysAndObjectsUsingBlock: 
+        ^(id key, id object, BOOL *stop)){
+            //Do something with &#39;key&#39; and &#39;object&#39; 
+            if (shouldStop) {
+            *stop = YES;
+}；
+
+//Set
+NSSet *aSet = /* ... */;
+[aSet enumerateObjectsUsingBlock:
+            ^(id object, BOOL *stop){
+    //Do something with &#39;object&#39; 
+        if (shouldStop) {
+            *stop = YES;
+        }
+  }];
+</code></pre>
+
+<p>此方式大大胜过其他方式的地方在于：<mark>遍历时可以直接从块里获取更多信息。在遍历数组时，可以知道当前所针对的下标。遍历<code>有序set(NSOrderedSet)</code>时也一样。而在遍历字典时，无须额外编码，即可同时获取键与值，因而省去了根据给定键来获取对应值这一步。用这种方式遍历字典，可以同时得知键与值，这很可能比其他方式快很多，因为在字典内部的数据结构中，键与值本来就是存储在一起的。</mark></p>
+
+<p><strong><font color=red>另一个好处就是：能够修改块的方法签名，以免进行类型转换操作，从效果上讲，相当于把本来需要执行的类型转换操作交给块方法签名来做。</font></strong></p>
+
+<p>比方说，要用“快速遍历法”来遍 历字典。若已知字典中的对象必为字符串，则可以这样编码：</p>
+
+<pre><code class="language-objc">for (NSString *key in aDictionary) {
+    NSString *object = (NSString*)aDictionary[key];
+    //Do something with 1 key1 and 1 object1
+)
+</code></pre>
+
+<p>如果改用基于块的方式来遍历，那么就可以在块方法签名中直接转换：</p>
+
+<pre><code class="language-objc">NSDictionary ^aDictionary = /* ••• */;
+[aDictionary enumerateKeysAndObjectsUsingBlock:
+        ^(NSString *key, NSString *obj, BOOL *stop){
+         //Do something with &#39;key&#39; and &#39;obj&#39;
+}];
+</code></pre>
+
+<p>之所以能如此，是因为<code>id</code>类型相当特殊，它可以像本例这样，为其他类型所覆写。要是原来的块签名把键与值都定义成<code>NSObject*</code>，那这么写就不行了。此技巧初看不甚显眼，实 则相当有用。指定对象的精确类型之后，编译器就可以检测出开发者是否调用了该对象所不 具备的方法，并在发现这种问题时报错。如果能够确知某<code>collection</code>里的对象是什么类型, 那就应该使用这种方法指明其类型。</p>
+
+<p>用此方式也可以执行反向遍历。数组、字典、set都实现了前述方法的另一个版本，使开发者可向其传入<code>“选项掩码”(option mask)</code>:</p>
+
+<pre><code class="language-objc">-(void)enumerateObjectsWithOptions:
+            (NSEnumerationOptions)options 
+            usingBlock: 
+            (void(^)(id obj, NSUInteger id, BOOL *stop))block
+
+-(void)enumerateKeysAndObjectsWithOptions:
+            (NSEnumerationOptions)options
+            usingBlock:
+            (void(^)(id key, id obj, BOOL *stop))block
+</code></pre>
+
+<p><code>NSEnumerationOptions</code>类型是个<code>enum</code>,其各种取值可用<code>“按位或”（bitwiseOR)</code>连接，用以表明遍历方式。具体选项不再过多介绍。</p>
+
+<p>总体来看，块枚举法拥有其他遍历方式都具备的优势，而且还能带来更多好处。与快速遍历法相比，它要多用一些代码，可是却能提供遍历时所针对的下标，在遍历字典时也能同时提供键与值，而且还有选项可以开启并发迭代功能，所以多写这点代码还是值得的。</p>
+
+<h2 id="toc_2">要点</h2>
+
+<ul>
+<li>遍历<code>collection</code>有多方式。最基本的办法是<code>for</code>循环，其次是<code>NSEnumerator</code>遍历法及快速遍历法，最新、最先进的方式则是“块枚举法”。</li>
+<li> “块枚举法”本身就能通过<code>GCD</code>来并发执行遍历操作，无须另行编写代码。而采用其他遍历方式则无法轻易实现这一点。</li>
+<li> 若提前知道待遍历的<code>collection</code>含有何种对象，则应修改块签名，指出对象的具体类型。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/11</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%83%E7%AB%A0.html'>第七章</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+              
+
+
+			<div class="row">
+			  <div class="large-6 columns">
+			  <p class="text-left" style="padding-top:25px;">
+			   
+			  </p>
+			  </div>
+			  <div class="large-6 columns">
+			<p class="text-right" style="padding-top:25px;">
+			
+			</p>
+			  </div>
+			</div>
+		</div>
+	</div><!-- large 8 -->
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15082871830637.html">使用Masonry框架来构造iOS布局</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15082052235459.html">ReactiveCocoa初步了解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15077122789332.html">多用块枚举，与快速遍历少用for循环</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

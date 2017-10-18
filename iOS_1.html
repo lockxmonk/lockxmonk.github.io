@@ -113,6 +113,194 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15038893459243.html">
+                
+                  <h1>iOS 中协议和委托传值的用法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>虽然之前一直听过和看过委托模式，但是并没有实际的操作。这次来实现一个简单的委托样例。来加深自己的了解。</p>
+
+<p>项目目录结构为：<br/>
+<img src="media/15038893459243/15039018875452.jpg" alt=""/></p>
+
+<p>首先我们创建一个协议：<code>ProtocolA</code></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+@protocol ProtocolA &lt;NSObject&gt;
+
+@required
+
+-(void)sendValue:(NSString*)str;
+
+
+@end
+</code></pre>
+
+<p>其中有一个方法<code>sendValue:</code>，由于加上了<code>@required</code>前缀，所以这个方法时必须实现的。如果想要一个方法是可选则实现与否，则要加上<code>@optional</code>。</p>
+
+<p>之后我们创建一个类<code>ClassA</code>：</p>
+
+<pre><code class="language-objc">//该类遵循ProtocolA，并且实现了它的方法
+
+//ClassA.h
+#import &lt;Foundation/Foundation.h&gt;
+#import &quot;ProtocolA.h&quot;
+
+@interface ClassA : NSObject&lt;ProtocolA&gt;
+
+@end
+
+//ClassA.m
+#import &quot;ClassA.h&quot;
+
+@implementation ClassA
+
+-(void)sendValue:(NSString *)str{
+    NSLog(@&quot;我是传过来的值：%@&quot; , str);
+}
+
+@end
+
+</code></pre>
+
+<p>写到这里，我们大概可以猜到，我们想让<code>ClassA</code>的实例来接受一个委托实现<code>ProtocolA</code>中的方法。</p>
+
+<p>所以我们这里继续创建一个<code>ClassB</code>，让它来发出一个委托，让<code>ClassA</code>代替它实现。</p>
+
+<pre><code class="language-objc">//ClassB.h
+
+#import &lt;Foundation/Foundation.h&gt;
+#import &quot;ClassA.h&quot;
+
+@interface ClassB : NSObject
+//这里我们创建了一个delegate对象，用于设置委托对象。
+@property(weak,nonatomic) id&lt;ProtocolA&gt; delegate;
+//创建一个方法来执行委托操作
+-(void)dowork;
+
+@end
+
+//ClassB.m
+
+#import &quot;ClassB.h&quot;
+
+@implementation ClassB
+
+//创建a的实例，将a设置为接受委托的对象。
+-(void)dowork{
+    ClassA *a = [ClassA new];
+    self.delegate = a;
+    //当响应了委托方法时，执行sendValue：
+    if ([self.delegate respondsToSelector:@selector(sendValue:)]) { // 如果协议响应了sendValue:方法
+        [self.delegate sendValue:@&quot;Hello&quot;]; // 通知执行协议方法
+    }
+}
+
+@end
+</code></pre>
+
+<p>最后在<code>main.m</code>中，执行：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+#import &quot;ClassB.h&quot;
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        ClassB *b = [ClassB new];
+        [b dowork];
+    }
+    return 0;
+}
+</code></pre>
+
+<p><strong>运行结果为：</strong><br/>
+<img src="media/15038893459243/15039016722409.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/28</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14956131169957.html">
+                
+                  <h1>在ios中判断一个viewcontroller是都已经正常present</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>之前present一个视图的时候,从来没有研究过如何判断一个视图是都已经正常弹出.比如下面这个方法是否正常执行:</p>
+
+<pre><code class="language-oc">[documentInteractionController presentPreviewAnimated:YES]
+</code></pre>
+
+<p>然而今天有一个需求需要知道上述方法是否正常执行,并弹出视图.</p>
+
+<p>之后通过阅读该方法的源码后发现:</p>
+
+<pre><code class="language-oc">// Bypasses the menu and opens the full screen preview window for the item at URL.  Returns NO if the item could not be previewed.
+// Note that you must implement the delegate method documentInteractionControllerViewControllerForPreview: to preview the document.
+- (BOOL)presentPreviewAnimated:(BOOL)animated;
+</code></pre>
+
+<p>该方法返回一个BOOL类型的值:当没有正常执行该方法时,会返回NO.正常返回YES.</p>
+
+<p>类似的还有如下方法:</p>
+
+<pre><code class="language-oc">- (BOOL)isBeingPresented NS_AVAILABLE_IOS(5_0);
+- (BOOL)isBeingDismissed NS_AVAILABLE_IOS(5_0);
+
+- (BOOL)isMovingToParentViewController NS_AVAILABLE_IOS(5_0);
+- (BOOL)isMovingFromParentViewController NS_AVAILABLE_IOS(5_0);
+</code></pre>
+
+<p>来判断viewController是消失还是出现在当前页面中.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/24</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14948283904445.html">
                 
                   <h1>在RN中利用原生Document Interaction Controller来预览和打开文档</h1>
@@ -322,6 +510,24 @@
 	      
 		      
 			      <li class="post">
+			        <a href="15082871830637.html">使用Masonry框架来构造iOS布局</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15082052235459.html">ReactiveCocoa初步了解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15077122789332.html">多用块枚举，与快速遍历少用for循环</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
 			      </li>
 		     
@@ -329,24 +535,6 @@
 		      
 			      <li class="post">
 			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15055441842255.html">第四十三条 掌握GCD和操作队列（NSOperation）的使用时机</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15050942669581.html">第四十二条 多用GCD，少用performSelector系列方法</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
 			      </li>
 		     
 		  

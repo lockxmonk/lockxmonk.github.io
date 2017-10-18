@@ -113,6 +113,205 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14921312042142.html">
+                
+                  <h1>匿名函数</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>当我们在传入函数时，有些时候，不需要显式地定义函数，直接传入匿名函数更方便。</p>
+
+<p>关键字<code>lambda</code>表示匿名函数</p>
+
+<p><strong>匿名函数有个限制，就是只能有一个表达式，不用写<code>return</code>，返回值就是该表达式的结果。</strong></p>
+
+<p>例如：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+print map(lambda x:x*x, [1,2,3,4,5,6])
+</code></pre>
+
+<p><img src="media/14921312042142/14921315287449.jpg" alt=""/></p>
+
+<p><font color=red>其中冒号前面的x表示函数参数。</font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/14</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14920643245223.html">
+                
+                  <h1>返回函数</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">函数作为返回值</h2>
+
+<p>在求和函数中，如果不需要立刻求和，而是在后面的代码中，根据需要再计算怎么办？可以不返回求和的结果，而是返回求和的函数！</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def lazy_sum(*args):
+    def sum():
+        ax = 0
+        for n in args:
+            ax = ax + n
+        return ax
+    return sum
+f = lazy_sum(1,3,4,5,5)
+#这里是f()不是f
+print f()
+</code></pre>
+
+<h2 id="toc_1">闭包</h2>
+
+<p>注意到返回的函数在其定义内部引用了局部变量args，所以，当一个函数返回了一个函数后，其内部的局部变量还被新函数引用，所以，闭包用起来简单，实现起来可不容易。</p>
+
+<p><strong>返回的函数并没有立刻执行，而是直到调用了<code>f()</code>才执行</strong><br/>
+例如：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def count():
+    fs = []
+    for i in range(1, 4):
+        def f():
+             return i*i
+        fs.append(f)
+    return fs
+
+f1, f2, f3 = count()
+print f1(),f2(),f3()
+</code></pre>
+
+<p>可能认为结果为<code>1，4，9</code>但是结果为：<br/>
+<img src="media/14920643245223/14920656661011.jpg" alt=""/><br/>
+<font color=red>原因就在于返回的函数引用了变量i，但它并非立刻执行。等到3个函数都返回时，它们所引用的变量i已经变成了3，因此最终结果为9。</font></p>
+
+<blockquote>
+<p>所以：返回闭包时牢记的一点就是：返回函数不要引用任何循环变量，或者后续会发生变化的变量。</p>
+</blockquote>
+
+<p>要引用的话，方法是再创建一个函数，用该函数的参数绑定循环变量当前的值，无论该循环变量后续如何更改，已绑定到函数参数的值不变：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def count():
+    fs=[]
+    for i in range(1,4):
+        def f(j):
+            def g():
+                return j*j
+            return g
+        fs.append(f(i))
+    return fs
+f1, f2, f3 = count()
+print f1(),f2(),f3()
+</code></pre>
+
+<p><img src="media/14920643245223/14920669289447.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/13</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14920539372230.html">
+                
+                  <h1>Sorted（排序）</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><strong>1.用sorted进行排序</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+num =[2,5,6,4,3,29,12]
+print sorted(num)
+
+</code></pre>
+
+<p><img src="media/14920539372230/14920542668861.jpg" alt=""/></p>
+
+<p><strong>2.默认情况下，对字符串排序，是按照ASCII的大小比较的，由于&#39;Z&#39; &lt; &#39;a&#39;，结果，大写字母Z会排在小写字母a的前面。<br/>
+现在，我们提出排序应该忽略大小写，按照字母序排序。</strong></p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def cmp_ignore_case(s1, s2):
+    u1 = s1.upper()
+    u2 = s2.upper()
+    if u1 &lt; u2:
+        return -1
+    if u1 &gt; u2:
+        return 1
+    return 0
+print sorted([&#39;bob&#39;, &#39;about&#39;, &#39;Zoo&#39;, &#39;Credit&#39;], cmp_ignore_case)
+</code></pre>
+
+<p><img src="media/14920539372230/14920543761031.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/13</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14920527647833.html">
                 
                   <h1>Filter</h1>
@@ -281,410 +480,6 @@ print (reduce(prod,m))
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14917858710123.html">
-                
-                  <h1>logistic regression(逻辑斯蒂回归)</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">逻辑斯蒂回归模型</a>
-<ul>
-<li>
-<a href="#toc_1">逻辑斯蒂分布</a>
-</li>
-<li>
-<a href="#toc_2">二项逻辑斯蒂回归模型</a>
-</li>
-<li>
-<a href="#toc_3">模型参数估计</a>
-</li>
-<li>
-<a href="#toc_4">多项了逻辑斯蒂回归</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_5">最大熵模型</a>
-<ul>
-<li>
-<a href="#toc_6">最大熵原理</a>
-<ul>
-<li>
-<a href="#toc_7">最大熵模型的定义</a>
-</li>
-<li>
-<a href="#toc_8">最大熵模型的学习</a>
-</li>
-<li>
-<a href="#toc_9">极大似然估计</a>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>简介：逻辑斯谛回归（logistic regression)是统计学习中的经典分类方法.最大熵是 概率模型学习的一个准则，将其推广到分类问题得到最大熵模型(maximum entropy model).逻辑斯谛回归模型与最大熵模型都属于对数线性模型.</p>
-
-<h2 id="toc_0">逻辑斯蒂回归模型</h2>
-
-<h3 id="toc_1">逻辑斯蒂分布</h3>
-
-<p><img src="media/14917858710123/14918919297549.jpg" alt=""/></p>
-
-<h3 id="toc_2">二项逻辑斯蒂回归模型</h3>
-
-<p>二项逻辑斯诗回归模型（binomial logistic regression model)是一种分类模型，由条件概率分布\(P(Y|X)\)表示，形式为参数化的逻辑斯谛分布.这里，随机变量X取值为实数，随机变量Y取值为1或0.我们通过监督学习的方法来估计模型参数.</p>
-
-<p><img src="media/14917858710123/14918930389977.jpg" alt=""/><br/>
-现在考査逻辑斯谛回归模型的特点.一个事件的几率（odds)是指该事件发生的概率与该事件不发生的概率的比值.如果事件发生的概率是p,那么该亊件的几率是\(\frac{1}{1-p}\) ,该事件的对数几率(log odds)或logit函数是<br/>
-<img src="media/14917858710123/14918936472837.jpg" alt=""/><br/>
-<font color = red>这就是说，在逻辑斯谛回归模型中，输出y = l的对数几率是输入x的线性函数.或者说，输出Y=1的对数几率是由输入x的线性函数表示的模型，即逻辑斯谛回归模型.</font></p>
-
-<p>换一个角度看，考虑对输入x进行分类的线性函数\(w*x\),其值域为实数域.注意，这里\(x\in R^{n+1},w \in R^{n+1}\).通过逻辑斯谛回归模型定义式(6.5)可以将线性函数\(w*x\)转换为概率：<br/>
-<img src="media/14917858710123/14918951209571.jpg" alt=""/></p>
-
-<p><strong>这时，线性函数的值越接近正无穷，概率值就越接近1；线性函数的值越接近负无穷，概率值就越接近0(如图6.1所示).这样的模型就是逻辑斯谛回归模型.</strong></p>
-
-<h3 id="toc_3">模型参数估计</h3>
-
-<p>逻辑斯谛回归模型学习时，对于给定的训练数据集\(T=\{{(x_1,y_1),(x_2,y_2)...(x_N,y_N)\}}\),其中\(x_i\in R^n,y_i \in \{{0,1\}}\)，<strong>可以应用极大似然估计法估计模型参数，从而得到逻辑斯谛回归模型.</strong><br/>
-<img src="media/14917858710123/14918969386189.jpg" alt=""/></p>
-
-<h3 id="toc_4">多项了逻辑斯蒂回归</h3>
-
-<p>上面介绍的逻辑斯谛回归模型是二项分类模型，用于二类分类.可以将其推广为多项逻辑斯缔回归模型(multi-nominal logistic regression model)，用于多类分类.假设离散型随机变量Y的取值集合是{1,2...K}，那么多项逻辑斯谛回归模型是:<br/>
-<img src="media/14917858710123/14918973306162.jpg" alt=""/><br/>
-二项逻辑斯谛回归的参数估计法也可以推广到多项逻辑斯讳回归.</p>
-
-<h1 id="toc_5">最大熵模型</h1>
-
-<p>最大熵模型（maximum entropy model)由最大熵原理推导实现.这里首先叙述一般的最大熵原理，然后讲解最大熵模型的推导，最后给出最大熵模型学习的形式。</p>
-
-<h2 id="toc_6">最大熵原理</h2>
-
-<p>最大熵原理是概率模型学习的一个准则.<font color=red>最大熵原理认为，学习概率模型时，在所有可能的概率模型（分布）中，熵最大的模型是最好的模型.通常用约束条件来确定概率模型的集合，所以，最大熵原理也可以表述为在满足约束条件的模型集合中选取熵最大的模型.</font></p>
-
-<p>假设离散随机变量X的概率分布是p(X),则其熵是：<br/>
-<img src="media/14917858710123/14919006601164.jpg" alt=""/><br/>
-直观地，<font color=red>最大熵原理认为要选择的概率模型首先必须满足已有的事实，即约束条件.在没有更多信息的情况下，那些不确定的部分都是“等可能的”.最大熵原理通过熵的最大化来表示等可能性.</font>“等可能”不容易操作，而熵则是一个可优化的数值指标.</p>
-
-<p>首先，可以通过一个简单的例子来了解一下最大熵原理.<br/>
-<img src="media/14917858710123/14919019478267.jpg" alt=""/></p>
-
-<p>图6.2提供了用最大熵原理进行概率模型选择的几何解释.概率模型集合P可由欧氏空间中的单纯形(simplex)表示，如左图的三角形(2-单纯形).一个点代表一个模型，整个单纯形代表模型集合.右图上的一条直线对应于一个约束 条件，直线的交集对应于满足所有约束条件的模型集合.一般地，这样的模型仍有无穷多个.学习的目的是在可能的模型集合中选择最优模型，而最大熵原理则给出最优模型选择的一个准则.<br/>
-<img src="media/14917858710123/14919593499530.jpg" alt=""/></p>
-
-<h3 id="toc_7">最大熵模型的定义</h3>
-
-<p>最大熵原理是统计学习的一般原理，将它应用到分类得到最大熵模型. </p>
-
-<p>假设分类模型是一个条件概率分布\(P(Y|X),X \in \mathcal{X} \subseteq R^n\)表示输入，\(Y \in \mathcal{Y}\)表示输出，\(\mathcal{X}\)和\(\mathcal{Y}\)分别是输入和输出的集合.这个模型表示的是对于给定的输入\(\mathcal{X}\)，以条作概率\(P(Y|X)\)输出Y.<br/>
-给定一个训练数据集<br/>
-\(T= {\{(x_1,y_1),(x_2,y_2),...(x_N,y_N)}\}\)<br/>
-学习的目标是用最大熵原理选择最好的分类模型。</p>
-
-<p>首先考虑模型应该满足的条件，给定训练数据集，可以确定联合分布P(X,Y)的经验分布和边缘分布P(X)的经验分布，分别以\(\tilde{P}(X,Y)和\tilde{P}(X)\)表示。这里：<br/>
-<img src="media/14917858710123/14919609290680.jpg" alt=""/><br/>
- 用特征函数\(f(x,y)描述输入x和输出y之间的某一个事实\)。其定义是：<br/>
- <img src="media/14917858710123/14919611561526.jpg" alt=""/><br/>
-特征函数f(x,y)关于经验分布\(\tilde{P}(X,Y)\)的期望值，用\(E_\tilde{P}(f)\)表示：<br/>
-<img src="media/14917858710123/14919613926643.jpg" alt=""/><br/>
-特征函数f(x,y)关于模型P(Y|X)与经验分布\(\tilde{P}(X)\)的期望值，用\(E_{P}(f)\)表示：<br/>
-<img src="media/14917858710123/14919617357953.jpg" alt=""/></p>
-
-<p>最大熵模型的定义为：<br/>
-<img src="media/14917858710123/14919625972087.jpg" alt=""/></p>
-
-<h3 id="toc_8">最大熵模型的学习</h3>
-
-<p>最大熵模型的学习过程就是求解最大熵模型的过程.最大熵模型的学习可以形式化为约束最优化问题.<br/>
-对于给定的训练数据集\(T= {\{(x_1,y_1),(x_2,y_2),...(x_N,y_N)}\}\)以及特征函数\(f_i(x,y),i=1,2,...n\),最大熵模型的学习等价于约束最优化问题：<br/>
-<img src="media/14917858710123/14919630413332.jpg" alt=""/><br/>
-求解约束最优化问题(6.14)〜(6.16)，所得出的解，就是最大熵模型学习的解.下面给出具体推导.<br/>
-这里，将约束最优化的原始问题转换为无约束最优化的对偶问题.通过求解对偶问题求解原始问题.<br/>
-<img src="media/14917858710123/14919633775267.jpg" alt=""/><br/>
-<img src="media/14917858710123/14919633957280.jpg" alt=""/></p>
-
-<p>下面举例来说明最大熵模型的计算：</p>
-
-<p><strong>例：假设随机变量X有5个取值{A,B,C,D,E}，要估计各个值的概率P(A),P(B),P(C),P(D),P(E).</strong></p>
-
-<p><img src="media/14917858710123/14919642672585.jpg" alt=""/><br/>
-<img src="media/14917858710123/14919642856866.jpg" alt=""/><br/>
-<img src="media/14917858710123/14919643007948.jpg" alt=""/></p>
-
-<h3 id="toc_9">极大似然估计</h3>
-
-<p>从以上最大熵模型学习中可以看出，最大熵模型是由式(6.22)、式(6.23)表示的 条件概率分布.下面证明对偶函数的极大化等价于最大嫡模型的极大似然估计.</p>
-
-<p>己知训练数据的经验概率分布\(\tilde{P}(X,Y)\),条件概率分布\(P(Y|X)\)的对数似然 函数表示为:<br/>
-<img src="media/14917858710123/14919659054476.jpg" alt=""/><br/>
-当提哦啊煎概率分布P(y|x)是最大熵模型(6.22)和(6.23)时,对数似然函数\(L_ \tilde{p}(P_w)\)为：<br/>
-<img src="media/14917858710123/14919660761710.jpg" alt=""/><br/>
-比较算式(6.26)和式(6.27),可得：<br/>
-<img src="media/14917858710123/14920442862315.jpg" alt=""/></p>
-
-<p>既然对偶函数\(\psi(w)\)等价于对数似然函数\(L_{\tilde p}(P_w)\) ,于是证明了最大熵模型学习中的对偶函数极大化等价于最大熵模型的极大似然估计这一事实.<br/>
-这样，最大熵模型的学习问题就转换为具体求解对数似然函数极大化或对偶函数极大化的问题.</p>
-
-<p>可以将最大熵模型写成更一般的形式.<br/>
-<img src="media/14917858710123/14920444597468.jpg" alt=""/><br/>
-最大熵模型与逻辑斯谛回归模型有类似的形式，它们又称为对数线性模型(log linear model).模型学习就是在给定的训练数据条件下对模型进行极大似然估计或正则化的极大似然估计.</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/10</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14908575557810.html">
-                
-                  <h1>决策树生成--CART算法</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">CART算法</a>
-<ul>
-<li>
-<a href="#toc_1">CART生成</a>
-<ul>
-<li>
-<a href="#toc_2">1.回归树的生成</a>
-</li>
-<li>
-<a href="#toc_3">2.分类树的生成</a>
-</li>
-<li>
-<a href="#toc_4">CART剪枝</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<h2 id="toc_0">CART算法</h2>
-
-<p>分类与回归树(classification and regression tree, CART)模型由 Breiman等人在1984年提出，是应用广泛的决策树学习方法.CART同样由特征选择、树 的生成及剪枝组成，<mark>既可以用于分类也可以用于回归.</mark>以下将用于分类与回归的树统称为决策树.</p>
-
-<p>CART是在给定输入随机变量X的条件下输出随机变量Y的条件概率分布的学习方法.CART假设决策树是二叉树，内部结点特征的取值为“是”和“否”，左分支是取值为“是”的分支，右分支是取值为“否”的分支.这样的决策树等价于递归地二分每个特征，将输入空间即特征空间划分为有限个单元，并在这些单元上确定预测的概率分布，也就是在输入给定的条件下输出的条件概率分布.</p>
-
-<p><strong>CART算法由以下两步组成：</strong></p>
-
-<p>1.决策树生成：基于训练数据集生成决策树，生成的决策树要尽量大：<br/>
-2.决策树剪枝：用验证数据集对己生成的树进行剪枝并选择最优子树，这时用损失函数最小作为剪枝的标准.</p>
-
-<h3 id="toc_1">CART生成</h3>
-
-<p>决策树的生成就是递归地构建二叉决策树的过程.对回归树用平方误差最小化准则，对分类树用基尼指数(Gini index)最小化准则，进行特征选择，生成二叉树.</p>
-
-<h4 id="toc_2">1.回归树的生成</h4>
-
-<p>假设X与Y分别为输入和输出变量，并且Y是连续变量，给定训练数据集:<br/>
-    \(D={(x_1,y_1),(x_2,y_2),...(x_N,y_N)}\)<br/>
-考虑如何生成回归树。</p>
-
-<p>一个回归树对应着输入空间（即特征空间）的一个划分以及在划分的单元上 的输出值.假设己将输入空间划分为M个单元\(R_1,R_2,R_3...R_M\),并且在每个单元\(R_M\)上 有一个固定的输出值\(c_m\)，于是回归树模型可表示为:<br/>
-<img src="media/14908575557810/14909500378632.jpg" alt=""/></p>
-
-<p>当输入空间的划分确定时，可以用平方误差\(\sum_{x_i\in R}(y_i-f(x_i))^2\)来表示回归树对于训练数据的预测误差，用平方误差最小的准则求解每个单元上的最优输出值.易知，单元\(R_m\)上的\(c_m\)的最优值\(\hat c_m\)是\(R_m\)上的所有输入实例\(x_i\)对应的输出\(y_i\)的均值，即:<br/>
-<img src="media/14908575557810/14909504677321.jpg" alt=""/></p>
-
-<p>问题是怎样对输入空间进行划分,这里采用启发式的方法，选择第j个变量\(x^{(j)}\)和它取的值s，作为切分变量（splitting variable)和切分点（splitting point),并定义两个区域：<br/>
-<img src="media/14908575557810/14909505605933.jpg" alt=""/><br/>
-然后寻找最优切分变量j和最优切分点s，最优地，求解：<br/>
-<img src="media/14908575557810/14909506372664.jpg" alt=""/><br/>
-对固定输入变量j可以找到最优切分点s:<br/>
-<img src="media/14908575557810/14909506657025.jpg" alt=""/><br/>
-便利所有输入变量，找到最优的切分变量j，构成一个对\((j,s)\).依此将输入空间划分为两个区域。接着，对每个区域重复上述划分过程，直到满足停止条件为止.这样就生成一棵回归树。这样的回归树通常称为最小二乘回归树(least squares regression tree)，现将算法叙述如下：</p>
-
-<p>最小二乘回归树生成算法：<br/>
-<img src="media/14908575557810/14909510077124.jpg" alt=""/></p>
-
-<h4 id="toc_3">2.分类树的生成</h4>
-
-<p>分类树用基尼指数选择最有特征，同时决定该特征的最优二值切分点。</p>
-
-<p><strong>基尼指数：</strong><br/>
-<img src="media/14908575557810/14913540871077.jpg" alt=""/><br/>
-如果样本集合D根据特征A是否取某一可能值a被分割成\(D_1和D_2\)两部分，即：<br/>
-<img src="media/14908575557810/14913550101283.jpg" alt=""/></p>
-
-<p>基尼指数Gini(D)表示集合D的不确定性，基尼指数Gini(D,A)表示经A=a分割后集合D的不确定性。基尼指数值越大，样本集合的不确定性也就越大，这一点与熵相似。</p>
-
-<p>图5.7显示二类分类问题中基尼指数Gini(p)、熵（单位比特）之半和分类误差率的关系.横坐标表示概率P，纵坐标表示损失.可以看出基尼指数和 熵之半的曲线很接近，都可以近似地代表分类误差率.<br/>
-<img src="media/14908575557810/14913559817897.jpg" alt=""/></p>
-
-<p><strong>CART生成算法：</strong><br/>
-<img src="media/14908575557810/14913560936133.jpg" alt=""/><br/>
-<img src="media/14908575557810/14913561059742.jpg" alt=""/></p>
-
-<p><strong>下面继续用例题来说明该算法：</strong><br/>
-<img src="media/14898241272608/14908402191601.jpg" alt=""/><br/>
-根据上表所给的训练数据集，应用CART算法生成决策树。</p>
-
-<p><img src="media/14908575557810/14913582940784.jpg" alt=""/></p>
-
-<h4 id="toc_4">CART剪枝</h4>
-
-<p>CART剪枝算法从“完全生长”的决策树的底端剪去一些子树，使决策树变小(模型变简单)，从而能够对未知数据有更准确的预测.CART剪枝算法由两步组成：首先从生成算法产生的决策树\(T_0\)底端开始不断剪枝，直到\(T_0\)的根结点，形成一个子树序列\( {T_0,T_1,...,T_n}\);然后通过交叉验证法在独立的验证数据集上对子树序列进行测试，从中选择最优子树.</p>
-
-<p>1.<strong>剪枝</strong>，形成一个子树序列<br/>
-在剪枝过程中，计算子树的损失函数：<br/>
-<img src="media/14908575557810/14913604606599.jpg" alt=""/><br/>
-其中，T为任意子树，C(T)为对训练数据的预测误差(如基尼指数)，丨T丨为子树的叶结点个数，\(α \geq0\)为参数，\(C_{\alpha}(T)\)为参数是\(\alpha\)时的子树T的整体损失.参数\(\alpha\)权衡训练数据的拟合程度与模型的复杂度.</p>
-
-<p>对固定的\(\alpha\), —定存在使损失函数\(C_{\alpha}(T)\)最小的子树，将其表示为\(T_{\alpha}\)。\(T_{\alpha}\)在损失函数\(C_{\alpha}(T)\)最小的意义下是最优的.容易验证这样的最优子树是唯一的.当\(\alpha\)大的时候，最优子树\(T_{\alpha}\)偏小；当\(\alpha\)小的时候，最优子树\(T_{\alpha}\)偏大.极端情况，当\(\alpha\) = 0时，整体树是最优的.当\(\alpha \rightarrow \infty \)时，根结点组成的单结点树是最优的.</p>
-
-<p>Breiman等人证明：可以用递归的方法对树进行剪枝.将\(\alpha\)从小增大，\(0=\alpha_0&lt;\alpha_1&lt;...&lt;\alpha_n&lt;\infty,\)，产生一系列的区间\([\alpha_i,\alpha_{i+1}),i=0,1,...n;\)，剪枝得到的子树 序列对应着区间\(\alpha \in [\alpha_i,\alpha_{i+1}),i=0,1,...n;\)的最优子树序列\( {T_0,T_1,...,T_n}\),序列中的子树是嵌套的.</p>
-
-<p><img src="media/14908575557810/14913621104324.jpg" alt=""/><br/>
-<img src="media/14908575557810/14913625337737.jpg" alt=""/></p>
-
-<p><strong>CART剪枝算法：</strong><br/>
-<img src="media/14908575557810/14913629643758.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/3/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14898241272608.html">
-                
-                  <h1>决策树的生成</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">ID3算法</a>
-</li>
-<li>
-<a href="#toc_1">C4.5d的生成算法</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_2">决策树的剪枝</a>
-
-
-<p>这次将学习决策树的生成算法，首先了解ID3的生成算法，然后再学习C4.5的生成算法，这些都是决策树学习的经典算法。</p>
-
-<h2 id="toc_0">ID3算法</h2>
-
-<p>ID3算法的核心是在决策树各个结点上应用信息增益准则选择特征，递归地构建决策树.具体方法是：从根结点（root node)开始，对结点计算所有可能的特征的信息增益，选择信息增益最大的特征作为结点的特征，由该特征的不同取值建立子结点：再对子结点递归地调用以上方法，构建决策树；直到所有特征的 信息增益均很小或没有特征可以选择为止.最后得到一个决策树.ID3相当于用极大似然法进行概率模型的选择.</p>
-
-<p><strong>该算法的具体步骤为：</strong><br/>
-<img src="media/14898241272608/14908400085381.jpg" alt=""/><br/>
-<img src="media/14898241272608/14908400481942.jpg" alt=""/></p>
-
-<p><strong>这里我们继续使用之前用过的表来进行计算：</strong><br/>
-<img src="media/14898241272608/14908402191601.jpg" alt=""/><br/>
-利用ID3算法建立决策树：<br/>
-<img src="media/14898241272608/14908417653584.jpg" alt=""/><br/>
-<mark>但是ID3只有树的生成，容易发生过拟合现象。</mark></p>
-
-<h2 id="toc_1">C4.5d的生成算法</h2>
-
-<p>C4.5算法与ID3算法相似，C4.5算法对ID3算法进行了改进.C4.5在生成的过程中，用<mark>信息增益比</mark>来选择特征(ID3为信息增益).<br/>
-<img src="media/14898241272608/14908421490687.jpg" alt=""/></p>
-
-<h1 id="toc_2">决策树的剪枝</h1>
-
-<p>决策树生成算法递归地产生决策树，直到不能继续下去为止.这样产生的树往往对训练数据的分类很准确，但对未知的测试数据的分类却没有那么准确，即出现过拟合现象.<mark>过拟合的原因在于学习时过多地考虑如何提高对训练数据的正确分类，从而构建出过于复杂的决策树</mark>.解决这个问题的办法是考虑决策树的复 杂度，对已生成的决策树进行简化.</p>
-
-<p>在决策树学习中将已生成的树进行简化的过程称为剪枝（pruning).具体地，剪枝从已生成的树上裁掉一些子树或叶结点，并将其根结点或父结点作为新的叶结点，从而简化分类树模型.</p>
-
-<p>这里学习一种简单的决策树学习的剪枝算法。</p>
-
-<p>决策树的剪枝往往通过极小化决策树整体的损失函数(loss fimction)或代价函数(costfimction)来实现.设树T的叶结点个数为\(|T|\)，t是树T的叶结点，该叶结点有\(N_{t}\)个样本点，其中k类的样本点有\(N_{tk}个，k=1,2,3...,K,H_i(T)\)为叶结点t上的经验熵，\(a\geq0\)为参数，则决策树学习的损失函数可以定义为:<br/>
-<img src="media/14898241272608/14908428498530.jpg" alt=""/><br/>
-式(5.14)中，c(t)表示模型对训练数据的预测误差，即模型与训练数据的拟合程度，|T|表示模型复杂度，参数\(a\geq0\)控制两者之间的影响.较大的\(\alpha\)促使选择较简单的模型(树)，较小的\(\alpha\)促使选择较复杂的模型(树).\(\alpha = 0\)意味着只考虑 模型与训练数据的拟合程度，不考虑模型的复杂度.</p>
-
-<p>剪枝，就是当\(\alpha\)确定时，选择损失函数最小的模型，即损失函数最小的子树.当\(\alpha\)值确定时，子树越大，往往与训练数据的拟合越好，但是模型的复杂度就越高；相反，子树越小，模型的复杂度就越低，但是往往与训练数据的拟合不好.损失函数正好表示了对两者的平衡.</p>
-
-<p>可以看出，决策树生成只考虑了通过提高信息增益（或信息增益比）对训练数据进行更好的拟合.而决策树剪枝通过优化损失函数还考虑了减小模型复杂度，决策树生成学习局部的模型，而决策树剪枝学习整体的模型.</p>
-
-<p>式(5.11)或式(5.14)定义的损失函数的极小化等价于正则化的极大似然估计.所以，利用损失函数最小原则进行剪枝就是用正则化的极大似然估计进行模型选择.</p>
-
-<p>下图是决策树的剪枝过程示意图。<br/>
-<img src="media/14898241272608/14908438468056.jpg" alt=""/></p>
-
-<p>剪枝算法如下：<br/>
-<img src="media/14898241272608/14908438815566.jpg" alt=""/><br/>
-<img src="media/14898241272608/14908438965218.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/3/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -768,6 +563,24 @@ print (reduce(prod,m))
 	      
 		      
 			      <li class="post">
+			        <a href="15082871830637.html">使用Masonry框架来构造iOS布局</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15082052235459.html">ReactiveCocoa初步了解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15077122789332.html">多用块枚举，与快速遍历少用for循环</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
 			      </li>
 		     
@@ -775,24 +588,6 @@ print (reduce(prod,m))
 		      
 			      <li class="post">
 			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15055441842255.html">第四十三条 掌握GCD和操作队列（NSOperation）的使用时机</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15050942669581.html">第四十二条 多用GCD，少用performSelector系列方法</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15049238737460.html">第四十一条 多用派发队列，少用同步锁</a>
 			      </li>
 		     
 		  
