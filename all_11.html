@@ -80,8 +80,6 @@
         
             <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
-        
             <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
         
             <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
@@ -91,6 +89,8 @@
             <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
         
             <li><a href="iOS.html">iOS</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
          
 
       </ul>
@@ -112,6 +112,64 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="14956131169957.html">
+                
+                  <h1>在ios中判断一个viewcontroller是都已经正常present</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>之前present一个视图的时候,从来没有研究过如何判断一个视图是都已经正常弹出.比如下面这个方法是否正常执行:</p>
+
+<pre><code class="language-oc">[documentInteractionController presentPreviewAnimated:YES]
+</code></pre>
+
+<p>然而今天有一个需求需要知道上述方法是否正常执行,并弹出视图.</p>
+
+<p>之后通过阅读该方法的源码后发现:</p>
+
+<pre><code class="language-oc">// Bypasses the menu and opens the full screen preview window for the item at URL.  Returns NO if the item could not be previewed.
+// Note that you must implement the delegate method documentInteractionControllerViewControllerForPreview: to preview the document.
+- (BOOL)presentPreviewAnimated:(BOOL)animated;
+</code></pre>
+
+<p>该方法返回一个BOOL类型的值:当没有正常执行该方法时,会返回NO.正常返回YES.</p>
+
+<p>类似的还有如下方法:</p>
+
+<pre><code class="language-oc">- (BOOL)isBeingPresented NS_AVAILABLE_IOS(5_0);
+- (BOOL)isBeingDismissed NS_AVAILABLE_IOS(5_0);
+
+- (BOOL)isMovingToParentViewController NS_AVAILABLE_IOS(5_0);
+- (BOOL)isMovingFromParentViewController NS_AVAILABLE_IOS(5_0);
+</code></pre>
+
+<p>来判断viewController是消失还是出现在当前页面中.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/24</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="14955929300450.html">
                 
@@ -2612,133 +2670,6 @@ print safe_b64decode(&#39;YWJjZA&#39;)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14948283904445.html">
-                
-                  <h1>在RN中利用原生Document Interaction Controller来预览和打开文档</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在react-native开发中有一个功能需求为，打开之前已经下载到Documents中的文件。一开始本想用webview来加载文件。后来发现有<code>UIDocumentInteractionController</code>这个api来更好的完成这个功能。</p>
-
-<p>首先在RN引用的类中加入<code>UIDocumentInteractionControllerDelegate</code>我们要用到这个来呈现预览视图：</p>
-
-<p>NativeUtil.h</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-#import &quot;RCTBridgeModule.h&quot;
-#import &quot;UIView+React.h&quot;       //要引入这个头文件，在rn中创建和加载原声视图
-
-
-@interface NativeUtil : NSObject &lt;RCTBridgeModule,UIDocumentInteractionControllerDelegate&gt;
-
-@end
-</code></pre>
-
-<p>在NativeUtil.m中实现该委托。定义一个暴露给RN的方法，在js中调用：</p>
-
-<pre><code class="language-objc">RCT_EXPORT_METHOD(ShowFileChooser: (RCTResponseSenderBlock)callback){
-  
-    NSString *filePath = @&quot;ceshi007&quot;;           callback(@[[NSNull null],filePath]);    //测试callback，从native向rn传值。
-
-
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);           //获取应用本沙盒内的目录。
-    NSString *documentpath = paths[0];      //获取document的路径
-    NSString *fileName = [documentpath stringByAppendingPathComponent:@&quot;Screenshot_2016-12-15-21-29-07-50.png&quot;];            //指定上述图片的路径。
-  NSURL *fileURL = [NSURL fileURLWithPath:fileName];
-  dispatch_async(dispatch_get_main_queue(), ^{              //运行主线程来加载界面，并初始化UIDocumentInteractionController
-    UIDocumentInteractionController *documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:fileURL];
-    documentInteractionController.delegate =self ;
-    [documentInteractionController presentPreviewAnimated:YES];             //present出来文件的预览界面。
-  });
-  
-}
-</code></pre>
-
-<p>之后定义<code>(UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller</code>方法，要加载出来预览的界面，上述方法必须实现，且返回一个当前的页面的ViewController。用于作为预览视图的父ViewController来弹出modal。</p>
-
-<pre><code class="language-objc">- (UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller{
-  UIViewController *newVC =[self getPresentedViewController];  //获取当前屏幕中present出来的viewcontroller。
-   return newVC;
-};
-</code></pre>
-
-<p>这里我们是在一个非视图类创建并在加载一个视图，所以我们要先获取到当前界面的<code>ViewController</code>，将被展示的<code>view</code>加到当前<code>view</code>的子视图，或用当前view <code>presentViewController</code>，或<code>pushViewContrller</code>。这里我从网上找到了两个方法：</p>
-
-<pre><code class="language-objc">//获取当前屏幕显示的viewcontroller
-- (UIViewController *)getCurrentVC  
-{  
-    UIViewController *result = nil;  
-      
-    UIWindow * window = [[UIApplication sharedApplication] keyWindow];  
-    if (window.windowLevel != UIWindowLevelNormal)  
-    {  
-        NSArray *windows = [[UIApplication sharedApplication] windows];  
-        for(UIWindow * tmpWin in windows)  
-        {  
-            if (tmpWin.windowLevel == UIWindowLevelNormal)  
-            {  
-                window = tmpWin;  
-                break;  
-            }  
-        }  
-    }  
-      
-    UIView *frontView = [[window subviews] objectAtIndex:0];  
-    id nextResponder = [frontView nextResponder];  
-      
-    if ([nextResponder isKindOfClass:[UIViewController class]])  
-        result = nextResponder;  
-    else  
-        result = window.rootViewController;  
-      
-    return result;  
-} 
-</code></pre>
-
-<pre><code class="language-objc">//获取当前屏幕中present出来的viewcontroller
-- (UIViewController *)getPresentedViewController  
-{  
-    UIViewController *appRootVC = [UIApplication sharedApplication].keyWindow.rootViewController;  
-    UIViewController *topVC = appRootVC;  
-    if (topVC.presentedViewController) {  
-        topVC = topVC.presentedViewController;  
-    }  
-      
-    return topVC;  
-}
-</code></pre>
-
-<blockquote>
-<p>在RN中，使用modal组件之后，弹出的modal视图的viewcontroller相当于present出来的viewcontroller.</p>
-</blockquote>
-
-<p>之后使用<code>[self getPresentedViewController]</code>就可以获得<code>viewcontroller</code>来加载视图。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/15</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -2795,8 +2726,6 @@ print safe_b64decode(&#39;YWJjZA&#39;)
         
             <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
-        
             <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
         
             <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
@@ -2806,6 +2735,8 @@ print safe_b64decode(&#39;YWJjZA&#39;)
             <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
         
             <a href="iOS.html"><strong>iOS</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
          
         </p>
 
@@ -2820,6 +2751,12 @@ print safe_b64decode(&#39;YWJjZA&#39;)
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15083737124086.html">使用RAC的基本操作</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15082871830637.html">使用Masonry框架来构造iOS布局</a>
@@ -2841,12 +2778,6 @@ print safe_b64decode(&#39;YWJjZA&#39;)
 		      
 			      <li class="post">
 			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
 			      </li>
 		     
 		  

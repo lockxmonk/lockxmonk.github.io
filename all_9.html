@@ -80,8 +80,6 @@
         
             <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
-        
             <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
         
             <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
@@ -91,6 +89,8 @@
             <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
         
             <li><a href="iOS.html">iOS</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
          
 
       </ul>
@@ -112,6 +112,572 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="14974936829967.html">
+                
+                  <h1>Caffe中Layer的学习</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Layer是Caffe的基本计算单元，至少有一个输入Blob (Bottom Blob)和一个输出Blob (Top Blob),部分Layer带有权值(Weight)和偏置项（Bias),<strong>有两个运算方向</strong>：前向传播（Forward)和反向传播（Backward)，其中前向传播计算会对输入Blob进行某种处理（存权值和偏置项的Layer会利用这些对输入进行处理）,得到输出Blob;而反向传播计算则对输出Blob的diff进行某种处理，得到输入Blob的diff(有权值和偏置项的Layer可能也会计算权值Blob、偏置项Blob的diff)。</p>
+
+<h2 id="toc_0">layer中的数据结构描述</h2>
+
+<p>我们可以搜索caffe中关于<code>message LayerParameter</code>的类,来了解.<br/>
+如果你一开始找不到这个类在那个文件描述,可以用下面这个命令去搜索:</p>
+
+<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;message LayerParameter&quot; *
+</code></pre>
+
+<p><img src="media/14974936829967/14974948024735.jpg" alt=""/><br/>
+得到它的路径.</p>
+
+<p>我们发现是在<code>src/caffe/proto/caffe.proto</code>这个路径中.因为caffe使用<code>google_protobuf</code>数据类型来声明layer.关于<code>google_protobuf</code>的相关内容,之后可以研究一下.</p>
+
+<p>这里我们看一下源码:</p>
+
+<pre><code class="language-protobuf">//注意：如果你增加了1个新的LayerParameter域，一定记得更新一个可用ID
+// LayerParameter 下一个layer-specific ID: 147 (last added: recurrent_param)
+message LayerParameter {
+  optional string name = 1; // the layer name
+  optional string type = 2; // the layer type
+  repeated string bottom = 3; // 输入Blob(bottom Blob)的名称
+  repeated string top = 4; // 输出Blob(Top Blob)的名称
+
+  // 当前计算阶段（TRAIN 或 TEST)
+    optional Phase phase = 10;
+
+  // 为每个Top Blob分配对损失函数的权重，毎个Layer都有默认值，要么为0,表示不参与目标函数计算：要么为1，表示参与损失函数计算
+  repeated float loss_weight = 5;
+
+  // 指定训练参数（例如相对全局学习常数的缩放因子，以及用于权值共享 的名称或其他设置)
+  repeated ParamSpec param = 6;
+
+  // 承载了该层数值参数的Blob
+  repeated BlobProto blobs = 7;
+  //是否对Bottom Blob进行反向传播过程。该字段的维度应与 Bottom Blob个数一致
+  // Specifies whether to backpropagate to each bottom. If unspecified,
+  // Caffe will automatically infer whether each input needs backpropagation
+  // to compute parameter gradients. If set to true for some inputs,
+  // backpropagation to those inputs is forced; if set false for some inputs,
+  // backpropagation to those inputs is skipped.
+  //
+  // The size must be either 0 or equal to the number of bottoms.
+  repeated bool propagate_down = 11;
+
+ //控制某个层在某个时刻是否包含在网络中，基于当前NetState。你可以为include或exclude(不要同时）指定非零值。如果没有任何规则，那么该层一直包含在网络中：如果当前NetState满足了任何1个指定规则，耶么该层会被包含或排斥
+  // Rules controlling whether and when a layer is included in the network,
+  // based on the current NetState.  You may specify a non-zero number of rules
+  // to include OR exclude, but not both.  If no include or exclude rules are
+  // specified, the layer is always included.  If the current NetState meets
+  // ANY (i.e., one or more) of the specified rules, the layer is
+  // included/excluded.
+  repeated NetStateRule include = 8;
+  repeated NetStateRule exclude = 9;
+
+  // Parameters for data pre-processing.数据预处理参数
+  optional TransformationParameter transform_param = 100;
+
+  // Parameters shared by loss layers.所有损失层共享的参数
+  optional LossParameter loss_param = 101;
+  
+  
+  //特定类型层的参数。注意一些层实现时可能有多于一种的计算引擎，这些层包括一个引擎类型和引擎参数来选择实现.默认引擎是在编译阶段由引擎开关设置的
+  // Layer type-specific parameters.
+  //
+  // Note: certain layers may have more than one computational engine
+  // for their implementation. These layers include an Engine type and
+  // engine parameter for selecting the implementation.
+  // The default for the engine is set by the ENGINE switch at compile-time.
+  optional AccuracyParameter accuracy_param = 102;
+  optional ArgMaxParameter argmax_param = 103;
+  optional BatchNormParameter batch_norm_param = 139;
+  optional BiasParameter bias_param = 141;
+  optional ConcatParameter concat_param = 104;
+  optional ContrastiveLossParameter contrastive_loss_param = 105;
+  optional ConvolutionParameter convolution_param = 106;
+  optional CropParameter crop_param = 144;
+  optional DataParameter data_param = 107;
+  optional DropoutParameter dropout_param = 108;
+  optional DummyDataParameter dummy_data_param = 109;
+  optional EltwiseParameter eltwise_param = 110;
+  optional ELUParameter elu_param = 140;
+  optional EmbedParameter embed_param = 137;
+  optional ExpParameter exp_param = 111;
+  optional FlattenParameter flatten_param = 135;
+  optional HDF5DataParameter hdf5_data_param = 112;
+  optional HDF5OutputParameter hdf5_output_param = 113;
+  optional HingeLossParameter hinge_loss_param = 114;
+  optional ImageDataParameter image_data_param = 115;
+  optional InfogainLossParameter infogain_loss_param = 116;
+  optional InnerProductParameter inner_product_param = 117;
+  optional InputParameter input_param = 143;
+  optional LogParameter log_param = 134;
+  optional LRNParameter lrn_param = 118;
+  optional MemoryDataParameter memory_data_param = 119;
+  optional MVNParameter mvn_param = 120;
+  optional ParameterParameter parameter_param = 145;
+  optional PoolingParameter pooling_param = 121;
+  optional PowerParameter power_param = 122;
+  optional PReLUParameter prelu_param = 131;
+  optional PythonParameter python_param = 130;
+  optional RecurrentParameter recurrent_param = 146;
+  optional ReductionParameter reduction_param = 136;
+  optional ReLUParameter relu_param = 123;
+  optional ReshapeParameter reshape_param = 133;
+  optional ScaleParameter scale_param = 142;
+  optional SigmoidParameter sigmoid_param = 124;
+  optional SoftmaxParameter softmax_param = 125;
+  optional SPPParameter spp_param = 132;
+  optional SliceParameter slice_param = 126;
+  optional TanHParameter tanh_param = 127;
+  optional ThresholdParameter threshold_param = 128;
+  optional TileParameter tile_param = 138;
+  optional WindowDataParameter window_data_param = 129;
+}
+
+</code></pre>
+
+<h2 id="toc_1">Layer是怎么炼成的</h2>
+
+<p>Layer头文件位于<code>include/caffe/layer.hpp</code>中，我们来解析一下: </p>
+
+<pre><code class="language-c++">#ifndef CAFFE_LAYER_H_
+#define CAFFE_LAYER_H_
+
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+#include &quot;caffe/blob.hpp&quot;
+#include &quot;caffe/common.hpp&quot;
+#include &quot;caffe/layer_factory.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
+#include &quot;caffe/util/math_functions.hpp&quot;
+
+/**
+ Forward declare boost::thread instead of including boost/thread.hpp
+ to avoid a boost/NVCC issues (#1009, #1010) on OSX.
+ */
+namespace boost { class mutex; }
+
+namespace caffe {
+
+/**
+ * @brief An interface for the units of computation which can be composed into a
+ *        Net.
+ *
+ * Layer%s must implement a Forward function, in which they take their input
+ * (bottom) Blob%s (if any) and compute their output Blob%s (if any).
+ * They may also implement a Backward function, in which they compute the error
+ * gradients with respect to their input Blob%s, given the error gradients with
+ * their output Blob%s.
+ */
+template &lt;typename Dtype&gt;
+class Layer {
+ public:
+  /**
+   * You should not implement your own constructor. Any set up code should go
+   * to SetUp(), where the dimensions of the bottom blobs are provided to the
+   * layer.
+   */
+   //显式构造函数，从LayerParameter对象中加载配置
+  explicit Layer(const LayerParameter&amp; param)
+    : layer_param_(param) {
+      // Set phase(训练/预测) and copy blobs (if there are any).
+      phase_ = param.phase();
+      if (layer_param_.blobs_size() &gt; 0) {
+        //按 layer_param_设置本身Blob对象个数，并依次将每个Blob对象尺寸调整为与layer_param_中的Blob尺寸一致
+        blobs_.resize(layer_param_.blobs_size());
+        for (int i = 0; i &lt; layer_param_.blobs_size(); ++i) {
+          blobs_[i].reset(new Blob&lt;Dtype&gt;());
+          blobs_[i]-&gt;FromProto(layer_param_.blobs(i));
+        }
+      }
+    }
+    //析构函数
+  virtual ~Layer() {}
+
+  /**
+   * @brief Implements common layer setup functionality.
+   *
+   * @param bottom the preshaped input blobs
+   * @param top
+   *     the allocated but unshaped output blobs, to be shaped by Reshape
+   *
+   * Checks that the number of bottom and top blobs is correct.
+   * Calls LayerSetUp to do special layer setup for individual layer types,
+   * followed by Reshape to set up sizes of top blobs and internal buffers.
+   * Sets up the loss weight multiplier blobs for any non-zero loss weights.
+   * This method may not be overridden.
+   */
+   
+   //配置函数,实现常用层配置接口，不可被覆盖
+  void SetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    CheckBlobCounts(bottom, top);   //检查Blob
+    LayerSetUp(bottom, top);        //  与层类型相关的配置过程
+    Reshape(bottom, top);       //对Top Blob变形
+    SetLossWeights(top);        //设置损失权值因子Blob
+  }
+
+  /**
+   * @brief Does layer-specific setup: your layer should implement this function
+   *        as well as Reshape.
+   *
+   * @param bottom
+   *     the preshaped input blobs, whose data fields store the input data for
+   *     this layer
+   * @param top
+   *     the allocated but unshaped output blobs
+   *
+   * This method should do one-time layer specific setup. This includes reading
+   * and processing relevent parameters from the &lt;code&gt;layer_param_&lt;/code&gt;.
+   * Setting up the shapes of top blobs and internal buffers should be done in
+   * &lt;code&gt;Reshape&lt;/code&gt;, which will be called before the forward pass to
+   * adjust the top blob sizes.
+   */
+   
+   //层配置（虚）函数，做特定类型层相关的配置，由该类型层自己实现
+  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {}
+   
+   //变形（纯虚）函数，修改Top Blob以及内部Blob缓冲区的形状
+  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) = 0;
+
+ 
+   //前向传播函数,给定Bottom Blob,计算Top Blob和loss,返回值为当前层loss
+   //该函数会调用相应设裕包装闲数，如Forward_cpu或Forward_gpu来实现真正的计算过程。如果该层有任意非零loss_weights参数，那么包装函数会计算并返回loss
+   //派生类应该实现Forward_cpu和Forward_gpu (可选〉
+  inline Dtype Forward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+
+  //反向传播函数，给定Top Blob误差梯度，汁算Bottom Blob误差梯度
+  //参数说明:
+  // top-Top Blob，其diff域包含来自上一层的误差梯度
+  // propagate_down -- 多路幵关，与Bottom Blob矢量维度相问，每个值表示是否将误差梯度传递到对应的 Bottom Blob
+  // bottom—Bottom Blob，其diff域需要由该函数计算得到
+  // 该函数会调用相应设备包装函数，如Backward_cpu或Backward_gpu来实现真正的计算过程，由派生类负责实现
+  inline void Backward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
+
+  //返回Layer内部可训练的权值、偏置项Blob向量
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt;&amp; blobs() {
+    return blobs_;
+  }
+
+  //返回Layer初始化参数（由ProtoBuffer提供)
+  const LayerParameter&amp; layer_param() const { return layer_param_; }
+
+  //将Layer初始化参数写入ProtoBuffer缓冲区
+  virtual void ToProto(LayerParameter* param, bool write_diff = false);
+
+  //返回与某个Top Blob相关的标量loss值
+  inline Dtype loss(const int top_index) const {
+    return (loss_.size() &gt; top_index) ? loss_[top_index] : Dtype(0);
+  }
+
+  //设置与某个Top Blob相关的标量loss值
+  inline void set_loss(const int top_index, const Dtype value) {
+    if (loss_.size() &lt;= top_index) {
+      loss_.resize(top_index + 1, Dtype(0));
+    }
+    loss_[top_index] = value;
+  }
+
+  //返回层类型字符串,便于识別,由派生类负责实现
+  virtual inline const char* type() const { return &quot;&quot;; }
+
+ //返回该Layer需要的输入Blob数目.-1表示不关心。由派生类负责实现
+  virtual inline int ExactNumBottomBlobs() const { return -1; }
+
+  virtual inline int MinBottomBlobs() const { return -1; }
+  
+  virtual inline int MaxBottomBlobs() const { return -1; }
+  //返回该Layer需要的输出Blob数目.-1表示不关心。由派生类负责实现
+  virtual inline int ExactNumTopBlobs() const { return -1; }
+ 
+  virtual inline int MinTopBlobs() const { return -1; }
+  
+  virtual inline int MaxTopBlobs() const { return -1; }
+  
+  //返回该Layer是否有相同的输入/输出Blob，由派生类负责实现
+  virtual inline bool EqualNumBottomTopBlobs() const { return false; }
+
+  //返回是否允许匿名Top Blob,即由该Layer自动创建。若为真，在Net::Init()函数中会创建足够多的匿名Top Blob来满足该 Layer ExactNumTopBlobs()、MinTopBlobs()需求
+  virtual inline bool AutoTopBlobs() const { return false; }
+
+  //返回某些Bottom Blob足否允许强制反向传播，如果AllowForceBackward(i) === false,将会忽略 force_backward 设定
+  virtual inline bool AllowForceBackward(const int bottom_index) const {
+    return true;
+  }
+
+  //指定该Layer是否计算相对权值或偏置项的梯度，具体相对谁由param_id指定
+  inline bool param_propagate_down(const int param_id) {
+    return (param_propagate_down_.size() &gt; param_id) ?
+        param_propagate_down_[param_id] : false;
+  }
+  
+  //设置该Layer是否计算相对权值或偏置项的梯度，具体相对谁由param_id指定
+  inline void set_param_propagate_down(const int param_id, const bool value) {
+    if (param_propagate_down_.size() &lt;= param_id) {
+      param_propagate_down_.resize(param_id + 1, true);
+    }
+    param_propagate_down_[param_id] = value;
+  }
+
+
+ protected:
+  /** The protobuf that stores the layer parameters */
+  LayerParameter layer_param_;
+  /** 当前所处阶段: TRAIN or TEST */
+  Phase phase_;
+  /** The vector that stores the learnable parameters as a set of blobs. */
+  //Layer 内部权值或偏置项，以 Blob 方式组织
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt; blobs_;
+  /** Vector indicating whether to compute the diff of each param blob. */
+  //标志位，是否计算对应参数的误差梯度
+  vector&lt;bool&gt; param_propagate_down_;
+
+  //标志位，在目标函数中，是否每个Top Blob都有非零权重
+  vector&lt;Dtype&gt; loss_;
+
+//下面4个函数，我们会在各个Layer派生类中经常看到
+
+  /** @brief Using the CPU device, compute the layer output. */
+  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) = 0;
+  /**
+   * @brief Using the GPU device, compute the layer output.
+   *        Fall back to Forward_cpu() if unavailable.
+   */
+  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    // LOG(WARNING) &lt;&lt; &quot;Using CPU code as backup.&quot;;
+    return Forward_cpu(bottom, top);
+  }
+
+  /**
+   * @brief Using the CPU device, compute the gradients for any parameters and
+   *        for the bottom blobs if propagate_down is true.
+   */
+  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) = 0;
+  /**
+   * @brief Using the GPU device, compute the gradients for any parameters and
+   *        for the bottom blobs if propagate_down is true.
+   *        Fall back to Backward_cpu() if unavailable.
+   */
+  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+    // LOG(WARNING) &lt;&lt; &quot;Using CPU code as backup.&quot;;
+    Backward_cpu(top, propagate_down, bottom);
+  }
+
+  /**
+   * Called by the parent Layer&#39;s SetUp to check that the number of bottom
+   * and top Blobs provided as input match the expected numbers specified by
+   * the {ExactNum,Min,Max}{Bottom,Top}Blobs() functions.
+   */
+   //校验输入/输出Blob数目是否满足Layer要求
+  virtual void CheckBlobCounts(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+                               const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    if (ExactNumBottomBlobs() &gt;= 0) {
+      CHECK_EQ(ExactNumBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes &quot; &lt;&lt; ExactNumBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (MinBottomBlobs() &gt;= 0) {
+      CHECK_LE(MinBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes at least &quot; &lt;&lt; MinBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (MaxBottomBlobs() &gt;= 0) {
+      CHECK_GE(MaxBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes at most &quot; &lt;&lt; MaxBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (ExactNumTopBlobs() &gt;= 0) {
+      CHECK_EQ(ExactNumTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces &quot; &lt;&lt; ExactNumTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (MinTopBlobs() &gt;= 0) {
+      CHECK_LE(MinTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces at least &quot; &lt;&lt; MinTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (MaxTopBlobs() &gt;= 0) {
+      CHECK_GE(MaxTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces at most &quot; &lt;&lt; MaxTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (EqualNumBottomTopBlobs()) {
+      CHECK_EQ(bottom.size(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces one top blob as output for each &quot;
+          &lt;&lt; &quot;bottom blob input.&quot;;
+    }
+  }
+
+  /**
+   * Called by SetUp to initialize the weights associated with any top blobs in
+   * the loss function. Store non-zero loss weights in the diff blob.
+   */
+   //该函数在Layer的Setup函数中被调用，主要目的是初始化与Top Blob相关的loss权重，放到Top Blob的diff域，实际由Forward()计算loss函数
+   //loss_weight == 0,表示当前层不参与loss函数汁算，大部分Layer属于这一类
+   //loss_weight ==1,表示当前层参与loss函数汁算，损失层（LossLayer) 属于这一类
+  inline void SetLossWeights(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  //从ProtoBuffer对象中获得Layer参数，这里需要用loss_weight参数
+    const int num_loss_weights = layer_param_.loss_weight_size();
+    //如果 ProtoBuffer中存在至少一个loss_weight参数,loss_weight参数个数应当与Top Blob数目相同，或者不要loss_weight参数
+    if (num_loss_weights) {
+      CHECK_EQ(top.size(), num_loss_weights) &lt;&lt; &quot;loss_weight must be &quot;
+          &quot;unspecified or specified once per top blob.&quot;;
+    //遍历每个Top Blob
+      for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      // 从 ProtoBuffer 对象拿到 loss_weight 实际值(0 或者1)
+        const Dtype loss_weight = layer_param_.loss_weight(top_id);
+        //若为0,跳过
+        if (loss_weight == Dtype(0)) { continue; }\
+        //若不为0,则对网络进行相关设置
+        this-&gt;set_loss(top_id, loss_weight);    //本地记录loss_weight值
+        const int count = top[top_id]-&gt;count();
+        Dtype* loss_multiplier = top[top_id]-&gt;mutable_cpu_diff();
+        //将loss_weight值入 Top Blob 的diff域，传递到其他需耍使用的地一方，实现远程同步
+        caffe_set(count, loss_weight, loss_multiplier);
+      }
+    }
+  }
+
+ private:
+ //禁用拷贝构造函数和賦值运算函数 
+  DISABLE_COPY_AND_ASSIGN(Layer);
+};  // class Layer
+
+// Forward and backward wrappers. You should implement the cpu and
+// gpu specific implementations instead, and should not change these
+// functions.
+//使用时只需在派生类中改写 Forward_cpu、Forward_gpu、Backward_cpu、Backward_gpu
+template &lt;typename Dtype&gt;
+inline Dtype Layer&lt;Dtype&gt;::Forward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  Dtype loss = 0;
+  Reshape(bottom, top);
+  switch (Caffe::mode()) {      //判断计算设备
+  case Caffe::CPU:      //在CPU上执行Forward计算
+    Forward_cpu(bottom, top);   //调用CPU版本的 Forward函数
+    //还没完，要计算loss (如果有的话)
+    for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      if (!this-&gt;loss(top_id)) { continue; }
+      const int count = top[top_id]-&gt;count();
+      // 若为 LossLayer，则已经通过Forward函数计算出全局损失函数，放在Top Blob data域
+      const Dtype* data = top[top_id]-&gt;cpu_data();
+      // 若loss_weight不为0,则己经在SetLossWeights函数中将loss权重放在Top Blob diff域
+      const Dtype* loss_weights = top[top_id]-&gt;cpu_diff();
+      // 计算加权后的loss之和，得到标量loss值
+      loss += caffe_cpu_dot(count, data, loss_weights);
+    }
+    break;
+  case Caffe::GPU:
+    Forward_gpu(bottom, top);
+#ifndef CPU_ONLY
+    for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      if (!this-&gt;loss(top_id)) { continue; }
+      const int count = top[top_id]-&gt;count();
+      const Dtype* data = top[top_id]-&gt;gpu_data();
+      const Dtype* loss_weights = top[top_id]-&gt;gpu_diff();
+      Dtype blob_loss = 0;
+      caffe_gpu_dot(count, data, loss_weights, &amp;blob_loss);
+      loss += blob_loss;
+    }
+#endif
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
+  }
+  return loss;
+}
+//反向传播函数,直接调用对应设备函数
+template &lt;typename Dtype&gt;
+inline void Layer&lt;Dtype&gt;::Backward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+    const vector&lt;bool&gt;&amp; propagate_down,
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+  switch (Caffe::mode()) {
+  case Caffe::CPU:
+    Backward_cpu(top, propagate_down, bottom);
+    break;
+  case Caffe::GPU:
+    Backward_gpu(top, propagate_down, bottom);
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
+  }
+}
+
+//将层配置参数序列化为ProtoBuffer
+template &lt;typename Dtype&gt;
+void Layer&lt;Dtype&gt;::ToProto(LayerParameter* param, bool write_diff) {
+  param-&gt;Clear();
+  param-&gt;CopyFrom(layer_param_);
+  param-&gt;clear_blobs();
+  for (int i = 0; i &lt; blobs_.size(); ++i) { //权值和偏置项也会保存
+    blobs_[i]-&gt;ToProto(param-&gt;add_blobs(), write_diff);
+  }
+}
+
+}  // namespace caffe
+
+#endif  // CAFFE_LAYER_H_
+
+</code></pre>
+
+<p><code>Layer</code>源文件位于<code>src/caffe/layer.cpp</code>中:</p>
+
+<pre><code class="language-c++">#include &quot;caffe/layer.hpp&quot;
+
+namespace caffe {
+
+INSTANTIATE_CLASS(Layer);
+
+}  // namespace caffe
+
+</code></pre>
+
+<p>可见Layer大部分函数并没有实现，只有虚函数，真正的实现都在派生类中。具体代码可以进一步阅读 <code>src/caffe/丨ayers/*.cpp</code>。</p>
+
+<p>在使用 Layer 之前，需要先包含头文件<code>#include &lt;caffe/layer.hpp&gt;</code>，再通过<code>using namespace caffe;</code>使用命名空间caffe。如果代码中试图创建Layer对象，编译时会报错：</p>
+
+<p><code>error: cannot declare variable &#39;a^ to be of abstract type &#39;caffe：:Layer&lt;float&gt;</code></p>
+
+<p>这是因为Layer类是一个虚基类，不能直接创建对象。关于虚基类,这里不再过多说明.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/15</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%20%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.html'>Caffe 数据结构</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="14974281629389.html">
                 
@@ -1826,85 +2392,6 @@ void ReLULayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14957648679184.html">
-                
-                  <h1>UDP编程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>TCP是建立可靠连接，并且通信双方都可以以流的形式发送数据。相对TCP，UDP则是<strong>面向无连接</strong>的协议。</p>
-
-<p><font color=red>使用UDP协议时，不需要建立连接，只需要知道对方的IP地址和端口号，就可以直接发数据包。但是，能不能到达就不知道了。</p>
-
-<p>虽然用UDP传输数据不可靠，但它的优点是和TCP比，速度快，对于不要求可靠到达的数据，就可以使用UDP协议。</font></p>
-
-<p>我们来看看如何通过UDP协议传输数据。和TCP类似，使用<mark>UDP的通信双方也分为客户端和服务器</mark>。服务器首先需要绑定端口：</p>
-
-<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# 绑定端口:
-s.bind((&#39;127.0.0.1&#39;, 9999))
-</code></pre>
-
-<p>创建Socket时，<code>SOCK_DGRAM</code>指定了这个Socket的类型是UDP。绑定端口和TCP一样，但是不需要调用<code>listen()</code>方法，而是直接接收来自任何客户端的数据：</p>
-
-<pre><code class="language-py">print &#39;Bind UDP on 9999...&#39;
-while True:
-    # 接收数据:
-    data, addr = s.recvfrom(1024)
-    print &#39;Received from %s:%s.&#39; % addr
-    s.sendto(&#39;Hello, %s!&#39; % data, addr)
-</code></pre>
-
-<p><code>recvfrom()</code>方法返回数据和客户端的地址与端口，这样，服务器收到数据后，直接调用<code>sendto()</code>就可以把数据用UDP发给客户端。</p>
-
-<p>注意这里省掉了多线程，因为这个例子很简单。</p>
-
-<p>客户端使用UDP时，首先仍然创建基于UDP的Socket，然后，不需要调用<code>connect()</code>，直接通过<code>sendto()</code>给服务器发数据：</p>
-
-<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-for data in [&#39;Michael&#39;, &#39;Tracy&#39;, &#39;Sarah&#39;]:
-    # 发送数据:
-    s.sendto(data, (&#39;127.0.0.1&#39;, 9999))
-    # 接收数据:
-    print s.recv(1024)
-s.close()
-</code></pre>
-
-<p>客户端:<br/>
-<img src="media/14957648679184/14957678758780.jpg" alt=""/><br/>
-服务器:<br/>
-<img src="media/14957648679184/14957678951579.jpg" alt=""/><br/>
-客户端从服务器接收数据仍然调用<code>recv()</code>方法。</p>
-
-<h2 id="toc_0">小结</h2>
-
-<p>UDP的使用与TCP类似，但是不需要建立连接。此外，服务器绑定UDP端口和TCP端口互不冲突，也就是说，UDP的9999端口与TCP的9999端口可以各自绑定。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1961,8 +2448,6 @@ s.close()
         
             <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
-        
             <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
         
             <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
@@ -1972,6 +2457,8 @@ s.close()
             <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
         
             <a href="iOS.html"><strong>iOS</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
          
         </p>
 
@@ -1986,6 +2473,12 @@ s.close()
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15083737124086.html">使用RAC的基本操作</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15082871830637.html">使用Masonry框架来构造iOS布局</a>
@@ -2007,12 +2500,6 @@ s.close()
 		      
 			      <li class="post">
 			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
 			      </li>
 		     
 		  

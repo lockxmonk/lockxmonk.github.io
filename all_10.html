@@ -80,8 +80,6 @@
         
             <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
-        
             <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
         
             <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
@@ -91,6 +89,8 @@
             <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
         
             <li><a href="iOS.html">iOS</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
          
 
       </ul>
@@ -112,6 +112,85 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="14957648679184.html">
+                
+                  <h1>UDP编程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>TCP是建立可靠连接，并且通信双方都可以以流的形式发送数据。相对TCP，UDP则是<strong>面向无连接</strong>的协议。</p>
+
+<p><font color=red>使用UDP协议时，不需要建立连接，只需要知道对方的IP地址和端口号，就可以直接发数据包。但是，能不能到达就不知道了。</p>
+
+<p>虽然用UDP传输数据不可靠，但它的优点是和TCP比，速度快，对于不要求可靠到达的数据，就可以使用UDP协议。</font></p>
+
+<p>我们来看看如何通过UDP协议传输数据。和TCP类似，使用<mark>UDP的通信双方也分为客户端和服务器</mark>。服务器首先需要绑定端口：</p>
+
+<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# 绑定端口:
+s.bind((&#39;127.0.0.1&#39;, 9999))
+</code></pre>
+
+<p>创建Socket时，<code>SOCK_DGRAM</code>指定了这个Socket的类型是UDP。绑定端口和TCP一样，但是不需要调用<code>listen()</code>方法，而是直接接收来自任何客户端的数据：</p>
+
+<pre><code class="language-py">print &#39;Bind UDP on 9999...&#39;
+while True:
+    # 接收数据:
+    data, addr = s.recvfrom(1024)
+    print &#39;Received from %s:%s.&#39; % addr
+    s.sendto(&#39;Hello, %s!&#39; % data, addr)
+</code></pre>
+
+<p><code>recvfrom()</code>方法返回数据和客户端的地址与端口，这样，服务器收到数据后，直接调用<code>sendto()</code>就可以把数据用UDP发给客户端。</p>
+
+<p>注意这里省掉了多线程，因为这个例子很简单。</p>
+
+<p>客户端使用UDP时，首先仍然创建基于UDP的Socket，然后，不需要调用<code>connect()</code>，直接通过<code>sendto()</code>给服务器发数据：</p>
+
+<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+for data in [&#39;Michael&#39;, &#39;Tracy&#39;, &#39;Sarah&#39;]:
+    # 发送数据:
+    s.sendto(data, (&#39;127.0.0.1&#39;, 9999))
+    # 接收数据:
+    print s.recv(1024)
+s.close()
+</code></pre>
+
+<p>客户端:<br/>
+<img src="media/14957648679184/14957678758780.jpg" alt=""/><br/>
+服务器:<br/>
+<img src="media/14957648679184/14957678951579.jpg" alt=""/><br/>
+客户端从服务器接收数据仍然调用<code>recv()</code>方法。</p>
+
+<h2 id="toc_0">小结</h2>
+
+<p>UDP的使用与TCP类似，但是不需要建立连接。此外，服务器绑定UDP端口和TCP端口互不冲突，也就是说，UDP的9999端口与TCP的9999端口可以各自绑定。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="14957594179111.html">
                 
@@ -1109,64 +1188,6 @@ login(user_text, password_text)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14956131169957.html">
-                
-                  <h1>在ios中判断一个viewcontroller是都已经正常present</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>之前present一个视图的时候,从来没有研究过如何判断一个视图是都已经正常弹出.比如下面这个方法是否正常执行:</p>
-
-<pre><code class="language-oc">[documentInteractionController presentPreviewAnimated:YES]
-</code></pre>
-
-<p>然而今天有一个需求需要知道上述方法是否正常执行,并弹出视图.</p>
-
-<p>之后通过阅读该方法的源码后发现:</p>
-
-<pre><code class="language-oc">// Bypasses the menu and opens the full screen preview window for the item at URL.  Returns NO if the item could not be previewed.
-// Note that you must implement the delegate method documentInteractionControllerViewControllerForPreview: to preview the document.
-- (BOOL)presentPreviewAnimated:(BOOL)animated;
-</code></pre>
-
-<p>该方法返回一个BOOL类型的值:当没有正常执行该方法时,会返回NO.正常返回YES.</p>
-
-<p>类似的还有如下方法:</p>
-
-<pre><code class="language-oc">- (BOOL)isBeingPresented NS_AVAILABLE_IOS(5_0);
-- (BOOL)isBeingDismissed NS_AVAILABLE_IOS(5_0);
-
-- (BOOL)isMovingToParentViewController NS_AVAILABLE_IOS(5_0);
-- (BOOL)isMovingFromParentViewController NS_AVAILABLE_IOS(5_0);
-</code></pre>
-
-<p>来判断viewController是消失还是出现在当前页面中.</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/24</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1223,8 +1244,6 @@ login(user_text, password_text)
         
             <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
-        
             <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
         
             <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
@@ -1234,6 +1253,8 @@ login(user_text, password_text)
             <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
         
             <a href="iOS.html"><strong>iOS</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
          
         </p>
 
@@ -1248,6 +1269,12 @@ login(user_text, password_text)
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15083737124086.html">使用RAC的基本操作</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15082871830637.html">使用Masonry框架来构造iOS布局</a>
@@ -1269,12 +1296,6 @@ login(user_text, password_text)
 		      
 			      <li class="post">
 			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
 			      </li>
 		     
 		  

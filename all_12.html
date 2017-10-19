@@ -80,8 +80,6 @@
         
             <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
-        
             <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
         
             <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
@@ -91,6 +89,8 @@
             <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
         
             <li><a href="iOS.html">iOS</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
          
 
       </ul>
@@ -112,6 +112,133 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="14948283904445.html">
+                
+                  <h1>在RN中利用原生Document Interaction Controller来预览和打开文档</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在react-native开发中有一个功能需求为，打开之前已经下载到Documents中的文件。一开始本想用webview来加载文件。后来发现有<code>UIDocumentInteractionController</code>这个api来更好的完成这个功能。</p>
+
+<p>首先在RN引用的类中加入<code>UIDocumentInteractionControllerDelegate</code>我们要用到这个来呈现预览视图：</p>
+
+<p>NativeUtil.h</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+#import &quot;RCTBridgeModule.h&quot;
+#import &quot;UIView+React.h&quot;       //要引入这个头文件，在rn中创建和加载原声视图
+
+
+@interface NativeUtil : NSObject &lt;RCTBridgeModule,UIDocumentInteractionControllerDelegate&gt;
+
+@end
+</code></pre>
+
+<p>在NativeUtil.m中实现该委托。定义一个暴露给RN的方法，在js中调用：</p>
+
+<pre><code class="language-objc">RCT_EXPORT_METHOD(ShowFileChooser: (RCTResponseSenderBlock)callback){
+  
+    NSString *filePath = @&quot;ceshi007&quot;;           callback(@[[NSNull null],filePath]);    //测试callback，从native向rn传值。
+
+
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);           //获取应用本沙盒内的目录。
+    NSString *documentpath = paths[0];      //获取document的路径
+    NSString *fileName = [documentpath stringByAppendingPathComponent:@&quot;Screenshot_2016-12-15-21-29-07-50.png&quot;];            //指定上述图片的路径。
+  NSURL *fileURL = [NSURL fileURLWithPath:fileName];
+  dispatch_async(dispatch_get_main_queue(), ^{              //运行主线程来加载界面，并初始化UIDocumentInteractionController
+    UIDocumentInteractionController *documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:fileURL];
+    documentInteractionController.delegate =self ;
+    [documentInteractionController presentPreviewAnimated:YES];             //present出来文件的预览界面。
+  });
+  
+}
+</code></pre>
+
+<p>之后定义<code>(UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller</code>方法，要加载出来预览的界面，上述方法必须实现，且返回一个当前的页面的ViewController。用于作为预览视图的父ViewController来弹出modal。</p>
+
+<pre><code class="language-objc">- (UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller{
+  UIViewController *newVC =[self getPresentedViewController];  //获取当前屏幕中present出来的viewcontroller。
+   return newVC;
+};
+</code></pre>
+
+<p>这里我们是在一个非视图类创建并在加载一个视图，所以我们要先获取到当前界面的<code>ViewController</code>，将被展示的<code>view</code>加到当前<code>view</code>的子视图，或用当前view <code>presentViewController</code>，或<code>pushViewContrller</code>。这里我从网上找到了两个方法：</p>
+
+<pre><code class="language-objc">//获取当前屏幕显示的viewcontroller
+- (UIViewController *)getCurrentVC  
+{  
+    UIViewController *result = nil;  
+      
+    UIWindow * window = [[UIApplication sharedApplication] keyWindow];  
+    if (window.windowLevel != UIWindowLevelNormal)  
+    {  
+        NSArray *windows = [[UIApplication sharedApplication] windows];  
+        for(UIWindow * tmpWin in windows)  
+        {  
+            if (tmpWin.windowLevel == UIWindowLevelNormal)  
+            {  
+                window = tmpWin;  
+                break;  
+            }  
+        }  
+    }  
+      
+    UIView *frontView = [[window subviews] objectAtIndex:0];  
+    id nextResponder = [frontView nextResponder];  
+      
+    if ([nextResponder isKindOfClass:[UIViewController class]])  
+        result = nextResponder;  
+    else  
+        result = window.rootViewController;  
+      
+    return result;  
+} 
+</code></pre>
+
+<pre><code class="language-objc">//获取当前屏幕中present出来的viewcontroller
+- (UIViewController *)getPresentedViewController  
+{  
+    UIViewController *appRootVC = [UIApplication sharedApplication].keyWindow.rootViewController;  
+    UIViewController *topVC = appRootVC;  
+    if (topVC.presentedViewController) {  
+        topVC = topVC.presentedViewController;  
+    }  
+      
+    return topVC;  
+}
+</code></pre>
+
+<blockquote>
+<p>在RN中，使用modal组件之后，弹出的modal视图的viewcontroller相当于present出来的viewcontroller.</p>
+</blockquote>
+
+<p>之后使用<code>[self getPresentedViewController]</code>就可以获得<code>viewcontroller</code>来加载视图。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/15</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="14946429015704.html">
                 
@@ -1739,167 +1866,6 @@ else:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14938608177246.html">
-                
-                  <h1>分布式进程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在Thread和Process中，应当优选Process，<font color=red><strong>因为Process更稳定，而且，Process可以分布到多台机器上，而Thread最多只能分布到同一台机器的多个CPU上。</strong></font></p>
-
-<p><strong>Python的<code>multiprocessing</code>模块不但支持多进程，其中<code>managers</code>子模块还支持把多进程分布到多台机器上。</strong><font color=red>一个服务进程可以作为调度者，将任务分布到其他多个进程中，依靠网络通信。由于<code>managers</code>模块封装很好，不必了解网络通信的细节，就可以很容易地编写分布式多进程程序。</font></p>
-
-<p>举个例子：如果我们<strong>已经有一个通过<code>Queue</code>通信的多进程程序在同一台机器上运行</strong>，现在，由于处理任务的进程任务繁重，希望把发送任务的进程和处理任务的进程分布到两台机器上。怎么用分布式进程实现？</p>
-
-<p>原有的<code>Queue</code>可以继续使用，<font color=red>但是，通过<code>managers</code>模块把<code>Queue</code>通过网络暴露出去，就可以让其他机器的进程访问<code>Queue</code>了。</font></p>
-
-<p>我们先看服务进程，服务进程负责启动<code>Queue</code>，把<code>Queue</code>注册到网络上，然后往<code>Queue</code>里面写入任务：</p>
-
-<pre><code class="language-py">#taskmanager.py
-#-*- coding: utf-8 -*-
-
-import random,time,Queue
-from multiprocessing.managers import BaseManager
-
-#发送任务的队列
-task_queue = Queue.Queue()
-#接受结果的队列
-result_queue = Queue.Queue()
-
-#从BaseManager继承的QueueManager:
-class QueueManager(BaseManager):
-    pass
-
-#把两个Queue都注册到网络上, callable参数关联了Queue对象:
-QueueManager.register(&#39;get_task_queue&#39;,callable=lambda:task_queue)
-QueueManager.register(&#39;get_result_queue&#39;,callable=lambda:result_queue)
-
-#绑定端口5000，设置验证码‘abc’：
-manager = QueueManager(address=(&#39;&#39;,5000),authkey=&#39;abc&#39;)
-#启动Queue
-manager.start()
-# 获得通过网络访问的Queue对象:
-task = manager.get_task_queue()
-result = manager.get_result_queue()
-#放几个任务进去
-for i in range(10):
-    n = random.randint(0, 10000)
-    print(&#39;Put task %d...&#39; %n)
-    task.put(n)
-
-#从result队列读取结果
-print(&#39;Try get results...&#39;)
-for i in range(10):
-    r = result.get(timeout=10)
-    print(&#39;Result:%s&#39;%r)
-#关闭
-manager.shutdown()
-</code></pre>
-
-<p>请注意，当我们在一台机器上写多进程程序时，创建的<code>Queue</code>可以直接拿来用，但是，在分布式多进程环境下，添加任务到<code>Queue</code>不可以直接对原始的<code>task_queue</code>进行操作，那样就绕过了<code>QueueManager</code>的封装，必须通过<code>manager.get_task_queue()</code>获得的<code>Queue</code>接口添加。</p>
-
-<p>然后，在另一台机器上启动任务进程（本机上启动也可以）：</p>
-
-<pre><code class="language-py">#taskworker.py
-#-*- coding: utf-8 -*-
-
-import time
-import sys
-import Queue
-from multiprocessing.managers import BaseManager
-
-# 创建类似的QueueManager:
-
-
-class QueueManager(BaseManager):
-    pass
-
-# 由于这个QueueManager只从网络上获取Queue，所以注册时只提供名字:
-QueueManager.register(&#39;get_task_queue&#39;)
-QueueManager.register(&#39;get_result_queue&#39;)
-
-# 连接到服务器，也就是运行taskmanager.py的机器:
-server_addr = &#39;127.0.0.1&#39;
-print(&#39;Connect to server %s...&#39; % server_addr)
-
-# 端口和验证码注意保持与taskmanager.py设置的完全一致:
-m = QueueManager(address=(server_addr, 5000), authkey=&#39;abc&#39;)
-# 从网络连接:
-m.connect()
-# 获取Queue的对象:
-task = m.get_task_queue()
-result = m.get_result_queue()
-# 从task队列取任务,并把结果写入result队列:
-for i in range(10):
-    try:
-        n = task.get(timeout=1)
-        print(&#39;run task %d * %d...&#39; % (n, n))
-        r = &#39;%d * %d = %d&#39; % (n, n, n * n)
-        time.sleep(1)
-        result.put(r)
-    except Queue.Empty:
-        print(&#39;task queue is empty.&#39;)
-# 处理结束:
-print(&#39;worker exit.&#39;)
-</code></pre>
-
-<p>任务进程要通过网络连接到服务进程，所以要指定服务进程的IP。</p>
-
-<p>现在，可以试试分布式进程的工作效果了。先启动<code>taskmanager.py</code>服务进程：</p>
-
-<p>启动后：<br/>
-<img src="media/14938608177246/14938633989382.jpg" alt=""/><br/>
-等待result队列中的值。（目前为空)</p>
-
-<p><code>taskmanager</code>进程发送完任务后，开始等待<code>result</code>队列的结果。现在启动<code>taskworker.py</code>进程：</p>
-
-<p><img src="media/14938608177246/14938634594880.jpg" alt=""/></p>
-
-<p><code>taskworker</code>进程结束，在<code>taskmanager</code>进程中会继续打印出结果：</p>
-
-<p><img src="media/14938608177246/14938634810692.jpg" alt=""/></p>
-
-<p>这个简单的<code>Manager/Worker</code>模型有什么用？<font color=red><strong>其实这就是一个简单但真正的分布式计算</strong></font>，把代码稍加改造，启动多个worker，就可以把任务分布到几台甚至几十台机器上，比如把计算<code>n*n</code>的代码换成发送邮件，就实现了邮件队列的异步发送。</p>
-
-<p>Queue对象存储在哪？注意到<code>taskworker.py</code>中根本没有创建<code>Queue</code>的代码，所以，Queue对象存储在<code>taskmanager.py</code>进程中：</p>
-
-<p><img src="media/14938608177246/14938635737718.jpg" alt=""/></p>
-
-<p>而<code>Queue</code>之所以能通过网络访问，就是通过<code>QueueManager</code>实现的。由于<code>QueueManager</code>管理的不止一个<code>Queue</code>，所以，要给每个<code>Queue</code>的网络调用接口起个名字，比如<code>get_task_queue</code>。</p>
-
-<p><code>authkey</code>有什么用？这是为了保证两台机器正常通信，不被其他机器恶意干扰。如果<code>taskworker.py</code>的<code>authkey</code>和<code>taskmanager.py</code>的<code>authkey</code>不一致，肯定连接不上。</p>
-
-<h2 id="toc_0">小结</h2>
-
-<p>Python的分布式进程接口简单，封装良好，适合需要把繁重任务分布到多台机器的环境下。</p>
-
-<p><font color=red>注意Queue的作用是用来传递任务和接收结果，每个任务的描述数据量要尽量小。比如发送一个处理日志文件的任务，就不要发送几百兆的日志文件本身，而是发送日志文件存放的完整路径，由Worker进程再去共享的磁盘上读取文件。</font></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1956,8 +1922,6 @@ print(&#39;worker exit.&#39;)
         
             <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
-        
             <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
         
             <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
@@ -1967,6 +1931,8 @@ print(&#39;worker exit.&#39;)
             <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
         
             <a href="iOS.html"><strong>iOS</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
          
         </p>
 
@@ -1981,6 +1947,12 @@ print(&#39;worker exit.&#39;)
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15083737124086.html">使用RAC的基本操作</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15082871830637.html">使用Masonry框架来构造iOS布局</a>
@@ -2002,12 +1974,6 @@ print(&#39;worker exit.&#39;)
 		      
 			      <li class="post">
 			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15065800553035.html">第四十五条：使用dispatch_once来执行只需运行一次的代码</a>
 			      </li>
 		     
 		  
