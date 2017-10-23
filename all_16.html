@@ -91,6 +91,8 @@
             <li><a href="iOS.html">iOS</a></li>
         
             <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
          
 
       </ul>
@@ -112,6 +114,62 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="14926690841704.html">
+                
+                  <h1>面向对象编程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>采用面向对象的程序设计思想来设计一个简单的学生成绩打印，我们首选思考的不是程序的执行流程，而是<code>Student</code>这种数据类型应该被视为一个对象，这个对象拥有<code>name</code>和<code>score</code>这两个属性（Property）。如果要打印一个学生的成绩，首先必须创建出这个学生对应的对象，然后，给对象发一个<code>print_score</code>消息，让对象自己把自己的数据打印出来</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.name = name
+        self.score = score
+
+    def print_score(self):
+        print &#39;%s:%s&#39; % (self.name, self.score)
+
+
+bart = Students(&#39;Bart&#39;, 59)
+lisa = Students(&#39;梁中豪&#39;, 100)
+bart.print_score()
+lisa.print_score()
+</code></pre>
+
+<p><img src="media/14926690841704/14926708025078.jpg" alt=""/></p>
+
+<p><strong>面向对象三大特点：封装、继承、多态。</strong></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="14926579397626.html">
                 
@@ -669,46 +727,6 @@ max(*args)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14921570225186.html">
-                
-                  <h1>拟牛顿法（最大熵模型的学习）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	
-
-<p>最大熵模型学习还可以应用牛顿法或者拟牛顿法。<br/>
-对于最大熵模型而言，<br/>
-<img src="media/14921570225186/14921574471740.jpg" alt=""/><br/>
-<img src="media/14921570225186/14921574611293.jpg" alt=""/><br/>
-相应的拟牛顿法BFGS算法如下。<br/>
-<img src="media/14921570225186/14921576945600.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -778,6 +796,8 @@ max(*args)
             <a href="iOS.html"><strong>iOS</strong></a>
         
             <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
          
         </p>
 
@@ -792,6 +812,12 @@ max(*args)
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15087194946164.html">动态规划</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15083737124086.html">使用RAC的基本操作</a>
@@ -813,12 +839,6 @@ max(*args)
 		      
 			      <li class="post">
 			        <a href="15077122789332.html">多用块枚举，与快速遍历少用for循环</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15075183660097.html">第三十四条 ： 以“自动释放池降低内存峰值”</a>
 			      </li>
 		     
 		  

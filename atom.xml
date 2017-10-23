@@ -4,13 +4,157 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-10-22T13:35:53+08:00</updated>
+  <updated>2017-10-22T13:37:02+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[动态规划]]></title>
+    <link href="https://lockxmonk.github.io/15087194946164.html"/>
+    <updated>2017-10-23T08:44:54+08:00</updated>
+    <id>https://lockxmonk.github.io/15087194946164.html</id>
+    <content type="html"><![CDATA[
+<ul>
+<li>
+<a href="#toc_0">钢条切割问题</a>
+<ul>
+<li>
+<a href="#toc_1">分治法</a>
+</li>
+<li>
+<a href="#toc_2">动态规划</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_3">总结</a>
+
+
+<p>动态规划与分治法很类似，都是通过组合子问题的解来求解原问题。但是不同的是动态规划应用于子问题重叠的情况,即不同的子问题也具有公共的子子问题。分治法在这种情况下，会反复的求解那些公共子子问题。而动态规划算法对每个子子问题只求解一遍，将其保存在一个表格中，避免每次都计算。</p>
+
+<h2 id="toc_0">钢条切割问题</h2>
+
+<p>我们第一个动态规划问题是钢条切割问题。<br/>
+<img src="media/15087194946164/15087197999988.jpg" alt=""/></p>
+
+<h3 id="toc_1">分治法</h3>
+
+<p>我们来先看一下简答的分治法：</p>
+
+<pre><code class="language-objc">//
+//  main.m
+//  CUT-ROD
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface CUT_ROD:NSObject;
+
+-(NSInteger)CUT_ROD:(NSArray*)P length:(NSInteger)n;
+
+@end
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        NSArray *c = @[@1,@5,@8,@9,@10,@17,@17,@20,@24,@30];
+        CUT_ROD *a = [CUT_ROD new];
+        NSInteger result = [a CUT_ROD:c length:10];
+        NSLog(@&quot;result is %ld&quot;,result);
+    }
+    return 0;
+}
+
+@implementation CUT_ROD
+//简单的分治法,会重复计算子子结果
+-(NSInteger)CUT_ROD:(NSArray *)P length:(NSInteger)n{
+    if (n==0) {
+        return 0;
+    }
+    NSInteger q = -1;
+    for (NSInteger i=0; i&lt;n; i++) {
+        q = q&gt;([P[i] integerValue]+[self CUT_ROD:P length:n-i-1]) ? q:([P[i] integerValue]+[self CUT_ROD:P length:n-i-1]);
+    }
+    return q;
+}
+
+@end
+
+</code></pre>
+
+<p>上述代码使用递归来实现的，但是每次都要递归的重复来计算相同的子子问题，如图所示：<br/>
+<img src="media/15087194946164/15087246470673.jpg" alt=""/></p>
+
+<p>所以我们就在想，只要把求解得到的子子问题答案记录下，等到下次要用的时候直接调用它，就可以省下大量的时间。所以我们下面采用动态规划来写一遍。</p>
+
+<h3 id="toc_2">动态规划</h3>
+
+<p><strong><font color=red>动态规划是一个典型的时空权衡的例子，付出额外的内存空间来降低计算时间。</font></strong></p>
+
+<p>第一种方法：带备忘的自顶向下算法</p>
+
+<pre><code class="language-objc">//动态规划 带备忘的自顶向下
+-(NSInteger)MEMOIZED_CUT_ROD:(NSArray *)P length:(NSInteger)n{
+    NSMutableArray *logArr =[[NSMutableArray alloc] initWithCapacity:11];
+    for (int i = 0; i&lt;=10; i++) {
+        [logArr addObject:@(-1)];
+    }
+    return [self MEMOIZED_CUT_ROD_AUX:P length:n log:logArr];
+}
+-(NSInteger)MEMOIZED_CUT_ROD_AUX:(NSArray*)p length:(NSInteger)n log:(NSMutableArray*)r{
+    NSInteger q;
+    if ([r[n] integerValue]&gt;=0) {
+        return [r[n] integerValue];
+    }
+    if (n==0) {
+        q = 0;
+    }else{
+        q = -1;
+        for (NSInteger i = 0; i&lt;n; i++) {
+            q = q&gt;[p[i] integerValue] + [self MEMOIZED_CUT_ROD_AUX:p length:n-i-1 log:r] ? q : [p[i] integerValue] + [self MEMOIZED_CUT_ROD_AUX:p length:n-i-1 log:r];
+        }
+    }
+    [r replaceObjectAtIndex:n withObject:@(q)];
+    return q;
+}
+</code></pre>
+
+<p><code>MEMOIZED_CUT_ROD</code>方法引入<code>r</code>数组，记录每个长度的最优收益值，下面的方法将记录的值存入<code>r</code>数组中，并调用存入<code>r</code>的子子问题所得到收益值。</p>
+
+<p>第二个方法，字底向上版本，这个版本更为简单：</p>
+
+<pre><code class="language-objc">-(NSInteger)BOTTOM_UP_CUT_ROD:(NSArray *)P length:(NSInteger)n{
+    NSMutableArray *arrLog = [[NSMutableArray alloc] initWithCapacity:11];
+    for (int i = 0; i&lt;=10; i++) {
+        [arrLog addObject:@(0)];
+    }
+    NSInteger q = -1;
+    for (int j=0; j&lt;n; j++) {
+        q = -1;
+        for (int i=0; i&lt;=j; i++) {
+            NSLog(@&quot;%li&quot;,q);
+            q = q &gt; ([P[i] integerValue] + [arrLog[j-i] integerValue]) ? q : ([P[i] integerValue] + [arrLog[j-i] integerValue]);
+            NSLog(@&quot;%li&quot;,q);
+        }
+        [arrLog replaceObjectAtIndex:j+1 withObject:@(q)];
+    }
+    return [arrLog[n] integerValue];
+}
+</code></pre>
+
+<p>依次来求解长度从1到n的最大收益。</p>
+
+<h1 id="toc_3">总结</h1>
+
+<p>当我们思考一个动态规划的问题时，最好弄清涉及的子问题与他们的依赖关系。如上图的依赖图为：<br/>
+<img src="media/15087194946164/15087412491634.jpg" alt=""/></p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[使用RAC的基本操作]]></title>
@@ -2178,123 +2322,6 @@ int main() {
     return 0;  
 }  
 </code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[消息转发机制的简单实现]]></title>
-    <link href="https://lockxmonk.github.io/15041475233104.html"/>
-    <updated>2017-08-31T10:45:23+08:00</updated>
-    <id>https://lockxmonk.github.io/15041475233104.html</id>
-    <content type="html"><![CDATA[
-<h2 id="toc_0">第一种</h2>
-
-<p>首先我们来实现这两个方法：<br/><br/>
-+(BOOL)resolveInstanceMethod:    (SEL)sel</p>
-
-<p>+(BOOL)resolveClassMethod:(SEL)sel</p>
-
-<p>这两个方法用于方法的动态解析，当一个对象执行一个方法时，发现没有找到所对应的实现。这是就要靠上面的方法来动态添加实现了</p>
-
-<p>举例来说：</p>
-
-<pre><code class="language-objc">//
-//  Person.h
-//  消息转发
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface Person : NSObject
-//接口中声明一个方法
--(void)run;
-
-@end
-
-//
-//  Person.m
-//  消息转发
-
-
-#import &quot;Person.h&quot;
-#import &lt;objc/runtime.h&gt;
-@implementation Person //在部署的时候我们没有实现接口中声明的run方法
-
-
-//编写C函数实现代码
-void addrun (id self, SEL _cmd){
-    NSLog(@&quot;%@　%s&quot;,self,sel_getName(_cmd));
-}
-
-+(BOOL)resolveInstanceMethod:(SEL)sel{
-    if (sel ==@selector(run)) {
-    //如果响应run方法，我们动态将上面实现的addrun方法添加到当前类中。
-        class_addMethod(self, sel, (IMP)addrun, &quot;v@:&quot;);
-    }
-    
-    return [super resolveInstanceMethod:sel];
-}
-
-@end
-
-//  main.m
-//  消息转发
-
-
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;Person.h&quot;
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-    //执行代码
-        Person *man = [Person new];
-        [man run];
-    }
-    return 0;
-}
-</code></pre>
-
-<p>结果为：<img src="media/15041475233104/15041480973843.jpg" alt=""/><br/>
-说明执行了我们添加的那个方法，而并没有报错。</p>
-
-<h2 id="toc_1">第二种</h2>
-
-<p>我们可以动态的向类中添加方法来解决无选择子的问题，我们也可以选择转换接受者来选择可以处理该选择子的对象。</p>
-
-<p>首先当我们，没有处理第一种方法的时候，运行期系统会给我们第二个机会，询问是否有备用的接受者。我们就要实现<code>orwardingTargetForSelector</code>了</p>
-
-<p>我们举例来看：</p>
-
-<p>首先我们先创建一个新类Car，并且创建一个<code>run</code>方法：</p>
-
-<p><img src="media/15041475233104/15041487720558.jpg" alt=""/></p>
-
-<p>然后在Person.m中，不对<code>resolveInstanceMethod</code>进行任何处理，在<code>forwardingTargetForSelector</code>中返回一个<code>Car</code>实例：<br/>
-<img src="media/15041475233104/15041488721835.jpg" alt=""/></p>
-
-<p>然后继续执行<code>main.m</code>文件，运行为：<br/>
-<img src="media/15041475233104/15041489461207.jpg" alt=""/></p>
-
-<p>说明系统已经将所要实现方法的对象转换为<code>Car</code>的实例对象。</p>
-
-<h2 id="toc_2">第三种</h2>
-
-<p>如果前两种我们都没有实现的话，就会进入第三种，执行完整的消息转发机制。</p>
-
-<p>就会调用两个方法<code>methodSignatureForSelector</code>和<code>forwardInvocation</code></p>
-
-<p><code>methodSignatureForSelector</code>方法用来指定方法签名，返回<code>nil</code>表示不处理，否则会进入下一步调用<code>forwardInvocation</code>方法。其中这个签名就是给<code>forwardInvocation</code>中的参数<code>NSInvocation</code>调用的。</p>
-
-<p><img src="media/15041475233104/15041604848181.jpg" alt=""/></p>
-
-<p>开头我们要找的错误<code>unrecognized selector sent to instance</code>原因，原来就是因为<code>methodSignatureForSelector</code>这个方法中，由于没有找到<code>run</code>对应的实现方法，所以返回了一个空的方法签名，最终导致程序报错崩溃。</p>
-
-<p>所以我们需要做的是自己新建方法签名，再在<code>forwardInvocation</code>中用你要转发的那个对象调用这个对应的签名，这样也实现了消息转发。</p>
-
-<p>关于生成签名的类型<code>&quot;v@:&quot;</code>解释一下。每一个方法会默认隐藏两个参数，<code>self</code>、<code>_cmd</code>，<code>self</code>代表方法调用者，<code>_cmd</code>代表这个方法的<code>SEL</code>，签名类型就是用来描述这个方法的返回值、参数的，<code>v</code>代表返回值为<code>void</code>，<code>@</code>表示<code>self</code>，<code>:</code>表示<code>_cmd</code>。</p>
-
-<p><strong>所以第二个和第三个字符必须是<code>“@:”</code> ，第一个字符是返回类型.</strong></p>
-
-<p><strong>具体的可以看一下了解</strong>：<a href="https://developer.apple.com/library/etc/redirect/xcode/content/1189/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100">Type Encodeing</a></p>
 
 ]]></content>
   </entry>
