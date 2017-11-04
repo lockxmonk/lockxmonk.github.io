@@ -93,6 +93,8 @@
             <li><a href="English%20Study.html">English Study</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
+        
+            <li><a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html">常见面试问题</a></li>
          
 
       </ul>
@@ -114,6 +116,746 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="14891936534415.html">
+                
+                  <h1>k近邻法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">k近邻算法</a>
+</li>
+<li>
+<a href="#toc_1">k近邻模型</a>
+<ul>
+<li>
+<a href="#toc_2">模型</a>
+</li>
+<li>
+<a href="#toc_3">距离度量</a>
+</li>
+<li>
+<a href="#toc_4">k值的选择</a>
+</li>
+<li>
+<a href="#toc_5">分类决策规则</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_6">k近邻法的实现：kd树</a>
+<ul>
+<li>
+<a href="#toc_7">构造kd树</a>
+</li>
+<li>
+<a href="#toc_8">搜索kd树</a>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>k近邻法（k-nearestneighbor,k-NN)是一种基本分类与回归方法。本书只讨论分类问题中的k近邻法。k近邻法的输入为实例的特征向量，对应于特征空间 的点；输出为实例的类别，可以取多类。k近邻法假设给定一个训练数据集，其中的实例类别己定。分类时，对新的实例，根据其k个最近邻的训练实例的类别， 通过多数表决等方式进行预测。因此，k近邻法不具有显式的学习过程。近邻法实际上利用训练数据集对特征向量空间进行划分，并作为其分类的“模型“，k值的选择、距离度量及分类决策规则是k近邻法的三个基本要素。k近邻法1968年由Cover和Hart提出。</p>
+
+<h2 id="toc_0">k近邻算法</h2>
+
+<p>k近邻算法简单、直观：给定一个训练数据集，对新的输入实例，在训练数据集中找到与该实例最邻近的k个实例，这k个实例的多数属于某个类，就把该输入实例分为这个类，下面叙述k邻近算法。<br/>
+<img src="media/14891936534415/14891944741165.jpg" alt=""/><br/>
+<img src="media/14891936534415/14891946432255.jpg" alt=""/></p>
+
+<h2 id="toc_1">k近邻模型</h2>
+
+<p>k近邻法使用的模型实际上对应于对特征空间的划分。模型由三个基本要素——距离度量、k值的选择和分类决策规则决定。</p>
+
+<h3 id="toc_2">模型</h3>
+
+<p>k近邻算法中，当训练集、距离度量（如欧氏距离）、k值及分类局侧规则（如多数表决）确定后，对于任何一个新的输入实例，它所属的类唯一地确定。这相当于根据上述要素将特征空间划分为一些子空间，确定子空间里的每个点所属的类。这一事实从最近邻算法中可以看得很清楚。</p>
+
+<p>特征空间中，对每个训练实例点\(x_i\),距离该点比其他点更近的所有点组成一个区域，叫作单元（cell).每个训练实例点拥有一个单元，所有训练实例点的单元构成对特征空间的一个划分。最近邻法将实例\(x_i\)的类\(y_i\),作为其单元中所有点的类标记（class label)。这样，每个单元的实例点的类别是确定的。下图是二维特征空间划分的一个例子。<br/>
+<img src="media/14891936534415/14891961608422.jpg" alt=""/></p>
+
+<h3 id="toc_3">距离度量</h3>
+
+<p>特征空间中两个实例点的距离是两个实例点相似程度的反映.k近邻模型的特征空间一般是n维实数向量空间\(R^n\)。使用的距离是欧氏距离，但也可以是其他距离，如更一般的\(L_p\)距离（\(L_p -distance\))或Minkowski距离（Minkowski distance)。<br/>
+关于特征空间中两坐标点的距离定义为：<br/>
+<img src="media/14891936534415/14891974598310.jpg" alt=""/></p>
+
+<p>不同的距离定义，所求出的最近邻点是不同的。<br/>
+<img src="media/14891936534415/14891979526147.jpg" alt=""/></p>
+
+<h3 id="toc_4">k值的选择</h3>
+
+<p>k值的选择会对k近邻法的结果产生重大影响。</p>
+
+<p>如果选择较小的k值，就相当于用较小的邻域中的训练实例进行预测，“学习”的近似误差（approximation error)会减小，只有与输入实例较近的（相似的）训练实例才会对预测结果起作用。但缺点是“学习”的估计误差（estimation error) 会增大，预测结果会对近邻的实例点非常敏感。如果邻近的实例点恰巧是噪声，预测就会出错.换句话说，值的减小就意味着整体模型变得复杂，容易发生过拟合。</p>
+
+<p>如果选择较大的k值，就相当于用较大邻域中的训练实例进行预测。其优点是可以减少学习的估计误差。但缺点是学习的近似误差会增大。这时与输入实例 较远的（不相似的）训练实例也会对预测起作用，使预测发生错误.k值的增大就意味着整体的模型变得简单。</p>
+
+<p>如果k=N,那么无论输入实例是什么，都将简单地预测它属于在训练实例中最多的类。这时，模型过于简单，完全忽略训练实例中的大量有用信息，是不可取的。</p>
+
+<p>在应用中，k值一般取一个比较小的数值。通常采用交叉验证法来选取最优的k值。</p>
+
+<h3 id="toc_5">分类决策规则</h3>
+
+<p>k近邻法中的分类决策规则往往是多数表决，即由输入实例的k个邻近的训练实例中的多数类决定输入实例的类。</p>
+
+<p>多数表决规则（majority voting rule)有如下解释：如果分类的损失函数为0-1损失函数，分类函数为：<br/>
+<img src="media/14891936534415/14891994327344.jpg" alt=""/></p>
+
+<p>那么误分类的概率为：<br/>
+<img src="media/14891936534415/14891994564311.jpg" alt=""/><br/>
+对给定的实例\(x \in \chi\),其中最邻近的k个训练实例点构成集合\(N_k(x)\),如果涵盖\(N_k(x)\)的区域的类别是\(C_j\),那么误分类率是：<br/>
+<img src="media/14891936534415/14891997004694.jpg" alt=""/><br/>
+要使误分类率最小即经验风险最小，就要使\(\sum_{x_i\in{N_k(x)}}I(y_i=c_j)\)最大，<mark>所以多数表决规则等价于风险最小化</mark>。</p>
+
+<h2 id="toc_6">k近邻法的实现：kd树</h2>
+
+<p>实现k近邻法时，主要考虑的问题是如何对训练数据进行快速k近邻捜索。这点在特征空间的维数大及训练数据容量大时尤其必要。</p>
+
+<p>k近邻法最简单的实现方法是线性扫描（linear  scan)。这时要计算输入实例与每一个训练实例的距离。当训练集很大时，计算非常耗时，这种方法是不可行的。</p>
+
+<p>为了提高k近邻搜索的效率，可以考虑使用特殊的结构存储训练数据，以减少计算距离的次数。具体方法很多，下面介绍其中的kd树(kd tree)方法.</p>
+
+<h3 id="toc_7">构造kd树</h3>
+
+<p>kd树是一种对k维空间中的实例点进行存储以便对其进行快速检索的树形数据结构。kd树是二叉树，表示对k维空间的一个划分（partition)。构造kd树相 当于不断地用垂直于坐标轴的超平面将k维空间切分，构成一系列的k维超矩形区域。kd树的每个结点对应于一个k维超矩形区域。</p>
+
+<p>构造kd树的方法如下：构造根结点，使根结点对应于k维空间中包含所有实例点的超矩形区域；通过下面的递归方法，不断地对k维空间进行切分，生成子结 点。在超矩形区域（结点）上选择一个坐标轴和在此坐标轴上的一个切分点，确定一个超平面，这个超平面通过选定的切分点并垂直于选定的坐标轴，将当前超矩形区域切分为左右两个子区域（子结点）：这时，实例被分到两个子区域.这个过程直到子区域内没有实例时终止（终止时的结点为叶结点）。在此过程中，将实例保存在相应的结点上。</p>
+
+<p>通常，依次选择坐标轴对空间切分，选择训练实例点在选定坐标轴上的中位数（median)为切分点，这样得到的kd树是平衡的。<mark>注意，平衡的kd树搜索时的效率未必是最优的</mark>。<br/>
+下面给出构造kd树的算法：<br/>
+<img src="media/14891936534415/14892010553846.jpg" alt=""/><br/>
+<img src="media/14891936534415/14892019093068.jpg" alt=""/></p>
+
+<p>下面给出一个例子，来反应上述算法的用途：<br/>
+<strong>（中位数：一组数据按大小顺序排列起来，处在中间位置的一个数或两个数的平均值。）</strong><br/>
+<img src="media/14891936534415/14892021282433.jpg" alt=""/><br/>
+<img src="media/14891936534415/14892121527765.jpg" alt=""/></p>
+
+<h3 id="toc_8">搜索kd树</h3>
+
+<p>下面介绍如何利用kd树进行k近邻搜索。可以看到，利用kd树可以省去对大部分数据点的搜索，从而减少搜索的计算量。这里以最近邻为例加以叙述，同样的方法可以应用到k近邻。</p>
+
+<p>给定一个目标点，搜索其最近邻。首先找到包含目标点的叶结点：然后从该叶结点出发，依次回退到父结点；不断査找与目标点最邻近的结点，当确定不可能存在更近的结点时终止。这样搜索就被限制在空间的局部区域上，效率大为提髙。</p>
+
+<p>包含目标点的叶结点对应包含目标点的最小超矩形区域。以此叶结点的实例点作为当前最近点。目标点的最近邻一定在以目标点为中心并通过当前最近点的 超球体的内部（参阅图3.5)。然后返回当前结点的父结点，如果父结点的另一子结点的超矩形区域与超球体相交，那么在相交的区域内寻找与目标点更近的实例点。如果存在这样的点，将此点作为新的当前最近点。算法转到更上一级的父结点，继续上述过程。如果父结点的另一子结点的超矩形区域与超球体不相交，或不存在比当前最近点更近的点，则停止搜索。<br/>
+下面叙述用kd树的最近邻搜索算法：</p>
+
+<pre><code>算法3.3 (用kd树的最近邻搜索）
+
+输入：己构造的kd树；目标点X；
+输出：x的最近邻。
+(1) 在kd树中找出包含目标点x的叶结点：从根结点出发，递归地向下访问kd树。若目标点x当前维的坐标小于切分点的坐标，则移动到左子结点，否则移 动到右子结点。直到子结点为叶结点为止.
+(2) 以此叶结点为”当前最近点“
+(3) 递归地向上回退，在每个结点进行以下操作：
+(a) 如果该结点保存的实例点比当前最近点距离目标点更近，则以该实例点为“当前最近点”
+(b) 当前最近点一定存在于该结点一个子结点对应的区域。检查该子结点的父结点的另一子结点对应的区域是否有更近的点。具体地，检査另一子结点对应
+的区域是否与以目标点为球心、以目标点与“当前最近点”间的距离为半径的超球体相交。
+如果相交，可能在另一个子结点对应的区域内存在距目标点更近的点，移动到另一个子结点。接着，递归地进行最近邻搜索：
+如果不相交，向上回退。
+(4)当回退到根结点时，搜索结束。最后的“当前最近点”即为x的最近邻点。
+    
+如果实例点是随机分布的，kd树搜索的平均计算复杂度是O(logN)，这里N是训练实例数.kd树更适用于训练实例数远大于空间维数时的k近邻搜索。当空 间维数接近训练实例数时，它的效率会迅速下降，几乎接近线性扫描。
+</code></pre>
+
+<p>下面通过一个例题来说明搜索方法：</p>
+
+<p><img src="media/14891936534415/14892141583109.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/3/11</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14891071598954.html">
+                
+                  <h1>感知机算法的收敛性</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">感知机学习算法的对偶形式</a>
+</li>
+</ul>
+
+
+<p>算法的收敛性主要是证明，对于线性可分数据集感知机学习算法原始形式收敛，即经过有限 次迭代可以得到一个将训练数据集完全正确划分的分离超平面及感知机模型。</p>
+
+<p>将偏置b并入权重向量w，记做\(\hat{w} = (w^T,b)^T\)同样也将输入向量加以扩充，加进常数1，记做：\(\hat{x} = (x^T,1)^T\),这样，\(\hat{x}\in R^{n+1}\)，\(\hat{w}\in R^{n+1}\) 显然，\(\hat{w}*\hat{x}=w*x+b\)。<br/>
+<img src="media/14891071598954/14891094628135.jpg" alt=""/></p>
+
+<p>上述定理主要说明误分类的次数<code>k</code>是有上界的，算法具有收敛性。</p>
+
+<p>下面是该定理的证明过程：<br/>
+<img src="media/14891071598954/14891100385544.jpg" alt=""/><br/>
+<img src="media/14891071598954/14891100637572.jpg" alt=""/><br/>
+<img src="media/14891071598954/14891105642852.jpg" alt=""/><br/>
+<img src="media/14891071598954/14891105771778.jpg" alt=""/></p>
+
+<blockquote>
+<p>所以定理表明，误分类的次数<code>k</code>是有上界的，经过有限次搜索可以找到将训练数据完全正确分开的分离超平面。也就是说，当训练数据集线性可分时，感知机学习算法原始形式迭代是收敛的。但是感知机学习算法存在许多解，这些解既依赖于初值的选择，也依赖于迭代过程中误分类点的选择顺序。为了得到唯一的超平面，需要对分离超平面增加约束条件。这就是线性支持向量机的想法。当训练集线性不可分时，感知机学习算法不收敛，迭代结果 就会发生震荡。</p>
+</blockquote>
+
+<h2 id="toc_0">感知机学习算法的对偶形式</h2>
+
+<p>现在考虑感知机学习算法的对偶形式。感知机学习算法的原始形式和对偶形式与支持向量机学习算法的原始形式和对偶形式相对应。</p>
+
+<p>对偶形式的基本思想是，将w和b表示为实例\(x_{i}\)和标记\(y_i\)的线性组合形式，通过求解其系数而求得w和b。不失一般性,在算法2.1中可假设初始值\(w_0,b_0\)均为0，对误分类点\((x_i,y_i)\)通过：<br/>
+\(w\leftarrow w+ηy_ix_i\)<br/>
+\(b\leftarrow b+ηy_i\)<br/>
+逐步修改w，b，设修改n次，则w,b关于\((x_i,y_i)\)的增量分别是\(α_ix_iy_i和α_iy_i\)这里\(α=n_iη\)。这样，从学习过程不难看出，最后学习到的w,b可以分别表示为：<img src="media/14891071598954/14891128523346.jpg" alt=""/><br/>
+这里，\(\alpha_i\geq0,i=1,2,...N,当\eta=1时\)，表示第i个实例点由于误分而进行更新的次数。实例点更新次数越多，意味着它距离分离超平面越近，也就越难正确分类。换句话说，这样的实例对学习结果影响最大。</p>
+
+<p>下面对照原始形式来叙述感知机学习算法的对偶形式。<br/>
+<img src="media/14891071598954/14891134427824.jpg" alt=""/><br/>
+<img src="media/14891071598954/14891134670827.jpg" alt=""/><br/>
+对偶形式中训练实例仅以内积的形式出现。为了方便，可以预先将训练集中实例间的内积计算出来并以矩阵的形式存储，这个矩阵就是所谓的Gram矩阵。<br/>
+\(G = [x_i * x_j]_{N*N}\)</p>
+
+<p>同样根据该算法有例题如下：<br/>
+<img src="media/14891071598954/14891137936409.jpg" alt=""/><br/>
+<img src="media/14891071598954/14891170220533.jpg" alt=""/><br/>
+对照例2.1，结果一致，迭代步骤也是互相对应的。<br/>
+与原始形式一样，感知机学习算法的对偶形式迭代是收敛的。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/3/10</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14890437581129.html">
+                
+                  <h1>感知机</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">感知机模型</a>
+</li>
+<li>
+<a href="#toc_1">感知机的学习策略</a>
+<ul>
+<li>
+<a href="#toc_2">数据集的线性可分性</a>
+</li>
+<li>
+<a href="#toc_3">感知机学习策略</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_4">感知机学习算法</a>
+<ul>
+<li>
+<a href="#toc_5">感知机学习算法的原始形式</a>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>感知机是二类分类的线性分类模型，其输入为实例的特征向量，输出为实例的类别（一般为+1和-1），感知机对应于输入空间（特征空间）中将实例划分为正负两类的分离超平面，属于判别模型。感知机学习旨在求出将训练数据进行线性划分的分离超平面。感知机也是神经网络与支持向量机的基础。</p>
+
+<h2 id="toc_0">感知机模型</h2>
+
+<p>感知机的定义为：<br/>
+<img src="media/14890437581129/14890447646559.jpg" alt=""/></p>
+
+<p>感知机有如下的几何解释：<br/>
+线性方程：w*x + b = 0<br/>
+对应于特征空间R中的一个超平面S，其中w是超平面的法向量，b是超平面的截距，这个超平面将特征空间划分为两个部分，位于两部分的点就被划分为正，负两类，如下图所示：<br/>
+<img src="media/14890437581129/14890449623708.jpg" alt=""/></p>
+
+<p>所以求感知机的模型，也就是去求得模型参数w，b。感知机预测，通过学习得到的感知机模型，对于新输入实例给出其对应的输出类别。</p>
+
+<h2 id="toc_1">感知机的学习策略</h2>
+
+<h3 id="toc_2">数据集的线性可分性</h3>
+
+<p><img src="media/14890437581129/14890453486666.jpg" alt=""/></p>
+
+<h3 id="toc_3">感知机学习策略</h3>
+
+<p>如果训练数据集是线性可分的，那么我们需要确定一个学习策略，也就是定义（经验）损失函数并将损失函数极小化。</p>
+
+<p>损失函数的一个自然选择是误分类点的总数。但是，这样的损失函数不是参数w,b的连续可导函数，不易优化。损失函数的另一个选择是误分类点到超平面S的总距离，这是感知机所采用的。为此，首先写出输入控件R中任一点x到平面S的距离：<img src="media/14890437581129/14890456220821.jpg" alt=""/><br/>
+这里，||w||是w的2范数。<br/>
+其次，对于五分类的数据（x，y）来说，<br/>
+<code>-y(w*x+b)&gt;0</code>成立。因为当<code>w*x+b&gt;0</code>时，<code>y=-1</code>，而当<code>w*x+b&lt;0</code>时<code>y=+1</code>，因此，误分类点x到超平面S的距离是：<br/>
+<img src="media/14890437581129/14890460147136.jpg" alt=""/><br/>
+这样，假设超平面S的误分类点集合为M，那么所有的误分类点到超平面S的总距离为：<br/>
+<img src="media/14890437581129/14890462066356.jpg" alt=""/></p>
+
+<p>所以，感知机的损失函数定义为：<img src="media/14890437581129/14890462888502.jpg" alt=""/></p>
+
+<p>显然，损失函数是非负的，如果没有误分类点，那么损失函数为0，而误分类点越少，误分类点离超平面越近，损失函数值越小。一个特定的样本点的损失函数：在误分类时是参数w，b的线性函数，在正确分类时是0，因此给定训练数据集T，损失函数是w，b的连续可导函数。<br/>
+总的来说我们的感知机学习策略就是在假设空间中选取使损失函数式最小的模型参数w，b。</p>
+
+<h2 id="toc_4">感知机学习算法</h2>
+
+<p>我们的策略已经明确，就是求解损失函数式的最优化，我们这里最优化的方法是随机梯度下降法。</p>
+
+<h3 id="toc_5">感知机学习算法的原始形式</h3>
+
+<p>感知机学习算法是对以下最优化问题的算法，给定一个训练集：<img src="media/14890437581129/14890473616479.jpg" alt=""/><br/>
+感知机学习算法是误分类驱动的，具体采用随机梯度下降法（stochastic gradient descent)。首先，任意选取一个超平面然后用梯度下降法不断地极小化目标函数<code>（2.5）</code>。极小化过程中不是一次使M中所有误分类点的梯度下降， 而是一次随机选取一个误分类点使其梯度下降。<br/>
+假设误分类点集合M是固定的，那么损失函数的梯度由<img src="media/14890437581129/14890475151426.jpg" alt=""/><br/>
+给出。<br/>
+随机选取一个误分类点<code>(x,y)</code>，对w,b进行更新：<img src="media/14890437581129/14890475562013.jpg" alt=""/><br/>
+式中η(0&lt;η≤1)是步长，在统计学习中又称为学习率，这样，通过迭代可以期待损失函数不断减小，直到为0，综上所述，得到如下算法：<img src="media/14890437581129/14890483224015.jpg" alt=""/><br/>
+这种学习算法直观上有如下解释：当一个实例点被误分类，即位于分离超平面的错误一侧时，则调整w,b的值，使分离超平面向该误分类点的一侧移动，以减少该误分类点与超平面间的距离，直至超平面越过该误分类点使其被正确分类。</p>
+
+<p>上述算法是感知机学习的基本算法，对应于后面的对偶形式，称为原始形式。感知机学习算法简单且易于实现。</p>
+
+<p>该算法使用方法如下：<br/>
+<img src="media/14890437581129/14890503525005.jpg" alt=""/><br/>
+<img src="media/14890437581129/14890503748369.jpg" alt=""/><br/>
+<img src="media/14890437581129/14890503942221.jpg" alt=""/><br/>
+这是在计算中误分类点先后取<code>x1,x3,x3,x3,x1,x3,x3</code>得到的分离超平面和感 知机模型，如果在计算中误分类点依次取<code>x1,x3,x3,x3,x2,x3,x3,x3,x1,x3,x3</code>那么得到的分离超平面是2x<sup>1</sup>+x<sup>2</sup>-5=0</p>
+
+<p>可见，感知机学习算法由于采用不同的初值或选取不同的误分类点，解可以不同。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/3/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14878150947508.html">
+                
+                  <h1>MNIST机器学习入门</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>MNIST是一个入门级的计算机视觉数据集，它包含各种手写数字图片：<br/>
+<img src="media/14878150947508/14878151559670.png" alt=""/></p>
+
+<p>它也包含每一张图片对应的标签，告诉我们这个是数字几。比如，上面这四张图片的标签分别是5，0，4，1。</p>
+
+<p>这里我们将试着训练一个机器学习模型用于预测图片里面的数字。这次我们的主要目的是研究如何使用TensorFlow。所以，我们这里会从一个很简单的数学模型开始，它叫做Softmax Regression。</p>
+
+<p>对应这个教程的实现代码很短，而且真正有意思的内容只包含在三行代码里面。但是，去理解包含在这些代码里面的设计思想是非常重要的：TensorFlow工作流程和机器学习的基本概念。因此，此次会很详细地介绍这些代码的实现原理。</p>
+
+<h1 id="toc_0">MNIST数据集</h1>
+
+<p>MNIST数据集的官网是<a href="http://yann.lecun.com/exdb/mnist/">Yann LeCun&#39;s website</a>。在这里，我们提供了一份python源代码（见附录）用于自动下载和安装这个数据集。你可以下载这份代码，然后用下面的代码导入到你的项目里面，也可以直接复制粘贴到你的代码文件里面。</p>
+
+<pre><code>import input_data
+mnist = input_data.read_data_sets(&quot;MNIST_data/&quot;, one_hot=True)
+</code></pre>
+
+<p>下载下来的数据集被分成两部分：60000行的训练数据集（mnist.train）和10000行的测试数据集（mnist.test）。这样的切分很重要，在机器学习模型设计时必须有一个单独的测试数据集不用于训练而是用来评估这个模型的性能，从而更加容易把设计的模型推广到其他数据集上（泛化）。</p>
+
+<p>正如前面提到的一样，每一个MNIST数据单元有两部分组成：一张包含手写数字的图片和一个对应的标签。我们把这些图片设为“xs”，把这些标签设为“ys”。训练数据集和测试数据集都包含xs和ys，比如训练数据集的图片是<code>mnist.train.images</code> ，训练数据集的标签是 <code>mnist.train.labels</code>。</p>
+
+<p>每一张图片包含28像素X28像素。我们可以用一个数字数组来表示这张图片：</p>
+
+<p><img src="media/14878150947508/14878156081245.png" alt=""/><br/>
+我们把这个数组展开成一个向量，长度是 28x28 = 784。如何展开这个数组（数字间的顺序）不重要，只要保持各个图片采用相同的方式展开。从这个角度来看，MNIST数据集的图片就是在784维向量空间里面的点, 并且拥有比较<a href="http://colah.github.io/posts/2014-10-Visualizing-MNIST/">复杂的结构</a> (提醒: 此类数据的可视化是计算密集型的)。</p>
+
+<p>展平图片的数字数组会丢失图片的二维结构信息。这显然是不理想的，最优秀的计算机视觉方法会挖掘并利用这些结构信息，我们会在后续教程中介绍。但是在这个教程中我们忽略这些结构，所介绍的简单数学模型，softmax回归(softmax regression)，不会利用这些结构信息。</p>
+
+<p>因此，在MNIST训练数据集中，mnist.train.images 是一个形状为 [60000, 784] 的张量，第一个维度数字用来索引图片，第二个维度数字用来索引每张图片中的像素点。在此张量里的每一个元素，都表示某张图片里的某个像素的强度值，值介于0和1之间。</p>
+
+<p><img src="media/14878150947508/14878161521414.png" alt=""/></p>
+
+<p>相对应的MNIST数据集的标签是介于0到9的数字，用来描述给定图片里表示的数字。为了用于这个教程，我们使标签数据是&quot;one-hot vectors&quot;。 一个one-hot向量除了某一位的数字是1以外其余各维度数字都是0。所以在此教程中，数字n将表示成一个只有在第n维度（从0开始）数字为1的10维向量。比如，标签0将表示成([1,0,0,0,0,0,0,0,0,0,0])。因此，<code>mnist.train.labels</code> 是一个 [60000, 10] 的数字矩阵。</p>
+
+<p><img src="media/14878150947508/14878162172884.png" alt=""/></p>
+
+<p>现在，我们准备好可以开始构建我们的模型啦！</p>
+
+<h2 id="toc_1">Softmax回归介绍</h2>
+
+<p>我们知道MNIST的每一张图片都表示一个数字，从0到9。我们希望得到给定图片代表每个数字的概率。比如说，我们的模型可能推测一张包含9的图片代表数字9的概率是80%但是判断它是8的概率是5%（因为8和9都有上半部分的小圆），然后给予它代表其他数字的概率更小的值。</p>
+
+<p>这是一个使用softmax回归（softmax regression）模型的经典案例。softmax模型可以用来给不同的对象分配概率。即使在之后，我们训练更加精细的模型时，最后一步也需要用softmax来分配概率。</p>
+
+<p>softmax回归（softmax regression）分两步：第一步</p>
+
+<p>为了得到一张给定图片属于某个特定数字类的证据（evidence），我们对图片像素值进行加权求和。如果这个像素具有很强的证据说明这张图片不属于该类，那么相应的权值为负数，相反如果这个像素拥有有利的证据支持这张图片属于这个类，那么权值是正数。</p>
+
+<p>下面的图片显示了一个模型学习到的图片上每个像素对于特定数字类的权值。红色代表负数权值，蓝色代表正数权值。</p>
+
+<p><img src="media/14878150947508/14878173006094.png" alt=""/></p>
+
+<p>我们也需要加入一个额外的偏置量（bias），因为输入往往会带有一些无关的干扰量。因此对于给定的输入图片 x 它代表的是数字 i 的证据可以表示为</p>
+
+<p><img src="media/14878150947508/14878173172518.png" alt=""/></p>
+
+<p>其中  <img src="media/14878150947508/14878173370916.png" alt=""/>代表权重，<img src="media/14878150947508/14878173498830.png" alt=""/> 代表数字 i 类的偏置量，j 代表给定图片 x 的像素索引用于像素求和。然后用softmax函数可以把这些证据转换成概率 y：<br/>
+<img src="media/14878150947508/14878173861592.png" alt=""/></p>
+
+<p>这里的softmax可以看成是一个激励（activation）函数或者链接（link）函数，把我们定义的线性函数的输出转换成我们想要的格式，也就是关于10个数字类的概率分布。因此，给定一张图片，它对于每一个数字的吻合度可以被softmax函数转换成为一个概率值。softmax函数可以定义为：</p>
+
+<p><img src="media/14878150947508/14878174086894.png" alt=""/></p>
+
+<p>展开等式右边的子式，可以得到：<br/>
+<img src="media/14878150947508/14878174196316.png" alt=""/></p>
+
+<p>但是更多的时候把softmax模型函数定义为前一种形式：把输入值当成幂指数求值，再正则化这些结果值。这个幂运算表示，更大的证据对应更大的假设模型（hypothesis）里面的乘数权重值。反之，拥有更少的证据意味着在假设模型里面拥有更小的乘数系数。假设模型里的权值不可以是0值或者负值。Softmax然后会正则化这些权重值，使它们的总和等于1，以此构造一个有效的概率分布。（更多的关于Softmax函数的信息，可以参考Michael Nieslen的书里面的这个<a href="http://neuralnetworksanddeeplearning.com/chap3.html#softmax">部分</a>，其中有关于softmax的可交互式的可视化解释。）</p>
+
+<p>对于softmax回归模型可以用下面的图解释，对于输入的<code>xs</code>加权求和，再分别加上一个偏置量，最后再输入到softmax函数中：</p>
+
+<p><img src="media/14878150947508/14878174795982.png" alt=""/></p>
+
+<p>如果把它写成一个等式，我们可以得到：<br/>
+<img src="media/14878150947508/14878175085060.png" alt=""/></p>
+
+<p>我们也可以用向量表示这个计算过程：用矩阵乘法和向量相加。这有助于提高计算效率。（也是一种更有效的思考方式）</p>
+
+<p><img src="media/14878150947508/14878174918084.png" alt=""/></p>
+
+<p>更进一步，可以写成更加紧凑的方式：<br/>
+<img src="media/14878150947508/14878175309181.png" alt=""/></p>
+
+<h2 id="toc_2">实现回归模型</h2>
+
+<p>为了用python实现高效的数值计算，我们通常会使用函数库，比如NumPy，会把类似矩阵乘法这样的复杂运算使用其他外部语言实现。不幸的是，从外部计算切换回Python的每一个操作，仍然是一个很大的开销。如果你用GPU来进行外部计算，这样的开销会更大。用分布式的计算方式，也会花费更多的资源用来传输数据。</p>
+
+<p>TensorFlow也把复杂的计算放在python之外完成，但是为了避免前面说的那些开销，它做了进一步完善。Tensorflow不单独地运行单一的复杂计算，而是让我们可以先用图描述一系列可交互的计算操作，然后全部一起在Python之外运行。（这样类似的运行方式，可以在不少的机器学习库中看到。）</p>
+
+<p>使用TensorFlow之前，首先导入它：</p>
+
+<pre><code class="language-py">import tensorflow as tf
+</code></pre>
+
+<p>我们通过操作符号变量来描述这些可交互的操作单元，可以用下面的方式创建一个：</p>
+
+<pre><code class="language-py">x = tf.placeholder(&quot;float&quot;, [None, 784])
+</code></pre>
+
+<p><code>x</code>不是一个特定的值，而是一个占位符<code>placeholder</code>，我们在TensorFlow运行计算时输入这个值。我们希望能够输入任意数量的MNIST图像，每一张图展平成784维的向量。我们用2维的浮点数张量来表示这些图，这个张量的形状是<code>[None，784 ]</code>。（这里的<code>None</code>表示此张量的第一个维度可以是任何长度的。）</p>
+
+<p>我们的模型也需要权重值和偏置量，当然我们可以把它们当做是另外的输入（使用占位符），但TensorFlow有一个更好的方法来表示它们：<code>Variable</code> 。 一个<code>Variable</code>代表一个可修改的张量，存在在TensorFlow的用于描述交互性操作的图中。它们可以用于计算输入值，也可以在计算中被修改。对于各种机器学习应用，一般都会有模型参数，可以用<code>Variable</code>表示。</p>
+
+<pre><code>y = tf.nn.softmax(tf.matmul(x,W) + b)
+</code></pre>
+
+<p>首先，我们用<code>tf.matmul(​​X，W)</code>表示<code>x</code>乘以<code>W</code>，对应之前等式里面的<img src="media/14878150947508/14878180799833.png" alt=""/>，这里<code>x</code>是一个2维张量拥有多个输入。然后再加上<code>b</code>，把和输入到<code>tf.nn.softmax</code>函数里面。</p>
+
+<p>至此，我们先用了几行简短的代码来设置变量，然后只用了一行代码来定义我们的模型。TensorFlow不仅仅可以使softmax回归模型计算变得特别简单，它也用这种非常灵活的方式来描述其他各种数值计算，从机器学习模型对物理学模拟仿真模型。一旦被定义好之后，我们的模型就可以在不同的设备上运行：计算机的CPU，GPU，甚至是手机！</p>
+
+<h2 id="toc_3">训练模型</h2>
+
+<p>为了训练我们的模型，我们首先需要定义一个指标来评估这个模型是好的。其实，在机器学习，我们通常定义指标来表示一个模型是坏的，这个指标称为成本（cost）或损失（loss），然后尽量最小化这个指标。但是，这两种方式是相同的。</p>
+
+<p>一个非常常见的，非常漂亮的成本函数是“交叉熵”（cross-entropy）。交叉熵产生于信息论里面的信息压缩编码技术，但是它后来演变成为从博弈论到机器学习等其他领域里的重要技术手段。它的定义如下：<br/>
+<img src="media/14878150947508/14878181838749.png" alt=""/></p>
+
+<p>y 是我们预测的概率分布, y&#39; 是实际的分布（我们输入的one-hot vector)。比较粗糙的理解是，交叉熵是用来衡量我们的预测用于描述真相的低效性。更详细的关于交叉熵的解释超出本次试验的范畴，但是很有必要好好<a href="http://colah.github.io/posts/2015-09-Visual-Information/">理解它</a>。</p>
+
+<p>为了计算交叉熵，我们首先需要添加一个新的占位符用于输入正确值：</p>
+
+<pre><code>y_ = tf.placeholder(&quot;float&quot;, [None,10])
+</code></pre>
+
+<p>然后我们可以用<img src="media/14878150947508/14878182871547.png" alt=""/>计算交叉熵:</p>
+
+<pre><code>cross_entropy = -tf.reduce_sum(y_*tf.log(y))
+</code></pre>
+
+<p>首先，用 <code>tf.log</code> 计算 <code>y</code> 的每个元素的对数。接下来，我们把 <code>y_</code>的每一个元素和 <code>tf.log(y_)</code> 的对应元素相乘。最后，用 <code>tf.reduce_sum</code> 计算张量的所有元素的总和。（注意，这里的交叉熵不仅仅用来衡量单一的一对预测和真实值，而是所有100幅图片的交叉熵的总和。对于100个数据点的预测表现比单一数据点的表现能更好地描述我们的模型的性能。</p>
+
+<p>现在我们知道我们需要我们的模型做什么啦，用TensorFlow来训练它是非常容易的。因为TensorFlow拥有一张描述你各个计算单元的图，它可以自动地使用<a href="http://colah.github.io/posts/2015-08-Backprop/">反向传播算法(backpropagation algorithm)</a>来有效地确定你的变量是如何影响你想要最小化的那个成本值的。然后，TensorFlow会用你选择的优化算法来不断地修改变量以降低成本。</p>
+
+<pre><code>train_step = tf.train.GradientDescentOptimizer(0.01).minimize(cross_entropy)
+</code></pre>
+
+<p>在这里，我们要求TensorFlow用梯度下降算法（gradient descent algorithm）以0.01的学习速率最小化交叉熵。梯度下降算法（gradient descent algorithm）是一个简单的学习过程，TensorFlow只需将每个变量一点点地往使成本不断降低的方向移动。当然TensorFlow也提供了<a href="http://www.tensorfly.cn/tfdoc/api_docs/python/train.html#optimizers">其他许多优化算法</a>：只要简单地调整一行代码就可以使用其他的算法。</p>
+
+<p>TensorFlow在这里实际上所做的是，它会在后台给描述你的计算的那张图里面增加一系列新的计算操作单元用于实现反向传播算法和梯度下降算法。然后，它返回给你的只是一个单一的操作，当运行这个操作时，它用梯度下降算法训练你的模型，微调你的变量，不断减少成本。</p>
+
+<p>现在，我们已经设置好了我们的模型。在运行计算之前，我们需要添加一个操作来初始化我们创建的变量：</p>
+
+<pre><code>init = tf.initialize_all_variables()
+</code></pre>
+
+<p>现在我们可以在一个<code>Session</code>里面启动我们的模型，并且初始化变量：</p>
+
+<pre><code>sess = tf.Session()
+sess.run(init)
+</code></pre>
+
+<p>然后开始训练模型，这里我们让模型循环训练1000次！</p>
+
+<pre><code>for i in range(1000):
+  batch_xs, batch_ys = mnist.train.next_batch(100)
+  sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
+</code></pre>
+
+<p>该循环的每个步骤中，我们都会随机抓取训练数据中的100个批处理数据点，然后我们用这些数据点作为参数替换之前的占位符来运行<code>train_step</code>。</p>
+
+<p>使用一小部分的随机数据来进行训练被称为随机训练（stochastic training）- 在这里更确切的说是随机梯度下降训练。在理想情况下，我们希望用我们所有的数据来进行每一步的训练，因为这能给我们更好的训练结果，但显然这需要很大的计算开销。所以，每一次训练我们可以使用不同的数据子集，这样做既可以减少计算开销，又可以最大化地学习到数据集的总体特性。</p>
+
+<h2 id="toc_4">评估我们的模型</h2>
+
+<p>那么我们的模型性能如何呢？</p>
+
+<p>首先让我们找出那些预测正确的标签。<code>tf.argmax</code>是一个非常有用的函数，它能给出某个tensor对象在某一维上的其数据最大值所在的索引值。由于标签向量是由0,1组成，因此最大值1所在的索引位置就是类别标签，比如<code>tf.argmax(y,1)</code>返回的是模型对于任一输入x预测到的标签值，而 <code>tf.argmax(y_,1)</code> 代表正确的标签，我们可以用 <code>tf.equal</code> 来检测我们的预测是否真实标签匹配(索引位置一样表示匹配)。</p>
+
+<pre><code>correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+</code></pre>
+
+<p>这行代码会给我们一组布尔值。为了确定正确预测项的比例，我们可以把布尔值转换成浮点数，然后取平均值。例如，<code>[True, False, True, True]</code> 会变成 <code>[1,0,1,1]</code> ，取平均值后得到 <code>0.75</code>.</p>
+
+<pre><code>accuracy = tf.reduce_mean(tf.cast(correct_prediction, &quot;float&quot;))
+</code></pre>
+
+<p>最后，我们计算所学习到的模型在测试数据集上面的正确率。</p>
+
+<pre><code>print sess.run(accuracy, feed_dict={x: mnist.test.images, y_: mnist.test.labels})
+</code></pre>
+
+<p>这个最终结果值应该大约是91%。</p>
+
+<p>这个结果好吗？嗯，并不太好。事实上，这个结果是很差的。这是因为我们仅仅使用了一个非常简单的模型。不过，做一些小小的改进，我们就可以得到97％的正确率。最好的模型甚至可以获得超过99.7％的准确率！（想了解更多信息，可以看看这个关于各种模型的<a href="http://rodrigob.github.io/are_we_there_yet/build/classification_datasets_results.html">性能对比列表</a>。)<br/>
+附件：<a href="media/14878150947508/input_data.py">input_data</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/2/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86.html'>基础知识</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14843637552703.html">
+                
+                  <h1>第5条：用枚举表示状态、选项、状态码</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>枚举只是一种常量命名的方式。某个对象所经历的各种状态就可以定义为一个简单的枚举集。比如说，用枚举表示socket connection的状态：</p>
+
+<pre><code>enum  EOCConnectionState{
+    EOCConnectionStateDisconnected，
+    EOCConnectionStateConnecting，
+    EOCConnectionStateConnected，
+}
+</code></pre>
+
+<p>这样便于理解，其中编译器会自动为每一个枚举分配一个独有的编号，从0开始，实现枚举所用的数据类型取决于编译器，不过其二进制位（bit)的个数必须能完全表示下枚举编号才行。在前例中，由于最大编号是2,所以使用1个字节的char类型即可。</p>
+
+<p>然而定义枚举变量的方式却不太简洁，要依如下语法编写：</p>
+
+<pre><code>enum EOCConnectionState state = EOCConnectionStateDisconnected;
+</code></pre>
+
+<p>若是每次不用敲入enum而只需写EOCConnectionState就好了。要想这样做，则需使用typedef关键字重新定义枚举类型：</p>
+
+<pre><code>enum EOCConnectionState {
+EOCConnectionStateDisconnected,
+EOCConnectionStateConnecting,
+EOCConnectionStateConnected,
+)；
+typedef enum EOCConnectionState EOCConnectionState;
+</code></pre>
+
+<p>现在可以用简写的EOCConnectionState来代替完整的enum EOCConnectionState 了：</p>
+
+<pre><code>EOCConnectionState state = EOCConnectionStateDisconnected;
+
+</code></pre>
+
+<p>在C++之后可以指定用何种“底层数据类型”来保存枚举类型的变量。这样做的好处是可以向前声明枚举变量了。若不指定底层数据类型，则无法向前声明枚举类型，因为编译器不清楚底层数据类型的大小,所以在用到此枚举类型时，也就不知道究竞该给变量分配多少空间。</p>
+
+<p>指定底层数据类型所用的语法是：</p>
+
+<pre><code>enum EOCConnectionStateConnectionState : NSInteger { /*...*/ };
+
+</code></pre>
+
+<p>还可以不使用编译器所分配的序号，而是手工指定某个枚举成员所对应的值。语法如下：</p>
+
+<pre><code>enum EOCConnectionStateConnectionState {
+EOCConnectionStateDisconnected = 1,
+EOCConnectionStateConnectingf
+EOCConnectionStateConnected
+}；
+</code></pre>
+
+<p>上述代码把EOCConnectionStateDisconnected的值设为1,而不使用编译器所分配的0，如前所述，接下来几个枚举的值都会在上一个的基础上递增1。比如说，EOCConnectionState-Connected的值就是3。</p>
+
+<p>还有一种情况应该使用枚举类型，那就是定义选项的时候。若这些选项可以彼此组合，则更应如此。只要枚举定义得对，各选项之间就可通过“按位或操作符”（bitwise OR operator)来组合。例如，iOSUI框架中有如下枚举类型，用来表示某个视图应该如何在水平或垂直方向上调整大小：</p>
+
+<pre><code>enum UIViewAutoresizing {
+   UIViewAutoresizingNone                  =0，
+   UIViewAutoresizingFlexibleLeftMargin    =1&lt;&lt;0,
+   UIViewAutoresizingFlexibleWidth         =1&lt;&lt;1,
+   UIViewAutoresizingFlexibleRightMargin   =1&lt;&lt;2,
+   □IViewAutoresizingFlexibleTopMargin     =1&lt;&lt;3,
+   UIViewAutoresizingFlexibleHeight        =1&lt;&lt;4,
+   UIViewAutoresizingFlexibleBottomMargin  =1&lt;&lt;5,
+}
+</code></pre>
+
+<p>每个选项均可以启用或者禁用，，使用上述方式来定义枚举值即可保证这一点，因为在每个枚举值所对应的二进制表示中，只有1个二进制位的值是1。用“按位或操作符”可组合多个选项，例如：<br/>
+<code>UIViewAutoResizingFlexibleWidth|UIViewAutoresizingFlexibleHeight<br/>
+</code><br/>
+下图列出了每个枚举成员的二进制值，并演示了刚才那两个枚举组合之后的值。用“按位或操作符”(bitwise OR operator)即可判断出是否已启用某个选项：</p>
+
+<pre><code>enum UIViewAutoresizing resizing =
+UIViewAutoresizingFlexiblGWidth | UIViewAutoresizingFlexibleHeight;
+
+if (resizing &amp; UIViewAutoresizingFlexibleWidth) {
+// UIViewAutoresizingFlexibleWidth is set
+}
+</code></pre>
+
+<p><img src="media/14843637552703/14845291672791.jpg" alt=""/><br/>
+　　上图中每个枚举值的二进制表示，以及对其中两个枚举值执行按位或操作之后的二进制值。</p>
+
+<p>　　在Foundation框架中也定义了一些辅助的宏，用这些宏来定义枚举类型时，也可以指定用于保存枚举值的底层数据类型。这些宏具备向后兼容（backward compatibility)能力，<font color=red><strong>如果目标平台的编译器支持新标准，那就使用新式语法，</strong></font>否则改用旧式语法。这些宏是用#define预处理指令来定义的，其中一个用于定义像EOCConnectionState这种普通的枚举类型，另一个用于定义像UIViewAutoresizing这种包含一系列选项的枚举类型，其用法如下：</p>
+
+<pre><code>typedef NS^ENUM(NSUInteger, EOCConnectionState) {
+    EOCConnectionStateDisconnected,
+    EOCConnectionStateConnecting,
+    EOCConnectionStateConnected,
+}；
+typedef NS_OPTIONS(NSUInteger, EOCPermittedDirection) {
+    EOCPermittedDirectionUp =   1   &lt;&lt;  0,
+    EOCPermittedDirectionDown   =   1   &lt;&lt;  1,
+    EOCPermittedDirectionLeft   =   1   &lt;&lt;  2,
+    EOCPermittedDirectionRight  =   1   &lt;&lt;  3,
+</code></pre>
+
+<p>最后还有一种枚举的用法，就是在switch语句里，有时可以这样定义：</p>
+
+<pre><code>typedef NS_ENUM(NSUInteger, EOCConnectionState) {
+    EOCConnectionStateDisconnected,
+    EOCConnectionStateConnecting,
+    EOCConnectionStateConnected,
+}；
+switch (currentState) {
+    EOCConnectionStateDisconnected:
+        // Handle disconnected state
+        break;
+    EOCConnectionStateConnecting:
+        // Handle connecting state
+        break;
+    EOCConnectionStateConnected:
+        // Handle connected state
+        break;
+}
+</code></pre>
+
+<p>我们总习惯在switch语句中加上default分支。然而，若是用枚举来定义状态机（state machine),则最好不要有default分支,因为不加default的话，如果稍后又加了一种状态，那么编译器就会发出警告信息，提示新加入的状态并未在switch分支中处理。假如写上了 default分支，那么它就会处理这个新状态，从而导致编译器不发瞀告信息，不利于程序的编写。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>应该用枚举来表示状态机的状态、传递给方法的选项以及状态码等值，给这些值起个易懂的名字。</li>
+<li>如果把传递给某个方法的选项表示为枚举类型，而多个选项又可同时使用，那么就将各选项值定义为2的幂，以便通过按位或操作将其组合起来。</li>
+<li>用NS_ENUM与NS_OPTIONS宏来定义枚举类型，并指明其底层数据类型。这样做可以确保枚举是用开发者所选的底层数据类型实现出来的，而不会采用编泽器所选的类型。</li>
+<li>在处理枚举类型的switch语句中不要实现default分支。这样的话，加入新枚举之后，编译器就会提示开发者：switch语句并未处理所有枚举，有利于定位TODO方位。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/1/14</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E7%86%9F%E6%82%89oc.html'>第一章 熟悉oc</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="14842935189837.html">
                 
@@ -207,445 +949,6 @@ NSString *const EOCStringConstant = @&quot;value&quot;;
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14842776114163.html">
-                
-                  <h1>第1条：了解Objective—C语言的起源</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">第2条：在类的头文件中尽量少引入其它头文件</a>
-</li>
-<li>
-<a href="#toc_1">第3条：多用字面量语法，少用与之等价的方法</a>
-<ul>
-<li>
-<a href="#toc_2">字面数值</a>
-</li>
-<li>
-<a href="#toc_3">字面量数组</a>
-</li>
-<li>
-<a href="#toc_4">字面量字典</a>
-</li>
-<li>
-<a href="#toc_5">可变数组与字典</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_6">要点</a>
-</li>
-</ul>
-
-
-<p>OC语言使用“消息结构”（messageing structure）而不是函数调用。OC是由Smalltalk演化而来。主要区别为：</p>
-
-<pre><code>//Messaging(OC)  
-
-Object *obj = [Object new];  
-[obj performWith:par1 and:par2];
-   
-//Function(C++)  
-
-Object *obj = new Object;    
-obj-&gt;perform(par1,par2);   
-</code></pre>
-
-<p>关键区别在于：使用消息结构的语言，其运行时所应执行的代码由运行环境所决定；而使用函数调用的语言，则由编译器决定。</p>
-
-<p>所有的OC语言的对象都应该如下声明：</p>
-
-<pre><code>NSString *str = @“The string”；
-</code></pre>
-
-<p>因为所有的对象所占内存总是分配在“堆空间”中，而绝不会分配在“栈”（stack）上。一般变量分配在栈上。<img src="media/14841901813337/QQ20170112-0@2x.png" alt="QQ20170112-0@2x"/></p>
-
-<p>要点：<br/>
-* OC为C语言添加了面向对象的特性，是它的超集。OC使用动态绑定的消息结构，也就是说，在运行时才会检查对象类型。接收一条消息之后，究竟应该执行何种代码，由运行时环境决定而不是编译器。<br/>
-* 理解C语言的核心概念有助于写好OC程序。尤其是要掌握内存模型和指针。</p>
-
-<h2 id="toc_0">第2条：在类的头文件中尽量少引入其它头文件</h2>
-
-<p>例如：<br/>
-创建一个EOCPerson的类，其中属性中包含有EOCEmployer的类。</p>
-
-<pre><code>//EOCPerson.h
-#import&lt;Foundation/Foundation.h&gt;
-@interface EOCPerson:NSObject
-@property (nonatomic,copy) NSString *firstname;
-@property (nonatomic,copy) NSString *lastname;
-@property (nonatomic,strong) EOCEmployer *employer;
-@end
-</code></pre>
-
-<p>这样做常见的方法是在头部引入：</p>
-
-<pre><code>#import “EOCEmployer.h”
-</code></pre>
-
-<p>但是我们在这里不需要知道EOCEmployer这个类的全部细节，只需要知道这里有一个类就好。所以有一个方法为：</p>
-
-<pre><code>@class EOCEmployer；
-</code></pre>
-
-<p>这叫做前向声明。现在EOCPerson的头文件变为：</p>
-
-<pre><code>//EOCPerson.h
-#import&lt;Foundation/Foundation.h&gt;
-
-@class EOCEmployer；
-
-@interface EOCPerson:NSObject
-@property (nonatomic,copy) NSString *firstname;
-@property (nonatomic,copy) NSString *lastname;
-@property (nonatomic,strong) EOCEmployer *employer;
-@end
-</code></pre>
-
-<p>但是EOCPerson类的实现文件则需要引入EOCEmployer类的头文件，因为知道其中所有的接口细节。于是，实现文件就是：</p>
-
-<pre><code>//EOCPerson.m
-#import &quot;EOCPerson.h&quot;;
-#import &quot;EOCEmployer.h&quot;
-
-@implementation EOCPerson
-//.....
-@end
-</code></pre>
-
-<p>要点：<br/>
-* 除非的确有必要，否则不要引入头文件。一般来说，应该在某个类的头文件中使用向前声明来提及别的类，并在实现文件中引入那些类的头文件。这样做可以尽量降低类之间的耦合。<br/>
-* 有时无法使用向前声明，比如要声明某各类所遵循的一项协议，这种情况下，尽量吧“该类所遵循的协议“的这条声明移至”class-continuation分类“中。如果不行的话，就把协议单独放在一个头文件中，然后将其引入。</p>
-
-<h2 id="toc_1">第3条：多用字面量语法，少用与之等价的方法</h2>
-
-<p>从OC1.0开始，有一种非常简单的方式创建NSString对象。这就是”字符串字面量（string literal）“，其语法如下所示：</p>
-
-<pre><code>NSString *string = @”effective OC 2.0“；
-</code></pre>
-
-<p>如果不用这种语法的话，就要以常见的alloc以及init方法来分配和初始化对象了。</p>
-
-<h3 id="toc_2">字面数值</h3>
-
-<p>有时候需要把整数、浮点数、布尔值封入OC对象中。这种情况下可以使用NSNumber类，该类可以处理多种类型的数值。最原始的创建方法为：</p>
-
-<pre><code>NSNumber *someNumber = [NSNumber numberWithInt:1];
-</code></pre>
-
-<p>上面这行代码创建了一个数字，将它的值设为了1.然而使用字面量能令代码更为整洁：</p>
-
-<pre><code>NSNumber *someNumber = @1；
-</code></pre>
-
-<h3 id="toc_3">字面量数组</h3>
-
-<p>创建方法为：</p>
-
-<pre><code>NSArray *animals =@[@&quot;cat&quot;,@&quot;dog&quot;,@&quot;mouse&quot;,@&quot;badger&quot;];
-</code></pre>
-
-<p>使用字面量获取则为：</p>
-
-<pre><code>NSString *dog = animals[1];
-</code></pre>
-
-<h3 id="toc_4">字面量字典</h3>
-
-<p>”字典“（dictionary）是一种映射性数据结构，可以向其中添加键值对。与数组一样字面量编写方式为：</p>
-
-<pre><code>NSDictionary *personData = @{@&quot;firstName&quot;:@&quot;Matt&quot;,
-                            @&quot;lastName&quot;:@&quot;Galloway&quot;,
-                            @&quot;age&quot;:@28}
-
-</code></pre>
-
-<h3 id="toc_5">可变数组与字典</h3>
-
-<p>通过取下标操作，可以访问数组中某个下标或者字典中某个键所对应的元素。如果数组与字典对象试课变得（mutable），那么也能通过下标修改其中的元素值。例如：</p>
-
-<pre><code>mutableArray[1] = @&quot;dog&quot;;
-mutableDictionary[@&quot;lastName&quot;] = @&quot;Galloway&quot;; 
-</code></pre>
-
-<h2 id="toc_6">要点</h2>
-
-<ul>
-<li>应该使用字面量语法来创建字符串、数值、数组、字典。与创建此类对象的常规方法相比，这么做更加简明扼要。</li>
-<li>应该通过下标来操作和访问数组小标或者字典中的键所对应的元素。</li>
-<li>用字面量语法创建数组或者字典时，若值中有nil，则会抛出异常。因此，务必保证值中不包含有nil。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/1/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%80%E7%AB%A0%20%E7%86%9F%E6%82%89oc.html'>第一章 熟悉oc</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14839432188714.html">
-                
-                  <h1>英语考试翻译总结</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">第一章</h2>
-
-<ol>
-<li>我曾经有一个老师当他的学生们搞砸了一些事情的时候叫他们傻瓜。这个老师是我们的管弦乐指挥，他是一个暴躁的乌克兰移民者，名字叫Jerry Kupchynsky，并且当某人走音时他将会停下整个组的人去怒吼。</li>
-<li>传统的智慧认为老师应该帮助学生去梳理知识，而不是将知识灌输进他们的脑袋中。作业和合作学习是备受欢迎的；像讲课和背诵这些传统的方法被认为是“钻杀”被人反对，被贬为是一种一定正确的方法去吸干年轻人的创造力和积极性。</li>
-<li>长期受人怀疑的死记硬背现在被认为是那些来自印度的家庭的孩子在全国拼字比赛中大胜同龄人的一个原因。</li>
-<li>当然，令人担心的是失败会使孩子们的心灵受到损伤，削弱他们的自尊。</li>
-<li>研究人员认为最有效的老师通常带领学生们通过合作学习和讨论来获取知识。</li>
-</ol>
-
-<h2 id="toc_1">第二章</h2>
-
-<ol>
-<li>一个新的研究消除了某些美国人所珍视的观点，即音乐可以提升孩子的智商。</li>
-<li>对于这一点，只有几十个研究曾经测试过传闻中的学习音乐给智力带来的好处，并且只有五个使用了随机控制研究，即研究被设计去分离那些因果效应。</li>
-<li>尽管只持续了15分钟，但是这种效应被吹嘘成为可持续促进孩子的智商提高，乔治亚州州长 Zell Mille 曾经在1988年保证每年有超过100万美元资金去为州里的每一个孩子提供一张古典音乐唱片。</li>
-<li>我们教孩子们莎士比亚不是因为我们认为它将帮助孩子们在SAT中做的更好，我们做这些是因为我们相信莎士比亚是重要的。</li>
-<li>总管人类历史和古代，音乐已经成为了人类动物的一种不可或缺的品质，世界上每一种文化的一个共性——包括儿童音乐。</li>
-</ol>
-
-<h2 id="toc_2">第三章</h2>
-
-<ol>
-<li>据估计有大约3亿中国人在使用英语读和写，但是没有受到足够的练习，因此加剧了这种经常被嘲笑的中式英语的使用。</li>
-<li>正如罗马将他们的语言在所占领的地域内传播作为一种统治的标记，如今与之等价的是将一种语言作为通用语的标签。</li>
-<li>随着众多有着不同语音和语法结构语言的交互，英语改变成其他语言将产生一些混合语言，这些语言不一定有着“正确”的英语语法，并且会强调本地语言所特有的不同的语音和语调，这些都是不足为奇的。</li>
-<li>中式英语从其他语言中的浮现，并且努力去摆脱中式英语是短期的调整，但是从长远来看，看到混合语言的规范化将不足为奇。</li>
-<li>语言对于文化和历史背景来说是独一无二的，并且保留剩下的世界语言遗产和见证一个新语言的出现，都在扩大语言熔炉的过程中至关重要。</li>
-</ol>
-
-<h2 id="toc_3">第四章</h2>
-
-<ol>
-<li>一部分原因来自于他对于风险与回报的独特视角，这种观点违背了投资人对于短期利益的观点。</li>
-<li>迪士尼的个性中混合了美国小镇居民怀旧的价值观，这种价值观伴随着现代科学和技术将会改变我们生活的信心。</li>
-<li>电影的成功帮助迪士尼促进了建立高端企业文化的原则，这种原则对公司未来的成功起到了重要的作用。</li>
-<li>如果缺少了才华，劳动和员工的奉献，任何一个迪士尼项目都无法落地。</li>
-<li>他知道要令直觉有意义必须要让他被实现，并且需要一系列的严密的分析和实打实的辛勤工作，同时需要围绕在他身边的那些艺术家的真正才华作为支撑。</li>
-</ol>
-
-<h2 id="toc_4">第五章</h2>
-
-<ol>
-<li>3D打印的兴起——通过互联网下载设计模型并且小规模的生产——可能预示着新一代生产者的出现，他们将“为发达国家带来空前多样化的产品”。</li>
-<li>在未来，新的技术和信息系统将简化日常杂务，每天的任务：想象一下一个可以自动摆放食物的冰箱，一个可以清洁，甩干，和折叠的洗衣机，在这之前可以根据一周的天气，运用算法推荐最合适的着装。</li>
-<li>对于全球来说，互联网的出现所带来的最大的影响是权利从政府和机构到个人的权利再分配。</li>
-<li>不像传统的媒体，他们的记者和编辑将精确性背景放到首位，基于互联网的媒体允许任何上网的人去发布不准确的消息，诽谤，或者是大范围的宣传——通常作者没有承担什么后果。</li>
-<li>因为技术渗透到了所有的这些领域，下一代的专家，记者和政策制定者将需要去掌握每一个领域，从而去理解技术作为一个当今世界改变的催化剂，是怎样快速的改变着工业，政府还有处于政治学核心的古老动态关系，即国家与个人的关系。</li>
-</ol>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/1/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='English%20Study.html'>English Study</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14837695242474.html">
-                
-                  <h1>英语考试词汇部分总结</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">第一章</h2>
-
-<pre><code> striking——显著地，突出的
- slender ——苗条的，瘦的
- impeccable——无瑕疵的，没有缺点的
- discernible——可辨别的，可识别的
- sloppy——草率的，粗心的
- sagaciousness——睿智，聪颖
- arrogance——自大，傲慢
- vow——誓言
- homonym——同音异议词
- glisten——晶莹剔透
- fix the blame on——归罪与。。 
-</code></pre>
-
-<pre><code>mess up——screwed up——搞砸
-poking——stab——戳
-toting——drag——拖，手提
-called my kid name——insult kids——责怪孩子
-predictor——indicator——指示，预示
-manifesto——presentation——展示，告示
-anagram——word play——文字游戏
-traumatize——hurt——使。。。收到创伤
-collaborative——cooperative——合作
-disciplinarians——authoritarian——权利主义者
-</code></pre>
-
-<h2 id="toc_1">第二章</h2>
-
-<pre><code>molecular——分子
-hyperactive——过度活跃的
-integrated——整合，合并
-retention——保留
-condense——浓缩
-clerical——文书方面的
-alert——警告
-aesthetically——美学上的
-compelling——令人瞩目的
-undeniably——不能否认的
-</code></pre>
-
-<pre><code>dispel——eliminate——驱散，消除
-overwhelming——tough——艰难，压倒性的
-extrinsic——exterior——外在的
-infamous——notorious——声名狼藉的
-recruit——select——雇佣，选择
-aptitude——talent——天赋
-enrichment——abundance——丰富，充裕
-outperformed——outdone——胜过，优于
-replicate——repeat——重复，复制
-integral——entire——完整的，全部的
-</code></pre>
-
-<h2 id="toc_2">第三章</h2>
-
-<pre><code>in theory——在理论上
-deficiency——缺陷，缺少
-reveling in——得意于，纵情于
-influx——流入
-for the sake of——为了，原因是
-preoccupation——全神贯注
-deviation——偏差
-facilitate——方便，便于
-elaborate——详细描述
-boggle at——吃惊，害怕
-</code></pre>
-
-<pre><code>fused——merged——混合，合并
-encompass——comprise——由。。。组成
-fortified——strengthened——加强
-segregation——separation——分离
-mounting——increasing——日益增长
-ethnically——racially——种族的，民族的
-muffle——repress——消除，安抚
-wiping——clearing out——擦除
-touched upon——触及到
-counter——contrary to——相反
-</code></pre>
-
-<h2 id="toc_3">第四章</h2>
-
-<pre><code>villain——混蛋，恶棍
-with regard to——关于，涉及到
-eclipse——日蚀
-condemn——谴责
-immense——巨大的，极大的
-treacherous——骗人的，奸诈的
-wield——使用
-depict——描绘
-mediate——调解，解决
-alternative——非正常的，独特的
-</code></pre>
-
-<pre><code>in conflict with——in opposition to——和。。冲突
-visionary——foreseer——有先见之明的人
-brink——edge——边缘
-reckless——bold——不仔细的，鲁莽的
-integrate——put together——整合
-initiate——lead——开始，带领
-be consistent with——be the same as——与。。一致
-setback——discouragement——挫折
-dazzle——impress——使人印象深刻
-strive for——try hard for——努力追求
-</code></pre>
-
-<h2 id="toc_4">第五章</h2>
-
-<pre><code>magnitude——extent——量级，大小
-boost——raised——促进，提升
-access——opportunity to use——可以使用
-exponential leap——rapid increase——指数级增长
-demise——death——死亡
-sagacity——insight——洞察力
-conducive——beneficial——有助于
-defy——refute——反驳
-available——obtainable——可获得的
-supersede——replace——取代
-</code></pre>
-
-<pre><code>permeate——渗透
-unprecedented——空前的
-dissemination——传播
-notorious——声名狼藉
-herald——预示，标志
-authoritarian——独裁主义
-premium——高端，优质
-underscore——强调
-downside——缺点，负面
-authoritative——权威性 
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/1/7</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='English%20Study.html'>English Study</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -657,7 +960,7 @@ authoritative——权威性
 			  </div>
 			  <div class="large-6 columns">
 			<p class="text-right" style="padding-top:25px;">
-			
+			 <a href="all_21.html">&raquo; Next Page</a> 
 			</p>
 			  </div>
 			</div>
@@ -717,6 +1020,8 @@ authoritative——权威性
             <a href="English%20Study.html"><strong>English Study</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
+        
+            <a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html"><strong>常见面试问题</strong></a>
          
         </p>
 
@@ -733,31 +1038,31 @@ authoritative——权威性
 	      
 		      
 			      <li class="post">
-			        <a href="15087194946164.html">动态规划</a>
+			        <a href="15097619961308.html">贪心算法（构造霍夫曼树）</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15083737124086.html">使用RAC的基本操作</a>
+			        <a href="15096800741665.html">贪心算法（活动选择问题）</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15082871830637.html">使用Masonry框架来构造iOS布局</a>
+			        <a href="15090074391982.html">常见iOS面试题基础篇</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15082052235459.html">ReactiveCocoa初步了解</a>
+			        <a href="15090066726855.html">常见iOS面试题（智力题）</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15077122789332.html">多用块枚举，与快速遍历少用for循环</a>
+			        <a href="15088085969493.html">最长公共子序列(动态规划)</a>
 			      </li>
 		     
 		  

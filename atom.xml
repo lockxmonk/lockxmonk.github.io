@@ -4,13 +4,395 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-10-22T13:37:02+08:00</updated>
+  <updated>2017-11-03T15:27:51+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[贪心算法（构造霍夫曼树）]]></title>
+    <link href="https://lockxmonk.github.io/15097619961308.html"/>
+    <updated>2017-11-04T10:19:56+08:00</updated>
+    <id>https://lockxmonk.github.io/15097619961308.html</id>
+    <content type="html"><![CDATA[
+<p>霍夫曼树的构造是使用了变长编码来减少数据所占空间，一般我们只考虑<strong>前缀码</strong>，即没有任何码字是其它码字的前缀。</p>
+
+<p>我们的构造过程如下所示：</p>
+
+<p><img src="media/15097619961308/15097621720916.jpg" alt=""/></p>
+
+<p>这里我们根据上述表示，我们每次总是“贪心”的选择两个最小的值来求和，并插入队列中。所以我们可以构造一个最小优先队列来存储各字母的频率。算法代码如下：</p>
+
+<pre><code class="language-c++">//
+//  main.cpp
+//  HUFFMAN
+//
+//  Created by LZH on 2017/11/4.
+//  Copyright © 2017年 LZH. All rights reserved.
+//
+
+#include &lt;iostream&gt;
+#include &lt;queue&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+typedef struct BitNode
+{
+    int frep;
+    struct BitNode *left;
+    struct BitNode *right;
+}Node;
+
+//定义比较结构
+struct cmp1{
+    bool operator ()(int &amp;a,int &amp;b){
+        return a&gt;b;//最小值优先
+    }
+};
+//构造霍夫曼树
+void HUFFMAN(int c, priority_queue&lt;int, vector&lt;int&gt;, cmp1&gt; &amp;que1)
+{
+    int n = c;
+    for (int i=0; i&lt;n-1; i++) {
+        Node *newNodeZ = (Node*)malloc(sizeof(Node));
+        Node *newNodeX = (Node*)malloc(sizeof(Node));
+        Node *newNodeY = (Node*)malloc(sizeof(Node));
+        newNodeX-&gt;frep = que1.top();
+        que1.pop();
+        newNodeY-&gt;frep = que1.top();
+        que1.pop();
+        newNodeZ-&gt;left = newNodeX;
+        newNodeZ-&gt;right = newNodeY;
+        
+        newNodeZ-&gt;frep =newNodeX-&gt;frep + newNodeY-&gt;frep;
+        que1.push(newNodeZ-&gt;frep);
+    }
+}
+
+int main() {
+//    priority_queue&lt;int&gt; que; //构造优先队列
+    int b[6] = {9,5,12,13,16,45};
+//    vector&lt;int&gt; a(b,b+6);
+    priority_queue&lt;int , vector&lt;int&gt;, cmp1 &gt;que1; //最小优先队列
+    for (int i=0; i&lt;6; i++) {
+        que1.push(b[i]);
+    }
+    HUFFMAN(6, que1);
+    while (!que1.empty()) {
+        cout&lt;&lt;que1.top()&lt;&lt;&#39; &#39;;
+        que1.pop();
+    }
+    return 0;
+}
+
+</code></pre>
+
+<p>最后输出为100，返回了编码树的根节点。<br/>
+<img src="media/15097619961308/15097623765624.jpg" alt=""/></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[贪心算法（活动选择问题）]]></title>
+    <link href="https://lockxmonk.github.io/15096800741665.html"/>
+    <updated>2017-11-03T11:34:34+08:00</updated>
+    <id>https://lockxmonk.github.io/15096800741665.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15096800741665/15096801101097.jpg" alt=""/></p>
+
+<p>这个问题是一个典型的可以运用贪心算法的题目，我们在初始的选择一个活动之后，应该将之后的资源被其他任务尽量多的占用。所以我们应该第一个选择活动最快结束的活动，因为它剩下的资源可以被它之后开始的任务尽量多的使用。所以我们可以运用一种递归形式或者迭代算法来表达这个形式：</p>
+
+<pre><code class="language-c++">//
+//  main.cpp
+//  Greedy_Activity_Selector
+//
+//  Created by LZH on 2017/11/3.
+//  Copyright © 2017年 LZH. All rights reserved.
+//
+
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+void print(int n)
+{
+    cout&lt;&lt;n&lt;&lt;&#39; &#39;;
+}
+
+/**
+ 迭代形式函数
+
+ @param s 活动开始时间数组
+ @param f 活动结束时间数组
+ @param result  用于存储结果
+ */
+void GREED_ACTIVITY_SELECTOR(vector&lt;int&gt; s , vector&lt;int&gt; f , vector&lt;int&gt; &amp;result)
+{
+    int n = s.size();
+    result.push_back(1);
+    int k=1;
+    for (int m=2; m&lt;=n; m++) {
+        if (s[m]&gt;=f[k]) {
+            result.push_back(m);
+            k = m;
+        }
+    }
+}
+
+/**
+ 尾递归形式函数
+
+ @param s 活动开始时间数组
+ @param f 活动结束时间数组
+ @param k 从活动k开始计算
+ @param n 共有n个活动
+ @param result 用于存储结果
+ */
+void RECURSIVE_ACTIVITY_SELECTOR(vector&lt;int&gt; s,vector&lt;int&gt; f, int k, int n, vector&lt;int&gt; &amp;result)
+{
+    int m = k+1;
+    while (m&lt;=n &amp;&amp; s[m]&lt;=f[k]) {
+        m++;
+    }
+    if (m&lt;=n) {
+        result.push_back(m);
+        RECURSIVE_ACTIVITY_SELECTOR(s, f, m, n ,result);
+    }
+}
+
+int main() {
+    int a[12] ={0,1,3,0,5,3,5,6,8,8,2,12};
+    int b[12] ={0,4,5,6,7,9,9,10,11,12,14,16};
+    vector&lt;int&gt; s(a,a+12);
+    vector&lt;int&gt; f(b,b+12);
+    vector&lt;int&gt; result;
+    RECURSIVE_ACTIVITY_SELECTOR(s, f, 0, 11, result);
+    GREED_ACTIVITY_SELECTOR(s, f, result);
+    for_each(result.begin(),result.end(),print);
+    return 0;
+}
+
+</code></pre>
+
+<p>其中递归形式的流程如下图所示：<br/>
+<img src="media/15096800741665/15096804218816.jpg" alt=""/></p>
+
+<p>但两种算法运行时间类似都为\(\Theta(n)\)</p>
+
+<h2 id="toc_0">与动态规划的不同</h2>
+
+<p>贪心算法通过做出局部最优来构造全局最优解。换句话说，直接做出在当前问题下看起来最优的选择，而不必考虑子问题的解。</p>
+
+<p><strong><font color=red>在动态规划中，每个步骤都要进行一次选择，但选择通常依赖于子问题的解</font></strong>，因此，我们通常以自底向上的方式来求解动态规划问题，先求解较小的子问题，然后是较大的子问题。但是在贪心算法中，我们总是做出在当时看起来最佳的选择，然后求解剩下的唯一子问题。<strong><font color=red>贪心算法进行选择时可能依赖之前做出的选择，但不依赖于任何将来的选择或者是子问题的解。</font></strong>所以贪心算法在进行第一次选择时不求解任何子问题，自顶向下进行逐步选择，将给定的子问题实例变小。</p>
+
+<p>两者最典型的区别，可以用<code>分数背包</code>和<code>0-1背包</code>问题来举例，这里不做细说。</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[常见iOS面试题基础篇]]></title>
+    <link href="https://lockxmonk.github.io/15090074391982.html"/>
+    <updated>2017-10-26T16:43:59+08:00</updated>
+    <id>https://lockxmonk.github.io/15090074391982.html</id>
+    <content type="html"><![CDATA[
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[常见iOS面试题（智力题）]]></title>
+    <link href="https://lockxmonk.github.io/15090066726855.html"/>
+    <updated>2017-10-26T16:31:12+08:00</updated>
+    <id>https://lockxmonk.github.io/15090066726855.html</id>
+    <content type="html"><![CDATA[
+<ul>
+<li>
+<a href="#toc_0">智力题</a>
+<ul>
+<li>
+<a href="#toc_1">四个人夜间要过一座桥，每人走路速度不一样，过桥需要时间分别是1，2，5，10分钟。现在只有一只手电筒在过桥时必须带，同时只能两人过，如何安排能够让四人最快速度过桥？</a>
+</li>
+<li>
+<a href="#toc_2">有25匹马赛跑，每次只能跑5匹，最快能赛几次找出跑得最快的3匹马？</a>
+</li>
+<li>
+<a href="#toc_3">如果你变成硬币那么小，然后被扔进一个搅拌机里，你将如何脱身？</a>
+</li>
+<li>
+<a href="#toc_4">五个强盗抢到100个金币来分赃，强盗1提出分配方案，为了防止他分配不公，强盗们达成一致：他的方案必须有所有人（包括1号自己）的半数以上（注意，必须大于百分之五十）通过才可执行。否则，他将被杀死，再由2号强盗提出分配方案，2号的方案也要所有剩下的人（包括他自己）的半数以上通过。否则他也将被杀死，依次类推。假设这五个强盗都贪婪成性、残忍无比、绝顶聪明而又一诺千金，都想自己得到最多，都想看到别人死去而自己活。请问，1号强盗要怎样分配才能使自己活着而得到的黄金最多？为什么？</a>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h2 id="toc_0">智力题</h2>
+
+<h3 id="toc_1">四个人夜间要过一座桥，每人走路速度不一样，过桥需要时间分别是1，2，5，10分钟。现在只有一只手电筒在过桥时必须带，同时只能两人过，如何安排能够让四人最快速度过桥？</h3>
+
+<pre><code class="language-c">答：1和2 先过。1返回，5和10先过，2返回，1和2一起过。一共时间=2+1+10+2+2=17分钟
+</code></pre>
+
+<h3 id="toc_2">有25匹马赛跑，每次只能跑5匹，最快能赛几次找出跑得最快的3匹马？</h3>
+
+<pre><code class="language-c">答案是7次。
+
+1. 首先将25匹马分成5组a、b、c、d、e进行比赛。比赛的次数就是5次。得到每组的第一名，分别编号a1,b1,c1,d1,e1。
+
+2. 然后我们将每组的第一名进行比赛，得出结果。假设a1&gt;b1&gt;c1&gt;d1&gt;e1。（大于号表示a1比b1快，1表示第一名）。在这个地方我们可以推断出，a1是所有马中最快的，所以它是第一名。d1,e1不可能是前三的马，同时这两匹马所在的组也不可能是前三的马。所以排除这两组马，还剩三组15匹马。现在需要找出第二快和第三快的马。
+
+3. 第二名和第三名的马在刚才的比赛中有以下几种分布情况：
+
+　　全部在a组（最快的马所在的组），那么它有是a1和a3.
+
+　　全部在b组，那么它们就是b1和b2。
+
+　　一匹在a组一匹在b组，那么它们是a2和b1.无论是第三名在a组还是第二名在a组都是这两匹。
+
+　　一匹在a组一匹在c组，那么它们是a2和c1。
+
+　　一匹在b组一匹在c组，那么它们是b1和c1。
+
+　　所以我们把a2,a3,b1,b2,c1拿出来再进行一场比赛。取前两名就是最终的结果。
+</code></pre>
+
+<h3 id="toc_3">如果你变成硬币那么小，然后被扔进一个搅拌机里，你将如何脱身？</h3>
+
+<pre><code class="language-c">这是Google的面试题，原题大概是：
+你被缩小到一枚硬币大小，密度不变质量减小，被扔进一个搅拌机里，搅拌机60秒后开始转动，你会怎么办？
+
+答案是：直接跳出来就可以了
+</code></pre>
+
+<h3 id="toc_4">五个强盗抢到100个金币来分赃，强盗1提出分配方案，为了防止他分配不公，强盗们达成一致：他的方案必须有所有人（包括1号自己）的半数以上（注意，必须大于百分之五十）通过才可执行。否则，他将被杀死，再由2号强盗提出分配方案，2号的方案也要所有剩下的人（包括他自己）的半数以上通过。否则他也将被杀死，依次类推。假设这五个强盗都贪婪成性、残忍无比、绝顶聪明而又一诺千金，都想自己得到最多，都想看到别人死去而自己活。请问，1号强盗要怎样分配才能使自己活着而得到的黄金最多？为什么？</h3>
+
+<blockquote>
+<p>显然，5号是最不合作的，因为他没有被扔下海的风险，从直觉上说，每扔下去一个，潜在的对手就少一个；4号正好相反，他生存的机会完全取决于前面还有人活着，因此此人似乎值得争取；3号对前两个的命运完全不同情，他只需要4号支持就可以了；2号则需要3票才能活，那么，你…… 　　思路对头，但是太笼统了，不要忘了我们的假设前提：每个人都十足理性，都不可能犯逻辑错误。所以，你应该按照严格的逻辑思维去推想他们的决定。让我们从后往前推理：5号不用说了，他的策略最简单：巴不得把所有人都送去喂鲨鱼(但要注意：这并不意味着他要对每个人投反对票，他也要考虑其他人方案通过的情况)。来看4号：如果1～3号强盗都喂了鲨鱼，只剩4号和5号的话，5号一定投反对票让4号喂鲨鱼，以独吞全部金币。所以，4号惟有支持3号才能保命。</p>
+
+<p>3号知道这个策略，就会提(100，0，0)的分配方案，对4号、5号一毛不拔而将全部金币归为己有，因为他知道4号一无所获但还是会投赞成票，再加上自己一票他的方案即可通过。不过，2号推知到3号的方案，就会提出(98，0，l，1)的方案，即放弃3号，而给予4号和5号各1枚金币。由于该方案对于4号和5号来说比在3号分配时更为有利，他们将支持他而不希望他出局而由3号来分配。这样，2号将拿走98枚金币。不过，2号的方案会被l号所洞悉，l号并将提出(97，0，1，2，0)或(97，0，1，0，2)的方案，即放弃2号，而给3号1枚金币，同时给4号或5号2枚金币。由于l号的这一方案对于3号和4号(或5号)来说，相比2号分配时更优，他们将投l号的赞成票，再加上1号自己的票，1号的方案可获通过，97枚金币可轻松落入腰包。这无疑是1号能够获取最大收益的方案了！</p>
+</blockquote>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[最长公共子序列(动态规划)]]></title>
+    <link href="https://lockxmonk.github.io/15088085969493.html"/>
+    <updated>2017-10-24T09:29:56+08:00</updated>
+    <id>https://lockxmonk.github.io/15088085969493.html</id>
+    <content type="html"><![CDATA[
+<p><strong>最长公共子序列问题（LCS）</strong>给定两个序列\(X=&lt;{x_1,x_2,...x_m}&gt;和Y=&lt;y_1,y_2,...y_n&gt;\),求X和Y长度最长的公共子序列。总共分三个步骤：</p>
+
+<h2 id="toc_0">步骤一：刻画最长公共子序列的特征</h2>
+
+<p><img src="media/15088085969493/15088091467243.jpg" alt=""/></p>
+
+<h2 id="toc_1">步骤二：一个递归解</h2>
+
+<p><img src="media/15088085969493/15088095444692.jpg" alt=""/></p>
+
+<h2 id="toc_2">步骤三：计算LCS的长度</h2>
+
+<p><img src="media/15088085969493/15088132625221.jpg" alt=""/></p>
+
+<p>上述过程我们有如下图来表示：<br/>
+<img src="media/15088085969493/15088133360817.jpg" alt=""/></p>
+
+<h2 id="toc_3">步骤4 构造LCS</h2>
+
+<p><img src="media/15088085969493/15088133035826.jpg" alt=""/></p>
+
+<p>这里我们用C++来构造这个算法：</p>
+
+<pre><code class="language-c++">//
+//  main.cpp
+//
+//  Created by LZH on 2017/10/30.
+//  Copyright © 2017年 梁中豪. All rights reserved.
+//
+
+
+#include &lt;iostream&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+using namespace std;
+
+//计算LCS的长度
+void LCS_LENGTH(char *X ,char *Y ,int **b ,int **c ,int &amp;m ,int &amp;n)
+{
+    //    int m = sizeof(X)/sizeof(char);
+    //    int n = sizeof(Y)/sizeof(char);
+    
+    //    int b[m][n];
+    //    int c[m][n];
+    
+    for (int i=1; i&lt;m; i++) {
+        for (int j=1; j&lt;n; j++) {
+            if (X[i]==Y[j]) {
+                c[i][j] = c[i-1][j-1]+1;
+                b[i][j] = 1;
+            }
+            else if (c[i-1][j]&gt;=c[i][j-1])
+            {
+                c[i][j] = c[i-1][j];
+                b[i][j] = 2;
+            }
+            else
+            {
+                c[i][j] = c[i][j-1];
+                b[i][j] = 3;
+            }
+        }
+    }
+}
+
+void PRINT_LCS(int **b,char *X,int i,int j)
+{
+    if (i==0 || j==0) {
+        return;
+    }
+    if (b[i][j]==1) {
+        PRINT_LCS(b, X, i-1, j-1);
+        cout &lt;&lt; X[i] &lt;&lt;endl;
+    }
+    else if (b[i][j]==2)
+    {
+        PRINT_LCS(b, X, i-1, j);
+    }
+    else
+    {
+        PRINT_LCS(b, X, i, j-1);
+    }
+}
+
+int main()
+{
+    char X[8] = {&#39;x&#39;,&#39;A&#39;,&#39;B&#39;,&#39;C&#39;,&#39;B&#39;,&#39;D&#39;,&#39;A&#39;,&#39;B&#39;};
+    char Y[7] = {&#39;y&#39;,&#39;B&#39;,&#39;D&#39;,&#39;C&#39;,&#39;A&#39;,&#39;B&#39;,&#39;A&#39;};
+    int m = sizeof(X)/sizeof(char);
+    int n = sizeof(Y)/sizeof(char);
+    int **b =new int*[m];
+    for (int i = 0; i&lt;m; i++) {
+        b[i] = new int[n];
+    }
+    
+    int **c = new int*[m];
+    for (int i = 0; i&lt;m; i++) {
+        c[i] = new int[n];
+    }
+    LCS_LENGTH(X,Y,b,c,m,n);
+    PRINT_LCS(b,X,m-1,n-1);
+    return 0;
+}
+
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[动态规划]]></title>
@@ -1893,435 +2275,6 @@ block();
 <li>使用匿名对象来隐藏类型名称（或类名）。</li>
 <li>如果具体类型不重要，重要的是对象能够响应（定义在协议里的）特定方法，那么可使用匿名对象来表示。</li>
 </ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[KVO的简单实现]]></title>
-    <link href="https://lockxmonk.github.io/15042539845357.html"/>
-    <updated>2017-09-01T16:19:44+08:00</updated>
-    <id>https://lockxmonk.github.io/15042539845357.html</id>
-    <content type="html"><![CDATA[
-<p>之间看有关<code>OC</code>和<code>iOS</code>的书都会看到<code>KVO</code>这个名词。所以今天来学习和实现一下。简单的说<code>KVO</code>即<code>Key-Value Observing</code>,它提供一种机制,当指定的对象的属性被修改后,则对象就会接受到通知。 </p>
-
-<p>它来源于设计模式中的观察者模式，其基本思想就是：</p>
-
-<blockquote>
-<p>一个目标对象管理所有依赖于它的观察者对象，并在它自身的状态改变时主动通知观察者对象。这个主动通知通常是通过调用各观察者对象所提供的接口方法来实现的。观察者模式较完美地将目标对象与观察者对象解耦。</p>
-</blockquote>
-
-<p>我们一般用到的都是自动实现<code>KVO</code>，所以我这里就不实现手动的<code>KVO</code>了。实现<code>KVO</code>需要两个主要的方法：</p>
-
-<pre><code class="language-objc">//注册观察者
-- (void)addObserver:(NSObject *)observer 
-        forKeyPath:(NSString *)keyPath 
-        options:(NSKeyValueObservingOptions)options 
-        context:(void *)context;
-        
-//当观察的对象属性有所改变就会通知观察者，该方法用来处理变更通知
-- (void)observeValueForKeyPath:(NSString *)keyPath 
-                     ofObject:(id)object 
-                        change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change 
-                        context:(void *)context;
-</code></pre>
-
-<p>这两个方法在<code>Foundation/NSKeyValueObserving.h</code>中，<code>NSObject，NSArray，NSSet</code>均实现了以上方法，因此我们不仅可以观察普通对象，还可以观察数组或结合类对象。</p>
-
-<p>我们来举例说明：</p>
-
-<p>创建一个观察者类：</p>
-
-<pre><code class="language-objc">//
-//  Observer.h
-//  KVO机制
-//
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface Observer : NSObject
-
-@end
-
-
-
-//  Observer.m
-//  KVO机制
-#import &quot;Observer.h&quot;
-
-@implementation Observer
-
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change context:(void *)context{
-    //判断发送过来的通知中更改的属性是否是name
-    if ([keyPath isEqualToString:@&quot;name&quot;]) {
-        //获取更改属性的类的信息
-        Class classInfo = (__bridge Class)context;
-        NSString *className = [NSString stringWithFormat:@&quot;%s&quot;, object_getClassName(classInfo)];
-        NSLog(@&quot; &gt;&gt; class : [%@] , Name changed&quot;, className);
-        NSLog(@&quot; &gt;&gt; old name is %@&quot;, [change objectForKey:@&quot;old&quot;]);
-        NSLog(@&quot; &gt;&gt; new name is %@&quot;, [change objectForKey:@&quot;new&quot;]);
-    
-    }else{
-        /*
-         *注意：在实现处理变更通知方法 observeValueForKeyPath 时，
-         *要将不能处理的 key 转发给 super 的 observeValueForKeyPath 来处理。
-         */
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
-}
-
-@end
-
-</code></pre>
-
-<p>然后创建一个用于观察的<code>Target</code>类</p>
-
-<pre><code class="language-objc">//  Target.h
-//  KVO机制
-
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface Target : NSObject
-
-@property(nonatomic,assign) NSString *name;
-
-@end
-
-
-//  Target.m
-//  KVO机制
-
-
-#import &quot;Target.h&quot;
-
-@implementation Target
-//给name属性一个初始值，用于检测变化
--(instancetype)init{
-    if (self = [super init]) {
-        _name = @&quot;yue&quot;;
-    }
-    return self;
-}
-@end
-</code></pre>
-
-<p>然后我们在<code>main.m</code>中添加观察者来执行：</p>
-
-<pre><code class="language-objc">//  main.m
-//  KVO机制
-
-
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;Observer.h&quot;
-#import &quot;Target.h&quot;
-
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        //分别创建实例
-        Observer *observer = [[Observer alloc]init];
-        Target *target = [[Target alloc]init];
-        
-        //target 增加一个观察者，用于观察name属性
-        [target addObserver:observer forKeyPath:@&quot;name&quot; options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:(__bridge void * _Nullable)([Target class])];
-        //更改name属性的值，响应观察者的动作
-        [target setName:@&quot;hao&quot;];
-        //移除name的观察者，防止内存泄露
-        [target removeObserver:observer forKeyPath:@&quot;name&quot;];
-    }
-    return 0;
-}
-
-</code></pre>
-
-<p>我们运行后结果如下：</p>
-
-<p><img src="media/15042539845357/15042556319090.jpg" alt=""/></p>
-
-<p>可以发现是<code>Target</code>类发送过来的通知，说明属性已经变更。</p>
-
-<p>下面我们来讨论一下传过来了的参数。其中<code>addObserver</code>方法中的<code>option：</code>参数用于指定应该包含哪种通知。其中主要有以下几种：</p>
-
-<ul>
-<li><strong>NSKeyValueObservingOptionNew</strong>：指出<code>change</code>字典应该包含有新的属性（如果适用）。</li>
-<li><strong>NSKeyValueObservingOptionOld</strong>：指出<code>change</code>字典应该包含有旧的属性（如果适用）。</li>
-<li><strong>NSKeyValueObservingOptionInitial</strong>：把初始化的值提供给处理方法，一旦注册，立马就会调用一次。通常它会带有新值，而不会带有旧值。</li>
-<li><strong>NSKeyValueObservingOptionPrior</strong>： 分2次调用。在值改变之前和值改变之后。</li>
-</ul>
-
-<p>其中<code>observeValueForKeyPath</code>方法中的<code>change</code>参数是一个字典型数据。会根据<code>option</code>参数的变化来生成不同的数据。一般会包含<code>new</code>和<code>old</code>两个<code>key</code>。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第27条 使用“class-continuation分类”隐藏实现细节]]></title>
-    <link href="https://lockxmonk.github.io/15042325338088.html"/>
-    <updated>2017-09-01T10:22:13+08:00</updated>
-    <id>https://lockxmonk.github.io/15042325338088.html</id>
-    <content type="html"><![CDATA[
-<h2 id="toc_0">第一种用途</h2>
-
-<p>类中经常会包含一些无须对外公布的方法及实例变最。其实这些内容也可以对外公布, 并且写明其为私有，开发者不应依赖它们。但是<code>OC</code>的动态性，使得不可能实现真正的私有方法或私有实例变量。</p>
-
-<p>但是我们最好还是只把确实需要对外公布的那部分内容公开。那么，这种不需对外公布但却应该具有的方法及实例变量应该怎么写呢？此时，这个特殊的<code>“class-continuation分类”</code>就派上用场了。</p>
-
-<p><font color=red><strong>“class-continuation分类”和普通的分类不同，它必须定义在其所接续的那个类的实现文件里。</strong></font></p>
-
-<p>例如：</p>
-
-<pre><code class="language-objc">//EOCPerson.m
-@interface EOCPerson () {
-    NSString * _anInstanceVariable;
-}
-// Method declarations here 
-@end
-@implementation EOCPerson {
-    int _anotherInstanceVariable;
-}
-// Method implementations here 
-@end
-</code></pre>
-
-<p>我们这样定义的目的是将这些方法或者实例变量隐藏起来，只供本类使用。即便在公共接口里将其标注为private,也还是会泄漏实现细节。</p>
-
-<p>例如有个绝密的类，不想给其他人知道。 假设你所写的某个类拥有那个绝密类的实例，而这个实例变量又声明在公共接口里面：</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-@class EOCSuperSecretClass;
-
-@interface EOCClass : NSObject {
-@private
-    EOCSuperSecretClass *_secretInstance;
-@end
-</code></pre>
-
-<p>这样别人就会知道有一个叫<code>EOCSuperSecretClass</code>的类了。</p>
-
-<p>所以我们通常应该这样：</p>
-
-<pre><code class="language-objc">// EOCClass.h
-#import &lt;Foundation/Foundation.h&gt;
-@interface EOCClass : NSObject 
-@end
-
-// EOCClass .m 
-#import &quot;EOCClass.h&quot;
-#import &quot;EOCSuperSecretClass.h&quot;
-@interface EOCClass ()  {
-    EOCSuperSecretClass *_secretInstance;
-@end
-
-@implementation EOCClass
-// Methods here
-@end
-</code></pre>
-
-<h2 id="toc_1">第二种用途</h2>
-
-<p>编写<code>Objective-C++</code>代码时 <code>“class-continuation分类”</code>也很有用。<code>Objective-C++</code>是 <code>OC</code>与<code>C++</code>的混合体，其代码可以用这两种语言来编写。由于兼容性原因，游戏后 端一般用<code>C++</code>来写。另外，有时候要使用的第三方库可能只有<code>C++</code>绑定，此时也必须使用 <code>C++</code>来编码。在这些情况下，使用<code>&quot;class-continuation分类&quot;</code>会很方便。假设某个类打算这样写：</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt; 
-#include &quot;SomeCppClass.h&quot; 
-@interface EOCClass : NSObject { 
-@private
-    SomeCppClass _cppClass;
-@end
-</code></pre>
-
-<p>该类的实现文件可能叫做<code>EOCClass.mm</code>,其中<code>.mm</code>扩展名表示编译器应该将此文件按<code>Objective-C++</code>来编译，否则，就无法正确引人<code>SomeCppClass.h</code>了。然而请注意，名为<code>SomeCppClass</code>的这个<code>C++</code>类必须完全引入，因为编译器要完整地解析其定义方能得知<code>_cppClass</code>实例变量的大小。于是，只要是包含<code>EOCClass.h</code>的类，都必须编译为 <code>Objective-C++</code>才行，因为它们都引入了<code>SomeCppClass</code>类的头文件。这很快就会失控，最终 导致整个应用程序全部都要编译为ObjeCtive-C++。这样显然会增加编码的负担。</p>
-
-<p>也许我们会想用前向声明来避免导入<code>SomeCppClass.h</code>,比如：</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt; 
-
-class SomeCppClass;
-
-@interface EOCClass : NSObject { 
-@private
-    SomeCppClass *_cppClass;
-@end
-</code></pre>
-
-<p>现在实例变量必须是指针，若不是，则编译器无法得知其大小，从而会报错。但所有指针的大小确实都是固定的，于是编译器只需知道其所指的类型即可。</p>
-
-<p>虽然我们这样做没有<code>#include &quot;SomeCppClass.h&quot;</code>但是我们前向声明该类时所用的<code>class</code>关键字还是<code>C++</code>下的关键字，所以仍然需要按照<code>OC</code>来编译才行。</p>
-
-<p>我们这里的解决方法还是一样，既然变量是<code>private</code>的，我们还是可以将它在<code>“class-continuation分类”</code>声明，改写成：</p>
-
-<pre><code class="language-objc">// EOCClass. h
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface EOCClass : NSObject
-
-
-// EOCClass.mm 
-#import &quot;EOCClass.h&quot;
-#include &quot;SomeCppClass.h&quot;
-
-@interface EOCClass ()  {
-    SomeCppClass _cppClass;
-}
-@end
-
-@implementation EOCClass 
-@end
-</code></pre>
-
-<p>改写后的<code>EOCClass</code>类，其头文件里就没有<code>C++</code>代码了，使用头文件的人甚至意识不到其底层实现代码中混有<code>C++</code>成分。某些系统库用到了这种模式，比如网页浏览器框架<code>WebKit</code>,其大部分代码都以<code>C++</code>编写，然而对外展示出来的却是一套整洁的<code>Objective-C</code>接口。<code>CoreAnimation</code>里面也用到了此模式，它的许多后端代码都用<code>C++</code>写成，但对外公布的却是一套纯<code>Objective-C</code>接口。</p>
-
-<h2 id="toc_2">第三种用法</h2>
-
-<p>就是将<code>public</code>接口中声明为“只读”的 属性扩展为“可读写”，以便在类的内部设置其值。</p>
-
-<p>例如：</p>
-
-<pre><code class="language-objc">// .h文件
-#import &lt;Foundation/Foundation.h&gt;
-@interface EOCPerson : NSObject
-
-@property (nonatomic, copy, readonly) NSString *firstName; 
-@property (nonatomic, copy, readonly) NSString *lastName;
-
--(id) initWithFirstName : (NSString*) firstName
-                lastName: (NSString*) lastName;
-
-@end
-
-</code></pre>
-
-<p>我们一般会在<code>“class-continuaticm分类”</code>中把这两个属性扩展为“可读写”：</p>
-
-<pre><code class="language-objc">@interface EOCPerson ()
-@property (nonatomic, copy, readwrite) NSString *firstName;
-@property (nonatomic, copy, readwrite) NSString *lastName;
-
--(void)p_privateMethod;
-@end
-</code></pre>
-
-<p>只需要用上面几行代码就行了。现在<code>EOCPerson</code>的实现代码可以随意调用<code>“setFirstName:”</code>或<code>“setLastName:”</code>这两个设置方法，也可以用“点语法”来设置属性。这样做很有用，既能令外界无法修改对象，又能在其内部按照需要管理其数据。</p>
-
-<p>只会在类的实现代码中用到的私有方法也可以声明在<code>“class-continuation分类”</code>中。这么做比较合适，因为它描述了那些只在类实现代码中才会使用的方法。上述的私有方法加上了<code>p_</code>前缀。</p>
-
-<h2 id="toc_3">第四种用法</h2>
-
-<p>当我们想要把对象所遵守的协议视为私有，就可以在<code>“class-continuation分类”</code>中声明。例如：</p>
-
-<pre><code class="language-objc">#import &quot;EOCPerson•h&quot;
-#import &quot;EOCSecretDelegate.h&quot;
-@interface EOCPerson () &lt;EOCSecretDelegate&gt; 
-@end
-@implementation EOCPerson
-    /*.....*/
-@end
-</code></pre>
-
-<h2 id="toc_4">要点</h2>
-
-<ul>
-<li><p>通过<code>“class-continuation分类”</code>向类中新增实例变量。</p></li>
-<li><p>如果某属性在主接口中声明为“只读”，而类的内部又要用设置方法修改此属性，那么就在<code>“class-continuation分类”</code>中将其扩展为“可读写”</p></li>
-<li><p>把私有方法的原型声明在<code>“class-continuation分类”</code>里面。</p></li>
-<li><p>若想使类所遵循的协议不为人所知，则可于<code>“class-continuation分类”</code>中声明。 </p></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第26条 不要在分类中声明属性]]></title>
-    <link href="https://lockxmonk.github.io/15042285213204.html"/>
-    <updated>2017-09-01T09:15:21+08:00</updated>
-    <id>https://lockxmonk.github.io/15042285213204.html</id>
-    <content type="html"><![CDATA[
-<p>属性是封装数据的方式（参见第6条)。尽管从技术上说，分类里也可以声明属性，但这种做法还是要尽量避免。</p>
-
-<p>原因在于，除了<code>“class-continuation分类”</code>（参见第27条）之外，其他分类都无法向类中新增实例变量，因此，它们无法把实现属性所需的实例变量合成出来。如果我们在分类中声明了一个<code>friends</code>属性。会提示我们</p>
-
-<blockquote>
-<p>warning: property  &#39;friends&#39; requires method &#39;friends&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
-
-<p>warning: property &#39;friends&#39; requires method &#39;setFriends:&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
-</blockquote>
-
-<p>说明系统没有为我们自动合成属性的<code>set</code>和<code>get</code>方法。我们要自己在分类中去实现，可以把存取方法声明为<code>@dynamic</code>, 也就是说，这些方法等到运行期再提供，编译器目前是看不见的。如果决定使用消息转发机制（参见第12条）在运行期拦截方法调用，并提供其实现，那么或许可以采用这种做法。</p>
-
-<p>当然我们也可以使用关联对象的方法。<strong><mark>但是还是不建议我们在分类中定义封装数据的属性。</mark></strong></p>
-
-<p>正确做法是把所有属性都定义在主接口里。类所封装的全部数据都应该定义在主接口中，这里是唯一能够定义实例变量(也就是数据）的地方。而属性只是定义实例变量及相关存取方法所用的“语法糖”，所以也应遵循同实例变量一样的规则。<mark>至于分类机制,则应将其理解为一种手段，目标在于扩展类的功能，而非封装数据。</mark></p>
-
-<p>但是有时候，只读属性（readonly）可以在分类中使用，但是我们要手动实现它的<code>get</code>方法。当然我们不建议搞特殊。最好还是在主接口中声明。然后在分类中声明一个获取方法，来获取数据。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>把封装数据所用的全部属性都定义在主接口里。</li>
-<li>在<code>“class-contimiation分类”</code>之外的其他分类中，可以定义存取方法，但尽量不要定义属性。</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[第25条 总是为第三方类的分类名称加前缀]]></title>
-    <link href="https://lockxmonk.github.io/15042274785369.html"/>
-    <updated>2017-09-01T08:57:58+08:00</updated>
-    <id>https://lockxmonk.github.io/15042274785369.html</id>
-    <content type="html"><![CDATA[
-<p>分类机制通常用于向无源码的既有类中新增功能。这个特性极为强大，但在使用时也很容易忽视其中可能产生的问题。</p>
-
-<p>我们在分类中添加方法，系统在运行期时会将分类中的方法加入类中。运行期系统会把分类中所实现的每个方法都加入类的方法列表中。<strong><font color=red>如果类中本来就有此方法，而分类又实现了一次，那么分类中的方法会覆盖原来那一份实现代码。实际上可能会发生很多次榭盖，比如某个分类中的方法覆盖了“主实现”中的相关方法，而另外一个分类 中的方法又覆盖了这个分类中的方法。多次覆盖的结果以最后一个分类为准。</font></strong></p>
-
-<p>所以我们为了解决此问题，一般做法是：<strong><font color=red>以命名空间来区别各个分类的名称与其中所定义的方法。</font></strong>我们这里的命名空间只是在相关名称前都加上公用的前缀。</p>
-
-<p>所以我们举例来说就是这样的：</p>
-
-<pre><code class="language-objc">@interface NSString (ABC_HTTP)
-//Encode a string with URL encoding 
--(NSString*) abc_urlEncodedStiring;
-
-// Decode a URL ©ncodeci string
--(NSString*) abc_urlDecodedString;
-@end
-</code></pre>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>向第三方类中添加分类时，总应给其名称加上你专用的前缀。</li>
-<li>向第三方类中添加分类时，总应给其中的方法名加上你专用的前缀。</li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[指针问题]]></title>
-    <link href="https://lockxmonk.github.io/15041689865677.html"/>
-    <updated>2017-08-31T16:43:06+08:00</updated>
-    <id>https://lockxmonk.github.io/15041689865677.html</id>
-    <content type="html"><![CDATA[
-<pre><code>#include &lt;stdio.h&gt;  
-   
-int main() {  
-      
-    int num = 10;  
-    int *p1 = &amp;num//p1存储num的地址  
-    int **p2 = &amp;p1;//p2存储p1的地址  
-    int ***p3 = &amp;p2;//p3存储p2的地址  
-      
-    *p1 = 100;//*p1取出num变量  
-    **p2 = 200;//**p2取出num变量  
-    ***p3 = 300;//***p3也是取出num变量  
-    printf(&quot;num = %d\n&quot;,num);  
-    printf(&quot;num = %d\n&quot;,***p3);  
-      
-    return 0;  
-}  
-</code></pre>
 
 ]]></content>
   </entry>
