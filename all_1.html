@@ -117,6 +117,172 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15087194946164.html">
+                
+                  <h1>动态规划</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">钢条切割问题</a>
+<ul>
+<li>
+<a href="#toc_1">分治法</a>
+</li>
+<li>
+<a href="#toc_2">动态规划</a>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_3">总结</a>
+
+
+<p>动态规划与分治法很类似，都是通过组合子问题的解来求解原问题。但是不同的是动态规划应用于子问题重叠的情况,即不同的子问题也具有公共的子子问题。分治法在这种情况下，会反复的求解那些公共子子问题。而动态规划算法对每个子子问题只求解一遍，将其保存在一个表格中，避免每次都计算。</p>
+
+<h2 id="toc_0">钢条切割问题</h2>
+
+<p>我们第一个动态规划问题是钢条切割问题。<br/>
+<img src="media/15087194946164/15087197999988.jpg" alt=""/></p>
+
+<h3 id="toc_1">分治法</h3>
+
+<p>我们来先看一下简答的分治法：</p>
+
+<pre><code class="language-objc">//
+//  main.m
+//  CUT-ROD
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface CUT_ROD:NSObject;
+
+-(NSInteger)CUT_ROD:(NSArray*)P length:(NSInteger)n;
+
+@end
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        NSArray *c = @[@1,@5,@8,@9,@10,@17,@17,@20,@24,@30];
+        CUT_ROD *a = [CUT_ROD new];
+        NSInteger result = [a CUT_ROD:c length:10];
+        NSLog(@&quot;result is %ld&quot;,result);
+    }
+    return 0;
+}
+
+@implementation CUT_ROD
+//简单的分治法,会重复计算子子结果
+-(NSInteger)CUT_ROD:(NSArray *)P length:(NSInteger)n{
+    if (n==0) {
+        return 0;
+    }
+    NSInteger q = -1;
+    for (NSInteger i=0; i&lt;n; i++) {
+        q = q&gt;([P[i] integerValue]+[self CUT_ROD:P length:n-i-1]) ? q:([P[i] integerValue]+[self CUT_ROD:P length:n-i-1]);
+    }
+    return q;
+}
+
+@end
+
+</code></pre>
+
+<p>上述代码使用递归来实现的，但是每次都要递归的重复来计算相同的子子问题，如图所示：<br/>
+<img src="media/15087194946164/15087246470673.jpg" alt=""/></p>
+
+<p>所以我们就在想，只要把求解得到的子子问题答案记录下，等到下次要用的时候直接调用它，就可以省下大量的时间。所以我们下面采用动态规划来写一遍。</p>
+
+<h3 id="toc_2">动态规划</h3>
+
+<p><strong><font color=red>动态规划是一个典型的时空权衡的例子，付出额外的内存空间来降低计算时间。</font></strong></p>
+
+<p>第一种方法：带备忘的自顶向下算法</p>
+
+<pre><code class="language-objc">//动态规划 带备忘的自顶向下
+-(NSInteger)MEMOIZED_CUT_ROD:(NSArray *)P length:(NSInteger)n{
+    NSMutableArray *logArr =[[NSMutableArray alloc] initWithCapacity:11];
+    for (int i = 0; i&lt;=10; i++) {
+        [logArr addObject:@(-1)];
+    }
+    return [self MEMOIZED_CUT_ROD_AUX:P length:n log:logArr];
+}
+-(NSInteger)MEMOIZED_CUT_ROD_AUX:(NSArray*)p length:(NSInteger)n log:(NSMutableArray*)r{
+    NSInteger q;
+    if ([r[n] integerValue]&gt;=0) {
+        return [r[n] integerValue];
+    }
+    if (n==0) {
+        q = 0;
+    }else{
+        q = -1;
+        for (NSInteger i = 0; i&lt;n; i++) {
+            q = q&gt;[p[i] integerValue] + [self MEMOIZED_CUT_ROD_AUX:p length:n-i-1 log:r] ? q : [p[i] integerValue] + [self MEMOIZED_CUT_ROD_AUX:p length:n-i-1 log:r];
+        }
+    }
+    [r replaceObjectAtIndex:n withObject:@(q)];
+    return q;
+}
+</code></pre>
+
+<p><code>MEMOIZED_CUT_ROD</code>方法引入<code>r</code>数组，记录每个长度的最优收益值，下面的方法将记录的值存入<code>r</code>数组中，并调用存入<code>r</code>的子子问题所得到收益值。</p>
+
+<p>第二个方法，字底向上版本，这个版本更为简单：</p>
+
+<pre><code class="language-objc">-(NSInteger)BOTTOM_UP_CUT_ROD:(NSArray *)P length:(NSInteger)n{
+    NSMutableArray *arrLog = [[NSMutableArray alloc] initWithCapacity:11];
+    for (int i = 0; i&lt;=10; i++) {
+        [arrLog addObject:@(0)];
+    }
+    NSInteger q = -1;
+    for (int j=0; j&lt;n; j++) {
+        q = -1;
+        for (int i=0; i&lt;=j; i++) {
+            NSLog(@&quot;%li&quot;,q);
+            q = q &gt; ([P[i] integerValue] + [arrLog[j-i] integerValue]) ? q : ([P[i] integerValue] + [arrLog[j-i] integerValue]);
+            NSLog(@&quot;%li&quot;,q);
+        }
+        [arrLog replaceObjectAtIndex:j+1 withObject:@(q)];
+    }
+    return [arrLog[n] integerValue];
+}
+</code></pre>
+
+<p>依次来求解长度从1到n的最大收益。</p>
+
+<h1 id="toc_3">总结</h1>
+
+<p>当我们思考一个动态规划的问题时，最好弄清涉及的子问题与他们的依赖关系。如上图的依赖图为：<br/>
+<img src="media/15087194946164/15087412491634.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html'>算法学习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15083737124086.html">
                 
                   <h1>使用RAC的基本操作</h1>
@@ -1190,85 +1356,6 @@ int main(int argc, char * argv[]) {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15065800553035.html">
-                
-                  <h1>第四十五条：使用dispatch_once来执行只需运行一次的代码</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>单例模式顾名思义，就是一个类一般只会同时存在一个实例，常见的实现方式为在类中编写名为<code>sharedInstance</code>的类方法。例如：</p>
-
-<pre><code class="language-objc">+(id)sharedImstance{
-    static EOCClass *sharedlnstance = nil;
-        @synchronized(self){
-            if (!sharedlnstance) {
-                sharedlnstance = [[self alloc] init];
-            }
-    }
-    return sharedlnstance;
-}
-</code></pre>
-
-<p>该方法只会返回全类共用的单例实例，而不会在每次调用时都创建新的实例。</p>
-
-<p>为保证线程安全，上述代码将创建单例实例的代码包裹在同步块里。</p>
-
-<p>GCD中的一个函数可以更简单的执行这种只需执行一次的代码。为：</p>
-
-<pre><code class="language-objc">void dispatch_once (dispatch_once_t *token,
-                    dispatch_block_t block);
-</code></pre>
-
-<p>此函数接受类型为的<code>dispatch_once_t</code>的特殊参数<code>token</code>，此外还接受块参数，在块里面执行我们所需要运行一次的代码。对于给定的<code>token</code>来说，该函数保证相关的块必定会执行，且仅执行一次。首次调用该函数时，必然会执行块中的代码，最重要的一点在于，此操作完全是线程安全的。<strong><font color=red>请注意，对于只需执行一次的块来说，每次凋用函数时传入的标记都必须完全相同。因此，开发 者通常将标记变量声明在<code>static</code>或<code>global</code>作用域里。</font></strong></p>
-
-<p>将上面的代码改为<code>dispatch_once</code>来执行，就可以换为：</p>
-
-<pre><code class="language-objc">+ (id)sharedInstance {
-    static EOCClass ^sharedInstance = nil； 
-    static dispatch_once_t onceToken;
-    dispatch_once(&amp;onceToken, ^{
-        sharedlnstance = [[self alloc] initJ;
-    })；
-    return sharedInstance;
-}
-</code></pre>
-
-<p>使用<code>dispatch_once</code>可以简化代码并且彻底保证线程安全，开发者根本无须担心加锁或同步。所有问题都由<code>GCD</code>在底层处理。</p>
-
-<p>相比于同步机制的繁琐，<code>dispatch_once</code>更高效，此函数采用“原子访问”（atomic access)来査询<code>token</code>，以判断其所对应的代码原来是否已经执行过。速度一般是同步机制的两倍。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>经常需要编写“只需执行一次的线程安全代码”（thread-safe single-code execution)。通过GCD所提供的<code>dispatch_once</code>函数，很容易就能实现此功能。</li>
-<li>标记应该声明在<code>static</code>或<code>global</code>作用域中，这样的话，在把只需执行一次的块传给<code>dispatch once</code>函数时，传进去的标记也是相同的。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1358,6 +1445,12 @@ int main(int argc, char * argv[]) {
 	      
 		      
 			      <li class="post">
+			        <a href="15109022752813.html">FMDB的使用方法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15097619961308.html">贪心算法（构造霍夫曼树）</a>
 			      </li>
 		     
@@ -1377,12 +1470,6 @@ int main(int argc, char * argv[]) {
 		      
 			      <li class="post">
 			        <a href="15090066726855.html">常见iOS面试题（智力题）</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15088085969493.html">最长公共子序列(动态规划)</a>
 			      </li>
 		     
 		  

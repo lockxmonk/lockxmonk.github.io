@@ -117,6 +117,153 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15037100500253.html">
+                
+                  <h1>第十七条 实现description方法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>调试程序时，我们一般要将对象的属性<code>NSLog</code>出来：</p>
+
+<pre><code class="language-objc">NSLog(@&quot;object = %@&quot;,object);
+</code></pre>
+
+<p>如果我们输出的对象是数组，或者字典和其它数据是可以将数据打印出来。但是如果打印的是自定义的类，那么输出的对象就类似于：</p>
+
+<pre><code class="language-objc">object = &lt;EOCPerson:0x7fd9a1600600&gt;
+</code></pre>
+
+<p>上面这种信息很不实用，所以我们要在自己的类里覆写<code>description</code>方法，否则打印信息时就会调用<code>NSObject</code>类所实现的默认方法。此方法定义在<code>NSObject</code>协议里，不过<code>NSObject</code>类也实现了它。</p>
+
+<p>想输出更为有用的信息也很简单，只需覆写<code>description</code>方法并将描述此对象的字符串 返回即可。例如，有下面这个代表个人信息的类：</p>
+
+<pre><code class="language-objc">//EOCPerson.h
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface EOCPerson : NSObject
+
+@property(nonatomic, readonly, copy)NSString *firstname;
+@property (nonatomic, copy, readonly) NSString *lastName;
+
+-(id) initWithFirstName: (NSString*) firstName lastName:(NSString*) lastName;
+
+@end
+
+//EOCPerson.m
+#import &quot;EOCPerson.h&quot;
+
+@implementation EOCPerson
+
+-(id)initWithFirstName:(NSString *)firstName lastName:(NSString *)lastName{
+    if ((self = [super init])) {
+        _firstname = [firstName copy];
+        _lastName = [lastName copy];
+    }
+    return self;
+}
+//description方法
+-(NSString*)description{
+
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , \&quot;%@ %@\&quot;&gt;&quot; , [self class], self ,_firstname ,_lastName ];
+}
+
+@end
+
+
+</code></pre>
+
+<p>那么输出就是：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+#import &quot;EOCPerson.h&quot;
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        EOCPerson *person = [[EOCPerson alloc] initWithFirstName:@&quot;Liang&quot; lastName:@&quot;Zhonghao&quot;];
+        NSLog(@&quot;Person = %@&quot; , person);
+    }
+    return 0;
+}
+
+</code></pre>
+
+<p><img src="media/15037100500253/15037119639541.jpg" alt=""/></p>
+
+<blockquote>
+<p><strong>建议：在新实现的 description方法中，也应该像默认的实现那样，打印出类的名字和指针地址，因为这些内容 有时也许会用到。</strong></p>
+</blockquote>
+
+<p>我们也可以借助字典类型的<code>description</code>方法来将打印何种信息标识出来：</p>
+
+<pre><code class="language-objc">
+-(NSString*)description{
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , 
+    [self class],
+     self, 
+     @{@&quot;firstname&quot;:_firstname,
+       @&quot;lastname&quot;:_lastName}];
+}
+</code></pre>
+
+<p>输出为：<br/>
+<img src="media/15037100500253/15037132520686.jpg" alt=""/></p>
+
+<p><code>NSObject</code>协议中还有个方法要注意，那就是<code>debugDescription</code>,此方法的用意与 <code>description</code>非常相似。二者区别在于，<code>debugDescription</code>方法是开发者在调试器（debugger) 中以控制台命令打印对象时才调用的。在<code>NSObject</code>类的默认实现中，此方法只是直接调用了<code>description</code>。我们还拿上个例子来说明：</p>
+
+<p><img src="media/15037100500253/15037137809556.jpg" alt=""/></p>
+
+<p>我们在NSLog下面打一个断点，进入调试模式，之后向调试控制台里输入命令。LLDB的“po”命令 可以完成对象打印（print-object)工作，其输出如下：<br/>
+<img src="media/15037100500253/15037138780545.jpg" alt=""/></p>
+
+<p>当然我们可以把人名放在<code>EOCPerson</code>对象的普通描述信息中，而把更详尽的内容放在调试所用的描述信息里：</p>
+
+<pre><code class="language-objc">-(NSString*)description{
+    return [NSString stringWithFormat:@&quot;%@ : %@&gt;&quot; , _firstname ,_lastName ];
+}
+
+-(NSString*)debugDescription{
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , [self class], self , @{@&quot;firstname&quot;:_firstname,@&quot;lastname&quot;:_lastName}];
+}
+
+</code></pre>
+
+<p>运行之后如下：<br/>
+<img src="media/15037100500253/15037141337080.jpg" alt=""/></p>
+
+<p>你可能不想把类名与指针地址这种额外内容放在普通的描述信息里，但是却希望调试的 时候能够很方便地看到它们，在此情况下，就可以使用这种输出方式来实现。Foundation框架的<code>NSArray</code>类就是这么做的.</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>实现<code>description</code>方法返回一个有意义的字符串，用以描述该实例。</li>
+<li>若想在调试时打印出更详尽的对象描述信息，则应实现<code>debugDescription</code>方法。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15036443106558.html">
                 
                   <h1>第十六条 提供"全能初始化方法"</h1>
@@ -828,139 +975,6 @@ void autoDictionarySetter(id self, SEL _cmd, id value) {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15033059328138.html">
-                
-                  <h1>第十一条:理解Objc_msgSend的作用</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在对象中调用方法,在oc中称作&quot;传递消息&quot;.消息有“名称&quot;（name)或“选择子&quot;（selector)，可以接受参数，而且可能还有返回值。</p>
-
-<p>因为OC是C语言的超集,所以我们用C语言来举例.C语言使用“静态绑定”（static binding),也就是说，在编译期就能决定运行时所应调用的函数。</p>
-
-<pre><code class="language-c">#import &lt;stdio.h&gt;
-
-void printHello() {
-    printf (&quot;Hello, world! \n&quot;);
-    }
-void printGoodbye() {
-    printf (&quot;Goodbye, world! \n&quot;);
-
-void doTheThing(int type) {
-    if (type == 0)  {
-        printHello();
-    }else{
-        printGoodbye();
-    }
-    return 0；
-}
-
-</code></pre>
-
-<p>编译器在编译代码的时候就已经知道程序中有<code>printHello</code>与<code>printGoodbye</code>这两个函数了，于是会直接生成调用这些函数的指令。而函数地址实际上是硬编码在指令之中的。</p>
-
-<p>但是将程序改写为下面这样后:</p>
-
-<pre><code class="language-c">#import &lt;stdio.h&gt;
-
-void printHello() {
-    printf (&quot;Hello, world! \n&quot;);
-    }
-void printGoodbye() {
-    printf (&quot;Goodbye, world! \n&quot;);
-
-void doTheThing(int type) {
-    void(*fnc)()
-    if (type == 0)  {
-        fnc = printHello;
-    }else{
-        fnc = printGoodbye;
-    }
-    fnc();
-    return 0；
-}
-
-</code></pre>
-
-<p>这个时候就要使用“动态绑定”（dynamic binding) 了，因为所要调用的函数直到运行期才能确定。编译器在这种情况下生成的指令与刚才那个例子不同，<mark>在第一个例子中，<code>if</code>与<code>else</code>语句里都有函数调用指令。而在第二个例子中，只有一个函数调用指令，不过待调用的函数地址无法硬编码在指令之中，而是要在运行期读取出来</mark>。</p>
-
-<p>在oc中如果向某对象传递消息(方法调用),就会使用动态绑定机制来决定需要调用的方法。在底层，所有方法都是普通的C语言函数，然而对象收到消息之后，究竟该调用哪个方法则完全于运行期决定，甚至可以在程序运行时改变，这些特性使得Objective-C成为一门真正的动态语言。</p>
-
-<p>给对象发送消息可以这样来写：</p>
-
-<pre><code class="language-objc">
-id returnValue = [someObject messageName:parameter];
-
-</code></pre>
-
-<p>在本例中，<code>someObject</code>叫做“接收者”（receiver),<code>messageName</code> 叫做<code>“选择子”</code>（selector)。选择子与参数合起来称为“消息”（message)。编译器看到此消息后，将其转换为一条标准的C语言函数调用，所调用的函数乃是消息传递机制中的核心函数,叫做<code>objc_msgSend</code>,其<br/>
-“原型&quot;（prototype)如下：</p>
-
-<pre><code class="language-c">
-void objc_msgSend(id self, SEL cmd, •••)
-
-</code></pre>
-
-<p>这是个‘参数个数可变的函数’(variadic function)9，能接受两个或两个以上的参数。第一个参数代表接收者，第二个参数代表选择子（SEL是选择子的类型)，后续参数就是消息中的那些参数，其顺序不变。<strong>选择子指的就是方法的名字</strong>。“选择子”与“方法”这两个词经常交替使用。编译器会把刚才那个例子中的消息转换为如下函数：</p>
-
-<pre><code class="language-c">
-id returnValue = objc_msgSend(someObject,
-                            ^selector(messageName:),
-                            parameter);
-
-</code></pre>
-
-<p><code>objc_msgSend</code>函数会依据接收者与选择子的类型来调用适当的方法。为了完成此操作，该方法需要在接收者所属的类中搜寻其“方法列表”（list of methods),如果能找到与选择子名称相符的方法，就跳至其实现代码。若是找不到，那就沿着继承体系继续向上査找，等找到合适的方法之后再跳转。如果最终还是找不到相符的方法，那就执行“消息转发” (message forwarding)操作。消息转发将在第12条中详解。</p>
-
-<p>其它特殊情况需要由一些函数来处理:</p>
-
-<ul>
-<li><strong>objc_msgSendstret。</strong>如果待发送的消息要返回结构体，那么可交由此函数处理。只有当CPU的寄存器能够容纳得下消息返回类型时，这个函数才能处理此消息。若是返回值无法容纳于CPU寄存器中（比如说返回的结构体太大了)，那么就由另一个函数执行派发。此时，那个函数会通过分配在栈上的某个变量来处理消息所返回的结构体。</li>
-<li>ObjC_mSgSerid_fpret。如果消息返回的是浮点数，那么可交由此函数处理,在某些架构的CPU中调用函数时，需要对浮点数寄存器（floating-point register)做特殊处理,也就是说，通常所用的ObjC_msgSend在这种情况下并不合适。这个函数是为了处理x86等架构CPU中某些令人稍觉惊讶的奇怪状况。</li>
-<li>objc_msgSendSuper3 如果要给超类发消息，例如[supermessage:parameter],那么就交由此函数处理。也有另外两个与objc_msgSendstret和objc_MsgSend_fpret等效的函数，用于处理发给super的相应消息。</li>
-</ul>
-
-<p>刚才曾提到,Objc_msgSend等函数一旦找到应该调用的方法之后，就会‘跳转过去’。之所以能这样做，是因为Objective-C对象的每个方法都可以视为简单的C函数，其原型如下：</p>
-
-<pre><code class="language-c">
-&lt;return type&gt; Class_selector(id self, SEL _cmd, •••)
-
-</code></pre>
-
-<p>真正的函数名和上面写的可能不太一样，笔者用“类”（class)和“选择子”（selector)来命名是想解释其工作原理。每个类里都有一张表格，其中的指针都会指向这种函数，而选择子的名称则是査表时所用的“键”。ObjC_msgSend等函数正是通过这张表格来寻找应该执行的方法并跳至其实现的。请注意，原型的样子和ObjC_msgSend函数很像。这不是巧合，而是为了利用“尾调用优化”技术，令“跳至方法实现”这一操作变得更简单些。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>消息由接收者、选择子及参数构成。给某对象&quot;发送消息&quot;(invoke a message)也就相当于在该对象上“调用方法”（call a method)。</li>
-<li>发给某对象的全部消息都要由“动态消息派发系统”（dynamic message dispatch system)来处理，该系统会査出对应的方法，并执行其代码。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/21</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1050,6 +1064,12 @@ id returnValue = objc_msgSend(someObject,
 	      
 		      
 			      <li class="post">
+			        <a href="15109022752813.html">FMDB的使用方法</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15097619961308.html">贪心算法（构造霍夫曼树）</a>
 			      </li>
 		     
@@ -1069,12 +1089,6 @@ id returnValue = objc_msgSend(someObject,
 		      
 			      <li class="post">
 			        <a href="15090066726855.html">常见iOS面试题（智力题）</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15088085969493.html">最长公共子序列(动态规划)</a>
 			      </li>
 		     
 		  
