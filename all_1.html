@@ -117,6 +117,143 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15088085969493.html">
+                
+                  <h1>最长公共子序列(动态规划)</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><strong>最长公共子序列问题（LCS）</strong>给定两个序列\(X=&lt;{x_1,x_2,...x_m}&gt;和Y=&lt;y_1,y_2,...y_n&gt;\),求X和Y长度最长的公共子序列。总共分三个步骤：</p>
+
+<h2 id="toc_0">步骤一：刻画最长公共子序列的特征</h2>
+
+<p><img src="media/15088085969493/15088091467243.jpg" alt=""/></p>
+
+<h2 id="toc_1">步骤二：一个递归解</h2>
+
+<p><img src="media/15088085969493/15088095444692.jpg" alt=""/></p>
+
+<h2 id="toc_2">步骤三：计算LCS的长度</h2>
+
+<p><img src="media/15088085969493/15088132625221.jpg" alt=""/></p>
+
+<p>上述过程我们有如下图来表示：<br/>
+<img src="media/15088085969493/15088133360817.jpg" alt=""/></p>
+
+<h2 id="toc_3">步骤4 构造LCS</h2>
+
+<p><img src="media/15088085969493/15088133035826.jpg" alt=""/></p>
+
+<p>这里我们用C++来构造这个算法：</p>
+
+<pre><code class="language-c++">//
+//  main.cpp
+//
+//  Created by LZH on 2017/10/30.
+//  Copyright © 2017年 梁中豪. All rights reserved.
+//
+
+
+#include &lt;iostream&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+using namespace std;
+
+//计算LCS的长度
+void LCS_LENGTH(char *X ,char *Y ,int **b ,int **c ,int &amp;m ,int &amp;n)
+{
+    //    int m = sizeof(X)/sizeof(char);
+    //    int n = sizeof(Y)/sizeof(char);
+    
+    //    int b[m][n];
+    //    int c[m][n];
+    
+    for (int i=1; i&lt;m; i++) {
+        for (int j=1; j&lt;n; j++) {
+            if (X[i]==Y[j]) {
+                c[i][j] = c[i-1][j-1]+1;
+                b[i][j] = 1;
+            }
+            else if (c[i-1][j]&gt;=c[i][j-1])
+            {
+                c[i][j] = c[i-1][j];
+                b[i][j] = 2;
+            }
+            else
+            {
+                c[i][j] = c[i][j-1];
+                b[i][j] = 3;
+            }
+        }
+    }
+}
+
+void PRINT_LCS(int **b,char *X,int i,int j)
+{
+    if (i==0 || j==0) {
+        return;
+    }
+    if (b[i][j]==1) {
+        PRINT_LCS(b, X, i-1, j-1);
+        cout &lt;&lt; X[i] &lt;&lt;endl;
+    }
+    else if (b[i][j]==2)
+    {
+        PRINT_LCS(b, X, i-1, j);
+    }
+    else
+    {
+        PRINT_LCS(b, X, i, j-1);
+    }
+}
+
+int main()
+{
+    char X[8] = {&#39;x&#39;,&#39;A&#39;,&#39;B&#39;,&#39;C&#39;,&#39;B&#39;,&#39;D&#39;,&#39;A&#39;,&#39;B&#39;};
+    char Y[7] = {&#39;y&#39;,&#39;B&#39;,&#39;D&#39;,&#39;C&#39;,&#39;A&#39;,&#39;B&#39;,&#39;A&#39;};
+    int m = sizeof(X)/sizeof(char);
+    int n = sizeof(Y)/sizeof(char);
+    int **b =new int*[m];
+    for (int i = 0; i&lt;m; i++) {
+        b[i] = new int[n];
+    }
+    
+    int **c = new int*[m];
+    for (int i = 0; i&lt;m; i++) {
+        c[i] = new int[n];
+    }
+    LCS_LENGTH(X,Y,b,c,m,n);
+    PRINT_LCS(b,X,m-1,n-1);
+    return 0;
+}
+
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/24</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html'>算法学习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15087194946164.html">
                 
                   <h1>动态规划</h1>
@@ -1245,117 +1382,6 @@ NSSet *aSet = /* ... */;
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15075183660097.html">
-                
-                  <h1>第三十四条 ： 以“自动释放池降低内存峰值”</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在<code>Objective-C</code>的引用计数架构中，有一项特性叫做<code>“自动释放池”(autoreleasepool)</code>。释放对象有两种方式：一种是 调用<code>release</code>方法，使其保留计数立即递减；<strong><font color=red>另一种是调用<code>autorelease</code>方法，将其加人“自动 释放池”中。自动释放池用于存放那些需要在稍后某个时刻释放的对象。<code>清空（drain)</code>自动释放池时，系统会向其中的对象发送<code>release</code>消息。</font></strong></p>
-
-<p>创建自动释放池的语句为：</p>
-
-<pre><code class="language-objc">@autoreleasepool{
-    // ....
-}
-</code></pre>
-
-<p>我们来看下面这个例子：</p>
-
-<pre><code class="language-objc">@autoreleasepool {
-    NSString *string = [NSString stringWithFormat: @&quot;1 = %i&quot;, 1]; 
-    @autoreleasepool {
-        NSNumber *number = [NSNumber numberWithlnt:1];
-        }
-}
-</code></pre>
-
-<p>上面这个例子展示了基本的用法，自动释放池于左花括号处创建, 并于对应的右花括号处自动清空。位于自动释放池范围内的对象，将在此范围末尾处收到<code>release</code>消息。自动释放池可以嵌套。系统在自动释放对象时，会把它放到最内层的池里。</p>
-
-<p><code>autoreleasepool</code>的常见用法为降低程序的内存峰值，比如下面这个代码：</p>
-
-<pre><code class="language-objc">NSArray *databaseRecords = /* ... */;
-NSMutableArray *people = [NSMutableArray new];
-for (NSDictionary *record in databaseRecords) {
-    EOCPerson *person = [[EOCPerson alloc] initWithRecord:record];
-    [people addObject:person];
-}
-</code></pre>
-
-<p>上述代码，因为<code>for</code>语句会不断的创建<code>person</code>对象，造成应用程序内存不断上涨，在执行完<code>for</code>语句后又会将所有临时对象都释放，造成内存的突然上涨与下降。这些临时对象本可以提前回收的，所以我们应该这么写：</p>
-
-<pre><code class="language-objc">NSArray *databaseRecords = /* ... */;
-NSMutableArray *people = [NSMutableArray new];
-for (NSDictionary *record in databaseRecords) {
-    @autoreleasepool{
-        EOCPerson *person = [[EOCPerson alloc] initWithRecord:record];
-        [people addObject:person];
-    }
-}
-</code></pre>
-
-<p>加上这个自动释放池之后，应用程序在执行循环时的内存峰值就会降低，不再像原来那么高了。<code>内存峰值(high-memory waterline)</code>是指应用程序在某个特定时段内的<code>最大内存用量 (highest memory footprint)</code>。新增的自动释放池块可以减少这个峰值，因为系统会在块的末尾把某些对象回收掉。而刚才提到的那种临时对象，就在回收之列。</p>
-
-<p>自动释放池机制就像<code>“栈”（stack)</code> 一样。系统创建好自动释放池之后，就将其推入栈中, 而清空自动释放池，则相当于将其从栈中弹出。在对象上执行自动释放操作，就等于将其放入栈顶的那个池里。</p>
-
-<p>现在我们创建一个iOS程序之后，系统会默认有一个<code>main.m文件</code>其中有代码：</p>
-
-<pre><code class="language-objc">#import &lt;UIKit/UIKit.h&gt;
-#import &quot;AppDelegate.h&quot;
-
-int main(int argc, char * argv[]) {
-    @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
-    }
-}
-</code></pre>
-
-<p>我们用自动释放池来包裹应用程序的<code>主入口点（main application entry point)</code>，除了上述主动添加了一个释放池，我们一般不需要主动添加，系统创建的线程一般默认都有自动释放池。</p>
-
-<p><code>@autordeaSepool</code>语法还有个好处：每个自动释放池均有其范围，可以避免无意间误用了那些在清空池后已为系统所回收的对象。例如：</p>
-
-<pre><code class="language-objc">@autoreleasepool {
-    id object = [self createObject];
-}
-[self useObject:object];
-
-</code></pre>
-
-<p>上述代码无法编译，因为<code>object</code>变量出了自动释放池块的外围后就不可用了（已经被释放），所以在调用<code>“useObject:”</code>方法时不能用它做参数。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>自动释放池排布在栈中，对象收到<code>autorelease</code>消息后，系统将其放入最顶端的池里。 </li>
-<li>合理运用自动释放池，可降低应用程序的内存峰值。</li>
-<li><code>@autoreleasepool</code>这种新式写法能创建出更为轻便的自动释放池。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%94%E7%AB%A0%20%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.html'>第五章 内存管理</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1445,6 +1471,12 @@ int main(int argc, char * argv[]) {
 	      
 		      
 			      <li class="post">
+			        <a href="15109904843500.html">AFNetworking的简单使用</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15109022752813.html">FMDB的使用方法</a>
 			      </li>
 		     
@@ -1464,12 +1496,6 @@ int main(int argc, char * argv[]) {
 		      
 			      <li class="post">
 			        <a href="15090074391982.html">常见iOS面试题基础篇</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15090066726855.html">常见iOS面试题（智力题）</a>
 			      </li>
 		     
 		  

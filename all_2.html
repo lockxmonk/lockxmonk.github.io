@@ -117,6 +117,117 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15075183660097.html">
+                
+                  <h1>第三十四条 ： 以“自动释放池降低内存峰值”</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在<code>Objective-C</code>的引用计数架构中，有一项特性叫做<code>“自动释放池”(autoreleasepool)</code>。释放对象有两种方式：一种是 调用<code>release</code>方法，使其保留计数立即递减；<strong><font color=red>另一种是调用<code>autorelease</code>方法，将其加人“自动 释放池”中。自动释放池用于存放那些需要在稍后某个时刻释放的对象。<code>清空（drain)</code>自动释放池时，系统会向其中的对象发送<code>release</code>消息。</font></strong></p>
+
+<p>创建自动释放池的语句为：</p>
+
+<pre><code class="language-objc">@autoreleasepool{
+    // ....
+}
+</code></pre>
+
+<p>我们来看下面这个例子：</p>
+
+<pre><code class="language-objc">@autoreleasepool {
+    NSString *string = [NSString stringWithFormat: @&quot;1 = %i&quot;, 1]; 
+    @autoreleasepool {
+        NSNumber *number = [NSNumber numberWithlnt:1];
+        }
+}
+</code></pre>
+
+<p>上面这个例子展示了基本的用法，自动释放池于左花括号处创建, 并于对应的右花括号处自动清空。位于自动释放池范围内的对象，将在此范围末尾处收到<code>release</code>消息。自动释放池可以嵌套。系统在自动释放对象时，会把它放到最内层的池里。</p>
+
+<p><code>autoreleasepool</code>的常见用法为降低程序的内存峰值，比如下面这个代码：</p>
+
+<pre><code class="language-objc">NSArray *databaseRecords = /* ... */;
+NSMutableArray *people = [NSMutableArray new];
+for (NSDictionary *record in databaseRecords) {
+    EOCPerson *person = [[EOCPerson alloc] initWithRecord:record];
+    [people addObject:person];
+}
+</code></pre>
+
+<p>上述代码，因为<code>for</code>语句会不断的创建<code>person</code>对象，造成应用程序内存不断上涨，在执行完<code>for</code>语句后又会将所有临时对象都释放，造成内存的突然上涨与下降。这些临时对象本可以提前回收的，所以我们应该这么写：</p>
+
+<pre><code class="language-objc">NSArray *databaseRecords = /* ... */;
+NSMutableArray *people = [NSMutableArray new];
+for (NSDictionary *record in databaseRecords) {
+    @autoreleasepool{
+        EOCPerson *person = [[EOCPerson alloc] initWithRecord:record];
+        [people addObject:person];
+    }
+}
+</code></pre>
+
+<p>加上这个自动释放池之后，应用程序在执行循环时的内存峰值就会降低，不再像原来那么高了。<code>内存峰值(high-memory waterline)</code>是指应用程序在某个特定时段内的<code>最大内存用量 (highest memory footprint)</code>。新增的自动释放池块可以减少这个峰值，因为系统会在块的末尾把某些对象回收掉。而刚才提到的那种临时对象，就在回收之列。</p>
+
+<p>自动释放池机制就像<code>“栈”（stack)</code> 一样。系统创建好自动释放池之后，就将其推入栈中, 而清空自动释放池，则相当于将其从栈中弹出。在对象上执行自动释放操作，就等于将其放入栈顶的那个池里。</p>
+
+<p>现在我们创建一个iOS程序之后，系统会默认有一个<code>main.m文件</code>其中有代码：</p>
+
+<pre><code class="language-objc">#import &lt;UIKit/UIKit.h&gt;
+#import &quot;AppDelegate.h&quot;
+
+int main(int argc, char * argv[]) {
+    @autoreleasepool {
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
+    }
+}
+</code></pre>
+
+<p>我们用自动释放池来包裹应用程序的<code>主入口点（main application entry point)</code>，除了上述主动添加了一个释放池，我们一般不需要主动添加，系统创建的线程一般默认都有自动释放池。</p>
+
+<p><code>@autordeaSepool</code>语法还有个好处：每个自动释放池均有其范围，可以避免无意间误用了那些在清空池后已为系统所回收的对象。例如：</p>
+
+<pre><code class="language-objc">@autoreleasepool {
+    id object = [self createObject];
+}
+[self useObject:object];
+
+</code></pre>
+
+<p>上述代码无法编译，因为<code>object</code>变量出了自动释放池块的外围后就不可用了（已经被释放），所以在调用<code>“useObject:”</code>方法时不能用它做参数。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>自动释放池排布在栈中，对象收到<code>autorelease</code>消息后，系统将其放入最顶端的池里。 </li>
+<li>合理运用自动释放池，可降低应用程序的内存峰值。</li>
+<li><code>@autoreleasepool</code>这种新式写法能创建出更为轻便的自动释放池。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%94%E7%AB%A0%20%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.html'>第五章 内存管理</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15065800553035.html">
                 
                   <h1>第四十五条：使用dispatch_once来执行只需运行一次的代码</h1>
@@ -670,136 +781,6 @@ typedef void(^EOCNetworkFetcherCompletionHandler) (NSData *data);
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15045090813380.html">
-                
-                  <h1>第三十九条 用handler块降低代码分散程度</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>iOS中我们经常采用异步执行任务的方式，来避免主线程的阻塞。因为<code>“系统监控器”（system watchdog)</code>在发现某个应用程序的主线程已经阻塞了一段时间之后，就会令其终止。导致程序崩溃。</p>
-
-<p>但是异步方法执行任务后，需要以某种手段来通知相关代码。实现这一功能有很多方法，常用的技巧是设计一个委托协议，令关注此事件的对象遵从该协议。对象成为<code>delegate</code>之后，就可以在相关事件发生时（例如某个异步任务执行完毕时）得到通知了。例如：</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-@class EOCNetworkFetcher;
-@protocol EOCNetworkFetcherDelegate &lt;NSObject&gt;
--(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher 
-    didFinishWithData:(NSData*)data;
-@end
-
-@interface EOCNetworkFetcher : NSObject 
-@property (nonatomic, weak) id &lt;EOCNetworkFetcherDelegate&gt; delegate; 
--(id)initWithURL:(NSURL*)url;
--(void)start;
-@end
-</code></pre>
-
-<p>其它类可以像下面这样来使用：</p>
-
-<pre><code class="language-objc">-(void)fetchFooData {
-    NSURL *url = [[NSURL alloc] initWithString:
-                    @&quot;http: //www.example.com/foo.dat&quot;]; 
-    EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url]; 
-    fetcher.delegate = self;
-    [fetcher start];
-}
-
--(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher didFinishWithData:(NSData*)data
-{
-    _fetchedFooData = data;
-}
-</code></pre>
-
-<p>上面在<code>EOCNetworkFetcher</code>类中声明了一个协议，协议中有一个方法用于通知对象已获取完数据。</p>
-
-<p>之后想要获取到通知的对象遵守该协议，成为它的委托对象。这样在执行完<code>start</code>方法之后，<code>EOCNetworkFetcher</code>会调用委托对象所遵守的协议方法，让委托对象获取收到的数据（也就是通知它）。</p>
-
-<p>上面这种做法没有错误，确实可行。但是如果我们改用块来写的话，代码会更清晰。就是把<code>completion handler</code>定义为块类型，将其当作参数直接传给<code>start</code>方法:</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-typedef void(^EOCNetworkFetcherCompletionHandler)(NSData *data);
-@interface EOCNetworkFetcher : NSObject 
--(id)initWithURL:(NSURL*)url;
--(void)startWithCompletionHandler:
-            (EOCNetworkFetcherCompletionHandler)handler;
-@end
-</code></pre>
-
-<p>这和使用委托协议很想，不过多了个好处，就是可以在调用<code>start</code>方法时直接以内联形式 定义<code>completion handler</code>,以此方式来使用<code>“网络数据获取器”（network fetcher)</code>,可以令代码比原先易懂很多。例如，下面这个类就以块的形式来定义<code>completion handler</code>,并以此为参数调用<code>API</code>:</p>
-
-<pre><code class="language-objc">-(void)fetchFooData {
-NSURL *url = [[NSURL alloc] initWithString:
-@&quot;http://www.example.com/foo.dat&quot;]; 
-EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
-[fetcher startWithCompletionHandler:^(NSData *data){ 
-    _fetchedFooData = data;
-})；
-</code></pre>
-
-<p>与使用委托模式的代码相比，用块写出来的代码显然更为整洁。异步任务执行完毕后所需运行的业务逻辑，和启动异步任务所用的代码放在了一起。而且，由于块声明在创建获取器的范围里，所以它可以访问此范围内的全部变量。</p>
-
-<p>这种写法其实最重要的用途是处理错误。现在很多基于块的<code>API</code>都使用块来处理错误，可以分别用两个处理程序来处理操作失败的情况和操作成功的情况。也可以把处理失败情况所需的代码，与处理正常情况所用的代码，都封装到同一个<code>completion handler</code>块里,我们建议使用后者，因为苹果公司也是这样设计<code>API</code>的。我们举例来说：</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-@class EOCNetworkFetcher;
-typedef void(^EOCNetworkFetcherCompletionHandler) 
-                                (NSData *data, NSError *error);
-
-@interface EOCNetworkFetcher : NSObject
--(id)initWithURL:(NSURL*)url;
--(void)startWithCompletionHandler:
-                (EOCNetworkFetcherCompletionHandler)completion;
-@end
-</code></pre>
-
-<p>此种API的调用方式如下:</p>
-
-<pre><code class="language-objc">EOCNetworkFetcher *fetcher =
-        [[EOCNetworkFetcher alloc] initWithURL:url]; 
-[fetcher startWithCompletionHander:
-    ^(NSData *data, NSError *error){ 
-    if (error) {
-        //Handle failure 
-    }else {
-        // Handle success
-    }
-}];
-</code></pre>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>在创建对象时，可以使用内联的<code>handler</code>块将相关业务逻辑一并声明。</li>
-<li>在有多个实例需要监控时，如果采用委托模式，那么经常需要根据传入的对象来切 换，而若改用<code>handler</code>块来实现，则可直接将块与相关对象放在一起。</li>
-<li>设计API时如果用到了<code>handler</code>块，那么可以增加一个参数，使调用者可通过此参数来决定应该把块安排在哪个队列上执行。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -889,6 +870,12 @@ typedef void(^EOCNetworkFetcherCompletionHandler)
 	      
 		      
 			      <li class="post">
+			        <a href="15109904843500.html">AFNetworking的简单使用</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15109022752813.html">FMDB的使用方法</a>
 			      </li>
 		     
@@ -908,12 +895,6 @@ typedef void(^EOCNetworkFetcherCompletionHandler)
 		      
 			      <li class="post">
 			        <a href="15090074391982.html">常见iOS面试题基础篇</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15090066726855.html">常见iOS面试题（智力题）</a>
 			      </li>
 		     
 		  
