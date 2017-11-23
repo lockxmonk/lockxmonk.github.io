@@ -117,6 +117,126 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15113375347657.html">
+                
+                  <h1>Arranging Coins</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>You have a total of n coins that you want to form in a staircase shape, where every k-th row must have exactly k coins.</p>
+
+<p>Given n, find the total number of full staircase rows that can be formed.</p>
+
+<p>n is a non-negative integer and fits within the range of a 32-bit signed integer.</p>
+
+<p><img src="media/15113375347657/15113375557158.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int arrangeCoins(int n) {
+        return floor(-0.5+sqrt((double)2*n+0.25));
+    }
+};
+</code></pre>
+
+<p>这道题的主要考虑<code>1+2+3+...+x&lt;=n</code>下，使x左边等式最接近n，并且不超过。</p>
+
+<p>推导为：</p>
+
+<pre><code>-&gt; 1+2+3+...+x = n
+-&gt; (1+x)x/2 = n
+-&gt; x^2+x = 2n
+-&gt; x^2+x+1/4 = 2n +1/4
+-&gt; (x+1/2)^2 = 2n +1/4
+-&gt; (x+0.5) = sqrt(2n+0.25)
+-&gt; x = -0.5 + sqrt(2n+0.25)
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15113344881540.html">
+                
+                  <h1>Add Binary</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given two binary strings, return their sum (also a binary string).</p>
+
+<p>For example,<br/>
+a = <code>&quot;11&quot;</code><br/>
+b = <code>&quot;1&quot;</code><br/>
+Return <code>&quot;100&quot;</code>.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string addBinary(string a, string b) {
+        int fw = 0;
+        string result = &quot;&quot;;
+        for(int i = a.size()-1,j=b.size()-1;i&gt;=0||j&gt;=0;i--,j--){
+            int ag = i&gt;=0?a[i]-&#39;0&#39;:0;
+            int bg = j&gt;=0?b[j]-&#39;0&#39;:0;
+            int tmp = (ag+bg+fw)%2;
+            fw = (ag+bg+fw)/2;
+            
+            result = char(tmp+&#39;0&#39;)+result;
+        }
+        if(fw==1){
+            result = &#39;1&#39;+result;
+        }
+        
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15113344372070.html">
                 
                   <h1>1-bit and 2-bit Characters</h1>
@@ -398,262 +518,6 @@ int main() {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15096800741665.html">
-                
-                  <h1>贪心算法（活动选择问题）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15096800741665/15096801101097.jpg" alt=""/></p>
-
-<p>这个问题是一个典型的可以运用贪心算法的题目，我们在初始的选择一个活动之后，应该将之后的资源被其他任务尽量多的占用。所以我们应该第一个选择活动最快结束的活动，因为它剩下的资源可以被它之后开始的任务尽量多的使用。所以我们可以运用一种递归形式或者迭代算法来表达这个形式：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//  Greedy_Activity_Selector
-//
-//  Created by LZH on 2017/11/3.
-//  Copyright © 2017年 LZH. All rights reserved.
-//
-
-#include &lt;iostream&gt;
-#include &lt;vector&gt;
-using namespace std;
-void print(int n)
-{
-    cout&lt;&lt;n&lt;&lt;&#39; &#39;;
-}
-
-/**
- 迭代形式函数
-
- @param s 活动开始时间数组
- @param f 活动结束时间数组
- @param result  用于存储结果
- */
-void GREED_ACTIVITY_SELECTOR(vector&lt;int&gt; s , vector&lt;int&gt; f , vector&lt;int&gt; &amp;result)
-{
-    int n = s.size();
-    result.push_back(1);
-    int k=1;
-    for (int m=2; m&lt;=n; m++) {
-        if (s[m]&gt;=f[k]) {
-            result.push_back(m);
-            k = m;
-        }
-    }
-}
-
-/**
- 尾递归形式函数
-
- @param s 活动开始时间数组
- @param f 活动结束时间数组
- @param k 从活动k开始计算
- @param n 共有n个活动
- @param result 用于存储结果
- */
-void RECURSIVE_ACTIVITY_SELECTOR(vector&lt;int&gt; s,vector&lt;int&gt; f, int k, int n, vector&lt;int&gt; &amp;result)
-{
-    int m = k+1;
-    while (m&lt;=n &amp;&amp; s[m]&lt;=f[k]) {
-        m++;
-    }
-    if (m&lt;=n) {
-        result.push_back(m);
-        RECURSIVE_ACTIVITY_SELECTOR(s, f, m, n ,result);
-    }
-}
-
-int main() {
-    int a[12] ={0,1,3,0,5,3,5,6,8,8,2,12};
-    int b[12] ={0,4,5,6,7,9,9,10,11,12,14,16};
-    vector&lt;int&gt; s(a,a+12);
-    vector&lt;int&gt; f(b,b+12);
-    vector&lt;int&gt; result;
-    RECURSIVE_ACTIVITY_SELECTOR(s, f, 0, 11, result);
-    GREED_ACTIVITY_SELECTOR(s, f, result);
-    for_each(result.begin(),result.end(),print);
-    return 0;
-}
-
-</code></pre>
-
-<p>其中递归形式的流程如下图所示：<br/>
-<img src="media/15096800741665/15096804218816.jpg" alt=""/></p>
-
-<p>但两种算法运行时间类似都为\(\Theta(n)\)</p>
-
-<h2 id="toc_0">与动态规划的不同</h2>
-
-<p>贪心算法通过做出局部最优来构造全局最优解。换句话说，直接做出在当前问题下看起来最优的选择，而不必考虑子问题的解。</p>
-
-<p><strong><font color=red>在动态规划中，每个步骤都要进行一次选择，但选择通常依赖于子问题的解</font></strong>，因此，我们通常以自底向上的方式来求解动态规划问题，先求解较小的子问题，然后是较大的子问题。但是在贪心算法中，我们总是做出在当时看起来最佳的选择，然后求解剩下的唯一子问题。<strong><font color=red>贪心算法进行选择时可能依赖之前做出的选择，但不依赖于任何将来的选择或者是子问题的解。</font></strong>所以贪心算法在进行第一次选择时不求解任何子问题，自顶向下进行逐步选择，将给定的子问题实例变小。</p>
-
-<p>两者最典型的区别，可以用<code>分数背包</code>和<code>0-1背包</code>问题来举例，这里不做细说。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/3</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15088085969493.html">
-                
-                  <h1>最长公共子序列(动态规划)</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><strong>最长公共子序列问题（LCS）</strong>给定两个序列\(X=&lt;{x_1,x_2,...x_m}&gt;和Y=&lt;y_1,y_2,...y_n&gt;\),求X和Y长度最长的公共子序列。总共分三个步骤：</p>
-
-<h2 id="toc_0">步骤一：刻画最长公共子序列的特征</h2>
-
-<p><img src="media/15088085969493/15088091467243.jpg" alt=""/></p>
-
-<h2 id="toc_1">步骤二：一个递归解</h2>
-
-<p><img src="media/15088085969493/15088095444692.jpg" alt=""/></p>
-
-<h2 id="toc_2">步骤三：计算LCS的长度</h2>
-
-<p><img src="media/15088085969493/15088132625221.jpg" alt=""/></p>
-
-<p>上述过程我们有如下图来表示：<br/>
-<img src="media/15088085969493/15088133360817.jpg" alt=""/></p>
-
-<h2 id="toc_3">步骤4 构造LCS</h2>
-
-<p><img src="media/15088085969493/15088133035826.jpg" alt=""/></p>
-
-<p>这里我们用C++来构造这个算法：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//
-//  Created by LZH on 2017/10/30.
-//  Copyright © 2017年 梁中豪. All rights reserved.
-//
-
-
-#include &lt;iostream&gt;
-#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
-using namespace std;
-
-//计算LCS的长度
-void LCS_LENGTH(char *X ,char *Y ,int **b ,int **c ,int &amp;m ,int &amp;n)
-{
-    //    int m = sizeof(X)/sizeof(char);
-    //    int n = sizeof(Y)/sizeof(char);
-    
-    //    int b[m][n];
-    //    int c[m][n];
-    
-    for (int i=1; i&lt;m; i++) {
-        for (int j=1; j&lt;n; j++) {
-            if (X[i]==Y[j]) {
-                c[i][j] = c[i-1][j-1]+1;
-                b[i][j] = 1;
-            }
-            else if (c[i-1][j]&gt;=c[i][j-1])
-            {
-                c[i][j] = c[i-1][j];
-                b[i][j] = 2;
-            }
-            else
-            {
-                c[i][j] = c[i][j-1];
-                b[i][j] = 3;
-            }
-        }
-    }
-}
-
-void PRINT_LCS(int **b,char *X,int i,int j)
-{
-    if (i==0 || j==0) {
-        return;
-    }
-    if (b[i][j]==1) {
-        PRINT_LCS(b, X, i-1, j-1);
-        cout &lt;&lt; X[i] &lt;&lt;endl;
-    }
-    else if (b[i][j]==2)
-    {
-        PRINT_LCS(b, X, i-1, j);
-    }
-    else
-    {
-        PRINT_LCS(b, X, i, j-1);
-    }
-}
-
-int main()
-{
-    char X[8] = {&#39;x&#39;,&#39;A&#39;,&#39;B&#39;,&#39;C&#39;,&#39;B&#39;,&#39;D&#39;,&#39;A&#39;,&#39;B&#39;};
-    char Y[7] = {&#39;y&#39;,&#39;B&#39;,&#39;D&#39;,&#39;C&#39;,&#39;A&#39;,&#39;B&#39;,&#39;A&#39;};
-    int m = sizeof(X)/sizeof(char);
-    int n = sizeof(Y)/sizeof(char);
-    int **b =new int*[m];
-    for (int i = 0; i&lt;m; i++) {
-        b[i] = new int[n];
-    }
-    
-    int **c = new int*[m];
-    for (int i = 0; i&lt;m; i++) {
-        c[i] = new int[n];
-    }
-    LCS_LENGTH(X,Y,b,c,m,n);
-    PRINT_LCS(b,X,m-1,n-1);
-    return 0;
-}
-
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/24</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -743,6 +607,18 @@ int main()
 	      
 		      
 			      <li class="post">
+			        <a href="15114255869932.html">Degree of an Array</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15114222067093.html">Find Pivot Index</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15114072257756.html">Best Time to Buy and Sell Stock II</a>
 			      </li>
 		     
@@ -756,18 +632,6 @@ int main()
 		      
 			      <li class="post">
 			        <a href="15114035796843.html">Array Partition I</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15114026353930.html">3Sum</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15113375347657.html">Arranging Coins</a>
 			      </li>
 		     
 		  

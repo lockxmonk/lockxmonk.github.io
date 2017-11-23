@@ -4,13 +4,100 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-11-22T16:01:47+08:00</updated>
+  <updated>2017-11-23T11:29:18+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Degree of an Array]]></title>
+    <link href="https://lockxmonk.github.io/15114255869932.html"/>
+    <updated>2017-11-23T16:26:26+08:00</updated>
+    <id>https://lockxmonk.github.io/15114255869932.html</id>
+    <content type="html"><![CDATA[
+<p>Given a non-empty array of non-negative integers <code>nums</code>, the degree of this array is defined as the maximum frequency of any one of its elements.</p>
+
+<p>Your task is to find the smallest possible length of a (contiguous) subarray of <code>nums</code>, that has the same degree as <code>nums</code>.</p>
+
+<p><img src="media/15114255869932/15114256313220.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findShortestSubArray(vector&lt;int&gt;&amp; nums) {
+        
+        if (nums.size()&lt;2) {
+            return nums.size();
+        }
+        unordered_map&lt;int, int&gt;startIndex , number;
+        int len = nums.size();
+        int fre = 0;
+        for (int i=0; i&lt;nums.size(); i++) {
+            if (startIndex.count(nums[i])==0) {
+                startIndex[nums[i]]=i;
+            }
+            number[nums[i]]++;
+            if (number[nums[i]]==fre) {
+                len = min(i-startIndex[nums[i]]+1, len);
+            }
+            if (number[nums[i]]&gt;fre) {
+                len = i - startIndex[nums[i]] + 1;
+                fre = number[nums[i]];
+            }
+        }
+        
+        return len;
+    }
+};
+</code></pre>
+
+<p>该算法主要使用了两个<code>hash_map</code>:<br/>
+一个来记录数字所出现的次数，另一个记录数字最开始出现的位置。一旦有一个数字的频数超过了当前的<code>len</code>，则更新<code>len</code>，若两个数字出现的频率相等则取长度最小的。</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Find Pivot Index]]></title>
+    <link href="https://lockxmonk.github.io/15114222067093.html"/>
+    <updated>2017-11-23T15:30:06+08:00</updated>
+    <id>https://lockxmonk.github.io/15114222067093.html</id>
+    <content type="html"><![CDATA[
+<p>Given an array of integers <code>nums</code>, write a method that returns the &quot;pivot&quot; index of this array.</p>
+
+<p>We define the pivot index as the index where the sum of the numbers to the left of the index is equal to the sum of the numbers to the right of the index.</p>
+
+<p>If no such index exists, we should return -1. If there are multiple pivot indexes, you should return the left-most pivot index.</p>
+
+<p><img src="media/15114222067093/15114222397308.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int pivotIndex(vector&lt;int&gt;&amp; nums) {
+        
+        if(nums.empty()) return -1;
+        
+        int sum = 0;
+        for(int i=0;i&lt;nums.size();i++) sum+=nums[i];
+    
+        int leftSum = 0;
+        for(int j=0;j&lt;nums.size();j++)
+        {
+            if (leftSum == sum - nums[j] -leftSum) {
+                return j;
+        }
+            leftSum += nums[j];
+        }
+        
+        return -1;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Best Time to Buy and Sell Stock II]]></title>
@@ -1646,270 +1733,6 @@ typedef void (^RWSignInResponse)(BOOL);
 <img src="media/15083737124086/15083777066162.png" alt=""/></p>
 
 <p>现在所有的工作都已经完成了，这个应用已经是响应式的啦!!</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[使用Masonry框架来构造iOS布局]]></title>
-    <link href="https://lockxmonk.github.io/15082871830637.html"/>
-    <updated>2017-10-18T08:39:43+08:00</updated>
-    <id>https://lockxmonk.github.io/15082871830637.html</id>
-    <content type="html"><![CDATA[
-<p>之前一直都是在使用<code>storyboards</code>来创建iOS布局，突然某一天看到使用代码布局后，界面元素的清晰易懂，就迷上了。。。</p>
-
-<p>所以这次简单学习一下使用<code>Masonry</code>帮助构建<code>iOS</code>界面元素。</p>
-
-<p>在阅读了<code>Masonry</code>的<a href="https://github.com/SnapKit/Masonry">github</a>主页之后，学习并安装了框架。</p>
-
-<h2 id="toc_0">框架的安装</h2>
-
-<p>安装框架非常简单，我们只需要在<code>podfile</code>中加上下面一句：</p>
-
-<pre><code class="language-objc">pod &#39;Masonry&#39;
-</code></pre>
-
-<p>之后为了语法的缩写以及代码自动补全我们来创建<code>Code Snippets</code></p>
-
-<pre><code class="language-objc">mas_make -&gt; [&lt;#view#&gt; mas_makeConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
-
-mas_update -&gt; [&lt;#view#&gt; mas_updateConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
-
-mas_remake -&gt; [&lt;#view#&gt; mas_remakeConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
-</code></pre>
-
-<p>将上述语句放到<code>~/Library/Developer/Xcode/UserData/CodeSnippets</code>中，之后我们在写相关代码的时候就会有代码提示了。</p>
-
-<p>我们在要使用<code>Masonry</code>的文件要频繁的导入<code>&quot;Masonry.h&quot;</code>头文件，所以为了方便，我们创建一个<code>Supporting Files</code>文件夹，并在其中创建一个<code>prefix.pch</code>文件。文件内容为：</p>
-
-<pre><code class="language-objc">//
-//  MBMasonry-Prefix.pch
-
-#import &lt;Availability.h&gt;
-
-// Include any system framework and library headers here that should be included in all compilation units.
-// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
-
-#ifndef __IPHONE_3_0
-#warning &quot;This project uses features only available in iOS SDK 3.0 and later.&quot;
-#endif
-
-#ifdef __OBJC__
-#import &lt;UIKit/UIKit.h&gt;
-#import &lt;Foundation/Foundation.h&gt;
-#import &lt;QuartzCore/QuartzCore.h&gt;
-
-//define this constant if you want to use Masonry without the &#39;mas_&#39; prefix
-// 只要添加了这个宏，就不用带mas_前缀
-#define MAS_SHORTHAND
-
-//define this constant if you want to enable auto-boxing for default syntax
-// 只要添加了这个宏，equalTo就等价于mas_equalTo
-#define MAS_SHORTHAND_GLOBALS
-//在这里导入头文件。
-#import &quot;Masonry.h&quot;
-
-#endif /* MBMasonry_Prefix_pch */
-
-</code></pre>
-
-<p>之后我们在使用的时候，就不用每个文件都导入一遍头文件了。</p>
-
-<h2 id="toc_1">使用方法</h2>
-
-<p>原声的iOS代码，对界面布局使用的是<code>NSLayoutAttribute</code>，用了<code>Masonry</code>后，我们使用封装好的<code>MASViewAttribute</code>。具体的属性等价关系如下图所示：<br/>
-<img src="media/15082871830637/15082883366505.jpg" alt=""/></p>
-
-<p>我们来举例说明一下，假入我们想要创建一个登陆界面。界面中要有<code>Name</code>和<code>Pass</code>两个<code>TextField</code>，并对应两个<code>Label</code>。</p>
-
-<p>那么我们可以按照如下方式来写：</p>
-
-<pre><code class="language-objc">//
-//  ViewController.m
-//  FirstRAC
-//
-//  Created by 梁中豪 on 2017/10/17.
-//  Copyright © 2017年 梁中豪. All rights reserved.
-//
-
-#import &quot;ViewController.h&quot;
-
-@interface ViewController ()
-@property(nonatomic,strong) UIView *login;
-@property(nonatomic,strong) UILabel *nameLabel;
-@property(nonatomic,strong) UILabel *passLabel;
-@property(nonatomic,strong) UITextField *name;
-@property(nonatomic,strong) UITextField *pass;
-
-
-@end
-
-@implementation ViewController
-
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    self.login = [[UIView alloc] initWithFrame:CGRectZero];
-    
-    _name = [[UITextField alloc] init];
-    _name.borderStyle = UIFontWeightBold;
-    _name.font = [UIFont systemFontOfSize:15];
-    _name.placeholder = @&quot;Enter Name&quot;;
-    [_login addSubview:_name];
-    
-    _pass = [[UITextField alloc] init];
-    _pass.borderStyle = UIFontWeightBold;
-    _pass.font = [UIFont systemFontOfSize:15];
-    _pass.placeholder = @&quot;Enter Pass&quot;;
-    [_login addSubview:_pass];
-    
-    _nameLabel = [[UILabel alloc] init];
-    _nameLabel.backgroundColor = UIColor.whiteColor;
-    _nameLabel.font = [UIFont systemFontOfSize:14.0];
-    _nameLabel.lineBreakMode = NSLineBreakByTruncatingTail;
-    _nameLabel.text = @&quot;Name&quot;;
-    [_login addSubview:_nameLabel];
-    
-    _passLabel = [[UILabel alloc] init];
-    _passLabel.backgroundColor = UIColor.whiteColor;
-    _passLabel.font = [UIFont systemFontOfSize:14.0];
-    _passLabel.lineBreakMode = NSLineBreakByTruncatingTail;
-    _passLabel.text = @&quot;Pass&quot;;
-    [_login addSubview:_passLabel];
-    [self.view addSubview:_login];
-    [self buildElem];
-}
-
-//为所创建的控件，创建约束
-- (void)buildElem{
-    [_login mas_makeConstraints:^(MASConstraintMaker *make){
-        make.left.right.and.bottom.equalTo(self.view);
-        make.top.equalTo(self.mas_topLayoutGuide);
-    }];
-    [_nameLabel mas_makeConstraints:^(MASConstraintMaker *make){
-        make.top.equalTo(_login.top);
-        make.height.equalTo(@20);
-        make.left.equalTo(_login.left).with.offset(20);
-    }];
-    [_passLabel mas_makeConstraints:^(MASConstraintMaker *make){
-        make.top.equalTo(_nameLabel.bottom).with.offset(10);
-        make.centerX.equalTo(_nameLabel.centerX);
-        make.height.equalTo(@20);
-    }];
-    [_name mas_makeConstraints:^(MASConstraintMaker *make){
-        make.left.equalTo(_nameLabel.right).with.offset(5);
-        make.centerY.equalTo(_nameLabel.centerY);
-        make.height.equalTo(@20);
-    }];
-    [_pass mas_makeConstraints:^(MASConstraintMaker *make){
-        make.left.equalTo(_passLabel.right).with.offset(5);
-        make.centerY.equalTo(_passLabel.centerY);
-        make.height.equalTo(@20);
-    }];
-
-}
-
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-@end
-
-</code></pre>
-
-<p>从上面可以看到，我们为元素创建了约束。当然这只是基本的方法。还有更多的<code>API</code>接口可以使用。我们这里就不在过多说明了。</p>
-
-<p>大概知道上面的用法，我们就可以开心的撸代码写界面去了。<br/>
-:smile:smile:smile:smile:smile:smile:smile:</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ReactiveCocoa初步了解]]></title>
-    <link href="https://lockxmonk.github.io/15082052235459.html"/>
-    <updated>2017-10-17T09:53:43+08:00</updated>
-    <id>https://lockxmonk.github.io/15082052235459.html</id>
-    <content type="html"><![CDATA[
-<p><code>ReactiveObjC</code>是一个受到函数响应式编程启发而开发的OC框架，对应的<code>Swift</code>框架叫做<code>ReactiveCocoa or ReactiveSwift</code>。简称为<code>RAC</code>。</p>
-
-<p>不同于使用那些被替代和修改的可编辑变量，RAC提供了一个<code>signals (represented by RACSignal)</code>用于捕获当前或者未来的值。这种做法工作起来类似于<code>KVO</code>，但是却没有那么繁琐。</p>
-
-<p><font color=red><strong>RAC的一大优势就是提供了一个统一的方法去解决异步表现，这些表现包括：委托方法，回调函数块，target-action机制，通知和KVO。</strong></font></p>
-
-<p>有如下例子：</p>
-
-<pre><code class="language-objc">//当self.name改变后，输出新的名字到控制台
-//
-//无论何时改变了值，RACObserve(self, username)都会创造了一个新的RACSignal用于发送当前self.name
-// 不管在什么时候signal发送了一个新的值，-subscribeNext: 都将执行块方法.
-[RACObserve(self, username) subscribeNext:^(NSString *newName) {
-    NSLog(@&quot;%@&quot;, newName);
-}];
-</code></pre>
-
-<p>但是不想KVO通知，signals是可以被链接和操作的：</p>
-
-<pre><code class="language-objc">// 只输出以&quot;j&quot;开头的名字.
-//
-// -filter returns a new RACSignal that only sends a new value when its block
-// returns YES.
-[[RACObserve(self, username)
-    filter:^(NSString *newName) {
-        return [newName hasPrefix:@&quot;j&quot;];
-    }]
-    subscribeNext:^(NSString *newName) {
-        NSLog(@&quot;%@&quot;, newName);
-    }];
-</code></pre>
-
-<p>其实上面代码也可以复杂的写成：</p>
-
-<pre><code class="language-objc">RACSignal *usernameSourceSignal = self.username;
-  
-RACSignal *filteredUsername =[usernameSourceSignal
-  filter:^(NSString *newName) {
-        return [newName hasPrefix:@&quot;j&quot;];
-    }];
-  
-[filteredUsername subscribeNext:^(NSString *newName) {
-        NSLog(@&quot;%@&quot;, newName);
-    }];
-</code></pre>
-
-<p>这是因为<code>RACSignal</code>的每个操作都会返回一个<code>RACsignal</code>，这在术语上叫做<code>连贯接口（fluent interface）</code>。这个功能可以让你直接构建管道，而不用每一步都使用本地变量。</p>
-
-<p><code>Signals</code>也可以被使用去获取状态。区别于观察属性和设置其他属性来反应新的值，<code>RAC</code>可以按照信号和操作来表达属性：</p>
-
-<pre><code class="language-objc">// Creates a one-way binding so that self.createEnabled will be
-// true whenever self.password and self.passwordConfirmation
-// are equal.
-//
-// RAC() is a macro that makes the binding look nicer.
-//
-// +combineLatest:reduce: takes an array of signals, executes the block with the
-// latest value from each signal whenever any of them changes, and returns a new
-// RACSignal that sends the return value of that block as values.
-RAC(self, createEnabled) = [RACSignal
-    combineLatest:@[ RACObserve(self, password), RACObserve(self, passwordConfirmation) ]
-    reduce:^(NSString *password, NSString *passwordConfirm) {
-        return @([passwordConfirm isEqualToString:password]);
-    }];
-</code></pre>
-
-<p>还有许多用法这就不举例了，详细用例可以查看<a href="https://github.com/ReactiveCocoa/ReactiveObjC#introduction">官方文档</a></p>
-
-<h2 id="toc_0">使用时机</h2>
-
-<p>刚开始，可能很难理解<code>RAC</code>,因为这个<code>ReactiveObjC</code>很抽象，很难了解什么时机应该使用它，怎样去解决问题。这里有几个推荐的使用时机：</p>
-
-<ul>
-<li>解决异步或者时间驱动的数据源</li>
-<li>链接依赖操作（尤其在网络处理方面）</li>
-<li>并行独立的工作</li>
-<li>简化集合的转变</li>
-</ul>
 
 ]]></content>
   </entry>

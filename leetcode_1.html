@@ -117,6 +117,126 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15113375347657.html">
+                
+                  <h1>Arranging Coins</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>You have a total of n coins that you want to form in a staircase shape, where every k-th row must have exactly k coins.</p>
+
+<p>Given n, find the total number of full staircase rows that can be formed.</p>
+
+<p>n is a non-negative integer and fits within the range of a 32-bit signed integer.</p>
+
+<p><img src="media/15113375347657/15113375557158.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int arrangeCoins(int n) {
+        return floor(-0.5+sqrt((double)2*n+0.25));
+    }
+};
+</code></pre>
+
+<p>这道题的主要考虑<code>1+2+3+...+x&lt;=n</code>下，使x左边等式最接近n，并且不超过。</p>
+
+<p>推导为：</p>
+
+<pre><code>-&gt; 1+2+3+...+x = n
+-&gt; (1+x)x/2 = n
+-&gt; x^2+x = 2n
+-&gt; x^2+x+1/4 = 2n +1/4
+-&gt; (x+1/2)^2 = 2n +1/4
+-&gt; (x+0.5) = sqrt(2n+0.25)
+-&gt; x = -0.5 + sqrt(2n+0.25)
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15113344881540.html">
+                
+                  <h1>Add Binary</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given two binary strings, return their sum (also a binary string).</p>
+
+<p>For example,<br/>
+a = <code>&quot;11&quot;</code><br/>
+b = <code>&quot;1&quot;</code><br/>
+Return <code>&quot;100&quot;</code>.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string addBinary(string a, string b) {
+        int fw = 0;
+        string result = &quot;&quot;;
+        for(int i = a.size()-1,j=b.size()-1;i&gt;=0||j&gt;=0;i--,j--){
+            int ag = i&gt;=0?a[i]-&#39;0&#39;:0;
+            int bg = j&gt;=0?b[j]-&#39;0&#39;:0;
+            int tmp = (ag+bg+fw)%2;
+            fw = (ag+bg+fw)/2;
+            
+            result = char(tmp+&#39;0&#39;)+result;
+        }
+        if(fw==1){
+            result = &#39;1&#39;+result;
+        }
+        
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15113344372070.html">
                 
                   <h1>1-bit and 2-bit Characters</h1>
@@ -381,6 +501,18 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15114255869932.html">Degree of an Array</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15114222067093.html">Find Pivot Index</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15114072257756.html">Best Time to Buy and Sell Stock II</a>
 			      </li>
 		     
@@ -394,18 +526,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15114035796843.html">Array Partition I</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15114026353930.html">3Sum</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15113375347657.html">Arranging Coins</a>
 			      </li>
 		     
 		  

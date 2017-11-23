@@ -117,6 +117,117 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14926690841704.html">
+                
+                  <h1>面向对象编程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>采用面向对象的程序设计思想来设计一个简单的学生成绩打印，我们首选思考的不是程序的执行流程，而是<code>Student</code>这种数据类型应该被视为一个对象，这个对象拥有<code>name</code>和<code>score</code>这两个属性（Property）。如果要打印一个学生的成绩，首先必须创建出这个学生对应的对象，然后，给对象发一个<code>print_score</code>消息，让对象自己把自己的数据打印出来</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class Students(object):
+    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+
+    def __init__(self, name, score):
+        super(Students, self).__init__()
+        self.name = name
+        self.score = score
+
+    def print_score(self):
+        print &#39;%s:%s&#39; % (self.name, self.score)
+
+
+bart = Students(&#39;Bart&#39;, 59)
+lisa = Students(&#39;梁中豪&#39;, 100)
+bart.print_score()
+lisa.print_score()
+</code></pre>
+
+<p><img src="media/14926690841704/14926708025078.jpg" alt=""/></p>
+
+<p><strong>面向对象三大特点：封装、继承、多态。</strong></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14926579397626.html">
+                
+                  <h1>使用_future_</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Python的每个新版本都会增加一些新的功能，或者对原来的功能作一些改动。有些改动是不兼容旧版本的，也就是在当前版本运行正常的代码，到下一个版本运行就可能不正常了。</p>
+
+<p>从Python 2.7到Python 3.x就有不兼容的一些改动，比如2.x里的字符串用<code>&#39;xxx&#39;</code>表示str，Unicode字符串用<code>u&#39;xxx&#39;</code>表示unicode，而在3.x中，所有字符串都被视为unicode，因此，写<code>u&#39;xxx&#39;和&#39;xxx&#39;</code>是完全一致的.还有在2.x中以<code>&#39;xxx&#39;</code>表示的str就必须写成<code>b&#39;xxx&#39;</code>，以此表示“二进制字符串”。</p>
+
+<p><font color=red>Python提供了<code>__future__模块</code>，把下一个新版本的特性导入到当前版本，于是我们就可以在当前版本中测试一些新版本的特性。</font>举例说明如下：</p>
+
+<p>为了适应Python 3.x的新的字符串的表示方法，在2.7版本的代码中，可以通过unicode_literals来使用Python 3.x的新的语法：</p>
+
+<pre><code class="language-py"># still running on Python 2.7
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
+print &#39;\&#39;xxx\&#39; is unicode?&#39;, isinstance(&#39;xxx&#39;, unicode)
+print &#39;u\&#39;xxx\&#39; is unicode?&#39;, isinstance(u&#39;xxx&#39;, unicode)
+print &#39;\&#39;xxx\&#39; is str?&#39;, isinstance(&#39;xxx&#39;, str)
+print &#39;b\&#39;xxx\&#39; is str?&#39;, isinstance(b&#39;xxx&#39;, str)
+</code></pre>
+
+<p><img src="media/14926579397626/14926584481460.jpg" alt=""/><br/>
+注意到上面的代码仍然在Python 2.7下运行，但结果显示去掉前缀u的<code>&#39;a string&#39;</code>仍是一个unicode，而加上前缀b的<code>b&#39;a string&#39;</code>才变成了str</p>
+
+<p>由于Python是由社区推动的开源并且免费的开发语言，不受商业公司控制，因此，<strong>Python的改进往往比较激进，不兼容的情况时有发生。Python为了确保你能顺利过渡到新版本，特别提供了__future__模块，让你在旧的版本中试验新版本的一些特性</strong>。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14925924499918.html">
                 
                   <h1>使用第三方模块</h1>
@@ -618,169 +729,6 @@ max(*args)
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14921570225186.html">
-                
-                  <h1>拟牛顿法（最大熵模型的学习）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	
-
-<p>最大熵模型学习还可以应用牛顿法或者拟牛顿法。<br/>
-对于最大熵模型而言，<br/>
-<img src="media/14921570225186/14921574471740.jpg" alt=""/><br/>
-<img src="media/14921570225186/14921574611293.jpg" alt=""/><br/>
-相应的拟牛顿法BFGS算法如下。<br/>
-<img src="media/14921570225186/14921576945600.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14921324340299.html">
-                
-                  <h1>装饰器</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>函数也是一个对象，而且函数对象可以被赋值给变量，所以，通过变量也能调用该函数。</p>
-
-<p>函数对象有一个<code>__name__</code>属性，可以拿到函数的名字：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def now():
-    print &#39;1992-12-14&#39;
-f = now
-f()
-print now.__name__,f.__name__
-
-</code></pre>
-
-<p><img src="media/14921324340299/14921328219891.jpg" alt=""/></p>
-
-<p><strong>现在，假设我们要增强<code>now()</code>函数的功能，比如，在函数调用前后自动打印日志，但又不希望修改<code>now()</code>函数的定义，这种在代码运行期间动态增加功能的方式，称之为“装饰器”<code>（Decorator）</code>。</strong></p>
-
-<p>本质上，<code>decorator</code>就是一个返回函数的高阶函数。所以，我们要定义一个能打印日志的<code>decorator</code>，可以定义如下：</p>
-
-<pre><code class="language-py">def log(func):
-    def wrapper(*args, **kw):
-        print &#39;call %s():&#39; % func.__name__
-        return func(*args, **kw)
-    return wrapper
-</code></pre>
-
-<p>观察上面的log，因为它是一个decorator，所以接受一个函数作为参数，并返回一个函数。我们要借助Python的@语法，把decorator置于函数的定义处：</p>
-
-<pre><code>@log
-def now():
-    print &#39;2013-12-25&#39;
-</code></pre>
-
-<p><img src="media/14921324340299/14921338711853.jpg" alt=""/></p>
-
-<p><strong>练习题：请编写一个decorator，能在函数调用的前后打印出&#39;begin call&#39;和&#39;end call&#39;的日志。</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def log(func):
-    def wrapper(*args, **kw):
-        print  &#39;begin call&#39;
-        res =  func(*args, **kw)
-        print &#39;end call2&#39;
-        return res
-    return wrapper
-@log
-def now():
-    print &#39;test&#39;
-now()
-</code></pre>
-
-<p><img src="media/14921324340299/14921348025676.jpg" alt=""/></p>
-
-<p><strong>练习题：再思考一下能否写出一个@log的decorator，使它既支持：</strong></p>
-
-<pre><code class="language-py">@log
-def f():
-    pass
-</code></pre>
-
-<p><strong>又支持</strong></p>
-
-<pre><code class="language-py">@log(&#39;execute&#39;)
-def f():
-    pass
-</code></pre>
-
-<p>解答：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import functools
-
-def log(text):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args ,**kw):
-            if len(text)&gt;0:
-                print &#39;%s %s()&#39; % (text, func.__name__)
-            else:
-                print &#39;%s()&#39; % func.__name__
-            return func(*args,**kw)
-        return wrapper
-    return decorator
-
-@log(&#39;sdfsf&#39;)
-def now():
-    print &#39;test&#39;
-now()
-</code></pre>
-
-<p><img src="media/14921324340299/14921357641252.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -870,6 +818,18 @@ now()
 	      
 		      
 			      <li class="post">
+			        <a href="15114255869932.html">Degree of an Array</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15114222067093.html">Find Pivot Index</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15114072257756.html">Best Time to Buy and Sell Stock II</a>
 			      </li>
 		     
@@ -883,18 +843,6 @@ now()
 		      
 			      <li class="post">
 			        <a href="15114035796843.html">Array Partition I</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15114026353930.html">3Sum</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15113375347657.html">Arranging Coins</a>
 			      </li>
 		     
 		  
