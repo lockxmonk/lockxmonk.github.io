@@ -117,36 +117,78 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15042285213204.html">
+                <a class="clearlink" href="15050942669581.html">
                 
-                  <h1>第26条 不要在分类中声明属性</h1>
+                  <h1>第四十二条 多用GCD，少用performSelector系列方法</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>属性是封装数据的方式（参见第6条)。尽管从技术上说，分类里也可以声明属性，但这种做法还是要尽量避免。</p>
+                        	<p><code>Objective-C</code>本质上是一门非常动态的语言（参见第11条)，<code>NSObject</code>定义了几个方法, <mark>令开发者可以随意调用任何方法。这几个方法可以推迟执行方法调用，也可以指定运行方法所用的线程。</mark>这些功能原来很有用，但是在出现了<code>GCD</code>之后，这些功能就尽量不要使用了，尽量用<code>GCD</code>来取代他们。</p>
 
-<p>原因在于，除了<code>“class-continuation分类”</code>（参见第27条）之外，其他分类都无法向类中新增实例变量，因此，它们无法把实现属性所需的实例变量合成出来。如果我们在分类中声明了一个<code>friends</code>属性。会提示我们</p>
+<p>其中他们又如下几个方法：</p>
 
-<blockquote>
-<p>warning: property  &#39;friends&#39; requires method &#39;friends&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
+<pre><code class="language-objc">-(id)performSelector : (SEL) selector
+//可以传两个参数
+-(id)performSelector : (SEL) selector
+           withObject:（id）objectA
+           withObject:（id）objectB
+//传一个参数
+-(id)performSelector : (SEL) selector
+           withObject:（id）object
+</code></pre>
 
-<p>warning: property &#39;friends&#39; requires method &#39;setFriends:&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
-</blockquote>
+<p>具体用法如：</p>
 
-<p>说明系统没有为我们自动合成属性的<code>set</code>和<code>get</code>方法。我们要自己在分类中去实现，可以把存取方法声明为<code>@dynamic</code>, 也就是说，这些方法等到运行期再提供，编译器目前是看不见的。如果决定使用消息转发机制（参见第12条）在运行期拦截方法调用，并提供其实现，那么或许可以采用这种做法。</p>
+<pre><code class="language-objc">[object performSelector: @selector(selectorName)];
 
-<p>当然我们也可以使用关联对象的方法。<strong><mark>但是还是不建议我们在分类中定义封装数据的属性。</mark></strong></p>
+[object performSelector: @selector(setValue:)
+             withObject: newValue];
+</code></pre>
 
-<p>正确做法是把所有属性都定义在主接口里。类所封装的全部数据都应该定义在主接口中，这里是唯一能够定义实例变量(也就是数据）的地方。而属性只是定义实例变量及相关存取方法所用的“语法糖”，所以也应遵循同实例变量一样的规则。<mark>至于分类机制,则应将其理解为一种手段，目标在于扩展类的功能，而非封装数据。</mark></p>
+<p>上面的用法，会有很多局限，比如在<code>ARC</code>下，会发出警告表示：<code>也许会内存泄露</code>，这是因为编译器并不知道将要的选择子是什么，因此，也就不了解其方法签名及返回值，甚至连是否有返回值都不清楚，而且由于编译器不知道方法名，所以就没办法运用<code>ARC</code>的内存管麵则来判定返回值是不是该释放。鉴于此，<code>ARC</code>采用了比较谨慎的做法，就是不添加释放操作。然而这么<br/>
+做可能导致内存泄漏，因为方法在返回对象时可能已经将其保留了。</p>
 
-<p>但是有时候，只读属性（readonly）可以在分类中使用，但是我们要手动实现它的<code>get</code>方法。当然我们不建议搞特殊。最好还是在主接口中声明。然后在分类中声明一个获取方法，来获取数据。</p>
+<p>另一个局限性是：返回值只能是<code>void</code>或对象类型。尽管所要执行的 选择子也可以返回<code>void</code>，但是<code>performSelector</code>方法的返回值类型毕竟是<code>id</code>。如果想返回整数或浮点数等类型的值，那么就需要执行一些复杂的转换操作了，而这种转换很容易出错。</p>
+
+<p>第三个局限是：这个方法最多只能传递两个参数，当选择子得到参数超过两个时，只能运用字典来传送数据（但是容易增加开销和造成bug）。</p>
+
+<p>所以我们的解决方法是：我们使用<code>块</code>来代替，并且<code>performSelector</code>系列方法都可以使用<code>GCD</code>机制使用块来实现。我们来举几个例子说明：</p>
+
+<p>如果我们想要延后执行某个任务：</p>
+
+<pre><code class="language-objc">//Using performSelector:withObjectrafterDelay: 
+[self performSelector:@selector(doSomething)
+           withObject:nil 
+           afterDelay:5.0];
+
+//Using dispatch_after
+dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, (int64 t)(5.0 * NSEC PER SEC));
+
+dispatch_after(time, dispatch_get_main—queue(), ^(void){
+     [self doSomething];
+})；
+</code></pre>
+
+<p>后者想要在主线程执行某个任务：</p>
+
+<pre><code class="language-objc">// Using performSelectorOnMainThread: withObject .-waitUntilDone :
+[self performSelectorOnMainThread:@selector(doSomething)
+                      withObject:nil 
+                      waitUntilDone:NO];
+//Using dispatch_async
+// (or if waitUntilDone is YES, then dispatchasync) 
+dispatch_async(dispatch_get_main_queue(), ^{
+        [self doSomething];
+});
+</code></pre>
 
 <h2 id="toc_0">要点</h2>
 
 <ul>
-<li>把封装数据所用的全部属性都定义在主接口里。</li>
-<li>在<code>“class-contimiation分类”</code>之外的其他分类中，可以定义存取方法，但尽量不要定义属性。</li>
+<li><code>performSelector</code>系列方法在内存管理方面容易有疏失。它无法确定将要执行的选择子具体是什么，因而<code>ARC</code>编译器也就无法插入适当的内存管理方法。</li>
+<li><code>performSelector</code>系列方法所能处理的选择子太过局限了，选择子的返回值类型及发送给方法的参数个数都受到限制。</li>
+<li>如果想把任务放在另一个线程上执行，那么最好不要用<code>performSelector</code>系列方法，而是应该把任务封装到块里，然后调用大中枢派发机制的相关方法来实现。</li>
 </ul>
 
                         
@@ -156,10 +198,10 @@
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/9/1</span>
+                    <span class="date">2017/9/11</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -173,35 +215,139 @@
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15042274785369.html">
+                <a class="clearlink" href="15049238737460.html">
                 
-                  <h1>第25条 总是为第三方类的分类名称加前缀</h1>
+                  <h1>第四十一条 多用派发队列，少用同步锁</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>分类机制通常用于向无源码的既有类中新增功能。这个特性极为强大，但在使用时也很容易忽视其中可能产生的问题。</p>
+                        	<p>在<code>OC</code>中，如果有多个线程要执行同一份代码，那么有时可能会出问题。这种情况下，通常要使用锁来实现某种同步机制。在<code>GCD</code>出现之前，有两种办法，第一种是采用内置的<code>“同步块”（synchronization block)</code>:</p>
 
-<p>我们在分类中添加方法，系统在运行期时会将分类中的方法加入类中。运行期系统会把分类中所实现的每个方法都加入类的方法列表中。<strong><font color=red>如果类中本来就有此方法，而分类又实现了一次，那么分类中的方法会覆盖原来那一份实现代码。实际上可能会发生很多次榭盖，比如某个分类中的方法覆盖了“主实现”中的相关方法，而另外一个分类 中的方法又覆盖了这个分类中的方法。多次覆盖的结果以最后一个分类为准。</font></strong></p>
-
-<p>所以我们为了解决此问题，一般做法是：<strong><font color=red>以命名空间来区别各个分类的名称与其中所定义的方法。</font></strong>我们这里的命名空间只是在相关名称前都加上公用的前缀。</p>
-
-<p>所以我们举例来说就是这样的：</p>
-
-<pre><code class="language-objc">@interface NSString (ABC_HTTP)
-//Encode a string with URL encoding 
--(NSString*) abc_urlEncodedStiring;
-
-// Decode a URL ©ncodeci string
--(NSString*) abc_urlDecodedString;
-@end
+<pre><code class="language-objc">-(void)synchronizedMethod {
+    @synchronized(self) {
+    //Safe
+    }
+}
 </code></pre>
+
+<p>这种写法会根据给定的对象，自动创建一个锁，并等待块中的代码执行完毕。执行到这段代码结尾处，锁就释放了。在本例中，同步行为所针对的对象是<code>self</code>。这么写通常没错，因为它可以保证每个对象实例都能不受干扰地运行其<code>synchronizedMethod</code>方法。然而，滥用 <code>@SynChronized(self)</code>则会降低代码效率，因为共用同一个锁的那些同步块，都必须按顺序执行。若是在<code>self</code>对象上频繁加锁，那么程序可能要等另一段与此无关的代码执行完毕，才能继续执行当前代码，这样做其实并没有必要。</p>
+
+<p>另一种加锁的办法是<code>NSLock</code>对象：</p>
+
+<pre><code class="language-objc">_lock = [[NSLockalloc] init];
+
+-(void)synchronizedMethod {
+    [_lock lock];
+    //Safe
+    [_lock unlock];
+}
+</code></pre>
+
+<p>也可以使用<code>NSRecursiveLock</code>这种<code>“递归锁’（recursive lock)</code>，线程能够多次持有该锁，而不会出现<code>死锁(deadlock)</code>现象。</p>
+
+<p>虽然上面两种方法可以用，但是也有一些缺陷，比如：在某些情况下，同步快会导致死锁，另外，效率不是很高。而如果直接使用锁对象的话，一旦遇到死锁，就会非常麻烦。</p>
+
+<p><strong>所以我们一般使用GCD来替代，它的优点就是可以简单，高效的为代码加锁</strong>。属性因为需要经常性的同步，所以当要线程安全的时候，加上<code>“atomic”</code>特质来修饰属性。</p>
+
+<p>但是如果我们想要自己实现属性访问方法时，可以：</p>
+
+<pre><code class="language-objc">-(NSString*)someString {
+    @synchronized(self) {
+        return _someString;
+    }
+}
+-(void)setSomeString:(NSString*)someString { 
+    @synchronized(self) {
+        _someString = someString;
+    }
+}
+</code></pre>
+
+<p>但是滥用<code>@synchronized(self)</code>会很危险，因为所有同步块都会彼此抢夺同一个锁。要是有很多个属性都这么写的话，那么每个属性的同步块都要等其他所有同步块执行完毕才能执行，这也许并不是开发者想要的效果。我们只是想令每个属性各自独立地同步。</p>
+
+<p><strong><em>而且上述做法并不是绝对的线程安全。因为在两次访问操作之间，其他线程可能会写入新的属性值。</em></strong></p>
+
+<p>这里我们使用<code>“串行同步队列”（serial synchronization queue)</code>。将读取操作及写入操作都安排在同一个队列里，即可保证数据同步。：</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_queue_create(&quot;com.effectiveobjectivec.syncQueue&quot;, NULL);
+
+-(NSString*)someString {
+    _block NSString *localSomeString;
+    dispatch_sync(_syncQueue, ^{
+        localSomeString = _someString;
+    })；
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+    dispatch_sync(_syncQueue,^{
+        _someString = someString;
+    });
+}
+</code></pre>
+
+<p>此模式的思路是：把设置操作与获取操作都安排在序列化的队列里执行（串行同步队列并不会拓展新的线程），这样的话，所有针对属性的访问操作就都同步了。（关于GCD的串行队列/并发队列与iOS多线程这里不详细讲解了，后续深入探讨）。</p>
+
+<p>多个获取方法可以并发执行，而获取方法与设置方法之间不能并发执行，利用这个特点，还能写出更快一些的代码来。此时正可以体现出<code>GCD</code>写法的好处。用同步块或锁对象，是无法轻易实现出下面这种方案的。这次不用串行队列，而改用<code>并发队列（concurrentquene)</code>:</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+
+-(NSString*}someString {
+    __block NSString *localSomeString; 
+    dispatch_sync( _syncQueue, ^{
+        localSomeString = _someString;
+    })； 
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+        dispatch_async(syncQueue, ^{
+        _someString = someScring;
+    });
+}
+</code></pre>
+
+<p>光是上面这些代码还不够，所有读取操作与写入操作都会在同一个队列上执行，不过由于是并发队列，所以读取与写人操作可以随时执行。而我们恰恰不想让这些操作随意执行。这就要用到<code>栅栏（barrier)</code>，是<code>GCD</code>中的一个功能：</p>
+
+<pre><code class="language-objc">void dispatch_barrier_async(dispatch_queue_t queue,
+                            dispatch_block_t block);
+void dispatch_barrier_sync(dispatch_queue_t queue,
+                            dispatch_block_t block);
+</code></pre>
+
+<p><strong><font color=red>在队列中，栅栏块必须单独执行，不能与其他块并行。这只对并发队列有意义，因为串行队列中的块总是按顺序逐个来执行的。并发队列如果发现接下来要处理的块是个栅栏块 (barrier block)，那么就一直要等当前所有并发块都执行完毕，才会单独执行这个栅栏块。待栅栏块执行过后，再按正常方式继续向下处理。</font></strong></p>
+
+<p>在本例中，可以用栅栏块来实现属性的设置方法。在设置方法中使用了栅栏块之后，对属性的读取操作依然可以并发执行，但是写人操作却必须单独执行了。例如：</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+
+-(NSString*}someString {
+    __block NSString *localSomeString; 
+    dispatch_sync( _syncQueue, ^{
+        localSomeString = _someString;
+    })； 
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+        dispatch_barrier_async(syncQueue, ^{
+        _someString = someScring;
+    });
+}
+</code></pre>
+
+<p><strong>执行的顺序如图所示：</strong><br/>
+<img src="media/15049238737460/15049413869385.jpg" alt=""/></p>
+
+<p>测试一下性能，你就会发现，这种做法肯定比使用串行队列要快。注意，设置函数也可以改用同步的<code>栅栏块(synchronous barrier)</code>来实现，那样做可能会更髙效，其原因刚才已经 解释过了。<strong><font color=red>最好还是测一测每种做法的性能，然后从中选出最适合当前场景的方案</font></strong>。</p>
 
 <h2 id="toc_0">要点</h2>
 
 <ul>
-<li>向第三方类中添加分类时，总应给其名称加上你专用的前缀。</li>
-<li>向第三方类中添加分类时，总应给其中的方法名加上你专用的前缀。</li>
+<li>派发队列可用来表述<code>同步语义（synchronization semantic)</code>,这种做法要比使用<code>@synchronized块</code>或<code>NSLock</code>对象更简单。</li>
+<li>将同步与异步派发结合起来，可以实现与普通加锁机制一样的同步行为，而这么做却不会阻塞执行异步派发的线程。</li>
+<li>使用同步队列及栅栏块，可以令同步行为更加髙效。</li>
 </ul>
 
                         
@@ -211,10 +357,10 @@
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/9/1</span>
+                    <span class="date">2017/9/9</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -228,31 +374,132 @@
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15041689865677.html">
+                <a class="clearlink" href="15045739362959.html">
                 
-                  <h1>指针问题</h1>
+                  <h1>第四十条 用块引用其所属对象时不要出现保留环</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<pre><code>#include &lt;stdio.h&gt;  
-   
-int main() {  
-      
-    int num = 10;  
-    int *p1 = &amp;num//p1存储num的地址  
-    int **p2 = &amp;p1;//p2存储p1的地址  
-    int ***p3 = &amp;p2;//p3存储p2的地址  
-      
-    *p1 = 100;//*p1取出num变量  
-    **p2 = 200;//**p2取出num变量  
-    ***p3 = 300;//***p3也是取出num变量  
-    printf(&quot;num = %d\n&quot;,num);  
-    printf(&quot;num = %d\n&quot;,***p3);  
-      
-    return 0;  
-}  
+                        	<p>我们使用块的时候，如果不仔细思索，很容易出现“保留环”，我们来举个例子，下面这个类就提供了一套接口，调用者可由此从某个URL中下载数据。在启动获取器时，可设置 <code>completion handler</code>,这个块会在下载结束之后以回调方式执行。为了能在下载完成后通过<code>p_requestCompleted</code>方法执行调用者所指定的块，这段代码需要把<code>completion handler</code>保存到实例变量里面。</p>
+
+<pre><code class="language-objc">// EOCNetwor kFetcher. h
+#import &lt;Foundation/Foundation.h&gt;
+typedef void(^EOCNetworkFetcherCompletionHandler) (NSData *data);
+
+@interface EOCNetworkFetcher : NSObject 
+@property (nonatomic, strong, readonly) NSURL *url;
+-(id)initWithURL:(NSURL^)url;
+-(void)startWithCompletionHandler:(EOCNetworkFetcherCompletionHandler)completion;
+
+
+
+// EOCNetworkFetcher.m
+#import &quot;EOCNetworkFetcher.h&quot;
+@interface EOCNetworkFetcher ()
+@property(nonatomic, strong, readwrite) NSURL *url;
+@property(nonatomic, copy) EOCNetworkFetcherCompletionHandler completionHandler; (nonatomic, strong) NSData *downloadedData;
+@implementation EOCNetworkFetcher
+
+-(id)initWithURL:(NSURL*)url {
+    if ((self = [super init])) {
+        _url = url;
+    }
+    return sel£;
+}
+
+-(void)startWithCompletionHandler:
+        (EOCNetworkFetcherCompletionHandlei) completion
+{
+    self.completionHandler = completion;
+    //Start the request
+    // Request sets downloadedData property
+    //When request is finished, p_requestCompleted is called
+}
+
+-(void)p_requestCompleted { 
+    if (_completionHandler){ 
+    _completionHandler(_downloadedData);
+    }
+}
+@end
 </code></pre>
+
+<p>某个类可能会创建这种网络数据获取器对象，并用其从<code>URL</code>中下载数据：</p>
+
+<pre><code class="language-objc">@implemantation EOCClass {
+    EOCNetworkFetcher *_networkFetcher;
+    NSData *_fetchedData;
+}
+-(void)downloadData {
+    NSURL *url = [[NSURL alloc] initWithString:
+                    @&quot;http://www.example.com/something.dat&quot;];
+    _networkFetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
+    [_networkFetcher startWithCompletionHandler:^(NSData *data){
+        NSLog (@&quot;Request URL %@ finished&quot;, _networkFetcher.url);
+        _fetchedData = data;
+    }]；
+}
+@end
+</code></pre>
+
+<p>这段代码没有什么问题，但是<strong><font color=red>里面有一个隐蔽的保留环</font></strong>，因为<code>completion handler</code>块要设置<code>_fetchedData</code>实例变量,所以它必须捕获<code>self</code>变量（变量捕获问题详见第37条。这就是说，<code>handler</code>块保留了创建网络数据获取器的那个<code>EOCClass</code>实例。而<code>EOCClass</code>实例则通过<code>strong</code>实例变量保留了获取器，最后，获取器对象又保留了<code>handler</code>块。</p>
+
+<p>如下图所示：<br/>
+<img src="media/15045739362959/15045760282053.jpg" alt=""/></p>
+
+<p>要打破保留环也很容易：要么令<code>_networkFetcher</code>实例变量不再引用获取器，要么令获取器的<code>completionHaiidler</code>属性不再持有<code>handler</code>块。在网络数据获取器这个例子中，应该等 <code>completion handler</code>块执行完毕后，再去打破保留环，以便使获取器对象在<code>handler</code>块执行期间保持存活状态。比方说，<code>completion handler</code>块的代码可以这么修改：</p>
+
+<pre><code class="language-objc">[_networkFetcher startWithCompletionHandler:^(NSData *data){
+        NSLog (@&quot;Request URL %@ finished&quot;, _networkFetcher.url);
+        _fetchedData = data;
+        _networkFetcher = nil;
+    }]；
+</code></pre>
+
+<p>如果设计<code>API</code>时用到了<code>completion handler</code>这样的同调块，那么很容易形成保留环，所以必须意识到这个重要问题。一般只要适时的清理环中的某个引用即可。</p>
+
+<p>但是上例如果不执行<code>completion handler</code>，那么保留环就无法打破，于是内存就会泄漏。</p>
+
+<p>所以我们使调用<code>API</code>的那段代码无须在执行期间保留指向网络数据获取器的引用，而是设定一套机制，令获取器对象自己设法保持存活。要想保持存活，获取器对象可以 在启动任务时把自己加到全局的<code>collection</code>中（比如用<code>set</code>来实现这个<code>collection</code>),待任务完成后，再移除。</p>
+
+<p>所以我们改写一下：</p>
+
+<pre><code class="language-objc">-(void)downloadData {
+    NSURL *url = [[NSURL alloc] initWithString:
+                    @&quot;http://www.example.com/something.dat&quot;];
+    EOCNetworkFetcher *networkFetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
+    [networkFetcher startWithCompletionHandler:^(NSData *data){
+        NSLog (@&quot;Request URL %@ finished&quot;, networkFetcher.url);
+        _fetchedData = data;
+    }]；
+}
+</code></pre>
+
+<p>大部分网络通信库都采用这种办法，因为假如令调用者自己来将获取器对象保持存活的话，他们会觉得麻烦。<code>Twitter</code>框架的<code>TWRequest</code>对象也用这个办法。</p>
+
+<p>但是上面这个例子仍然有保留环，<code>completion handler</code>块会通过获取器对象来引用其中的<code>URL</code>,之后获取器会反过来经由<code>CompletionHandler</code>属性保留这个块。我们把块保留在属性里的目的是想稍后来使用这个块。所以一旦我们运行过<code>completion handler</code>之后就可以将它释放了。我们消除保留环可以按照下面修改：</p>
+
+<pre><code class="language-objc">-(void)p_requestCompleted { 
+    if (_completionHandler){ 
+        _completionHandler(_downloadedData);
+    }
+    self.completionHandler = nil;
+}
+</code></pre>
+
+<p>这样只要下载请求执行完毕，保留环就解除了。</p>
+
+<p>请注意，之所以要在<code>start</code>方法中把<code>completion handler</code>作为参数传进去，这也是一条重要原因。假如把<code>completion handler</code>暴露为获取器对象的公共属性，那么就不便在执行完下载请求之后直接将其淸理掉了，因为既然已经把<code>handler</code>作为属性公布了，那就意味着调用者可以自由使用它，若是此时又在内部将其清理掉的话，则会破坏<code>“封装语义” (encapsulation semantic)</code>。</p>
+
+<p><font color=red>这两种保留环都很容易发生。使用块来编程时，一不小心就会出现这种<code>bug</code>,反过来说，只要小心谨慎，这种问题也很容易解决。关键在于，要想清楚块可能会捕获并保留哪些对象。如果这些对象又直接或间接保留了块，那么就要考虑怎样在适当的时机解除保留环。</font></p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>如果块所捕获的对象直接或间接地保留了块本身，那么就得当心保留环问题。</li>
+<li>一定要找个适当的时机解除保留环，而不能把责任推给API的调用者。</li>
+</ul>
 
                         
                       </div>
@@ -261,10 +508,10 @@ int main() {
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/8/31</span>
+                    <span class="date">2017/9/5</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -278,259 +525,110 @@ int main() {
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15041475233104.html">
+                <a class="clearlink" href="15045090813380.html">
                 
-                  <h1>消息转发机制的简单实现</h1>
+                  <h1>第三十九条 用handler块降低代码分散程度</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<h2 id="toc_0">第一种</h2>
+                        	<p>iOS中我们经常采用异步执行任务的方式，来避免主线程的阻塞。因为<code>“系统监控器”（system watchdog)</code>在发现某个应用程序的主线程已经阻塞了一段时间之后，就会令其终止。导致程序崩溃。</p>
 
-<p>首先我们来实现这两个方法：<br/><br/>
-+(BOOL)resolveInstanceMethod:    (SEL)sel</p>
-
-<p>+(BOOL)resolveClassMethod:(SEL)sel</p>
-
-<p>这两个方法用于方法的动态解析，当一个对象执行一个方法时，发现没有找到所对应的实现。这是就要靠上面的方法来动态添加实现了</p>
-
-<p>举例来说：</p>
-
-<pre><code class="language-objc">//
-//  Person.h
-//  消息转发
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface Person : NSObject
-//接口中声明一个方法
--(void)run;
-
-@end
-
-//
-//  Person.m
-//  消息转发
-
-
-#import &quot;Person.h&quot;
-#import &lt;objc/runtime.h&gt;
-@implementation Person //在部署的时候我们没有实现接口中声明的run方法
-
-
-//编写C函数实现代码
-void addrun (id self, SEL _cmd){
-    NSLog(@&quot;%@　%s&quot;,self,sel_getName(_cmd));
-}
-
-+(BOOL)resolveInstanceMethod:(SEL)sel{
-    if (sel ==@selector(run)) {
-    //如果响应run方法，我们动态将上面实现的addrun方法添加到当前类中。
-        class_addMethod(self, sel, (IMP)addrun, &quot;v@:&quot;);
-    }
-    
-    return [super resolveInstanceMethod:sel];
-}
-
-@end
-
-//  main.m
-//  消息转发
-
-
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;Person.h&quot;
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-    //执行代码
-        Person *man = [Person new];
-        [man run];
-    }
-    return 0;
-}
-</code></pre>
-
-<p>结果为：<img src="media/15041475233104/15041480973843.jpg" alt=""/><br/>
-说明执行了我们添加的那个方法，而并没有报错。</p>
-
-<h2 id="toc_1">第二种</h2>
-
-<p>我们可以动态的向类中添加方法来解决无选择子的问题，我们也可以选择转换接受者来选择可以处理该选择子的对象。</p>
-
-<p>首先当我们，没有处理第一种方法的时候，运行期系统会给我们第二个机会，询问是否有备用的接受者。我们就要实现<code>orwardingTargetForSelector</code>了</p>
-
-<p>我们举例来看：</p>
-
-<p>首先我们先创建一个新类Car，并且创建一个<code>run</code>方法：</p>
-
-<p><img src="media/15041475233104/15041487720558.jpg" alt=""/></p>
-
-<p>然后在Person.m中，不对<code>resolveInstanceMethod</code>进行任何处理，在<code>forwardingTargetForSelector</code>中返回一个<code>Car</code>实例：<br/>
-<img src="media/15041475233104/15041488721835.jpg" alt=""/></p>
-
-<p>然后继续执行<code>main.m</code>文件，运行为：<br/>
-<img src="media/15041475233104/15041489461207.jpg" alt=""/></p>
-
-<p>说明系统已经将所要实现方法的对象转换为<code>Car</code>的实例对象。</p>
-
-<h2 id="toc_2">第三种</h2>
-
-<p>如果前两种我们都没有实现的话，就会进入第三种，执行完整的消息转发机制。</p>
-
-<p>就会调用两个方法<code>methodSignatureForSelector</code>和<code>forwardInvocation</code></p>
-
-<p><code>methodSignatureForSelector</code>方法用来指定方法签名，返回<code>nil</code>表示不处理，否则会进入下一步调用<code>forwardInvocation</code>方法。其中这个签名就是给<code>forwardInvocation</code>中的参数<code>NSInvocation</code>调用的。</p>
-
-<p><img src="media/15041475233104/15041604848181.jpg" alt=""/></p>
-
-<p>开头我们要找的错误<code>unrecognized selector sent to instance</code>原因，原来就是因为<code>methodSignatureForSelector</code>这个方法中，由于没有找到<code>run</code>对应的实现方法，所以返回了一个空的方法签名，最终导致程序报错崩溃。</p>
-
-<p>所以我们需要做的是自己新建方法签名，再在<code>forwardInvocation</code>中用你要转发的那个对象调用这个对应的签名，这样也实现了消息转发。</p>
-
-<p>关于生成签名的类型<code>&quot;v@:&quot;</code>解释一下。每一个方法会默认隐藏两个参数，<code>self</code>、<code>_cmd</code>，<code>self</code>代表方法调用者，<code>_cmd</code>代表这个方法的<code>SEL</code>，签名类型就是用来描述这个方法的返回值、参数的，<code>v</code>代表返回值为<code>void</code>，<code>@</code>表示<code>self</code>，<code>:</code>表示<code>_cmd</code>。</p>
-
-<p><strong>所以第二个和第三个字符必须是<code>“@:”</code> ，第一个字符是返回类型.</strong></p>
-
-<p><strong>具体的可以看一下了解</strong>：<a href="https://developer.apple.com/library/etc/redirect/xcode/content/1189/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100">Type Encodeing</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/31</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15041406291157.html">
-                
-                  <h1>第24条 将类的实现代码分散到便于管理的数个分类之中</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>一个类里面经常会填满各种各样的方法，有时候将那么多方法放在一个类的实现文件里是合理的。但是我们如果通过OC的<code>分类</code>机制将类代码按逻辑划入几个分区中，这对于开发和调试都有帮助。</p>
-
-<p>我们来举个例子，我们对个人信息建模分类：</p>
+<p>但是异步方法执行任务后，需要以某种手段来通知相关代码。实现这一功能有很多方法，常用的技巧是设计一个委托协议，令关注此事件的对象遵从该协议。对象成为<code>delegate</code>之后，就可以在相关事件发生时（例如某个异步任务执行完毕时）得到通知了。例如：</p>
 
 <pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-Sinterface EOCPerson : NSObject
-@property (nonatomic, copy, readonly) NSString *firstName; 
-@property (nonatomic, copy, readonly) NSString *lastName; 
-@property (nonatomic, strong, readonly) NSArray *friends;
-
--(id)initWithFirstName:(NSString*) firstName
-            andLastName:(NSString*)lastName;
-            
-/* Friendship methods */
--(void)addFriend:(EOCPerson*)person;
-- (void)removeFriend:(EOCPerson*)person;
--(BOOL)isFriendsWith:(EOCPerson*)person;
-
-/* Work methods */
--(void)performDaysWork;
--(void)takeVacationFromWork;
-
-/* Play methods */
--(void)goToTheCinema;
--(void)goToSportsGame;
-</code></pre>
-
-<p>在实现该类时，所有方法的代码可能会写在一个大文件里。显得很臃肿。所以可以用“分类”机制把刚才的类改写成下面这样：</p>
-
-<pre><code class="language-objc">@import &lt;Foundation/Foundation.h&gt;
-@interface EOCPerson : NSObject
-@property (nonatomic, strong, readonly) NSArray *friends;
-@property (nonatomic, copy, readonly) NSString *lastName;
-@property (nonatomic, copy, readonly) NSString *firstName; 
- 
--(id) initWithFirstName: (NSString*)firstName
-            andLastNames:(NSString*)lastName;
-
+@class EOCNetworkFetcher;
+@protocol EOCNetworkFetcherDelegate &lt;NSObject&gt;
+-(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher 
+    didFinishWithData:(NSData*)data;
 @end
 
-@interface EOCPerson (Friendship)
--(void)addFriend:(EOCPerson*)person;
--(void)removeFriend:(EOCPerson*)person;
--(BOOL)isFriendsWith:(EOCPerson*)person; 
-@end
-
-@interface EOCPerson (Work)
--(void)performDaysWork;
--(void)takeVacationFromWork; 
-@end
-
-@interface EOCPerson (Play)
--(void)goToTheCinema;
--(void)goToSportsGame;
+@interface EOCNetworkFetcher : NSObject 
+@property (nonatomic, weak) id &lt;EOCNetworkFetcherDelegate&gt; delegate; 
+-(id)initWithURL:(NSURL*)url;
+-(void)start;
 @end
 </code></pre>
 
-<p>现在，类的实现代码按照方法分成了好几个部分。所以说，这项语言特性当然就叫做<code>“分类”</code>啦。</p>
+<p>其它类可以像下面这样来使用：</p>
 
-<p>但是这些代码还是在一个文件中声明的，所以我们还可以将其拆分为多个文件：</p>
-
-<ul>
-<li>  EOCPerson+Friendship(.h/.m)</li>
-<li> EOCPerson+Work(.h/.m)</li>
-<li> EOCPerson+Play(.h/.m)</li>
-</ul>
-
-<p>比方说，与交友功能相关的那个分类可以这样写：</p>
-
-<pre><code class="language-objc">// EOCPerson+Friendship.h
-#import &quot;EOCPerson.h&quot;
-@interface EOCPerson (Friendship)
--(void)addFriend:(EOCPerson*)person;
--(void)removeFriend:(EOCPerson*)person;
--(BOOL)isFriendsWith:(EOCPerson*)person;
-@end
-
-// EOCPerson+Friendship.m 
-
-#import EOCPerson+Friendship.h
-@implementation EOCPerson (Friendship)
--(void)addFriend:(EOCPerson*)person {
-    /*...*/
+<pre><code class="language-objc">-(void)fetchFooData {
+    NSURL *url = [[NSURL alloc] initWithString:
+                    @&quot;http: //www.example.com/foo.dat&quot;]; 
+    EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url]; 
+    fetcher.delegate = self;
+    [fetcher start];
 }
--(void)removeFriend:(EOCPerson*)person {
-    /*...*/
+
+-(void)networkFetcher:(EOCNetworkFetcher*)networkFetcher didFinishWithData:(NSData*)data
+{
+    _fetchedFooData = data;
 }
--(BOOL)isFriendsWith:(EOCPerson*)person {
-    /*...*/
-}
+</code></pre>
+
+<p>上面在<code>EOCNetworkFetcher</code>类中声明了一个协议，协议中有一个方法用于通知对象已获取完数据。</p>
+
+<p>之后想要获取到通知的对象遵守该协议，成为它的委托对象。这样在执行完<code>start</code>方法之后，<code>EOCNetworkFetcher</code>会调用委托对象所遵守的协议方法，让委托对象获取收到的数据（也就是通知它）。</p>
+
+<p>上面这种做法没有错误，确实可行。但是如果我们改用块来写的话，代码会更清晰。就是把<code>completion handler</code>定义为块类型，将其当作参数直接传给<code>start</code>方法:</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+typedef void(^EOCNetworkFetcherCompletionHandler)(NSData *data);
+@interface EOCNetworkFetcher : NSObject 
+-(id)initWithURL:(NSURL*)url;
+-(void)startWithCompletionHandler:
+            (EOCNetworkFetcherCompletionHandler)handler;
 @end
 </code></pre>
 
-<p>通过分类机制，可以把类代码分成很多个易于管理的小块，以便单独检视。<mark>使用分类机制之后，如果想用分类中的方法，那么要记得在引入<code>EOCPerson.h</code>时一并引入分类的头文件</mark>。</p>
+<p>这和使用委托协议很想，不过多了个好处，就是可以在调用<code>start</code>方法时直接以内联形式 定义<code>completion handler</code>,以此方式来使用<code>“网络数据获取器”（network fetcher)</code>,可以令代码比原先易懂很多。例如，下面这个类就以块的形式来定义<code>completion handler</code>,并以此为参数调用<code>API</code>:</p>
 
-<p>这样使用分类之后，对于某个分类中的所有 方法来说，分类名称都会出现在其符号中。例如，<code>“addFriend:”</code>方法的“符号名”（symbol name)如下：</p>
-
-<pre><code class="language-objc">-[EOCPerson(Friendship) addFriend:]
+<pre><code class="language-objc">-(void)fetchFooData {
+NSURL *url = [[NSURL alloc] initWithString:
+@&quot;http://www.example.com/foo.dat&quot;]; 
+EOCNetworkFetcher *fetcher = [[EOCNetworkFetcher alloc] initWithURL:url];
+[fetcher startWithCompletionHandler:^(NSData *data){ 
+    _fetchedFooData = data;
+})；
 </code></pre>
 
-<p>也可以创建名为<code>Private</code>的分类把这种方法全都放在里面。这个分类里的方法一般只会在类或框架内部使用，而无须对外公布。这样一来，类的使用者有时可能会在査看回溯信息时发现<code>private</code>一词，就知道不应该直接调用此方法了。</p>
+<p>与使用委托模式的代码相比，用块写出来的代码显然更为整洁。异步任务执行完毕后所需运行的业务逻辑，和启动异步任务所用的代码放在了一起。而且，由于块声明在创建获取器的范围里，所以它可以访问此范围内的全部变量。</p>
+
+<p>这种写法其实最重要的用途是处理错误。现在很多基于块的<code>API</code>都使用块来处理错误，可以分别用两个处理程序来处理操作失败的情况和操作成功的情况。也可以把处理失败情况所需的代码，与处理正常情况所用的代码，都封装到同一个<code>completion handler</code>块里,我们建议使用后者，因为苹果公司也是这样设计<code>API</code>的。我们举例来说：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@class EOCNetworkFetcher;
+typedef void(^EOCNetworkFetcherCompletionHandler) 
+                                (NSData *data, NSError *error);
+
+@interface EOCNetworkFetcher : NSObject
+-(id)initWithURL:(NSURL*)url;
+-(void)startWithCompletionHandler:
+                (EOCNetworkFetcherCompletionHandler)completion;
+@end
+</code></pre>
+
+<p>此种API的调用方式如下:</p>
+
+<pre><code class="language-objc">EOCNetworkFetcher *fetcher =
+        [[EOCNetworkFetcher alloc] initWithURL:url]; 
+[fetcher startWithCompletionHander:
+    ^(NSData *data, NSError *error){ 
+    if (error) {
+        //Handle failure 
+    }else {
+        // Handle success
+    }
+}];
+</code></pre>
 
 <h2 id="toc_0">要点</h2>
 
 <ul>
-<li>使用分类机制把类的实现代码划分成易于管理的小块。</li>
-<li>将应该视为“私有”的方法归入名叫<code>Private</code>的分类中，以隐藏实现细节。</li>
+<li>在创建对象时，可以使用内联的<code>handler</code>块将相关业务逻辑一并声明。</li>
+<li>在有多个实例需要监控时，如果采用委托模式，那么经常需要根据传入的对象来切 换，而若改用<code>handler</code>块来实现，则可直接将块与相关对象放在一起。</li>
+<li>设计API时如果用到了<code>handler</code>块，那么可以增加一个参数，使调用者可通过此参数来决定应该把块安排在哪个队列上执行。</li>
 </ul>
 
                         
@@ -540,10 +638,10 @@ Sinterface EOCPerson : NSObject
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/8/31</span>
+                    <span class="date">2017/9/4</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -557,80 +655,64 @@ Sinterface EOCPerson : NSObject
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15040800241477.html">
+                <a class="clearlink" href="15044922241087.html">
                 
-                  <h1>iOS基础概念总结（一）</h1>
+                  <h1>第三十八条 为常用的块类型创建typedef</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<ul>
-<li>
-<a href="#toc_0">1. OC的前向声明</a>
-</li>
-<li>
-<a href="#toc_1">2. #import和#include的区别？</a>
-</li>
-<li>
-<a href="#toc_2">3. 用NSLog函数输出一个浮点类型，结果四舍五入，并保留一位小数</a>
-</li>
-<li>
-<a href="#toc_3">4.property属性的修饰符有什么样的作用</a>
-</li>
-<li>
-<a href="#toc_4">5. self.name=@object和_name=@object有什么不同?</a>
-</li>
-</ul>
+                        	<p>我们在定义一个块时，语法是这样的：</p>
 
-
-<h2 id="toc_0">1. OC的前向声明</h2>
-
-<p>由于在编译 <code>Person</code> 类的文件时，不需要知道Dog类的全部细节（Dog类中的方法），若使用 <code>#import &quot;Dog.h&quot;</code> 则必须知道<code>Dog.h</code>的全部细节，而Person类中只需要知道类名Dog就可以了,可用通过以下方式告诉编译器<code>@class Dog;</code>这种方式叫<code>向前声明 （forward declaring）</code>,当<code>.m</code>文件中要了解实现细节的时候在引入<code>dog.h</code></p>
-
-<pre><code class="language-objc">//Person.h
-#import &lt;Foundation/Foundation.h&gt;
-@class Dog;  //前向声明
-@interface Person : NSObject
-@property (nonatomic, strong) NSString *name;
-@property (nonatomic, strong) Dog *dog;
-
+<pre><code class="language-objc">int^(variableName)(BOOL flag,int value) = ^(BOOL flag, int value){
+    //Implemention
+    return someInt;
+}
 </code></pre>
 
-<ul>
-<li><strong>向前声明解决了两个类互相引用的问题。</strong></li>
-<li><strong>向前声明可用降低编译时间，除非必要，则可以使用向前申明，并在实现文件中映入头文件，这样做可用尽量降低类之间的耦合。</strong></li>
-</ul>
+<p>此块接受两个类型分别为<code>BOOL</code>及<code>int</code>的参数，并返回类型为<code>int</code>的值。并且把它赋给了一个变量。</p>
 
-<h2 id="toc_1">2. #import和#include的区别？</h2>
+<p>与其他类型的变量不同，在定义块变量时，要把变量名放在类型之中，而不要放在右侧。这种语法非常难记，也非常难读。<strong><font color=red>鉴于此，我们应该为常用的块类型起个别名，</font></strong>尤其是打算把代码发布成API供他人使用时，更应这样做。开发者可以起个更为易读的名字来表示块的用途，而把块的类型隐藏在其后面。例如：</p>
 
-<p><code>#import</code>是<code>Objective-C</code>导入头文件的语法，可保证不会重复导入。<br/>
-<code>#include</code>是C/C++导入头文件的语法，如果是objective-c与C/C++混编码，对于C/C++类型的文件，还是使用#include来引入，这种写法需要添加防重复导入的语法。</p>
-
-<h2 id="toc_2">3. 用NSLog函数输出一个浮点类型，结果四舍五入，并保留一位小数</h2>
-
-<pre><code class="language-objc">float money = 1.011;
-NSLog(@&quot;%.1f&quot;, money);
+<pre><code class="language-objc">//定义
+typedef int(^EOCSomeBlock)(BOOL flag, int value);
 </code></pre>
 
-<h2 id="toc_3">4.property属性的修饰符有什么样的作用</h2>
+<p>声明变量时，要把名称放在类型中间，并在前面加上<code>“^”</code>符号，而定义新类型时也得这么做。上面这条语句向系统中新增了一个名为<code>EOCSomeBlock</code>的类型。此后，不用再以复杂的块类型来创建变量了，直接使用新类型即可：</p>
 
-<p><code>property</code>是属性访问声明，扩号内支持以下几个属性：</p>
+<pre><code class="language-objc">EOCSomeBlock block = ^(BOOL flag, int value){
+    // Implementation
+};
+</code></pre>
+
+<p><strong><mark>这次代码读起来就顺畅多了：与定义其他变量时一样，变量类型在左边，变量名在右边。</mark></strong></p>
+
+<p>我们可以利用这个将使用块的API做的简单易用些，例如：</p>
+
+<pre><code class="language-objc">-(void)startWithCompletionHandler:
+            (void(^)(NSData *data, NSError *error))completion;
+</code></pre>
+
+<p>上面代码接受了一个块作为参数，所以我们可以用上面定义块的方法来改写它：</p>
+
+<pre><code class="language-objc">typedef void(^EOCCompletionHandler)(NSData *data, NSError *error);
+
+-(void)startWithCompletionHandler: (EOCCompletionHandler)completion;
+</code></pre>
+
+<p>现在参数看上去就简单多了，而且易于理解。</p>
+
+<p>我们在定义块的时候要注意，最好在使用块类型的类中定义这些<code>typedef</code>，而且还应该把这个类的名字加在由<code>typedef</code>所定义的新类型名前面，这样可以阐明块的用途。还可以用<code>typedef</code>给同一个块签名类型创建数个别名。在这件事上，多多益善。因为，开发者看到类型的别名以及签名中的参数之后，可以很容易的理解类型的用途。</p>
+
+<p>与此相似，如果有好几个类都要执行相似但各有区别的异步任务，而这几个类又不 能放人同一个继承体系，那么，每个类就应该有自己的<code>completion handler</code>类型。这几个<code>completion handler</code>的签名也许完全相同，但最好还是在每个类里都各自定义一个别名，而不 要共用同一个名称。反之，若这些类能纳人同一个继承中，则应该将类型定义语句放在超类中，以供各子类使用。</p>
+
+<h2 id="toc_0">要点</h2>
 
 <ul>
-<li><strong>getter=getName、setter=setName</strong>：设置setter与getter的方法名</li>
-<li><p><strong>readwrite、readonly</strong>：设置可供访问级别</p></li>
-<li><p><strong>assign</strong>：方法直接赋值，不进行任何retain操作，为了解决原类型与环循引用问题</p></li>
-<li><p><strong>retain</strong>：其setter方法对参数进行release旧值再retain新值，所有实现都是这个顺序</p></li>
-<li><p><strong>strong</strong>：此特质表明该属性定义了一种“拥有关系”（owning relationship)。为这种属性设置新值时，设置方法会先保留新值，并释放旧值，然后再将新值设置上去。</p></li>
-<li><p><strong>weak</strong>  此特质表明该属性定义了一种“非拥有关系”（nonowning relationship)。<strong>为这种属性设置新值时，设置方法既不保留新值，也不释放旧值</strong>。此特质同assign类似,然而在属性所指的对象遭到摧毁时，属性值也会清空（nil out)。</p></li>
-<li><p><strong>unsafe_unretained</strong>  此特质的语义和assign相同，但是它适用于“对象类型”（object type),该特质表达一种“非拥有关系”（“不保留”，unretained),<strong>当目标对象遭到摧毁时，属性值不会自动清空（“不安全”，unsafe),这一点与weak有区别</strong>。</p></li>
-<li><p><strong>copy</strong>：其setter方法进行copy操作，与retain处理流程一样，先对旧值release，再copy出新的对象，retainCount为1。这是为了减少对上下文的依赖而引入的机制。</p></li>
-<li><p><strong>nonatomic</strong>：非原子性访问，不加同步， 多线程并发访问会提高性能。注意，如果不加此属性，则默认是两个访问方法都为原子型事务访问。</p></li>
+<li>以<code>typedef</code>重新定义块类型，可令块变量用起来更加简单。</li>
+<li>定义新类型时应遵从现有的命名习惯，勿使其名称与别的类型相冲突。</li>
+<li>不妨为同一个块签名定义多个类型别名。如果要重构的代码使用了块类型的某个别名，那么只需修改相应<code>typedef</code>中的块签名即可，无须改动其他<code>typedef</code>。</li>
 </ul>
-
-<h2 id="toc_4">5. self.name=@object和_name=@object有什么不同?</h2>
-
-<p><code>self.name =”object”：</code>会调用对象的<code>setName()</code>方法；<code>name = “object”：</code>会直接把<code>&quot;object&quot;</code>字符串赋值给当前对象的<code>name</code>属性。后者的效率会很高，因为没有调用set方法而是直接方法问内存。</p>
 
                         
                       </div>
@@ -639,10 +721,163 @@ NSLog(@&quot;%.1f&quot;, money);
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/8/30</span>
+                    <span class="date">2017/9/4</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15043212815193.html">
+                
+                  <h1>第三十七条 理解“块”这一概念</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>首先，块与函数类似，只不过是直接定义在另一个函数里的，和定义它的那个函数共享同一 个范围内的东西。块用<code>“^”</code>符号来表示，后面跟着一对花括号，括号里面是块的实现代码。 例如，下面就是个简单的块：</p>
+
+<pre><code class="language-objc">^{
+    //Block implementation here
+}
+</code></pre>
+
+<p>块其实就是个值，而且自有其相关类型。与<code>int</code>、<code>float</code>或<code>Objective-C</code>对象一样，也可以把块赋给变量,然后像使用其他变量那样使用它。块类型的语法与函数指针近似。下面列出的这个块很简单，没有参数，也不返回值：</p>
+
+<pre><code class="language-objc">void (^someBlock) () = A {
+    //Block implementation here
+}；
+</code></pre>
+
+<p>这段代码定义了一个名为<code>someBlock</code>的变量。由于变量名写在正中间，所以看上去也许 =有点怪，不过一旦理解了语法，很容易就能读懂。块类型的语法结构如下：</p>
+
+<pre><code class="language-objc">return_type (^block_name)(parameters)
+</code></pre>
+
+<p>我们来举个例子，下面这种写法所定义的块，返回<code>int</code>值，并且接受两个<code>int</code>做参数：</p>
+
+<pre><code class="language-objc">int (^addBlock) (int a, int b) = ^(int a, int b){
+     return a + b;
+};
+</code></pre>
+
+<p>定义好之后，就可以像函数那样使用了。比方说，<code>addBlock</code>块可以这样用:</p>
+
+<pre><code class="language-objc">int add = addBlock (2, 5) ;  //&lt; add = 12
+</code></pre>
+
+<p>块的强大之处是：在声明它的范围里，所有变量都可以为其所捕获。这也就是说，那个范围里的全部变量，在块里依然可用。比如，下面这段代码所定义的块，就使用了块以外的变量：</p>
+
+<pre><code class="language-objc">int additional = 5;
+int (^addBlock) (int a, int b) = ^(int a, int b){ 
+    return a + b + additional;
+};
+
+int add = addBlock (2, 5);  //&lt; add = 12
+</code></pre>
+
+<p>默认情况下，为块所捕获的变量，是不可以在块里修改的。在本例中，假如块内的代码改动了<code>additional</code>变量的值，那么编译器就会报错。不过，声明变量的时候可以加上<code>__block</code> 修饰符，这样就可以在块内修改了。</p>
+
+<p>例如：</p>
+
+<pre><code class="language-objc">__block int additional = 5;
+int (^addBlock) (int a, int b) = ^(int a, int b){   
+    additional++;
+    return a + b + additional;
+};
+
+int add = addBlock (2, 5);  //&lt; add = 13
+</code></pre>
+
+<p>块的另一个用法是<code>“内联块”（inline block）</code>，例如：</p>
+
+<pre><code class="language-objc">NSArray *array = @[@0, @1, @2, @3, @4, @5];
+_block NSInteger count = 0;
+[array enumerateObjectsUsingBlock:
+    ^(NSNumber *number, NSUInteger idx, BOOL *stop){
+        if([number compare:@2] == NSOrderedAscending) { 
+        count++;
+    }
+}];
+//count = 2
+</code></pre>
+
+<p>这段范例代码也演示了<code>“内联块”（inline block)</code>的用法。传给<code>“numerateObjectsUsingBlock:”</code>方法的块并未先賦给局部变量,而是直接内联在函数调用里了。</p>
+
+<p>然后我们在声明和使用块的时候，要注意它的作用范围。定义块的时候，其所占的内存区域是分配在栈中的。这就是说，块只在定义它的那个范围内有效。比如下面这个：</p>
+
+<pre><code class="language-objc">void(^block)();
+if ( /* some condition */ ){
+    block = ^{
+        NSLog(@&quot;Block A&quot;);
+    };
+} else {
+    block = ^{
+        NSLog(@&quot;Block B&quot;);
+    };
+}
+block();
+</code></pre>
+
+<p>定义在<code>if</code>及<code>else</code>语句中的两个块都分配在栈内存中。编译器会给每个块分配好栈内存, 然而等离开了相应的范围之后，编译器有可能把分配给块的内存覆写掉。于是，这两个块只 能保证在对应的<code>if</code>或<code>else</code>语句范围内有效。这样写出来的代码可以编译，但是运行起来时而正确，时而错误。若编译器未覆写待执行的块，则程序照常运行，若覆写，则程序崩溃。</p>
+
+<p>我们为了解决这个问题可以给块对象发送<code>copy</code>消息以拷贝之。这样的话，就可以把块从栈复制到堆了。</p>
+
+<p>拷贝后的块，可以在定义它的那个范围之外使用。而且，一旦复制到堆上，块就成了带引用计数的对象了。后续的复制操作都不会真的执行复制，只是递增块对象的引用计数。如果不再使用这个块，那就应将其释放，在ARC环境下会自动释放。</p>
+
+<p>改动后跟下面一样：</p>
+
+<pre><code class="language-objc">void (^block)();
+if (/* some condition */ ){ 
+    block = [^{
+        NSLog(@,fBlock Aw);
+    } copy];
+} else {
+    block = [^{
+        NSLog(@&quot;Block B&quot;);
+    } copy];
+}
+block();
+</code></pre>
+
+<p>除了“桟块”和“堆块”之外，还有一类块叫做<strong><mark>“全局块”（global block)</mark></strong>。这种块不会捕捉任何状态（比如外围的变量等)，运行时也无须有状态来参与。块所使用的整个内存区域，在编译期已经完全确定了，因此，全局块可以声明在全局内存里，而不需要在每次用到 的时候于栈中创建。另外，全局块的拷贝操作是个空操作，因为全局块决不可能为系统所回收。这种块实际上相当于单例。下面就是个全局块：</p>
+
+<pre><code class="language-objc">void (^block)() = ^{
+    NSLog(@&quot;This is a block&quot;);
+};
+</code></pre>
+
+<p><mark>由于运行该块所需的全部信息都能在编译期确定，所以可把它做成全局块。</mark>这完全是种优化技术：若把如此简单的块当成复杂的块来处理，那就会在复制及丢弃该块时执行一些无谓的操作。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>块是<code>C、C++、Objective-C</code>中的词法闭包。</li>
+<li>块可接受参数，也可返回值。</li>
+<li>块可以分配在栈或堆上，也可以是全局的。分配在栈上的块可拷贝到堆里，这样的话，就和标准的<code>Objective-C</code>对象一样，具备引用计数了。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -744,31 +979,31 @@ NSLog(@&quot;%.1f&quot;, money);
 	      
 		      
 			      <li class="post">
-			        <a href="15109904843500.html">AFNetworking的简单使用</a>
+			        <a href="15114072257756.html">Best Time to Buy and Sell Stock II</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15109022752813.html">FMDB的使用方法</a>
+			        <a href="15114062990936.html">Best Time to Buy and Sell Stock</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15097619961308.html">贪心算法（构造霍夫曼树）</a>
+			        <a href="15114035796843.html">Array Partition I</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15096800741665.html">贪心算法（活动选择问题）</a>
+			        <a href="15114026353930.html">3Sum</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15090074391982.html">常见iOS面试题基础篇</a>
+			        <a href="15113375347657.html">Arranging Coins</a>
 			      </li>
 		     
 		  
