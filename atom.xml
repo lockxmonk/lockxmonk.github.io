@@ -4,13 +4,263 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-11-23T16:31:17+08:00</updated>
+  <updated>2017-11-29T23:58:18+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Given an integer array, find three numbers whose product is maximum and output the maximum product.]]></title>
+    <link href="https://lockxmonk.github.io/15120258790187.html"/>
+    <updated>2017-11-30T15:11:19+08:00</updated>
+    <id>https://lockxmonk.github.io/15120258790187.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15120258790187/15120319341000.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int maximumProduct(vector&lt;int&gt;&amp; nums) {
+        sort(nums.begin(), nums.end());
+        int len = nums.size();
+        int tmp1 = nums[len-1]*nums[len-2]*nums[len-3];
+        int tmp2 = nums[len-1]*nums[0]*nums[1];
+        return max(tmp1, tmp2);
+    }
+};
+</code></pre>
+
+<p>主要考虑含有负数的情况。</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Two Sum II - Input array is sorted]]></title>
+    <link href="https://lockxmonk.github.io/15120258181532.html"/>
+    <updated>2017-11-30T15:10:18+08:00</updated>
+    <id>https://lockxmonk.github.io/15120258181532.html</id>
+    <content type="html"><![CDATA[
+<p>Given an array of integers that is already <strong><em>sorted in ascending order</em></strong>, find two numbers such that they add up to a specific target number.</p>
+
+<p>The function twoSum should return indices of the two numbers such that they add up to the target, where index1 must be less than index2. Please note that your returned answers (both index1 and index2) are not zero-based.</p>
+
+<p>You may assume that each input would have exactly one solution and you may not use the same element twice.</p>
+
+<p><img src="media/15120258181532/15120258628279.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; numbers, int target) {
+        int str = 0;
+        int end = numbers.size()-1;
+        while (numbers[str]+numbers[end]!=target) {
+            if (numbers[str]+numbers[end]&gt;target) {
+                end--;
+            }else{
+                str++;
+            }
+        }
+        return vector&lt;int&gt;({str+1,end+1});
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Summary Ranges]]></title>
+    <link href="https://lockxmonk.github.io/15120236843494.html"/>
+    <updated>2017-11-30T14:34:44+08:00</updated>
+    <id>https://lockxmonk.github.io/15120236843494.html</id>
+    <content type="html"><![CDATA[
+<p>Given a sorted integer array without duplicates, return the summary of its ranges.求数组中，连续数字的区间。</p>
+
+<p><img src="media/15120236843494/15120237048289.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;string&gt; summaryRanges(vector&lt;int&gt;&amp; nums) {
+        
+        vector&lt;string&gt; result;
+        if(nums.size()==0) return result;
+        
+        int end = nums[0]+1;
+        int total = 0;
+        if (nums.size()==1) {
+            result.push_back(to_string(nums[0]));
+            return result;
+        }
+        nums.push_back(INT_MAX); //充当哨兵
+        for (int i=1; i&lt;nums.size(); i++) {
+            if (nums[i]==end) {
+                end++;
+                total++;
+                continue;
+            }else{
+                end = nums[i]+1;
+                if (total==0) {
+                    result.push_back(to_string(nums[i-1]));
+                }else{
+                    string tmp = to_string(nums[i-1-total])+&quot;-&gt;&quot;+to_string(nums[i-1]);
+                    result.push_back(tmp);
+                }
+                total = 0;
+            }
+        }
+        return result;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Majority Element]]></title>
+    <link href="https://lockxmonk.github.io/15120100977395.html"/>
+    <updated>2017-11-30T10:48:17+08:00</updated>
+    <id>https://lockxmonk.github.io/15120100977395.html</id>
+    <content type="html"><![CDATA[
+<p>Given an array of size n, find the majority element. The majority element is the element that appears more than <code>⌊ n/2 ⌋</code> times.</p>
+
+<p>You may assume that the array is non-empty and the majority element always exist in the array.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int majorityElement(vector&lt;int&gt;&amp; nums) {
+        sort(nums.begin(), nums.end());
+        int total = 1;
+        int tmp = 1;
+        int result = nums[0];
+        if (nums.size()==1) {
+            return result;
+        }
+        nums.push_back(INT_MAX); //在最后增加一个边界哨兵
+        for (int i=1; i&lt;=nums.size(); i++) {
+            if (nums[i]==nums[i-1]) {
+                tmp++;
+            }else{
+                result = tmp&gt;total ? nums[i-1]:result;
+                total = max(tmp, total);
+                tmp = 1;
+            }
+        }
+        
+        return result;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Remove Duplicates from Sorted Array]]></title>
+    <link href="https://lockxmonk.github.io/15120074710373.html"/>
+    <updated>2017-11-30T10:04:31+08:00</updated>
+    <id>https://lockxmonk.github.io/15120074710373.html</id>
+    <content type="html"><![CDATA[
+<p>Given a sorted array, remove the duplicates <code>in-place</code> such that each element appear only once and return the new length.</p>
+
+<p>Do not allocate extra space for another array, you must do this by modifying the input array <code>in-place</code> with O(1) extra memory.</p>
+
+<p><img src="media/15120074710373/15120081165110.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
+        int tmp = INT_MIN;
+        int log = 0;
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (tmp!=nums[i]) {
+                tmp = nums[i];
+            }else{
+                log++;
+            }
+            nums[i-log] = nums[i];
+        }
+        
+        return nums.size()-log;
+    }
+};
+</code></pre>
+
+<p><img src="media/15120074710373/15120082747602.jpg" alt=""/></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Remove Element]]></title>
+    <link href="https://lockxmonk.github.io/15120073985530.html"/>
+    <updated>2017-11-30T10:03:18+08:00</updated>
+    <id>https://lockxmonk.github.io/15120073985530.html</id>
+    <content type="html"><![CDATA[
+<p>Given an array and a value, remove all instances of that value <strong>in-place</strong> and return the new length.</p>
+
+<p>Do not allocate extra space for another array, you must do this by modifying the input array <strong>in-place</strong> with O(1) extra memory.</p>
+
+<p>The order of elements can be changed. It doesn&#39;t matter what you leave beyond the new length.</p>
+
+<p><img src="media/15120073985530/15120074297000.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int removeElement(vector&lt;int&gt;&amp; nums, int val) {
+        int total = 0;
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (nums[i]==val) {
+                total++;
+            }else{
+                nums[i-total] = nums[i];
+            }
+        }
+        return nums.size()-total;
+    }
+};
+</code></pre>
+
+<p><img src="media/15120073985530/15120074551545.jpg" alt=""/></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Move Zeroes]]></title>
+    <link href="https://lockxmonk.github.io/15120064619713.html"/>
+    <updated>2017-11-30T09:47:41+08:00</updated>
+    <id>https://lockxmonk.github.io/15120064619713.html</id>
+    <content type="html"><![CDATA[
+<p>Given an array <code>nums</code>, write a function to move all 0&#39;s to the end of it while maintaining the relative order of the non-zero elements.</p>
+
+<p>For example, given <code>nums = [0, 1, 0, 3, 12]</code>, after calling your function, <code>nums</code> should be <code>[1, 3, 12, 0, 0]</code>.</p>
+
+<p><strong>Note:</strong><br/>
+1.  You must do this in-place without making a copy of the array.<br/>
+2.  Minimize the total number of operations.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    void moveZeroes(vector&lt;int&gt;&amp; nums) {
+        int log = 0; //索引0元素位置
+        int logNO = 0;  //索引非0应放元素位置
+        while (log&lt;nums.size()) {
+            if (nums[log]!=0) {
+                swap(nums[logNO], nums[log]);
+                logNO++;
+            }
+            log++;
+        }
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[☆☆Find All Numbers Disappeared in an Array]]></title>
@@ -516,648 +766,6 @@ public:
     }
 };
 </code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[1-bit and 2-bit Characters]]></title>
-    <link href="https://lockxmonk.github.io/15113344372070.html"/>
-    <updated>2017-11-22T15:07:17+08:00</updated>
-    <id>https://lockxmonk.github.io/15113344372070.html</id>
-    <content type="html"><![CDATA[
-<p>We have two special characters. The first character can be represented by one bit <code>0</code>. The second character can be represented by two bits (<code>10 or 11</code>).</p>
-
-<p>Now given a string represented by several bits. Return whether the last character must be a one-bit character or not. The given string will always end with a zero.<br/>
-<img src="media/15113344372070/15113344696565.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool isOneBitCharacter(vector&lt;int&gt;&amp; bits) {
-        int i = 0;
-        int b = 0;
-        while(i&lt;bits.size()){            
-            if(bits[i]==1)
-            {
-                i=i+2;
-                b=0;
-            }else{
-                i++;
-                b=1;
-            }
-        };
-        if(b==0){
-            return 0;
-        }else {
-            return 1; 
-        }
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Add Digits]]></title>
-    <link href="https://lockxmonk.github.io/15113342915297.html"/>
-    <updated>2017-11-22T15:04:51+08:00</updated>
-    <id>https://lockxmonk.github.io/15113342915297.html</id>
-    <content type="html"><![CDATA[
-<p>Given a non-negative integer num, repeatedly add all its digits until the result has only one digit.</p>
-
-<p>For example:</p>
-
-<p>Given <code>num = 38</code>, the process is like: <code>3 + 8 = 11</code>, <code>1 + 1 = 2</code>. Since <code>2</code> has only one digit, return it.</p>
-
-<p>Follow up:<br/>
-Could you do it without any loop/recursion in O(1) runtime?</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int addDigits(int num) {
-        // while(num/10&gt;0){
-        //     int sum = 0;
-        //     while(num&gt;0){
-        //         sum +=num%10;
-        //         num /=10;
-        //     }
-        //     num = sum;
-        // }
-        return 1+ (num-1)%9;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Add Strings]]></title>
-    <link href="https://lockxmonk.github.io/15113342227318.html"/>
-    <updated>2017-11-22T15:03:42+08:00</updated>
-    <id>https://lockxmonk.github.io/15113342227318.html</id>
-    <content type="html"><![CDATA[
-<p>Given two non-negative integers num1 and num2 represented as string, return the sum of num1 and num2.</p>
-
-<p>Note:</p>
-
-<p>The length of both <code>num1</code> and <code>num2</code> is &lt; 5100.<br/>
-Both <code>num1</code> and <code>num2</code> contains only digits <code>0-9</code>.<br/>
-Both <code>num1</code> and <code>num2</code> does not contain any leading zero.<br/>
-You must not use any built-in BigInteger library or convert the inputs to integer directly.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string addStrings(string num1, string num2) {
-        int fw = 0;
-        string result =&quot;&quot;;
-        for(int i = num1.size()-1,j = num2.size()-1;i&gt;=0||j&gt;=0;i--,j--){
-            int n1 = i&gt;=0 ? num1[i]-&#39;0&#39;:0;
-            int n2 = j&gt;=0 ? num2[j]-&#39;0&#39;:0;
-            int tmp = (n1+n2+fw)%10;
-            fw = (n1+n2+fw)/10;
-            result = char(tmp+&#39;0&#39;) + result;
-        }
-        if(fw){
-            result = char(fw +&#39;0&#39;)+ result;
-        }
-        return result;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AFNetworking的简单使用]]></title>
-    <link href="https://lockxmonk.github.io/15109904843500.html"/>
-    <updated>2017-11-18T15:34:44+08:00</updated>
-    <id>https://lockxmonk.github.io/15109904843500.html</id>
-    <content type="html"><![CDATA[
-<p>最近看学习一些项目代码到了使用<code>AFNetworking</code>的项目，所以去学习了一下，这里简单的总结一下，<code>AFNetworking</code>的使用方法。</p>
-
-<h2 id="toc_0">AFNetworking简介</h2>
-
-<p><code>AFNetworking</code>是一个很受大众欢迎的网络框架，可以帮助管理和处理网络任务请求，包括下载、上传、<code>get</code>、<code>post</code>请求等。</p>
-
-<h2 id="toc_1">安装</h2>
-
-<p><code>AFNetworking</code>的安装可以使用<code>CocoaPods</code>在文件中加入：</p>
-
-<pre><code class="language-objc">pod &#39;AFNetworking&#39;
-</code></pre>
-
-<p>并执行 <code>pod install</code>就可以了。有一点要注意的是最新版本为<code>3.1</code>这个版本删除了基于<code>NSURLConnectionOperation</code>的<code>AFHTTPRequestOperationManager</code>的支持。转而使用基于<code>NSURLSession</code>封装的<code>AFHTTPSessionManager</code>。</p>
-
-<h2 id="toc_2">网络监听</h2>
-
-<p><code>AFNetworking</code>提供了一个监听网络状态的方法，来实时的判断当前网络是否良好。具体代码如下：</p>
-
-<pre><code class="language-objc">// 如果要检测网络状态的变化,必须用检测管理器的单例的startMonitoring
-    /**
-     AFNetworkReachabilityStatusUnknown          = -1,  // 未知
-     AFNetworkReachabilityStatusNotReachable     = 0,   // 无连接
-     AFNetworkReachabilityStatusReachableViaWWAN = 1,   // 3G 花钱
-     AFNetworkReachabilityStatusReachableViaWiFi = 2,   // 局域网络,不花钱
-     */
-    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
-    [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
-        debugLog(@&quot;%ld&quot;,(long)status);
-    }];
-</code></pre>
-
-<p>根据当前网络状态会输出所对应的状态数值。</p>
-
-<h2 id="toc_3">下载</h2>
-
-<pre><code class="language-objc">    //session的默认配置
-    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-    //根据配置创建管理者
-    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
-    NSURL *url = [NSURL URLWithString:@&quot;http://smartdsp.xmu.edu.cn/memberpdf/fuxueyang/cvpr2017/cvpr2017.pdf&quot;];
-    //根据url创建请求对象
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
-    //创建下载任务
-    NSURLSessionDownloadTask *downloadTask = [manager downloadTaskWithRequest:request progress:nil destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-        //设置下载路径
-        NSURL *documentsDirectoryURL = [[NSFileManager defaultManager] URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
-        //返回文件存放在本地的地址
-        return [documentsDirectoryURL URLByAppendingPathComponent:[response suggestedFilename]];
-    } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
-        //下载完成后调用方法
-        debugLog(@&quot;File download to:%@ , %@&quot;,filePath,error);
-    }];
-    //开始下载任务
-    [downloadTask resume];
-</code></pre>
-
-<h2 id="toc_4">get请求</h2>
-
-<pre><code class="language-objc">    NSString *urlString = @&quot;https://www.weifar.com/api/ExamQuestion/id&quot;;
-    NSDictionary *parameters = @{@&quot;id&quot;:@6};
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
-    //根据上述参数和请求地址来发送请求
-    [manager GET:urlString parameters:parameters progress:^(NSProgress * _Nonnull downloadProgress) {
-        debugLog(@&quot;%@&quot;,downloadProgress);
-    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        //成功获取数据后，进行处理
-        if (responseObject) {
-            NSArray *a = responseObject[@&quot;Questions&quot;];
-            NSDictionary *dic = a[0];
-            NSString *str = dic[@&quot;BlockDescription&quot;];
-            debugLog(@&quot;%@&quot;,str);
-        }
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        //请求失败，打印错误
-        debugLog(@&quot;%@&quot;,error);
-    }];
-</code></pre>
-
-<h2 id="toc_5">总结</h2>
-
-<p>以上就是<code>AFNetworking</code>的基本使用，还有其他的一些功能由于没有合适的接口可以进行操作，暂且先搁置下。具体的操作可以参考官方的<code>AFNetworking</code><a href="http://cocoadocs.org/docsets/AFNetworking/3.1.0/index.html">API文档</a>,</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[FMDB的使用方法]]></title>
-    <link href="https://lockxmonk.github.io/15109022752813.html"/>
-    <updated>2017-11-17T15:04:35+08:00</updated>
-    <id>https://lockxmonk.github.io/15109022752813.html</id>
-    <content type="html"><![CDATA[
-<ul>
-<li>
-<a href="#toc_0">FMDB简介</a>
-</li>
-<li>
-<a href="#toc_1">使用方法</a>
-<ul>
-<li>
-<a href="#toc_2">引入相关文件</a>
-</li>
-<li>
-<a href="#toc_3">建立数据库</a>
-</li>
-<li>
-<a href="#toc_4">打开数据库</a>
-</li>
-<li>
-<a href="#toc_5">执行更新（update）操作</a>
-</li>
-<li>
-<a href="#toc_6">执行查询操作</a>
-</li>
-<li>
-<a href="#toc_7">数据参数</a>
-</li>
-<li>
-<a href="#toc_8">线程安全</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_9">总结</a>
-
-
-<p>最近再看其它大牛写的项目代码，发现许多用到了<code>FMDB</code>，所以去了解了一下。</p>
-
-<h2 id="toc_0">FMDB简介</h2>
-
-<p>FMDB是一个第三方的开源库，我们可以通过<code>cocopods</code>搜索并整合到项目里面，FMDB其实就是对<code>SQLite</code>的<code>API</code>进行了封装，加上了面向对象的思想，让我们不必使用繁琐的<code>C</code>语言<code>API</code>函数，比起直接操作<code>SQLite</code>更加方便。</p>
-
-<p>并且<code>FMDB</code> 同时兼容 <code>ARC</code> 和非 <code>ARC</code> 工程，会自动根据工程配置来调整相关的内存管理代码。</p>
-
-<h2 id="toc_1">使用方法</h2>
-
-<p>本文使用方法，均参考<code>FMDB</code>的<code>github</code>项目文档<a href="https://github.com/ccgus/fmdb">https://github.com/ccgus/fmdb</a></p>
-
-<h3 id="toc_2">引入相关文件</h3>
-
-<p>因为是对<code>sqlite</code>的封装所以我们在项目中需要引入它的库。<br/>
-<img src="media/15109022752813/15109026776351.jpg" alt=""/></p>
-
-<p>之后在文件中导入它的头文件：</p>
-
-<pre><code class="language-objc">#import &quot;FMDB.h&quot;
-</code></pre>
-
-<h3 id="toc_3">建立数据库</h3>
-
-<p>建立数据库只有简单的一句代码，如果当前路径不存在所需的数据库则会自动创建，若存在则会获取到。当路径为字符（<code>@“”</code>）时，一个空的数据库将被创建在临时的位置，数据库关闭时候将被自动删除。路径为<code>NULL</code>时空数据库会被放在内存中，关闭时也将自动被删除。具体信息可以参见：<a href="http://www.sqlite.org/inmemorydb.html">http://www.sqlite.org/inmemorydb.html</a></p>
-
-<pre><code class="language-objc">#define PATH_OF_DOCUMENT    [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0]
-
-_path = [PATH_OF_DOCUMENT stringByAppendingPathComponent:@&quot;test.db&quot;];
-//创建数据库
-FMDatabase *db = [FMDatabase databaseWithPath:_path];
-</code></pre>
-
-<h3 id="toc_4">打开数据库</h3>
-
-<p>在对数据库进行交互时，必须要先打开它。如果打开失败，可能是权限不足或者资源不足。</p>
-
-<pre><code class="language-objc">if (![db open]) {
-    // [db release];   // uncomment this line in manual referencing code; in ARC, this is not necessary/permitted
-    db = nil;
-    return;
-}
-</code></pre>
-
-<h3 id="toc_5">执行更新（update）操作</h3>
-
-<p>FMDB中除了<code>select</code>为查询（<code>query</code>）以为都为更新操作。</p>
-
-<p>例如我们执行一个<strong>插入</strong>操作的完整步骤为：</p>
-
-<pre><code class="language-objc">    static int idx = 1;
-    FMDatabase *db = [FMDatabase databaseWithPath:_path];
-    if ([db open]) {
-        NSString * sql = @&quot;insert into User (name, password) values(?, ?) &quot;;
-        NSString *name = [NSString stringWithFormat:@&quot;lzh%d&quot;,idx++];
-        BOOL result = [db executeUpdate:sql,name,@&quot;op&quot;];
-        if (!result) {
-            debugLog(@&quot;error to insert data&quot;);
-        }else{
-            debugLog(@&quot;succ to insert data&quot;);
-        }
-        [db close];
-    }
-</code></pre>
-
-<p><strong>查询</strong>操作：</p>
-
-<pre><code class="language-objc">    FMDatabase *db = [FMDatabase databaseWithPath:_path];
-    if ([db open]) {
-        NSString *sql =@&quot;select * from User&quot;;
-        FMResultSet *result = [db executeQuery:sql];
-        while ([result next]) {
-            int userId = [result intForColumn:@&quot;id&quot;];
-            NSString *name = [result stringForColumn:@&quot;name&quot;];
-            NSString *pass = [result stringForColumn:@&quot;password&quot;];
-            debugLog(@&quot;user id = %d, name = %@, pass = %@&quot;, userId, name, pass);
-        }
-        [db close];
-    }
-</code></pre>
-
-<p><strong>删除</strong>操作：</p>
-
-<pre><code class="language-objc">    static int idx = 1;
-    FMDatabase *db =[FMDatabase databaseWithPath:_path];
-    if ([db open]) {
-        NSString *sql = @&quot;delete from User where id = ?&quot;;
-        BOOL result = [db executeUpdate:sql , @(idx++)];
-        if (!result) {
-            debugLog(@&quot;error to delete db data&quot;);
-        } else {
-            debugLog(@&quot;succ to deleta db data&quot;);
-        }
-        [db close];
-    }
-</code></pre>
-
-<p>我们可以看到执行<code>sql</code>语句的时候用的都是<code>executeUpdate：</code>方法。</p>
-
-<h3 id="toc_6">执行查询操作</h3>
-
-<p>查询操作与上面的有点区别，我们需要用<code>FMResultSet</code>来存储我们的查询结果，并调用它的<code>next：</code>方法来对数据进行逐行操作：</p>
-
-<pre><code class="language-objc">    FMDatabase *db = [FMDatabase databaseWithPath:_path];
-    if ([db open]) {
-        NSString *sql =@&quot;select * from User&quot;;
-        FMResultSet *result = [db executeQuery:sql];
-        while ([result next]) {
-            int userId = [result intForColumn:@&quot;id&quot;];
-            NSString *name = [result stringForColumn:@&quot;name&quot;];
-            NSString *pass = [result stringForColumn:@&quot;password&quot;];
-            debugLog(@&quot;user id = %d, name = %@, pass = %@&quot;, userId, name, pass);
-        }
-        [db close];
-    }
-</code></pre>
-
-<p>上面代码可以发现执行<code>sql</code>语句变为<code>executeQuery:</code>方法，该方法会将结果返回为<code>FMResultSet</code>类型，之后我们需要调用<code>stringForColumn:</code>对结果进行解析。<br/>
-<code>FMDB</code>提供如下多个方法来获取不同类型的数据：</p>
-
-<pre><code class="language-objc">intForColumn:
-longForColumn:
-longLongIntForColumn:
-boolForColumn:
-doubleForColumn:
-stringForColumn:
-dateForColumn:
-dataForColumn:
-dataNoCopyForColumn:
-UTF8StringForColumn:
-objectForColumn:
-</code></pre>
-
-<p>也可以按照列的索引对数据进行获取，<code>{type}ForColumnIndex:</code></p>
-
-<h3 id="toc_7">数据参数</h3>
-
-<p>我们可以在<code>sql</code>语句中，用<code>？</code>表示执行语句的参数，然后在 <code>executeUpdate：</code>方法来将<code>?</code>所指代的具体参数传入，例如上面的代码：</p>
-
-<pre><code class="language-objc">    NSString * sql = @&quot;insert into User (name, password) values(?, ?) &quot;;
-    NSString *name = [NSString stringWithFormat:@&quot;lzh%d&quot;,idx++];
-    BOOL result = [db executeUpdate:sql,name,@&quot;op&quot;];
-</code></pre>
-
-<h3 id="toc_8">线程安全</h3>
-
-<p><code>FMDatabase</code>这个类是线程不安全的，如果在多个线程同时使用一个<code>FMDatabase</code>实例，会造成数据混乱问题。所以，提供了一个<code>FMDatabaseQueue</code>并且使用它来对多个线程间进行交互，<code>FMDatabaseQueue</code>对象将通过接入多个线程进行同步和整合。</p>
-
-<p>使用的方法也很简单：</p>
-
-<p>首先创建一个数据库<code>path</code>来初始化<code>FMDatabaseQueue</code>，然后就可以将一个闭包 (block) 传入 <code>inDatabase</code> 方法中。</p>
-
-<pre><code class="language-objc">
-FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:aPath];
-
-[queue inDatabase:^(FMDatabase *db) {
-    [db executeUpdate:@&quot;INSERT INTO myTable VALUES (?)&quot;, @1];
-    [db executeUpdate:@&quot;INSERT INTO myTable VALUES (?)&quot;, @2];
-    [db executeUpdate:@&quot;INSERT INTO myTable VALUES (?)&quot;, @3];
-
-    FMResultSet *rs = [db executeQuery:@&quot;select * from foo&quot;];
-    while ([rs next]) {
-        …
-    }
-}];
-</code></pre>
-
-<p>按照上面的方法我们可以创建多个线程来异步的对数据库进行操作：</p>
-
-<pre><code class="language-objc">FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:_path];
-    dispatch_queue_t q1 = dispatch_queue_create(&quot;queue1&quot;, NULL);
-    dispatch_queue_t q2 = dispatch_queue_create(&quot;queue2&quot;, NULL);
-    
-    dispatch_async(q1, ^{
-        for (int i =1; i&lt;100; ++i) {
-            [queue inDatabase:^(FMDatabase *db){
-                NSString *sql = @&quot;insert into User (name, password) values(?, ?)&quot;;
-                NSString *name = [NSString stringWithFormat:@&quot;queue1 %d&quot;, i];
-                BOOL result = [db executeUpdate:sql,name,@&quot;opop&quot;];
-                if (!result) {
-                    debugLog(@&quot;error to add db data: %@&quot;, name);
-                } else {
-                    debugLog(@&quot;succ to add db data: %@&quot;, name);
-                }
-            }];
-        }
-    });
-    dispatch_async(q2,^{
-        for (int i = 0; i &lt; 100; ++i) {
-            [queue inDatabase:^(FMDatabase *db) {
-                NSString * sql = @&quot;insert into user (name, password) values(?, ?) &quot;;
-                NSString * name = [NSString stringWithFormat:@&quot;queue2 %d&quot;, i];
-                BOOL result = [db executeUpdate:sql, name, @&quot;opop22&quot;];
-                if (!result) {
-                    debugLog(@&quot;error to add db data: %@&quot;, name);
-                } else {
-                    debugLog(@&quot;succ to add db data: %@&quot;, name);
-                }
-            }];
-        }
-    });
-</code></pre>
-
-<p>执行后可以发现数据库中的部分表数据如下：<br/>
-<img src="media/15109022752813/15109055831966.jpg" alt=""/></p>
-
-<p>两个线程可以异步执行互不干扰。</p>
-
-<p>上面数据库的显示 使用的是<code>Navicat</code>，也有其它的数据库管理软件可以显示。</p>
-
-<h1 id="toc_9">总结</h1>
-
-<p><code>FMDB</code>是一个在<code>iOS</code>上简化<code>sqlite API</code>的第三方库，对<code>sqlite</code>进行了很有好的封装，便于维护与增加效率。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[贪心算法（构造霍夫曼树）]]></title>
-    <link href="https://lockxmonk.github.io/15097619961308.html"/>
-    <updated>2017-11-04T10:19:56+08:00</updated>
-    <id>https://lockxmonk.github.io/15097619961308.html</id>
-    <content type="html"><![CDATA[
-<p>霍夫曼树的构造是使用了变长编码来减少数据所占空间，一般我们只考虑<strong>前缀码</strong>，即没有任何码字是其它码字的前缀。</p>
-
-<p>我们的构造过程如下所示：</p>
-
-<p><img src="media/15097619961308/15097621720916.jpg" alt=""/></p>
-
-<p>这里我们根据上述表示，我们每次总是“贪心”的选择两个最小的值来求和，并插入队列中。所以我们可以构造一个最小优先队列来存储各字母的频率。算法代码如下：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//  HUFFMAN
-//
-//  Created by LZH on 2017/11/4.
-//  Copyright © 2017年 LZH. All rights reserved.
-//
-
-#include &lt;iostream&gt;
-#include &lt;queue&gt;
-#include &lt;vector&gt;
-using namespace std;
-
-typedef struct BitNode
-{
-    int frep;
-    struct BitNode *left;
-    struct BitNode *right;
-}Node;
-
-//定义比较结构
-struct cmp1{
-    bool operator ()(int &amp;a,int &amp;b){
-        return a&gt;b;//最小值优先
-    }
-};
-//构造霍夫曼树
-void HUFFMAN(int c, priority_queue&lt;int, vector&lt;int&gt;, cmp1&gt; &amp;que1)
-{
-    int n = c;
-    for (int i=0; i&lt;n-1; i++) {
-        Node *newNodeZ = (Node*)malloc(sizeof(Node));
-        Node *newNodeX = (Node*)malloc(sizeof(Node));
-        Node *newNodeY = (Node*)malloc(sizeof(Node));
-        newNodeX-&gt;frep = que1.top();
-        que1.pop();
-        newNodeY-&gt;frep = que1.top();
-        que1.pop();
-        newNodeZ-&gt;left = newNodeX;
-        newNodeZ-&gt;right = newNodeY;
-        
-        newNodeZ-&gt;frep =newNodeX-&gt;frep + newNodeY-&gt;frep;
-        que1.push(newNodeZ-&gt;frep);
-    }
-}
-
-int main() {
-//    priority_queue&lt;int&gt; que; //构造优先队列
-    int b[6] = {9,5,12,13,16,45};
-//    vector&lt;int&gt; a(b,b+6);
-    priority_queue&lt;int , vector&lt;int&gt;, cmp1 &gt;que1; //最小优先队列
-    for (int i=0; i&lt;6; i++) {
-        que1.push(b[i]);
-    }
-    HUFFMAN(6, que1);
-    while (!que1.empty()) {
-        cout&lt;&lt;que1.top()&lt;&lt;&#39; &#39;;
-        que1.pop();
-    }
-    return 0;
-}
-
-</code></pre>
-
-<p>最后输出为100，返回了编码树的根节点。<br/>
-<img src="media/15097619961308/15097623765624.jpg" alt=""/></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[贪心算法（活动选择问题）]]></title>
-    <link href="https://lockxmonk.github.io/15096800741665.html"/>
-    <updated>2017-11-03T11:34:34+08:00</updated>
-    <id>https://lockxmonk.github.io/15096800741665.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15096800741665/15096801101097.jpg" alt=""/></p>
-
-<p>这个问题是一个典型的可以运用贪心算法的题目，我们在初始的选择一个活动之后，应该将之后的资源被其他任务尽量多的占用。所以我们应该第一个选择活动最快结束的活动，因为它剩下的资源可以被它之后开始的任务尽量多的使用。所以我们可以运用一种递归形式或者迭代算法来表达这个形式：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//  Greedy_Activity_Selector
-//
-//  Created by LZH on 2017/11/3.
-//  Copyright © 2017年 LZH. All rights reserved.
-//
-
-#include &lt;iostream&gt;
-#include &lt;vector&gt;
-using namespace std;
-void print(int n)
-{
-    cout&lt;&lt;n&lt;&lt;&#39; &#39;;
-}
-
-/**
- 迭代形式函数
-
- @param s 活动开始时间数组
- @param f 活动结束时间数组
- @param result  用于存储结果
- */
-void GREED_ACTIVITY_SELECTOR(vector&lt;int&gt; s , vector&lt;int&gt; f , vector&lt;int&gt; &amp;result)
-{
-    int n = s.size();
-    result.push_back(1);
-    int k=1;
-    for (int m=2; m&lt;=n; m++) {
-        if (s[m]&gt;=f[k]) {
-            result.push_back(m);
-            k = m;
-        }
-    }
-}
-
-/**
- 尾递归形式函数
-
- @param s 活动开始时间数组
- @param f 活动结束时间数组
- @param k 从活动k开始计算
- @param n 共有n个活动
- @param result 用于存储结果
- */
-void RECURSIVE_ACTIVITY_SELECTOR(vector&lt;int&gt; s,vector&lt;int&gt; f, int k, int n, vector&lt;int&gt; &amp;result)
-{
-    int m = k+1;
-    while (m&lt;=n &amp;&amp; s[m]&lt;=f[k]) {
-        m++;
-    }
-    if (m&lt;=n) {
-        result.push_back(m);
-        RECURSIVE_ACTIVITY_SELECTOR(s, f, m, n ,result);
-    }
-}
-
-int main() {
-    int a[12] ={0,1,3,0,5,3,5,6,8,8,2,12};
-    int b[12] ={0,4,5,6,7,9,9,10,11,12,14,16};
-    vector&lt;int&gt; s(a,a+12);
-    vector&lt;int&gt; f(b,b+12);
-    vector&lt;int&gt; result;
-    RECURSIVE_ACTIVITY_SELECTOR(s, f, 0, 11, result);
-    GREED_ACTIVITY_SELECTOR(s, f, result);
-    for_each(result.begin(),result.end(),print);
-    return 0;
-}
-
-</code></pre>
-
-<p>其中递归形式的流程如下图所示：<br/>
-<img src="media/15096800741665/15096804218816.jpg" alt=""/></p>
-
-<p>但两种算法运行时间类似都为\(\Theta(n)\)</p>
-
-<h2 id="toc_0">与动态规划的不同</h2>
-
-<p>贪心算法通过做出局部最优来构造全局最优解。换句话说，直接做出在当前问题下看起来最优的选择，而不必考虑子问题的解。</p>
-
-<p><strong><font color=red>在动态规划中，每个步骤都要进行一次选择，但选择通常依赖于子问题的解</font></strong>，因此，我们通常以自底向上的方式来求解动态规划问题，先求解较小的子问题，然后是较大的子问题。但是在贪心算法中，我们总是做出在当时看起来最佳的选择，然后求解剩下的唯一子问题。<strong><font color=red>贪心算法进行选择时可能依赖之前做出的选择，但不依赖于任何将来的选择或者是子问题的解。</font></strong>所以贪心算法在进行第一次选择时不求解任何子问题，自顶向下进行逐步选择，将给定的子问题实例变小。</p>
-
-<p>两者最典型的区别，可以用<code>分数背包</code>和<code>0-1背包</code>问题来举例，这里不做细说。</p>
 
 ]]></content>
   </entry>

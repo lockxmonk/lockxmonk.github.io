@@ -117,50 +117,84 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15114255869932.html">
+                <a class="clearlink" href="15120258790187.html">
                 
-                  <h1>Degree of an Array</h1>
+                  <h1>Given an integer array, find three numbers whose product is maximum and output the maximum product.</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a non-empty array of non-negative integers <code>nums</code>, the degree of this array is defined as the maximum frequency of any one of its elements.</p>
-
-<p>Your task is to find the smallest possible length of a (contiguous) subarray of <code>nums</code>, that has the same degree as <code>nums</code>.</p>
-
-<p><img src="media/15114255869932/15114256313220.jpg" alt=""/></p>
+                        	<p><img src="media/15120258790187/15120319341000.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int findShortestSubArray(vector&lt;int&gt;&amp; nums) {
-        
-        if (nums.size()&lt;2) {
-            return nums.size();
-        }
-        unordered_map&lt;int, int&gt;startIndex , number;
+    int maximumProduct(vector&lt;int&gt;&amp; nums) {
+        sort(nums.begin(), nums.end());
         int len = nums.size();
-        int fre = 0;
-        for (int i=0; i&lt;nums.size(); i++) {
-            if (startIndex.count(nums[i])==0) {
-                startIndex[nums[i]]=i;
+        int tmp1 = nums[len-1]*nums[len-2]*nums[len-3];
+        int tmp2 = nums[len-1]*nums[0]*nums[1];
+        return max(tmp1, tmp2);
+    }
+};
+</code></pre>
+
+<p>主要考虑含有负数的情况。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/30</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120258181532.html">
+                
+                  <h1>Two Sum II - Input array is sorted</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of integers that is already <strong><em>sorted in ascending order</em></strong>, find two numbers such that they add up to a specific target number.</p>
+
+<p>The function twoSum should return indices of the two numbers such that they add up to the target, where index1 must be less than index2. Please note that your returned answers (both index1 and index2) are not zero-based.</p>
+
+<p>You may assume that each input would have exactly one solution and you may not use the same element twice.</p>
+
+<p><img src="media/15120258181532/15120258628279.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; numbers, int target) {
+        int str = 0;
+        int end = numbers.size()-1;
+        while (numbers[str]+numbers[end]!=target) {
+            if (numbers[str]+numbers[end]&gt;target) {
+                end--;
+            }else{
+                str++;
             }
-            number[nums[i]]++;
-            if (number[nums[i]]==fre) {
-                len = min(i-startIndex[nums[i]]+1, len);
-            }
-            if (number[nums[i]]&gt;fre) {
-                len = i - startIndex[nums[i]] + 1;
-                fre = number[nums[i]];
-            }
         }
-        
-        return len;
+        return vector&lt;int&gt;({str+1,end+1});
     }
 };
 </code></pre>
-
-<p>该算法主要使用了两个<code>hash_map</code>:<br/>
-一个来记录数字所出现的次数，另一个记录数字最开始出现的位置。一旦有一个数字的频数超过了当前的<code>len</code>，则更新<code>len</code>，若两个数字出现的频率相等则取长度最小的。</p>
 
                         
                       </div>
@@ -169,7 +203,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/23</span>
+                    <span class="date">2017/11/30</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -186,285 +220,51 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15114222067093.html">
+                <a class="clearlink" href="15120236843494.html">
                 
-                  <h1>Find Pivot Index</h1>
+                  <h1>Summary Ranges</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given an array of integers <code>nums</code>, write a method that returns the &quot;pivot&quot; index of this array.</p>
+                        	<p>Given a sorted integer array without duplicates, return the summary of its ranges.求数组中，连续数字的区间。</p>
 
-<p>We define the pivot index as the index where the sum of the numbers to the left of the index is equal to the sum of the numbers to the right of the index.</p>
-
-<p>If no such index exists, we should return -1. If there are multiple pivot indexes, you should return the left-most pivot index.</p>
-
-<p><img src="media/15114222067093/15114222397308.jpg" alt=""/></p>
+<p><img src="media/15120236843494/15120237048289.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int pivotIndex(vector&lt;int&gt;&amp; nums) {
+    vector&lt;string&gt; summaryRanges(vector&lt;int&gt;&amp; nums) {
         
-        if(nums.empty()) return -1;
+        vector&lt;string&gt; result;
+        if(nums.size()==0) return result;
         
-        int sum = 0;
-        for(int i=0;i&lt;nums.size();i++) sum+=nums[i];
-    
-        int leftSum = 0;
-        for(int j=0;j&lt;nums.size();j++)
-        {
-            if (leftSum == sum - nums[j] -leftSum) {
-                return j;
+        int end = nums[0]+1;
+        int total = 0;
+        if (nums.size()==1) {
+            result.push_back(to_string(nums[0]));
+            return result;
         }
-            leftSum += nums[j];
-        }
-        
-        return -1;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15114072257756.html">
-                
-                  <h1>Best Time to Buy and Sell Stock II</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Say you have an array for which the \(i^{th}\) element is the price of a given stock on day i.</p>
-
-<p>Design an algorithm to find the maximum profit. You may complete as many transactions as you like (ie, buy one and sell one share of the stock multiple times). However, you may not engage in multiple transactions at the same time (ie, you must sell the stock before you buy again).</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maxProfit(vector&lt;int&gt;&amp; prices) {
-        int result = 0;
-        for(int i = 1;i&lt;prices.size();i++)
-        {
-            result += max(prices[i]-prices[i-1] , 0);
-        }
-        return result;
-    }
-};
-
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15114062990936.html">
-                
-                  <h1>Best Time to Buy and Sell Stock</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Say you have an array for which the \(i^{th}\) element is the price of a given stock on day i.</p>
-
-<p>If you were only permitted to complete at most one transaction (ie, buy one and sell one share of the stock), design an algorithm to find the maximum profit.</p>
-
-<p><img src="media/15114062990936/15114063447573.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maxProfit(vector&lt;int&gt;&amp; prices) {
-        int minPrice=INT_MAX;
-        int maxProfit = 0;
-        
-        for (int i=0; i&lt;prices.size(); i++) {
-            minPrice = min(prices[i], minPrice);
-            maxProfit = max(maxProfit, prices[i]-minPrice);
-        }
-        
-        return maxProfit;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15114035796843.html">
-                
-                  <h1>Array Partition I</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of <strong>2n</strong> integers, your task is to group these integers into n pairs of integer, say (a1, b1), (a2, b2), ..., (an, bn) which makes sum of min(ai, bi) for all i from 1 to n as large as possible.</p>
-
-<p><img src="media/15114035796843/15114036022226.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int arrayPairSum(vector&lt;int&gt;&amp; nums) {
-        
-        sort(nums.begin(),nums.end());
-        int result=0;
-        for (int i=0; i&lt;nums.size(); i+=2) {
-            result+=nums[i];
-        }
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15114026353930.html">
-                
-                  <h1>3Sum</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array S of n integers, are there elements a, b, c in S such that a + b + c = 0? Find all unique triplets in the array which gives the sum of zero.</p>
-
-<p><strong>Note:</strong> The solution set must not contain duplicate triplets.</p>
-
-<p><img src="media/15114026353930/15114026868536.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; threeSum(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(),nums.end());
-        vector&lt;vector&lt;int&gt;&gt; result;
-        vector&lt;int&gt; tmpResult;
-        
-        int p,q,tmp;
-        for(int i = 0 ;i&lt;nums.size();i++)
-        {
-            if(i!=0&amp;&amp;nums[i]==nums[i-1]) continue;
-            int currentNum = nums[i];
-            p = i+1;
-            q = nums.size()-1;
-            
-            while(p&lt;q)
-            {
-                if(p!=i+1&amp;&amp;nums[p]==nums[p-1])
-                {
-                    p++;
-                    continue;
+        nums.push_back(INT_MAX); //充当哨兵
+        for (int i=1; i&lt;nums.size(); i++) {
+            if (nums[i]==end) {
+                end++;
+                total++;
+                continue;
+            }else{
+                end = nums[i]+1;
+                if (total==0) {
+                    result.push_back(to_string(nums[i-1]));
+                }else{
+                    string tmp = to_string(nums[i-1-total])+&quot;-&gt;&quot;+to_string(nums[i-1]);
+                    result.push_back(tmp);
                 }
-                tmp = nums[q]+nums[p];
-                if(tmp==-currentNum)
-                {
-                    tmpResult.push_back(currentNum);
-                    tmpResult.push_back(nums[q]);
-                    tmpResult.push_back(nums[p]);
-                    result.push_back(tmpResult);
-                    tmpResult.clear();
-                    p++;
-                    q--;
-                }else if (tmp&gt;-currentNum)
-                {
-                    q--;
-                }else p++;
+                total = 0;
             }
         }
-        
         return result;
     }
 };
 </code></pre>
-
-<p><strong>two real problems .</strong></p>
-
-<ul>
-<li><p>how to find the sum?<br/>
-change it to a 2 sum problem. when you have one value, the sum of the other two is -value.<br/>
-2 sum problem has a O(n) solution. so the final is O(n<sup>2).</sup></p></li>
-<li><p>how to remove the duplicate?<br/>
-for same values, we only use the first one and pass the rest.</p></li>
-</ul>
 
                         
                       </div>
@@ -473,10 +273,182 @@ for same values, we only use the first one and pass the rest.</p></li>
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/23</span>
+                    <span class="date">2017/11/30</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120100977395.html">
+                
+                  <h1>Majority Element</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of size n, find the majority element. The majority element is the element that appears more than <code>⌊ n/2 ⌋</code> times.</p>
+
+<p>You may assume that the array is non-empty and the majority element always exist in the array.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int majorityElement(vector&lt;int&gt;&amp; nums) {
+        sort(nums.begin(), nums.end());
+        int total = 1;
+        int tmp = 1;
+        int result = nums[0];
+        if (nums.size()==1) {
+            return result;
+        }
+        nums.push_back(INT_MAX); //在最后增加一个边界哨兵
+        for (int i=1; i&lt;=nums.size(); i++) {
+            if (nums[i]==nums[i-1]) {
+                tmp++;
+            }else{
+                result = tmp&gt;total ? nums[i-1]:result;
+                total = max(tmp, total);
+                tmp = 1;
+            }
+        }
+        
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/30</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120074710373.html">
+                
+                  <h1>Remove Duplicates from Sorted Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a sorted array, remove the duplicates <code>in-place</code> such that each element appear only once and return the new length.</p>
+
+<p>Do not allocate extra space for another array, you must do this by modifying the input array <code>in-place</code> with O(1) extra memory.</p>
+
+<p><img src="media/15120074710373/15120081165110.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
+        int tmp = INT_MIN;
+        int log = 0;
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (tmp!=nums[i]) {
+                tmp = nums[i];
+            }else{
+                log++;
+            }
+            nums[i-log] = nums[i];
+        }
+        
+        return nums.size()-log;
+    }
+};
+</code></pre>
+
+<p><img src="media/15120074710373/15120082747602.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/30</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120073985530.html">
+                
+                  <h1>Remove Element</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array and a value, remove all instances of that value <strong>in-place</strong> and return the new length.</p>
+
+<p>Do not allocate extra space for another array, you must do this by modifying the input array <strong>in-place</strong> with O(1) extra memory.</p>
+
+<p>The order of elements can be changed. It doesn&#39;t matter what you leave beyond the new length.</p>
+
+<p><img src="media/15120073985530/15120074297000.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int removeElement(vector&lt;int&gt;&amp; nums, int val) {
+        int total = 0;
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (nums[i]==val) {
+                total++;
+            }else{
+                nums[i-total] = nums[i];
+            }
+        }
+        return nums.size()-total;
+    }
+};
+</code></pre>
+
+<p><img src="media/15120073985530/15120074551545.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/30</span>
+                    
           				   
                   </div>
                   <div class="more-right right">
@@ -578,31 +550,31 @@ for same values, we only use the first one and pass the rest.</p></li>
 	      
 		      
 			      <li class="post">
-			        <a href="15114255869932.html">Degree of an Array</a>
+			        <a href="15120258790187.html">Given an integer array, find three numbers whose product is maximum and output the maximum product.</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15114222067093.html">Find Pivot Index</a>
+			        <a href="15120258181532.html">Two Sum II - Input array is sorted</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15114072257756.html">Best Time to Buy and Sell Stock II</a>
+			        <a href="15120236843494.html">Summary Ranges</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15114062990936.html">Best Time to Buy and Sell Stock</a>
+			        <a href="15120100977395.html">Majority Element</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15114035796843.html">Array Partition I</a>
+			        <a href="15120074710373.html">Remove Duplicates from Sorted Array</a>
 			      </li>
 		     
 		  
