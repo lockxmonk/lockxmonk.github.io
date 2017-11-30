@@ -4,13 +4,113 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-11-29T23:58:18+08:00</updated>
+  <updated>2017-11-30T16:52:50+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Longest Continuous Increasing Subsequence]]></title>
+    <link href="https://lockxmonk.github.io/15120510835546.html"/>
+    <updated>2017-11-30T22:11:23+08:00</updated>
+    <id>https://lockxmonk.github.io/15120510835546.html</id>
+    <content type="html"><![CDATA[
+<p>Given an unsorted array of integers, find the length of longest <code>continuous</code> increasing subsequence.</p>
+
+<p><img src="media/15120510835546/15120511118059.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findLengthOfLCIS(vector&lt;int&gt;&amp; nums) {
+        int tmp = 1;
+        int result = 1;
+        if (nums.size()==1) {
+            return tmp;
+        }
+        if (nums.empty()) {
+            return 0;
+        }
+        nums.push_back(INT_MIN);
+        for (int i =1; i&lt;nums.size(); i++) {
+            if (nums[i]&gt;nums[i-1]) {
+                tmp++;
+            }else{
+                result = max(tmp, result);
+                tmp = 1;
+            }
+        }
+        return result; 
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Missing Number]]></title>
+    <link href="https://lockxmonk.github.io/15120333911660.html"/>
+    <updated>2017-11-30T17:16:31+08:00</updated>
+    <id>https://lockxmonk.github.io/15120333911660.html</id>
+    <content type="html"><![CDATA[
+<p>Given an array containing n distinct numbers taken from <code>0, 1, 2, ..., n</code>, find the one that is missing from the array.</p>
+
+<p>For example,<br/>
+Given <code>nums = [0, 1, 3]</code> return <code>2</code>.</p>
+
+<p>Note:<br/>
+Your algorithm should run in linear runtime complexity. Could you implement it using only constant extra space complexity?</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int missingNumber(vector&lt;int&gt;&amp; nums) {
+        int len = nums.size();
+        if (len==1) {
+            return nums[0]==1?0:1;
+        }
+        sort(nums.begin(), nums.end());
+        if (nums[0]!=0) {
+            return 0;
+        }
+        for (int i=1; i&lt;len; i++) {
+            if (i==0&amp;&amp;nums[i]!=0) {
+                return 0;
+            }
+            if (nums[i]!=nums[i-1]+1) {
+                return nums[i]-1;
+            }
+        }
+        return nums[len-1]+1;
+    }
+};
+</code></pre>
+
+<p>第二种解法：<br/>
+```c++<br/>
+class Solution {<br/>
+public:<br/>
+    int missingNumber(vector<int>&amp; nums) {<br/>
+        int result = nums.size();<br/>
+        int i=0;</p>
+
+<pre><code>    for(int num:nums){
+        result ^= num;
+        result ^= i;
+        i++;
+    }
+
+    return result;
+}
+</code></pre>
+
+<p>};<br/>
+```</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Given an integer array, find three numbers whose product is maximum and output the maximum product.]]></title>
@@ -690,82 +790,6 @@ change it to a 2 sum problem. when you have one value, the sum of the other two 
 <li><p>how to remove the duplicate?<br/>
 for same values, we only use the first one and pass the rest.</p></li>
 </ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Arranging Coins]]></title>
-    <link href="https://lockxmonk.github.io/15113375347657.html"/>
-    <updated>2017-11-22T15:58:54+08:00</updated>
-    <id>https://lockxmonk.github.io/15113375347657.html</id>
-    <content type="html"><![CDATA[
-<p>You have a total of n coins that you want to form in a staircase shape, where every k-th row must have exactly k coins.</p>
-
-<p>Given n, find the total number of full staircase rows that can be formed.</p>
-
-<p>n is a non-negative integer and fits within the range of a 32-bit signed integer.</p>
-
-<p><img src="media/15113375347657/15113375557158.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int arrangeCoins(int n) {
-        return floor(-0.5+sqrt((double)2*n+0.25));
-    }
-};
-</code></pre>
-
-<p>这道题的主要考虑<code>1+2+3+...+x&lt;=n</code>下，使x左边等式最接近n，并且不超过。</p>
-
-<p>推导为：</p>
-
-<pre><code>-&gt; 1+2+3+...+x = n
--&gt; (1+x)x/2 = n
--&gt; x^2+x = 2n
--&gt; x^2+x+1/4 = 2n +1/4
--&gt; (x+1/2)^2 = 2n +1/4
--&gt; (x+0.5) = sqrt(2n+0.25)
--&gt; x = -0.5 + sqrt(2n+0.25)
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Add Binary]]></title>
-    <link href="https://lockxmonk.github.io/15113344881540.html"/>
-    <updated>2017-11-22T15:08:08+08:00</updated>
-    <id>https://lockxmonk.github.io/15113344881540.html</id>
-    <content type="html"><![CDATA[
-<p>Given two binary strings, return their sum (also a binary string).</p>
-
-<p>For example,<br/>
-a = <code>&quot;11&quot;</code><br/>
-b = <code>&quot;1&quot;</code><br/>
-Return <code>&quot;100&quot;</code>.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string addBinary(string a, string b) {
-        int fw = 0;
-        string result = &quot;&quot;;
-        for(int i = a.size()-1,j=b.size()-1;i&gt;=0||j&gt;=0;i--,j--){
-            int ag = i&gt;=0?a[i]-&#39;0&#39;:0;
-            int bg = j&gt;=0?b[j]-&#39;0&#39;:0;
-            int tmp = (ag+bg+fw)%2;
-            fw = (ag+bg+fw)/2;
-            
-            result = char(tmp+&#39;0&#39;)+result;
-        }
-        if(fw==1){
-            result = &#39;1&#39;+result;
-        }
-        
-        return result;
-    }
-};
-</code></pre>
 
 ]]></content>
   </entry>

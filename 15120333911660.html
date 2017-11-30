@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Base64 - LZH007
+  Missing Number - LZH007
   
   </title>
   
@@ -117,14 +117,12 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>Base64</h1>
+          <h1>Missing Number</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/5/23</span>
+          <span class="date">2017/11/30</span>
 
-          <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
            
          
           <span class="comments">
@@ -137,85 +135,58 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <ul>
-<li>
-<a href="#toc_0">练习:</a>
-</li>
-<li>
-<a href="#toc_1">小结</a>
-</li>
-</ul>
+      <p>Given an array containing n distinct numbers taken from <code>0, 1, 2, ..., n</code>, find the one that is missing from the array.</p>
 
+<p>For example,<br/>
+Given <code>nums = [0, 1, 3]</code> return <code>2</code>.</p>
 
-<p>Base64是一种用64个字符来表示任意二进制数据的方法。</p>
+<p>Note:<br/>
+Your algorithm should run in linear runtime complexity. Could you implement it using only constant extra space complexity?</p>
 
-<p>用记事本打开<code>exe、jpg、pdf</code>这些文件时，我们都会看到一大堆乱码，因为二进制文件包含很多无法显示和打印的字符，所以，如果要让记事本这样的文本处理软件能处理二进制数据，就需要一个二进制到字符串的转换方法。Base64是一种最常见的二进制编码方法。</p>
-
-<p>Base64的原理很简单，首先，准备一个包含64个字符的数组：</p>
-
-<pre><code>[&#39;A&#39;, &#39;B&#39;, &#39;C&#39;, ... &#39;a&#39;, &#39;b&#39;, &#39;c&#39;, ... &#39;0&#39;, &#39;1&#39;, ... &#39;+&#39;, &#39;/&#39;]
+<pre><code class="language-c++">class Solution {
+public:
+    int missingNumber(vector&lt;int&gt;&amp; nums) {
+        int len = nums.size();
+        if (len==1) {
+            return nums[0]==1?0:1;
+        }
+        sort(nums.begin(), nums.end());
+        if (nums[0]!=0) {
+            return 0;
+        }
+        for (int i=1; i&lt;len; i++) {
+            if (i==0&amp;&amp;nums[i]!=0) {
+                return 0;
+            }
+            if (nums[i]!=nums[i-1]+1) {
+                return nums[i]-1;
+            }
+        }
+        return nums[len-1]+1;
+    }
+};
 </code></pre>
 
-<p>然后，对二进制数据进行处理，每3个字节一组，一共是<code>3x8=24bit</code>，划为4组，每组正好6个bit：<img src="media/14955000885655/14955010424104.jpg" alt=""/></p>
+<p>第二种解法：<br/>
+```c++<br/>
+class Solution {<br/>
+public:<br/>
+    int missingNumber(vector<int>&amp; nums) {<br/>
+        int result = nums.size();<br/>
+        int i=0;</p>
 
-<p>这样我们得到4个数字作为索引，然后查表，获得相应的4个字符，就是编码后的字符串。</p>
+<pre><code>    for(int num:nums){
+        result ^= num;
+        result ^= i;
+        i++;
+    }
 
-<p>所以，Base64编码会把3字节的二进制数据编码为4字节的文本数据，长度增加33%，好处是编码后的文本数据可以在邮件正文、网页等直接显示。</p>
-
-<p>如果要编码的二进制数据不是3的倍数，最后会剩下1个或2个字节怎么办？Base64用<code>\x00</code>字节在末尾补足后，再在编码的末尾加上1个或2个<code>=</code>号，表示补了多少字节，解码的时候，会自动去掉。</p>
-
-<p>Python内置的<code>base64</code>可以直接进行base64的编解码：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-import base64
-print base64.b64encode(&#39;binary\x00string&#39;)
-print base64.b64decode(&#39;YmluYXJ5AHN0cmluZw==&#39;)
+    return result;
+}
 </code></pre>
 
-<p><img src="media/14955000885655/14955014556004.jpg" alt=""/></p>
-
-<p>由于标准的Base64编码后可能出现字符<code>+</code>和<code>/</code>，在URL中就不能直接作为参数，所以又有一种&quot;url safe&quot;的base64编码，其实就是把字符<code>+</code>和<code>/</code>分别变成<code>-</code>和<code>_</code>：<br/>
-<img src="media/14955000885655/14955018446875.jpg" alt=""/><br/>
-还可以自己定义64个字符的排列顺序，这样就可以自定义Base64编码，不过，通常情况下完全没有必要。</p>
-
-<p>Base64是一种通过查表的编码方法，不能用于加密，即使使用自定义的编码表也不行。</p>
-
-<p>Base64适用于小段内容的编码，比如数字证书签名、Cookie的内容等。</p>
-
-<p>由于<code>=</code>字符也可能出现在Base64编码中，但<code>=</code>用在URL、Cookie里面会造成歧义，所以，很多Base64编码后会把<code>=</code>去掉：</p>
-
-<pre><code># 标准Base64:
-&#39;abcd&#39; -&gt; &#39;YWJjZA==&#39;
-# 自动去掉=:
-&#39;abcd&#39; -&gt; &#39;YWJjZA&#39;
-</code></pre>
-
-<p>去掉=后怎么解码呢？因为Base64是把3个字节变为4个字节，所以，Base64编码的长度永远是4的倍数，因此，需要加上=把Base64字符串的长度变为4的倍数，就可以正常解码了。</p>
-
-<h2 id="toc_0">练习:</h2>
-
-<p>请写一个能去掉<code>=</code>的base64解码函数:</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-import base64
-def safe_b64decode(str):
-    num = len(str)%4
-    if num==0:
-        return base64.b64decode(str)
-    else :
-        for x in range(num):
-             str = str + &#39;=&#39;
-        return str 
-print base64.b64decode(&#39;YWJjZA==&#39;)
-#print base64.b64decode(&#39;YWJjZA&#39;)
-print safe_b64decode(&#39;YWJjZA&#39;)
-</code></pre>
-
-<p><img src="media/14955000885655/14955026953083.jpg" alt=""/></p>
-
-<h2 id="toc_1">小结</h2>
-
-<p>Base64是一种任意二进制到文本字符串的编码方法，常用于在URL、Cookie、网页中传输少量二进制数据。</p>
+<p>};<br/>
+```</p>
 
 
     
@@ -226,16 +197,16 @@ print safe_b64decode(&#39;YWJjZA&#39;)
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14955029237844.html" 
-          title="Previous Post: Struct">&laquo; Struct</a>
+          <a href="15120510835546.html" 
+          title="Previous Post: Longest Continuous Increasing Subsequence">&laquo; Longest Continuous Increasing Subsequence</a>
       
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14948310433460.html" 
-          title="Next Post: 下学期英语课后翻译总结">下学期英语课后翻译总结 &raquo;</a>
+          <a  href="15120258790187.html" 
+          title="Next Post: Given an integer array, find three numbers whose product is maximum and output the maximum product.">Given an integer array, find three numbers whose product is maximum and output the maximum product. &raquo;</a>
       
       </p>
         </div>

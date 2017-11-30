@@ -117,6 +117,146 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15114035796843.html">
+                
+                  <h1>Array Partition I</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of <strong>2n</strong> integers, your task is to group these integers into n pairs of integer, say (a1, b1), (a2, b2), ..., (an, bn) which makes sum of min(ai, bi) for all i from 1 to n as large as possible.</p>
+
+<p><img src="media/15114035796843/15114036022226.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int arrayPairSum(vector&lt;int&gt;&amp; nums) {
+        
+        sort(nums.begin(),nums.end());
+        int result=0;
+        for (int i=0; i&lt;nums.size(); i+=2) {
+            result+=nums[i];
+        }
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15114026353930.html">
+                
+                  <h1>3Sum</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array S of n integers, are there elements a, b, c in S such that a + b + c = 0? Find all unique triplets in the array which gives the sum of zero.</p>
+
+<p><strong>Note:</strong> The solution set must not contain duplicate triplets.</p>
+
+<p><img src="media/15114026353930/15114026868536.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; threeSum(vector&lt;int&gt;&amp; nums) {
+        sort(nums.begin(),nums.end());
+        vector&lt;vector&lt;int&gt;&gt; result;
+        vector&lt;int&gt; tmpResult;
+        
+        int p,q,tmp;
+        for(int i = 0 ;i&lt;nums.size();i++)
+        {
+            if(i!=0&amp;&amp;nums[i]==nums[i-1]) continue;
+            int currentNum = nums[i];
+            p = i+1;
+            q = nums.size()-1;
+            
+            while(p&lt;q)
+            {
+                if(p!=i+1&amp;&amp;nums[p]==nums[p-1])
+                {
+                    p++;
+                    continue;
+                }
+                tmp = nums[q]+nums[p];
+                if(tmp==-currentNum)
+                {
+                    tmpResult.push_back(currentNum);
+                    tmpResult.push_back(nums[q]);
+                    tmpResult.push_back(nums[p]);
+                    result.push_back(tmpResult);
+                    tmpResult.clear();
+                    p++;
+                    q--;
+                }else if (tmp&gt;-currentNum)
+                {
+                    q--;
+                }else p++;
+            }
+        }
+        
+        return result;
+    }
+};
+</code></pre>
+
+<p><strong>two real problems .</strong></p>
+
+<ul>
+<li><p>how to find the sum?<br/>
+change it to a 2 sum problem. when you have one value, the sum of the other two is -value.<br/>
+2 sum problem has a O(n) solution. so the final is O(n<sup>2).</sup></p></li>
+<li><p>how to remove the duplicate?<br/>
+for same values, we only use the first one and pass the rest.</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15113375347657.html">
                 
                   <h1>Arranging Coins</h1>
@@ -352,180 +492,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15113342227318.html">
-                
-                  <h1>Add Strings</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given two non-negative integers num1 and num2 represented as string, return the sum of num1 and num2.</p>
-
-<p>Note:</p>
-
-<p>The length of both <code>num1</code> and <code>num2</code> is &lt; 5100.<br/>
-Both <code>num1</code> and <code>num2</code> contains only digits <code>0-9</code>.<br/>
-Both <code>num1</code> and <code>num2</code> does not contain any leading zero.<br/>
-You must not use any built-in BigInteger library or convert the inputs to integer directly.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string addStrings(string num1, string num2) {
-        int fw = 0;
-        string result =&quot;&quot;;
-        for(int i = num1.size()-1,j = num2.size()-1;i&gt;=0||j&gt;=0;i--,j--){
-            int n1 = i&gt;=0 ? num1[i]-&#39;0&#39;:0;
-            int n2 = j&gt;=0 ? num2[j]-&#39;0&#39;:0;
-            int tmp = (n1+n2+fw)%10;
-            fw = (n1+n2+fw)/10;
-            result = char(tmp+&#39;0&#39;) + result;
-        }
-        if(fw){
-            result = char(fw +&#39;0&#39;)+ result;
-        }
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/22</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15109904843500.html">
-                
-                  <h1>AFNetworking的简单使用</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>最近看学习一些项目代码到了使用<code>AFNetworking</code>的项目，所以去学习了一下，这里简单的总结一下，<code>AFNetworking</code>的使用方法。</p>
-
-<h2 id="toc_0">AFNetworking简介</h2>
-
-<p><code>AFNetworking</code>是一个很受大众欢迎的网络框架，可以帮助管理和处理网络任务请求，包括下载、上传、<code>get</code>、<code>post</code>请求等。</p>
-
-<h2 id="toc_1">安装</h2>
-
-<p><code>AFNetworking</code>的安装可以使用<code>CocoaPods</code>在文件中加入：</p>
-
-<pre><code class="language-objc">pod &#39;AFNetworking&#39;
-</code></pre>
-
-<p>并执行 <code>pod install</code>就可以了。有一点要注意的是最新版本为<code>3.1</code>这个版本删除了基于<code>NSURLConnectionOperation</code>的<code>AFHTTPRequestOperationManager</code>的支持。转而使用基于<code>NSURLSession</code>封装的<code>AFHTTPSessionManager</code>。</p>
-
-<h2 id="toc_2">网络监听</h2>
-
-<p><code>AFNetworking</code>提供了一个监听网络状态的方法，来实时的判断当前网络是否良好。具体代码如下：</p>
-
-<pre><code class="language-objc">// 如果要检测网络状态的变化,必须用检测管理器的单例的startMonitoring
-    /**
-     AFNetworkReachabilityStatusUnknown          = -1,  // 未知
-     AFNetworkReachabilityStatusNotReachable     = 0,   // 无连接
-     AFNetworkReachabilityStatusReachableViaWWAN = 1,   // 3G 花钱
-     AFNetworkReachabilityStatusReachableViaWiFi = 2,   // 局域网络,不花钱
-     */
-    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
-    [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
-        debugLog(@&quot;%ld&quot;,(long)status);
-    }];
-</code></pre>
-
-<p>根据当前网络状态会输出所对应的状态数值。</p>
-
-<h2 id="toc_3">下载</h2>
-
-<pre><code class="language-objc">    //session的默认配置
-    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-    //根据配置创建管理者
-    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
-    NSURL *url = [NSURL URLWithString:@&quot;http://smartdsp.xmu.edu.cn/memberpdf/fuxueyang/cvpr2017/cvpr2017.pdf&quot;];
-    //根据url创建请求对象
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
-    //创建下载任务
-    NSURLSessionDownloadTask *downloadTask = [manager downloadTaskWithRequest:request progress:nil destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-        //设置下载路径
-        NSURL *documentsDirectoryURL = [[NSFileManager defaultManager] URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
-        //返回文件存放在本地的地址
-        return [documentsDirectoryURL URLByAppendingPathComponent:[response suggestedFilename]];
-    } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
-        //下载完成后调用方法
-        debugLog(@&quot;File download to:%@ , %@&quot;,filePath,error);
-    }];
-    //开始下载任务
-    [downloadTask resume];
-</code></pre>
-
-<h2 id="toc_4">get请求</h2>
-
-<pre><code class="language-objc">    NSString *urlString = @&quot;https://www.weifar.com/api/ExamQuestion/id&quot;;
-    NSDictionary *parameters = @{@&quot;id&quot;:@6};
-    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
-    //根据上述参数和请求地址来发送请求
-    [manager GET:urlString parameters:parameters progress:^(NSProgress * _Nonnull downloadProgress) {
-        debugLog(@&quot;%@&quot;,downloadProgress);
-    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-        //成功获取数据后，进行处理
-        if (responseObject) {
-            NSArray *a = responseObject[@&quot;Questions&quot;];
-            NSDictionary *dic = a[0];
-            NSString *str = dic[@&quot;BlockDescription&quot;];
-            debugLog(@&quot;%@&quot;,str);
-        }
-    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-        //请求失败，打印错误
-        debugLog(@&quot;%@&quot;,error);
-    }];
-</code></pre>
-
-<h2 id="toc_5">总结</h2>
-
-<p>以上就是<code>AFNetworking</code>的基本使用，还有其他的一些功能由于没有合适的接口可以进行操作，暂且先搁置下。具体的操作可以参考官方的<code>AFNetworking</code><a href="http://cocoadocs.org/docsets/AFNetworking/3.1.0/index.html">API文档</a>,</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -615,6 +581,18 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15120510835546.html">Longest Continuous Increasing Subsequence</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15120333911660.html">Missing Number</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15120258790187.html">Given an integer array, find three numbers whose product is maximum and output the maximum product.</a>
 			      </li>
 		     
@@ -628,18 +606,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15120236843494.html">Summary Ranges</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15120100977395.html">Majority Element</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15120074710373.html">Remove Duplicates from Sorted Array</a>
 			      </li>
 		     
 		  

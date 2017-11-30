@@ -117,6 +117,134 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14932573311953.html">
+                
+                  <h1>图像去雾相关论文总结</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">1.特征学习的单幅图像去雾算法 2016年</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_1">2.尺度自适应暗通道先验去雾方法</a>
+
+
+<h2 id="toc_0">1.特征学习的单幅图像去雾算法 2016年</h2>
+
+<p><strong>目的：</strong>为提高图像去雾的普适性，提出一种特征学习的单幅图像去雾方法。</p>
+
+<p><strong>方法：</strong>通过稀疏自动编码机对有雾图像进行<strong>多尺度的纹理结构特征提取</strong>，同时抽取各种与雾相关的颜色特征。然后采用多层神经网络进行样本训练，得到雾天条件下纹理结构特征及颜色特征与场景深度间的映射关系，并估算出有雾图像的场景深度图。最后结合大气散射模型，根据场景深度图复原无雾图像。</p>
+
+<p><strong>结论：对实验结果的定性及定量分 析表明，本文算法能有效获取有雾图像的场景深度，复原出视觉效果理想的无雾图像，且具有很好的场景普适性。</strong></p>
+
+<p><strong>理解</strong>：<font color=red>本文认为图像去雾的问题可进一步转化为场景深度d的求解问题。</font>本文通过自动编码机获取到图片中物体的纹理特征，然后用多尺度的方法分别提取<strong>颜色特征、暗原色特征、颜色衰减特征、纹理结构</strong>特征。<strong>四者结合对场景深度进行估计</strong>。</p>
+
+<p><strong>可以改进的</strong>：</p>
+
+<ol>
+<li><p>算法实时性不够强，效率比较低，可以考虑缩小图片尺寸，降低数据量，从而运用到视频去雾。</p></li>
+<li><p>对雾气分布不均匀的图像，效果不理想，需要结合不同的气象模型来建立更为鲁棒的物理模型。</p></li>
+</ol>
+
+<h1 id="toc_1">2.尺度自适应暗通道先验去雾方法</h1>
+
+<p><strong>目的：</strong><br/>
+针对暗通道先验去雾方法的尺度选择问题 提出了一种尺度自适应方法， 根据图像的颜色和边 缘特征将暗通道求解的尺度自适应地调整到一个合适的范围。</p>
+
+<p><strong>方法：</strong></p>
+
+<ol>
+<li><p>由颜色特征求解初始尺度：<font color=red>对于图像的不同区域采用不同的尺度求解暗通道: 在亮度较低或饱和度较高的区域，采用较小尺度; 在亮度较高且饱和度较低的区域，采用较大尺度;在景深突变处，采用较小尺度;在平滑区域，采用较大尺度。</font></p></li>
+<li><p>由边缘特征对尺度进行修正:由于“光晕”现象发生在景深突变处，如果在边缘附近采用较小的尺度，可使透射率的求解窗口\(Ω_r(x)\)尽量不跨越景深边界，从而减小“光晕”现象; 在非边缘处采用较大的尺度，可以增大 \(J_{dark}(x)→0\)的概率，使复原图像的背景更平滑，噪声和失真更小。 由边缘特征对初始尺度\(r_0(x)\)进行修正.</p></li>
+</ol>
+
+<p><strong>结论：</strong><br/>
+整个去雾过程参数自动配置，无需人工干预，兼顾不同尺度复原图像的优点，复原图像色彩自然，对比度提升显著，并有效抑制了“光晕”现象。对多种雾化场景图像的处理结果表明: <strong>文中方法对场景的适应性强， 在任何情况下的处理结果均能达到 DG 方法的最优结果，甚至更好。</strong></p>
+
+<p><strong>理解：</strong><br/>
+该论文主要是针对HE的去雾方法，对暗通道尺寸进行自适应确定，减少了人工干预的复杂度。</p>
+
+<p><strong>可以改进：</strong><br/>
+<font color=red>该算法在运行时间上可以改进，也可以利用机器学习的方法来提取图片特征，避免Canny算子的局限性造成的边缘提取误差。<br/>
+可以与上篇论文进行结合来提高上文尺度特征提取的效率。</font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/27</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14928484245894.html">
+                
+                  <h1>文档测试</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>如果你经常阅读Python的官方文档，可以看到很多文档都有示例代码。比如<a href="https://docs.python.org/2/library/re.html">re</a>模块就带了很多示例代码：</p>
+
+<pre><code>&gt;&gt;&gt; import re
+&gt;&gt;&gt; m = re.search(&#39;(?&lt;=abc)def&#39;, &#39;abcdef&#39;)
+&gt;&gt;&gt; m.group(0)
+&#39;def&#39;
+</code></pre>
+
+<p>可以把这些示例代码在Python的交互式环境下输入并执行，结果与文档中的示例代码显示的一致。</p>
+
+<p>这些代码与其他说明可以写在注释中，然后，由一些工具来自动生成文档。既然这些代码本身就可以粘贴出来直接运行，那么，可不可以自动执行写在注释中的这些代码呢？</p>
+
+<p>答案是肯定的。</p>
+
+<p>当我们编写注释时，如果写上这样的注释：</p>
+
+<pre><code class="language-py">
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/22</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14928429198094.html">
                 
                   <h1>单元测试</h1>
@@ -878,735 +1006,6 @@ print L
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14926766188460.html">
-                
-                  <h1>面向对象高级编程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">使用__slots__</a>
-</li>
-<li>
-<a href="#toc_1">使用@property</a>
-</li>
-<li>
-<a href="#toc_2">多重继承</a>
-<ul>
-<li>
-<a href="#toc_3">Mixin</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_4">定制类</a>
-<ul>
-<li>
-<a href="#toc_5">__str__</a>
-</li>
-<li>
-<a href="#toc_6">__iter__</a>
-</li>
-<li>
-<a href="#toc_7">__getitem__</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_8">__getattr__</a>
-</li>
-<li>
-<a href="#toc_9">__call__</a>
-</li>
-</ul>
-
-
-<p>正常情况下，当我们定义了一个class，创建了一个class的实例后，我们可以给该实例绑定任何属性和方法，这就是动态语言的灵活性。</p>
-
-<p><strong><em>我们可以动态的给某一个实例绑定属性、方法。要绑定该类所有的实例的话，则可以将方法绑定到该类上。</em></strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-
-class Student(object):
-    &quot;&quot;&quot;docstring for Student&quot;&quot;&quot;
-    pass
-s = Student()
-s.name = &#39;梁中豪&#39;  # 动态给实例绑定一个属性
-
-from types import MethodType
-
-
-def set_age(self, age):  # 定义一个函数作为实例方法
-    self.age = age
-s.set_age = MethodType(set_age, s, Student)  # 给实例绑定一个方法
-s.set_age(25)
-
-# 为了给所有实例都绑定方法，可以给class绑定方法：
-
-
-def set_score(self, score):  # 定义一个函数作为实例方法
-    self.score = score
-Student.set_score = MethodType(set_score, None, Student)
-s.set_score(100) #给class绑定方法后，所有实例均可调用
-s2 = Student()
-s2.set_score(90)
-print s.name, s.age, s.score, s2.score
-</code></pre>
-
-<p><img src="media/14926766188460/14926773474695.jpg" alt=""/></p>
-
-<h2 id="toc_0">使用__slots__</h2>
-
-<p>如果我们想要限制class的属性怎么办？比如，只允许对Student实例添加<code>name和age</code>属性。那么可以使用一个特殊的<code>__slots__</code>变量。</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-
-class Student(object):
-    &quot;&quot;&quot;docstring for Student&quot;&quot;&quot;
-    __slots__ = (&#39;name&#39;,&#39;age&#39;)
-    
-s = Student()
-s.name = &#39;梁中豪&#39;
-s.age = 21
-print s.name, s.age
-s.score = 90
-print s.score
-
-</code></pre>
-
-<p><img src="media/14926766188460/14926779162430.jpg" alt=""/></p>
-
-<p><font color=red>使用<code>__slots__</code>要注意，<code>__slots__</code>定义的属性仅对当前类起作用，对继承的子类是不起作用的. 除非在子类中也定义<code>__slots__</code>，这样，子类允许定义的属性就是自身的<code>__slots__</code>加上父类的<code>__slots__</code>。<br/>
-</font></p>
-
-<h2 id="toc_1">使用@property</h2>
-
-<p>在绑定属性时，如果我们直接把属性暴露出去，虽然写起来很简单，但是，没办法检查参数，导致可以把成绩随便改。</p>
-
-<p>这显然不合逻辑。为了限制score的范围，可以通过一个<code>set_score()</code>方法来设置成绩，再通过一个<code>get_score()</code>来获取成绩，这样，在<code>set_score()</code>方法里，就可以检查参数：</p>
-
-<pre><code class="language-py">class Student(object):
-
-    def get_score(self):
-        return self._score
-
-    def set_score(self, value):
-        if not isinstance(value, int):
-            raise ValueError(&#39;score must be an integer!&#39;)
-        if value &lt; 0 or value &gt; 100:
-            raise ValueError(&#39;score must between 0 ~ 100!&#39;)
-        self._score = value
-s = Student()
-s.set_score(50)
-s.get_score()
-s.set_score(999)
-s.get_score()
-</code></pre>
-
-<p><img src="media/14926766188460/14927376402165.jpg" alt=""/></p>
-
-<p>上面的调用方法又略显复杂，没有直接用属性这么直接简单。</p>
-
-<p>对于类的方法，装饰器一样起作用。Python内置的<code>@property</code>装饰器就是负责把一个方法变成属性调用的：</p>
-
-<pre><code class="language-py">
-class Student(object):
-
-    @property
-    def score(self):
-        return self._score
-
-    @score.setter
-    def score(self, value):
-        if not isinstance(value, int):
-            raise ValueError(&#39;score must be an integer!&#39;)
-        if value &lt; 0 or value &gt; 100:
-            raise ValueError(&#39;score must between 0 ~ 100!&#39;)
-        self._score = value
-
-s = Student
-s.score = 60
-print s.score
-</code></pre>
-
-<p><code>@property</code>的实现比较复杂，我们先考察如何使用。把一个<code>getter</code>方法变成属性，只需要加上<code>@property</code>就可以了，此时，<code>@property</code>本身又创建了另一个装饰器<code>@score.setter</code>，负责把一个<code>setter</code>方法变成属性赋值</p>
-
-<p>如果只定义getter方法，不定义setter方法就是一个只读属性：</p>
-
-<pre><code class="language-py">class Student(object):
-
-    @property
-    def birth(self):
-        return self._birth
-
-    @birth.setter
-    def birth(self, value):
-        self._birth = value
-
-    @property
-    def age(self):
-        return 2014 - self._birth
-s = Student()
-s.birth = 23
-print s.birth
-</code></pre>
-
-<h2 id="toc_2">多重继承</h2>
-
-<p>继承是面向对象编程的一个重要的方式，因为通过继承，子类就可以扩展父类的功能。</p>
-
-<p>一个类可以继承多个类，称为多重继承，如下所示：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Animal(object):
-    &quot;&quot;&quot;docstring for Animal&quot;&quot;&quot;
-    pass
-
-
-class Mammal(Animal):
-    &quot;&quot;&quot;docstring for Mammal&quot;&quot;&quot;
-    print &#39;Mammal&#39;
-
-
-class Bird(Animal):
-    &quot;&quot;&quot;docstring for Bird&quot;&quot;&quot;
-    print &#39;Bird&#39;
-
-
-class Runable(object):
-    &quot;&quot;&quot;docstring for Runable&quot;&quot;&quot;
-
-    def run(self):
-        print &#39;Running...&#39;
-
-
-class Flyable(object):
-    &quot;&quot;&quot;docstring for Flyable&quot;&quot;&quot;
-
-    def fly(self):
-        print &#39;Flying...&#39;
-
-
-class Dog(Mammal, Runable):
-    &quot;&quot;&quot;docstring for Dog&quot;&quot;&quot;
-    pass
-
-
-class Bat(Mammal, Flyable):
-    &quot;&quot;&quot;docstring for Bat&quot;&quot;&quot;
-    pass
-</code></pre>
-
-<p>通过多重继承，一个子类就可以同时获得多个父类的所有功能。</p>
-
-<h3 id="toc_3">Mixin</h3>
-
-<p>在设计类的继承关系时，通常，主线都是单一继承下来的，例如，<code>Ostrich</code>继承自<code>Bird</code>。但是，如果需要“混入”额外的功能，通过多重继承就可以实现，比如，让<code>Ostrich</code>除了继承自<code>Bird</code>外，再同时继承<code>Runnable</code>。这种设计通常称之为<code>Mixin</code>。</p>
-
-<p>为了更好地看出继承关系，我们把Runnable和Flyable改为<code>RunnableMixin</code>和<code>FlyableMixin</code>。类似的，你还可以定义出肉食动物<code>CarnivorousMixin</code>和植食动物<code>HerbivoresMixin</code>，让某个动物同时拥有好几个<code>Mixin</code>：</p>
-
-<pre><code class="language-py">class Dog(Mammal, RunnableMixin, CarnivorousMixin):
-    pass
-</code></pre>
-
-<p>由于Python允许使用多重继承，因此，Mixin就是一种常见的设计。</p>
-
-<p><strong>只允许单一继承的语言（如Java）不能使用Mixin的设计</strong>。</p>
-
-<h2 id="toc_4">定制类</h2>
-
-<p>看到类似<code>__slots__</code>这种形如<code>__xxx__</code>的变量或者函数名就要注意，这些在Python中是有特殊用途的。</p>
-
-<p>类似有很多特殊变量来帮助我们定制类：</p>
-
-<h3 id="toc_5">__str__</h3>
-
-<p>我们先定义一个<code>Student</code>类，打印一个实例：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-    def __init__(self, name):
-        super(Students, self).__init__()
-        self.name = name
-print Students(&#39;LZH&#39;)
-</code></pre>
-
-<p><img src="media/14926766188460/14927559673818.jpg" alt=""/><br/>
-得到上图所示，我们可以定制所打印的内容。</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-    def __init__(self, name):
-        super(Students, self).__init__()
-        self.name = name
-    def __str__(self):
-        return &#39;Students object (name:%s)&#39; %self.name
-print Students(&#39;LZH&#39;)
-</code></pre>
-
-<p><img src="media/14926766188460/14927560929527.jpg" alt=""/><br/>
-这样打印出来的实例，不但好看，而且容易看出实例内部重要的数据。<br/>
-当然这只是负责定制<code>print</code>方法输出的内容。直接敲变量不用<code>print</code>，打印出来的实例还是不好看。</p>
-
-<p>这是因为直接显示变量调用的不是<code>__str__()</code>，而是<code>__repr__()</code>，两者的区别是<code>__str__()</code>返回用户看到的字符串，而<code>__repr__()</code>返回程序开发者看到的字符串，也就是说，<code>__repr__()</code>是为调试服务的。</p>
-
-<pre><code class="language-py">class Student(object):
-    def __init__(self, name):
-        self.name = name
-    def __str__(self):
-        return &#39;Student object (name=%s)&#39; % self.name
-    __repr__ = __str__  #因为两者方法几乎一样，所以可以直接偷懒将前者赋值给repr
-</code></pre>
-
-<h3 id="toc_6">__iter__</h3>
-
-<p>如果一个类想被用于<code>for ... in</code>循环，类似<code>list或tuple</code>那样，就必须实现一个<code>__iter__()</code>方法，该方法返回一个迭代对象，然后，Python的for循环就会不断调用该迭代对象的<code>next()</code>方法拿到循环的下一个值，直到遇到StopIteration错误时退出循环。</p>
-
-<p>我们以斐波那契数列为例，写一个Fib类，可以作用于for循环：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-
-class Fib(object):
-    &quot;&quot;&quot;docstring for Fib&quot;&quot;&quot;
-
-    def __init__(self):
-        self.a, self.b = 0, 1  # 初始化两个计数器a，b
-
-    def __iter__(self):
-        return self  # 实例本身就是迭代对象，故返回自己
-
-    def next(self):
-        self.a, self.b = self.b, self.a + self.b
-        if self.a &gt; 100:
-            raise StopIteration()
-        return self.a
-
-for n in Fib():
-    print n
-</code></pre>
-
-<p><img src="media/14926766188460/14927569583236.jpg" alt=""/></p>
-
-<h3 id="toc_7">__getitem__</h3>
-
-<p>上述要表现得像list那样按照下标取出元素，需要实现<code>__getitem__()</code>方法：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-class Fib(object):
-    &quot;&quot;&quot;docstring for Fib&quot;&quot;&quot;
-
-    def __getitem__(self, n):
-        a, b = 1, 1
-        for x in range(n):
-            a, b = b, a + b
-        print a
-
-f = Fib()
-f[0]
-f[2]
-f[4]
-
-</code></pre>
-
-<p><img src="media/14926766188460/14927581032895.jpg" alt=""/></p>
-
-<p>不能简单的直接执行切片方法，Fib会报错。原因是<code>__getitem__()</code>传入的参数可能是一个int，也可能是一个切片对象slice，所以要做判断：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-
-class Fib(object):
-    &quot;&quot;&quot;docstring for Fib&quot;&quot;&quot;
-
-    def __getitem__(self, n):
-        if isinstance(n, int):
-            a, b = 1, 1
-            for x in range(n):
-                a, b = b, a + b
-            print a
-        if isinstance(n, slice):
-            start = n.start
-            stop = n.stop
-            a, b = 1, 1
-            L = []
-            for x in range(stop):
-                if x &gt;= start:
-                    L.append(a)
-                a, b = b, a + b
-            print L
-
-f = Fib()
-f[5]
-f[1:5]
-</code></pre>
-
-<p><img src="media/14926766188460/14927591015675.jpg" alt=""/></p>
-
-<h2 id="toc_8">__getattr__</h2>
-
-<p>当定义好一个类后，若实例调用一个不存在的属性，则会报错，但是我们可以运用<code>__getattr__</code>动态返回一个属性。例如：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Student(object):
-
-    def __init__(self):
-        self.name = &#39;Michael&#39;
-
-    def __getattr__(self, attr):
-        if attr==&#39;score&#39;:
-            return 99
-
-s = Student()
-print s.name
-print s.score
-print s.age
-</code></pre>
-
-<p><img src="media/14926766188460/14927598715799.jpg" alt=""/><br/>
-只有在没有找到属性的情况下，才调用<code>__getattr__</code>，已有的属性，比如<code>name</code>，不会在<code>__getattr__</code>中查找。</p>
-
-<p>此外，注意到任意调用如<code>s.age</code>都会返回<code>None</code>，这是因为我们定义的<code>__getattr__</code>默认返回就是<code>None</code>。</p>
-
-<p><strong>这实际上可以把一个类的所有属性和方法调用全部动态化处理了，不需要任何特殊手段。例如动态的拼接api接口：</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Chain(object):
-
-    def __init__(self, path=&#39;&#39;):
-        self._path = path
-
-    def __getattr__(self, path):
-        return Chain(&#39;%s/%s&#39; % (self._path, path))
-
-    def __str__(self):
-        return self._path
-print Chain().status.user.timeline.list
-print Chain(&#39;LZH&#39;).status.user.timeline.list
-</code></pre>
-
-<p><img src="media/14926766188460/14927597036919.jpg" alt=""/></p>
-
-<h2 id="toc_9">__call__</h2>
-
-<p>任何类，只需要定义一个__call__()方法，就可以直接对实例进行调用。请看示例：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-    def __init__(self, name):
-        super(Students, self).__init__()
-        self.name = name
-    def __call__(self):
-        print (&#39;My name is %s.&#39; % self.name)
-
-s = Students(&#39;LZH&#39;)
-s()
-</code></pre>
-
-<p><img src="media/14926766188460/14927611817291.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/20</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14926712777578.html">
-                
-                  <h1>类和实例</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">数据封装</a>
-</li>
-<li>
-<a href="#toc_1">访问限制</a>
-</li>
-<li>
-<a href="#toc_2">继承和多态</a>
-</li>
-<li>
-<a href="#toc_3">获取对象信息</a>
-<ul>
-<li>
-<a href="#toc_4">使用type()</a>
-</li>
-<li>
-<a href="#toc_5">使用isinstance()</a>
-</li>
-<li>
-<a href="#toc_6">使用dir()</a>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>在Python中，定义类是通过<code>class</code>关键字：</p>
-
-<pre><code class="language-py">class Student(object):
-    pass
-</code></pre>
-
-<p><code>class</code>后面紧接着是类名，即<code>Student</code>，类名通常是大写开头的单词，紧接着是<code>(object)</code>，表示该类是从哪个类继承下来的，继承的概念我们后面再讲，通常，<strong>如果没有合适的继承类，就使用object类，这是所有类最终都会继承的类</strong>。</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.name = name
-        self.score = score
-</code></pre>
-
-<p>注意到<code>__init__</code>方法的第一个参数永远是self，表示创建的实例本身，因此，在<code>__init__</code>方法内部，就可以把各种属性绑定到<code>self</code>，因为<code>self</code>就指向创建的实例本身。</p>
-
-<p>和普通的函数相比，在类中定义的函数只有一点不同，<font color=red>就是第一个参数永远是实例变量self，并且，调用时，不用传递该参数。除此之外，类的方法和普通函数没有什么区别，所以，你仍然可以用默认参数、可变参数和关键字参数。</font></p>
-
-<h2 id="toc_0">数据封装</h2>
-
-<p>面向对象编程的一个重要特点就是数据封装，创建实例需要给出<code>name</code>和<code>score</code>，而如何打印，都是在Student类的内部定义的，这些数据和逻辑被“封装”起来了，调用很容易，但却不用知道内部实现的细节。</p>
-
-<p>例如下面增加一个成绩分类的方法：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.name = name
-        self.score = score
-
-    def print_score(self):
-        print &#39;%s:%s&#39; % (self.name, self.score)
-
-    def get_grade(self):
-        if self.score &gt;= 90:
-            print &#39;A&#39;
-        elif self.score &gt;= 60:
-            print &#39;B&#39;
-        else:
-            print &#39;C&#39;
-
-bart = Students(&#39;Bart&#39;, 59)
-lisa = Students(&#39;梁中豪&#39;, 100)
-bart.print_score()
-bart.get_grade()
-lisa.print_score()
-lisa.get_grade()
-</code></pre>
-
-<h2 id="toc_1">访问限制</h2>
-
-<p>在Class内部，可以有属性和方法，而外部代码可以通过直接调用实例变量的方法来操作数据，这样，就隐藏了内部的复杂逻辑。</p>
-
-<p>但是，从前面Student类的定义来看，外部代码还是可以自由地修改一个实例的<code>name</code>、<code>score</code>属性</p>
-
-<p>如果要让内部属性不被外部访问，可以把属性的名称前加上两个下划线<code>__</code>，<font color=red>在Python中，实例的变量名如果以<code>__</code>开头，就变成了一个私有变量（private），只有内部可以访问，外部不能访问，</font>所以，我们把Student类改一改：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.__name = name
-        self.__score = score
-
-    def print_score(self):
-        print &#39;%s:%s&#39; % (self.__name, self.__score)
-
-   
-bart = Students(&#39;Bart&#39;, 59)
-lisa = Students(&#39;梁中豪&#39;, 100)
-bart.print_score()
-lisa.__name
-</code></pre>
-
-<p>改完后，对于外部代码来说，没什么变动，但是已经无法从外部访问实例变量.<code>__name</code>和实例变量<code>.__score</code>了：<br/>
-<img src="media/14926712777578/14926727380387.jpg" alt=""/><br/>
-如果又要允许外部代码修改score,可以给Student类增加set_score方法.这里跟java很像。不在过多叙述。</p>
-
-<h2 id="toc_2">继承和多态</h2>
-
-<p>在OOP程序设计中，当我们定义一个class的时候，可以从某个现有的class继承，新的class称为子类（Subclass），而被继承的class称为基类、父类或超类（Base class、Super class）。</p>
-
-<p>继承最大的好处是子类获得了父类的全部功能。由于<code>Animial</code>实现了<code>run()</code>方法，因此，<code>Dog</code>和<code>Cat</code>作为它的子类，什么事也没干，就自动拥有了<code>run()</code>方法，当然也可以对父类方法进行重写。</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Animal(object):
-    &quot;&quot;&quot;docstring for Animal&quot;&quot;&quot;
-
-    def run(self):
-        print &#39;Animal is running..&#39;
-
-
-class Dog(Animal):
-    pass
-
-
-class Cat(Animal):
-    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
-
-    def run(self):
-        print &#39;Cat is running..&#39;
-
-dog = Dog()
-dog.run()
-
-cat = Cat()
-cat.run()
-
-</code></pre>
-
-<p><img src="media/14926712777578/14926743181176.jpg" alt=""/></p>
-
-<h2 id="toc_3">获取对象信息</h2>
-
-<p>当我们拿到一个对象的引用时，如何知道这个对象是什么类型？</p>
-
-<h3 id="toc_4">使用type()</h3>
-
-<p>基本类型都可以用<code>type()</code>判断：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-print type(123),type(&#39;str&#39;),type(None)
-</code></pre>
-
-<p><img src="media/14926712777578/14926750871663.jpg" alt=""/></p>
-
-<p>Python把每种type类型都定义好了常量，放在types模块里，使用之前，需要先导入：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import types
-print type(&#39;abc&#39;)==types.StringType
-print type(u&#39;abc&#39;)==types.UnicodeType
-print type([])==types.ListType
-print type(str) == types.TypeType
-</code></pre>
-
-<p><img src="media/14926712777578/14926752976543.jpg" alt=""/><br/>
-<strong>最后注意到有一种类型就叫TypeType，所有类型本身的类型就是TypeType.比如<code>int，str</code>等</strong></p>
-
-<h3 id="toc_5">使用isinstance()</h3>
-
-<p>我们使用<code>isinstance()</code>来判断class的类型，例如：</p>
-
-<pre><code class="language-py">class Animals(object):
-    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
-    pass
-class Cat(Animals):
-    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
-    pass
-class Dog(Animals):
-    &quot;&quot;&quot;docstring for Dog&quot;&quot;&quot;
-    pass
-a = Animals()
-d = Dog()
-h = Cat()
-print isinstance(h, Cat),isinstance(d, Dog),isinstance(a, Animals)
-</code></pre>
-
-<p><img src="media/14926712777578/14926756201012.jpg" alt=""/></p>
-
-<p>当然也可以用<code>isinstance()</code>来判断基本类型</p>
-
-<h3 id="toc_6">使用dir()</h3>
-
-<p>如果要获得一个对象的所有属性和方法，可以使用<code>dir()</code>函数，它返回一个包含字符串的<code>list</code>，比如，获得一个str对象的所有属性和方法：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; dir(&#39;abc&#39;)
-</code></pre>
-
-<p><img src="media/14926712777578/14926758082813.jpg" alt=""/></p>
-
-<p><strong>仅仅把属性和方法列出来是不够的，配合<code>getattr()、setattr()以及hasattr()</code>，我们可以直接操作一个对象的状态：</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-class Animals(object):
-    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
-
-    def __init__(self):
-        self.x = 9
-
-    def power(self):
-        print self.x * self.x
-obj = Animals()
-
-print hasattr(obj, &#39;x&#39;)  # 有属性&#39;x&#39;吗？
-print hasattr(obj, &#39;y&#39;)  # 有属性&#39;y&#39;吗？
-print setattr(obj, &#39;y&#39;, 19)  # 设置一个属性&#39;y&#39;
-print getattr(obj, &#39;y&#39;)  # 获取属性&#39;y&#39;
-print obj.y
-</code></pre>
-
-<p><img src="media/14926712777578/14926764199501.jpg" alt=""/></p>
-
-<p>也可以获得对象的方法：</p>
-
-<pre><code class="language-py">fn = getattr(obj, &#39;power&#39;)
-print fn,fn(),
-</code></pre>
-
-<p><img src="media/14926712777578/14926765852729.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/20</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1696,6 +1095,18 @@ print fn,fn(),
 	      
 		      
 			      <li class="post">
+			        <a href="15120510835546.html">Longest Continuous Increasing Subsequence</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15120333911660.html">Missing Number</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15120258790187.html">Given an integer array, find three numbers whose product is maximum and output the maximum product.</a>
 			      </li>
 		     
@@ -1709,18 +1120,6 @@ print fn,fn(),
 		      
 			      <li class="post">
 			        <a href="15120236843494.html">Summary Ranges</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15120100977395.html">Majority Element</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15120074710373.html">Remove Duplicates from Sorted Array</a>
 			      </li>
 		     
 		  

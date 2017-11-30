@@ -117,6 +117,180 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15113342227318.html">
+                
+                  <h1>Add Strings</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given two non-negative integers num1 and num2 represented as string, return the sum of num1 and num2.</p>
+
+<p>Note:</p>
+
+<p>The length of both <code>num1</code> and <code>num2</code> is &lt; 5100.<br/>
+Both <code>num1</code> and <code>num2</code> contains only digits <code>0-9</code>.<br/>
+Both <code>num1</code> and <code>num2</code> does not contain any leading zero.<br/>
+You must not use any built-in BigInteger library or convert the inputs to integer directly.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string addStrings(string num1, string num2) {
+        int fw = 0;
+        string result =&quot;&quot;;
+        for(int i = num1.size()-1,j = num2.size()-1;i&gt;=0||j&gt;=0;i--,j--){
+            int n1 = i&gt;=0 ? num1[i]-&#39;0&#39;:0;
+            int n2 = j&gt;=0 ? num2[j]-&#39;0&#39;:0;
+            int tmp = (n1+n2+fw)%10;
+            fw = (n1+n2+fw)/10;
+            result = char(tmp+&#39;0&#39;) + result;
+        }
+        if(fw){
+            result = char(fw +&#39;0&#39;)+ result;
+        }
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15109904843500.html">
+                
+                  <h1>AFNetworking的简单使用</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>最近看学习一些项目代码到了使用<code>AFNetworking</code>的项目，所以去学习了一下，这里简单的总结一下，<code>AFNetworking</code>的使用方法。</p>
+
+<h2 id="toc_0">AFNetworking简介</h2>
+
+<p><code>AFNetworking</code>是一个很受大众欢迎的网络框架，可以帮助管理和处理网络任务请求，包括下载、上传、<code>get</code>、<code>post</code>请求等。</p>
+
+<h2 id="toc_1">安装</h2>
+
+<p><code>AFNetworking</code>的安装可以使用<code>CocoaPods</code>在文件中加入：</p>
+
+<pre><code class="language-objc">pod &#39;AFNetworking&#39;
+</code></pre>
+
+<p>并执行 <code>pod install</code>就可以了。有一点要注意的是最新版本为<code>3.1</code>这个版本删除了基于<code>NSURLConnectionOperation</code>的<code>AFHTTPRequestOperationManager</code>的支持。转而使用基于<code>NSURLSession</code>封装的<code>AFHTTPSessionManager</code>。</p>
+
+<h2 id="toc_2">网络监听</h2>
+
+<p><code>AFNetworking</code>提供了一个监听网络状态的方法，来实时的判断当前网络是否良好。具体代码如下：</p>
+
+<pre><code class="language-objc">// 如果要检测网络状态的变化,必须用检测管理器的单例的startMonitoring
+    /**
+     AFNetworkReachabilityStatusUnknown          = -1,  // 未知
+     AFNetworkReachabilityStatusNotReachable     = 0,   // 无连接
+     AFNetworkReachabilityStatusReachableViaWWAN = 1,   // 3G 花钱
+     AFNetworkReachabilityStatusReachableViaWiFi = 2,   // 局域网络,不花钱
+     */
+    [[AFNetworkReachabilityManager sharedManager] startMonitoring];
+    [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
+        debugLog(@&quot;%ld&quot;,(long)status);
+    }];
+</code></pre>
+
+<p>根据当前网络状态会输出所对应的状态数值。</p>
+
+<h2 id="toc_3">下载</h2>
+
+<pre><code class="language-objc">    //session的默认配置
+    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
+    //根据配置创建管理者
+    AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
+    NSURL *url = [NSURL URLWithString:@&quot;http://smartdsp.xmu.edu.cn/memberpdf/fuxueyang/cvpr2017/cvpr2017.pdf&quot;];
+    //根据url创建请求对象
+    NSURLRequest *request = [NSURLRequest requestWithURL:url];
+    //创建下载任务
+    NSURLSessionDownloadTask *downloadTask = [manager downloadTaskWithRequest:request progress:nil destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+        //设置下载路径
+        NSURL *documentsDirectoryURL = [[NSFileManager defaultManager] URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:nil create:NO error:nil];
+        //返回文件存放在本地的地址
+        return [documentsDirectoryURL URLByAppendingPathComponent:[response suggestedFilename]];
+    } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+        //下载完成后调用方法
+        debugLog(@&quot;File download to:%@ , %@&quot;,filePath,error);
+    }];
+    //开始下载任务
+    [downloadTask resume];
+</code></pre>
+
+<h2 id="toc_4">get请求</h2>
+
+<pre><code class="language-objc">    NSString *urlString = @&quot;https://www.weifar.com/api/ExamQuestion/id&quot;;
+    NSDictionary *parameters = @{@&quot;id&quot;:@6};
+    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    //根据上述参数和请求地址来发送请求
+    [manager GET:urlString parameters:parameters progress:^(NSProgress * _Nonnull downloadProgress) {
+        debugLog(@&quot;%@&quot;,downloadProgress);
+    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        //成功获取数据后，进行处理
+        if (responseObject) {
+            NSArray *a = responseObject[@&quot;Questions&quot;];
+            NSDictionary *dic = a[0];
+            NSString *str = dic[@&quot;BlockDescription&quot;];
+            debugLog(@&quot;%@&quot;,str);
+        }
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        //请求失败，打印错误
+        debugLog(@&quot;%@&quot;,error);
+    }];
+</code></pre>
+
+<h2 id="toc_5">总结</h2>
+
+<p>以上就是<code>AFNetworking</code>的基本使用，还有其他的一些功能由于没有合适的接口可以进行操作，暂且先搁置下。具体的操作可以参考官方的<code>AFNetworking</code><a href="http://cocoadocs.org/docsets/AFNetworking/3.1.0/index.html">API文档</a>,</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/18</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15109022752813.html">
                 
                   <h1>FMDB的使用方法</h1>
@@ -654,241 +828,6 @@ int main() {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15090066726855.html">
-                
-                  <h1>常见iOS面试题（智力题）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">智力题</a>
-<ul>
-<li>
-<a href="#toc_1">四个人夜间要过一座桥，每人走路速度不一样，过桥需要时间分别是1，2，5，10分钟。现在只有一只手电筒在过桥时必须带，同时只能两人过，如何安排能够让四人最快速度过桥？</a>
-</li>
-<li>
-<a href="#toc_2">有25匹马赛跑，每次只能跑5匹，最快能赛几次找出跑得最快的3匹马？</a>
-</li>
-<li>
-<a href="#toc_3">如果你变成硬币那么小，然后被扔进一个搅拌机里，你将如何脱身？</a>
-</li>
-<li>
-<a href="#toc_4">五个强盗抢到100个金币来分赃，强盗1提出分配方案，为了防止他分配不公，强盗们达成一致：他的方案必须有所有人（包括1号自己）的半数以上（注意，必须大于百分之五十）通过才可执行。否则，他将被杀死，再由2号强盗提出分配方案，2号的方案也要所有剩下的人（包括他自己）的半数以上通过。否则他也将被杀死，依次类推。假设这五个强盗都贪婪成性、残忍无比、绝顶聪明而又一诺千金，都想自己得到最多，都想看到别人死去而自己活。请问，1号强盗要怎样分配才能使自己活着而得到的黄金最多？为什么？</a>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<h2 id="toc_0">智力题</h2>
-
-<h3 id="toc_1">四个人夜间要过一座桥，每人走路速度不一样，过桥需要时间分别是1，2，5，10分钟。现在只有一只手电筒在过桥时必须带，同时只能两人过，如何安排能够让四人最快速度过桥？</h3>
-
-<pre><code class="language-c">答：1和2 先过。1返回，5和10先过，2返回，1和2一起过。一共时间=2+1+10+2+2=17分钟
-</code></pre>
-
-<h3 id="toc_2">有25匹马赛跑，每次只能跑5匹，最快能赛几次找出跑得最快的3匹马？</h3>
-
-<pre><code class="language-c">答案是7次。
-
-1. 首先将25匹马分成5组a、b、c、d、e进行比赛。比赛的次数就是5次。得到每组的第一名，分别编号a1,b1,c1,d1,e1。
-
-2. 然后我们将每组的第一名进行比赛，得出结果。假设a1&gt;b1&gt;c1&gt;d1&gt;e1。（大于号表示a1比b1快，1表示第一名）。在这个地方我们可以推断出，a1是所有马中最快的，所以它是第一名。d1,e1不可能是前三的马，同时这两匹马所在的组也不可能是前三的马。所以排除这两组马，还剩三组15匹马。现在需要找出第二快和第三快的马。
-
-3. 第二名和第三名的马在刚才的比赛中有以下几种分布情况：
-
-　　全部在a组（最快的马所在的组），那么它是a2和a3.
-
-　　全部在b组，那么它们就是b1和b2。
-
-　　一匹在a组一匹在b组，那么它们是a2和b1.无论是第三名在a组还是第二名在a组都是这两匹。
-
-　　一匹在a组一匹在c组，那么它们是a2和c1。
-
-　　一匹在b组一匹在c组，那么它们是b1和c1。
-
-　　所以我们把a2,a3,b1,b2,c1拿出来再进行一场比赛。取前两名就是最终的结果。
-</code></pre>
-
-<h3 id="toc_3">如果你变成硬币那么小，然后被扔进一个搅拌机里，你将如何脱身？</h3>
-
-<pre><code class="language-c">这是Google的面试题，原题大概是：
-你被缩小到一枚硬币大小，密度不变质量减小，被扔进一个搅拌机里，搅拌机60秒后开始转动，你会怎么办？
-
-答案是：直接跳出来就可以了
-</code></pre>
-
-<h3 id="toc_4">五个强盗抢到100个金币来分赃，强盗1提出分配方案，为了防止他分配不公，强盗们达成一致：他的方案必须有所有人（包括1号自己）的半数以上（注意，必须大于百分之五十）通过才可执行。否则，他将被杀死，再由2号强盗提出分配方案，2号的方案也要所有剩下的人（包括他自己）的半数以上通过。否则他也将被杀死，依次类推。假设这五个强盗都贪婪成性、残忍无比、绝顶聪明而又一诺千金，都想自己得到最多，都想看到别人死去而自己活。请问，1号强盗要怎样分配才能使自己活着而得到的黄金最多？为什么？</h3>
-
-<blockquote>
-<p>显然，5号是最不合作的，因为他没有被扔下海的风险，从直觉上说，每扔下去一个，潜在的对手就少一个；4号正好相反，他生存的机会完全取决于前面还有人活着，因此此人似乎值得争取；3号对前两个的命运完全不同情，他只需要4号支持就可以了；2号则需要3票才能活，那么，你…… 　　思路对头，但是太笼统了，不要忘了我们的假设前提：每个人都十足理性，都不可能犯逻辑错误。所以，你应该按照严格的逻辑思维去推想他们的决定。让我们从后往前推理：5号不用说了，他的策略最简单：巴不得把所有人都送去喂鲨鱼(但要注意：这并不意味着他要对每个人投反对票，他也要考虑其他人方案通过的情况)。来看4号：如果1～3号强盗都喂了鲨鱼，只剩4号和5号的话，5号一定投反对票让4号喂鲨鱼，以独吞全部金币。所以，4号惟有支持3号才能保命。</p>
-
-<p>3号知道这个策略，就会提(100，0，0)的分配方案，对4号、5号一毛不拔而将全部金币归为己有，因为他知道4号一无所获但还是会投赞成票，再加上自己一票他的方案即可通过。不过，2号推知到3号的方案，就会提出(98，0，l，1)的方案，即放弃3号，而给予4号和5号各1枚金币。由于该方案对于4号和5号来说比在3号分配时更为有利，他们将支持他而不希望他出局而由3号来分配。这样，2号将拿走98枚金币。不过，2号的方案会被l号所洞悉，l号并将提出(97，0，1，2，0)或(97，0，1，0，2)的方案，即放弃2号，而给3号1枚金币，同时给4号或5号2枚金币。由于l号的这一方案对于3号和4号(或5号)来说，相比2号分配时更优，他们将投l号的赞成票，再加上1号自己的票，1号的方案可获通过，97枚金币可轻松落入腰包。这无疑是1号能够获取最大收益的方案了！</p>
-</blockquote>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html'>常见面试问题</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15088085969493.html">
-                
-                  <h1>最长公共子序列(动态规划)</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><strong>最长公共子序列问题（LCS）</strong>给定两个序列\(X=&lt;{x_1,x_2,...x_m}&gt;和Y=&lt;y_1,y_2,...y_n&gt;\),求X和Y长度最长的公共子序列。总共分三个步骤：</p>
-
-<h2 id="toc_0">步骤一：刻画最长公共子序列的特征</h2>
-
-<p><img src="media/15088085969493/15088091467243.jpg" alt=""/></p>
-
-<h2 id="toc_1">步骤二：一个递归解</h2>
-
-<p><img src="media/15088085969493/15088095444692.jpg" alt=""/></p>
-
-<h2 id="toc_2">步骤三：计算LCS的长度</h2>
-
-<p><img src="media/15088085969493/15088132625221.jpg" alt=""/></p>
-
-<p>上述过程我们有如下图来表示：<br/>
-<img src="media/15088085969493/15088133360817.jpg" alt=""/></p>
-
-<h2 id="toc_3">步骤4 构造LCS</h2>
-
-<p><img src="media/15088085969493/15088133035826.jpg" alt=""/></p>
-
-<p>这里我们用C++来构造这个算法：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//
-//  Created by LZH on 2017/10/30.
-//  Copyright © 2017年 梁中豪. All rights reserved.
-//
-
-
-#include &lt;iostream&gt;
-#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
-using namespace std;
-
-//计算LCS的长度
-void LCS_LENGTH(char *X ,char *Y ,int **b ,int **c ,int &amp;m ,int &amp;n)
-{
-    //    int m = sizeof(X)/sizeof(char);
-    //    int n = sizeof(Y)/sizeof(char);
-    
-    //    int b[m][n];
-    //    int c[m][n];
-    
-    for (int i=1; i&lt;m; i++) {
-        for (int j=1; j&lt;n; j++) {
-            if (X[i]==Y[j]) {
-                c[i][j] = c[i-1][j-1]+1;
-                b[i][j] = 1;
-            }
-            else if (c[i-1][j]&gt;=c[i][j-1])
-            {
-                c[i][j] = c[i-1][j];
-                b[i][j] = 2;
-            }
-            else
-            {
-                c[i][j] = c[i][j-1];
-                b[i][j] = 3;
-            }
-        }
-    }
-}
-
-void PRINT_LCS(int **b,char *X,int i,int j)
-{
-    if (i==0 || j==0) {
-        return;
-    }
-    if (b[i][j]==1) {
-        PRINT_LCS(b, X, i-1, j-1);
-        cout &lt;&lt; X[i] &lt;&lt;endl;
-    }
-    else if (b[i][j]==2)
-    {
-        PRINT_LCS(b, X, i-1, j);
-    }
-    else
-    {
-        PRINT_LCS(b, X, i, j-1);
-    }
-}
-
-int main()
-{
-    char X[8] = {&#39;x&#39;,&#39;A&#39;,&#39;B&#39;,&#39;C&#39;,&#39;B&#39;,&#39;D&#39;,&#39;A&#39;,&#39;B&#39;};
-    char Y[7] = {&#39;y&#39;,&#39;B&#39;,&#39;D&#39;,&#39;C&#39;,&#39;A&#39;,&#39;B&#39;,&#39;A&#39;};
-    int m = sizeof(X)/sizeof(char);
-    int n = sizeof(Y)/sizeof(char);
-    int **b =new int*[m];
-    for (int i = 0; i&lt;m; i++) {
-        b[i] = new int[n];
-    }
-    
-    int **c = new int*[m];
-    for (int i = 0; i&lt;m; i++) {
-        c[i] = new int[n];
-    }
-    LCS_LENGTH(X,Y,b,c,m,n);
-    PRINT_LCS(b,X,m-1,n-1);
-    return 0;
-}
-
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/24</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -978,6 +917,18 @@ int main()
 	      
 		      
 			      <li class="post">
+			        <a href="15120510835546.html">Longest Continuous Increasing Subsequence</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15120333911660.html">Missing Number</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15120258790187.html">Given an integer array, find three numbers whose product is maximum and output the maximum product.</a>
 			      </li>
 		     
@@ -991,18 +942,6 @@ int main()
 		      
 			      <li class="post">
 			        <a href="15120236843494.html">Summary Ranges</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15120100977395.html">Majority Element</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15120074710373.html">Remove Duplicates from Sorted Array</a>
 			      </li>
 		     
 		  
