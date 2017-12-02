@@ -117,81 +117,31 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15120258790187.html">
+                <a class="clearlink" href="15122038176626.html">
                 
-                  <h1>Given an integer array, find three numbers whose product is maximum and output the maximum product.</h1>
+                  <h1>Judge Route Circle</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15120258790187/15120319341000.jpg" alt=""/></p>
+                        	<p><img src="media/15122038176626/15122038286763.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int maximumProduct(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        int len = nums.size();
-        int tmp1 = nums[len-1]*nums[len-2]*nums[len-3];
-        int tmp2 = nums[len-1]*nums[0]*nums[1];
-        return max(tmp1, tmp2);
-    }
-};
-</code></pre>
-
-<p>主要考虑含有负数的情况。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120258181532.html">
-                
-                  <h1>Two Sum II - Input array is sorted</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of integers that is already <strong><em>sorted in ascending order</em></strong>, find two numbers such that they add up to a specific target number.</p>
-
-<p>The function twoSum should return indices of the two numbers such that they add up to the target, where index1 must be less than index2. Please note that your returned answers (both index1 and index2) are not zero-based.</p>
-
-<p>You may assume that each input would have exactly one solution and you may not use the same element twice.</p>
-
-<p><img src="media/15120258181532/15120258628279.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; numbers, int target) {
-        int str = 0;
-        int end = numbers.size()-1;
-        while (numbers[str]+numbers[end]!=target) {
-            if (numbers[str]+numbers[end]&gt;target) {
-                end--;
-            }else{
-                str++;
+    bool judgeCircle(string moves) {
+        int UD = 0 ,LR = 0;
+        for(char a:moves){
+            if (a==&#39;U&#39;) {
+                UD++;
+            }else if (a==&#39;D&#39;){
+                UD--;
+            }else if (a==&#39;L&#39;){
+                LR++;
+            }else if (a==&#39;R&#39;){
+                LR--;
             }
         }
-        return vector&lt;int&gt;({str+1,end+1});
+        return (UD==0&amp;&amp;LR==0) ? 1:0;
     }
 };
 </code></pre>
@@ -203,7 +153,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/30</span>
+                    <span class="date">2017/12/2</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -220,48 +170,95 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15120236843494.html">
+                <a class="clearlink" href="15122027653799.html">
                 
-                  <h1>Summary Ranges</h1>
+                  <h1>Self Dividing Numbers</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a sorted integer array without duplicates, return the summary of its ranges.求数组中，连续数字的区间。</p>
-
-<p><img src="media/15120236843494/15120237048289.jpg" alt=""/></p>
+                        	<p><img src="media/15122027653799/15122027840243.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    vector&lt;string&gt; summaryRanges(vector&lt;int&gt;&amp; nums) {
-        
-        vector&lt;string&gt; result;
-        if(nums.size()==0) return result;
-        
-        int end = nums[0]+1;
-        int total = 0;
-        if (nums.size()==1) {
-            result.push_back(to_string(nums[0]));
-            return result;
+    vector&lt;int&gt; selfDividingNumbers(int left, int right) {
+        vector&lt;int&gt; v;
+        for (int i = left; i &lt;= right; ++i) {
+            int j= i;
+            bool ok = 1;
+            while (j) {
+                int d= (j%10);
+                if (d == 0 || i % d) ok = 0;
+                j/=10;
+            }
+            if (ok) v.push_back(i);
         }
-        nums.push_back(INT_MAX); //充当哨兵
-        for (int i=1; i&lt;nums.size(); i++) {
-            if (nums[i]==end) {
-                end++;
-                total++;
-                continue;
-            }else{
-                end = nums[i]+1;
-                if (total==0) {
-                    result.push_back(to_string(nums[i-1]));
-                }else{
-                    string tmp = to_string(nums[i-1-total])+&quot;-&gt;&quot;+to_string(nums[i-1]);
-                    result.push_back(tmp);
-                }
-                total = 0;
+        return v;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15122009526780.html">
+                
+                  <h1>Non-decreasing Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15122009526780/15122009632510.jpg" alt=""/></p>
+
+<p><strong>用到了<code>is_sorted</code>来判断是否升序排列</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool checkPossibility(vector&lt;int&gt;&amp; nums) {
+        for (int i=0; i &lt; nums.size()-1; i++){
+            if (nums[i] &gt; nums[i+1]){
+                
+                int temp = nums[i];
+                //
+                // &quot;erase&quot; nums[i], then check if nums is sorted without nums[i]
+                //
+                nums[i] = nums[i+1];
+                if (is_sorted(nums.begin(), nums.end())) { return true; }
+                
+                //
+                // &quot;erase&quot; nums[i+1], then check if nums is sorted without nums[i+1]
+                //
+                nums[i+1] = nums[i] = temp;
+                if (is_sorted(nums.begin(), nums.end())) { return true; }
+                
+                //
+                // nums is NOT sorted (without nums[i] XOR without nums[i+1])
+                //
+                return false;
             }
         }
-        return result;
+        return true;
     }
 };
 </code></pre>
@@ -273,7 +270,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/30</span>
+                    <span class="date">2017/12/2</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -290,39 +287,28 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15120100977395.html">
+                <a class="clearlink" href="15121974728141.html">
                 
-                  <h1>Majority Element</h1>
+                  <h1>Third Maximum Number</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given an array of size n, find the majority element. The majority element is the element that appears more than <code>⌊ n/2 ⌋</code> times.</p>
+                        	<p><img src="media/15121974728141/15121974890265.jpg" alt=""/></p>
 
-<p>You may assume that the array is non-empty and the majority element always exist in the array.</p>
+<p><strong>利用set的自动排序和去除重复元素来解决问题。</strong></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int majorityElement(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        int total = 1;
-        int tmp = 1;
-        int result = nums[0];
-        if (nums.size()==1) {
-            return result;
-        }
-        nums.push_back(INT_MAX); //在最后增加一个边界哨兵
-        for (int i=1; i&lt;=nums.size(); i++) {
-            if (nums[i]==nums[i-1]) {
-                tmp++;
-            }else{
-                result = tmp&gt;total ? nums[i-1]:result;
-                total = max(tmp, total);
-                tmp = 1;
+    int thirdMax(vector&lt;int&gt;&amp; nums) {
+        set&lt;int&gt; result;
+        for (int num:nums) {
+            result.insert(num);
+            if (result.size()&gt;3) {
+                result.erase(result.begin());
             }
         }
-        
-        return result;
+        return result.size()&lt;3? *result.rbegin():*result.begin();
     }
 };
 </code></pre>
@@ -334,7 +320,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/30</span>
+                    <span class="date">2017/12/2</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -351,99 +337,33 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15119708919827.html">
+                <a class="clearlink" href="15121892650067.html">
                 
-                  <h1>☆☆Find All Numbers Disappeared in an Array</h1>
+                  <h1>K-diff Pairs in an Array</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given an array of integers where 1 ≤ a[i] ≤ n (n = size of array), some elements appear twice and others appear once.</p>
-
-<p>Find all the elements of [1, n] inclusive that do not appear in this array.</p>
-
-<p>Could you do it without extra space and in O(n) runtime? You may assume the returned list does not count as extra space.</p>
-
-<p><img src="media/15119708919827/15119710141999.jpg" alt=""/></p>
+                        	<p><img src="media/15121892650067/15121892810535.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    vector&lt;int&gt; findDisappearedNumbers(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size();
-        for(int i=0; i&lt;len; i++) {
-            int m = abs(nums[i])-1;  // index start from 0
-            nums[m] = nums[m]&gt;0 ? -nums[m] : nums[m];
+    int findPairs(vector&lt;int&gt;&amp; nums, int k) {
+        if (k&lt;0) {
+            return 0;
         }
-        vector&lt;int&gt; res;
-        for(int i = 0; i&lt;len; i++) {
-            if(nums[i] &gt; 0) res.push_back(i+1);
-        }
-        return res;
-    }
-};
-</code></pre>
-
-<p>该题用了一个特殊的方法，<strong>取负法</strong>。</p>
-
-<p><strong>含义是：将元素对应的位置取负。简单一句话可能不好理解，我们举个例子。假设在位置k放了元素i，则在取负的过程中i的取值有两种可能：为正，表示当前尚未遇到元素k将该位置取负；为负，表示当前已经有元素k出现，并将元素取负。但是我们不关心k，我们关心元素i。元素i既然出现，我们就看一下位置i：为正，表示这是元素i第一次出现，我们将位置i取负；为负，表示元素i已经出现过一次，我们不做任何操作。不管一个元素出现一次还是两次，只要出现它对应的位置就会被取负。当某个元素不出现的时候，该元素对应的位置始终访问不到，所以还是正值，通过这种方法我们就可以找到哪些元素没有出现。</strong> </p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/29</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15119656914314.html">
-                
-                  <h1>Max Area of Island</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a non-empty 2D array <code>grid</code> of 0&#39;s and 1&#39;s, an island is a group of 1&#39;s (representing land) connected 4-directionally (horizontal or vertical.) You may assume all four edges of the grid are surrounded by water.</p>
-
-<p>Find the maximum area of an island in the given 2D array. (If there is no island, the maximum area is 0.)<br/>
-<img src="media/15119656914314/15119657218724.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int areaNum(vector&lt;vector&lt;int&gt;&gt;&amp; grid, int m ,int n){
-        if (m&lt;grid.size()&amp;&amp;m&gt;=0&amp;&amp;n&lt;grid[0].size()&amp;&amp;n&gt;=0&amp;&amp;grid[m][n]==1) {
-            //将经过的位置标记为0，避免循环检验
-            grid[m][n] = 0;
-            return 1+ areaNum(grid, m+1, n)+areaNum(grid, m, n+1)+areaNum(grid, m-1, n)+areaNum(grid, m, n-1);
-        }
-        return 0;
-    }
-    
-    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
-        int result = 0;
-        for (int i =0; i&lt;grid.size(); i++) {
-            for (int j=0; j&lt;grid[0].size(); j++) {
-                if (grid[i][j]==1) {
-                    result = max(result, areaNum(grid, i, j));
-                }
+        unordered_set&lt;int&gt; result;  //用集合避免重复
+        unordered_map&lt;int, int&gt; hash;   //hash表来映射所需数值
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if (hash.count(nums[i]+k)) {
+                result.insert(nums[i]+k);
             }
+            if (hash.count(nums[i]-k)) {
+                result.insert(nums[i]);
+            }
+            hash[nums[i]] += 1;
         }
-        return result;
+        return result.size();
     }
 };
 </code></pre>
@@ -455,7 +375,64 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/29</span>
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15121252648085.html">
+                
+                  <h1>Shortest Unsorted Continuous Subarray</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an integer array, you need to find one <strong>continuous</strong> subarray that if you only sort this subarray in ascending order, then the whole array will be sorted in ascending order, too.</p>
+
+<p>You need to find the <strong>shortest</strong> such subarray and output its length.</p>
+
+<p><img src="media/15121252648085/15121252900217.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findUnsortedSubarray(vector&lt;int&gt;&amp; nums) {
+        vector&lt;int&gt; sortNums = nums;
+        sort(sortNums.begin(), sortNums.end());
+        int str = 0,end = nums.size()-1;
+        while (nums[str]==sortNums[str]) {
+            if (str==end) {
+                return 0;
+            }
+            str++;
+        }
+        while (nums[end]==sortNums[end]) {
+            end--;
+        }
+        return end-str+1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -560,31 +537,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15120510835546.html">Longest Continuous Increasing Subsequence</a>
+			        <a href="15122038176626.html">Judge Route Circle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15120333911660.html">Missing Number</a>
+			        <a href="15122027653799.html">Self Dividing Numbers</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15120258790187.html">Given an integer array, find three numbers whose product is maximum and output the maximum product.</a>
+			        <a href="15122009526780.html">Non-decreasing Array</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15120258181532.html">Two Sum II - Input array is sorted</a>
+			        <a href="15121974728141.html">Third Maximum Number</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15120236843494.html">Summary Ranges</a>
+			        <a href="15121892650067.html">K-diff Pairs in an Array</a>
 			      </li>
 		     
 		  

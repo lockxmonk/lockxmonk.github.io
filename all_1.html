@@ -117,144 +117,61 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15120074710373.html">
+                <a class="clearlink" href="15121123646545.html">
                 
-                  <h1>Remove Duplicates from Sorted Array</h1>
+                  <h1>Can Place Flowers</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a sorted array, remove the duplicates <code>in-place</code> such that each element appear only once and return the new length.</p>
+                        	<p>Suppose you have a long flowerbed in which some of the plots are planted and some are not. However, flowers cannot be planted in adjacent plots - they would compete for water and both would die.</p>
 
-<p>Do not allocate extra space for another array, you must do this by modifying the input array <code>in-place</code> with O(1) extra memory.</p>
+<p>Given a flowerbed (represented as an array containing 0 and 1, where 0 means empty and 1 means not empty), and a number n, return if n new flowers can be planted in it without violating the no-adjacent-flowers rule.</p>
 
-<p><img src="media/15120074710373/15120081165110.jpg" alt=""/></p>
+<p><img src="media/15121123646545/15121188914337.jpg" alt=""/></p>
+
+<p><strong>第一种：3格的滑动窗口</strong></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
-        int tmp = INT_MIN;
-        int log = 0;
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (tmp!=nums[i]) {
-                tmp = nums[i];
-            }else{
-                log++;
-            }
-            nums[i-log] = nums[i];
+    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
+        int str = 0 ,end = 2;
+        int tol = 0;
+        if (flowerbed.size()==1&amp;&amp;flowerbed[0]==0) {
+            tol++;
+        }else if(flowerbed[0]==0&amp;&amp;flowerbed[1]==0) {
+            flowerbed[0]=1;
+            tol++;
         }
         
-        return nums.size()-log;
+        while (end&lt;=flowerbed.size()-1) {
+            if (!(flowerbed[str]||flowerbed[str+1]||flowerbed[end])) {
+                flowerbed[str+1] = 1;
+                tol++;
+            }
+            str++;
+            end++;
+        }
+        if (flowerbed.size()&gt;=3&amp;&amp;flowerbed[flowerbed.size()-1]==0&amp;&amp;flowerbed[flowerbed.size()-2]==0) {
+            tol++;
+        }
+        return tol&gt;=n?1:0;
     }
 };
 </code></pre>
 
-<p><img src="media/15120074710373/15120082747602.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120073985530.html">
-                
-                  <h1>Remove Element</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array and a value, remove all instances of that value <strong>in-place</strong> and return the new length.</p>
-
-<p>Do not allocate extra space for another array, you must do this by modifying the input array <strong>in-place</strong> with O(1) extra memory.</p>
-
-<p>The order of elements can be changed. It doesn&#39;t matter what you leave beyond the new length.</p>
-
-<p><img src="media/15120073985530/15120074297000.jpg" alt=""/></p>
+<p>第二种：</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int removeElement(vector&lt;int&gt;&amp; nums, int val) {
-        int total = 0;
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (nums[i]==val) {
-                total++;
-            }else{
-                nums[i-total] = nums[i];
+    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
+        for (int i = 0; i &lt; flowerbed.size(); i++) {
+            if (!flowerbed[i] &amp;&amp; (i == 0 || !flowerbed[i - 1]) &amp;&amp; (i == flowerbed.size() - 1 || !flowerbed[i + 1])) {
+                flowerbed[i] = 1;
+                n--;
             }
         }
-        return nums.size()-total;
-    }
-};
-</code></pre>
-
-<p><img src="media/15120073985530/15120074551545.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120064619713.html">
-                
-                  <h1>Move Zeroes</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array <code>nums</code>, write a function to move all 0&#39;s to the end of it while maintaining the relative order of the non-zero elements.</p>
-
-<p>For example, given <code>nums = [0, 1, 0, 3, 12]</code>, after calling your function, <code>nums</code> should be <code>[1, 3, 12, 0, 0]</code>.</p>
-
-<p><strong>Note:</strong><br/>
-1.  You must do this in-place without making a copy of the array.<br/>
-2.  Minimize the total number of operations.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    void moveZeroes(vector&lt;int&gt;&amp; nums) {
-        int log = 0; //索引0元素位置
-        int logNO = 0;  //索引非0应放元素位置
-        while (log&lt;nums.size()) {
-            if (nums[log]!=0) {
-                swap(nums[logNO], nums[log]);
-                logNO++;
-            }
-            log++;
-        }
+        return n &lt;= 0;
     }
 };
 </code></pre>
@@ -266,65 +183,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/30</span>
-                    
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15119708919827.html">
-                
-                  <h1>☆☆Find All Numbers Disappeared in an Array</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of integers where 1 ≤ a[i] ≤ n (n = size of array), some elements appear twice and others appear once.</p>
-
-<p>Find all the elements of [1, n] inclusive that do not appear in this array.</p>
-
-<p>Could you do it without extra space and in O(n) runtime? You may assume the returned list does not count as extra space.</p>
-
-<p><img src="media/15119708919827/15119710141999.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; findDisappearedNumbers(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size();
-        for(int i=0; i&lt;len; i++) {
-            int m = abs(nums[i])-1;  // index start from 0
-            nums[m] = nums[m]&gt;0 ? -nums[m] : nums[m];
-        }
-        vector&lt;int&gt; res;
-        for(int i = 0; i&lt;len; i++) {
-            if(nums[i] &gt; 0) res.push_back(i+1);
-        }
-        return res;
-    }
-};
-</code></pre>
-
-<p>该题用了一个特殊的方法，<strong>取负法</strong>。</p>
-
-<p><strong>含义是：将元素对应的位置取负。简单一句话可能不好理解，我们举个例子。假设在位置k放了元素i，则在取负的过程中i的取值有两种可能：为正，表示当前尚未遇到元素k将该位置取负；为负，表示当前已经有元素k出现，并将元素取负。但是我们不关心k，我们关心元素i。元素i既然出现，我们就看一下位置i：为正，表示这是元素i第一次出现，我们将位置i取负；为负，表示元素i已经出现过一次，我们不做任何操作。不管一个元素出现一次还是两次，只要出现它对应的位置就会被取负。当某个元素不出现的时候，该元素对应的位置始终访问不到，所以还是正值，通过这种方法我们就可以找到哪些元素没有出现。</strong> </p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/29</span>
+                    <span class="date">2017/12/1</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -341,37 +200,80 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15119656914314.html">
+                <a class="clearlink" href="15121120473287.html">
                 
-                  <h1>Max Area of Island</h1>
+                  <h1>Contains Duplicate II</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a non-empty 2D array <code>grid</code> of 0&#39;s and 1&#39;s, an island is a group of 1&#39;s (representing land) connected 4-directionally (horizontal or vertical.) You may assume all four edges of the grid are surrounded by water.</p>
+                        	<p>Given an array of integers and an integer <code>k</code>, find out whether there are two distinct indices <code>i</code> and <code>j</code> in the array such that <code>nums[i] = nums[j]</code> and the absolute difference between <code>i</code> and <code>j</code> is at most <code>k</code>.</p>
 
-<p>Find the maximum area of an island in the given 2D array. (If there is no island, the maximum area is 0.)<br/>
-<img src="media/15119656914314/15119657218724.jpg" alt=""/></p>
+<p>判断数组中是否有重复的元素，并且下标之差不超过<code>k</code>。</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int areaNum(vector&lt;vector&lt;int&gt;&gt;&amp; grid, int m ,int n){
-        if (m&lt;grid.size()&amp;&amp;m&gt;=0&amp;&amp;n&lt;grid[0].size()&amp;&amp;n&gt;=0&amp;&amp;grid[m][n]==1) {
-            //将经过的位置标记为0，避免循环检验
-            grid[m][n] = 0;
-            return 1+ areaNum(grid, m+1, n)+areaNum(grid, m, n+1)+areaNum(grid, m-1, n)+areaNum(grid, m, n-1);
+    bool containsNearbyDuplicate(vector&lt;int&gt;&amp; nums, int k) {
+        unordered_map&lt;int, int&gt; hash;
+        for (int i=0; i&lt;nums.size(); i++) {
+            if (hash.find(nums[i])!=hash.end()&amp;&amp;i-hash[nums[i]]&lt;=k) {
+                return 1;
+            }else{
+                hash[nums[i]] = i;
+            }
         }
         return 0;
     }
-    
-    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
-        int result = 0;
-        for (int i =0; i&lt;grid.size(); i++) {
-            for (int j=0; j&lt;grid[0].size(); j++) {
-                if (grid[i][j]==1) {
-                    result = max(result, areaNum(grid, i, j));
-                }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15121110105671.html">
+                
+                  <h1>Two Sum</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15121110105671/15121110244234.jpg" alt=""/></p>
+
+<p><strong>运用hash表</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; nums, int target) {
+        unordered_map&lt;int, int&gt; hash;
+        vector&lt;int&gt; result;
+        for (int i=0; i&lt;nums.size(); i++) {
+            int numToFind = target - nums[i];
+            if (hash.find(numToFind)!=hash.end()) {
+                result.push_back(hash[numToFind]);
+                result.push_back(i);
             }
+            hash[nums[i]] = i;
         }
         return result;
     }
@@ -385,7 +287,59 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/29</span>
+                    <span class="date">2017/12/1</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120990794732.html">
+                
+                  <h1>Maximum Average Subarray I</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15120990794732/15120991082558.jpg" alt=""/></p>
+
+<p><strong>解决方法：滑动窗口方案</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    double findMaxAverage(vector&lt;int&gt;&amp; nums, int k) {
+        double r = INT_MIN;
+        double sum = 0;
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if (i&lt;k) {
+                sum+=nums[i];
+            }else{
+                r = max(sum, r);
+                sum +=nums[i]-nums[i-k];
+            }
+        }
+        r = max(sum, r);
+        return r/double(k);
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -402,31 +356,82 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15119430001845.html">
+                <a class="clearlink" href="15120964350892.html">
                 
-                  <h1>Max Consecutive Ones</h1>
+                  <h1>Pascal's Triangle</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a binary array, find the maximum number of consecutive 1s in this array.<br/>
-<img src="media/15119430001845/15119430248541.jpg" alt=""/></p>
+                        	<p>Given numRows, generate the first numRows of Pascal&#39;s triangle.</p>
+
+<p>For example, given numRows = 5,<br/>
+Return<img src="media/15120964350892/15120964567125.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int findMaxConsecutiveOnes(vector&lt;int&gt;&amp; nums) {
-        int sum1 = 0;
-        int tmp = 0;
-        for (int i=0; i&lt;nums.size(); i++) {
-        if (nums[i]==1) {
-            tmp++;
-        }else{
-            tmp = 0;
+    vector&lt;vector&lt;int&gt;&gt; generate(int numRows) {
+        vector&lt;vector&lt;int&gt;&gt;result(numRows);
+        for (int i = 0; i&lt;numRows; i++) {
+            result[i].resize(i+1);
+            result[i][0] = result[i][i] = 1;
+        
+            for (int j = 1; j&lt;i; j++) {
+                result[i][j] = result[i-1][j-1]+result[i-1][j];
+            }
         }
-            sum1 = max(tmp, sum1);
+        return result;
+        
+     }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120931328273.html">
+                
+                  <h1>Search Insert Position</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
+
+<p>You may assume no duplicates in the array.<br/>
+<img src="media/15120931328273/15120931550538.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
+        int result = 0;
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (nums[i]&gt;=target) {
+                return i;
+            }
         }
-    
-        return sum1;
+        return nums.size();
     }
 };
 </code></pre>
@@ -438,7 +443,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/29</span>
+                    <span class="date">2017/12/1</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -543,31 +548,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15120510835546.html">Longest Continuous Increasing Subsequence</a>
+			        <a href="15122038176626.html">Judge Route Circle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15120333911660.html">Missing Number</a>
+			        <a href="15122027653799.html">Self Dividing Numbers</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15120258790187.html">Given an integer array, find three numbers whose product is maximum and output the maximum product.</a>
+			        <a href="15122009526780.html">Non-decreasing Array</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15120258181532.html">Two Sum II - Input array is sorted</a>
+			        <a href="15121974728141.html">Third Maximum Number</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15120236843494.html">Summary Ranges</a>
+			        <a href="15121892650067.html">K-diff Pairs in an Array</a>
 			      </li>
 		     
 		  
