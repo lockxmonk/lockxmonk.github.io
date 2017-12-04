@@ -117,34 +117,291 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15113342915297.html">
+                <a class="clearlink" href="15114062990936.html">
                 
-                  <h1>Add Digits</h1>
+                  <h1>Best Time to Buy and Sell Stock</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a non-negative integer num, repeatedly add all its digits until the result has only one digit.</p>
+                        	<p>Say you have an array for which the \(i^{th}\) element is the price of a given stock on day i.</p>
 
-<p>For example:</p>
+<p>If you were only permitted to complete at most one transaction (ie, buy one and sell one share of the stock), design an algorithm to find the maximum profit.</p>
 
-<p>Given <code>num = 38</code>, the process is like: <code>3 + 8 = 11</code>, <code>1 + 1 = 2</code>. Since <code>2</code> has only one digit, return it.</p>
-
-<p>Follow up:<br/>
-Could you do it without any loop/recursion in O(1) runtime?</p>
+<p><img src="media/15114062990936/15114063447573.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int addDigits(int num) {
-        // while(num/10&gt;0){
-        //     int sum = 0;
-        //     while(num&gt;0){
-        //         sum +=num%10;
-        //         num /=10;
-        //     }
-        //     num = sum;
-        // }
-        return 1+ (num-1)%9;
+    int maxProfit(vector&lt;int&gt;&amp; prices) {
+        int minPrice=INT_MAX;
+        int maxProfit = 0;
+        
+        for (int i=0; i&lt;prices.size(); i++) {
+            minPrice = min(prices[i], minPrice);
+            maxProfit = max(maxProfit, prices[i]-minPrice);
+        }
+        
+        return maxProfit;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15114035796843.html">
+                
+                  <h1>Array Partition I</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of <strong>2n</strong> integers, your task is to group these integers into n pairs of integer, say (a1, b1), (a2, b2), ..., (an, bn) which makes sum of min(ai, bi) for all i from 1 to n as large as possible.</p>
+
+<p><img src="media/15114035796843/15114036022226.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int arrayPairSum(vector&lt;int&gt;&amp; nums) {
+        
+        sort(nums.begin(),nums.end());
+        int result=0;
+        for (int i=0; i&lt;nums.size(); i+=2) {
+            result+=nums[i];
+        }
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15114026353930.html">
+                
+                  <h1>3Sum</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array S of n integers, are there elements a, b, c in S such that a + b + c = 0? Find all unique triplets in the array which gives the sum of zero.</p>
+
+<p><strong>Note:</strong> The solution set must not contain duplicate triplets.</p>
+
+<p><img src="media/15114026353930/15114026868536.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; threeSum(vector&lt;int&gt;&amp; nums) {
+        sort(nums.begin(),nums.end());
+        vector&lt;vector&lt;int&gt;&gt; result;
+        vector&lt;int&gt; tmpResult;
+        
+        int p,q,tmp;
+        for(int i = 0 ;i&lt;nums.size();i++)
+        {
+            if(i!=0&amp;&amp;nums[i]==nums[i-1]) continue;
+            int currentNum = nums[i];
+            p = i+1;
+            q = nums.size()-1;
+            
+            while(p&lt;q)
+            {
+                if(p!=i+1&amp;&amp;nums[p]==nums[p-1])
+                {
+                    p++;
+                    continue;
+                }
+                tmp = nums[q]+nums[p];
+                if(tmp==-currentNum)
+                {
+                    tmpResult.push_back(currentNum);
+                    tmpResult.push_back(nums[q]);
+                    tmpResult.push_back(nums[p]);
+                    result.push_back(tmpResult);
+                    tmpResult.clear();
+                    p++;
+                    q--;
+                }else if (tmp&gt;-currentNum)
+                {
+                    q--;
+                }else p++;
+            }
+        }
+        
+        return result;
+    }
+};
+</code></pre>
+
+<p><strong>two real problems .</strong></p>
+
+<ul>
+<li><p>how to find the sum?<br/>
+change it to a 2 sum problem. when you have one value, the sum of the other two is -value.<br/>
+2 sum problem has a O(n) solution. so the final is O(n<sup>2).</sup></p></li>
+<li><p>how to remove the duplicate?<br/>
+for same values, we only use the first one and pass the rest.</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15113375347657.html">
+                
+                  <h1>Arranging Coins</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>You have a total of n coins that you want to form in a staircase shape, where every k-th row must have exactly k coins.</p>
+
+<p>Given n, find the total number of full staircase rows that can be formed.</p>
+
+<p>n is a non-negative integer and fits within the range of a 32-bit signed integer.</p>
+
+<p><img src="media/15113375347657/15113375557158.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int arrangeCoins(int n) {
+        return floor(-0.5+sqrt((double)2*n+0.25));
+    }
+};
+</code></pre>
+
+<p>这道题的主要考虑<code>1+2+3+...+x&lt;=n</code>下，使x左边等式最接近n，并且不超过。</p>
+
+<p>推导为：</p>
+
+<pre><code>-&gt; 1+2+3+...+x = n
+-&gt; (1+x)x/2 = n
+-&gt; x^2+x = 2n
+-&gt; x^2+x+1/4 = 2n +1/4
+-&gt; (x+1/2)^2 = 2n +1/4
+-&gt; (x+0.5) = sqrt(2n+0.25)
+-&gt; x = -0.5 + sqrt(2n+0.25)
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15113344881540.html">
+                
+                  <h1>Add Binary</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given two binary strings, return their sum (also a binary string).</p>
+
+<p>For example,<br/>
+a = <code>&quot;11&quot;</code><br/>
+b = <code>&quot;1&quot;</code><br/>
+Return <code>&quot;100&quot;</code>.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string addBinary(string a, string b) {
+        int fw = 0;
+        string result = &quot;&quot;;
+        for(int i = a.size()-1,j=b.size()-1;i&gt;=0||j&gt;=0;i--,j--){
+            int ag = i&gt;=0?a[i]-&#39;0&#39;:0;
+            int bg = j&gt;=0?b[j]-&#39;0&#39;:0;
+            int tmp = (ag+bg+fw)%2;
+            fw = (ag+bg+fw)/2;
+            
+            result = char(tmp+&#39;0&#39;)+result;
+        }
+        if(fw==1){
+            result = &#39;1&#39;+result;
+        }
+        
+        return result;
     }
 };
 </code></pre>
@@ -173,38 +430,38 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15113342227318.html">
+                <a class="clearlink" href="15113344372070.html">
                 
-                  <h1>Add Strings</h1>
+                  <h1>1-bit and 2-bit Characters</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given two non-negative integers num1 and num2 represented as string, return the sum of num1 and num2.</p>
+                        	<p>We have two special characters. The first character can be represented by one bit <code>0</code>. The second character can be represented by two bits (<code>10 or 11</code>).</p>
 
-<p>Note:</p>
-
-<p>The length of both <code>num1</code> and <code>num2</code> is &lt; 5100.<br/>
-Both <code>num1</code> and <code>num2</code> contains only digits <code>0-9</code>.<br/>
-Both <code>num1</code> and <code>num2</code> does not contain any leading zero.<br/>
-You must not use any built-in BigInteger library or convert the inputs to integer directly.</p>
+<p>Now given a string represented by several bits. Return whether the last character must be a one-bit character or not. The given string will always end with a zero.<br/>
+<img src="media/15113344372070/15113344696565.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    string addStrings(string num1, string num2) {
-        int fw = 0;
-        string result =&quot;&quot;;
-        for(int i = num1.size()-1,j = num2.size()-1;i&gt;=0||j&gt;=0;i--,j--){
-            int n1 = i&gt;=0 ? num1[i]-&#39;0&#39;:0;
-            int n2 = j&gt;=0 ? num2[j]-&#39;0&#39;:0;
-            int tmp = (n1+n2+fw)%10;
-            fw = (n1+n2+fw)/10;
-            result = char(tmp+&#39;0&#39;) + result;
+    bool isOneBitCharacter(vector&lt;int&gt;&amp; bits) {
+        int i = 0;
+        int b = 0;
+        while(i&lt;bits.size()){            
+            if(bits[i]==1)
+            {
+                i=i+2;
+                b=0;
+            }else{
+                i++;
+                b=1;
+            }
+        };
+        if(b==0){
+            return 0;
+        }else {
+            return 1; 
         }
-        if(fw){
-            result = char(fw +&#39;0&#39;)+ result;
-        }
-        return result;
     }
 };
 </code></pre>
@@ -243,7 +500,7 @@ public:
 			  </div>
 			  <div class="large-6 columns">
 			<p class="text-right" style="padding-top:25px;">
-			
+			 <a href="leetcode_6.html">&raquo; Next Page</a> 
 			</p>
 			  </div>
 			</div>
@@ -321,31 +578,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15122038176626.html">Judge Route Circle</a>
+			        <a href="15123924891077.html">Implement strStr()</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15122027653799.html">Self Dividing Numbers</a>
+			        <a href="15123884479504.html">String Compression</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15122009526780.html">Non-decreasing Array</a>
+			        <a href="15123785215963.html">Count Binary Substrings</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15121974728141.html">Third Maximum Number</a>
+			        <a href="15123751997678.html">Detect Capital</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15121892650067.html">K-diff Pairs in an Array</a>
+			        <a href="15123699886595.html">Reverse String</a>
 			      </li>
 		     
 		  

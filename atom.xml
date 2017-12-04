@@ -4,13 +4,223 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-12-01T18:48:29+08:00</updated>
+  <updated>2017-12-04T21:02:29+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Implement strStr()]]></title>
+    <link href="https://lockxmonk.github.io/15123924891077.html"/>
+    <updated>2017-12-04T21:01:29+08:00</updated>
+    <id>https://lockxmonk.github.io/15123924891077.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15123924891077/15123924935113.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int strStr(string haystack, string needle) {
+        int j = 0;  //标记needle的初始位置
+        int h = haystack.length(), n = needle.length();
+        if (!n) {
+            return 0;
+        }
+        for (int i =0; i&lt;h-n+1; i++) {
+            int tmp = i;
+            while (tmp&lt;h &amp;&amp; j&lt;n &amp;&amp; haystack[tmp]==needle[j]) {
+                tmp++;
+                j++;
+            }
+            if (j==n) {
+                return i;
+            }else{
+                j=0;
+            }
+        }
+        return -1;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[String Compression]]></title>
+    <link href="https://lockxmonk.github.io/15123884479504.html"/>
+    <updated>2017-12-04T19:54:07+08:00</updated>
+    <id>https://lockxmonk.github.io/15123884479504.html</id>
+    <content type="html"><![CDATA[
+<p>Given an array of characters, compress it in-place.</p>
+
+<p>The length after compression must always be smaller than or equal to the original array.</p>
+
+<p>Every element of the array should be a character (not int) of length 1.</p>
+
+<p>After you are done modifying the input array in-place, return the new length of the array.</p>
+
+<p>Follow up:<br/>
+Could you solve it using only O(1) extra space?</p>
+
+<p><img src="media/15123884479504/15123884710226.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int compress(vector&lt;char&gt;&amp; chars) {
+        int tol = 1;    //统计相同字符的数量
+        for (int i = 0; i&lt;chars.size(); i++) {
+            while (i!=chars.size()-1 &amp;&amp; chars[i]==chars[i+1]) {
+                chars.erase(chars.begin()+i+1);
+                tol++;
+            }
+            int log = 0; //标记插入数字是1的情况
+            int logNum = 0;  //统计插入的数字个数
+            while (log==1||tol!=1 &amp;&amp; tol&gt;0) {
+                chars.insert(chars.begin()+i+1, char(tol%10+&#39;0&#39;));
+                tol/=10;
+                log = tol==1?tol:0;
+                logNum++;
+            }
+            i+=logNum;
+            tol = 1;
+        }
+        return chars.size();
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Count Binary Substrings]]></title>
+    <link href="https://lockxmonk.github.io/15123785215963.html"/>
+    <updated>2017-12-04T17:08:41+08:00</updated>
+    <id>https://lockxmonk.github.io/15123785215963.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15123785215963/15123785359347.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int countBinarySubstrings(string s) {
+        vector&lt;int&gt; res;
+        int tol = 1;
+        for (int i=1; i&lt;=s.length(); i++) {
+            if (s[i]==s[i-1]) {
+                tol++;
+            }else{
+                res.push_back(tol);
+                tol =1;
+            }
+        }
+        int count = 0;
+        for(int i=1, n=res.size(); i&lt;n; ++i){
+            count += min(res[i-1], res[i]);
+        }
+        return count;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Detect Capital]]></title>
+    <link href="https://lockxmonk.github.io/15123751997678.html"/>
+    <updated>2017-12-04T16:13:19+08:00</updated>
+    <id>https://lockxmonk.github.io/15123751997678.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15123751997678/15123752096895.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool detectCapitalUse(string word) {
+        int a[word.length()];
+        int r = 0;
+        for (int i = 0; i&lt;word.length(); i++) {
+            if (word[i]&gt;=&#39;A&#39;&amp;&amp;word[i]&lt;=&#39;Z&#39;) {
+                a[i] = 1;
+                r+=a[i];
+            }
+        }
+        if (r==word.length()||(a[0]==1&amp;&amp;r==1)||r==0) {
+            return true;
+        }
+        return false;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Reverse String]]></title>
+    <link href="https://lockxmonk.github.io/15123699886595.html"/>
+    <updated>2017-12-04T14:46:28+08:00</updated>
+    <id>https://lockxmonk.github.io/15123699886595.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15123699886595/15123699978085.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string reverseString(string s) {
+        int str = 0;
+        int end = s.length()-1;
+        while (str&lt;=end) {
+            char tmp;
+            tmp = s[str];
+            s[str] = s[end];
+            s[end] = tmp;
+            str++;
+            end--;
+        }
+        return s;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Reverse Words in a String III]]></title>
+    <link href="https://lockxmonk.github.io/15123539966341.html"/>
+    <updated>2017-12-04T10:19:56+08:00</updated>
+    <id>https://lockxmonk.github.io/15123539966341.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15123539966341/15123540495829.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string reverseWords(string s) {
+        string res;
+        int str = 0;
+        for (int i=0; i&lt;s.length(); i++) {
+            if (s[i]==&#39; &#39;||i==s.length()-1) {
+                int j = i==s.length()-1 ? i:i-1;
+                while (j&gt;=str) {
+                    char tmp = s[str];
+                    s[str] = s[j];
+                    s[j] = tmp;
+                    j--;
+                    str++;
+                }
+                str = i+1;
+            }
+        }
+
+        return s;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Judge Route Circle]]></title>
@@ -547,250 +757,6 @@ public:
     }
 };
 </code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Missing Number]]></title>
-    <link href="https://lockxmonk.github.io/15120333911660.html"/>
-    <updated>2017-11-30T17:16:31+08:00</updated>
-    <id>https://lockxmonk.github.io/15120333911660.html</id>
-    <content type="html"><![CDATA[
-<p>Given an array containing n distinct numbers taken from <code>0, 1, 2, ..., n</code>, find the one that is missing from the array.</p>
-
-<p>For example,<br/>
-Given <code>nums = [0, 1, 3]</code> return <code>2</code>.</p>
-
-<p>Note:<br/>
-Your algorithm should run in linear runtime complexity. Could you implement it using only constant extra space complexity?</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int missingNumber(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size();
-        if (len==1) {
-            return nums[0]==1?0:1;
-        }
-        sort(nums.begin(), nums.end());
-        if (nums[0]!=0) {
-            return 0;
-        }
-        for (int i=1; i&lt;len; i++) {
-            if (i==0&amp;&amp;nums[i]!=0) {
-                return 0;
-            }
-            if (nums[i]!=nums[i-1]+1) {
-                return nums[i]-1;
-            }
-        }
-        return nums[len-1]+1;
-    }
-};
-</code></pre>
-
-<p>第二种解法：<br/>
-```c++<br/>
-class Solution {<br/>
-public:<br/>
-    int missingNumber(vector<int>&amp; nums) {<br/>
-        int result = nums.size();<br/>
-        int i=0;</p>
-
-<pre><code>    for(int num:nums){
-        result ^= num;
-        result ^= i;
-        i++;
-    }
-
-    return result;
-}
-</code></pre>
-
-<p>};<br/>
-```</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Given an integer array, find three numbers whose product is maximum and output the maximum product.]]></title>
-    <link href="https://lockxmonk.github.io/15120258790187.html"/>
-    <updated>2017-11-30T15:11:19+08:00</updated>
-    <id>https://lockxmonk.github.io/15120258790187.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15120258790187/15120319341000.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maximumProduct(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        int len = nums.size();
-        int tmp1 = nums[len-1]*nums[len-2]*nums[len-3];
-        int tmp2 = nums[len-1]*nums[0]*nums[1];
-        return max(tmp1, tmp2);
-    }
-};
-</code></pre>
-
-<p>主要考虑含有负数的情况。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Two Sum II - Input array is sorted]]></title>
-    <link href="https://lockxmonk.github.io/15120258181532.html"/>
-    <updated>2017-11-30T15:10:18+08:00</updated>
-    <id>https://lockxmonk.github.io/15120258181532.html</id>
-    <content type="html"><![CDATA[
-<p>Given an array of integers that is already <strong><em>sorted in ascending order</em></strong>, find two numbers such that they add up to a specific target number.</p>
-
-<p>The function twoSum should return indices of the two numbers such that they add up to the target, where index1 must be less than index2. Please note that your returned answers (both index1 and index2) are not zero-based.</p>
-
-<p>You may assume that each input would have exactly one solution and you may not use the same element twice.</p>
-
-<p><img src="media/15120258181532/15120258628279.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; numbers, int target) {
-        int str = 0;
-        int end = numbers.size()-1;
-        while (numbers[str]+numbers[end]!=target) {
-            if (numbers[str]+numbers[end]&gt;target) {
-                end--;
-            }else{
-                str++;
-            }
-        }
-        return vector&lt;int&gt;({str+1,end+1});
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Summary Ranges]]></title>
-    <link href="https://lockxmonk.github.io/15120236843494.html"/>
-    <updated>2017-11-30T14:34:44+08:00</updated>
-    <id>https://lockxmonk.github.io/15120236843494.html</id>
-    <content type="html"><![CDATA[
-<p>Given a sorted integer array without duplicates, return the summary of its ranges.求数组中，连续数字的区间。</p>
-
-<p><img src="media/15120236843494/15120237048289.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;string&gt; summaryRanges(vector&lt;int&gt;&amp; nums) {
-        
-        vector&lt;string&gt; result;
-        if(nums.size()==0) return result;
-        
-        int end = nums[0]+1;
-        int total = 0;
-        if (nums.size()==1) {
-            result.push_back(to_string(nums[0]));
-            return result;
-        }
-        nums.push_back(INT_MAX); //充当哨兵
-        for (int i=1; i&lt;nums.size(); i++) {
-            if (nums[i]==end) {
-                end++;
-                total++;
-                continue;
-            }else{
-                end = nums[i]+1;
-                if (total==0) {
-                    result.push_back(to_string(nums[i-1]));
-                }else{
-                    string tmp = to_string(nums[i-1-total])+&quot;-&gt;&quot;+to_string(nums[i-1]);
-                    result.push_back(tmp);
-                }
-                total = 0;
-            }
-        }
-        return result;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Majority Element]]></title>
-    <link href="https://lockxmonk.github.io/15120100977395.html"/>
-    <updated>2017-11-30T10:48:17+08:00</updated>
-    <id>https://lockxmonk.github.io/15120100977395.html</id>
-    <content type="html"><![CDATA[
-<p>Given an array of size n, find the majority element. The majority element is the element that appears more than <code>⌊ n/2 ⌋</code> times.</p>
-
-<p>You may assume that the array is non-empty and the majority element always exist in the array.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int majorityElement(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        int total = 1;
-        int tmp = 1;
-        int result = nums[0];
-        if (nums.size()==1) {
-            return result;
-        }
-        nums.push_back(INT_MAX); //在最后增加一个边界哨兵
-        for (int i=1; i&lt;=nums.size(); i++) {
-            if (nums[i]==nums[i-1]) {
-                tmp++;
-            }else{
-                result = tmp&gt;total ? nums[i-1]:result;
-                total = max(tmp, total);
-                tmp = 1;
-            }
-        }
-        
-        return result;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Remove Duplicates from Sorted Array]]></title>
-    <link href="https://lockxmonk.github.io/15120074710373.html"/>
-    <updated>2017-11-30T10:04:31+08:00</updated>
-    <id>https://lockxmonk.github.io/15120074710373.html</id>
-    <content type="html"><![CDATA[
-<p>Given a sorted array, remove the duplicates <code>in-place</code> such that each element appear only once and return the new length.</p>
-
-<p>Do not allocate extra space for another array, you must do this by modifying the input array <code>in-place</code> with O(1) extra memory.</p>
-
-<p><img src="media/15120074710373/15120081165110.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
-        int tmp = INT_MIN;
-        int log = 0;
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (tmp!=nums[i]) {
-                tmp = nums[i];
-            }else{
-                log++;
-            }
-            nums[i-log] = nums[i];
-        }
-        
-        return nums.size()-log;
-    }
-};
-</code></pre>
-
-<p><img src="media/15120074710373/15120082747602.jpg" alt=""/></p>
 
 ]]></content>
   </entry>
