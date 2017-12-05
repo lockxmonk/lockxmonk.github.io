@@ -4,13 +4,216 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-12-04T21:02:29+08:00</updated>
+  <updated>2017-12-04T21:02:54+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Battleships in a Board]]></title>
+    <link href="https://lockxmonk.github.io/15124598875437.html"/>
+    <updated>2017-12-05T15:44:47+08:00</updated>
+    <id>https://lockxmonk.github.io/15124598875437.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15124598875437/15124598979272.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int countBattleships(vector&lt;vector&lt;char&gt;&gt;&amp; board) {
+        int m = board.size();
+        int n = board[0].size();
+        int res = 0;
+        for (int i=0; i&lt;m; i++) {
+            for (int j =0; j&lt;n; j++) {
+                if ((board[i][j]==&#39;X&#39;)&amp;&amp;(i==0||board[i-1][j]!=&#39;X&#39;)&amp;&amp;(j==0||board[i][j-1]!=&#39;X&#39;)) {
+                    ++res;
+                }
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Complex Number Multiplication]]></title>
+    <link href="https://lockxmonk.github.io/15124576449217.html"/>
+    <updated>2017-12-05T15:07:24+08:00</updated>
+    <id>https://lockxmonk.github.io/15124576449217.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15124576449217/15124576549963.jpg" alt=""/></p>
+
+<p>第一次写的复杂版：</p>
+
+<pre><code class="language-c++">string complexNumberMultiply(string a, string b) {
+    int a1=0 ,b1=0 ,a2=0 ,b2=0;
+    for (int i = 0; i&lt;a.length(); i++) {
+        int log = 0;
+        if (a[i]==&#39;+&#39;) {
+            log = i;
+            string tmp;
+            for (int j=0; j&lt;i; j++) {
+                tmp+=a[j];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;a1);
+            tmp = &quot;&quot;;
+            for (int m = i+1; m&lt;a.length()-1; m++) {
+                tmp+=a[m];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;b1);
+        }
+    }
+    for (int i = 0; i&lt;b.length(); i++) {
+        int log = 0;
+        if (b[i]==&#39;+&#39;) {
+            log = i;
+            string tmp;
+            for (int j=0; j&lt;i; j++) {
+                tmp+=b[j];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;a2);
+            tmp = &quot;&quot;;
+            for (int m = i+1; m&lt;b.length()-1; m++) {
+                tmp+=b[m];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;b2);
+        }
+    }
+    string res = to_string(a1*a2-b1*b2)+&quot;+&quot;+to_string(a1*b2+a2*b1)+&quot;i&quot;;
+    return res;
+}
+</code></pre>
+
+<p>精简版：</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string complexNumberMultiply(string a, string b) {
+        int c,d,e,f;
+        char ret[100];
+        sscanf(a.c_str(),&quot;%d+%di&quot;,&amp;c,&amp;d);
+        sscanf(b.c_str(),&quot;%d+%di&quot;,&amp;e,&amp;f);
+        cout&lt;&lt;c&lt;&lt;&quot; &quot;&lt;&lt;d&lt;&lt;&quot; &quot;&lt;&lt;e&lt;&lt;&quot; &quot;&lt;&lt;f&lt;&lt;endl;
+        sprintf(ret,&quot;%d+%di&quot;,(c*e-f*d),(d*e+c*f));
+        string ans(ret);
+        return ans;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Student Attendance Record I]]></title>
+    <link href="https://lockxmonk.github.io/15124550672696.html"/>
+    <updated>2017-12-05T14:24:27+08:00</updated>
+    <id>https://lockxmonk.github.io/15124550672696.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15124550672696/15124551477663.jpg" alt=""/></p>
+
+<p>优化前：<br/>
+<code>c++<br/>
+bool checkRecord(string s) {<br/>
+    int logA = 0;<br/>
+    for (int i=0; i&lt;s.length(); i++) {<br/>
+        if (s[i]==&#39;A&#39;) {<br/>
+            logA++;<br/>
+            if (logA&gt;1) {<br/>
+                return 0;<br/>
+            }<br/>
+        }<br/>
+        if (i&gt;1&amp;&amp;s[i]==&#39;L&#39;&amp;&amp;s[i-1]==&#39;L&#39;&amp;&amp;s[i-2]==&#39;L&#39;) {<br/>
+            return 0;<br/>
+        }<br/>
+    }<br/>
+    return 1;<br/>
+}<br/>
+</code></p>
+
+<p>优化后：</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool checkRecord(string s) {
+        int count_A = 0;
+        int pos = 0;
+        while(pos&lt;s.length())
+        {
+            if(s[pos]==&#39;A&#39;)
+            {
+                count_A++;
+                pos++;
+                if(count_A&gt;1)
+                    return false;
+            }
+            else if(s[pos]==&#39;L&#39;)
+            {
+                int count = 0;
+                while(pos&lt;s.length()&amp;&amp;s[pos]==&#39;L&#39;)
+                {
+                    count++;
+                    pos++;
+                }
+                if(count&gt;2)
+                    return false;
+            }
+            else
+                pos++;
+            
+        }
+        return true;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Baseball Game]]></title>
+    <link href="https://lockxmonk.github.io/15124490673294.html"/>
+    <updated>2017-12-05T12:44:27+08:00</updated>
+    <id>https://lockxmonk.github.io/15124490673294.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15124490673294/15124490974323.jpg" alt=""/><br/>
+<img src="media/15124490673294/15124491075954.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int calPoints(vector&lt;string&gt;&amp; ops) {
+        int sum = 0, score = 0;
+        vector&lt;int&gt; rounds;
+        for (string op : ops) {
+            if (op == &quot;C&quot;) {
+                sum -= rounds.back();
+                rounds.pop_back();
+                continue;
+            }
+            if (op == &quot;D&quot;) {
+                sum += score = rounds.back() * 2;
+            }
+            else if (op == &quot;+&quot;) {
+                sum += score = rounds[rounds.size() - 1] + rounds[rounds.size() - 2];
+            }
+            else {
+                sum += score = stoi(op);
+            }
+            rounds.push_back(score);
+        }
+        return sum;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Implement strStr()]]></title>
@@ -568,192 +771,6 @@ public:
         }
         r = max(sum, r);
         return r/double(k);
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Pascal's Triangle]]></title>
-    <link href="https://lockxmonk.github.io/15120964350892.html"/>
-    <updated>2017-12-01T10:47:15+08:00</updated>
-    <id>https://lockxmonk.github.io/15120964350892.html</id>
-    <content type="html"><![CDATA[
-<p>Given numRows, generate the first numRows of Pascal&#39;s triangle.</p>
-
-<p>For example, given numRows = 5,<br/>
-Return<img src="media/15120964350892/15120964567125.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; generate(int numRows) {
-        vector&lt;vector&lt;int&gt;&gt;result(numRows);
-        for (int i = 0; i&lt;numRows; i++) {
-            result[i].resize(i+1);
-            result[i][0] = result[i][i] = 1;
-        
-            for (int j = 1; j&lt;i; j++) {
-                result[i][j] = result[i-1][j-1]+result[i-1][j];
-            }
-        }
-        return result;
-        
-     }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Search Insert Position]]></title>
-    <link href="https://lockxmonk.github.io/15120931328273.html"/>
-    <updated>2017-12-01T09:52:12+08:00</updated>
-    <id>https://lockxmonk.github.io/15120931328273.html</id>
-    <content type="html"><![CDATA[
-<p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
-
-<p>You may assume no duplicates in the array.<br/>
-<img src="media/15120931328273/15120931550538.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
-        int result = 0;
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (nums[i]&gt;=target) {
-                return i;
-            }
-        }
-        return nums.size();
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Maximum Subarray]]></title>
-    <link href="https://lockxmonk.github.io/15120924554362.html"/>
-    <updated>2017-12-01T09:40:55+08:00</updated>
-    <id>https://lockxmonk.github.io/15120924554362.html</id>
-    <content type="html"><![CDATA[
-<p>Find the contiguous subarray within an array (containing at least one number) which has the largest sum.</p>
-
-<p>For example, given the array<code>[-2,1,-3,4,-1,2,1,-5,4]</code>,<br/>
-the contiguous subarray <code>[4,-1,2,1]</code> has the largest sum = <code>6</code>.</p>
-
-<p>第一种解法：分治法</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; findCrossSubArray(vector&lt;int&gt;&amp; nums, int mid, int low ,int high){
-        int sum = 0;
-        int leftSum = INT_MIN;
-        int maxLeft = 0;
-        for (int i = mid; i&gt;=low; i--) {
-            sum = sum+nums[i];
-            if (sum&gt;leftSum) {
-                leftSum = sum;
-                maxLeft = i;
-            }
-        }
-        sum = 0;
-        int rightSum = INT_MIN;
-        int maxRight = 0;
-        for (int j=mid+1; j&lt;=high; j++) {
-            sum = sum+nums[j];
-            if (sum&gt;rightSum) {
-                rightSum = sum;
-                maxRight = j;
-            }
-        }
-        
-        return {{maxLeft,maxRight,leftSum+rightSum}};
-    }
-
-    vector&lt;int&gt; findMaxSubArray(vector&lt;int&gt;&amp; nums,int low ,int high)
-    {
-        if (low==high) {
-            return {{low,high,nums[low]}};
-        }else{
-            int mid = (low+high)/2;
-            vector&lt;int&gt; leftSum = findMaxSubArray(nums, low, mid);
-            vector&lt;int&gt; rightSum = findMaxSubArray(nums, mid+1, high);
-            vector&lt;int&gt; crossSum = findCrossSubArray(nums, mid, low, high);
-            if (leftSum[2]&gt;=rightSum[2]&amp;&amp;leftSum[2]&gt;=crossSum[2]) {
-                return leftSum;
-            }else if(rightSum[2]&gt;=leftSum[2]&amp;&amp;rightSum[2]&gt;=crossSum[2])
-            {
-                return rightSum;
-            }
-            else return crossSum;
-        }
-    
-    }
-
-
-    int maxSubArray(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size()-1;
-        vector&lt;int&gt; result = findMaxSubArray(nums, 0, len);
-        return result[2];
-    }
-};
-</code></pre>
-
-<p>第二种解法：</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maxSubArray(vector&lt;int&gt;&amp; nums) {
-        int ans=nums[0],i,j,sum=0;
-        for(i=0;i&lt;nums.size();i++){
-            sum+=nums[i];
-            ans=max(sum,ans);
-            sum=max(sum,0);
-        }
-        return ans;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Longest Continuous Increasing Subsequence]]></title>
-    <link href="https://lockxmonk.github.io/15120510835546.html"/>
-    <updated>2017-11-30T22:11:23+08:00</updated>
-    <id>https://lockxmonk.github.io/15120510835546.html</id>
-    <content type="html"><![CDATA[
-<p>Given an unsorted array of integers, find the length of longest <code>continuous</code> increasing subsequence.</p>
-
-<p><img src="media/15120510835546/15120511118059.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int findLengthOfLCIS(vector&lt;int&gt;&amp; nums) {
-        int tmp = 1;
-        int result = 1;
-        if (nums.size()==1) {
-            return tmp;
-        }
-        if (nums.empty()) {
-            return 0;
-        }
-        nums.push_back(INT_MIN);
-        for (int i =1; i&lt;nums.size(); i++) {
-            if (nums[i]&gt;nums[i-1]) {
-                tmp++;
-            }else{
-                result = max(tmp, result);
-                tmp = 1;
-            }
-        }
-        return result; 
     }
 };
 </code></pre>

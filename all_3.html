@@ -117,6 +117,215 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15121110105671.html">
+                
+                  <h1>Two Sum</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15121110105671/15121110244234.jpg" alt=""/></p>
+
+<p><strong>运用hash表</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; nums, int target) {
+        unordered_map&lt;int, int&gt; hash;
+        vector&lt;int&gt; result;
+        for (int i=0; i&lt;nums.size(); i++) {
+            int numToFind = target - nums[i];
+            if (hash.find(numToFind)!=hash.end()) {
+                result.push_back(hash[numToFind]);
+                result.push_back(i);
+            }
+            hash[nums[i]] = i;
+        }
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120990794732.html">
+                
+                  <h1>Maximum Average Subarray I</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15120990794732/15120991082558.jpg" alt=""/></p>
+
+<p><strong>解决方法：滑动窗口方案</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    double findMaxAverage(vector&lt;int&gt;&amp; nums, int k) {
+        double r = INT_MIN;
+        double sum = 0;
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if (i&lt;k) {
+                sum+=nums[i];
+            }else{
+                r = max(sum, r);
+                sum +=nums[i]-nums[i-k];
+            }
+        }
+        r = max(sum, r);
+        return r/double(k);
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120964350892.html">
+                
+                  <h1>Pascal's Triangle</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given numRows, generate the first numRows of Pascal&#39;s triangle.</p>
+
+<p>For example, given numRows = 5,<br/>
+Return<img src="media/15120964350892/15120964567125.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; generate(int numRows) {
+        vector&lt;vector&lt;int&gt;&gt;result(numRows);
+        for (int i = 0; i&lt;numRows; i++) {
+            result[i].resize(i+1);
+            result[i][0] = result[i][i] = 1;
+        
+            for (int j = 1; j&lt;i; j++) {
+                result[i][j] = result[i-1][j-1]+result[i-1][j];
+            }
+        }
+        return result;
+        
+     }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120931328273.html">
+                
+                  <h1>Search Insert Position</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
+
+<p>You may assume no duplicates in the array.<br/>
+<img src="media/15120931328273/15120931550538.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
+        int result = 0;
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (nums[i]&gt;=target) {
+                return i;
+            }
+        }
+        return nums.size();
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15120924554362.html">
                 
                   <h1>Maximum Subarray</h1>
@@ -284,261 +493,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15120333911660.html">
-                
-                  <h1>Missing Number</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array containing n distinct numbers taken from <code>0, 1, 2, ..., n</code>, find the one that is missing from the array.</p>
-
-<p>For example,<br/>
-Given <code>nums = [0, 1, 3]</code> return <code>2</code>.</p>
-
-<p>Note:<br/>
-Your algorithm should run in linear runtime complexity. Could you implement it using only constant extra space complexity?</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int missingNumber(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size();
-        if (len==1) {
-            return nums[0]==1?0:1;
-        }
-        sort(nums.begin(), nums.end());
-        if (nums[0]!=0) {
-            return 0;
-        }
-        for (int i=1; i&lt;len; i++) {
-            if (i==0&amp;&amp;nums[i]!=0) {
-                return 0;
-            }
-            if (nums[i]!=nums[i-1]+1) {
-                return nums[i]-1;
-            }
-        }
-        return nums[len-1]+1;
-    }
-};
-</code></pre>
-
-<p>第二种解法：<br/>
-```c++<br/>
-class Solution {<br/>
-public:<br/>
-    int missingNumber(vector<int>&amp; nums) {<br/>
-        int result = nums.size();<br/>
-        int i=0;</p>
-
-<pre><code>    for(int num:nums){
-        result ^= num;
-        result ^= i;
-        i++;
-    }
-
-    return result;
-}
-</code></pre>
-
-<p>};<br/>
-```</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120258790187.html">
-                
-                  <h1>Given an integer array, find three numbers whose product is maximum and output the maximum product.</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15120258790187/15120319341000.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maximumProduct(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        int len = nums.size();
-        int tmp1 = nums[len-1]*nums[len-2]*nums[len-3];
-        int tmp2 = nums[len-1]*nums[0]*nums[1];
-        return max(tmp1, tmp2);
-    }
-};
-</code></pre>
-
-<p>主要考虑含有负数的情况。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120258181532.html">
-                
-                  <h1>Two Sum II - Input array is sorted</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of integers that is already <strong><em>sorted in ascending order</em></strong>, find two numbers such that they add up to a specific target number.</p>
-
-<p>The function twoSum should return indices of the two numbers such that they add up to the target, where index1 must be less than index2. Please note that your returned answers (both index1 and index2) are not zero-based.</p>
-
-<p>You may assume that each input would have exactly one solution and you may not use the same element twice.</p>
-
-<p><img src="media/15120258181532/15120258628279.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; numbers, int target) {
-        int str = 0;
-        int end = numbers.size()-1;
-        while (numbers[str]+numbers[end]!=target) {
-            if (numbers[str]+numbers[end]&gt;target) {
-                end--;
-            }else{
-                str++;
-            }
-        }
-        return vector&lt;int&gt;({str+1,end+1});
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120236843494.html">
-                
-                  <h1>Summary Ranges</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a sorted integer array without duplicates, return the summary of its ranges.求数组中，连续数字的区间。</p>
-
-<p><img src="media/15120236843494/15120237048289.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;string&gt; summaryRanges(vector&lt;int&gt;&amp; nums) {
-        
-        vector&lt;string&gt; result;
-        if(nums.size()==0) return result;
-        
-        int end = nums[0]+1;
-        int total = 0;
-        if (nums.size()==1) {
-            result.push_back(to_string(nums[0]));
-            return result;
-        }
-        nums.push_back(INT_MAX); //充当哨兵
-        for (int i=1; i&lt;nums.size(); i++) {
-            if (nums[i]==end) {
-                end++;
-                total++;
-                continue;
-            }else{
-                end = nums[i]+1;
-                if (total==0) {
-                    result.push_back(to_string(nums[i-1]));
-                }else{
-                    string tmp = to_string(nums[i-1-total])+&quot;-&gt;&quot;+to_string(nums[i-1]);
-                    result.push_back(tmp);
-                }
-                total = 0;
-            }
-        }
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -628,31 +582,31 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15124598875437.html">Battleships in a Board</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15124576449217.html">Complex Number Multiplication</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15124550672696.html">Student Attendance Record I</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15124490673294.html">Baseball Game</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15123924891077.html">Implement strStr()</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15123884479504.html">String Compression</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15123785215963.html">Count Binary Substrings</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15123751997678.html">Detect Capital</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15123699886595.html">Reverse String</a>
 			      </li>
 		     
 		  
