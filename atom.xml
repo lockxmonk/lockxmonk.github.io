@@ -4,13 +4,136 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-12-05T16:50:54+08:00</updated>
+  <updated>2017-12-06T16:44:34+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Nim Game]]></title>
+    <link href="https://lockxmonk.github.io/15126366447476.html"/>
+    <updated>2017-12-07T16:50:44+08:00</updated>
+    <id>https://lockxmonk.github.io/15126366447476.html</id>
+    <content type="html"><![CDATA[
+<p>You are playing the following Nim Game with your friend: There is a heap of stones on the table, each time one of you take turns to remove 1 to 3 stones. The one who removes the last stone will be the winner. You will take the first turn to remove the stones.</p>
+
+<p>Both of you are very clever and have optimal strategies for the game. Write a function to determine whether you can win the game given the number of stones in the heap.</p>
+
+<p>For example, if there are 4 stones in the heap, then you will never win the game: no matter 1, 2, or 3 stones you remove, the last stone will always be removed by your friend.</p>
+
+<p>列举1~n情况，每4个一循环.<br/>
+<code>c++<br/>
+class Solution {<br/>
+public:<br/>
+    bool canWinNim(int n) {<br/>
+        return n%4!=0;<br/>
+    }<br/>
+};<br/>
+</code></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Next Greater Element I]]></title>
+    <link href="https://lockxmonk.github.io/15126354530210.html"/>
+    <updated>2017-12-07T16:30:53+08:00</updated>
+    <id>https://lockxmonk.github.io/15126354530210.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15126354530210/15126354552862.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; nextGreaterElement(vector&lt;int&gt;&amp; findNums, vector&lt;int&gt;&amp; nums) {
+        vector&lt;int&gt; res;
+        for(auto num1:findNums){
+            for (int i = 0; i&lt;nums.size(); i++) {
+                int log = 0;
+                if (nums[i]==num1) {
+                    for (int j = i; j&lt;nums.size(); j++) {
+                        if (nums[j]&gt;num1) {
+                            res.push_back(nums[j]);
+                            log = 1;
+                            break;
+                        }
+                    }
+                    if (log == 0) res.push_back(-1);
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Island Perimeter]]></title>
+    <link href="https://lockxmonk.github.io/15126325722591.html"/>
+    <updated>2017-12-07T15:42:52+08:00</updated>
+    <id>https://lockxmonk.github.io/15126325722591.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15126325722591/15126325750006.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int islandPerimeter(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        int squNum = 0 ,log = 0;
+        for (int i = 0; i&lt;grid.size(); i++) {
+            for (int j = 0; j&lt;grid[0].size(); j++) {
+                if (grid[i][j]==1) {
+                    squNum++;
+                    if (i!=0&amp;&amp;grid[i-1][j]==1) {
+                        log+=2;
+                    }
+                    if (j!=grid[0].size()-1&amp;&amp;grid[i][j+1]==1) {
+                        log+=2;
+                    }
+                }
+            }
+        }
+        return squNum*4-log;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hamming Distance]]></title>
+    <link href="https://lockxmonk.github.io/15126119727244.html"/>
+    <updated>2017-12-07T09:59:32+08:00</updated>
+    <id>https://lockxmonk.github.io/15126119727244.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15126119727244/15126119824070.jpg" alt=""/></p>
+
+<p>利用按位异或操作<code>^</code>来标记不同的位置。<br/>
+<code>c++<br/>
+class Solution {<br/>
+public:<br/>
+    int hammingDistance(int x, int y) {<br/>
+        int tmp = x^y;<br/>
+        int res = 0;<br/>
+        while (tmp) {<br/>
+            if ((tmp&gt;&gt;1)&lt;&lt;1!=tmp) {<br/>
+                res++;<br/>
+            }<br/>
+            tmp&gt;&gt;=1;<br/>
+        }<br/>
+        return res;<br/>
+    }<br/>
+};<br/>
+</code></p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Keyboard Row]]></title>
@@ -615,163 +738,6 @@ public:
             }
         }
         return true;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Third Maximum Number]]></title>
-    <link href="https://lockxmonk.github.io/15121974728141.html"/>
-    <updated>2017-12-02T14:51:12+08:00</updated>
-    <id>https://lockxmonk.github.io/15121974728141.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15121974728141/15121974890265.jpg" alt=""/></p>
-
-<p><strong>利用set的自动排序和去除重复元素来解决问题。</strong></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int thirdMax(vector&lt;int&gt;&amp; nums) {
-        set&lt;int&gt; result;
-        for (int num:nums) {
-            result.insert(num);
-            if (result.size()&gt;3) {
-                result.erase(result.begin());
-            }
-        }
-        return result.size()&lt;3? *result.rbegin():*result.begin();
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[K-diff Pairs in an Array]]></title>
-    <link href="https://lockxmonk.github.io/15121892650067.html"/>
-    <updated>2017-12-02T12:34:25+08:00</updated>
-    <id>https://lockxmonk.github.io/15121892650067.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15121892650067/15121892810535.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int findPairs(vector&lt;int&gt;&amp; nums, int k) {
-        if (k&lt;0) {
-            return 0;
-        }
-        unordered_set&lt;int&gt; result;  //用集合避免重复
-        unordered_map&lt;int, int&gt; hash;   //hash表来映射所需数值
-        for (int i = 0; i&lt;nums.size(); i++) {
-            if (hash.count(nums[i]+k)) {
-                result.insert(nums[i]+k);
-            }
-            if (hash.count(nums[i]-k)) {
-                result.insert(nums[i]);
-            }
-            hash[nums[i]] += 1;
-        }
-        return result.size();
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Shortest Unsorted Continuous Subarray]]></title>
-    <link href="https://lockxmonk.github.io/15121252648085.html"/>
-    <updated>2017-12-01T18:47:44+08:00</updated>
-    <id>https://lockxmonk.github.io/15121252648085.html</id>
-    <content type="html"><![CDATA[
-<p>Given an integer array, you need to find one <strong>continuous</strong> subarray that if you only sort this subarray in ascending order, then the whole array will be sorted in ascending order, too.</p>
-
-<p>You need to find the <strong>shortest</strong> such subarray and output its length.</p>
-
-<p><img src="media/15121252648085/15121252900217.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int findUnsortedSubarray(vector&lt;int&gt;&amp; nums) {
-        vector&lt;int&gt; sortNums = nums;
-        sort(sortNums.begin(), sortNums.end());
-        int str = 0,end = nums.size()-1;
-        while (nums[str]==sortNums[str]) {
-            if (str==end) {
-                return 0;
-            }
-            str++;
-        }
-        while (nums[end]==sortNums[end]) {
-            end--;
-        }
-        return end-str+1;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Can Place Flowers]]></title>
-    <link href="https://lockxmonk.github.io/15121123646545.html"/>
-    <updated>2017-12-01T15:12:44+08:00</updated>
-    <id>https://lockxmonk.github.io/15121123646545.html</id>
-    <content type="html"><![CDATA[
-<p>Suppose you have a long flowerbed in which some of the plots are planted and some are not. However, flowers cannot be planted in adjacent plots - they would compete for water and both would die.</p>
-
-<p>Given a flowerbed (represented as an array containing 0 and 1, where 0 means empty and 1 means not empty), and a number n, return if n new flowers can be planted in it without violating the no-adjacent-flowers rule.</p>
-
-<p><img src="media/15121123646545/15121188914337.jpg" alt=""/></p>
-
-<p><strong>第一种：3格的滑动窗口</strong></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
-        int str = 0 ,end = 2;
-        int tol = 0;
-        if (flowerbed.size()==1&amp;&amp;flowerbed[0]==0) {
-            tol++;
-        }else if(flowerbed[0]==0&amp;&amp;flowerbed[1]==0) {
-            flowerbed[0]=1;
-            tol++;
-        }
-        
-        while (end&lt;=flowerbed.size()-1) {
-            if (!(flowerbed[str]||flowerbed[str+1]||flowerbed[end])) {
-                flowerbed[str+1] = 1;
-                tol++;
-            }
-            str++;
-            end++;
-        }
-        if (flowerbed.size()&gt;=3&amp;&amp;flowerbed[flowerbed.size()-1]==0&amp;&amp;flowerbed[flowerbed.size()-2]==0) {
-            tol++;
-        }
-        return tol&gt;=n?1:0;
-    }
-};
-</code></pre>
-
-<p>第二种：</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
-        for (int i = 0; i &lt; flowerbed.size(); i++) {
-            if (!flowerbed[i] &amp;&amp; (i == 0 || !flowerbed[i - 1]) &amp;&amp; (i == flowerbed.size() - 1 || !flowerbed[i + 1])) {
-                flowerbed[i] = 1;
-                n--;
-            }
-        }
-        return n &lt;= 0;
     }
 };
 </code></pre>

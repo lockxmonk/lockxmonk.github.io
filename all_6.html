@@ -117,6 +117,230 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15120074710373.html">
+                
+                  <h1>Remove Duplicates from Sorted Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a sorted array, remove the duplicates <code>in-place</code> such that each element appear only once and return the new length.</p>
+
+<p>Do not allocate extra space for another array, you must do this by modifying the input array <code>in-place</code> with O(1) extra memory.</p>
+
+<p><img src="media/15120074710373/15120081165110.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
+        int tmp = INT_MIN;
+        int log = 0;
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (tmp!=nums[i]) {
+                tmp = nums[i];
+            }else{
+                log++;
+            }
+            nums[i-log] = nums[i];
+        }
+        
+        return nums.size()-log;
+    }
+};
+</code></pre>
+
+<p><img src="media/15120074710373/15120082747602.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/30</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120073985530.html">
+                
+                  <h1>Remove Element</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array and a value, remove all instances of that value <strong>in-place</strong> and return the new length.</p>
+
+<p>Do not allocate extra space for another array, you must do this by modifying the input array <strong>in-place</strong> with O(1) extra memory.</p>
+
+<p>The order of elements can be changed. It doesn&#39;t matter what you leave beyond the new length.</p>
+
+<p><img src="media/15120073985530/15120074297000.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int removeElement(vector&lt;int&gt;&amp; nums, int val) {
+        int total = 0;
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (nums[i]==val) {
+                total++;
+            }else{
+                nums[i-total] = nums[i];
+            }
+        }
+        return nums.size()-total;
+    }
+};
+</code></pre>
+
+<p><img src="media/15120073985530/15120074551545.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/30</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120064619713.html">
+                
+                  <h1>Move Zeroes</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array <code>nums</code>, write a function to move all 0&#39;s to the end of it while maintaining the relative order of the non-zero elements.</p>
+
+<p>For example, given <code>nums = [0, 1, 0, 3, 12]</code>, after calling your function, <code>nums</code> should be <code>[1, 3, 12, 0, 0]</code>.</p>
+
+<p><strong>Note:</strong><br/>
+1.  You must do this in-place without making a copy of the array.<br/>
+2.  Minimize the total number of operations.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    void moveZeroes(vector&lt;int&gt;&amp; nums) {
+        int log = 0; //索引0元素位置
+        int logNO = 0;  //索引非0应放元素位置
+        while (log&lt;nums.size()) {
+            if (nums[log]!=0) {
+                swap(nums[logNO], nums[log]);
+                logNO++;
+            }
+            log++;
+        }
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/30</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15119708919827.html">
+                
+                  <h1>Find All Numbers Disappeared in an Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of integers where 1 ≤ a[i] ≤ n (n = size of array), some elements appear twice and others appear once.</p>
+
+<p>Find all the elements of [1, n] inclusive that do not appear in this array.</p>
+
+<p>Could you do it without extra space and in O(n) runtime? You may assume the returned list does not count as extra space.</p>
+
+<p><img src="media/15119708919827/15119710141999.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; findDisappearedNumbers(vector&lt;int&gt;&amp; nums) {
+        int len = nums.size();
+        for(int i=0; i&lt;len; i++) {
+            int m = abs(nums[i])-1;  // index start from 0
+            nums[m] = nums[m]&gt;0 ? -nums[m] : nums[m];
+        }
+        vector&lt;int&gt; res;
+        for(int i = 0; i&lt;len; i++) {
+            if(nums[i] &gt; 0) res.push_back(i+1);
+        }
+        return res;
+    }
+};
+</code></pre>
+
+<p>该题用了一个特殊的方法，<strong>取负法</strong>。</p>
+
+<p><strong>含义是：将元素对应的位置取负。简单一句话可能不好理解，我们举个例子。假设在位置k放了元素i，则在取负的过程中i的取值有两种可能：为正，表示当前尚未遇到元素k将该位置取负；为负，表示当前已经有元素k出现，并将元素取负。但是我们不关心k，我们关心元素i。元素i既然出现，我们就看一下位置i：为正，表示这是元素i第一次出现，我们将位置i取负；为负，表示元素i已经出现过一次，我们不做任何操作。不管一个元素出现一次还是两次，只要出现它对应的位置就会被取负。当某个元素不出现的时候，该元素对应的位置始终访问不到，所以还是正值，通过这种方法我们就可以找到哪些元素没有出现。</strong> </p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/29</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15119656914314.html">
                 
                   <h1>Max Area of Island</h1>
@@ -230,264 +454,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15119407096444.html">
-                
-                  <h1>Range Sum Query 2D - Immutable</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a 2D matrix matrix, find the sum of the elements inside the rectangle defined by its upper left corner (row1, col1) and lower right corner (row2, col2).<br/>
-<img src="media/15119407096444/15119407391245.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class NumMatrix {
-private:
-    int col,row;
-    vector&lt;vector&lt;int&gt;&gt; sums;
-public:
-    NumMatrix(vector&lt;vector&lt;int&gt;&gt; matrix) {
-        row = matrix.size();
-        col =row&gt;0 ? matrix[0].size():0;
-        sums = vector&lt;vector&lt;int&gt;&gt;(row+1, vector&lt;int&gt;(col+1,0));
-        for(int i=1;i&lt;=row;i++)
-        {
-            for(int j=1;j&lt;=col;j++)
-            {
-                sums[i][j] = sums[i-1][j]+sums[i][j-1]+matrix[i-1][j-1]-sums[i-1][j-1];
-            }
-        }
-    }
-    
-    int sumRegion(int row1, int col1, int row2, int col2) {
-        return sums[row2+1][col2+1]-sums[row2+1][col1]-sums[row1][col2+1]+sums[row1][col1];
-    }
-};
-
-/**
- * Your NumMatrix object will be instantiated and called as such:
- * NumMatrix obj = new NumMatrix(matrix);
- * int param_1 = obj.sumRegion(row1,col1,row2,col2);
- */
-</code></pre>
-
-<p><a href="https://leetcode.com/problems/range-sum-query-2d-immutable/description/">题目详细链接</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/29</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15119406678576.html">
-                
-                  <h1>Reshape the Matrix</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>In MATLAB, there is a very useful function called &#39;reshape&#39;, which can reshape a matrix into a new one with different size but keep its original data.</p>
-
-<p>You&#39;re given a matrix represented by a two-dimensional array, and two positive integers r and c representing the row number and column number of the wanted reshaped matrix, respectively.</p>
-
-<p>The reshaped matrix need to be filled with all the elements of the original matrix in the same row-traversing order as they were.</p>
-
-<p>If the &#39;reshape&#39; operation with given parameters is possible and legal, output the new reshaped matrix; Otherwise, output the original matrix.</p>
-
-<p><img src="media/15119406678576/15119406900999.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; matrixReshape(vector&lt;vector&lt;int&gt;&gt;&amp; nums, int r, int c) {
-        int sumNum = nums.size() * nums[0].size();
-        int r1 = nums.size();
-        int c1 = nums[0].size();
-        if (sumNum != r*c) {
-            return nums;
-        }
-        vector&lt;vector&lt;int&gt;&gt; result = vector&lt;vector&lt;int&gt;&gt;(r,vector&lt;int&gt;(c,0));
-        int j = 0;
-        for (int i =0; i&lt;r*c; i++) {
-            result[i/c][i%c] = nums[i/c1][i%c1];
-        }
-        
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/29</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15114255869932.html">
-                
-                  <h1>Degree of an Array</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a non-empty array of non-negative integers <code>nums</code>, the degree of this array is defined as the maximum frequency of any one of its elements.</p>
-
-<p>Your task is to find the smallest possible length of a (contiguous) subarray of <code>nums</code>, that has the same degree as <code>nums</code>.</p>
-
-<p><img src="media/15114255869932/15114256313220.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int findShortestSubArray(vector&lt;int&gt;&amp; nums) {
-        
-        if (nums.size()&lt;2) {
-            return nums.size();
-        }
-        unordered_map&lt;int, int&gt;startIndex , number;
-        int len = nums.size();
-        int fre = 0;
-        for (int i=0; i&lt;nums.size(); i++) {
-            if (startIndex.count(nums[i])==0) {
-                startIndex[nums[i]]=i;
-            }
-            number[nums[i]]++;
-            if (number[nums[i]]==fre) {
-                len = min(i-startIndex[nums[i]]+1, len);
-            }
-            if (number[nums[i]]&gt;fre) {
-                len = i - startIndex[nums[i]] + 1;
-                fre = number[nums[i]];
-            }
-        }
-        
-        return len;
-    }
-};
-</code></pre>
-
-<p>该算法主要使用了两个<code>hash_map</code>:<br/>
-一个来记录数字所出现的次数，另一个记录数字最开始出现的位置。一旦有一个数字的频数超过了当前的<code>len</code>，则更新<code>len</code>，若两个数字出现的频率相等则取长度最小的。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15114222067093.html">
-                
-                  <h1>Find Pivot Index</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of integers <code>nums</code>, write a method that returns the &quot;pivot&quot; index of this array.</p>
-
-<p>We define the pivot index as the index where the sum of the numbers to the left of the index is equal to the sum of the numbers to the right of the index.</p>
-
-<p>If no such index exists, we should return -1. If there are multiple pivot indexes, you should return the left-most pivot index.</p>
-
-<p><img src="media/15114222067093/15114222397308.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int pivotIndex(vector&lt;int&gt;&amp; nums) {
-        
-        if(nums.empty()) return -1;
-        
-        int sum = 0;
-        for(int i=0;i&lt;nums.size();i++) sum+=nums[i];
-    
-        int leftSum = 0;
-        for(int j=0;j&lt;nums.size();j++)
-        {
-            if (leftSum == sum - nums[j] -leftSum) {
-                return j;
-        }
-            leftSum += nums[j];
-        }
-        
-        return -1;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -577,31 +543,31 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15126366447476.html">Nim Game</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15126354530210.html">Next Greater Element I</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15126325722591.html">Island Perimeter</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15126119727244.html">Hamming Distance</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15125498375074.html">Keyboard Row</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15125446581353.html">Repeated String Match</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15125415026569.html">Number of Segments in a String</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15124598875437.html">Battleships in a Board</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15124576449217.html">Complex Number Multiplication</a>
 			      </li>
 		     
 		  

@@ -117,6 +117,264 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15119407096444.html">
+                
+                  <h1>Range Sum Query 2D - Immutable</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a 2D matrix matrix, find the sum of the elements inside the rectangle defined by its upper left corner (row1, col1) and lower right corner (row2, col2).<br/>
+<img src="media/15119407096444/15119407391245.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class NumMatrix {
+private:
+    int col,row;
+    vector&lt;vector&lt;int&gt;&gt; sums;
+public:
+    NumMatrix(vector&lt;vector&lt;int&gt;&gt; matrix) {
+        row = matrix.size();
+        col =row&gt;0 ? matrix[0].size():0;
+        sums = vector&lt;vector&lt;int&gt;&gt;(row+1, vector&lt;int&gt;(col+1,0));
+        for(int i=1;i&lt;=row;i++)
+        {
+            for(int j=1;j&lt;=col;j++)
+            {
+                sums[i][j] = sums[i-1][j]+sums[i][j-1]+matrix[i-1][j-1]-sums[i-1][j-1];
+            }
+        }
+    }
+    
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        return sums[row2+1][col2+1]-sums[row2+1][col1]-sums[row1][col2+1]+sums[row1][col1];
+    }
+};
+
+/**
+ * Your NumMatrix object will be instantiated and called as such:
+ * NumMatrix obj = new NumMatrix(matrix);
+ * int param_1 = obj.sumRegion(row1,col1,row2,col2);
+ */
+</code></pre>
+
+<p><a href="https://leetcode.com/problems/range-sum-query-2d-immutable/description/">题目详细链接</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/29</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15119406678576.html">
+                
+                  <h1>Reshape the Matrix</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>In MATLAB, there is a very useful function called &#39;reshape&#39;, which can reshape a matrix into a new one with different size but keep its original data.</p>
+
+<p>You&#39;re given a matrix represented by a two-dimensional array, and two positive integers r and c representing the row number and column number of the wanted reshaped matrix, respectively.</p>
+
+<p>The reshaped matrix need to be filled with all the elements of the original matrix in the same row-traversing order as they were.</p>
+
+<p>If the &#39;reshape&#39; operation with given parameters is possible and legal, output the new reshaped matrix; Otherwise, output the original matrix.</p>
+
+<p><img src="media/15119406678576/15119406900999.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; matrixReshape(vector&lt;vector&lt;int&gt;&gt;&amp; nums, int r, int c) {
+        int sumNum = nums.size() * nums[0].size();
+        int r1 = nums.size();
+        int c1 = nums[0].size();
+        if (sumNum != r*c) {
+            return nums;
+        }
+        vector&lt;vector&lt;int&gt;&gt; result = vector&lt;vector&lt;int&gt;&gt;(r,vector&lt;int&gt;(c,0));
+        int j = 0;
+        for (int i =0; i&lt;r*c; i++) {
+            result[i/c][i%c] = nums[i/c1][i%c1];
+        }
+        
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/29</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15114255869932.html">
+                
+                  <h1>Degree of an Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a non-empty array of non-negative integers <code>nums</code>, the degree of this array is defined as the maximum frequency of any one of its elements.</p>
+
+<p>Your task is to find the smallest possible length of a (contiguous) subarray of <code>nums</code>, that has the same degree as <code>nums</code>.</p>
+
+<p><img src="media/15114255869932/15114256313220.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findShortestSubArray(vector&lt;int&gt;&amp; nums) {
+        
+        if (nums.size()&lt;2) {
+            return nums.size();
+        }
+        unordered_map&lt;int, int&gt;startIndex , number;
+        int len = nums.size();
+        int fre = 0;
+        for (int i=0; i&lt;nums.size(); i++) {
+            if (startIndex.count(nums[i])==0) {
+                startIndex[nums[i]]=i;
+            }
+            number[nums[i]]++;
+            if (number[nums[i]]==fre) {
+                len = min(i-startIndex[nums[i]]+1, len);
+            }
+            if (number[nums[i]]&gt;fre) {
+                len = i - startIndex[nums[i]] + 1;
+                fre = number[nums[i]];
+            }
+        }
+        
+        return len;
+    }
+};
+</code></pre>
+
+<p>该算法主要使用了两个<code>hash_map</code>:<br/>
+一个来记录数字所出现的次数，另一个记录数字最开始出现的位置。一旦有一个数字的频数超过了当前的<code>len</code>，则更新<code>len</code>，若两个数字出现的频率相等则取长度最小的。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15114222067093.html">
+                
+                  <h1>Find Pivot Index</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of integers <code>nums</code>, write a method that returns the &quot;pivot&quot; index of this array.</p>
+
+<p>We define the pivot index as the index where the sum of the numbers to the left of the index is equal to the sum of the numbers to the right of the index.</p>
+
+<p>If no such index exists, we should return -1. If there are multiple pivot indexes, you should return the left-most pivot index.</p>
+
+<p><img src="media/15114222067093/15114222397308.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int pivotIndex(vector&lt;int&gt;&amp; nums) {
+        
+        if(nums.empty()) return -1;
+        
+        int sum = 0;
+        for(int i=0;i&lt;nums.size();i++) sum+=nums[i];
+    
+        int leftSum = 0;
+        for(int j=0;j&lt;nums.size();j++)
+        {
+            if (leftSum == sum - nums[j] -leftSum) {
+                return j;
+        }
+            leftSum += nums[j];
+        }
+        
+        return -1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15114072257756.html">
                 
                   <h1>Best Time to Buy and Sell Stock II</h1>
@@ -203,266 +461,6 @@ public:
                   <div class="more-left left">
                   
                     <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15114035796843.html">
-                
-                  <h1>Array Partition I</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of <strong>2n</strong> integers, your task is to group these integers into n pairs of integer, say (a1, b1), (a2, b2), ..., (an, bn) which makes sum of min(ai, bi) for all i from 1 to n as large as possible.</p>
-
-<p><img src="media/15114035796843/15114036022226.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int arrayPairSum(vector&lt;int&gt;&amp; nums) {
-        
-        sort(nums.begin(),nums.end());
-        int result=0;
-        for (int i=0; i&lt;nums.size(); i+=2) {
-            result+=nums[i];
-        }
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15114026353930.html">
-                
-                  <h1>3Sum</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array S of n integers, are there elements a, b, c in S such that a + b + c = 0? Find all unique triplets in the array which gives the sum of zero.</p>
-
-<p><strong>Note:</strong> The solution set must not contain duplicate triplets.</p>
-
-<p><img src="media/15114026353930/15114026868536.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; threeSum(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(),nums.end());
-        vector&lt;vector&lt;int&gt;&gt; result;
-        vector&lt;int&gt; tmpResult;
-        
-        int p,q,tmp;
-        for(int i = 0 ;i&lt;nums.size();i++)
-        {
-            if(i!=0&amp;&amp;nums[i]==nums[i-1]) continue;
-            int currentNum = nums[i];
-            p = i+1;
-            q = nums.size()-1;
-            
-            while(p&lt;q)
-            {
-                if(p!=i+1&amp;&amp;nums[p]==nums[p-1])
-                {
-                    p++;
-                    continue;
-                }
-                tmp = nums[q]+nums[p];
-                if(tmp==-currentNum)
-                {
-                    tmpResult.push_back(currentNum);
-                    tmpResult.push_back(nums[q]);
-                    tmpResult.push_back(nums[p]);
-                    result.push_back(tmpResult);
-                    tmpResult.clear();
-                    p++;
-                    q--;
-                }else if (tmp&gt;-currentNum)
-                {
-                    q--;
-                }else p++;
-            }
-        }
-        
-        return result;
-    }
-};
-</code></pre>
-
-<p><strong>two real problems .</strong></p>
-
-<ul>
-<li><p>how to find the sum?<br/>
-change it to a 2 sum problem. when you have one value, the sum of the other two is -value.<br/>
-2 sum problem has a O(n) solution. so the final is O(n<sup>2).</sup></p></li>
-<li><p>how to remove the duplicate?<br/>
-for same values, we only use the first one and pass the rest.</p></li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15113375347657.html">
-                
-                  <h1>Arranging Coins</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>You have a total of n coins that you want to form in a staircase shape, where every k-th row must have exactly k coins.</p>
-
-<p>Given n, find the total number of full staircase rows that can be formed.</p>
-
-<p>n is a non-negative integer and fits within the range of a 32-bit signed integer.</p>
-
-<p><img src="media/15113375347657/15113375557158.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int arrangeCoins(int n) {
-        return floor(-0.5+sqrt((double)2*n+0.25));
-    }
-};
-</code></pre>
-
-<p>这道题的主要考虑<code>1+2+3+...+x&lt;=n</code>下，使x左边等式最接近n，并且不超过。</p>
-
-<p>推导为：</p>
-
-<pre><code>-&gt; 1+2+3+...+x = n
--&gt; (1+x)x/2 = n
--&gt; x^2+x = 2n
--&gt; x^2+x+1/4 = 2n +1/4
--&gt; (x+1/2)^2 = 2n +1/4
--&gt; (x+0.5) = sqrt(2n+0.25)
--&gt; x = -0.5 + sqrt(2n+0.25)
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/22</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15113344881540.html">
-                
-                  <h1>Add Binary</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given two binary strings, return their sum (also a binary string).</p>
-
-<p>For example,<br/>
-a = <code>&quot;11&quot;</code><br/>
-b = <code>&quot;1&quot;</code><br/>
-Return <code>&quot;100&quot;</code>.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string addBinary(string a, string b) {
-        int fw = 0;
-        string result = &quot;&quot;;
-        for(int i = a.size()-1,j=b.size()-1;i&gt;=0||j&gt;=0;i--,j--){
-            int ag = i&gt;=0?a[i]-&#39;0&#39;:0;
-            int bg = j&gt;=0?b[j]-&#39;0&#39;:0;
-            int tmp = (ag+bg+fw)%2;
-            fw = (ag+bg+fw)/2;
-            
-            result = char(tmp+&#39;0&#39;)+result;
-        }
-        if(fw==1){
-            result = &#39;1&#39;+result;
-        }
-        
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/22</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -567,31 +565,31 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15126366447476.html">Nim Game</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15126354530210.html">Next Greater Element I</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15126325722591.html">Island Perimeter</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15126119727244.html">Hamming Distance</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15125498375074.html">Keyboard Row</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15125446581353.html">Repeated String Match</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15125415026569.html">Number of Segments in a String</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15124598875437.html">Battleships in a Board</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15124576449217.html">Complex Number Multiplication</a>
 			      </li>
 		     
 		  
