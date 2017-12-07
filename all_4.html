@@ -117,6 +117,224 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15120931328273.html">
+                
+                  <h1>Search Insert Position</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
+
+<p>You may assume no duplicates in the array.<br/>
+<img src="media/15120931328273/15120931550538.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
+        int result = 0;
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (nums[i]&gt;=target) {
+                return i;
+            }
+        }
+        return nums.size();
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120924554362.html">
+                
+                  <h1>Maximum Subarray</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Find the contiguous subarray within an array (containing at least one number) which has the largest sum.</p>
+
+<p>For example, given the array<code>[-2,1,-3,4,-1,2,1,-5,4]</code>,<br/>
+the contiguous subarray <code>[4,-1,2,1]</code> has the largest sum = <code>6</code>.</p>
+
+<p>第一种解法：分治法</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; findCrossSubArray(vector&lt;int&gt;&amp; nums, int mid, int low ,int high){
+        int sum = 0;
+        int leftSum = INT_MIN;
+        int maxLeft = 0;
+        for (int i = mid; i&gt;=low; i--) {
+            sum = sum+nums[i];
+            if (sum&gt;leftSum) {
+                leftSum = sum;
+                maxLeft = i;
+            }
+        }
+        sum = 0;
+        int rightSum = INT_MIN;
+        int maxRight = 0;
+        for (int j=mid+1; j&lt;=high; j++) {
+            sum = sum+nums[j];
+            if (sum&gt;rightSum) {
+                rightSum = sum;
+                maxRight = j;
+            }
+        }
+        
+        return {{maxLeft,maxRight,leftSum+rightSum}};
+    }
+
+    vector&lt;int&gt; findMaxSubArray(vector&lt;int&gt;&amp; nums,int low ,int high)
+    {
+        if (low==high) {
+            return {{low,high,nums[low]}};
+        }else{
+            int mid = (low+high)/2;
+            vector&lt;int&gt; leftSum = findMaxSubArray(nums, low, mid);
+            vector&lt;int&gt; rightSum = findMaxSubArray(nums, mid+1, high);
+            vector&lt;int&gt; crossSum = findCrossSubArray(nums, mid, low, high);
+            if (leftSum[2]&gt;=rightSum[2]&amp;&amp;leftSum[2]&gt;=crossSum[2]) {
+                return leftSum;
+            }else if(rightSum[2]&gt;=leftSum[2]&amp;&amp;rightSum[2]&gt;=crossSum[2])
+            {
+                return rightSum;
+            }
+            else return crossSum;
+        }
+    
+    }
+
+
+    int maxSubArray(vector&lt;int&gt;&amp; nums) {
+        int len = nums.size()-1;
+        vector&lt;int&gt; result = findMaxSubArray(nums, 0, len);
+        return result[2];
+    }
+};
+</code></pre>
+
+<p>第二种解法：</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int maxSubArray(vector&lt;int&gt;&amp; nums) {
+        int ans=nums[0],i,j,sum=0;
+        for(i=0;i&lt;nums.size();i++){
+            sum+=nums[i];
+            ans=max(sum,ans);
+            sum=max(sum,0);
+        }
+        return ans;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120510835546.html">
+                
+                  <h1>Longest Continuous Increasing Subsequence</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an unsorted array of integers, find the length of longest <code>continuous</code> increasing subsequence.</p>
+
+<p><img src="media/15120510835546/15120511118059.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findLengthOfLCIS(vector&lt;int&gt;&amp; nums) {
+        int tmp = 1;
+        int result = 1;
+        if (nums.size()==1) {
+            return tmp;
+        }
+        if (nums.empty()) {
+            return 0;
+        }
+        nums.push_back(INT_MIN);
+        for (int i =1; i&lt;nums.size(); i++) {
+            if (nums[i]&gt;nums[i-1]) {
+                tmp++;
+            }else{
+                result = max(tmp, result);
+                tmp = 1;
+            }
+        }
+        return result; 
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/30</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15120333911660.html">
                 
                   <h1>Missing Number</h1>
@@ -301,193 +519,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15120236843494.html">
-                
-                  <h1>Summary Ranges</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a sorted integer array without duplicates, return the summary of its ranges.求数组中，连续数字的区间。</p>
-
-<p><img src="media/15120236843494/15120237048289.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;string&gt; summaryRanges(vector&lt;int&gt;&amp; nums) {
-        
-        vector&lt;string&gt; result;
-        if(nums.size()==0) return result;
-        
-        int end = nums[0]+1;
-        int total = 0;
-        if (nums.size()==1) {
-            result.push_back(to_string(nums[0]));
-            return result;
-        }
-        nums.push_back(INT_MAX); //充当哨兵
-        for (int i=1; i&lt;nums.size(); i++) {
-            if (nums[i]==end) {
-                end++;
-                total++;
-                continue;
-            }else{
-                end = nums[i]+1;
-                if (total==0) {
-                    result.push_back(to_string(nums[i-1]));
-                }else{
-                    string tmp = to_string(nums[i-1-total])+&quot;-&gt;&quot;+to_string(nums[i-1]);
-                    result.push_back(tmp);
-                }
-                total = 0;
-            }
-        }
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120100977395.html">
-                
-                  <h1>Majority Element</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of size n, find the majority element. The majority element is the element that appears more than <code>⌊ n/2 ⌋</code> times.</p>
-
-<p>You may assume that the array is non-empty and the majority element always exist in the array.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int majorityElement(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        int total = 1;
-        int tmp = 1;
-        int result = nums[0];
-        if (nums.size()==1) {
-            return result;
-        }
-        nums.push_back(INT_MAX); //在最后增加一个边界哨兵
-        for (int i=1; i&lt;=nums.size(); i++) {
-            if (nums[i]==nums[i-1]) {
-                tmp++;
-            }else{
-                result = tmp&gt;total ? nums[i-1]:result;
-                total = max(tmp, total);
-                tmp = 1;
-            }
-        }
-        
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120074710373.html">
-                
-                  <h1>Remove Duplicates from Sorted Array</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a sorted array, remove the duplicates <code>in-place</code> such that each element appear only once and return the new length.</p>
-
-<p>Do not allocate extra space for another array, you must do this by modifying the input array <code>in-place</code> with O(1) extra memory.</p>
-
-<p><img src="media/15120074710373/15120081165110.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
-        int tmp = INT_MIN;
-        int log = 0;
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (tmp!=nums[i]) {
-                tmp = nums[i];
-            }else{
-                log++;
-            }
-            nums[i-log] = nums[i];
-        }
-        
-        return nums.size()-log;
-    }
-};
-</code></pre>
-
-<p><img src="media/15120074710373/15120082747602.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -577,6 +608,24 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15125498375074.html">Keyboard Row</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15125446581353.html">Repeated String Match</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15125415026569.html">Number of Segments in a String</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15124598875437.html">Battleships in a Board</a>
 			      </li>
 		     
@@ -584,24 +633,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15124576449217.html">Complex Number Multiplication</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15124550672696.html">Student Attendance Record I</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15124490673294.html">Baseball Game</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15123924891077.html">Implement strStr()</a>
 			      </li>
 		     
 		  

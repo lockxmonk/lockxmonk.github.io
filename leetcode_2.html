@@ -117,6 +117,168 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15123539966341.html">
+                
+                  <h1>Reverse Words in a String III</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15123539966341/15123540495829.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string reverseWords(string s) {
+        string res;
+        int str = 0;
+        for (int i=0; i&lt;s.length(); i++) {
+            if (s[i]==&#39; &#39;||i==s.length()-1) {
+                int j = i==s.length()-1 ? i:i-1;
+                while (j&gt;=str) {
+                    char tmp = s[str];
+                    s[str] = s[j];
+                    s[j] = tmp;
+                    j--;
+                    str++;
+                }
+                str = i+1;
+            }
+        }
+
+        return s;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15122038176626.html">
+                
+                  <h1>Judge Route Circle</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15122038176626/15122038286763.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool judgeCircle(string moves) {
+        int UD = 0 ,LR = 0;
+        for(char a:moves){
+            if (a==&#39;U&#39;) {
+                UD++;
+            }else if (a==&#39;D&#39;){
+                UD--;
+            }else if (a==&#39;L&#39;){
+                LR++;
+            }else if (a==&#39;R&#39;){
+                LR--;
+            }
+        }
+        return (UD==0&amp;&amp;LR==0) ? 1:0;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15122027653799.html">
+                
+                  <h1>Self Dividing Numbers</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15122027653799/15122027840243.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; selfDividingNumbers(int left, int right) {
+        vector&lt;int&gt; v;
+        for (int i = left; i &lt;= right; ++i) {
+            int j= i;
+            bool ok = 1;
+            while (j) {
+                int d= (j%10);
+                if (d == 0 || i % d) ok = 0;
+                j/=10;
+            }
+            if (ok) v.push_back(i);
+        }
+        return v;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15122009526780.html">
                 
                   <h1>Non-decreasing Array</h1>
@@ -286,197 +448,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15121252648085.html">
-                
-                  <h1>Shortest Unsorted Continuous Subarray</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an integer array, you need to find one <strong>continuous</strong> subarray that if you only sort this subarray in ascending order, then the whole array will be sorted in ascending order, too.</p>
-
-<p>You need to find the <strong>shortest</strong> such subarray and output its length.</p>
-
-<p><img src="media/15121252648085/15121252900217.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int findUnsortedSubarray(vector&lt;int&gt;&amp; nums) {
-        vector&lt;int&gt; sortNums = nums;
-        sort(sortNums.begin(), sortNums.end());
-        int str = 0,end = nums.size()-1;
-        while (nums[str]==sortNums[str]) {
-            if (str==end) {
-                return 0;
-            }
-            str++;
-        }
-        while (nums[end]==sortNums[end]) {
-            end--;
-        }
-        return end-str+1;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15121123646545.html">
-                
-                  <h1>Can Place Flowers</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Suppose you have a long flowerbed in which some of the plots are planted and some are not. However, flowers cannot be planted in adjacent plots - they would compete for water and both would die.</p>
-
-<p>Given a flowerbed (represented as an array containing 0 and 1, where 0 means empty and 1 means not empty), and a number n, return if n new flowers can be planted in it without violating the no-adjacent-flowers rule.</p>
-
-<p><img src="media/15121123646545/15121188914337.jpg" alt=""/></p>
-
-<p><strong>第一种：3格的滑动窗口</strong></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
-        int str = 0 ,end = 2;
-        int tol = 0;
-        if (flowerbed.size()==1&amp;&amp;flowerbed[0]==0) {
-            tol++;
-        }else if(flowerbed[0]==0&amp;&amp;flowerbed[1]==0) {
-            flowerbed[0]=1;
-            tol++;
-        }
-        
-        while (end&lt;=flowerbed.size()-1) {
-            if (!(flowerbed[str]||flowerbed[str+1]||flowerbed[end])) {
-                flowerbed[str+1] = 1;
-                tol++;
-            }
-            str++;
-            end++;
-        }
-        if (flowerbed.size()&gt;=3&amp;&amp;flowerbed[flowerbed.size()-1]==0&amp;&amp;flowerbed[flowerbed.size()-2]==0) {
-            tol++;
-        }
-        return tol&gt;=n?1:0;
-    }
-};
-</code></pre>
-
-<p>第二种：</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
-        for (int i = 0; i &lt; flowerbed.size(); i++) {
-            if (!flowerbed[i] &amp;&amp; (i == 0 || !flowerbed[i - 1]) &amp;&amp; (i == flowerbed.size() - 1 || !flowerbed[i + 1])) {
-                flowerbed[i] = 1;
-                n--;
-            }
-        }
-        return n &lt;= 0;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15121120473287.html">
-                
-                  <h1>Contains Duplicate II</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of integers and an integer <code>k</code>, find out whether there are two distinct indices <code>i</code> and <code>j</code> in the array such that <code>nums[i] = nums[j]</code> and the absolute difference between <code>i</code> and <code>j</code> is at most <code>k</code>.</p>
-
-<p>判断数组中是否有重复的元素，并且下标之差不超过<code>k</code>。</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool containsNearbyDuplicate(vector&lt;int&gt;&amp; nums, int k) {
-        unordered_map&lt;int, int&gt; hash;
-        for (int i=0; i&lt;nums.size(); i++) {
-            if (hash.find(nums[i])!=hash.end()&amp;&amp;i-hash[nums[i]]&lt;=k) {
-                return 1;
-            }else{
-                hash[nums[i]] = i;
-            }
-        }
-        return 0;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -566,6 +537,24 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15125498375074.html">Keyboard Row</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15125446581353.html">Repeated String Match</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15125415026569.html">Number of Segments in a String</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15124598875437.html">Battleships in a Board</a>
 			      </li>
 		     
@@ -573,24 +562,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15124576449217.html">Complex Number Multiplication</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15124550672696.html">Student Attendance Record I</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15124490673294.html">Baseball Game</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15123924891077.html">Implement strStr()</a>
 			      </li>
 		     
 		  

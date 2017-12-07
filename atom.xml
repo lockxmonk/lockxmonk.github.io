@@ -4,13 +4,106 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-12-04T21:02:54+08:00</updated>
+  <updated>2017-12-05T16:50:54+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Keyboard Row]]></title>
+    <link href="https://lockxmonk.github.io/15125498375074.html"/>
+    <updated>2017-12-06T16:43:57+08:00</updated>
+    <id>https://lockxmonk.github.io/15125498375074.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15125498375074/15125498549999.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;string&gt; findWords(vector&lt;string&gt;&amp; words) {
+        set&lt;char&gt; row1 = {&#39;q&#39;, &#39;w&#39;, &#39;e&#39;, &#39;r&#39;, &#39;t&#39;, &#39;y&#39;,&#39;u&#39;, &#39;i&#39;, &#39;o&#39;, &#39;p&#39;};
+        set&lt;char&gt; row2 = {&#39;a&#39;, &#39;s&#39;, &#39;d&#39;, &#39;f&#39;, &#39;g&#39;, &#39;h&#39;, &#39;j&#39;, &#39;k&#39;, &#39;l&#39;};
+        set&lt;char&gt; row3 = { &#39;z&#39;, &#39;x&#39;, &#39;c&#39;, &#39;v&#39;, &#39;b&#39; ,&#39;n&#39;, &#39;m&#39;};
+        vector&lt;set&lt;char&gt;&gt; rows = {row1,row2,row3};
+        vector&lt;string&gt; res;
+        for (auto str: words) {
+            int log = 0;
+            for (int i = 0; i&lt;rows.size(); i++) {
+                if (rows[i].count((char)tolower(str[0]))&gt;0) {
+                    log = i;
+                }
+            }
+            for (int j = 0; j&lt;str.length(); j++) {
+                if (rows[log].count((char)tolower(str[j]))==0) {
+                    break;
+                }
+                if (j==str.length()-1) {
+                    res.push_back(str);
+                }
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Repeated String Match]]></title>
+    <link href="https://lockxmonk.github.io/15125446581353.html"/>
+    <updated>2017-12-06T15:17:38+08:00</updated>
+    <id>https://lockxmonk.github.io/15125446581353.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15125446581353/15125446683319.jpg" alt=""/></p>
+
+<p>要考虑<code>&quot;abc&quot; &quot;abc&quot; &quot;abc&quot;</code>和<code>&quot;c abc a&quot;</code>的情况，所以<code>i&lt;=lenB/lenA+2</code><br/>
+<code>c++<br/>
+class Solution {<br/>
+public:<br/>
+    int repeatedStringMatch(string A, string B) {<br/>
+        int lenA = A.length(),lenB = B.length();<br/>
+        string tmp = A;<br/>
+        for (int i = 1; i&lt;=lenB/lenA+2; i++ , tmp+=A) {<br/>
+            if (tmp.find(B)!=string::npos) {<br/>
+                return i;<br/>
+            }<br/>
+        }<br/>
+        return -1;<br/>
+    }<br/>
+};<br/>
+</code></p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Number of Segments in a String]]></title>
+    <link href="https://lockxmonk.github.io/15125415026569.html"/>
+    <updated>2017-12-06T14:25:02+08:00</updated>
+    <id>https://lockxmonk.github.io/15125415026569.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15125415026569/15125415108675.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int countSegments(string s) {
+        int res = 0;
+        for (int i = 0; i&lt;s.length(); i++) {
+            if (s[i]!=&#39; &#39;&amp;&amp; (s[i+1]==&#39; &#39;|| i==s.length()-1)) {
+                res++;
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Battleships in a Board]]></title>
@@ -679,98 +772,6 @@ public:
             }
         }
         return n &lt;= 0;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Contains Duplicate II]]></title>
-    <link href="https://lockxmonk.github.io/15121120473287.html"/>
-    <updated>2017-12-01T15:07:27+08:00</updated>
-    <id>https://lockxmonk.github.io/15121120473287.html</id>
-    <content type="html"><![CDATA[
-<p>Given an array of integers and an integer <code>k</code>, find out whether there are two distinct indices <code>i</code> and <code>j</code> in the array such that <code>nums[i] = nums[j]</code> and the absolute difference between <code>i</code> and <code>j</code> is at most <code>k</code>.</p>
-
-<p>判断数组中是否有重复的元素，并且下标之差不超过<code>k</code>。</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool containsNearbyDuplicate(vector&lt;int&gt;&amp; nums, int k) {
-        unordered_map&lt;int, int&gt; hash;
-        for (int i=0; i&lt;nums.size(); i++) {
-            if (hash.find(nums[i])!=hash.end()&amp;&amp;i-hash[nums[i]]&lt;=k) {
-                return 1;
-            }else{
-                hash[nums[i]] = i;
-            }
-        }
-        return 0;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Two Sum]]></title>
-    <link href="https://lockxmonk.github.io/15121110105671.html"/>
-    <updated>2017-12-01T14:50:10+08:00</updated>
-    <id>https://lockxmonk.github.io/15121110105671.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15121110105671/15121110244234.jpg" alt=""/></p>
-
-<p><strong>运用hash表</strong></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; nums, int target) {
-        unordered_map&lt;int, int&gt; hash;
-        vector&lt;int&gt; result;
-        for (int i=0; i&lt;nums.size(); i++) {
-            int numToFind = target - nums[i];
-            if (hash.find(numToFind)!=hash.end()) {
-                result.push_back(hash[numToFind]);
-                result.push_back(i);
-            }
-            hash[nums[i]] = i;
-        }
-        return result;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Maximum Average Subarray I]]></title>
-    <link href="https://lockxmonk.github.io/15120990794732.html"/>
-    <updated>2017-12-01T11:31:19+08:00</updated>
-    <id>https://lockxmonk.github.io/15120990794732.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15120990794732/15120991082558.jpg" alt=""/></p>
-
-<p><strong>解决方法：滑动窗口方案</strong></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    double findMaxAverage(vector&lt;int&gt;&amp; nums, int k) {
-        double r = INT_MIN;
-        double sum = 0;
-        for (int i = 0; i&lt;nums.size(); i++) {
-            if (i&lt;k) {
-                sum+=nums[i];
-            }else{
-                r = max(sum, r);
-                sum +=nums[i]-nums[i-k];
-            }
-        }
-        r = max(sum, r);
-        return r/double(k);
     }
 };
 </code></pre>
