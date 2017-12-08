@@ -117,29 +117,31 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15121120473287.html">
+                <a class="clearlink" href="15122038176626.html">
                 
-                  <h1>Contains Duplicate II</h1>
+                  <h1>Judge Route Circle</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given an array of integers and an integer <code>k</code>, find out whether there are two distinct indices <code>i</code> and <code>j</code> in the array such that <code>nums[i] = nums[j]</code> and the absolute difference between <code>i</code> and <code>j</code> is at most <code>k</code>.</p>
-
-<p>判断数组中是否有重复的元素，并且下标之差不超过<code>k</code>。</p>
+                        	<p><img src="media/15122038176626/15122038286763.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    bool containsNearbyDuplicate(vector&lt;int&gt;&amp; nums, int k) {
-        unordered_map&lt;int, int&gt; hash;
-        for (int i=0; i&lt;nums.size(); i++) {
-            if (hash.find(nums[i])!=hash.end()&amp;&amp;i-hash[nums[i]]&lt;=k) {
-                return 1;
-            }else{
-                hash[nums[i]] = i;
+    bool judgeCircle(string moves) {
+        int UD = 0 ,LR = 0;
+        for(char a:moves){
+            if (a==&#39;U&#39;) {
+                UD++;
+            }else if (a==&#39;D&#39;){
+                UD--;
+            }else if (a==&#39;L&#39;){
+                LR++;
+            }else if (a==&#39;R&#39;){
+                LR--;
             }
         }
-        return 0;
+        return (UD==0&amp;&amp;LR==0) ? 1:0;
     }
 };
 </code></pre>
@@ -151,7 +153,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/1</span>
+                    <span class="date">2017/12/2</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -168,32 +170,200 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15120990794732.html">
+                <a class="clearlink" href="15122027653799.html">
                 
-                  <h1>Maximum Average Subarray I</h1>
+                  <h1>Self Dividing Numbers</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15120990794732/15120991082558.jpg" alt=""/></p>
-
-<p><strong>解决方法：滑动窗口方案</strong></p>
+                        	<p><img src="media/15122027653799/15122027840243.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    double findMaxAverage(vector&lt;int&gt;&amp; nums, int k) {
-        double r = INT_MIN;
-        double sum = 0;
+    vector&lt;int&gt; selfDividingNumbers(int left, int right) {
+        vector&lt;int&gt; v;
+        for (int i = left; i &lt;= right; ++i) {
+            int j= i;
+            bool ok = 1;
+            while (j) {
+                int d= (j%10);
+                if (d == 0 || i % d) ok = 0;
+                j/=10;
+            }
+            if (ok) v.push_back(i);
+        }
+        return v;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15122009526780.html">
+                
+                  <h1>Non-decreasing Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15122009526780/15122009632510.jpg" alt=""/></p>
+
+<p><strong>用到了<code>is_sorted</code>来判断是否升序排列</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool checkPossibility(vector&lt;int&gt;&amp; nums) {
+        for (int i=0; i &lt; nums.size()-1; i++){
+            if (nums[i] &gt; nums[i+1]){
+                
+                int temp = nums[i];
+                //
+                // &quot;erase&quot; nums[i], then check if nums is sorted without nums[i]
+                //
+                nums[i] = nums[i+1];
+                if (is_sorted(nums.begin(), nums.end())) { return true; }
+                
+                //
+                // &quot;erase&quot; nums[i+1], then check if nums is sorted without nums[i+1]
+                //
+                nums[i+1] = nums[i] = temp;
+                if (is_sorted(nums.begin(), nums.end())) { return true; }
+                
+                //
+                // nums is NOT sorted (without nums[i] XOR without nums[i+1])
+                //
+                return false;
+            }
+        }
+        return true;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15121974728141.html">
+                
+                  <h1>Third Maximum Number</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15121974728141/15121974890265.jpg" alt=""/></p>
+
+<p><strong>利用set的自动排序和去除重复元素来解决问题。</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int thirdMax(vector&lt;int&gt;&amp; nums) {
+        set&lt;int&gt; result;
+        for (int num:nums) {
+            result.insert(num);
+            if (result.size()&gt;3) {
+                result.erase(result.begin());
+            }
+        }
+        return result.size()&lt;3? *result.rbegin():*result.begin();
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15121892650067.html">
+                
+                  <h1>K-diff Pairs in an Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15121892650067/15121892810535.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findPairs(vector&lt;int&gt;&amp; nums, int k) {
+        if (k&lt;0) {
+            return 0;
+        }
+        unordered_set&lt;int&gt; result;  //用集合避免重复
+        unordered_map&lt;int, int&gt; hash;   //hash表来映射所需数值
         for (int i = 0; i&lt;nums.size(); i++) {
-            if (i&lt;k) {
-                sum+=nums[i];
-            }else{
-                r = max(sum, r);
-                sum +=nums[i]-nums[i-k];
+            if (hash.count(nums[i]+k)) {
+                result.insert(nums[i]+k);
             }
+            if (hash.count(nums[i]-k)) {
+                result.insert(nums[i]);
+            }
+            hash[nums[i]] += 1;
         }
-        r = max(sum, r);
-        return r/double(k);
+        return result.size();
     }
 };
 </code></pre>
@@ -205,7 +375,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/1</span>
+                    <span class="date">2017/12/2</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -222,82 +392,35 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15120964350892.html">
+                <a class="clearlink" href="15121252648085.html">
                 
-                  <h1>Pascal's Triangle</h1>
+                  <h1>Shortest Unsorted Continuous Subarray</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given numRows, generate the first numRows of Pascal&#39;s triangle.</p>
+                        	<p>Given an integer array, you need to find one <strong>continuous</strong> subarray that if you only sort this subarray in ascending order, then the whole array will be sorted in ascending order, too.</p>
 
-<p>For example, given numRows = 5,<br/>
-Return<img src="media/15120964350892/15120964567125.jpg" alt=""/></p>
+<p>You need to find the <strong>shortest</strong> such subarray and output its length.</p>
 
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; generate(int numRows) {
-        vector&lt;vector&lt;int&gt;&gt;result(numRows);
-        for (int i = 0; i&lt;numRows; i++) {
-            result[i].resize(i+1);
-            result[i][0] = result[i][i] = 1;
-        
-            for (int j = 1; j&lt;i; j++) {
-                result[i][j] = result[i-1][j-1]+result[i-1][j];
-            }
-        }
-        return result;
-        
-     }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120931328273.html">
-                
-                  <h1>Search Insert Position</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
-
-<p>You may assume no duplicates in the array.<br/>
-<img src="media/15120931328273/15120931550538.jpg" alt=""/></p>
+<p><img src="media/15121252648085/15121252900217.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
-        int result = 0;
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (nums[i]&gt;=target) {
-                return i;
+    int findUnsortedSubarray(vector&lt;int&gt;&amp; nums) {
+        vector&lt;int&gt; sortNums = nums;
+        sort(sortNums.begin(), sortNums.end());
+        int str = 0,end = nums.size()-1;
+        while (nums[str]==sortNums[str]) {
+            if (str==end) {
+                return 0;
             }
+            str++;
         }
-        return nums.size();
+        while (nums[end]==sortNums[end]) {
+            end--;
+        }
+        return end-str+1;
     }
 };
 </code></pre>
@@ -310,163 +433,6 @@ public:
                   <div class="more-left left">
                   
                     <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120924554362.html">
-                
-                  <h1>Maximum Subarray</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Find the contiguous subarray within an array (containing at least one number) which has the largest sum.</p>
-
-<p>For example, given the array<code>[-2,1,-3,4,-1,2,1,-5,4]</code>,<br/>
-the contiguous subarray <code>[4,-1,2,1]</code> has the largest sum = <code>6</code>.</p>
-
-<p>第一种解法：分治法</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; findCrossSubArray(vector&lt;int&gt;&amp; nums, int mid, int low ,int high){
-        int sum = 0;
-        int leftSum = INT_MIN;
-        int maxLeft = 0;
-        for (int i = mid; i&gt;=low; i--) {
-            sum = sum+nums[i];
-            if (sum&gt;leftSum) {
-                leftSum = sum;
-                maxLeft = i;
-            }
-        }
-        sum = 0;
-        int rightSum = INT_MIN;
-        int maxRight = 0;
-        for (int j=mid+1; j&lt;=high; j++) {
-            sum = sum+nums[j];
-            if (sum&gt;rightSum) {
-                rightSum = sum;
-                maxRight = j;
-            }
-        }
-        
-        return {{maxLeft,maxRight,leftSum+rightSum}};
-    }
-
-    vector&lt;int&gt; findMaxSubArray(vector&lt;int&gt;&amp; nums,int low ,int high)
-    {
-        if (low==high) {
-            return {{low,high,nums[low]}};
-        }else{
-            int mid = (low+high)/2;
-            vector&lt;int&gt; leftSum = findMaxSubArray(nums, low, mid);
-            vector&lt;int&gt; rightSum = findMaxSubArray(nums, mid+1, high);
-            vector&lt;int&gt; crossSum = findCrossSubArray(nums, mid, low, high);
-            if (leftSum[2]&gt;=rightSum[2]&amp;&amp;leftSum[2]&gt;=crossSum[2]) {
-                return leftSum;
-            }else if(rightSum[2]&gt;=leftSum[2]&amp;&amp;rightSum[2]&gt;=crossSum[2])
-            {
-                return rightSum;
-            }
-            else return crossSum;
-        }
-    
-    }
-
-
-    int maxSubArray(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size()-1;
-        vector&lt;int&gt; result = findMaxSubArray(nums, 0, len);
-        return result[2];
-    }
-};
-</code></pre>
-
-<p>第二种解法：</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maxSubArray(vector&lt;int&gt;&amp; nums) {
-        int ans=nums[0],i,j,sum=0;
-        for(i=0;i&lt;nums.size();i++){
-            sum+=nums[i];
-            ans=max(sum,ans);
-            sum=max(sum,0);
-        }
-        return ans;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120258790187.html">
-                
-                  <h1>Given an integer array, find three numbers whose product is maximum and output the maximum product.</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15120258790187/15120319341000.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maximumProduct(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        int len = nums.size();
-        int tmp1 = nums[len-1]*nums[len-2]*nums[len-3];
-        int tmp2 = nums[len-1]*nums[0]*nums[1];
-        return max(tmp1, tmp2);
-    }
-};
-</code></pre>
-
-<p>主要考虑含有负数的情况。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -571,31 +537,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15126366447476.html">Nim Game</a>
+			        <a href="15127409536382.html">Happy Number</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15126354530210.html">Next Greater Element I</a>
+			        <a href="15127221024719.html">Find the Difference</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15126325722591.html">Island Perimeter</a>
+			        <a href="15127198152754.html">Distribute Candies</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15126119727244.html">Hamming Distance</a>
+			        <a href="15127166881202.html">Fizz Buzz</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15125498375074.html">Keyboard Row</a>
+			        <a href="15127150080101.html">Sum of Two Integers</a>
 			      </li>
 		     
 		  

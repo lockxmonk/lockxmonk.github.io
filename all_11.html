@@ -117,451 +117,112 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15077122789332.html">
+                <a class="clearlink" href="15090074391982.html">
                 
-                  <h1>多用块枚举，与快速遍历少用for循环</h1>
+                  <h1>常见iOS面试题基础篇</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html'>常见面试问题</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15090066726855.html">
+                
+                  <h1>常见iOS面试题（智力题）</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
                         	<ul>
 <li>
-<a href="#toc_0">快速遍历</a>
+<a href="#toc_0">智力题</a>
+<ul>
+<li>
+<a href="#toc_1">四个人夜间要过一座桥，每人走路速度不一样，过桥需要时间分别是1，2，5，10分钟。现在只有一只手电筒在过桥时必须带，同时只能两人过，如何安排能够让四人最快速度过桥？</a>
 </li>
 <li>
-<a href="#toc_1">基于块的遍历</a>
+<a href="#toc_2">有25匹马赛跑，每次只能跑5匹，最快能赛几次找出跑得最快的3匹马？</a>
 </li>
 <li>
-<a href="#toc_2">要点</a>
+<a href="#toc_3">如果你变成硬币那么小，然后被扔进一个搅拌机里，你将如何脱身？</a>
+</li>
+<li>
+<a href="#toc_4">五个强盗抢到100个金币来分赃，强盗1提出分配方案，为了防止他分配不公，强盗们达成一致：他的方案必须有所有人（包括1号自己）的半数以上（注意，必须大于百分之五十）通过才可执行。否则，他将被杀死，再由2号强盗提出分配方案，2号的方案也要所有剩下的人（包括他自己）的半数以上通过。否则他也将被杀死，依次类推。假设这五个强盗都贪婪成性、残忍无比、绝顶聪明而又一诺千金，都想自己得到最多，都想看到别人死去而自己活。请问，1号强盗要怎样分配才能使自己活着而得到的黄金最多？为什么？</a>
+</li>
+</ul>
 </li>
 </ul>
 
 
-<p>我们在编程时，经常会需要遍历某个<code>collection</code>，例如<code>NSArrary，NSDictionary，NSSet</code>等。</p>
+<h2 id="toc_0">智力题</h2>
 
-<p>我们经常使用<code>for</code>循坏来遍历，这样对于数组来说还好，但是根据定义，字典与<code>set</code>都是<code>“无序的&quot;（imoniered)</code>，<em><mark>所以无法根据特定的整数下标来直接访问其中的值</mark></em>。于是，就需要先获取字典里的所有键或是<code>set</code>里的所有对象，这两种情况下，都可以在获取到的有序数组上遍历，以便借此访问原字典及原<code>set</code>中的值。</p>
+<h3 id="toc_1">四个人夜间要过一座桥，每人走路速度不一样，过桥需要时间分别是1，2，5，10分钟。现在只有一只手电筒在过桥时必须带，同时只能两人过，如何安排能够让四人最快速度过桥？</h3>
 
-<p>但是创建这个附加数组会有额外开销，而且还会多创建一个数组对象，它会保留<code>collection</code>中的所有元素对象。 当然了，释放数组时这些附加对象也要释放，可是要调用本来不需执行的方法。其他各种遍 历方式都无须创建这种中介数组。</p>
-
-<p>例如：</p>
-
-<pre><code class="language-objc">// Dictionary
-NSDictionary *aDictionary = /* .... */;
-NSArray *keys = [aDictionary allKeys]; 
-for (int i = 0; i &lt; keys.count; i++) { 
-    id key = keys[i]; 
-    id value = aDictionary[key];
-    //Do something with &#39;key&#39; and &#39;value&#39;
-}
-
-//Set
-NSSet *aSet = /* ... */;
-NSArray *objects = [aSet allObjects]; 
-for (int i = 0; i &lt; objects.count; i++)
-{ 
-    id object = objects [i];
-    //Do something with &#39;object&#39;
-} 
+<pre><code class="language-c">答：1和2 先过。1返回，5和10先过，2返回，1和2一起过。一共时间=2+1+10+2+2=17分钟
 </code></pre>
 
-<p>上述代码实现遍历比较麻烦，所以我们推荐使用快速遍历与块循环。</p>
+<h3 id="toc_2">有25匹马赛跑，每次只能跑5匹，最快能赛几次找出跑得最快的3匹马？</h3>
 
-<h2 id="toc_0">快速遍历</h2>
+<pre><code class="language-c">答案是7次。
 
-<p>快速遍历是<code>OC 2.0</code>所引入的一个新功能。它语法更简洁，它为<code>for</code>循环开设了<code>in</code>关键字。这个关键字大幅简化了遍历<code>collection</code>所需的语法，比方说要遍历数组，就可以这么写：</p>
+1. 首先将25匹马分成5组a、b、c、d、e进行比赛。比赛的次数就是5次。得到每组的第一名，分别编号a1,b1,c1,d1,e1。
 
-<pre><code class="language-objc">NSArray *anArray = /* ••• */; 
-for (id object in anArray) {
-    //Do something with &#39;object&#39;
-}
+2. 然后我们将每组的第一名进行比赛，得出结果。假设a1&gt;b1&gt;c1&gt;d1&gt;e1。（大于号表示a1比b1快，1表示第一名）。在这个地方我们可以推断出，a1是所有马中最快的，所以它是第一名。d1,e1不可能是前三的马，同时这两匹马所在的组也不可能是前三的马。所以排除这两组马，还剩三组15匹马。现在需要找出第二快和第三快的马。
+
+3. 第二名和第三名的马在刚才的比赛中有以下几种分布情况：
+
+　　全部在a组（最快的马所在的组），那么它是a2和a3.
+
+　　全部在b组，那么它们就是b1和b2。
+
+　　一匹在a组一匹在b组，那么它们是a2和b1.无论是第三名在a组还是第二名在a组都是这两匹。
+
+　　一匹在a组一匹在c组，那么它们是a2和c1。
+
+　　一匹在b组一匹在c组，那么它们是b1和c1。
+
+　　所以我们把a2,a3,b1,b2,c1拿出来再进行一场比赛。取前两名就是最终的结果。
 </code></pre>
 
-<p>这样写简单多了。如果某个类的对象支持快速遍历，那么就可以宣称自己遵从名为 <code>NSFastEmimeraticm</code>的协议，从而令开发者可以采用此语法来迭代该对象。</p>
+<h3 id="toc_3">如果你变成硬币那么小，然后被扔进一个搅拌机里，你将如何脱身？</h3>
 
-<p>遍历字典与set为：</p>
+<pre><code class="language-c">这是Google的面试题，原题大概是：
+你被缩小到一枚硬币大小，密度不变质量减小，被扔进一个搅拌机里，搅拌机60秒后开始转动，你会怎么办？
 
-<pre><code class="language-objc">// Dictionary
-NSDictionary *aDictionary = /* ... */; 
-for (id key in aDictionary) {
-    id value = aDictionary[key];
-    //Do something with &#39;key&#39; and &#39;value&#39;
-}
-
-//Set
-NSSet *aSet = /* ... */; 
-for (id object in aSet) {
-    //Do something with &#39;object&#39;
-}
+答案是：直接跳出来就可以了
 </code></pre>
 
-<p>由于<code>NSEnumerator</code>对象也实现了 <code>NSFastEnumeration</code>协议，所以能用来执行反向遍历。 若要反向遍历数组，可采用下面这种写法：</p>
-
-<pre><code class="language-objc">NSArray *anArray = /* ... */;
-for (id object in [anArray reverseObjectEnumerator]){
-    //Do something with &#39;object&#39;
-}
-</code></pre>
-
-<p><strong><font color=red>在目前所介绍的遍历方式中，这种办法是语法最简单且效率最髙的，然而如果在遍历字典时需要同时获取键与值，那么会多出来一步。而且，与传统的<code>for</code>循环不同，这种遍历方式无法轻松获取当前遍历操作所针对的下标。遍历时通常会用到这个下标，比如很多算法都需要它。</font></strong></p>
-
-<h2 id="toc_1">基于块的遍历</h2>
-
-<p>在当前的<code>Objective-C</code>语言中，最新引人的一种做法就是基于块来遍历。<code>NSArray</code>中定义了下面这个方法，它可以实现最基本的遍历功能：</p>
-
-<pre><code class="language-objc">-(void)enumerateObjectsUsingBlock:
-        (void(^)(id object, NSUInteger idx, BOOL *stop))block
-</code></pre>
-
-<p>此之外，还有一系列类似的遍历方法，它们可以接受各种选项，以控制遍历操作，稍后将会讨论那些方法。</p>
-
-<p>在遍历数组及<code>set</code>时，每次迭代都要执行由<code>block</code>参数所传人的块，<strong><font color=red>在遍历数组及set时，每次迭代都要执行由block参数所传人的块，这个块有三个参数， 分别是当前迭代所针对的对象、所针对的下标，以及指向布尔值的指针。前两个参数的含义不言而喻。而通过第三个参数所提供的机制，开发者可以终止遍历操作。</font></strong> </p>
-
-<p>例如，下面这段代码用此方法来遍历数组：</p>
-
-<pre><code class="language-objc">NSArray *anArray = /* ... */;
-[anArray enumerateObjectsUsingBlock:
-        ^(id object, NSUInteger id, BOOL *stop){
-    //Do something with &#39;object&#39; 
-    if (shouldStop) {
-        *stop = YES;
-}
-</code></pre>
-
-<p>这种写法稍微多了几行代码，不过依然明晰，而且遍历时既能获取对象，也能知道其下标。此方法还提供了一种优雅的机制，用于终止遍历操作，开发者可以通过设定<code>stop</code>变最值来实现，当然，使用<code>for</code>等遍历方式时，也可以通过<code>break</code>来终止循环，那样做也很好。</p>
-
-<p>此方式不仅可用来遍历数组。<code>NSSet</code>里面也有同样的块枚举方法，<code>NSDictionary</code>也是这样, 只是略有不同：</p>
-
-<pre><code class="language-objc">-(void)enumerateKeysAndObjectsUsingBlock:
-        (void(^)(id key, id object, BOOL *stop))block
-</code></pre>
-
-<p>因此，遍历字典与<code>set</code>也同样简单：</p>
-
-<pre><code class="language-objc">// Dictionary
-NSDictionary *aDictionary = /* ... */;
-[aDietionary enumerateKeysAndObjectsUsingBlock: 
-        ^(id key, id object, BOOL *stop)){
-            //Do something with &#39;key&#39; and &#39;object&#39; 
-            if (shouldStop) {
-            *stop = YES;
-}；
-
-//Set
-NSSet *aSet = /* ... */;
-[aSet enumerateObjectsUsingBlock:
-            ^(id object, BOOL *stop){
-    //Do something with &#39;object&#39; 
-        if (shouldStop) {
-            *stop = YES;
-        }
-  }];
-</code></pre>
-
-<p>此方式大大胜过其他方式的地方在于：<mark>遍历时可以直接从块里获取更多信息。在遍历数组时，可以知道当前所针对的下标。遍历<code>有序set(NSOrderedSet)</code>时也一样。而在遍历字典时，无须额外编码，即可同时获取键与值，因而省去了根据给定键来获取对应值这一步。用这种方式遍历字典，可以同时得知键与值，这很可能比其他方式快很多，因为在字典内部的数据结构中，键与值本来就是存储在一起的。</mark></p>
-
-<p><strong><font color=red>另一个好处就是：能够修改块的方法签名，以免进行类型转换操作，从效果上讲，相当于把本来需要执行的类型转换操作交给块方法签名来做。</font></strong></p>
-
-<p>比方说，要用“快速遍历法”来遍 历字典。若已知字典中的对象必为字符串，则可以这样编码：</p>
-
-<pre><code class="language-objc">for (NSString *key in aDictionary) {
-    NSString *object = (NSString*)aDictionary[key];
-    //Do something with 1 key1 and 1 object1
-)
-</code></pre>
-
-<p>如果改用基于块的方式来遍历，那么就可以在块方法签名中直接转换：</p>
-
-<pre><code class="language-objc">NSDictionary ^aDictionary = /* ••• */;
-[aDictionary enumerateKeysAndObjectsUsingBlock:
-        ^(NSString *key, NSString *obj, BOOL *stop){
-         //Do something with &#39;key&#39; and &#39;obj&#39;
-}];
-</code></pre>
-
-<p>之所以能如此，是因为<code>id</code>类型相当特殊，它可以像本例这样，为其他类型所覆写。要是原来的块签名把键与值都定义成<code>NSObject*</code>，那这么写就不行了。此技巧初看不甚显眼，实 则相当有用。指定对象的精确类型之后，编译器就可以检测出开发者是否调用了该对象所不 具备的方法，并在发现这种问题时报错。如果能够确知某<code>collection</code>里的对象是什么类型, 那就应该使用这种方法指明其类型。</p>
-
-<p>用此方式也可以执行反向遍历。数组、字典、set都实现了前述方法的另一个版本，使开发者可向其传入<code>“选项掩码”(option mask)</code>:</p>
-
-<pre><code class="language-objc">-(void)enumerateObjectsWithOptions:
-            (NSEnumerationOptions)options 
-            usingBlock: 
-            (void(^)(id obj, NSUInteger id, BOOL *stop))block
-
--(void)enumerateKeysAndObjectsWithOptions:
-            (NSEnumerationOptions)options
-            usingBlock:
-            (void(^)(id key, id obj, BOOL *stop))block
-</code></pre>
-
-<p><code>NSEnumerationOptions</code>类型是个<code>enum</code>,其各种取值可用<code>“按位或”（bitwiseOR)</code>连接，用以表明遍历方式。具体选项不再过多介绍。</p>
-
-<p>总体来看，块枚举法拥有其他遍历方式都具备的优势，而且还能带来更多好处。与快速遍历法相比，它要多用一些代码，可是却能提供遍历时所针对的下标，在遍历字典时也能同时提供键与值，而且还有选项可以开启并发迭代功能，所以多写这点代码还是值得的。</p>
-
-<h2 id="toc_2">要点</h2>
-
-<ul>
-<li>遍历<code>collection</code>有多方式。最基本的办法是<code>for</code>循环，其次是<code>NSEnumerator</code>遍历法及快速遍历法，最新、最先进的方式则是“块枚举法”。</li>
-<li> “块枚举法”本身就能通过<code>GCD</code>来并发执行遍历操作，无须另行编写代码。而采用其他遍历方式则无法轻易实现这一点。</li>
-<li> 若提前知道待遍历的<code>collection</code>含有何种对象，则应修改块签名，指出对象的具体类型。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/11</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%83%E7%AB%A0%20%E7%86%9F%E6%82%89%E7%B3%BB%E7%BB%9F%E6%A1%86%E6%9E%B6.html'>第七章 熟悉系统框架</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15075183660097.html">
-                
-                  <h1>第三十四条 ： 以“自动释放池降低内存峰值”</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在<code>Objective-C</code>的引用计数架构中，有一项特性叫做<code>“自动释放池”(autoreleasepool)</code>。释放对象有两种方式：一种是 调用<code>release</code>方法，使其保留计数立即递减；<strong><font color=red>另一种是调用<code>autorelease</code>方法，将其加人“自动 释放池”中。自动释放池用于存放那些需要在稍后某个时刻释放的对象。<code>清空（drain)</code>自动释放池时，系统会向其中的对象发送<code>release</code>消息。</font></strong></p>
-
-<p>创建自动释放池的语句为：</p>
-
-<pre><code class="language-objc">@autoreleasepool{
-    // ....
-}
-</code></pre>
-
-<p>我们来看下面这个例子：</p>
-
-<pre><code class="language-objc">@autoreleasepool {
-    NSString *string = [NSString stringWithFormat: @&quot;1 = %i&quot;, 1]; 
-    @autoreleasepool {
-        NSNumber *number = [NSNumber numberWithlnt:1];
-        }
-}
-</code></pre>
-
-<p>上面这个例子展示了基本的用法，自动释放池于左花括号处创建, 并于对应的右花括号处自动清空。位于自动释放池范围内的对象，将在此范围末尾处收到<code>release</code>消息。自动释放池可以嵌套。系统在自动释放对象时，会把它放到最内层的池里。</p>
-
-<p><code>autoreleasepool</code>的常见用法为降低程序的内存峰值，比如下面这个代码：</p>
-
-<pre><code class="language-objc">NSArray *databaseRecords = /* ... */;
-NSMutableArray *people = [NSMutableArray new];
-for (NSDictionary *record in databaseRecords) {
-    EOCPerson *person = [[EOCPerson alloc] initWithRecord:record];
-    [people addObject:person];
-}
-</code></pre>
-
-<p>上述代码，因为<code>for</code>语句会不断的创建<code>person</code>对象，造成应用程序内存不断上涨，在执行完<code>for</code>语句后又会将所有临时对象都释放，造成内存的突然上涨与下降。这些临时对象本可以提前回收的，所以我们应该这么写：</p>
-
-<pre><code class="language-objc">NSArray *databaseRecords = /* ... */;
-NSMutableArray *people = [NSMutableArray new];
-for (NSDictionary *record in databaseRecords) {
-    @autoreleasepool{
-        EOCPerson *person = [[EOCPerson alloc] initWithRecord:record];
-        [people addObject:person];
-    }
-}
-</code></pre>
-
-<p>加上这个自动释放池之后，应用程序在执行循环时的内存峰值就会降低，不再像原来那么高了。<code>内存峰值(high-memory waterline)</code>是指应用程序在某个特定时段内的<code>最大内存用量 (highest memory footprint)</code>。新增的自动释放池块可以减少这个峰值，因为系统会在块的末尾把某些对象回收掉。而刚才提到的那种临时对象，就在回收之列。</p>
-
-<p>自动释放池机制就像<code>“栈”（stack)</code> 一样。系统创建好自动释放池之后，就将其推入栈中, 而清空自动释放池，则相当于将其从栈中弹出。在对象上执行自动释放操作，就等于将其放入栈顶的那个池里。</p>
-
-<p>现在我们创建一个iOS程序之后，系统会默认有一个<code>main.m文件</code>其中有代码：</p>
-
-<pre><code class="language-objc">#import &lt;UIKit/UIKit.h&gt;
-#import &quot;AppDelegate.h&quot;
-
-int main(int argc, char * argv[]) {
-    @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([AppDelegate class]));
-    }
-}
-</code></pre>
-
-<p>我们用自动释放池来包裹应用程序的<code>主入口点（main application entry point)</code>，除了上述主动添加了一个释放池，我们一般不需要主动添加，系统创建的线程一般默认都有自动释放池。</p>
-
-<p><code>@autordeaSepool</code>语法还有个好处：每个自动释放池均有其范围，可以避免无意间误用了那些在清空池后已为系统所回收的对象。例如：</p>
-
-<pre><code class="language-objc">@autoreleasepool {
-    id object = [self createObject];
-}
-[self useObject:object];
-
-</code></pre>
-
-<p>上述代码无法编译，因为<code>object</code>变量出了自动释放池块的外围后就不可用了（已经被释放），所以在调用<code>“useObject:”</code>方法时不能用它做参数。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>自动释放池排布在栈中，对象收到<code>autorelease</code>消息后，系统将其放入最顶端的池里。 </li>
-<li>合理运用自动释放池，可降低应用程序的内存峰值。</li>
-<li><code>@autoreleasepool</code>这种新式写法能创建出更为轻便的自动释放池。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%94%E7%AB%A0%20%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86.html'>第五章 内存管理</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15065800553035.html">
-                
-                  <h1>第四十五条：使用dispatch_once来执行只需运行一次的代码</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>单例模式顾名思义，就是一个类一般只会同时存在一个实例，常见的实现方式为在类中编写名为<code>sharedInstance</code>的类方法。例如：</p>
-
-<pre><code class="language-objc">+(id)sharedImstance{
-    static EOCClass *sharedlnstance = nil;
-        @synchronized(self){
-            if (!sharedlnstance) {
-                sharedlnstance = [[self alloc] init];
-            }
-    }
-    return sharedlnstance;
-}
-</code></pre>
-
-<p>该方法只会返回全类共用的单例实例，而不会在每次调用时都创建新的实例。</p>
-
-<p>为保证线程安全，上述代码将创建单例实例的代码包裹在同步块里。</p>
-
-<p>GCD中的一个函数可以更简单的执行这种只需执行一次的代码。为：</p>
-
-<pre><code class="language-objc">void dispatch_once (dispatch_once_t *token,
-                    dispatch_block_t block);
-</code></pre>
-
-<p>此函数接受类型为的<code>dispatch_once_t</code>的特殊参数<code>token</code>，此外还接受块参数，在块里面执行我们所需要运行一次的代码。对于给定的<code>token</code>来说，该函数保证相关的块必定会执行，且仅执行一次。首次调用该函数时，必然会执行块中的代码，最重要的一点在于，此操作完全是线程安全的。<strong><font color=red>请注意，对于只需执行一次的块来说，每次凋用函数时传入的标记都必须完全相同。因此，开发 者通常将标记变量声明在<code>static</code>或<code>global</code>作用域里。</font></strong></p>
-
-<p>将上面的代码改为<code>dispatch_once</code>来执行，就可以换为：</p>
-
-<pre><code class="language-objc">+ (id)sharedInstance {
-    static EOCClass ^sharedInstance = nil； 
-    static dispatch_once_t onceToken;
-    dispatch_once(&amp;onceToken, ^{
-        sharedlnstance = [[self alloc] initJ;
-    })；
-    return sharedInstance;
-}
-</code></pre>
-
-<p>使用<code>dispatch_once</code>可以简化代码并且彻底保证线程安全，开发者根本无须担心加锁或同步。所有问题都由<code>GCD</code>在底层处理。</p>
-
-<p>相比于同步机制的繁琐，<code>dispatch_once</code>更高效，此函数采用“原子访问”（atomic access)来査询<code>token</code>，以判断其所对应的代码原来是否已经执行过。速度一般是同步机制的两倍。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>经常需要编写“只需执行一次的线程安全代码”（thread-safe single-code execution)。通过GCD所提供的<code>dispatch_once</code>函数，很容易就能实现此功能。</li>
-<li>标记应该声明在<code>static</code>或<code>global</code>作用域中，这样的话，在把只需执行一次的块传给<code>dispatch once</code>函数时，传进去的标记也是相同的。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15055441842255.html">
-                
-                  <h1>第四十三条 掌握GCD和操作队列（NSOperation）的使用时机</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>虽然<code>GCD</code>很棒，但是我们有时候也应该选用正确的工具来使用。所以我们这里来介绍下<code>NSOperation</code>。</p>
-
-<p>很少有其他技术能与<code>GCD</code>的同步机制相媲美。对于那些只需执行一次的代码来说，使用<code>GCD</code>的<code>dispatch_once</code>最为方便。</p>
-
-<p>但是如果执行后台任务，<code>NSOperation</code>也许更适合。<code>NSOperation</code>是在<code>GCD</code>出现之前就有的一种技术。甚至现在操作队列在底层是用<code>GCD</code>来实现的。</p>
-
-<p>在两者的诸多差别中，<strong><font color=red>首先要注意：GCD是纯C的API,而操作队列则是Objective-C的对象。</font></strong>在<code>GCD</code>中，任务用块来表示，而块是个轻量级数据结构（参见第37条）。与之相 反，“操作&quot;（operation)则是个更为重量级的<code>Objective-C</code>对象。虽说如此，但<code>GCD</code>并不总是最佳方案。有时候采用对象所带来的开销微乎其微，使用完整对象所带来的好处反而大大超过其缺点。</p>
-
-<p>所以我们来介绍下它的好处：</p>
-
-<ul>
-<li><p>取消某个操作。如果使用操作队列，那么想要取消操作是很容易的。运行任务之前, 可以在<code>NSOperation</code>对象上调用<code>cancel</code>方法，该方法会设置对象内的标志位，用以表明此任务不需执行，不过，已经启动的任务无法取消。若是不使用操作队列，而是把块安排到<code>GCD</code>队列，那就无法取消了。那套架构是“安排好任务之后就不管了&quot;（fire and forget)。</p></li>
-<li><p>指定操作间的依赖关系。一个操作可以依赖其他多个操作。开发者能够指定操作之间的依赖体系，使特定的操作必须在另外一个操作顺利执行完毕后方可执行。比方说，从服务器端下载并处理文件的动作，可以用操作来表示，而在处理其他文件之前，必须先下载<code>“清单文件”（manifest file)</code>。后续的下载操作，都要依赖于先下载清单文件这一操作。如果操作队列允许并发的话，那么后续的多个下载操作就可以同时执行，但前提是它们所依赖的那个清单文件下载操作已经执行完毕。</p></li>
-<li><p>通过键值观测机制监控<code>NSOperation</code>对象的属性。<code>NSOperation</code>对象有许多属性都适合通过键值观测机制（简称KVO)来监听，比如可以通过<code>isCancelled</code>属性来判断任务是否已取消，又比如可以通过<code>isFinished</code>属性来判断任务是否已完成。如果想在某个任务变更其状态时得到通知，或是想用比<code>GCD</code>更为精细的方式来控制所要执行的 任务，那么键值观测机制会很有用。</p></li>
-<li><p>指定操作的优先级。操作的优先级表示此操作与队列中其他操作之间的优先关系。优先级高的操作先执行，优先级低的后执行。操作队列的<code>调度算法（scheduling algorithm)</code>虽<code>“不透明&quot;（opaque)</code>,但必然是经过一番深思熟虑才写成的。反之，<code>GCD</code>则没有直接实现此功能的办法。<code>GCD</code>的队列确实有优先级，不过那是针对整个队列来说的，而不是针对每个块来说的。而令开发者在<code>GCD</code>之上自己来编写调度算法，又不太合适。<strong><font color=red>因此，在优先级这一点上，操作队列所提供的功能要比GCD更为便利。</font></strong></p></li>
-</ul>
+<h3 id="toc_4">五个强盗抢到100个金币来分赃，强盗1提出分配方案，为了防止他分配不公，强盗们达成一致：他的方案必须有所有人（包括1号自己）的半数以上（注意，必须大于百分之五十）通过才可执行。否则，他将被杀死，再由2号强盗提出分配方案，2号的方案也要所有剩下的人（包括他自己）的半数以上通过。否则他也将被杀死，依次类推。假设这五个强盗都贪婪成性、残忍无比、绝顶聪明而又一诺千金，都想自己得到最多，都想看到别人死去而自己活。请问，1号强盗要怎样分配才能使自己活着而得到的黄金最多？为什么？</h3>
 
 <blockquote>
-<p><code>NSOperation</code>对象也有<code>“线程优先级”（thread priority)</code>,这决定了运行此操作的线程处在 何种优先级上。用<code>GCD</code>也可以实现此功能，然而采用操作队列更简单，只需设置一个属性。</p>
+<p>显然，5号是最不合作的，因为他没有被扔下海的风险，从直觉上说，每扔下去一个，潜在的对手就少一个；4号正好相反，他生存的机会完全取决于前面还有人活着，因此此人似乎值得争取；3号对前两个的命运完全不同情，他只需要4号支持就可以了；2号则需要3票才能活，那么，你…… 　　思路对头，但是太笼统了，不要忘了我们的假设前提：每个人都十足理性，都不可能犯逻辑错误。所以，你应该按照严格的逻辑思维去推想他们的决定。让我们从后往前推理：5号不用说了，他的策略最简单：巴不得把所有人都送去喂鲨鱼(但要注意：这并不意味着他要对每个人投反对票，他也要考虑其他人方案通过的情况)。来看4号：如果1～3号强盗都喂了鲨鱼，只剩4号和5号的话，5号一定投反对票让4号喂鲨鱼，以独吞全部金币。所以，4号惟有支持3号才能保命。</p>
+
+<p>3号知道这个策略，就会提(100，0，0)的分配方案，对4号、5号一毛不拔而将全部金币归为己有，因为他知道4号一无所获但还是会投赞成票，再加上自己一票他的方案即可通过。不过，2号推知到3号的方案，就会提出(98，0，l，1)的方案，即放弃3号，而给予4号和5号各1枚金币。由于该方案对于4号和5号来说比在3号分配时更为有利，他们将支持他而不希望他出局而由3号来分配。这样，2号将拿走98枚金币。不过，2号的方案会被l号所洞悉，l号并将提出(97，0，1，2，0)或(97，0，1，0，2)的方案，即放弃2号，而给3号1枚金币，同时给4号或5号2枚金币。由于l号的这一方案对于3号和4号(或5号)来说，相比2号分配时更优，他们将投l号的赞成票，再加上1号自己的票，1号的方案可获通过，97枚金币可轻松落入腰包。这无疑是1号能够获取最大收益的方案了！</p>
 </blockquote>
 
-<ul>
-<li>重用 <code>NSOperation</code>对象。系统内置了一些<code>NSOperation</code>的子类（比如<code>NSBlockOperation</code>)供开发者调用，要是不想用这些固有子类的话，那就得自己来创建了。这些类就是普通的<code>Objective-C</code>对象，能够存放任何信息。对象在执行时可以充分利用存于其中的信息，而且还可以随意调用定义在类中的方法。这就比派发队列中那些简单的块要强大许多。这些<code>NSOperation</code>类可以在代码中多次使用，它们符合软件开发中的“不重复”原则。</li>
-</ul>
-
-<p>正如大家所见，操作队列有很多地方胜过派发队列。操作队列提供了多种执行任务的方式，而且都是写好了的，直接就能使用。</p>
-
-<p>所以我们说，某些功能确实可以用高层的<code>Objective-C</code>方法来做，但这并不等于说它就一定比底层实现方案好。要想确定哪种方案更佳，最好还是测试一下性能。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>在解决多线程与任务管理问题时，派发队列并非唯一方案。</li>
-<li>操作队列提供了一套高层的<code>Objective-C API</code>，能实现纯<code>GCD</code>所具备的绝大部分功能，而且还能完成一些更为复杂的操作，那些操作若改用<code>GCD</code>来实现，则需另外编写代码。</li>
-</ul>
-
                         
                       </div>
                   </div>
@@ -569,10 +230,10 @@ int main(int argc, char * argv[]) {
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/9/16</span>
+                    <span class="date">2017/10/26</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
+          					    <span class="posted-in"><a href='%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html'>常见面试问题</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -586,79 +247,118 @@ int main(int argc, char * argv[]) {
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15050942669581.html">
+                <a class="clearlink" href="15088085969493.html">
                 
-                  <h1>第四十二条 多用GCD，少用performSelector系列方法</h1>
+                  <h1>最长公共子序列(动态规划)</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><code>Objective-C</code>本质上是一门非常动态的语言（参见第11条)，<code>NSObject</code>定义了几个方法, <mark>令开发者可以随意调用任何方法。这几个方法可以推迟执行方法调用，也可以指定运行方法所用的线程。</mark>这些功能原来很有用，但是在出现了<code>GCD</code>之后，这些功能就尽量不要使用了，尽量用<code>GCD</code>来取代他们。</p>
+                        	<p><strong>最长公共子序列问题（LCS）</strong>给定两个序列\(X=&lt;{x_1,x_2,...x_m}&gt;和Y=&lt;y_1,y_2,...y_n&gt;\),求X和Y长度最长的公共子序列。总共分三个步骤：</p>
 
-<p>其中他们又如下几个方法：</p>
+<h2 id="toc_0">步骤一：刻画最长公共子序列的特征</h2>
 
-<pre><code class="language-objc">-(id)performSelector : (SEL) selector
-//可以传两个参数
--(id)performSelector : (SEL) selector
-           withObject:（id）objectA
-           withObject:（id）objectB
-//传一个参数
--(id)performSelector : (SEL) selector
-           withObject:（id）object
+<p><img src="media/15088085969493/15088091467243.jpg" alt=""/></p>
+
+<h2 id="toc_1">步骤二：一个递归解</h2>
+
+<p><img src="media/15088085969493/15088095444692.jpg" alt=""/></p>
+
+<h2 id="toc_2">步骤三：计算LCS的长度</h2>
+
+<p><img src="media/15088085969493/15088132625221.jpg" alt=""/></p>
+
+<p>上述过程我们有如下图来表示：<br/>
+<img src="media/15088085969493/15088133360817.jpg" alt=""/></p>
+
+<h2 id="toc_3">步骤4 构造LCS</h2>
+
+<p><img src="media/15088085969493/15088133035826.jpg" alt=""/></p>
+
+<p>这里我们用C++来构造这个算法：</p>
+
+<pre><code class="language-c++">//
+//  main.cpp
+//
+//  Created by LZH on 2017/10/30.
+//  Copyright © 2017年 梁中豪. All rights reserved.
+//
+
+
+#include &lt;iostream&gt;
+#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+using namespace std;
+
+//计算LCS的长度
+void LCS_LENGTH(char *X ,char *Y ,int **b ,int **c ,int &amp;m ,int &amp;n)
+{
+    //    int m = sizeof(X)/sizeof(char);
+    //    int n = sizeof(Y)/sizeof(char);
+    
+    //    int b[m][n];
+    //    int c[m][n];
+    
+    for (int i=1; i&lt;m; i++) {
+        for (int j=1; j&lt;n; j++) {
+            if (X[i]==Y[j]) {
+                c[i][j] = c[i-1][j-1]+1;
+                b[i][j] = 1;
+            }
+            else if (c[i-1][j]&gt;=c[i][j-1])
+            {
+                c[i][j] = c[i-1][j];
+                b[i][j] = 2;
+            }
+            else
+            {
+                c[i][j] = c[i][j-1];
+                b[i][j] = 3;
+            }
+        }
+    }
+}
+
+void PRINT_LCS(int **b,char *X,int i,int j)
+{
+    if (i==0 || j==0) {
+        return;
+    }
+    if (b[i][j]==1) {
+        PRINT_LCS(b, X, i-1, j-1);
+        cout &lt;&lt; X[i] &lt;&lt;endl;
+    }
+    else if (b[i][j]==2)
+    {
+        PRINT_LCS(b, X, i-1, j);
+    }
+    else
+    {
+        PRINT_LCS(b, X, i, j-1);
+    }
+}
+
+int main()
+{
+    char X[8] = {&#39;x&#39;,&#39;A&#39;,&#39;B&#39;,&#39;C&#39;,&#39;B&#39;,&#39;D&#39;,&#39;A&#39;,&#39;B&#39;};
+    char Y[7] = {&#39;y&#39;,&#39;B&#39;,&#39;D&#39;,&#39;C&#39;,&#39;A&#39;,&#39;B&#39;,&#39;A&#39;};
+    int m = sizeof(X)/sizeof(char);
+    int n = sizeof(Y)/sizeof(char);
+    int **b =new int*[m];
+    for (int i = 0; i&lt;m; i++) {
+        b[i] = new int[n];
+    }
+    
+    int **c = new int*[m];
+    for (int i = 0; i&lt;m; i++) {
+        c[i] = new int[n];
+    }
+    LCS_LENGTH(X,Y,b,c,m,n);
+    PRINT_LCS(b,X,m-1,n-1);
+    return 0;
+}
+
 </code></pre>
-
-<p>具体用法如：</p>
-
-<pre><code class="language-objc">[object performSelector: @selector(selectorName)];
-
-[object performSelector: @selector(setValue:)
-             withObject: newValue];
-</code></pre>
-
-<p>上面的用法，会有很多局限，比如在<code>ARC</code>下，会发出警告表示：<code>也许会内存泄露</code>，这是因为编译器并不知道将要的选择子是什么，因此，也就不了解其方法签名及返回值，甚至连是否有返回值都不清楚，而且由于编译器不知道方法名，所以就没办法运用<code>ARC</code>的内存管麵则来判定返回值是不是该释放。鉴于此，<code>ARC</code>采用了比较谨慎的做法，就是不添加释放操作。然而这么<br/>
-做可能导致内存泄漏，因为方法在返回对象时可能已经将其保留了。</p>
-
-<p>另一个局限性是：返回值只能是<code>void</code>或对象类型。尽管所要执行的 选择子也可以返回<code>void</code>，但是<code>performSelector</code>方法的返回值类型毕竟是<code>id</code>。如果想返回整数或浮点数等类型的值，那么就需要执行一些复杂的转换操作了，而这种转换很容易出错。</p>
-
-<p>第三个局限是：这个方法最多只能传递两个参数，当选择子得到参数超过两个时，只能运用字典来传送数据（但是容易增加开销和造成bug）。</p>
-
-<p>所以我们的解决方法是：我们使用<code>块</code>来代替，并且<code>performSelector</code>系列方法都可以使用<code>GCD</code>机制使用块来实现。我们来举几个例子说明：</p>
-
-<p>如果我们想要延后执行某个任务：</p>
-
-<pre><code class="language-objc">//Using performSelector:withObjectrafterDelay: 
-[self performSelector:@selector(doSomething)
-           withObject:nil 
-           afterDelay:5.0];
-
-//Using dispatch_after
-dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, (int64 t)(5.0 * NSEC PER SEC));
-
-dispatch_after(time, dispatch_get_main—queue(), ^(void){
-     [self doSomething];
-})；
-</code></pre>
-
-<p>后者想要在主线程执行某个任务：</p>
-
-<pre><code class="language-objc">// Using performSelectorOnMainThread: withObject .-waitUntilDone :
-[self performSelectorOnMainThread:@selector(doSomething)
-                      withObject:nil 
-                      waitUntilDone:NO];
-//Using dispatch_async
-// (or if waitUntilDone is YES, then dispatchasync) 
-dispatch_async(dispatch_get_main_queue(), ^{
-        [self doSomething];
-});
-</code></pre>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li><code>performSelector</code>系列方法在内存管理方面容易有疏失。它无法确定将要执行的选择子具体是什么，因而<code>ARC</code>编译器也就无法插入适当的内存管理方法。</li>
-<li><code>performSelector</code>系列方法所能处理的选择子太过局限了，选择子的返回值类型及发送给方法的参数个数都受到限制。</li>
-<li>如果想把任务放在另一个线程上执行，那么最好不要用<code>performSelector</code>系列方法，而是应该把任务封装到块里，然后调用大中枢派发机制的相关方法来实现。</li>
-</ul>
 
                         
                       </div>
@@ -667,10 +367,10 @@ dispatch_async(dispatch_get_main_queue(), ^{
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/9/11</span>
+                    <span class="date">2017/10/24</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -684,140 +384,147 @@ dispatch_async(dispatch_get_main_queue(), ^{
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15049238737460.html">
+                <a class="clearlink" href="15087194946164.html">
                 
-                  <h1>第四十一条 多用派发队列，少用同步锁</h1>
+                  <h1>动态规划</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>在<code>OC</code>中，如果有多个线程要执行同一份代码，那么有时可能会出问题。这种情况下，通常要使用锁来实现某种同步机制。在<code>GCD</code>出现之前，有两种办法，第一种是采用内置的<code>“同步块”（synchronization block)</code>:</p>
-
-<pre><code class="language-objc">-(void)synchronizedMethod {
-    @synchronized(self) {
-    //Safe
-    }
-}
-</code></pre>
-
-<p>这种写法会根据给定的对象，自动创建一个锁，并等待块中的代码执行完毕。执行到这段代码结尾处，锁就释放了。在本例中，同步行为所针对的对象是<code>self</code>。这么写通常没错，因为它可以保证每个对象实例都能不受干扰地运行其<code>synchronizedMethod</code>方法。然而，滥用 <code>@SynChronized(self)</code>则会降低代码效率，因为共用同一个锁的那些同步块，都必须按顺序执行。若是在<code>self</code>对象上频繁加锁，那么程序可能要等另一段与此无关的代码执行完毕，才能继续执行当前代码，这样做其实并没有必要。</p>
-
-<p>另一种加锁的办法是<code>NSLock</code>对象：</p>
-
-<pre><code class="language-objc">_lock = [[NSLockalloc] init];
-
--(void)synchronizedMethod {
-    [_lock lock];
-    //Safe
-    [_lock unlock];
-}
-</code></pre>
-
-<p>也可以使用<code>NSRecursiveLock</code>这种<code>“递归锁’（recursive lock)</code>，线程能够多次持有该锁，而不会出现<code>死锁(deadlock)</code>现象。</p>
-
-<p>虽然上面两种方法可以用，但是也有一些缺陷，比如：在某些情况下，同步快会导致死锁，另外，效率不是很高。而如果直接使用锁对象的话，一旦遇到死锁，就会非常麻烦。</p>
-
-<p><strong>所以我们一般使用GCD来替代，它的优点就是可以简单，高效的为代码加锁</strong>。属性因为需要经常性的同步，所以当要线程安全的时候，加上<code>“atomic”</code>特质来修饰属性。</p>
-
-<p>但是如果我们想要自己实现属性访问方法时，可以：</p>
-
-<pre><code class="language-objc">-(NSString*)someString {
-    @synchronized(self) {
-        return _someString;
-    }
-}
--(void)setSomeString:(NSString*)someString { 
-    @synchronized(self) {
-        _someString = someString;
-    }
-}
-</code></pre>
-
-<p>但是滥用<code>@synchronized(self)</code>会很危险，因为所有同步块都会彼此抢夺同一个锁。要是有很多个属性都这么写的话，那么每个属性的同步块都要等其他所有同步块执行完毕才能执行，这也许并不是开发者想要的效果。我们只是想令每个属性各自独立地同步。</p>
-
-<p><strong><em>而且上述做法并不是绝对的线程安全。因为在两次访问操作之间，其他线程可能会写入新的属性值。</em></strong></p>
-
-<p>这里我们使用<code>“串行同步队列”（serial synchronization queue)</code>。将读取操作及写入操作都安排在同一个队列里，即可保证数据同步。：</p>
-
-<pre><code class="language-objc">_syncQueue = dispatch_queue_create(&quot;com.effectiveobjectivec.syncQueue&quot;, NULL);
-
--(NSString*)someString {
-    _block NSString *localSomeString;
-    dispatch_sync(_syncQueue, ^{
-        localSomeString = _someString;
-    })；
-    return localSomeString;
-}
-
--(void)setSomeString:(NSString*)someString { 
-    dispatch_sync(_syncQueue,^{
-        _someString = someString;
-    });
-}
-</code></pre>
-
-<p>此模式的思路是：把设置操作与获取操作都安排在序列化的队列里执行（串行同步队列并不会拓展新的线程），这样的话，所有针对属性的访问操作就都同步了。（关于GCD的串行队列/并发队列与iOS多线程这里不详细讲解了，后续深入探讨）。</p>
-
-<p>多个获取方法可以并发执行，而获取方法与设置方法之间不能并发执行，利用这个特点，还能写出更快一些的代码来。此时正可以体现出<code>GCD</code>写法的好处。用同步块或锁对象，是无法轻易实现出下面这种方案的。这次不用串行队列，而改用<code>并发队列（concurrentquene)</code>:</p>
-
-<pre><code class="language-objc">_syncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-
--(NSString*}someString {
-    __block NSString *localSomeString; 
-    dispatch_sync( _syncQueue, ^{
-        localSomeString = _someString;
-    })； 
-    return localSomeString;
-}
-
--(void)setSomeString:(NSString*)someString { 
-        dispatch_async(syncQueue, ^{
-        _someString = someScring;
-    });
-}
-</code></pre>
-
-<p>光是上面这些代码还不够，所有读取操作与写入操作都会在同一个队列上执行，不过由于是并发队列，所以读取与写人操作可以随时执行。而我们恰恰不想让这些操作随意执行。这就要用到<code>栅栏（barrier)</code>，是<code>GCD</code>中的一个功能：</p>
-
-<pre><code class="language-objc">void dispatch_barrier_async(dispatch_queue_t queue,
-                            dispatch_block_t block);
-void dispatch_barrier_sync(dispatch_queue_t queue,
-                            dispatch_block_t block);
-</code></pre>
-
-<p><strong><font color=red>在队列中，栅栏块必须单独执行，不能与其他块并行。这只对并发队列有意义，因为串行队列中的块总是按顺序逐个来执行的。并发队列如果发现接下来要处理的块是个栅栏块 (barrier block)，那么就一直要等当前所有并发块都执行完毕，才会单独执行这个栅栏块。待栅栏块执行过后，再按正常方式继续向下处理。</font></strong></p>
-
-<p>在本例中，可以用栅栏块来实现属性的设置方法。在设置方法中使用了栅栏块之后，对属性的读取操作依然可以并发执行，但是写人操作却必须单独执行了。例如：</p>
-
-<pre><code class="language-objc">_syncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-
--(NSString*}someString {
-    __block NSString *localSomeString; 
-    dispatch_sync( _syncQueue, ^{
-        localSomeString = _someString;
-    })； 
-    return localSomeString;
-}
-
--(void)setSomeString:(NSString*)someString { 
-        dispatch_barrier_async(syncQueue, ^{
-        _someString = someScring;
-    });
-}
-</code></pre>
-
-<p><strong>执行的顺序如图所示：</strong><br/>
-<img src="media/15049238737460/15049413869385.jpg" alt=""/></p>
-
-<p>测试一下性能，你就会发现，这种做法肯定比使用串行队列要快。注意，设置函数也可以改用同步的<code>栅栏块(synchronous barrier)</code>来实现，那样做可能会更髙效，其原因刚才已经 解释过了。<strong><font color=red>最好还是测一测每种做法的性能，然后从中选出最适合当前场景的方案</font></strong>。</p>
-
-<h2 id="toc_0">要点</h2>
-
+                        	<ul>
+<li>
+<a href="#toc_0">钢条切割问题</a>
 <ul>
-<li>派发队列可用来表述<code>同步语义（synchronization semantic)</code>,这种做法要比使用<code>@synchronized块</code>或<code>NSLock</code>对象更简单。</li>
-<li>将同步与异步派发结合起来，可以实现与普通加锁机制一样的同步行为，而这么做却不会阻塞执行异步派发的线程。</li>
-<li>使用同步队列及栅栏块，可以令同步行为更加髙效。</li>
+<li>
+<a href="#toc_1">分治法</a>
+</li>
+<li>
+<a href="#toc_2">动态规划</a>
+</li>
 </ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_3">总结</a>
+
+
+<p>动态规划与分治法很类似，都是通过组合子问题的解来求解原问题。但是不同的是动态规划应用于子问题重叠的情况,即不同的子问题也具有公共的子子问题。分治法在这种情况下，会反复的求解那些公共子子问题。而动态规划算法对每个子子问题只求解一遍，将其保存在一个表格中，避免每次都计算。</p>
+
+<h2 id="toc_0">钢条切割问题</h2>
+
+<p>我们第一个动态规划问题是钢条切割问题。<br/>
+<img src="media/15087194946164/15087197999988.jpg" alt=""/></p>
+
+<h3 id="toc_1">分治法</h3>
+
+<p>我们来先看一下简答的分治法：</p>
+
+<pre><code class="language-objc">//
+//  main.m
+//  CUT-ROD
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface CUT_ROD:NSObject;
+
+-(NSInteger)CUT_ROD:(NSArray*)P length:(NSInteger)n;
+
+@end
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        NSArray *c = @[@1,@5,@8,@9,@10,@17,@17,@20,@24,@30];
+        CUT_ROD *a = [CUT_ROD new];
+        NSInteger result = [a CUT_ROD:c length:10];
+        NSLog(@&quot;result is %ld&quot;,result);
+    }
+    return 0;
+}
+
+@implementation CUT_ROD
+//简单的分治法,会重复计算子子结果
+-(NSInteger)CUT_ROD:(NSArray *)P length:(NSInteger)n{
+    if (n==0) {
+        return 0;
+    }
+    NSInteger q = -1;
+    for (NSInteger i=0; i&lt;n; i++) {
+        q = q&gt;([P[i] integerValue]+[self CUT_ROD:P length:n-i-1]) ? q:([P[i] integerValue]+[self CUT_ROD:P length:n-i-1]);
+    }
+    return q;
+}
+
+@end
+
+</code></pre>
+
+<p>上述代码使用递归来实现的，但是每次都要递归的重复来计算相同的子子问题，如图所示：<br/>
+<img src="media/15087194946164/15087246470673.jpg" alt=""/></p>
+
+<p>所以我们就在想，只要把求解得到的子子问题答案记录下，等到下次要用的时候直接调用它，就可以省下大量的时间。所以我们下面采用动态规划来写一遍。</p>
+
+<h3 id="toc_2">动态规划</h3>
+
+<p><strong><font color=red>动态规划是一个典型的时空权衡的例子，付出额外的内存空间来降低计算时间。</font></strong></p>
+
+<p>第一种方法：带备忘的自顶向下算法</p>
+
+<pre><code class="language-objc">//动态规划 带备忘的自顶向下
+-(NSInteger)MEMOIZED_CUT_ROD:(NSArray *)P length:(NSInteger)n{
+    NSMutableArray *logArr =[[NSMutableArray alloc] initWithCapacity:11];
+    for (int i = 0; i&lt;=10; i++) {
+        [logArr addObject:@(-1)];
+    }
+    return [self MEMOIZED_CUT_ROD_AUX:P length:n log:logArr];
+}
+-(NSInteger)MEMOIZED_CUT_ROD_AUX:(NSArray*)p length:(NSInteger)n log:(NSMutableArray*)r{
+    NSInteger q;
+    if ([r[n] integerValue]&gt;=0) {
+        return [r[n] integerValue];
+    }
+    if (n==0) {
+        q = 0;
+    }else{
+        q = -1;
+        for (NSInteger i = 0; i&lt;n; i++) {
+            q = q&gt;[p[i] integerValue] + [self MEMOIZED_CUT_ROD_AUX:p length:n-i-1 log:r] ? q : [p[i] integerValue] + [self MEMOIZED_CUT_ROD_AUX:p length:n-i-1 log:r];
+        }
+    }
+    [r replaceObjectAtIndex:n withObject:@(q)];
+    return q;
+}
+</code></pre>
+
+<p><code>MEMOIZED_CUT_ROD</code>方法引入<code>r</code>数组，记录每个长度的最优收益值，下面的方法将记录的值存入<code>r</code>数组中，并调用存入<code>r</code>的子子问题所得到收益值。</p>
+
+<p>第二个方法，字底向上版本，这个版本更为简单：</p>
+
+<pre><code class="language-objc">-(NSInteger)BOTTOM_UP_CUT_ROD:(NSArray *)P length:(NSInteger)n{
+    NSMutableArray *arrLog = [[NSMutableArray alloc] initWithCapacity:11];
+    for (int i = 0; i&lt;=10; i++) {
+        [arrLog addObject:@(0)];
+    }
+    NSInteger q = -1;
+    for (int j=0; j&lt;n; j++) {
+        q = -1;
+        for (int i=0; i&lt;=j; i++) {
+            NSLog(@&quot;%li&quot;,q);
+            q = q &gt; ([P[i] integerValue] + [arrLog[j-i] integerValue]) ? q : ([P[i] integerValue] + [arrLog[j-i] integerValue]);
+            NSLog(@&quot;%li&quot;,q);
+        }
+        [arrLog replaceObjectAtIndex:j+1 withObject:@(q)];
+    }
+    return [arrLog[n] integerValue];
+}
+</code></pre>
+
+<p>依次来求解长度从1到n的最大收益。</p>
+
+<h1 id="toc_3">总结</h1>
+
+<p>当我们思考一个动态规划的问题时，最好弄清涉及的子问题与他们的依赖关系。如上图的依赖图为：<br/>
+<img src="media/15087194946164/15087412491634.jpg" alt=""/></p>
 
                         
                       </div>
@@ -826,10 +533,651 @@ void dispatch_barrier_sync(dispatch_queue_t queue,
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/9/9</span>
+                    <span class="date">2017/10/23</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15083737124086.html">
+                
+                  <h1>使用RAC的基本操作</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">开始</a>
+<ul>
+<li>
+<a href="#toc_1">类型转换</a>
+</li>
+<li>
+<a href="#toc_2">创建有效的状态信号</a>
+</li>
+<li>
+<a href="#toc_3">聚合信号</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_4">响应式的登录</a>
+<ul>
+<li>
+<a href="#toc_5">创建信号</a>
+</li>
+<li>
+<a href="#toc_6">添加附加操作（Adding side-effects）</a>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>作为一个iOS开发者，你写的每一行代码几乎都是在相应某个事件，例如按钮的点击，收到网络消息，属性的变化（通过KVO）或者用户位置的变化（通过CoreLocation）。但是这些事件都用不同的方式来处理，比如action、delegate、KVO、callback等。<code>ReactiveCocoa</code>为事件定义了一个标准接口，从而可以使用一些基本工具来更容易的连接、过滤和组合。</p>
+
+<p>这里我们来创建一个简单的登录功能界面，当输入的<code>name</code>与<code>password</code>符合我们的预期就输出<code>success</code>。</p>
+
+<h2 id="toc_0">开始</h2>
+
+<p>首先我们创建一个工程起名为<code>FirstRAC</code>，并在里面创建<code>podfile</code>文件：</p>
+
+<pre><code class="language-objc">source &#39;https://github.com/CocoaPods/Specs.git&#39;
+
+platform :ios, ‘8.0’
+use_frameworks!
+
+target &#39;FirstRAC’ do
+
+    pod &#39;Masonry&#39;
+    pod &#39;ReactiveObjC&#39;, &#39;~&gt; 3.0.0&#39;
+
+end
+</code></pre>
+
+<p>首先我们创建一个<code>button</code>，两个<code>Label</code>和<code>textField</code>如下图所示：<br/>
+<img src="media/15083737124086/15083741205915.jpg" alt=""/></p>
+
+<p>这里我们的界面布局使用<code>Masonry</code>来进行约束。</p>
+
+<p>界面元素的属性声明为：</p>
+
+<pre><code class="language-objc">@property(nonatomic,strong) UIView *login;
+@property(nonatomic,strong) UILabel *nameLabel;
+@property(nonatomic,strong) UILabel *passLabel;
+@property(nonatomic,strong) UITextField *name;
+@property(nonatomic,strong) UITextField *pass;
+@property(nonatomic,strong) UIButton *sign;
+</code></pre>
+
+<p>元素的约束以及创建为：</p>
+
+<pre><code class="language-objc">self.login = [[UIView alloc] initWithFrame:CGRectZero];
+    
+    _name = [[UITextField alloc] init];
+    _name.borderStyle = UIFontWeightBold;
+    _name.font = [UIFont systemFontOfSize:15];
+    _name.placeholder = @&quot;Enter Name&quot;;
+    [_login addSubview:_name];
+    
+    _pass = [[UITextField alloc] init];
+    _pass.borderStyle = UIFontWeightBold;
+    _pass.font = [UIFont systemFontOfSize:15];
+    _pass.placeholder = @&quot;Enter Pass&quot;;
+    [_login addSubview:_pass];
+    
+    _nameLabel = [[UILabel alloc] init];
+    _nameLabel.backgroundColor = UIColor.whiteColor;
+    _nameLabel.font = [UIFont systemFontOfSize:14.0];
+    _nameLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+    _nameLabel.text = @&quot;Name&quot;;
+    [_login addSubview:_nameLabel];
+    
+    _passLabel = [[UILabel alloc] init];
+    _passLabel.backgroundColor = UIColor.whiteColor;
+    _passLabel.font = [UIFont systemFontOfSize:14.0];
+    _passLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+    _passLabel.text = @&quot;Pass&quot;;
+    [_login addSubview:_passLabel];
+    
+    _sign = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    _sign.layer.borderWidth = 3;
+//    _sign.layer.borderColor = [UIColor blueColor].CGColor;
+    _sign.titleLabel.textColor = [UIColor redColor];
+//    _sign.backgroundColor = [UIColor greenColor];
+    [_sign setTitle:@&quot;Sign&quot; forState:UIControlStateNormal];
+    [_sign setTitle:@&quot;Push&quot; forState:UIControlStateHighlighted];
+    [_sign setTitleColor:UIColor.blackColor forState:UIControlStateNormal];
+    _sign.showsTouchWhenHighlighted = YES;
+//    [_sign addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
+    [_login addSubview:_sign];
+    [self.view addSubview:_login];
+
+    [_login mas_makeConstraints:^(MASConstraintMaker *make){
+        make.left.right.and.bottom.equalTo(self.view);
+        make.top.equalTo(self.mas_topLayoutGuide).offset(@50);
+    }];
+    [_nameLabel mas_makeConstraints:^(MASConstraintMaker *make){
+        make.top.equalTo(_login.top);
+        make.height.equalTo(@20);
+        make.left.equalTo(_login.left).with.offset(20);
+    }];
+    [_passLabel mas_makeConstraints:^(MASConstraintMaker *make){
+        make.top.equalTo(_nameLabel.bottom).with.offset(10);
+        make.centerX.equalTo(_nameLabel.centerX);
+        make.height.equalTo(@20);
+    }];
+    [_name mas_makeConstraints:^(MASConstraintMaker *make){
+        make.left.equalTo(_nameLabel.right).with.offset(5);
+        make.centerY.equalTo(_nameLabel.centerY);
+        make.height.equalTo(@20);
+    }];
+    [_pass mas_makeConstraints:^(MASConstraintMaker *make){
+        make.left.equalTo(_passLabel.right).with.offset(5);
+        make.centerY.equalTo(_passLabel.centerY);
+        make.height.equalTo(@20);
+    }];
+    [_sign mas_makeConstraints:^(MASConstraintMaker *make){
+        make.height.equalTo(@50);
+        make.width.equalTo(@100);
+        make.top.equalTo(_pass.bottom).offset(@50);
+        make.centerX.equalTo(self.view.centerX);
+    }];
+
+</code></pre>
+
+<p>之后我们运用<code>RAC</code>为界面的元素添加各种事件，首先我们可以简单的为<code>name</code>的<code>textField</code>来订阅事件：</p>
+
+<pre><code class="language-objc">[[self.name.rac_textSignal
+     filter:^BOOL(id value){
+         NSString *text = value;
+         return text.length&gt;3;
+     }]
+     subscribeNext:^(id x){
+        NSLog(@&quot;%@&quot;,x);
+    }];
+</code></pre>
+
+<p>该事件对输入的文本进行过滤，将输入文本的长度大于3的文本转化成信号，传递给下一个订阅事件；下一个订阅者输出文本内容。</p>
+
+<p><font color=red>RACSignal有很多方法可以来订阅不同的事件类型。每个方法都需要至少一个block，当事件发生时就会执行block中的逻辑。在上面的例子中可以看到每次next事件发生时，<br/>
+subscribeNext:方法提供的block都会执行。<br/><br/>
+ReactiveCocoa框架使用category来为很多基本UIKit控件添加signal。这样你就能给控件添加订阅了，text field的<code>rac_textSignal</code>就是这么来的。</font></p>
+
+<h3 id="toc_1">类型转换</h3>
+
+<p>我们运行下面代码就会发现：</p>
+
+<pre><code class="language-objc">[[[self.pass.rac_textSignal
+       map:^id(NSString *text){
+           return @(text.length);
+       }]
+      filter:^BOOL(NSNumber *length){
+          return [length integerValue]&gt;3;
+      }]
+     subscribeNext:^(id x){
+         NSLog(@&quot;%@&quot;,x);
+     }];
+</code></pre>
+
+<p>编译运行，你会发现<code>log</code>输出变成了文本的长度而不是内容。这是因为：<font color=red>新加的map操作通过block改变了事件的数据。map从上一个next事件接收数据，通过执行block把返回值传给下一个next事件。在上面的代码中，map以NSString为输入，取字符串的长度，返回一个NSNumber。</font></p>
+
+<p>如下图所示：<br/>
+<img src="media/15083737124086/15083747539689.png" alt=""/></p>
+
+<p>能看到<code>map</code>操作之后的步骤收到的都是<code>NSNumber</code>实例。你可以使用<code>map</code>操作来把接收的数据转换成想要的类型，只要它是个对象。</p>
+
+<h3 id="toc_2">创建有效的状态信号</h3>
+
+<p>首先我们创建两个信号;</p>
+
+<pre><code class="language-objc">RACSignal *validUsernameSignal =[self.name.rac_textSignal
+                                     map:^id(NSString *text){
+                                         return @([self isValidUsername:text]);
+                                     }];
+RACSignal *validPasswordSignal = [self.pass.rac_textSignal
+                                      map:^id(NSString *text){
+                                          return @([self isValidPassword:text]);
+                                      }];
+
+- (BOOL)isValidUsername:(NSString *)username {
+    return username.length &gt; 3;
+}
+
+- (BOOL)isValidPassword:(NSString *)password {
+    return password.length &gt; 3;
+}
+</code></pre>
+
+<p>可以看到，上面的代码对每个输入框的<code>rac_textSignal</code>应用了一个map转换。输出是一个用<code>NSNumber</code>封装的布尔值。</p>
+
+<p>下一步是转换这些信号，从而能为输入框设置不同的背景颜色。基本上就是，你订阅这些信号，然后用接收到的值来更新输入框的背景颜色。下面有一种方法很方便：</p>
+
+<pre><code class="language-objc">    RAC(self.name , backgroundColor) = [validUsernameSignal
+                                        map:^id(NSNumber *nameValid){
+                                            return [nameValid boolValue] ? [UIColor clearColor]:[UIColor yellowColor];
+                                        }];
+    RAC(self.pass , backgroundColor) = [validPasswordSignal
+                                        map:^id(NSNumber *nameValid){
+                                            return [nameValid boolValue] ? [UIColor clearColor]:[UIColor yellowColor];
+                                        }];
+</code></pre>
+
+<p><strong><font color=red>RAC宏允许直接把信号的输出应用到对象的属性上。RAC宏有两个参数，第一个是需要设置属性值的对象，第二个是属性名。每次信号产生一个next事件，传递过来的值都会应用到该属性上。</font></strong></p>
+
+<p><img src="media/15083737124086/15083750523260.png" alt=""/></p>
+
+<h3 id="toc_3">聚合信号</h3>
+
+<p>目前在应用中，登录按钮只有当用户名和密码输入框的输入都有效时才工作。现在要把这里改成响应式的。</p>
+
+<p>现在的代码中已经有可以产生用户名和密码输入框是否有效的信号了——<code>validUsernameSignal</code>和<code>validPasswordSignal</code>了。现在需要做的就是聚合这两个信号来决定登录按钮是否可用。</p>
+
+<p>把下面的代码添加到<code>viewDidLoad</code>的末尾：</p>
+
+<pre><code class="language-objc">RACSignal *signUpActiveSignal = [RACSignal combineLatest:@[validUsernameSignal,validPasswordSignal] reduce:^id(NSNumber *usernameValid, NSNumber *passwordValid){
+        return @([usernameValid boolValue]&amp;&amp;[passwordValid boolValue]);
+    }];
+</code></pre>
+
+<p><strong><font color=red>上面的代码使用combineLatest:reduce:方法把validUsernameSignal和validPasswordSignal产生的最新的值聚合在一起，并生成一个新的信号。每次这两个源信号的任何一个产生新值时，reduce block都会执行，block的返回值会发给下一个信号。</font></strong></p>
+
+<p><em>注意：RACsignal的这个方法可以聚合任意数量的信号，reduce block的参数和每个源信号相关。ReactiveCocoa有一个工具类RACBlockTrampoline，它在内部处理reduce block的可变参数。实际上在ReactiveCocoa的实现中有很多隐藏的技巧，值得你去看看。</em></p>
+
+<p>现在我们的逻辑变为：<img src="media/15083737124086/15083753306027.png" alt=""/></p>
+
+<p>上图展示了一些重要的概念，你可以使用<code>ReactiveCocoa</code>来完成一些重量级的任务。   </p>
+
+<ul>
+<li><p>分割——信号可以有很多<code>subscriber</code>，也就是作为很多后续步骤的源。注意上图中那个用来表示用户名和密码有效性的布尔信号，它被分割成多个，用于不同的地方。</p></li>
+<li><p>聚合——多个信号可以聚合成一个新的信号，在上面的例子中，两个布尔信号聚合成了一个。实际上你可以聚合并产生任何类型的信号。</p></li>
+</ul>
+
+<p><strong><mark>这些改动的结果就是，代码中没有用来表示两个输入框有效状态的私有属性了。这就是用响应式编程的一个关键区别，你不需要使用实例变量来追踪瞬时状态。</mark></strong></p>
+
+<h2 id="toc_4">响应式的登录</h2>
+
+<p>应用目前使用上面图中展示的响应式管道来管理输入框和按钮的状态。但是按钮按下的处理用的还是<code>action</code>，所以下一步就是把剩下的逻辑都替换成响应式的。</p>
+
+<p>你已经知道了<code>ReactiveCocoa</code>框架是如何给基本<code>UIKit</code>控件添加属性和方法的了。目前你已经使用了<code>rac_textSignal</code>，它会在文本发生变化时产生信号。为了处理按钮的事件，现在需要用到<code>ReactiveCocoa</code>为<code>UIKit</code>添加的另一个方法，<mark><code>rac_signalForControlEvents</code></mark>。</p>
+
+<p>现在回到<code>ViewController.m</code>中，把下面的代码添加到<code>viewDidLoad</code>的末尾：</p>
+
+<pre><code class="language-objc">[[self.signInButton
+   rac_signalForControlEvents:UIControlEventTouchUpInside]
+   subscribeNext:^(id x) {
+     NSLog(@&quot;button clicked&quot;);
+   }];
+</code></pre>
+
+<p>上面的代码从按钮的<code>UIControlEventTouchUpInside</code>事件创建了一个信号，然后添加了一个订阅，在每次事件发生时都会输出<code>log</code>。<br/>
+你就会发现每次点击按钮后，就会响应输出事件，输出<code>button clicked</code>。</p>
+
+<p>现在按钮有了点击事件的信号，下一步就是把它和登录流程连接起来。。那么问题就来了，打开<code>RWSignInService.h</code>，看一下接口：</p>
+
+<pre><code class="language-objc">//RWSignInService.h
+#import &lt;Foundation/Foundation.h&gt;
+
+typedef void (^RWSignInResponse)(BOOL);
+
+@interface RWSignInService : NSObject
+- (void)signInWithUsername:(NSString *)username
+                 password:(NSString *)password
+                 complete:(RWSignInResponse)completeBlock;
+@end
+
+//RWSignInService.m
+#import &quot;RWSignInService.h&quot;
+
+@implementation RWSignInService
+
+- (void)signInWithUsername:(NSString *)username password:(NSString *)password complete:(RWSignInResponse)completeBlock {
+    
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    double delayInSeconds = 2.0;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+        BOOL success = [username isEqualToString:@&quot;user&quot;] &amp;&amp; [password isEqualToString:@&quot;password&quot;];
+        completeBlock(success);
+    });
+}
+
+@end
+</code></pre>
+
+<p>这个<code>service</code>有3个参数，用户名、密码和一个完成回调<code>block</code>。这个<code>block</code>会在登录成功或失败时执行。你可以在按钮点击事件的<code>subscribeNext: blcok</code>里直接调用这个方法。</p>
+
+<p><em>注意：本教程为了简便使用了一个假的service，所以它不依赖任何外部API。但你现在的确遇到了一个问题，如何使用这些不是用信号表示的API呢？</em></p>
+
+<h3 id="toc_5">创建信号</h3>
+
+<p><mark>幸运的是，把已有的异步API用信号的方式来表示相当简单。</mark>，还是在<code>ViewController.m</code>中，添加下面的方法：</p>
+
+<pre><code class="language-objc">-(RACSignal *)signInSignal{
+    return [RACSignal createSignal:^RACDisposable *(id subscriber){
+        [self.signInService signInWithUsername:self.name.text password:self.pass.text complete:^(BOOL success){
+            [subscriber sendNext:@(success)];
+            [subscriber sendCompleted];
+        }];
+        return nil;
+    }];
+}
+</code></pre>
+
+<p>上面的方法创建了一个信号，使用用户名和密码登录。现在分解来看一下。</p>
+
+<p>上面的代码使用<code>RACSignal</code>的<code>createSignal:</code>方法来创建信号。方法的入参是一个<code>block</code>，这个<code>block</code>描述了这个信号。当这个信号有<code>subscriber</code>时，<code>block</code>里的代码就会执行。</p>
+
+<p><code>block</code>的入参是一个<code>subscriber</code>实例，它遵循<code>RACSubscriber</code>协议，协议里有一些方法来产生事件，你可以发送任意数量的<code>next</code>事件，或者用<code>error\complete</code>事件来终止。本例中，信号发送了一个<code>next</code>事件来表示登录是否成功，随后是一个<code>complete</code>事件。</p>
+
+<p>这个<code>block</code>的返回值是一个<code>RACDisposable</code>对象，它允许你在一个订阅被取消时执行一些清理工作。当前的信号不需要执行清理操作，所以返回<code>nil</code>就可以了。</p>
+
+<p>可以看到，把一个异步<code>API</code>用信号封装是多简单！</p>
+
+<p>现在就来使用这个新的信号。把之前添加在<code>viewDidLoad</code>中的代码更新成下面这样的：</p>
+
+<pre><code class="language-objc">[[[self.signInButton
+   rac_signalForControlEvents:UIControlEventTouchUpInside]
+   map:^id(id x){
+     return[self signInSignal];
+   }]
+   subscribeNext:^(id x){
+     NSLog(@&quot;Sign in result: %@&quot;, x);
+   }];
+
+</code></pre>
+
+<p>上面的代码使用<code>map</code>方法，把按钮点击信号转换成了登录信号。<code>subscriber</code>输出<code>log</code>.</p>
+
+<p>编译运行，点击登录按钮，查看<code>Xcode</code>的控制台后发现输出的是一个信号实例，没错，你已经给<code>subscribeNext:</code>的<code>block</code>传入了一个信号，但传入的不是登录结果的信号。<br/>
+<img src="media/15083737124086/15083764662317.png" alt=""/></p>
+
+<p>当点击按钮时，<code>rac_signalForControlEvents</code>发送了一个<code>next</code>事件（事件的data是UIButton）。<code>map</code>操作创建并返回了登录信号，这意味着后续步骤都会收到一个<code>RACSignal</code>。这就是你在<code>subscribeNext:</code>这步看到的。</p>
+
+<p>上面问题的解决方法，有时候叫做信号中的信号，换句话说就是一个外部信号里面还有一个内部信号。你可以在外部信号的<code>subscribeNext:block</code>里订阅内部信号。不过这样嵌套太混乱啦，还好<code>ReactiveCocoa</code>已经解决了这个问题。</p>
+
+<p>解决的方法很简单，只需要把<code>map</code>操作改成<code>flattenMap</code>就可以了：</p>
+
+<pre><code class="language-objc">[[[self.signInButton
+   rac_signalForControlEvents:UIControlEventTouchUpInside]
+   flattenMap:^id(id x){
+     return[self signInSignal];
+   }]
+   subscribeNext:^(id x){
+     NSLog(@&quot;Sign in result: %@&quot;, x);
+   }];
+</code></pre>
+
+<p>这个操作把按钮点击事件转换为登录信号，同时还从内部信号发送事件到外部信号。</p>
+
+<p>到这里我们的大部分内容就结束了。最后就是在<code>subscribeNext</code>步骤里添加登录成功后的逻辑。把代码更新成下面的：</p>
+
+<pre><code class="language-objc">[[[self.sign rac_signalForControlEvents:UIControlEventTouchUpInside]
+     flattenMap:^id(id x){
+         return [self signInSignal];
+     }]
+     subscribeNext:^(NSNumber*signedIn){
+         BOOL success =[signedIn boolValue];
+         if(success){
+             NSLog(@&quot;Success!!!&quot;);
+         }
+     }];
+</code></pre>
+
+<p>但是，你注意到这个应用现在有一些用户体验上的小问题了吗？当登录service正在校验用户名和密码时，登录按钮应该是不可点击的。这会防止用户多次执行登录操作。</p>
+
+<p>这个逻辑应该怎么添加呢？改变按钮的可用状态并不是转换（map）、过滤（filter）或者其他已经学过的概念。其实这个就叫做“副作用”，换句话说就是在一个<code>next</code>事件发生时执行的逻辑，而该逻辑并不改变事件本身。</p>
+
+<h3 id="toc_6">添加附加操作（Adding side-effects）</h3>
+
+<p>把代码更新成下面的：</p>
+
+<pre><code class="language-objc">[[[[self.sign rac_signalForControlEvents:UIControlEventTouchUpInside]
+       doNext:^(id x){
+           self.sign.enabled = NO;
+       }]
+     flattenMap:^id(id x){
+         return [self signInSignal];
+     }]
+     subscribeNext:^(NSNumber*signedIn){
+         BOOL success =[signedIn boolValue];
+         if(success){
+             NSLog(@&quot;Success!!!&quot;);
+         }
+     }];
+</code></pre>
+
+<p>你可以看到<code>doNext:</code>是直接跟在按钮点击事件的后面。而且<code>doNext: block</code>并没有返回值。因为它是附加操作，并不改变事件本身。</p>
+
+<p>上面的<code>doNext: block</code>把按钮置为不可点击，隐藏登录失败提示。然后在<code>subscribeNext: block</code>里重新把按钮置为可点击，并根据登录结果来决定是否显示失败提示。</p>
+
+<p>之前的管道图就更新成下面这样的：<br/>
+<img src="media/15083737124086/15083777066162.png" alt=""/></p>
+
+<p>现在所有的工作都已经完成了，这个应用已经是响应式的啦!!</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15082871830637.html">
+                
+                  <h1>使用Masonry框架来构造iOS布局</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>之前一直都是在使用<code>storyboards</code>来创建iOS布局，突然某一天看到使用代码布局后，界面元素的清晰易懂，就迷上了。。。</p>
+
+<p>所以这次简单学习一下使用<code>Masonry</code>帮助构建<code>iOS</code>界面元素。</p>
+
+<p>在阅读了<code>Masonry</code>的<a href="https://github.com/SnapKit/Masonry">github</a>主页之后，学习并安装了框架。</p>
+
+<h2 id="toc_0">框架的安装</h2>
+
+<p>安装框架非常简单，我们只需要在<code>podfile</code>中加上下面一句：</p>
+
+<pre><code class="language-objc">pod &#39;Masonry&#39;
+</code></pre>
+
+<p>之后为了语法的缩写以及代码自动补全我们来创建<code>Code Snippets</code></p>
+
+<pre><code class="language-objc">mas_make -&gt; [&lt;#view#&gt; mas_makeConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
+
+mas_update -&gt; [&lt;#view#&gt; mas_updateConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
+
+mas_remake -&gt; [&lt;#view#&gt; mas_remakeConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
+</code></pre>
+
+<p>将上述语句放到<code>~/Library/Developer/Xcode/UserData/CodeSnippets</code>中，之后我们在写相关代码的时候就会有代码提示了。</p>
+
+<p>我们在要使用<code>Masonry</code>的文件要频繁的导入<code>&quot;Masonry.h&quot;</code>头文件，所以为了方便，我们创建一个<code>Supporting Files</code>文件夹，并在其中创建一个<code>prefix.pch</code>文件。文件内容为：</p>
+
+<pre><code class="language-objc">//
+//  MBMasonry-Prefix.pch
+
+#import &lt;Availability.h&gt;
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+#ifndef __IPHONE_3_0
+#warning &quot;This project uses features only available in iOS SDK 3.0 and later.&quot;
+#endif
+
+#ifdef __OBJC__
+#import &lt;UIKit/UIKit.h&gt;
+#import &lt;Foundation/Foundation.h&gt;
+#import &lt;QuartzCore/QuartzCore.h&gt;
+
+//define this constant if you want to use Masonry without the &#39;mas_&#39; prefix
+// 只要添加了这个宏，就不用带mas_前缀
+#define MAS_SHORTHAND
+
+//define this constant if you want to enable auto-boxing for default syntax
+// 只要添加了这个宏，equalTo就等价于mas_equalTo
+#define MAS_SHORTHAND_GLOBALS
+//在这里导入头文件。
+#import &quot;Masonry.h&quot;
+
+#endif /* MBMasonry_Prefix_pch */
+
+</code></pre>
+
+<p>之后我们在使用的时候，就不用每个文件都导入一遍头文件了。</p>
+
+<h2 id="toc_1">使用方法</h2>
+
+<p>原声的iOS代码，对界面布局使用的是<code>NSLayoutAttribute</code>，用了<code>Masonry</code>后，我们使用封装好的<code>MASViewAttribute</code>。具体的属性等价关系如下图所示：<br/>
+<img src="media/15082871830637/15082883366505.jpg" alt=""/></p>
+
+<p>我们来举例说明一下，假入我们想要创建一个登陆界面。界面中要有<code>Name</code>和<code>Pass</code>两个<code>TextField</code>，并对应两个<code>Label</code>。</p>
+
+<p>那么我们可以按照如下方式来写：</p>
+
+<pre><code class="language-objc">//
+//  ViewController.m
+//  FirstRAC
+//
+//  Created by 梁中豪 on 2017/10/17.
+//  Copyright © 2017年 梁中豪. All rights reserved.
+//
+
+#import &quot;ViewController.h&quot;
+
+@interface ViewController ()
+@property(nonatomic,strong) UIView *login;
+@property(nonatomic,strong) UILabel *nameLabel;
+@property(nonatomic,strong) UILabel *passLabel;
+@property(nonatomic,strong) UITextField *name;
+@property(nonatomic,strong) UITextField *pass;
+
+
+@end
+
+@implementation ViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.login = [[UIView alloc] initWithFrame:CGRectZero];
+    
+    _name = [[UITextField alloc] init];
+    _name.borderStyle = UIFontWeightBold;
+    _name.font = [UIFont systemFontOfSize:15];
+    _name.placeholder = @&quot;Enter Name&quot;;
+    [_login addSubview:_name];
+    
+    _pass = [[UITextField alloc] init];
+    _pass.borderStyle = UIFontWeightBold;
+    _pass.font = [UIFont systemFontOfSize:15];
+    _pass.placeholder = @&quot;Enter Pass&quot;;
+    [_login addSubview:_pass];
+    
+    _nameLabel = [[UILabel alloc] init];
+    _nameLabel.backgroundColor = UIColor.whiteColor;
+    _nameLabel.font = [UIFont systemFontOfSize:14.0];
+    _nameLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+    _nameLabel.text = @&quot;Name&quot;;
+    [_login addSubview:_nameLabel];
+    
+    _passLabel = [[UILabel alloc] init];
+    _passLabel.backgroundColor = UIColor.whiteColor;
+    _passLabel.font = [UIFont systemFontOfSize:14.0];
+    _passLabel.lineBreakMode = NSLineBreakByTruncatingTail;
+    _passLabel.text = @&quot;Pass&quot;;
+    [_login addSubview:_passLabel];
+    [self.view addSubview:_login];
+    [self buildElem];
+}
+
+//为所创建的控件，创建约束
+- (void)buildElem{
+    [_login mas_makeConstraints:^(MASConstraintMaker *make){
+        make.left.right.and.bottom.equalTo(self.view);
+        make.top.equalTo(self.mas_topLayoutGuide);
+    }];
+    [_nameLabel mas_makeConstraints:^(MASConstraintMaker *make){
+        make.top.equalTo(_login.top);
+        make.height.equalTo(@20);
+        make.left.equalTo(_login.left).with.offset(20);
+    }];
+    [_passLabel mas_makeConstraints:^(MASConstraintMaker *make){
+        make.top.equalTo(_nameLabel.bottom).with.offset(10);
+        make.centerX.equalTo(_nameLabel.centerX);
+        make.height.equalTo(@20);
+    }];
+    [_name mas_makeConstraints:^(MASConstraintMaker *make){
+        make.left.equalTo(_nameLabel.right).with.offset(5);
+        make.centerY.equalTo(_nameLabel.centerY);
+        make.height.equalTo(@20);
+    }];
+    [_pass mas_makeConstraints:^(MASConstraintMaker *make){
+        make.left.equalTo(_passLabel.right).with.offset(5);
+        make.centerY.equalTo(_passLabel.centerY);
+        make.height.equalTo(@20);
+    }];
+
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end
+
+</code></pre>
+
+<p>从上面可以看到，我们为元素创建了约束。当然这只是基本的方法。还有更多的<code>API</code>接口可以使用。我们这里就不在过多说明了。</p>
+
+<p>大概知道上面的用法，我们就可以开心的撸代码写界面去了。<br/>
+:smile:smile:smile:smile:smile:smile:smile:</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/18</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -931,31 +1279,31 @@ void dispatch_barrier_sync(dispatch_queue_t queue,
 	      
 		      
 			      <li class="post">
-			        <a href="15126366447476.html">Nim Game</a>
+			        <a href="15127409536382.html">Happy Number</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15126354530210.html">Next Greater Element I</a>
+			        <a href="15127221024719.html">Find the Difference</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15126325722591.html">Island Perimeter</a>
+			        <a href="15127198152754.html">Distribute Candies</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15126119727244.html">Hamming Distance</a>
+			        <a href="15127166881202.html">Fizz Buzz</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15125498375074.html">Keyboard Row</a>
+			        <a href="15127150080101.html">Sum of Two Integers</a>
 			      </li>
 		     
 		  

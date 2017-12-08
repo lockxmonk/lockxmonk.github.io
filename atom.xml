@@ -4,13 +4,235 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-12-06T16:44:34+08:00</updated>
+  <updated>2017-12-07T17:20:54+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Happy Number]]></title>
+    <link href="https://lockxmonk.github.io/15127409536382.html"/>
+    <updated>2017-12-08T21:49:13+08:00</updated>
+    <id>https://lockxmonk.github.io/15127409536382.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15127409536382/15127409821970.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int happy(int num){
+        int a = 0;
+        while (num!=0) {
+            a += int(pow(num%10, 2));
+            num/=10;
+        }
+        return a;
+    }
+
+
+    bool isHappy(int n) {
+        int slow, fast;
+        slow = fast = n;
+        do {
+            slow = happy(slow);
+            fast = happy(fast);
+            fast = happy(fast);
+        } while(slow != fast);
+
+        return slow==1?1:0;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Find the Difference]]></title>
+    <link href="https://lockxmonk.github.io/15127221024719.html"/>
+    <updated>2017-12-08T16:35:02+08:00</updated>
+    <id>https://lockxmonk.github.io/15127221024719.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15127221024719/15127221121271.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    char findTheDifference(string s, string t) {
+        char sum = 0;
+        for (char c: s) {
+            sum^=c;
+        }
+        for (char c: t) {
+            sum^=c;
+        }
+        return sum;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Distribute Candies]]></title>
+    <link href="https://lockxmonk.github.io/15127198152754.html"/>
+    <updated>2017-12-08T15:56:55+08:00</updated>
+    <id>https://lockxmonk.github.io/15127198152754.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15127198152754/15127198177167.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int distributeCandies(vector&lt;int&gt;&amp; candies) {
+        int res = 0;
+        unordered_map&lt;int, vector&lt;int&gt;&gt; map;
+        for (int i =0; i&lt;candies.size(); i++) {
+            map[candies[i]].push_back(candies[i]);
+        }
+        if (map.size()&lt;=candies.size()/2) {
+            return map.size();
+        }else{
+            return candies.size()/2;
+        }
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Fizz Buzz]]></title>
+    <link href="https://lockxmonk.github.io/15127166881202.html"/>
+    <updated>2017-12-08T15:04:48+08:00</updated>
+    <id>https://lockxmonk.github.io/15127166881202.html</id>
+    <content type="html"><![CDATA[
+<p>Write a program that outputs the string representation of numbers from 1 to n.</p>
+
+<p>But for multiples of three it should output “Fizz” instead of the number and for the multiples of five output “Buzz”. For numbers which are multiples of both three and five output “FizzBuzz”.</p>
+
+<p><img src="media/15127166881202/15127167059726.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;string&gt; fizzBuzz(int n) {
+        vector&lt;string&gt; res;
+        for (int i=1; i&lt;=n; i++) {
+            if (i%3==0&amp;&amp;i%5==0) {
+                res.push_back(&quot;FizzBuzz&quot;);
+            }else if (i%5==0){
+                res.push_back(&quot;Buzz&quot;);
+            }else if(i%3==0){
+                res.push_back(&quot;Fizz&quot;);
+            }else{
+                res.push_back(to_string(i));
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Sum of Two Integers]]></title>
+    <link href="https://lockxmonk.github.io/15127150080101.html"/>
+    <updated>2017-12-08T14:36:48+08:00</updated>
+    <id>https://lockxmonk.github.io/15127150080101.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15127150080101/15127150099516.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int getSum(int a, int b) {
+        int sum = a;
+        while (b!=0) {
+            sum = a^b;
+            b = (a&amp;b)&lt;&lt;1;
+            a = sum;
+        }
+        return a;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Employee Importance]]></title>
+    <link href="https://lockxmonk.github.io/15127074753393.html"/>
+    <updated>2017-12-08T12:31:15+08:00</updated>
+    <id>https://lockxmonk.github.io/15127074753393.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15127074753393/15127075000371.jpg" alt=""/></p>
+
+<pre><code class="language-c++">/*
+// Employee info
+class Employee {
+public:
+    // It&#39;s the unique ID of each node.
+    // unique id of this employee
+    int id;
+    // the importance value of this employee
+    int importance;
+    // the id of direct subordinates
+    vector&lt;int&gt; subordinates;
+};
+*/
+class Solution {
+public:
+    int getImportance(vector&lt;Employee*&gt; employees, int id) {
+        unordered_map&lt;int ,Employee*&gt; map;
+        for(auto emp:employees){
+            map[emp-&gt;id] = emp;
+        }
+        return help(map,id);
+    }
+    
+    int help(unordered_map&lt;int, Employee*&gt;&amp; map, int id){
+        int sum = map[id]-&gt;importance;
+        for(auto element : map[id]-&gt;subordinates){
+            sum += help(map, element);
+        }
+        return sum;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Single Number]]></title>
+    <link href="https://lockxmonk.github.io/15127037334925.html"/>
+    <updated>2017-12-08T11:28:53+08:00</updated>
+    <id>https://lockxmonk.github.io/15127037334925.html</id>
+    <content type="html"><![CDATA[
+<p>Given an array of integers, every element appears twice except for one. Find that single one.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int singleNumber(vector&lt;int&gt;&amp; nums) {
+        sort(nums.begin(), nums.end());
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (nums[i]!=nums[i+1]) {
+                return nums[i];
+            }else{
+                i++;
+            }
+        }
+        return -1;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Nim Game]]></title>
@@ -24,15 +246,15 @@
 
 <p>For example, if there are 4 stones in the heap, then you will never win the game: no matter 1, 2, or 3 stones you remove, the last stone will always be removed by your friend.</p>
 
-<p>列举1~n情况，每4个一循环.<br/>
-<code>c++<br/>
-class Solution {<br/>
-public:<br/>
-    bool canWinNim(int n) {<br/>
-        return n%4!=0;<br/>
-    }<br/>
-};<br/>
-</code></p>
+<p>列举1~n情况，每4个一循环.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool canWinNim(int n) {
+        return n%4!=0;
+    }
+};
+</code></pre>
 
 ]]></content>
   </entry>
@@ -507,237 +729,6 @@ public:
             tol = 1;
         }
         return chars.size();
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Count Binary Substrings]]></title>
-    <link href="https://lockxmonk.github.io/15123785215963.html"/>
-    <updated>2017-12-04T17:08:41+08:00</updated>
-    <id>https://lockxmonk.github.io/15123785215963.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15123785215963/15123785359347.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int countBinarySubstrings(string s) {
-        vector&lt;int&gt; res;
-        int tol = 1;
-        for (int i=1; i&lt;=s.length(); i++) {
-            if (s[i]==s[i-1]) {
-                tol++;
-            }else{
-                res.push_back(tol);
-                tol =1;
-            }
-        }
-        int count = 0;
-        for(int i=1, n=res.size(); i&lt;n; ++i){
-            count += min(res[i-1], res[i]);
-        }
-        return count;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Detect Capital]]></title>
-    <link href="https://lockxmonk.github.io/15123751997678.html"/>
-    <updated>2017-12-04T16:13:19+08:00</updated>
-    <id>https://lockxmonk.github.io/15123751997678.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15123751997678/15123752096895.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool detectCapitalUse(string word) {
-        int a[word.length()];
-        int r = 0;
-        for (int i = 0; i&lt;word.length(); i++) {
-            if (word[i]&gt;=&#39;A&#39;&amp;&amp;word[i]&lt;=&#39;Z&#39;) {
-                a[i] = 1;
-                r+=a[i];
-            }
-        }
-        if (r==word.length()||(a[0]==1&amp;&amp;r==1)||r==0) {
-            return true;
-        }
-        return false;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Reverse String]]></title>
-    <link href="https://lockxmonk.github.io/15123699886595.html"/>
-    <updated>2017-12-04T14:46:28+08:00</updated>
-    <id>https://lockxmonk.github.io/15123699886595.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15123699886595/15123699978085.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string reverseString(string s) {
-        int str = 0;
-        int end = s.length()-1;
-        while (str&lt;=end) {
-            char tmp;
-            tmp = s[str];
-            s[str] = s[end];
-            s[end] = tmp;
-            str++;
-            end--;
-        }
-        return s;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Reverse Words in a String III]]></title>
-    <link href="https://lockxmonk.github.io/15123539966341.html"/>
-    <updated>2017-12-04T10:19:56+08:00</updated>
-    <id>https://lockxmonk.github.io/15123539966341.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15123539966341/15123540495829.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string reverseWords(string s) {
-        string res;
-        int str = 0;
-        for (int i=0; i&lt;s.length(); i++) {
-            if (s[i]==&#39; &#39;||i==s.length()-1) {
-                int j = i==s.length()-1 ? i:i-1;
-                while (j&gt;=str) {
-                    char tmp = s[str];
-                    s[str] = s[j];
-                    s[j] = tmp;
-                    j--;
-                    str++;
-                }
-                str = i+1;
-            }
-        }
-
-        return s;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Judge Route Circle]]></title>
-    <link href="https://lockxmonk.github.io/15122038176626.html"/>
-    <updated>2017-12-02T16:36:57+08:00</updated>
-    <id>https://lockxmonk.github.io/15122038176626.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15122038176626/15122038286763.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool judgeCircle(string moves) {
-        int UD = 0 ,LR = 0;
-        for(char a:moves){
-            if (a==&#39;U&#39;) {
-                UD++;
-            }else if (a==&#39;D&#39;){
-                UD--;
-            }else if (a==&#39;L&#39;){
-                LR++;
-            }else if (a==&#39;R&#39;){
-                LR--;
-            }
-        }
-        return (UD==0&amp;&amp;LR==0) ? 1:0;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Self Dividing Numbers]]></title>
-    <link href="https://lockxmonk.github.io/15122027653799.html"/>
-    <updated>2017-12-02T16:19:25+08:00</updated>
-    <id>https://lockxmonk.github.io/15122027653799.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15122027653799/15122027840243.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; selfDividingNumbers(int left, int right) {
-        vector&lt;int&gt; v;
-        for (int i = left; i &lt;= right; ++i) {
-            int j= i;
-            bool ok = 1;
-            while (j) {
-                int d= (j%10);
-                if (d == 0 || i % d) ok = 0;
-                j/=10;
-            }
-            if (ok) v.push_back(i);
-        }
-        return v;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Non-decreasing Array]]></title>
-    <link href="https://lockxmonk.github.io/15122009526780.html"/>
-    <updated>2017-12-02T15:49:12+08:00</updated>
-    <id>https://lockxmonk.github.io/15122009526780.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15122009526780/15122009632510.jpg" alt=""/></p>
-
-<p><strong>用到了<code>is_sorted</code>来判断是否升序排列</strong></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool checkPossibility(vector&lt;int&gt;&amp; nums) {
-        for (int i=0; i &lt; nums.size()-1; i++){
-            if (nums[i] &gt; nums[i+1]){
-                
-                int temp = nums[i];
-                //
-                // &quot;erase&quot; nums[i], then check if nums is sorted without nums[i]
-                //
-                nums[i] = nums[i+1];
-                if (is_sorted(nums.begin(), nums.end())) { return true; }
-                
-                //
-                // &quot;erase&quot; nums[i+1], then check if nums is sorted without nums[i+1]
-                //
-                nums[i+1] = nums[i] = temp;
-                if (is_sorted(nums.begin(), nums.end())) { return true; }
-                
-                //
-                // nums is NOT sorted (without nums[i] XOR without nums[i+1])
-                //
-                return false;
-            }
-        }
-        return true;
     }
 };
 </code></pre>
