@@ -117,61 +117,35 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15121123646545.html">
+                <a class="clearlink" href="15123539966341.html">
                 
-                  <h1>Can Place Flowers</h1>
+                  <h1>Reverse Words in a String III</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Suppose you have a long flowerbed in which some of the plots are planted and some are not. However, flowers cannot be planted in adjacent plots - they would compete for water and both would die.</p>
-
-<p>Given a flowerbed (represented as an array containing 0 and 1, where 0 means empty and 1 means not empty), and a number n, return if n new flowers can be planted in it without violating the no-adjacent-flowers rule.</p>
-
-<p><img src="media/15121123646545/15121188914337.jpg" alt=""/></p>
-
-<p><strong>第一种：3格的滑动窗口</strong></p>
+                        	<p><img src="media/15123539966341/15123540495829.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
-        int str = 0 ,end = 2;
-        int tol = 0;
-        if (flowerbed.size()==1&amp;&amp;flowerbed[0]==0) {
-            tol++;
-        }else if(flowerbed[0]==0&amp;&amp;flowerbed[1]==0) {
-            flowerbed[0]=1;
-            tol++;
-        }
-        
-        while (end&lt;=flowerbed.size()-1) {
-            if (!(flowerbed[str]||flowerbed[str+1]||flowerbed[end])) {
-                flowerbed[str+1] = 1;
-                tol++;
-            }
-            str++;
-            end++;
-        }
-        if (flowerbed.size()&gt;=3&amp;&amp;flowerbed[flowerbed.size()-1]==0&amp;&amp;flowerbed[flowerbed.size()-2]==0) {
-            tol++;
-        }
-        return tol&gt;=n?1:0;
-    }
-};
-</code></pre>
-
-<p>第二种：</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
-        for (int i = 0; i &lt; flowerbed.size(); i++) {
-            if (!flowerbed[i] &amp;&amp; (i == 0 || !flowerbed[i - 1]) &amp;&amp; (i == flowerbed.size() - 1 || !flowerbed[i + 1])) {
-                flowerbed[i] = 1;
-                n--;
+    string reverseWords(string s) {
+        string res;
+        int str = 0;
+        for (int i=0; i&lt;s.length(); i++) {
+            if (s[i]==&#39; &#39;||i==s.length()-1) {
+                int j = i==s.length()-1 ? i:i-1;
+                while (j&gt;=str) {
+                    char tmp = s[str];
+                    s[str] = s[j];
+                    s[j] = tmp;
+                    j--;
+                    str++;
+                }
+                str = i+1;
             }
         }
-        return n &lt;= 0;
+
+        return s;
     }
 };
 </code></pre>
@@ -183,7 +157,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/1</span>
+                    <span class="date">2017/12/4</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -200,29 +174,31 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15121120473287.html">
+                <a class="clearlink" href="15122038176626.html">
                 
-                  <h1>Contains Duplicate II</h1>
+                  <h1>Judge Route Circle</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given an array of integers and an integer <code>k</code>, find out whether there are two distinct indices <code>i</code> and <code>j</code> in the array such that <code>nums[i] = nums[j]</code> and the absolute difference between <code>i</code> and <code>j</code> is at most <code>k</code>.</p>
-
-<p>判断数组中是否有重复的元素，并且下标之差不超过<code>k</code>。</p>
+                        	<p><img src="media/15122038176626/15122038286763.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    bool containsNearbyDuplicate(vector&lt;int&gt;&amp; nums, int k) {
-        unordered_map&lt;int, int&gt; hash;
-        for (int i=0; i&lt;nums.size(); i++) {
-            if (hash.find(nums[i])!=hash.end()&amp;&amp;i-hash[nums[i]]&lt;=k) {
-                return 1;
-            }else{
-                hash[nums[i]] = i;
+    bool judgeCircle(string moves) {
+        int UD = 0 ,LR = 0;
+        for(char a:moves){
+            if (a==&#39;U&#39;) {
+                UD++;
+            }else if (a==&#39;D&#39;){
+                UD--;
+            }else if (a==&#39;L&#39;){
+                LR++;
+            }else if (a==&#39;R&#39;){
+                LR--;
             }
         }
-        return 0;
+        return (UD==0&amp;&amp;LR==0) ? 1:0;
     }
 };
 </code></pre>
@@ -234,7 +210,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/1</span>
+                    <span class="date">2017/12/2</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -251,31 +227,30 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15121110105671.html">
+                <a class="clearlink" href="15122027653799.html">
                 
-                  <h1>Two Sum</h1>
+                  <h1>Self Dividing Numbers</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15121110105671/15121110244234.jpg" alt=""/></p>
-
-<p><strong>运用hash表</strong></p>
+                        	<p><img src="media/15122027653799/15122027840243.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; nums, int target) {
-        unordered_map&lt;int, int&gt; hash;
-        vector&lt;int&gt; result;
-        for (int i=0; i&lt;nums.size(); i++) {
-            int numToFind = target - nums[i];
-            if (hash.find(numToFind)!=hash.end()) {
-                result.push_back(hash[numToFind]);
-                result.push_back(i);
+    vector&lt;int&gt; selfDividingNumbers(int left, int right) {
+        vector&lt;int&gt; v;
+        for (int i = left; i &lt;= right; ++i) {
+            int j= i;
+            bool ok = 1;
+            while (j) {
+                int d= (j%10);
+                if (d == 0 || i % d) ok = 0;
+                j/=10;
             }
-            hash[nums[i]] = i;
+            if (ok) v.push_back(i);
         }
-        return result;
+        return v;
     }
 };
 </code></pre>
@@ -287,8 +262,10 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/1</span>
-                    
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -302,32 +279,148 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15120990794732.html">
+                <a class="clearlink" href="15122009526780.html">
                 
-                  <h1>Maximum Average Subarray I</h1>
+                  <h1>Non-decreasing Array</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15120990794732/15120991082558.jpg" alt=""/></p>
+                        	<p><img src="media/15122009526780/15122009632510.jpg" alt=""/></p>
 
-<p><strong>解决方法：滑动窗口方案</strong></p>
+<p><strong>用到了<code>is_sorted</code>来判断是否升序排列</strong></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    double findMaxAverage(vector&lt;int&gt;&amp; nums, int k) {
-        double r = INT_MIN;
-        double sum = 0;
+    bool checkPossibility(vector&lt;int&gt;&amp; nums) {
+        for (int i=0; i &lt; nums.size()-1; i++){
+            if (nums[i] &gt; nums[i+1]){
+                
+                int temp = nums[i];
+                //
+                // &quot;erase&quot; nums[i], then check if nums is sorted without nums[i]
+                //
+                nums[i] = nums[i+1];
+                if (is_sorted(nums.begin(), nums.end())) { return true; }
+                
+                //
+                // &quot;erase&quot; nums[i+1], then check if nums is sorted without nums[i+1]
+                //
+                nums[i+1] = nums[i] = temp;
+                if (is_sorted(nums.begin(), nums.end())) { return true; }
+                
+                //
+                // nums is NOT sorted (without nums[i] XOR without nums[i+1])
+                //
+                return false;
+            }
+        }
+        return true;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15121974728141.html">
+                
+                  <h1>Third Maximum Number</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15121974728141/15121974890265.jpg" alt=""/></p>
+
+<p><strong>利用set的自动排序和去除重复元素来解决问题。</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int thirdMax(vector&lt;int&gt;&amp; nums) {
+        set&lt;int&gt; result;
+        for (int num:nums) {
+            result.insert(num);
+            if (result.size()&gt;3) {
+                result.erase(result.begin());
+            }
+        }
+        return result.size()&lt;3? *result.rbegin():*result.begin();
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15121892650067.html">
+                
+                  <h1>K-diff Pairs in an Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15121892650067/15121892810535.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findPairs(vector&lt;int&gt;&amp; nums, int k) {
+        if (k&lt;0) {
+            return 0;
+        }
+        unordered_set&lt;int&gt; result;  //用集合避免重复
+        unordered_map&lt;int, int&gt; hash;   //hash表来映射所需数值
         for (int i = 0; i&lt;nums.size(); i++) {
-            if (i&lt;k) {
-                sum+=nums[i];
-            }else{
-                r = max(sum, r);
-                sum +=nums[i]-nums[i-k];
+            if (hash.count(nums[i]+k)) {
+                result.insert(nums[i]+k);
             }
+            if (hash.count(nums[i]-k)) {
+                result.insert(nums[i]);
+            }
+            hash[nums[i]] += 1;
         }
-        r = max(sum, r);
-        return r/double(k);
+        return result.size();
     }
 };
 </code></pre>
@@ -339,111 +432,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120964350892.html">
-                
-                  <h1>Pascal's Triangle</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given numRows, generate the first numRows of Pascal&#39;s triangle.</p>
-
-<p>For example, given numRows = 5,<br/>
-Return<img src="media/15120964350892/15120964567125.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; generate(int numRows) {
-        vector&lt;vector&lt;int&gt;&gt;result(numRows);
-        for (int i = 0; i&lt;numRows; i++) {
-            result[i].resize(i+1);
-            result[i][0] = result[i][i] = 1;
-        
-            for (int j = 1; j&lt;i; j++) {
-                result[i][j] = result[i-1][j-1]+result[i-1][j];
-            }
-        }
-        return result;
-        
-     }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120931328273.html">
-                
-                  <h1>Search Insert Position</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
-
-<p>You may assume no duplicates in the array.<br/>
-<img src="media/15120931328273/15120931550538.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
-        int result = 0;
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (nums[i]&gt;=target) {
-                return i;
-            }
-        }
-        return nums.size();
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
+                    <span class="date">2017/12/2</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -548,31 +537,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15127409536382.html">Happy Number</a>
+			        <a href="15128072112005.html">Relative Ranks</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127221024719.html">Find the Difference</a>
+			        <a href="15128043838038.html">Valid Anagram</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127198152754.html">Distribute Candies</a>
+			        <a href="15128026901484.html">Assign Cookies</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127166881202.html">Fizz Buzz</a>
+			        <a href="15128009688279.html">Ransom Note</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127150080101.html">Sum of Two Integers</a>
+			        <a href="15127898937133.html">Reverse String II</a>
 			      </li>
 		     
 		  

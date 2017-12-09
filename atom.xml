@@ -4,13 +4,251 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-12-07T17:20:54+08:00</updated>
+  <updated>2017-12-08T21:49:54+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Relative Ranks]]></title>
+    <link href="https://lockxmonk.github.io/15128072112005.html"/>
+    <updated>2017-12-09T16:13:31+08:00</updated>
+    <id>https://lockxmonk.github.io/15128072112005.html</id>
+    <content type="html"><![CDATA[
+<p>Given scores of <strong>N</strong> athletes, find their relative ranks and the people with the top three highest scores, who will be awarded medals: &quot;Gold Medal&quot;, &quot;Silver Medal&quot; and &quot;Bronze Medal&quot;.</p>
+
+<p><img src="media/15128072112005/15128073582183.jpg" alt=""/></p>
+
+<p><code>pair</code>的用法和优先队列的使用</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;string&gt; findRelativeRanks(vector&lt;int&gt;&amp; nums) {
+        priority_queue&lt;pair&lt;int,int&gt; &gt; pq;
+        for(int i=0;i&lt;nums.size();i++)
+        {
+            pq.push(make_pair(nums[i],i));
+        }
+        vector&lt;string&gt; res(nums.size(),&quot;&quot;);
+        int count = 1;
+        for(int i=0; i&lt;nums.size();i++)
+        {
+            if(count==1) {res[pq.top().second] = &quot;Gold Medal&quot;; count++;}
+            else if(count==2) {res[pq.top().second] = &quot;Silver Medal&quot;; count++;}
+            else if(count==3) {res[pq.top().second] = &quot;Bronze Medal&quot;; count++;}
+            else {res[pq.top().second] = to_string(count); count++;}
+            pq.pop();
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Valid Anagram]]></title>
+    <link href="https://lockxmonk.github.io/15128043838038.html"/>
+    <updated>2017-12-09T15:26:23+08:00</updated>
+    <id>https://lockxmonk.github.io/15128043838038.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15128043838038/15128043943990.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool isAnagram(string s, string t) {
+        if (s.length() != t.length()) return false;
+        unordered_map&lt;char, int&gt; map;
+        for (int i =0; i&lt;s.length(); i++) {
+            map[s[i]]++;
+            map[t[i]]--;
+        }
+        for(auto s:map){
+            if(s.second&lt;0) return 0;
+        }
+        return 1;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Assign Cookies]]></title>
+    <link href="https://lockxmonk.github.io/15128026901484.html"/>
+    <updated>2017-12-09T14:58:10+08:00</updated>
+    <id>https://lockxmonk.github.io/15128026901484.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15128026901484/15128027017206.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findContentChildren(vector&lt;int&gt;&amp; g, vector&lt;int&gt;&amp; s) {
+        sort(g.begin(), g.end());
+        sort(s.begin(), s.end());
+        int logG=0;
+        for (int i=0; i&lt;s.size(); i++) {
+            if (g[logG]&lt;=s[i]&amp;&amp;logG&lt;g.size()) {
+                logG++;
+            }
+        }
+        return logG;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ransom Note]]></title>
+    <link href="https://lockxmonk.github.io/15128009688279.html"/>
+    <updated>2017-12-09T14:29:28+08:00</updated>
+    <id>https://lockxmonk.github.io/15128009688279.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15128009688279/15128009813033.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool canConstruct(string ransomNote, string magazine) {
+        unordered_map&lt;char, int&gt; map;
+        for (int i = 0; i&lt;magazine.length(); i++) {
+            map[magazine[i]]++;
+        }
+        for (int j = 0; j&lt;ransomNote.length(); j++) {
+            if(--map[ransomNote[j]]&lt;0) return 0;
+        }
+        return 1;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Reverse String II]]></title>
+    <link href="https://lockxmonk.github.io/15127898937133.html"/>
+    <updated>2017-12-09T11:24:53+08:00</updated>
+    <id>https://lockxmonk.github.io/15127898937133.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15127898937133/15127899074799.jpg" alt=""/></p>
+
+<p>运用内置的<code>reverse</code>函数</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string reverseStr(string s, int k) {
+        for (int i = 0; i&lt;s.length(); i+=2*k) {
+            reverse(s.begin()+i, min(s.begin()+i+k, s.end()));
+        }
+        return s;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Base 7]]></title>
+    <link href="https://lockxmonk.github.io/15127884486398.html"/>
+    <updated>2017-12-09T11:00:48+08:00</updated>
+    <id>https://lockxmonk.github.io/15127884486398.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15127884486398/15127884572899.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string convertToBase7(int num) {
+        int x = abs(num); string res;
+        do {
+          res = to_string(x%7)+res;
+        } while (x/=7);
+        
+        return (num&gt;=0? &quot;&quot; : &quot;-&quot;) + res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[License Key Formatting]]></title>
+    <link href="https://lockxmonk.github.io/15127864249320.html"/>
+    <updated>2017-12-09T10:27:04+08:00</updated>
+    <id>https://lockxmonk.github.io/15127864249320.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15127864249320/15127864500019.jpg" alt=""/></p>
+
+<p>第一版：</p>
+
+<pre><code class="language-c++">    int log = 0;
+    string ele=&quot;&quot;;
+    string re=&quot;&quot;;
+    for (int i = S.length()-1; i&gt;=0; i--) {
+        if (S[i]!=&#39;-&#39;) {
+            log++;
+            S[i]=toupper(S[i]);
+            ele = S[i]+ele;
+        }
+        if (log==K||i==0) {
+            if (i==0) {
+                re = ele+re;
+            }else{
+                re = &#39;-&#39;+ele+re;
+            }
+            log = 0;
+            ele = &quot;&quot;;
+        }
+    }
+    return re[0]==&#39;-&#39;?re.substr(1,re.length()-1):re;
+</code></pre>
+
+<p>第二版：运用栈</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string licenseKeyFormatting(string S, int K) {
+        stack&lt;string&gt; st;
+        string line;
+        for(int i=S.length()-1;i&gt;=0;i--){
+            if(S[i]==&#39;-&#39;) continue;
+            
+            if(line.length()&lt;K){
+                if(S[i]&gt;=&#39;a&#39; &amp;&amp; S[i]&lt;=&#39;z&#39;) line.insert(0, 1, S[i]-&#39;a&#39;+&#39;A&#39;);
+                else line.insert(0, 1, S[i]);
+                
+                if(line.length()==K){
+                    st.push(line);
+                    line=&quot;&quot;;
+                }
+            }
+        }
+        if(st.empty()) return line;
+        
+        if(line.length() == 0){
+            line += st.top();
+            st.pop();
+        }
+        while(!st.empty()){
+            line+=&#39;-&#39;;
+            line+=st.top();
+            st.pop();
+        }
+        return line;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Happy Number]]></title>
@@ -421,317 +659,6 @@ public:<br/>
     }<br/>
 };<br/>
 </code></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Number of Segments in a String]]></title>
-    <link href="https://lockxmonk.github.io/15125415026569.html"/>
-    <updated>2017-12-06T14:25:02+08:00</updated>
-    <id>https://lockxmonk.github.io/15125415026569.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15125415026569/15125415108675.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int countSegments(string s) {
-        int res = 0;
-        for (int i = 0; i&lt;s.length(); i++) {
-            if (s[i]!=&#39; &#39;&amp;&amp; (s[i+1]==&#39; &#39;|| i==s.length()-1)) {
-                res++;
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Battleships in a Board]]></title>
-    <link href="https://lockxmonk.github.io/15124598875437.html"/>
-    <updated>2017-12-05T15:44:47+08:00</updated>
-    <id>https://lockxmonk.github.io/15124598875437.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15124598875437/15124598979272.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int countBattleships(vector&lt;vector&lt;char&gt;&gt;&amp; board) {
-        int m = board.size();
-        int n = board[0].size();
-        int res = 0;
-        for (int i=0; i&lt;m; i++) {
-            for (int j =0; j&lt;n; j++) {
-                if ((board[i][j]==&#39;X&#39;)&amp;&amp;(i==0||board[i-1][j]!=&#39;X&#39;)&amp;&amp;(j==0||board[i][j-1]!=&#39;X&#39;)) {
-                    ++res;
-                }
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Complex Number Multiplication]]></title>
-    <link href="https://lockxmonk.github.io/15124576449217.html"/>
-    <updated>2017-12-05T15:07:24+08:00</updated>
-    <id>https://lockxmonk.github.io/15124576449217.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15124576449217/15124576549963.jpg" alt=""/></p>
-
-<p>第一次写的复杂版：</p>
-
-<pre><code class="language-c++">string complexNumberMultiply(string a, string b) {
-    int a1=0 ,b1=0 ,a2=0 ,b2=0;
-    for (int i = 0; i&lt;a.length(); i++) {
-        int log = 0;
-        if (a[i]==&#39;+&#39;) {
-            log = i;
-            string tmp;
-            for (int j=0; j&lt;i; j++) {
-                tmp+=a[j];
-            }
-            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;a1);
-            tmp = &quot;&quot;;
-            for (int m = i+1; m&lt;a.length()-1; m++) {
-                tmp+=a[m];
-            }
-            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;b1);
-        }
-    }
-    for (int i = 0; i&lt;b.length(); i++) {
-        int log = 0;
-        if (b[i]==&#39;+&#39;) {
-            log = i;
-            string tmp;
-            for (int j=0; j&lt;i; j++) {
-                tmp+=b[j];
-            }
-            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;a2);
-            tmp = &quot;&quot;;
-            for (int m = i+1; m&lt;b.length()-1; m++) {
-                tmp+=b[m];
-            }
-            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;b2);
-        }
-    }
-    string res = to_string(a1*a2-b1*b2)+&quot;+&quot;+to_string(a1*b2+a2*b1)+&quot;i&quot;;
-    return res;
-}
-</code></pre>
-
-<p>精简版：</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string complexNumberMultiply(string a, string b) {
-        int c,d,e,f;
-        char ret[100];
-        sscanf(a.c_str(),&quot;%d+%di&quot;,&amp;c,&amp;d);
-        sscanf(b.c_str(),&quot;%d+%di&quot;,&amp;e,&amp;f);
-        cout&lt;&lt;c&lt;&lt;&quot; &quot;&lt;&lt;d&lt;&lt;&quot; &quot;&lt;&lt;e&lt;&lt;&quot; &quot;&lt;&lt;f&lt;&lt;endl;
-        sprintf(ret,&quot;%d+%di&quot;,(c*e-f*d),(d*e+c*f));
-        string ans(ret);
-        return ans;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Student Attendance Record I]]></title>
-    <link href="https://lockxmonk.github.io/15124550672696.html"/>
-    <updated>2017-12-05T14:24:27+08:00</updated>
-    <id>https://lockxmonk.github.io/15124550672696.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15124550672696/15124551477663.jpg" alt=""/></p>
-
-<p>优化前：<br/>
-<code>c++<br/>
-bool checkRecord(string s) {<br/>
-    int logA = 0;<br/>
-    for (int i=0; i&lt;s.length(); i++) {<br/>
-        if (s[i]==&#39;A&#39;) {<br/>
-            logA++;<br/>
-            if (logA&gt;1) {<br/>
-                return 0;<br/>
-            }<br/>
-        }<br/>
-        if (i&gt;1&amp;&amp;s[i]==&#39;L&#39;&amp;&amp;s[i-1]==&#39;L&#39;&amp;&amp;s[i-2]==&#39;L&#39;) {<br/>
-            return 0;<br/>
-        }<br/>
-    }<br/>
-    return 1;<br/>
-}<br/>
-</code></p>
-
-<p>优化后：</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool checkRecord(string s) {
-        int count_A = 0;
-        int pos = 0;
-        while(pos&lt;s.length())
-        {
-            if(s[pos]==&#39;A&#39;)
-            {
-                count_A++;
-                pos++;
-                if(count_A&gt;1)
-                    return false;
-            }
-            else if(s[pos]==&#39;L&#39;)
-            {
-                int count = 0;
-                while(pos&lt;s.length()&amp;&amp;s[pos]==&#39;L&#39;)
-                {
-                    count++;
-                    pos++;
-                }
-                if(count&gt;2)
-                    return false;
-            }
-            else
-                pos++;
-            
-        }
-        return true;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Baseball Game]]></title>
-    <link href="https://lockxmonk.github.io/15124490673294.html"/>
-    <updated>2017-12-05T12:44:27+08:00</updated>
-    <id>https://lockxmonk.github.io/15124490673294.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15124490673294/15124490974323.jpg" alt=""/><br/>
-<img src="media/15124490673294/15124491075954.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int calPoints(vector&lt;string&gt;&amp; ops) {
-        int sum = 0, score = 0;
-        vector&lt;int&gt; rounds;
-        for (string op : ops) {
-            if (op == &quot;C&quot;) {
-                sum -= rounds.back();
-                rounds.pop_back();
-                continue;
-            }
-            if (op == &quot;D&quot;) {
-                sum += score = rounds.back() * 2;
-            }
-            else if (op == &quot;+&quot;) {
-                sum += score = rounds[rounds.size() - 1] + rounds[rounds.size() - 2];
-            }
-            else {
-                sum += score = stoi(op);
-            }
-            rounds.push_back(score);
-        }
-        return sum;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Implement strStr()]]></title>
-    <link href="https://lockxmonk.github.io/15123924891077.html"/>
-    <updated>2017-12-04T21:01:29+08:00</updated>
-    <id>https://lockxmonk.github.io/15123924891077.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15123924891077/15123924935113.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int strStr(string haystack, string needle) {
-        int j = 0;  //标记needle的初始位置
-        int h = haystack.length(), n = needle.length();
-        if (!n) {
-            return 0;
-        }
-        for (int i =0; i&lt;h-n+1; i++) {
-            int tmp = i;
-            while (tmp&lt;h &amp;&amp; j&lt;n &amp;&amp; haystack[tmp]==needle[j]) {
-                tmp++;
-                j++;
-            }
-            if (j==n) {
-                return i;
-            }else{
-                j=0;
-            }
-        }
-        return -1;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[String Compression]]></title>
-    <link href="https://lockxmonk.github.io/15123884479504.html"/>
-    <updated>2017-12-04T19:54:07+08:00</updated>
-    <id>https://lockxmonk.github.io/15123884479504.html</id>
-    <content type="html"><![CDATA[
-<p>Given an array of characters, compress it in-place.</p>
-
-<p>The length after compression must always be smaller than or equal to the original array.</p>
-
-<p>Every element of the array should be a character (not int) of length 1.</p>
-
-<p>After you are done modifying the input array in-place, return the new length of the array.</p>
-
-<p>Follow up:<br/>
-Could you solve it using only O(1) extra space?</p>
-
-<p><img src="media/15123884479504/15123884710226.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int compress(vector&lt;char&gt;&amp; chars) {
-        int tol = 1;    //统计相同字符的数量
-        for (int i = 0; i&lt;chars.size(); i++) {
-            while (i!=chars.size()-1 &amp;&amp; chars[i]==chars[i+1]) {
-                chars.erase(chars.begin()+i+1);
-                tol++;
-            }
-            int log = 0; //标记插入数字是1的情况
-            int logNum = 0;  //统计插入的数字个数
-            while (log==1||tol!=1 &amp;&amp; tol&gt;0) {
-                chars.insert(chars.begin()+i+1, char(tol%10+&#39;0&#39;));
-                tol/=10;
-                log = tol==1?tol:0;
-                logNum++;
-            }
-            i+=logNum;
-            tol = 1;
-        }
-        return chars.size();
-    }
-};
-</code></pre>
 
 ]]></content>
   </entry>

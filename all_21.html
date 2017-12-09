@@ -117,29 +117,97 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="14974276192148.html">
+                <a class="clearlink" href="14985505390356.html">
                 
-                  <h1>重新利用boot camp安装win10</h1>
+                  <h1>使用SQLite</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>由于原来给win10分的磁盘容量太小,而mac又不能在后续动态给win分区增加磁盘容量,所以只能重新安装分区了.</p>
+                        	<p>SQLite是一种嵌入式数据库，它的数据库就是一个文件。由于SQLite本身是C写的，而且体积很小，所以，经常被集成到各种应用程序中，甚至在iOS和Android的App中都可以集成。</p>
+
+<p>Python就内置了SQLite3，所以，在Python中使用SQLite，不需要安装任何东西，直接使用。</p>
+
+<p>在使用SQLite前，我们先要搞清楚几个概念：</p>
 
 <ol>
-<li>打开mac系统工具中的磁盘<code>磁盘工具</code>选择总的磁盘,点击上方的<code>分区</code>按钮,将系统中其它分区删掉(通过点击饼图中的对应区域,点击下方的<code>-</code>号),就可以将分区删掉,合并到mac系统磁盘.其他分区比如之前安装win产生的<code>OSXRESERVED Partition</code> </li>
-<li>打开bootcamp,点击恢复按钮,将之前的win系统抹掉,之后就会发现,你的mac系统磁盘变回来了.</li>
-<li>重启一下,之后打开bootcamp,点击下方的<code>继续</code>按钮,选择系统iso镜像,为win系统选择分区大小(这回分多些😓).</li>
-<li>点击确定,等待下载Windows支持软件.
-<img src="media/14974276192148/14974281373736.jpg" alt=""/></li>
-<li>安装之后,在OSRESEVER分区中,的bootcamp文件夹中打开安装驱动的程序.</li>
+<li><p>表是数据库中存放关系数据的集合，一个数据库里面通常都包含多个表，比如学生的表，班级的表，学校的表，等等。表和表之间通过外键关联。</p></li>
+<li><p>要操作关系数据库，首先需要连接到数据库，一个数据库连接称为Connection；</p></li>
+<li><p>连接到数据库后，需要打开游标，称之为Cursor，通过Cursor执行SQL语句，然后，获得执行结果。</p></li>
+<li><p>Python定义了一套操作数据库的API接口，任何数据库要连接到Python，只需要提供符合Python标准的数据库驱动即可。</p></li>
 </ol>
 
-<p>到此win10 应该就安装好了~</p>
+<p>由于SQLite的驱动内置在Python标准库中，所以我们可以直接来操作SQLite数据库。</p>
 
-<h2 id="toc_0">注意</h2>
+<p>我们在Python交互式命令行实践一下：</p>
 
-<p><strong>由于apple公司更新了最新的文件系统APFS，导致bootcamp并没有很好的支持。现在，win下是不能识别到mac系统启动程序的。</strong></p>
+<pre><code class="language-python">
+# 导入SQLite驱动:
+&gt;&gt;&gt; import sqlite3
+
+# 连接到SQLite数据库
+# 数据库文件是test.db
+# 如果文件不存在，会自动在当前目录创建:
+&gt;&gt;&gt; conn = sqlite3.connect(&#39;test.db&#39;)
+# 创建一个Cursor:
+&gt;&gt;&gt; cursor = conn.cursor()
+# 执行一条SQL语句，创建user表:
+&gt;&gt;&gt; cursor.execute(&#39;create table user (id varchar(20) primary key, name varchar(20))&#39;)
+&lt;sqlite3.Cursor object at 0x104082490&gt;
+# 继续执行一条SQL语句，插入一条记录:
+&gt;&gt;&gt; cursor.execute(&#39;insert into user (id, name) values (\&#39;1\&#39; , \&#39;Michale\&#39;)&#39;)
+&lt;sqlite3.Cursor object at 0x104082490&gt;
+# 通过rowcount获得插入的行数:
+&gt;&gt;&gt; cursor.rowcount
+1
+# 关闭Cursor:
+&gt;&gt;&gt; cursor.close()
+# 提交事务:
+&gt;&gt;&gt; conn.commit()
+# 关闭Connection:
+&gt;&gt;&gt; conn.close()
+
+</code></pre>
+
+<p>创建和插入表数据后,我们来查询:</p>
+
+<pre><code class="language-python">
+&gt;&gt;&gt; conn = sqlite3.connect(&#39;test.db&#39;)
+&gt;&gt;&gt; cursor = conn.cursor()
+# 执行查询语句:
+&gt;&gt;&gt; cursor.execute(&#39;select * from user where id = ? &#39;, (&#39;1&#39;,))
+&lt;sqlite3.Cursor object at 0x104082500&gt;
+# 获得查询结果集:
+&gt;&gt;&gt; values = cursor.fetchall()
+&gt;&gt;&gt; values
+[(u&#39;1&#39;, u&#39;Michale&#39;)]
+&gt;&gt;&gt; cursor.close()
+&gt;&gt;&gt; conn.close()
+</code></pre>
+
+<p><font color=red><strong>注意事项</strong></font></p>
+
+<ol>
+<li><p>使用Python的DB-API时，只要搞清楚Connection和Cursor对象，打开后一定记得关闭，就可以放心地使用。</p></li>
+<li><p>使用Cursor对象执行<code>insert</code>，<code>update</code>，<code>delete</code>语句时，执行结果由<code>rowcount</code>返回影响的行数，就可以拿到执行结果。</p></li>
+<li><p>使用Cursor对象执行<code>select</code>语句时，通过<code>featchall()</code>可以拿到结果集。结果集是一个<code>list</code>，每个元素都是一个<code>tuple</code>，对应一行记录。</p></li>
+<li><p>如果SQL语句带有参数，那么需要把参数按照位置传递给<code>execute()</code>方法，有几个<code>?</code>占位符就必须对应几个参数，例如：</p></li>
+</ol>
+
+<pre><code class="language-py">
+cursor.execute(&#39;select * from user where name=? and pwd=?&#39;, (&#39;abc&#39;, &#39;123456&#39;))
+
+</code></pre>
+
+<p>SQLite支持常见的标准SQL语句以及几种常见的数据类型。具体文档请参阅SQLite官方网站。</p>
+
+<h2 id="toc_0">小结</h2>
+
+<p>在Python中操作数据库时，要先导入数据库对应的驱动，然后，通过Connection对象和Cursor对象操作数据。</p>
+
+<p>要确保打开的Connection对象和Cursor对象都正确地被关闭，否则，资源就会泄露。</p>
+
+<p>如何才能确保出错的情况下也关闭掉Connection对象和Cursor对象呢？请回忆<code>try:...except:...finally:...</code>的用法。</p>
 
                         
                       </div>
@@ -148,10 +216,10 @@
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/6/14</span>
+                    <span class="date">2017/6/27</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='MAC%20OS.html'>MAC OS</a></span>
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -165,907 +233,813 @@
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="14970763342670.html">
+                <a class="clearlink" href="14984437069936.html">
                 
-                  <h1>caffe数据结构描述</h1>
+                  <h1>数据转换器</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>打开caffe目录下的<code>src/caffe/proto/caffe.proto</code>文件,首先讲的就是Blob的描述.</p>
+                        	<ul>
+<li>
+<a href="#toc_0">数据结构描述</a>
+</li>
+<li>
+<a href="#toc_1">数据变换器的实现</a>
+</li>
+</ul>
 
-<pre><code class="language-protobuf">// 该结构描述了 Blob的形状信息
-message BlobShape {
-  repeated int64 dim = 1 [packed = true];  //只包括若干int64类型值，分别表示Blob每个维度的大小。packed表示这些值在内存中紧密排布，没有空洞
+
+<p>Caffe的数据变换器（DataTransformer)主要提供了对原始输入图像的预处理方法，包括随机切块、随机镜像、幅度缩放、去均值、灰度/色度变换等。相信熟悉图像处理、OpenCV的读者对上述操作并不陌生。</p>
+
+<h2 id="toc_0">数据结构描述</h2>
+
+<pre><code class="language-protobuf">message TransformationParameter {
+  // For data pre-processing, we can do simple scaling and subtracting the
+  // data mean, if provided. Note that the mean subtraction is always carried
+  // out before scaling.
+  //像素幅度缩放参数，默认为1，即不缩放
+  optional float scale = 1 [default = 1];
+  // Specify if we want to randomly mirror data.
+  //图像随机镜像开关，默认为false,即不进行镜像操作
+  optional bool mirror = 2 [default = false];
+  // Specify if we would like to randomly crop an image.
+  //图像随机切块的大小，默认为0,即不进行切块操作
+  optional uint32 crop_size = 3 [default = 0];
+  // mean_file and mean_value cannot be specified at the same time(存储图像均值的文件)
+  optional string mean_file = 4;
+  // if specified can be repeated once (would subtract it from all the channels)
+  // or can be repeated the same number of times as channels
+  // (would subtract them from the corresponding channel)
+  //均值数值，无须读取文件。若数目与图像通道数相等，则每个图像通道分别减去对应的均值；如果只给出一个值.则毎个图像通道都减去同一个均值
+  repeated float mean_value = 5;
+  // Force the decoded image to have 3 color channels.
+  //强制为三通道彩色图像输入
+  optional bool force_color = 6 [default = false];
+  // Force the decoded image to have 1 color channels.
+  //强制为单通道灰度图像输入
+  optional bool force_gray = 7 [default = false];
 }
-
-//该结构描述Blob在磁盘中序列化后的形态
-message BlobProto {
-  optional BlobShape shape = 7;    //可选，包括一个BlobShape对象
-  repeated float data = 5 [packed = true]; // //包括若千浮点元素，存储数据或权值，元素数目由shape或（num, channels, height, width)确定，这些元素在内存中紧密排布.
-  repeated float diff = 6 [packed = true];  ////包括若干浮点元素，用于存储增量信息，维度与data 数组一致
-  repeated double double_data = 8 [packed = true];  // 与 data并列，只是类型为double
-  repeated double double_diff = 9 [packed = true];  // 与 diff 并列，只是类型为 double
-
-  // 4D dimensions -- deprecated.  Use &quot;shape&quot; instead.
-  optional int32 num = 1 [default = 0];
-  optional int32 channels = 2 [default = 0];
-  optional int32 height = 3 [default = 0];
-  optional int32 width = 4 [default = 0];
-}
-
-// The BlobProtoVector is simply a way to pass multiple blobproto instances
-// around.
-message BlobProtoVector {
-  repeated BlobProto blobs = 1;
-}
-</code></pre>
-
-<p><strong>这里我们使用protobuffer主要是因为它具有很好的健壮性,将编程最容易出问题的地方加以隐藏，让机器自动处理.</strong></p>
-
-<h2 id="toc_0">Blob的构成</h2>
-
-<p>Blob是一个模板类,声明在<code>include/caffe/blob.hpp中</code>,里面封装了一些基本的Layer,Net,Solver等,还有syncedmem类:</p>
-
-<pre><code class="language-C++">
-#include &lt;algorithm&gt;
-#include &lt;string&gt;
-#include &lt;vector&gt;
-
-#include &quot;caffe/common.hpp&quot;
-#include &quot;caffe/proto/caffe.pb.h&quot;//由protoc生成的头文件，声明了 BlobProto、BlobShape等遵循caffe.proto协议的数据结构 可以在src/caffe/proto文件下运行protoc caffe.proto --cpp_out=./命令生成该头文件.
-#include &quot;caffe/syncedmem.hpp&quot;  //CPU/GPU共享内存类，用于数据同步
-
-const int kMaxBlobAxes = 32;    //Blob最大维数目
-template &lt;typename Dtype&gt;
-class Blob {    //类声明
- public:
-    //默认构造函数
-  Blob()
-       : data_(), diff_(), count_(0), capacity_(0) {}
-    //显式构造函数
-  explicit Blob(const int num, const int channels, const int height, const int width);
-  explicit Blob(const vector&lt;int&gt;&amp; shape);
-
- //变形函数，报据输入参数重新设置当前Blob形状,必要时重新分配内存
-  void Reshape(const int num, const int channels, const int height,
-      const int width);
-  
-  void Reshape(const vector&lt;int&gt;&amp; shape);
-  void Reshape(const BlobShape&amp; shape);
-  void ReshapeLike(const Blob&amp; other);
-  //得到Blob形状字符串用于打印log,见Caffe运行log,类似&quot;Top shape: 100 1 28 28 (78400)&quot;
-  inline string shape_string() const {
-    ostringstream stream;
-    for (int i = 0; i &lt; shape_.size(); ++i) {
-      stream &lt;&lt; shape_[i] &lt;&lt; &quot; &quot;;
-    }
-    stream &lt;&lt; &quot;(&quot; &lt;&lt; count_ &lt;&lt; &quot;)&quot;;
-    return stream.str();
-  }
-  //返回Blob形状
-  inline const vector&lt;int&gt;&amp; shape() const { return shape_; }
-    //返回某1维度的尺寸
-  inline int shape(int index) const {
-    return shape_[CanonicalAxisIndex(index)];
-  }
-  //返回维度数目
-  inline int num_axes() const { return shape_.size(); }
-  //返回Blob中元素总数
-  inline int count() const { return count_; }
-    //返回Blob中某几维子集的元素总数
-    inline int count(int start_axis, int end_axis) const {
-    CHECK_LE(start_axis, end_axis); //保证 start_axis &lt;= end_axis
-    CHECK_GE(start_axis, 0);  // 保证 start_axis &gt;= 0
-    CHECK_GE(end_axis, 0);      // 保证 end_axis &gt;= 0
-    CHECK_LE(start_axis, num_axes()); //保证start_axis    &lt;=总的维度数目
-    CHECK_LE(end_axis, num_axes()); //保证end_axis &lt;=总的维度数目
-    int count = 1;
-    for (int i = start_axis; i &lt; end_axis; ++i) {
-      count *= shape(i);
-    }
-    return count;
-  }
-  //计算从某一维度开始的元素总数
-  inline int count(int start_axis) const {
-    return count(start_axis, num_axes());
-  }
-  //转换坐标轴索引[-N,N)为普通索引[0,N)
-  inline int CanonicalAxisIndex(int axis_index) const {
-    CHECK_GE(axis_index, -num_axes())
-        &lt;&lt; &quot;axis &quot; &lt;&lt; axis_index &lt;&lt; &quot; out of range for &quot; &lt;&lt; num_axes()
-        &lt;&lt; &quot;-D Blob with shape &quot; &lt;&lt; shape_string();
-    CHECK_LT(axis_index, num_axes())
-        &lt;&lt; &quot;axis &quot; &lt;&lt; axis_index &lt;&lt; &quot; out of range for &quot; &lt;&lt; num_axes()
-        &lt;&lt; &quot;-D Blob with shape &quot; &lt;&lt; shape_string();
-    if (axis_index &lt; 0) {
-    //负索引表示从后向前访问，-1表示最后一个个元素，普通索引值为 N-1:同理，-2 =&gt; N-2, -3 =&gt; N-3,…
-      return axis_index + num_axes();
-    }
-    return axis_index;
-  }
-  //获取某一维的尺寸
-  /// @brief Deprecated legacy shape accessor num: use shape(0) instead.
-  inline int num() const { return LegacyShape(0); }
-  /// @brief Deprecated legacy shape accessor channels: use shape(1) instead.
-  inline int channels() const { return LegacyShape(1); }
-  /// @brief Deprecated legacy shape accessor height: use shape(2) instead.
-  inline int height() const { return LegacyShape(2); }
-  /// @brief Deprecated legacy shape accessor width: use shape(3) instead.
-  inline int width() const { return LegacyShape(3); }
-  inline int LegacyShape(int index) const {
-    CHECK_LE(num_axes(), 4)
-        &lt;&lt; &quot;Cannot use legacy accessors on Blobs with &gt; 4 axes.&quot;;
-    CHECK_LT(index, 4);
-    CHECK_GE(index, -4);
-    if (index &gt;= num_axes() || index &lt; -num_axes()) {
-      // Axis is out of range, but still in [0, 3] (or [-4, -1] for reverse
-      // indexing) -- this special case simulates the one-padding used to fill
-      // extraneous axes of legacy blobs.
-      return 1;
-    }
-    return shape(index);
-  }
-  //下面的是计算偏移量的函数
-  inline int offset(const int n, const int c = 0, const int h = 0,
-      const int w = 0) const {
-    CHECK_GE(n, 0);
-    CHECK_LE(n, num());
-    CHECK_GE(channels(), 0);
-    CHECK_LE(c, channels());
-    CHECK_GE(height(), 0);
-    CHECK_LE(h, height());
-    CHECK_GE(width(), 0);
-    CHECK_LE(w, width());
-    return ((n * channels() + c) * height() + h) * width() + w;
-  }
-
-  inline int offset(const vector&lt;int&gt;&amp; indices) const {
-    CHECK_LE(indices.size(), num_axes());
-    int offset = 0;
-    for (int i = 0; i &lt; num_axes(); ++i) {
-      offset *= shape(i);
-      if (indices.size() &gt; i) {
-        CHECK_GE(indices[i], 0);
-        CHECK_LT(indices[i], shape(i));
-        offset += indices[i];
-      }
-    }
-    return offset;
-  }
-  //按值拷贝Blob到当前Blob
-  void CopyFrom(const Blob&lt;Dtype&gt;&amp; source, bool copy_diff = false, bool reshape = false);
-  
-  //下面几个函数是存取器(getter/setter)
-  inline Dtype data_at(const int n, const int c, const int h,
-      const int w) const {
-    return cpu_data()[offset(n, c, h, w)];
-  }
-
-  inline Dtype diff_at(const int n, const int c, const int h,
-      const int w) const {
-    return cpu_diff()[offset(n, c, h, w)];
-  }
-
-  inline Dtype data_at(const vector&lt;int&gt;&amp; index) const {
-    return cpu_data()[offset(index)];
-  }
-
-  inline Dtype diff_at(const vector&lt;int&gt;&amp; index) const {
-    return cpu_diff()[offset(index)];
-  }
-
-  inline const shared_ptr&lt;SyncedMemory&gt;&amp; data() const {
-    CHECK(data_);
-    return data_;
-  }
-
-  inline const shared_ptr&lt;SyncedMemory&gt;&amp; diff() const {
-    CHECK(diff_);
-    return diff_;
-  }
-  
-  //只读访问cpu_date
-  const Dtype* cpu_data() const;
-  //设置cpu_date
-  void set_cpu_data(Dtype* data);
-  const int* gpu_shape() const;
-  //只读访问gpu_date
-  const Dtype* gpu_data() const;
-  //设置gpu_date
-  void set_gpu_data(Dtype* data);
-  //只读访问cpu_diff
-  const Dtype* cpu_diff() const;
-  //只读访问gpu_diff
-  const Dtype* gpu_diff() const;
-  //下面四个是读写访问数据
-  Dtype* mutable_cpu_data();
-  Dtype* mutable_gpu_data();
-  Dtype* mutable_cpu_diff();
-  Dtype* mutable_gpu_diff();
-  void Update();    //Blob更新运算，可简单理解为data与diff的merge过程
-  //反序列化函数，从BlobProto中恢复个Blob对象
-  void FromProto(const BlobProto&amp; proto, bool reshape = true);
-  //序列化函数，将内存中的Blob对象保存到BlobProto中
-  void ToProto(BlobProto* proto, bool write_diff = false) const;
-
-  /// @brief Compute the sum of absolute values (L1 norm) of the data.
-  Dtype asum_data() const;
-  /// @brief Compute the sum of absolute values (L1 norm) of the diff.
-  Dtype asum_diff() const;
-  /// @brief Compute the sum of squares (L2 norm squared) of the data.
-  Dtype sumsq_data() const;
-  /// @brief Compute the sum of squares (L2 norm squared) of the diff.
-  Dtype sumsq_diff() const;
-
-/// @brief Scale the blob data by a constant factor.
-  void scale_data(Dtype scale_factor);
-  /// @brief Scale the blob diff by a constant factor.
-  void scale_diff(Dtype scale_factor);
- // 共享另一个 Blob 的 diff
-  void ShareData(const Blob&amp; other);
-  void ShareDiff(const Blob&amp; other);
-  
-  protected:
-  shared_ptr&lt;SyncedMemory&gt; data_;   //存放指向data的指针
-  shared_ptr&lt;SyncedMemory&gt; diff_;   //存放指向diff的指针
-  shared_ptr&lt;SyncedMemory&gt; shape_data_; 
-  vector&lt;int&gt; shape_;   //形状信息
-  int count_;   //存放有效元素数目信息
-  int capacity_;    //存放Blob容器的容量信息
-
-  DISABLE_COPY_AND_ASSIGN(Blob);    //禁用拷贝构造函数、陚值运算符重载
-};  // class Blob
 
 </code></pre>
 
-<p><strong>注意到Caffe类中成员变量名都带有后缀，这样在函数实现中容易区分临时变量和类成员变量。</strong></p>
+<h2 id="toc_1">数据变换器的实现</h2>
 
-<p>打幵<code>include/caffe/syncedmem.hpp</code>，査看该类的用法:</p>
+<p>数据变换器声明头文件位于<code>include/cafTe/data_transformer.hpp</code>中，如果需要单独使用该模块,应包含这个头文件。文件内容如下:</p>
 
-<pre><code class="language-c++">#ifndef CAFFE_SYNCEDMEM_HPP_
-#define CAFFE_SYNCEDMEM_HPP_
+<pre><code class="language-c++">#ifndef CAFFE_DATA_TRANSFORMER_HPP
+#define CAFFE_DATA_TRANSFORMER_HPP
 
-#include &lt;cstdlib&gt;
-
-#ifdef USE_MKL
-  #include &quot;mkl.h&quot;
-#endif
-
-#include &quot;caffe/common.hpp&quot;
-
-namespace caffe {
-
-//如果在GPU模式，且CUDA使能，那么主机内存会以页锁定内存方式分配（使用cudaMallocHostU函数。对f-单GPU的性能提升不明显，但多GPU会非常明显)
-inline void CaffeMallocHost(void** ptr, size_t size, bool* use_cuda) {
-#ifndef CPU_ONLY
-  if (Caffe::mode() == Caffe::GPU) {
-    CUDA_CHECK(cudaMallocHost(ptr, size));
-    *use_cuda = true;
-    return;
-  }
-#endif
-#ifdef USE_MKL
-  *ptr = mkl_malloc(size ? size:1, 64);
-#else
-  *ptr = malloc(size);
-#endif
-  *use_cuda = false;
-  CHECK(*ptr) &lt;&lt; &quot;host allocation of size &quot; &lt;&lt; size &lt;&lt; &quot; failed&quot;;
-}
-// 与CaffeMallocHost对应
-inline void CaffeFreeHost(void* ptr, bool use_cuda) {
-#ifndef CPU_ONLY
-  if (use_cuda) {
-    CUDA_CHECK(cudaFreeHost(ptr));
-    return;
-  }
-#endif
-#ifdef USE_MKL
-  mkl_free(ptr);
-#else
-  free(ptr);
-#endif
-}
-
-//该类负责存储分配以及主机和设备间同步
-class SyncedMemory {
- public:
- //构造函数
-  SyncedMemory();
-  //显式构造函数
-  explicit SyncedMemory(size_t size);
-  //析构函数
-  ~SyncedMemory();
-  const void* cpu_data();       //只读获取cpu data
-  void set_cpu_data(void* data);    //设置cpu data
-  const void* gpu_data();       //只读获取gpu data
-  void set_gpu_data(void* data);    //设置gpu data
-  void* mutable_cpu_data();     // 读写获取 cpu data
-  void* mutable_gpu_data();     // 读写获取 gpu data
-  //状态机变量，表示4种状态：术初始化、CPU数据奋效、GPU数据有效、己同步
-  enum SyncedHead { UNINITIALIZED, HEAD_AT_CPU, HEAD_AT_GPU, SYNCED };
-  //获得当前状态机变量值
-  SyncedHead head() { return head_; }
-  //获得当前存储空间尺寸
-  size_t size() { return size_; }
-
-#ifndef CPU_ONLY
-  void async_gpu_push(const cudaStream_t&amp; stream);
-#endif
-
- private:
-  void check_device();
-
-  void to_cpu();    //数据同步至CPU
-  void to_gpu();    //数据同步至GPU
-  void* cpu_ptr_;   //位于CPU的数据指针
-  void* gpu_ptr_;   //位于GPU的数据指针
-  size_t size_;     //存储空间大小
-  SyncedHead head_; //状态机变量
-  bool own_cpu_data_;   //标志是否拥有CPU数据所有权（否，即从别的对象共享)
-  bool cpu_malloc_use_cuda_;
-  bool own_gpu_data_;   ////标志是否拥有GPU数据所有权
-  int device_;      //设备号
-
-  DISABLE_COPY_AND_ASSIGN(SyncedMemory);
-};  // class SyncedMemory
-
-}  // namespace caffe
-
-#endif  // CAFFE_SYNCEDMEM_HPP_
-
-</code></pre>
-
-<p>Blob类实现的源码位于<code>src/caffe/blob.cpp</code>中，内容如下:</p>
-
-<pre><code class="language-c++">
-#include &lt;climits&gt;
 #include &lt;vector&gt;
 
 #include &quot;caffe/blob.hpp&quot;
 #include &quot;caffe/common.hpp&quot;
-#include &quot;caffe/syncedmem.hpp&quot;
-#include &quot;caffe/util/math_functions.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
 
 namespace caffe {
-//变维函数，将（num, channels, height, width}参数转换为vector&lt;int&gt;，然后调用重载的变维函数void Blob&lt;Dtype&gt;::Reshape(const BlobShape&amp; shape)
-template &lt;typename Dtype&gt;
-void Blob&lt;Dtype&gt;::Reshape(const int num, const int channels, const int height,
-    const int width) {
-  vector&lt;int&gt; shape(4);
-  shape[0] = num;
-  shape[1] = channels;
-  shape[2] = height;
-  shape[3] = width;
-  Reshape(shape);
-}
-//真正变维函数
-template &lt;typename Dtype&gt;
-void Blob&lt;Dtype&gt;::Reshape(const vector&lt;int&gt;&amp; shape) {
-  CHECK_LE(shape.size(), kMaxBlobAxes); //保证vector维度&lt;=kMaxBlobAxes
-  count_ = 1;   //用于计算元素总数=num * channels * height * width 
-  shape_.resize(shape.size());  //成员变量维度也被重罝
-  if (!shape_data_ || shape_data_-&gt;size() &lt; shape.size() * sizeof(int)) {
-    shape_data_.reset(new SyncedMemory(shape.size() * sizeof(int)));
-  }
-  int* shape_data = static_cast&lt;int*&gt;(shape_data_-&gt;mutable_cpu_data());
-  for (int i = 0; i &lt; shape.size(); ++i) {
-    CHECK_GE(shape[i], 0);  // 保证每维度尺寸都&gt;=0
-    if (count_ != 0) {
-    //证count_不溢出
-      CHECK_LE(shape[i], INT_MAX / count_) &lt;&lt; &quot;blob size exceeds INT_MAX&quot;;
-    }
-    count_ *= shape[i];     //count_累乘
-    shape_[i] = shape[i];   //为成员变量赋值
-    shape_data[i] = shape[i];
-  }
-  if (count_ &gt; capacity_) {     //如果新的count_大于当前己分f配空间容量
-    capacity_ = count_;         //扩容，重新分配data_和dif f_空间
-    data_.reset(new SyncedMemory(capacity_ * sizeof(Dtype)));
-    diff_.reset(new SyncedMemory(capacity_ * sizeof(Dtype)));
-  }
-}
 
-//void Blob&lt;Dtype&gt;::Reshape(const BlobShape&amp; shape) 和void Blob&lt;Dtype&gt;::ReshapeLike(const Blob&lt;Dtype&gt;&amp; other)与上面类似. 
+/**
+ * @brief Applies common transformations to the input data, such as
+ * scaling, mirroring, substracting the image mean...
+ */
+ //DataTransformer类声明
+template &lt;typename Dtype&gt;
+class DataTransformer {
+ public:
+ //显式构造函数
+  explicit DataTransformer(const TransformationParameter&amp; param, Phase phase);
+  //析构函数
+  virtual ~DataTransformer() {}
 
+  /**
+   * @brief Initialize the Random number generations if needed by the
+   *    transformation.
+   */
+   //初始化随机数种子函数
+  void InitRand();
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to the data.
+   *
+   * @param datum
+   *    Datum containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See data_layer.cpp for an example.
+   */
+   //下面几种函数重载,以适应多种输入数据源
+  void Transform(const Datum&amp; datum, Blob&lt;Dtype&gt;* transformed_blob);
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a vector of Datum.
+   *
+   * @param datum_vector
+   *    A vector of Datum containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See memory_layer.cpp for an example.
+   */
+  void Transform(const vector&lt;Datum&gt; &amp; datum_vector,
+                Blob&lt;Dtype&gt;* transformed_blob);
+
+#ifdef USE_OPENCV
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a vector of Mat.
+   *
+   * @param mat_vector
+   *    A vector of Mat containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See memory_layer.cpp for an example.
+   */
+  void Transform(const vector&lt;cv::Mat&gt; &amp; mat_vector,
+                Blob&lt;Dtype&gt;* transformed_blob);
+
+  /**
+   * @brief Applies the transformation defined in the data layer&#39;s
+   * transform_param block to a cv::Mat
+   *
+   * @param cv_img
+   *    cv::Mat containing the data to be transformed.
+   * @param transformed_blob
+   *    This is destination blob. It can be part of top blob&#39;s data if
+   *    set_cpu_data() is used. See image_data_layer.cpp for an example.
+   */
+  void Transform(const cv::Mat&amp; cv_img, Blob&lt;Dtype&gt;* transformed_blob);
+#endif  // USE_OPENCV
+
+  /**
+   * @brief Applies the same transformation defined in the data layer&#39;s
+   * transform_param block to all the num images in a input_blob.
+   *
+   * @param input_blob
+   *    A Blob containing the data to be transformed. It applies the same
+   *    transformation to all the num images in the blob.
+   * @param transformed_blob
+   *    This is destination blob, it will contain as many images as the
+   *    input blob. It can be part of top blob&#39;s data.
+   */
+  void Transform(Blob&lt;Dtype&gt;* input_blob, Blob&lt;Dtype&gt;* transformed_blob);
+
+
+ //获取执行Transform后的输出Blob形状
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *
+   * @param datum
+   *    Datum containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const Datum&amp; datum);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *    It uses the first element to infer the shape of the blob.
+   *
+   * @param datum_vector
+   *    A vector of Datum containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const vector&lt;Datum&gt; &amp; datum_vector);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *    It uses the first element to infer the shape of the blob.
+   *
+   * @param mat_vector
+   *    A vector of Mat containing the data to be transformed.
+   */
+#ifdef USE_OPENCV
+  vector&lt;int&gt; InferBlobShape(const vector&lt;cv::Mat&gt; &amp; mat_vector);
+  /**
+   * @brief Infers the shape of transformed_blob will have when
+   *    the transformation is applied to the data.
+   *
+   * @param cv_img
+   *    cv::Mat containing the data to be transformed.
+   */
+  vector&lt;int&gt; InferBlobShape(const cv::Mat&amp; cv_img);
+#endif  // USE_OPENCV
+
+ protected:
+   /**
+   * @brief Generates a random integer from Uniform({0, 1, ..., n-1}).
+   *
+   * @param n
+   *    The upperbound (exclusive) value of the random number.
+   * @return
+   *    A uniformly random integer value from ({0, 1, ..., n-1}).
+   */
+   //产生取值{0, 1, n-1}的随机整数，服从均匀分布
+  virtual int Rand(int n);
+
+  void Transform(const Datum&amp; datum, Dtype* transformed_data);
+  // Tranformation parameters(变换参数，该数据结构由ProtoBuffer工具自动生成)
+  TransformationParameter param_;
+
+//随机数生成器，声明在include/caffe/common.hpp中
+  shared_ptr&lt;Caffe::RNG&gt; rng_;
+//当前运行阶段，可能为TRAIN或TEST。阶段不同，执行变换会有差异
+  Phase phase_;
+//均值图像,用于从均值文件中读取
+  Blob&lt;Dtype&gt; data_mean_;
+//均值数值,用于从param_中提取
+  vector&lt;Dtype&gt; mean_values_;
+};
+
+}  // namespace caffe
+
+#endif  // CAFFE_DATA_TRANSFORMER_HPP_
+
+</code></pre>
+
+<p>数据变化器的实现文件位于<code>src/caffe/data_transformer.cpp</code>，我们来深入阅读一下。</p>
+
+<pre><code class="language-c++">#ifdef USE_OPENCV
+#include &lt;opencv2/core/core.hpp&gt;
+#endif  // USE_OPENCV
+
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+#include &quot;caffe/data_transformer.hpp&quot;
+#include &quot;caffe/util/io.hpp&quot;
+#include &quot;caffe/util/math_functions.hpp&quot;
+#include &quot;caffe/util/rng.hpp&quot;
+
+namespace caffe {
 //构造函数
-template &lt;typename Dtype&gt;
-Blob&lt;Dtype&gt;::Blob(const int num, const int channels, const int height,
-    const int width)
-  // 调用Reshape之前必须初始化capacity_，否则会导致不可预期结果
-  : capacity_(0) {
-  Reshape(num, channels, height, width);
-}
-
-template &lt;typename Dtype&gt;
-Blob&lt;Dtype&gt;::Blob(const vector&lt;int&gt;&amp; shape)
-  // capacity_ must be initialized before calling Reshape
-  : capacity_(0) {
-  Reshape(shape);
-}
-
-template &lt;typename Dtype&gt;
-const int* Blob&lt;Dtype&gt;::gpu_shape() const {
-  CHECK(shape_data_);
-  return (const int*)shape_data_-&gt;gpu_data();
-}
-//只读获取cpu date指针
-template &lt;typename Dtype&gt;
-const Dtype* Blob&lt;Dtype&gt;::cpu_data() const {
-  CHECK(data_);     //保证data_不为 NULL
-  return (const Dtype*)data_-&gt;cpu_data();
-}
-//修改cpu data指针
-template &lt;typename Dtype&gt;
-void Blob&lt;Dtype&gt;::set_cpu_data(Dtype* data) {
-  CHECK(data);
-  // Make sure CPU and GPU sizes remain equal
-  size_t size = count_ * sizeof(Dtype);
-  if (data_-&gt;size() != size) {
-    data_.reset(new SyncedMemory(size));
-    diff_.reset(new SyncedMemory(size));
+template&lt;typename Dtype&gt;
+DataTransformer&lt;Dtype&gt;::DataTransformer(const TransformationParameter&amp; param,
+    Phase phase)
+    : param_(param), phase_(phase) {        //初始化param_和phase_
+  // check if we want to use mean_file(查看是否使用均值文件)
+  if (param_.has_mean_file()) {
+  //如果定了均值文件，又指定了均值数值，则报错，只能2选1
+    CHECK_EQ(param_.mean_value_size(), 0) &lt;&lt;
+      &quot;Cannot specify mean_file and mean_value at the same time&quot;;
+    const string&amp; mean_file = param.mean_file();    //获取均值文件名
+    if (Caffe::root_solver()) {
+      LOG(INFO) &lt;&lt; &quot;Loading mean file from: &quot; &lt;&lt; mean_file;
+    }
+    //从均值文件中读取数据到blob_proto对象中
+    BlobProto blob_proto;
+    ReadProtoFromBinaryFileOrDie(mean_file.c_str(), &amp;blob_proto);
+    //从blob_proto将均值反序列化到data_mean_内存中 
+    data_mean_.FromProto(blob_proto);
   }
-  data_-&gt;set_cpu_data(data);
-}
-
-template &lt;typename Dtype&gt;
-const Dtype* Blob&lt;Dtype&gt;::gpu_data() const {
-  CHECK(data_);
-  return (const Dtype*)data_-&gt;gpu_data();
-}
-
-template &lt;typename Dtype&gt;
-void Blob&lt;Dtype&gt;::set_gpu_data(Dtype* data) {
-  CHECK(data);
-  // Make sure CPU and GPU sizes remain equal
-  size_t size = count_ * sizeof(Dtype);
-  if (data_-&gt;size() != size) {
-    data_.reset(new SyncedMemory(size));
-    diff_.reset(new SyncedMemory(size));
-  }
-  data_-&gt;set_gpu_data(data);
-}
-//只读获取cpu_diff指针
-template &lt;typename Dtype&gt;
-const Dtype* Blob&lt;Dtype&gt;::cpu_diff() const {
-  CHECK(diff_);
-  return (const Dtype*)diff_-&gt;cpu_data();
-}
-//只读获取gpu_diff指针
-template &lt;typename Dtype&gt;
-const Dtype* Blob&lt;Dtype&gt;::gpu_diff() const {
-  CHECK(diff_);
-  return (const Dtype*)diff_-&gt;gpu_data();
-}
-//读写访问cpu data指针
-template &lt;typename Dtype&gt;
-Dtype* Blob&lt;Dtype&gt;::mutable_cpu_data() {
-  CHECK(data_);
-  return static_cast&lt;Dtype*&gt;(data_-&gt;mutable_cpu_data());
-}
-//读写访问gpu data指针
-template &lt;typename Dtype&gt;
-Dtype* Blob&lt;Dtype&gt;::mutable_gpu_data() {
-  CHECK(data_);
-  return static_cast&lt;Dtype*&gt;(data_-&gt;mutable_gpu_data());
-}
-//与上面相同
-template &lt;typename Dtype&gt;
-Dtype* Blob&lt;Dtype&gt;::mutable_cpu_diff() {
-  CHECK(diff_);
-  return static_cast&lt;Dtype*&gt;(diff_-&gt;mutable_cpu_data());
-}
-
-template &lt;typename Dtype&gt;
-Dtype* Blob&lt;Dtype&gt;::mutable_gpu_diff() {
-  CHECK(diff_);
-  return static_cast&lt;Dtype*&gt;(diff_-&gt;mutable_gpu_data());
-}
-//共享另一个Blob的data指针
-template &lt;typename Dtype&gt;
-void Blob&lt;Dtype&gt;::ShareData(const Blob&amp; other) {
-  CHECK_EQ(count_, other.count());
-  data_ = other.data();
-}
-//共享另一个Blob的diff指针
-template &lt;typename Dtype&gt;
-void Blob&lt;Dtype&gt;::ShareDiff(const Blob&amp; other) {
-  CHECK_EQ(count_, other.count());
-  diff_ = other.diff();
-}
-//Update()函数用于网络参数Blob的更新。其中int和unsigned int类型处理并未实现
-template &lt;&gt; void Blob&lt;unsigned int&gt;::Update() { NOT_IMPLEMENTED; }
-template &lt;&gt; void Blob&lt;int&gt;::Update() { NOT_IMPLEMENTED; }
-template &lt;typename Dtype&gt;
-void Blob&lt;Dtype&gt;::Update() {
-  // We will perform update based on where the data is located.data在哪里我们就在那里更新
-  switch (data_-&gt;head()) {
-  case SyncedMemory::HEAD_AT_CPU:       //data位于cpu端
-    // 执行CPU计算
-        caffe_axpy&lt;Dtype&gt;(count_, Dtype(-1),
-        static_cast&lt;const Dtype*&gt;(diff_-&gt;cpu_data()),
-        static_cast&lt;Dtype*&gt;(data_-&gt;mutable_cpu_data()));
-    break;
-  case SyncedMemory::HEAD_AT_GPU:   //data位于GPU端,或者CPU/GPU已经同步
-  case SyncedMemory::SYNCED:
-#ifndef CPU_ONLY
-    // 执行 CPU 上的计算，data_[i】=data_[i] - diff_[i], i = 0,1,2,…，count_-1
-    caffe_gpu_axpy&lt;Dtype&gt;(count_, Dtype(-1),
-        static_cast&lt;const Dtype*&gt;(diff_-&gt;gpu_data()),
-        static_cast&lt;Dtype*&gt;(data_-&gt;mutable_gpu_data()));
-#else
-    NO_GPU;     //编泽时打开了CPU_ONLY选项，那么GPU模式禁用
-#endif
-    break;
-  default:
-    LOG(FATAL) &lt;&lt; &quot;Syncedmem not initialized.&quot;;
-  }
-}
-//计算data_的L1-范数,其中int和unsigned int类型处理并未实现
-template &lt;&gt; unsigned int Blob&lt;unsigned int&gt;::asum_data() const {
-  NOT_IMPLEMENTED;
-  return 0;
-}
-template &lt;&gt; int Blob&lt;int&gt;::asum_data() const {
-  NOT_IMPLEMENTED;
-  return 0;
-}
-
-template &lt;typename Dtype&gt;
-Dtype Blob&lt;Dtype&gt;::asum_data() const {
-  if (!data_) { return 0; }
-  switch (data_-&gt;head()) {
-  case SyncedMemory::HEAD_AT_CPU:
-    return caffe_cpu_asum(count_, cpu_data());  //执行CPU上的asum计算
-  case SyncedMemory::HEAD_AT_GPU:
-  case SyncedMemory::SYNCED:
-#ifndef CPU_ONLY
-  {
-    Dtype asum;
-    caffe_gpu_asum(count_, gpu_data(), &amp;asum);
-    return asum;
-  }
-#else
-    NO_GPU;
-#endif
-  case SyncedMemory::UNINITIALIZED:
-    return 0;
-  default:
-    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; data_-&gt;head();
-  }
-  return 0;
-}
-
-template &lt;&gt; unsigned int Blob&lt;unsigned int&gt;::asum_diff() const {
-  NOT_IMPLEMENTED;
-  return 0;
-}
-
-template &lt;&gt; int Blob&lt;int&gt;::asum_diff() const {
-  NOT_IMPLEMENTED;
-  return 0;
-}
-//同上,计算diff_的L1范数
-template &lt;typename Dtype&gt;
-Dtype Blob&lt;Dtype&gt;::asum_diff() const {
-  if (!diff_) { return 0; }
-  switch (diff_-&gt;head()) {
-  case SyncedMemory::HEAD_AT_CPU:
-    return caffe_cpu_asum(count_, cpu_diff());
-  case SyncedMemory::HEAD_AT_GPU:
-  case SyncedMemory::SYNCED:
-#ifndef CPU_ONLY
-  {
-    Dtype asum;
-    caffe_gpu_asum(count_, gpu_diff(), &amp;asum);
-    return asum;
-  }
-#else
-    NO_GPU;
-#endif
-  case SyncedMemory::UNINITIALIZED:
-    return 0;
-  default:
-    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; diff_-&gt;head();
-  }
-  return 0;
-}
-//计算data_的L2-范数
-template &lt;&gt; unsigned int Blob&lt;unsigned int&gt;::sumsq_data() const {
-  NOT_IMPLEMENTED;
-  return 0;
-}
-template &lt;&gt; int Blob&lt;int&gt;::sumsq_data() const {
-  NOT_IMPLEMENTED;
-  return 0;
-}
-
-template &lt;typename Dtype&gt;
-Dtype Blob&lt;Dtype&gt;::sumsq_data() const {
-  Dtype sumsq;
-  const Dtype* data;
-  if (!data_) { return 0; }
-  switch (data_-&gt;head()) {
-  case SyncedMemory::HEAD_AT_CPU:
-    data = cpu_data();
-    sumsq = caffe_cpu_dot(count_, data, data);  //执行 CPU上的dot计算
-    break;
-  case SyncedMemory::HEAD_AT_GPU:
-  case SyncedMemory::SYNCED:
-#ifndef CPU_ONLY
-    data = gpu_data();
-    caffe_gpu_dot(count_, data, data, &amp;sumsq);
-#else
-    NO_GPU;
-#endif
-    break;
-  case SyncedMemory::UNINITIALIZED:
-    return 0;
-  default:
-    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; data_-&gt;head();
-  }
-  return sumsq;
-}
-//同上,计算diff_的L2-范数
-template &lt;&gt; unsigned int Blob&lt;unsigned int&gt;::sumsq_diff() const {
-  NOT_IMPLEMENTED;
-  return 0;
-}
-template &lt;&gt; int Blob&lt;int&gt;::sumsq_diff() const {
-  NOT_IMPLEMENTED;
-  return 0;
-}
-template &lt;typename Dtype&gt;
-Dtype Blob&lt;Dtype&gt;::sumsq_diff() const {
-  Dtype sumsq;
-  const Dtype* diff;
-  if (!diff_) { return 0; }
-  switch (diff_-&gt;head()) {
-  case SyncedMemory::HEAD_AT_CPU:
-    diff = cpu_diff();
-    sumsq = caffe_cpu_dot(count_, diff, diff);
-    break;
-  case SyncedMemory::HEAD_AT_GPU:
-  case SyncedMemory::SYNCED:
-#ifndef CPU_ONLY
-    diff = gpu_diff();
-    caffe_gpu_dot(count_, diff, diff, &amp;sumsq);
-    break;
-#else
-    NO_GPU;
-#endif
-  case SyncedMemory::UNINITIALIZED:
-    return 0;
-  default:
-    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; data_-&gt;head();
-  }
-  return sumsq;
-}
-//对data_进行幅度缩放
-template &lt;&gt; void Blob&lt;unsigned int&gt;::scale_data(unsigned int scale_factor) {
-  NOT_IMPLEMENTED;
-}
-
-template &lt;&gt; void Blob&lt;int&gt;::scale_data(int scale_factor) {
-  NOT_IMPLEMENTED;
-}
-
-template &lt;typename Dtype&gt;
-void Blob&lt;Dtype&gt;::scale_data(Dtype scale_factor) {
-  Dtype* data;
-  if (!data_) { return; }
-  switch (data_-&gt;head()) {
-  case SyncedMemory::HEAD_AT_CPU:   //执行CPU上的计算
-    data = mutable_cpu_data();
-    caffe_scal(count_, scale_factor, data);
-    return;
-  case SyncedMemory::HEAD_AT_GPU:
-  case SyncedMemory::SYNCED:
-#ifndef CPU_ONLY
-    data = mutable_gpu_data();
-    caffe_gpu_scal(count_, scale_factor, data);
-    return;
-#else
-    NO_GPU;
-#endif
-  case SyncedMemory::UNINITIALIZED:
-    return;
-  default:
-    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; data_-&gt;head();
-  }
-}
-
-template &lt;&gt; void Blob&lt;unsigned int&gt;::scale_diff(unsigned int scale_factor) {
-  NOT_IMPLEMENTED;
-}
-
-template &lt;&gt; void Blob&lt;int&gt;::scale_diff(int scale_factor) {
-  NOT_IMPLEMENTED;
-}
-//对diff_进行缩放,同理
-template &lt;typename Dtype&gt;
-void Blob&lt;Dtype&gt;::scale_diff(Dtype scale_factor) {
-  Dtype* diff;
-  if (!diff_) { return; }
-  switch (diff_-&gt;head()) {
-  case SyncedMemory::HEAD_AT_CPU:
-    diff = mutable_cpu_diff();
-    caffe_scal(count_, scale_factor, diff);
-    return;
-  case SyncedMemory::HEAD_AT_GPU:
-  case SyncedMemory::SYNCED:
-#ifndef CPU_ONLY
-    diff = mutable_gpu_diff();
-    caffe_gpu_scal(count_, scale_factor, diff);
-    return;
-#else
-    NO_GPU;
-#endif
-  case SyncedMemory::UNINITIALIZED:
-    return;
-  default:
-    LOG(FATAL) &lt;&lt; &quot;Unknown SyncedMemory head state: &quot; &lt;&lt; diff_-&gt;head();
-  }
-}
-//判断形状是否相同
-template &lt;typename Dtype&gt;
-bool Blob&lt;Dtype&gt;::ShapeEquals(const BlobProto&amp; other) {
-  if (other.has_num() || other.has_channels() ||
-      other.has_height() || other.has_width()) {
-    // Using deprecated 4D Blob dimensions --
-    // shape is (num, channels, height, width).
-    // Note: we do not use the normal Blob::num(), Blob::channels(), etc.
-    // methods as these index from the beginning of the blob shape, where legacy parameter blobs were indexed from the end of the blob shape (e.g., bias Blob shape (1 x 1 x 1 x N), IP layer weight Blob shape (1 x 1 x M x N)).
-    //输入的维度若使用过时的维度信息（num, channels,height, width)，则需要转换为新的vector参数,代码使用了C++中的“懒”逻辑
-    return shape_.size() &lt;= 4 &amp;&amp;
-           LegacyShape(-4) == other.num() &amp;&amp;
-           LegacyShape(-3) == other.channels() &amp;&amp;
-           LegacyShape(-2) == other.height() &amp;&amp;
-           LegacyShape(-1) == other.width();
-  }
-  //直接对比
-  vector&lt;int&gt; other_shape(other.shape().dim_size());
-  for (int i = 0; i &lt; other.shape().dim_size(); ++i) {
-    other_shape[i] = other.shape().dim(i);
-  }
-  return shape_ == other_shape;
-}
-//从另一个Blob对象拷贝data (可选diff),必要时进行变维
-template &lt;typename Dtype&gt;
-void Blob&lt;Dtype&gt;::CopyFrom(const Blob&amp; source, bool copy_diff, bool reshape) {
-  if (source.count() != count_ || source.shape() != shape_) {
-    if (reshape) {
-      ReshapeLike(source);      //如果要变维,则执行这个
-    } else {    //两个blob形状不同,则报错
-      LOG(FATAL) &lt;&lt; &quot;Trying to copy blobs of different sizes.&quot;;
+  // check if we want to use mean_value(均值数值)
+  if (param_.mean_value_size() &gt; 0) {
+    CHECK(param_.has_mean_file() == false) &lt;&lt;
+      &quot;Cannot specify mean_file and mean_value at the same time&quot;;
+    for (int c = 0; c &lt; param_.mean_value_size(); ++c) {
+      mean_values_.push_back(param_.mean_value(c));//从param_中读取均值数值,不在读取均值文件
     }
   }
-  switch (Caffe::mode()) {
-  case Caffe::GPU:      //GPU模式
-    if (copy_diff) {
-      caffe_copy(count_, source.gpu_diff(),
-          static_cast&lt;Dtype*&gt;(diff_-&gt;mutable_gpu_data()));
-    } else {
-      caffe_copy(count_, source.gpu_data(),
-          static_cast&lt;Dtype*&gt;(data_-&gt;mutable_gpu_data()));
-    }
-    break;
-  case Caffe::CPU:      //CPU模式
-    if (copy_diff) {
-      caffe_copy(count_, source.cpu_diff(),
-          static_cast&lt;Dtype*&gt;(diff_-&gt;mutable_cpu_data()));
-    } else {
-      caffe_copy(count_, source.cpu_data(),
-          static_cast&lt;Dtype*&gt;(data_-&gt;mutable_cpu_data()));
-    }
-    break;
-  default:
-    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
-  }
 }
+//变换函数，从众多重载函数中，我们选择一个重点讲解，其他的计算流程都类似
+//下面函数使用了Datum作为输入，这个结构体我们可以从caffe.proto中一窥究竟
+/*
+    // Datum用来从LMDB/LEVELDB中读取数据，或将数据写入LMDB/LEVELDB,和BlobProto有相似的功能,只是BlobProto用于模型权值序列化/反序列化，而Datum专为数据或特征阁（feature map)提供序列化/反序列化服务.
+message Datum {
+ //数据维度信息，channels * height ★ width
+  optional int32 channels = 1;
+  optional int32 height = 2;
+  optional int32 width = 3;
+  // the actual image data, in bytes(图像数据，以字节类型存储)
+  optional bytes data = 4;
+  //标签数据，统一用int32类型存储
+  optional int32 label = 5;
+  // Optionally, the datum could also hold float data.(可选，图像数据也可以用float类型存储 )
+  repeated float float_data = 6;
+  // If true data contains an encoded image that need to be decoded(是否为编码数据，默认不是)
+  optional bool encoded = 7 [default = false];
+}
+*/
 
-//从BlobProto中加载一个Blob,适用于从磁盘载入之前导出的Blob
-template &lt;typename Dtype&gt;
-void Blob&lt;Dtype&gt;::FromProto(const BlobProto&amp; proto, bool reshape) {
-  if (reshape) {        //从BlobProto对象中获得所需各个维度信息
-    vector&lt;int&gt; shape;
-    if (proto.has_num() || proto.has_channels() ||
-        proto.has_height() || proto.has_width()) {
-      // Using deprecated 4D Blob dimensions --
-      // shape is (num, channels, height, width).
-      shape.resize(4);
-      shape[0] = proto.num();
-      shape[1] = proto.channels();
-      shape[2] = proto.height();
-      shape[3] = proto.width();
-    } else {
-      shape.resize(proto.shape().dim_size());
-      for (int i = 0; i &lt; proto.shape().dim_size(); ++i) {
-        shape[i] = proto.shape().dim(i);
+//下面函数输入为Datum,输出为数据指针 
+template&lt;typename Dtype&gt;
+void DataTransformer&lt;Dtype&gt;::Transform(const Datum&amp; datum,
+                                       Dtype* transformed_data) {
+  //获得datum数据字串、维度信息
+  const string&amp; data = datum.data();
+  const int datum_channels = datum.channels();
+  const int datum_height = datum.height();
+  const int datum_width = datum.width();
+
+//从取处理参数，如切块大小、幅度缩放、随机镜像、图像均值等
+  const int crop_size = param_.crop_size();
+  const Dtype scale = param_.scale();
+  const bool do_mirror = param_.mirror() &amp;&amp; Rand(2);
+  const bool has_mean_file = param_.has_mean_file();
+  const bool has_uint8 = data.size() &gt; 0;
+  const bool has_mean_values = mean_values_.size() &gt; 0;
+
+  CHECK_GT(datum_channels, 0);  //保证输入数据通道数大于0
+  CHECK_GE(datum_height, crop_size);    //保证输入数据宽和高大于切块大小
+  CHECK_GE(datum_width, crop_size);
+//获得图像均值
+  Dtype* mean = NULL;
+  if (has_mean_file) {  //若指定了图像均值文件
+  //保证图像均值的维度与输入图像数据的维度完全相同 
+    CHECK_EQ(datum_channels, data_mean_.channels());
+    CHECK_EQ(datum_height, data_mean_.height());
+    CHECK_EQ(datum_width, data_mean_.width());
+    mean = data_mean_.mutable_cpu_data(); //夺取图像均值数据控制权
+  }
+  if (has_mean_values) {    //若没有指定图像均值文件，而是直接给出数值
+  //保证均值数值维度为1,或与输人图像数据的channels数目相同
+    CHECK(mean_values_.size() == 1 || mean_values_.size() == datum_channels) &lt;&lt;
+     &quot;Specify either 1 mean_value or as many as channels: &quot; &lt;&lt; datum_channels;
+    if (datum_channels &gt; 1 &amp;&amp; mean_values_.size() == 1) {
+      // Replicate the mean_value for simplicity(若均值数值维度为1,而输入数据channels数目大于1,则重复该值channels次 )
+      for (int c = 1; c &lt; datum_channels; ++c) {
+        mean_values_.push_back(mean_values_[0]);
       }
     }
-    Reshape(shape);     //Blob按照维度信息进行变维
+  }
+  //输入图像宽和高
+  int height = datum_height;
+  int width = datum_width;
+  //开始图像切块
+  int h_off = 0;
+  int w_off = 0;
+  if (crop_size) { //crop_size不为0，则进行切块;若为0表示不切块
+    height = crop_size;
+    width = crop_size;
+    // We only do random crop when we do training.
+    if (phase_ == TRAIN) {
+      h_off = Rand(datum_height - crop_size + 1); //切块的 height偏移量
+      w_off = Rand(datum_width - crop_size + 1);  //切块的 width 偏移量
+    } else {
+      h_off = (datum_height - crop_size) / 2;
+      w_off = (datum_width - crop_size) / 2;
+    }
+  }
+
+  Dtype datum_element;      //存放输入图像的像素值
+  int top_index, data_index;    //分别存放输出index,输入index
+  for (int c = 0; c &lt; datum_channels; ++c) {
+    for (int h = 0; h &lt; height; ++h) {
+      for (int w = 0; w &lt; width; ++w) {
+        data_index = (c * datum_height + h_off + h) * datum_width + w_off + w;
+        if (do_mirror) {    //若需要镜像操作，则对输出index设置width反向
+          top_index = (c * height + h) * width + (width - 1 - w);
+        } else {
+          top_index = (c * height + h) * width + w;
+        }
+        if (has_uint8) {    //若datum中使用uint8存储图像数据，需要转换为float
+          datum_element =
+            static_cast&lt;Dtype&gt;(static_cast&lt;uint8_t&gt;(data[data_index]));
+        } else {
+          datum_element = datum.float_data(data_index);
+        }
+        if (has_mean_file) {    //若指定了均值文件
+          transformed_data[top_index] =
+            (datum_element - mean[data_index]) * scale; // 执行去均值、幅度缩放
+        } else {
+          if (has_mean_values) {    //若指定了均值数值
+            transformed_data[top_index] =
+              (datum_element - mean_values_[c]) * scale;    //去均值,幅度缩放
+          } else {
+            transformed_data[top_index] = datum_element * scale;    //不去均值,制作幅度缩放
+          }
+        }
+      }
+    }
+  }
+}
+
+//与上面函数类似.只是输出变为Blob
+template&lt;typename Dtype&gt;
+void DataTransformer&lt;Dtype&gt;::Transform(const Datum&amp; datum,
+                                       Blob&lt;Dtype&gt;* transformed_blob) {
+  // If datum is encoded, decode and transform the cv::image.(如果datum是经过编码的图像，则先解码 )
+  if (datum.encoded()) {
+#ifdef USE_OPENCV
+    CHECK(!(param_.force_color() &amp;&amp; param_.force_gray()))
+        &lt;&lt; &quot;cannot set both force_color and force_gray&quot;;
+    cv::Mat cv_img;
+    if (param_.force_color() || param_.force_gray()) {
+    // If force_color then decode in color otherwise decode in gray.
+      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
+    } else {
+      cv_img = DecodeDatumToCVMatNative(datum);
+    }
+    // Transform the cv::image into blob.(将cv::image变为Blob)
+    return Transform(cv_img, transformed_blob);
+#else
+    LOG(FATAL) &lt;&lt; &quot;Encoded datum requires OpenCV; compile with USE_OPENCV.&quot;;
+#endif  // USE_OPENCV
   } else {
-    CHECK(ShapeEquals(proto)) &lt;&lt; &quot;shape mismatch (reshape not set)&quot;;
+    if (param_.force_color() || param_.force_gray()) {
+      LOG(ERROR) &lt;&lt; &quot;force_color and force_gray only for encoded datum&quot;;
+    }
   }
-  // copy data 加载数据
-  Dtype* data_vec = mutable_cpu_data();
-  if (proto.double_data_size() &gt; 0) {   // 如果之前保存的是double类型 data
-    CHECK_EQ(count_, proto.double_data_size());
-    for (int i = 0; i &lt; count_; ++i) {
-      data_vec[i] = proto.double_data(i);   //加载double date
+
+  const int crop_size = param_.crop_size();
+  const int datum_channels = datum.channels();
+  const int datum_height = datum.height();
+  const int datum_width = datum.width();
+
+  // Check dimensions.
+  const int channels = transformed_blob-&gt;channels();
+  const int height = transformed_blob-&gt;height();
+  const int width = transformed_blob-&gt;width();
+  const int num = transformed_blob-&gt;num();
+
+  CHECK_EQ(channels, datum_channels);
+  CHECK_LE(height, datum_height);
+  CHECK_LE(width, datum_width);
+  CHECK_GE(num, 1);
+
+  if (crop_size) {
+    CHECK_EQ(crop_size, height);
+    CHECK_EQ(crop_size, width);
+  } else {
+    CHECK_EQ(datum_height, height);
+    CHECK_EQ(datum_width, width);
+  }
+
+  Dtype* transformed_data = transformed_blob-&gt;mutable_cpu_data();
+  Transform(datum, transformed_data);   //参数变换完毕，调用现有函数
+}
+
+//对一组datum进行变换
+template&lt;typename Dtype&gt;
+void DataTransformer&lt;Dtype&gt;::Transform(const vector&lt;Datum&gt; &amp; datum_vector,
+                                       Blob&lt;Dtype&gt;* transformed_blob) {
+  const int datum_num = datum_vector.size();
+  const int num = transformed_blob-&gt;num();
+  const int channels = transformed_blob-&gt;channels();
+  const int height = transformed_blob-&gt;height();
+  const int width = transformed_blob-&gt;width();
+
+  CHECK_GT(datum_num, 0) &lt;&lt; &quot;There is no datum to add&quot;;
+  CHECK_LE(datum_num, num) &lt;&lt;
+    &quot;The size of datum_vector must be no greater than transformed_blob-&gt;num()&quot;;
+  Blob&lt;Dtype&gt; uni_blob(1, channels, height, width); //临时Blob
+  //依次对每个datum进行变换.放入对应的Blob中
+  for (int item_id = 0; item_id &lt; datum_num; ++item_id) {
+    int offset = transformed_blob-&gt;offset(item_id);
+    uni_blob.set_cpu_data(transformed_blob-&gt;mutable_cpu_data() + offset);
+    Transform(datum_vector[item_id], &amp;uni_blob);
+  }
+}
+//对一组输入cv::Mat对象进行变换.放入Blob中
+#ifdef USE_OPENCV
+template&lt;typename Dtype&gt;
+void DataTransformer&lt;Dtype&gt;::Transform(const vector&lt;cv::Mat&gt; &amp; mat_vector,
+                                       Blob&lt;Dtype&gt;* transformed_blob) {
+  const int mat_num = mat_vector.size();
+  const int num = transformed_blob-&gt;num();
+  const int channels = transformed_blob-&gt;channels();
+  const int height = transformed_blob-&gt;height();
+  const int width = transformed_blob-&gt;width();
+
+  CHECK_GT(mat_num, 0) &lt;&lt; &quot;There is no MAT to add&quot;;
+  CHECK_EQ(mat_num, num) &lt;&lt;
+    &quot;The size of mat_vector must be equals to transformed_blob-&gt;num()&quot;;
+  Blob&lt;Dtype&gt; uni_blob(1, channels, height, width);
+  for (int item_id = 0; item_id &lt; mat_num; ++item_id) {
+    int offset = transformed_blob-&gt;offset(item_id);
+    uni_blob.set_cpu_data(transformed_blob-&gt;mutable_cpu_data() + offset);
+    Transform(mat_vector[item_id], &amp;uni_blob);
+  }
+}
+
+//对一个cv:Mat对象进行变换
+template&lt;typename Dtype&gt;
+void DataTransformer&lt;Dtype&gt;::Transform(const cv::Mat&amp; cv_img,
+                                       Blob&lt;Dtype&gt;* transformed_blob) {
+  const int crop_size = param_.crop_size();
+  const int img_channels = cv_img.channels();
+  const int img_height = cv_img.rows;
+  const int img_width = cv_img.cols;
+
+  // Check dimensions.
+  const int channels = transformed_blob-&gt;channels();
+  const int height = transformed_blob-&gt;height();
+  const int width = transformed_blob-&gt;width();
+  const int num = transformed_blob-&gt;num();
+
+  CHECK_EQ(channels, img_channels);
+  CHECK_LE(height, img_height);
+  CHECK_LE(width, img_width);
+  CHECK_GE(num, 1);
+
+  CHECK(cv_img.depth() == CV_8U) &lt;&lt; &quot;Image data type must be unsigned byte&quot;;
+
+  const Dtype scale = param_.scale();
+  const bool do_mirror = param_.mirror() &amp;&amp; Rand(2);
+  const bool has_mean_file = param_.has_mean_file();
+  const bool has_mean_values = mean_values_.size() &gt; 0;
+
+  CHECK_GT(img_channels, 0);
+  CHECK_GE(img_height, crop_size);
+  CHECK_GE(img_width, crop_size);
+
+  Dtype* mean = NULL;
+  if (has_mean_file) {
+    CHECK_EQ(img_channels, data_mean_.channels());
+    CHECK_EQ(img_height, data_mean_.height());
+    CHECK_EQ(img_width, data_mean_.width());
+    mean = data_mean_.mutable_cpu_data();
+  }
+  if (has_mean_values) {
+    CHECK(mean_values_.size() == 1 || mean_values_.size() == img_channels) &lt;&lt;
+     &quot;Specify either 1 mean_value or as many as channels: &quot; &lt;&lt; img_channels;
+    if (img_channels &gt; 1 &amp;&amp; mean_values_.size() == 1) {
+      // Replicate the mean_value for simplicity(复制均值数值,便于操作)
+      for (int c = 1; c &lt; img_channels; ++c) {
+        mean_values_.push_back(mean_values_[0]);
+      }
+    }
+  }
+
+  int h_off = 0;
+  int w_off = 0;
+  cv::Mat cv_cropped_img = cv_img;
+  if (crop_size) {
+    CHECK_EQ(crop_size, height);
+    CHECK_EQ(crop_size, width);
+    // We only do random crop when we do training.
+    if (phase_ == TRAIN) {
+      h_off = Rand(img_height - crop_size + 1);
+      w_off = Rand(img_width - crop_size + 1);
+    } else {
+      h_off = (img_height - crop_size) / 2;
+      w_off = (img_width - crop_size) / 2;
+    }
+    cv::Rect roi(w_off, h_off, crop_size, crop_size);
+    cv_cropped_img = cv_img(roi);
+  } else {
+    CHECK_EQ(img_height, height);
+    CHECK_EQ(img_width, width);
+  }
+
+  CHECK(cv_cropped_img.data);
+
+  Dtype* transformed_data = transformed_blob-&gt;mutable_cpu_data();
+  int top_index;
+  for (int h = 0; h &lt; height; ++h) {
+    const uchar* ptr = cv_cropped_img.ptr&lt;uchar&gt;(h);
+    int img_index = 0;
+    for (int w = 0; w &lt; width; ++w) {
+      for (int c = 0; c &lt; img_channels; ++c) {
+        if (do_mirror) {
+          top_index = (c * height + h) * width + (width - 1 - w);
+        } else {
+          top_index = (c * height + h) * width + w;
+        }
+        // int top_index = (c * height + h) * width + w;
+        Dtype pixel = static_cast&lt;Dtype&gt;(ptr[img_index++]);
+        if (has_mean_file) {
+          int mean_index = (c * img_height + h_off + h) * img_width + w_off + w;
+          transformed_data[top_index] =
+            (pixel - mean[mean_index]) * scale;
+        } else {
+          if (has_mean_values) {
+            transformed_data[top_index] =
+              (pixel - mean_values_[c]) * scale;
+          } else {
+            transformed_data[top_index] = pixel * scale;
+          }
+        }
+      }
+    }
+  }
+}
+#endif  // USE_OPENCV
+
+//输入是Blob,输出也是Blob
+template&lt;typename Dtype&gt;
+void DataTransformer&lt;Dtype&gt;::Transform(Blob&lt;Dtype&gt;* input_blob,
+                                       Blob&lt;Dtype&gt;* transformed_blob) {
+  const int crop_size = param_.crop_size();
+  const int input_num = input_blob-&gt;num();
+  const int input_channels = input_blob-&gt;channels();
+  const int input_height = input_blob-&gt;height();
+  const int input_width = input_blob-&gt;width();
+
+  if (transformed_blob-&gt;count() == 0) {
+    // Initialize transformed_blob with the right shape.(初始化变换后的Blob的形状)
+    if (crop_size) {
+      transformed_blob-&gt;Reshape(input_num, input_channels,
+                                crop_size, crop_size);
+    } else {
+      transformed_blob-&gt;Reshape(input_num, input_channels,
+                                input_height, input_width);
+    }
+  }
+
+  const int num = transformed_blob-&gt;num();
+  const int channels = transformed_blob-&gt;channels();
+  const int height = transformed_blob-&gt;height();
+  const int width = transformed_blob-&gt;width();
+  const int size = transformed_blob-&gt;count();
+
+  CHECK_LE(input_num, num);
+  CHECK_EQ(input_channels, channels);
+  CHECK_GE(input_height, height);
+  CHECK_GE(input_width, width);
+
+
+  const Dtype scale = param_.scale();
+  const bool do_mirror = param_.mirror() &amp;&amp; Rand(2);
+  const bool has_mean_file = param_.has_mean_file();
+  const bool has_mean_values = mean_values_.size() &gt; 0;
+
+  int h_off = 0;
+  int w_off = 0;
+  if (crop_size) {
+    CHECK_EQ(crop_size, height);
+    CHECK_EQ(crop_size, width);
+    // We only do random crop when we do training.
+    if (phase_ == TRAIN) {
+      h_off = Rand(input_height - crop_size + 1);
+      w_off = Rand(input_width - crop_size + 1);
+    } else {
+      h_off = (input_height - crop_size) / 2;
+      w_off = (input_width - crop_size) / 2;
     }
   } else {
-    CHECK_EQ(count_, proto.data_size());
-    for (int i = 0; i &lt; count_; ++i) {
-      data_vec[i] = proto.data(i);  //否则加载float data
+    CHECK_EQ(input_height, height);
+    CHECK_EQ(input_width, width);
+  }
+
+  Dtype* input_data = input_blob-&gt;mutable_cpu_data();
+  if (has_mean_file) {
+    CHECK_EQ(input_channels, data_mean_.channels());
+    CHECK_EQ(input_height, data_mean_.height());
+    CHECK_EQ(input_width, data_mean_.width());
+    for (int n = 0; n &lt; input_num; ++n) {
+      int offset = input_blob-&gt;offset(n);
+      caffe_sub(data_mean_.count(), input_data + offset,
+            data_mean_.cpu_data(), input_data + offset);
     }
   }
-  if (proto.double_diff_size() &gt; 0) {   // 如果之前保存的是 double 类型 diff
-    CHECK_EQ(count_, proto.double_diff_size());
-    Dtype* diff_vec = mutable_cpu_diff();
-    for (int i = 0; i &lt; count_; ++i) {
-      diff_vec[i] = proto.double_diff(i);
+
+  if (has_mean_values) {
+    CHECK(mean_values_.size() == 1 || mean_values_.size() == input_channels) &lt;&lt;
+     &quot;Specify either 1 mean_value or as many as channels: &quot; &lt;&lt; input_channels;
+    if (mean_values_.size() == 1) {
+      caffe_add_scalar(input_blob-&gt;count(), -(mean_values_[0]), input_data);
+    } else {
+      for (int n = 0; n &lt; input_num; ++n) {
+        for (int c = 0; c &lt; input_channels; ++c) {
+          int offset = input_blob-&gt;offset(n, c);
+          caffe_add_scalar(input_height * input_width, -(mean_values_[c]),
+            input_data + offset);
+        }
+      }
     }
-  } else if (proto.diff_size() &gt; 0) {
-    CHECK_EQ(count_, proto.diff_size());
-    Dtype* diff_vec = mutable_cpu_diff();
-    for (int i = 0; i &lt; count_; ++i) {
-      diff_vec[i] = proto.diff(i);
+  }
+
+  Dtype* transformed_data = transformed_blob-&gt;mutable_cpu_data();
+
+  for (int n = 0; n &lt; input_num; ++n) {
+    int top_index_n = n * channels;
+    int data_index_n = n * channels;
+    for (int c = 0; c &lt; channels; ++c) {
+      int top_index_c = (top_index_n + c) * height;
+      int data_index_c = (data_index_n + c) * input_height + h_off;
+      for (int h = 0; h &lt; height; ++h) {
+        int top_index_h = (top_index_c + h) * width;
+        int data_index_h = (data_index_c + h) * input_width + w_off;
+        if (do_mirror) {
+          int top_index_w = top_index_h + width - 1;
+          for (int w = 0; w &lt; width; ++w) {
+            transformed_data[top_index_w-w] = input_data[data_index_h + w];
+          }
+        } else {
+          for (int w = 0; w &lt; width; ++w) {
+            transformed_data[top_index_h + w] = input_data[data_index_h + w];
+          }
+        }
+      }
     }
+  }
+  if (scale != Dtype(1)) {
+    DLOG(INFO) &lt;&lt; &quot;Scale: &quot; &lt;&lt; scale;
+    caffe_scal(size, scale, transformed_data);
   }
 }
-//将Blob中的data(可选diff)导出到BlobProto结构体.便于存储到磁盘文件中
-template &lt;&gt;
-void Blob&lt;double&gt;::ToProto(BlobProto* proto, bool write_diff) const {
-  proto-&gt;clear_shape();     //重置proto的维度,保证与blob相同
-  for (int i = 0; i &lt; shape_.size(); ++i) {
-    proto-&gt;mutable_shape()-&gt;add_dim(shape_[i]);
-  }
-  proto-&gt;clear_double_data();   //清除data
-  proto-&gt;clear_double_diff();   //清除diff
-  const double* data_vec = cpu_data();  //将data导出到proto
-  for (int i = 0; i &lt; count_; ++i) {
-    proto-&gt;add_double_data(data_vec[i]);
-  }
-  if (write_diff) {         //  若有write_diff的需求
-    const double* diff_vec = cpu_diff();    //将diff导出到proto
-    for (int i = 0; i &lt; count_; ++i) {
-      proto-&gt;add_double_diff(diff_vec[i]);
+
+//获得数据变换输出Blob尺寸
+template&lt;typename Dtype&gt;
+vector&lt;int&gt; DataTransformer&lt;Dtype&gt;::InferBlobShape(const Datum&amp; datum) {
+  if (datum.encoded()) {
+#ifdef USE_OPENCV
+    CHECK(!(param_.force_color() &amp;&amp; param_.force_gray()))
+        &lt;&lt; &quot;cannot set both force_color and force_gray&quot;;
+    cv::Mat cv_img;
+    if (param_.force_color() || param_.force_gray()) {
+    // If force_color then decode in color otherwise decode in gray.
+      cv_img = DecodeDatumToCVMat(datum, param_.force_color());
+    } else {
+      cv_img = DecodeDatumToCVMatNative(datum);
     }
+    // InferBlobShape using the cv::image.
+    return InferBlobShape(cv_img);
+#else
+    LOG(FATAL) &lt;&lt; &quot;Encoded datum requires OpenCV; compile with USE_OPENCV.&quot;;
+#endif  // USE_OPENCV
+  }
+  const int crop_size = param_.crop_size();
+  const int datum_channels = datum.channels();
+  const int datum_height = datum.height();
+  const int datum_width = datum.width();
+  // Check dimensions.
+  CHECK_GT(datum_channels, 0);
+  CHECK_GE(datum_height, crop_size);
+  CHECK_GE(datum_width, crop_size);
+  // Build BlobShape.
+  vector&lt;int&gt; shape(4);
+  shape[0] = 1;
+  shape[1] = datum_channels;
+  shape[2] = (crop_size)? crop_size: datum_height;
+  shape[3] = (crop_size)? crop_size: datum_width;
+  return shape;
+}
+
+
+template&lt;typename Dtype&gt;
+vector&lt;int&gt; DataTransformer&lt;Dtype&gt;::InferBlobShape(
+    const vector&lt;Datum&gt; &amp; datum_vector) {
+  const int num = datum_vector.size();
+  CHECK_GT(num, 0) &lt;&lt; &quot;There is no datum to in the vector&quot;;
+  // Use first datum in the vector to InferBlobShape.
+  vector&lt;int&gt; shape = InferBlobShape(datum_vector[0]);
+  // Adjust num to the size of the vector.
+  shape[0] = num;
+  return shape;
+}
+
+#ifdef USE_OPENCV
+template&lt;typename Dtype&gt;
+vector&lt;int&gt; DataTransformer&lt;Dtype&gt;::InferBlobShape(const cv::Mat&amp; cv_img) {
+  const int crop_size = param_.crop_size();
+  const int img_channels = cv_img.channels();
+  const int img_height = cv_img.rows;
+  const int img_width = cv_img.cols;
+  // Check dimensions.
+  CHECK_GT(img_channels, 0);
+  CHECK_GE(img_height, crop_size);
+  CHECK_GE(img_width, crop_size);
+  // Build BlobShape.
+  vector&lt;int&gt; shape(4);
+  shape[0] = 1;
+  shape[1] = img_channels;
+  shape[2] = (crop_size)? crop_size: img_height;
+  shape[3] = (crop_size)? crop_size: img_width;
+  return shape;
+}
+
+template&lt;typename Dtype&gt;
+vector&lt;int&gt; DataTransformer&lt;Dtype&gt;::InferBlobShape(
+    const vector&lt;cv::Mat&gt; &amp; mat_vector) {
+  const int num = mat_vector.size();
+  CHECK_GT(num, 0) &lt;&lt; &quot;There is no cv_img to in the vector&quot;;
+  // Use first cv_img in the vector to InferBlobShape.
+  vector&lt;int&gt; shape = InferBlobShape(mat_vector[0]);
+  // Adjust num to the size of the vector.
+  shape[0] = num;
+  return shape;
+}
+#endif  // USE_OPENCV
+
+//初始化随机数种子
+template &lt;typename Dtype&gt;
+void DataTransformer&lt;Dtype&gt;::InitRand() {
+//如果在初始化参数中要求对输入进行随机镜像操作，或者在训练阶段需要随机切块,那么需要初始化随机数种子
+  const bool needs_rand = param_.mirror() ||
+      (phase_ == TRAIN &amp;&amp; param_.crop_size());
+  if (needs_rand) {
+    const unsigned int rng_seed = caffe_rng_rand();
+    rng_.reset(new Caffe::RNG(rng_seed));
+  } else {
+    rng_.reset();
   }
 }
-//同上,只不过类型为float
-template &lt;&gt;
-void Blob&lt;float&gt;::ToProto(BlobProto* proto, bool write_diff) const {
-  proto-&gt;clear_shape();
-  for (int i = 0; i &lt; shape_.size(); ++i) {
-    proto-&gt;mutable_shape()-&gt;add_dim(shape_[i]);
-  }
-  proto-&gt;clear_data();
-  proto-&gt;clear_diff();
-  const float* data_vec = cpu_data();
-  for (int i = 0; i &lt; count_; ++i) {
-    proto-&gt;add_data(data_vec[i]);
-  }
-  if (write_diff) {
-    const float* diff_vec = cpu_diff();
-    for (int i = 0; i &lt; count_; ++i) {
-      proto-&gt;add_diff(diff_vec[i]);
-    }
-  }
+
+//生成0~n-1之间的随机数
+template &lt;typename Dtype&gt;
+int DataTransformer&lt;Dtype&gt;::Rand(int n) {
+  CHECK(rng_);
+  CHECK_GT(n, 0);
+  caffe::rng_t* rng =
+      static_cast&lt;caffe::rng_t*&gt;(rng_-&gt;generator());
+  return ((*rng)() % n);
 }
-//实例化Blob   类模板（float, double)
-INSTANTIATE_CLASS(Blob);
-template class Blob&lt;int&gt;;
-template class Blob&lt;unsigned int&gt;;
+
+INSTANTIATE_CLASS(DataTransformer);
 
 }  // namespace caffe
 
 </code></pre>
-
-<p><strong>到此,我们就了解了Caffe一些基本的数据结构.后面就应该学习Layer层中对数据的一些处理.</strong></p>
 
                         
                       </div>
@@ -1074,7 +1048,1092 @@ template class Blob&lt;unsigned int&gt;;
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/6/10</span>
+                    <span class="date">2017/6/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%20I/O%E6%A8%A1%E5%9D%97.html'>Caffe I/O模块</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14982657549571.html">
+                
+                  <h1>Caffe I/O模块</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>这里我们讨论学习Caffe的I/O模块，即与<strong>数据</strong>打交道的模块。</p>
+
+<p>我们在运行Caffe例程前，首先需要将原始数据转换为<strong>LMDB</strong>格式，训练网络时则需要由数据读取层(DataLayer)不断地从LMDB读取数据，送入后续卷积、下采样 等计算层。作为基础,Caffe I/O模块的效率直接影响到处理效果。</p>
+
+<h2 id="toc_0">数据读取层</h2>
+
+<p>Caffe数据读取层(DataLayer)是Layer的派生类。除了读取LMDB、LEVELDB之外，也可以从原始图像直接读取(ImageDataLayer)。</p>
+
+<h3 id="toc_1">数据结构描述</h3>
+
+<p>我们在<code>caffe.proto</code>中可以找到,关于数据结构的描述</p>
+
+<pre><code class="language-protobuf">message DataParameter {
+//输入数据使用的DB类型
+  enum DB {
+    LEVELDB = 0;    //使用 LEVELDB
+    LMDB = 1;       //使用 LMDB
+  }
+  // Specify the data source.(源数据的路径)
+  optional string source = 1;
+  // Specify the batch size.( 一个批量数据包含的图片数)
+  optional uint32 batch_size = 4;
+  // The rand_skip variable is for the data layer to skip a few data points
+  // to avoid all asynchronous sgd clients to start at the same point. The skip
+  // point would be set as rand_skip * rand(0,1). Note that rand_skip should not
+  // be larger than the number of keys in the database.
+  // DEPRECATED. Each solver accesses a different subset of the database.
+  //随机跳过若干图片，跳跃数为rand_skip * rand(0, 1)
+  optional uint32 rand_skip = 7 [default = 0];
+  //默认输入数据使用DB类型，默认为LEVELDB
+  optional DB backend = 8 [default = LEVELDB];
+  // DEPRECATED. See TransformationParameter. For data pre-processing, we can do
+  // simple scaling and subtracting the data mean, if provided. Note that the
+  // mean subtraction is always carried out before scaling.
+  //scale、mean_file、crop_size、mirror 均为旧版参数，现已转移到 TransformationParameter
+  optional float scale = 2 [default = 1];
+  optional string mean_file = 3;
+  // DEPRECATED. See TransformationParameter. Specify if we would like to randomly
+  // crop an image.
+  optional uint32 crop_size = 5 [default = 0];
+  // DEPRECATED. See TransformationParameter. Specify if we want to randomly mirror
+  // data.
+  optional bool mirror = 6 [default = false];
+  //强制编码图像为三通道彩色图像
+  optional bool force_encoded_color = 9 [default = false];
+  // Prefetch queue (Increase if data feeding bandwidth varies, within the
+  // limit of device memory for GPU training)
+  //预取队列(预先放到主机内存中的批量数.默认为4个Batch)
+  optional uint32 prefetch = 10 [default = 4];
+}
+
+</code></pre>
+
+<h3 id="toc_2">数据读取层的实现</h3>
+
+<p>数据读取层声明位于<code>include/caffe/layers/base_data_layers.hpp</code>中，如果需要单独使用该层，则应包含这个头文件.</p>
+
+<pre><code class="language-c++">namespace caffe {
+
+/**
+ * @brief Provides base for data layers that feed blobs to the Net.
+ *
+ * TODO(dox): thorough documentation for Forward and proto params.
+ */
+template &lt;typename Dtype&gt;
+class BaseDataLayer : public Layer&lt;Dtype&gt; {
+ public:
+ //显式构造函数
+  explicit BaseDataLayer(const LayerParameter&amp; param);
+  // LayerSetUp: implements common data layer setup functionality, and calls
+  // DataLayerSetUp to do special data layer setup for individual layer types.
+  // This method may not be overridden except by the BasePrefetchingDataLayer.
+  //层配置，实现通用层配置功能，之后调用DataLayerSetUp进行数据读取层的特别配置 
+  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  virtual void DataLayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {}
+  // Data layers have no bottoms, so reshaping is trivial.(数据读取没有Bottom Blob,变形操作很简单 )
+  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {}
+//反向传播函数不需要做任何操作
+  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {}
+  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {}
+
+ protected:
+ //数据预处理变换器参数
+  TransformationParameter transform_param_;
+  //数据预处理变换器
+  shared_ptr&lt;DataTransformer&lt;Dtype&gt; &gt; data_transformer_;
+  //是否输出标签数据
+  bool output_labels_;
+};
+//批量数据，用于存放数据读取层输出
+template &lt;typename Dtype&gt;
+class Batch {
+ public:
+ //包含两个Blob: data_用于存放图片数据，label_用于存放标签
+  Blob&lt;Dtype&gt; data_, label_;
+};
+
+//带预取功能的数据读取派生于BaseDataLayer和InternalThread
+template &lt;typename Dtype&gt;
+class BasePrefetchingDataLayer :
+    public BaseDataLayer&lt;Dtype&gt;, public InternalThread {
+ public:
+ //显式构造函数
+  explicit BasePrefetchingDataLayer(const LayerParameter&amp; param);
+  // LayerSetUp: implements common data layer setup functionality, and calls
+  // DataLayerSetUp to do special data layer setup for individual layer types.
+  // This method may not be overridden.
+  //层设置函数
+  void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+//前向传播
+  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+
+ protected:
+  virtual void InternalThreadEntry();   //内部线程入口
+  virtual void load_batch(Batch&lt;Dtype&gt;* batch) = 0; //载入批量数据,纯虚函数
+
+  vector&lt;shared_ptr&lt;Batch&lt;Dtype&gt; &gt; &gt; prefetch_; //预取Buffer
+  BlockingQueue&lt;Batch&lt;Dtype&gt;*&gt; prefetch_free_;  //空闲Batch队列
+  BlockingQueue&lt;Batch&lt;Dtype&gt;*&gt; prefetch_full_;  //已加载Batch队列
+  Batch&lt;Dtype&gt;* prefetch_current_;  //当前Batch(猜的)
+
+  Blob&lt;Dtype&gt; transformed_data_;    //变换后的数据
+};
+
+
+</code></pre>
+
+<p>数据读取层的实现位于<code>src/caffe/layers/base_data_layer.cpp</code>中，内容如下:</p>
+
+<pre><code class="language-c++">#include &lt;boost/thread.hpp&gt;
+#include &lt;vector&gt;
+
+#include &quot;caffe/blob.hpp&quot;
+#include &quot;caffe/data_transformer.hpp&quot;
+#include &quot;caffe/internal_thread.hpp&quot;
+#include &quot;caffe/layer.hpp&quot;
+#include &quot;caffe/layers/base_data_layer.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
+#include &quot;caffe/util/blocking_queue.hpp&quot;
+
+namespace caffe {
+//构造函数，初始化Layer参数、数据变换器参数
+template &lt;typename Dtype&gt;
+BaseDataLayer&lt;Dtype&gt;::BaseDataLayer(const LayerParameter&amp; param)
+    : Layer&lt;Dtype&gt;(param),
+      transform_param_(param.transform_param()) {
+}
+//BaseDataLayer层设置 
+template &lt;typename Dtype&gt;
+void BaseDataLayer&lt;Dtype&gt;::LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  if (top.size() == 1) {    //判断输出Blob个数，若为1只输出data，若为2则输出data和label
+    output_labels_ = false;
+  } else {
+    output_labels_ = true;
+  }
+  //初始化数据变化器对象
+  data_transformer_.reset(
+      new DataTransformer&lt;Dtype&gt;(transform_param_, this-&gt;phase_));
+  data_transformer_-&gt;InitRand();    //生成随机数种子
+  // The subclasses should setup the size of bottom and top
+  //子类负责设置Top Blob形状
+  DataLayerSetUp(bottom, top);
+}
+//BasePrefetchingDataLayer 构造函数
+template &lt;typename Dtype&gt;
+BasePrefetchingDataLayer&lt;Dtype&gt;::BasePrefetchingDataLayer(
+    const LayerParameter&amp; param)
+    : BaseDataLayer&lt;Dtype&gt;(param),
+      prefetch_(param.data_param().prefetch()),
+      prefetch_free_(), prefetch_full_(), prefetch_current_() {
+  for (int i = 0; i &lt; prefetch_.size(); ++i) {
+    prefetch_[i].reset(new Batch&lt;Dtype&gt;());
+    prefetch_free_.push(prefetch_[i].get());    //将Batch对象都放入空闲队列中
+  }
+}
+//BasePrefetchingDataLayer层配置函数
+template &lt;typename Dtype&gt;
+void BasePrefetchingDataLayer&lt;Dtype&gt;::LayerSetUp(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  BaseDataLayer&lt;Dtype&gt;::LayerSetUp(bottom, top);
+
+  // Before starting the prefetch thread, we make cpu_data and gpu_data
+  // calls so that the prefetch thread does not accidentally make simultaneous
+  // cudaMalloc calls when the main thread is running. In some GPUs this
+  // seems to cause failures if we do not so.
+  //在幵启数据预取线程前，通过调用Blob相应函数先进行cudaMalloc,避免在多线程情况下同时进行cudaMalloc.会导致CUDA API调用失败
+  for (int i = 0; i &lt; prefetch_.size(); ++i) {
+    prefetch_[i]-&gt;data_.mutable_cpu_data();
+    if (this-&gt;output_labels_) {
+      prefetch_[i]-&gt;label_.mutable_cpu_data();
+    }
+  }
+  //如果编译选项没有CPU_ONLY,则需要编译GPU代码
+#ifndef CPU_ONLY    
+  if (Caffe::mode() == Caffe::GPU) {
+    for (int i = 0; i &lt; prefetch_.size(); ++i) {
+      prefetch_[i]-&gt;data_.mutable_gpu_data();
+      if (this-&gt;output_labels_) {
+        prefetch_[i]-&gt;label_.mutable_gpu_data();    //功能同上
+      }
+    }
+  }
+#endif
+  DLOG(INFO) &lt;&lt; &quot;Initializing prefetch&quot;;
+  this-&gt;data_transformer_-&gt;InitRand();
+  StartInternalThread();    //开启内部预取线程
+  DLOG(INFO) &lt;&lt; &quot;Prefetch initialized.&quot;;
+}
+//内部线程入口
+template &lt;typename Dtype&gt;
+void BasePrefetchingDataLayer&lt;Dtype&gt;::InternalThreadEntry() {
+//创建CUDA Stream,非阻塞类型
+#ifndef CPU_ONLY
+  cudaStream_t stream;
+  if (Caffe::mode() == Caffe::GPU) {
+    CUDA_CHECK(cudaStreamCreateWithFlags(&amp;stream, cudaStreamNonBlocking));
+  }
+#endif
+
+  try {
+    while (!must_stop()) {  //循环载入批量数据
+      Batch&lt;Dtype&gt;* batch = prefetch_free_.pop();   //拿到一个空闲Batch
+      load_batch(batch);    //载入批量数据
+#ifndef CPU_ONLY
+      if (Caffe::mode() == Caffe::GPU) {
+        batch-&gt;data_.data().get()-&gt;async_gpu_push(stream);
+        if (this-&gt;output_labels_) {
+          batch-&gt;label_.data().get()-&gt;async_gpu_push(stream);
+        }
+        CUDA_CHECK(cudaStreamSynchronize(stream));//同步到GPU
+      }
+#endif
+      prefetch_full_.push(batch);   //加入到带负载的Batch队列中
+    }
+  } catch (boost::thread_interrupted&amp;) {
+    // Interrupted exception is expected on shutdown(捕获到异常,退出while循环)
+  }
+#ifndef CPU_ONLY
+  if (Caffe::mode() == Caffe::GPU) {
+    CUDA_CHECK(cudaStreamDestroy(stream));  //销毁CUDA Stream
+  }
+#endif
+}
+//前向传波函数
+template &lt;typename Dtype&gt;
+void BasePrefetchingDataLayer&lt;Dtype&gt;::Forward_cpu(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    //从带负载的Batch队列中取出一个Batch对象
+  if (prefetch_current_) {
+    prefetch_free_.push(prefetch_current_);
+  }
+  prefetch_current_ = prefetch_full_.pop(&quot;Waiting for data&quot;);
+  // Reshape to loaded data.(Top Blob根据Batch形状进行变形)
+  top[0]-&gt;ReshapeLike(prefetch_current_-&gt;data_);
+  //将数据放到Top Blob中
+  top[0]-&gt;set_cpu_data(prefetch_current_-&gt;data_.mutable_cpu_data());
+  if (this-&gt;output_labels_) {
+    // Reshape to loaded labels.(同上)
+    top[1]-&gt;ReshapeLike(prefetch_current_-&gt;label_);
+    top[1]-&gt;set_cpu_data(prefetch_current_-&gt;label_.mutable_cpu_data());
+  }
+}
+
+#ifdef CPU_ONLY
+STUB_GPU_FORWARD(BasePrefetchingDataLayer, Forward);
+#endif
+
+INSTANTIATE_CLASS(BaseDataLayer);
+INSTANTIATE_CLASS(BasePrefetchingDataLayer);
+
+}  // namespace caffe
+
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/24</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%20I/O%E6%A8%A1%E5%9D%97.html'>Caffe I/O模块</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14980252836745.html">
+                
+                  <h1>MAC下openBlas的安装</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>这里我们安装openblas主要有两种方法:</p>
+
+<ol>
+<li>通过git代码到本地并安装</li>
+<li>通过brew来安装</li>
+</ol>
+
+<h2 id="toc_0">git到本地编译安装.</h2>
+
+<ol>
+<li>git代码到本地并安装</li>
+</ol>
+
+<pre><code>git clone https://github.com/xianyi/OpenBLAS.git
+cd OpenBLAS
+make -j4
+make install
+
+</code></pre>
+
+<ol>
+<li>修改Caffe的<code>Makefile.config</code></li>
+</ol>
+
+<pre><code>BLAS := open
+BLAS_INCLUDE :=  /opt/OpenBLAS/include
+BLAS_LIB := /opt/OpenBLAS/lib
+</code></pre>
+
+<ol>
+<li>caffe重新make</li>
+</ol>
+
+<pre><code>make clean
+make pycaffe
+make all -j4
+make test &amp;&amp; runtest
+</code></pre>
+
+<h2 id="toc_1">使用brew进行安装</h2>
+
+<ol>
+<li><code>brew uninstall openblas; brew install --fresh -vd openblas.</code>运行上面命令安装openblas</li>
+<li>更改<code>Makefile.config</code></li>
+</ol>
+
+<pre><code>
+# Homebrew puts openblas in a directory that is not on the standard search path
+BLAS_INCLUDE := $(shell brew --prefix openblas)/include
+BLAS_LIB := $(shell brew --prefix openblas)/lib
+
+</code></pre>
+
+<ol>
+<li>重新编译</li>
+</ol>
+
+<p><strong>如果有些人遇到了这种错误</strong></p>
+
+<pre><code>In file included from src/caffe/util/blocking_queue.cpp:5:
+In file included from ./include/caffe/layers/base_data_layer.hpp:9:
+In file included from ./include/caffe/layer.hpp:12:
+In file included from ./include/caffe/util/math_functions.hpp:11:
+./include/caffe/util/mkl_alternate.hpp:14:10: fatal error: &#39;cblas.h&#39; file not found
+#include &lt;cblas.h&gt;
+         ^
+1 error generated.
+make: *** [.build_release/src/caffe/util/blocking_queue.o] Error 1
+</code></pre>
+
+<p>可以试试这个命令:</p>
+
+<pre><code>cmake -DCMAKE_CXX_FLAGS=-I/usr/local/opt/openblas/include ..
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/21</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%20I/O%E6%A8%A1%E5%9D%97.html'>Caffe I/O模块</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14980135145677.html">
+                
+                  <h1>Caffe中的Net</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">Net的基本用法</a>
+</li>
+<li>
+<a href="#toc_1">数据结构描述</a>
+</li>
+<li>
+<a href="#toc_2">Net的形成</a>
+</li>
+<li>
+<a href="#toc_3">机制和策略</a>
+</li>
+</ul>
+
+
+<p>Net在Caffe中代表一个完整的CNN模型，它包含若干Layer实例。前面我们已经在第5天内容中看到用ProtoBuffer文本文件（prototxt)描述的经典网络结构如LeNet、AlexNet,这些结构反映在Caffe代码实现上就是一个Net对象。<strong>Net其实是相对Blob、 Layer更为复杂的设计，需要沉住气</strong>。</p>
+
+<h2 id="toc_0">Net的基本用法</h2>
+
+<p>Net是一张图纸，对应的描述文件为<code>*.prototxt</code>,我们选择Caffe自带的CaffeNet模型描述文件,位于<code>models/bvlc_reference_caffenet/deploy.prototxt</code>。将该文件拷贝到当前工作目录下。</p>
+
+<p>编写测试代码为:</p>
+
+<pre><code class="language-c++">#include &lt;vector&gt;
+#include &lt;iostream&gt;
+#include &lt;caffe/net.hpp&gt;
+using namespace caffe;
+using namespace std;
+
+int main(void)
+{
+    std::string proto(&quot;deploy.prototxt&quot;);
+    Net&lt;float&gt; nn(proto,caffe::TEST);
+    vector&lt;string&gt; bn = nn.blob_names();    // 获取 Net 中所有 Blob 对象名
+    vector&lt;string&gt; ln = nn.layer_names();   // 获取 Net 中所有 Layer 对象名
+    for (int i = 0; i &lt; bn.size(); i++)
+    {
+        cout&lt;&lt;&quot;Blob #&quot;&lt;&lt;i&lt;&lt;&quot; : &quot;&lt;&lt;bn[i]&lt;&lt;endl;
+    }
+    for (int i = 0; i &lt; ln.size(); i++)
+    {
+        cout&lt;&lt;&quot;layer #&quot;&lt;&lt;i&lt;&lt;&quot; : &quot;&lt;&lt;ln[i]&lt;&lt;endl;
+    }
+    return 0;
+}
+</code></pre>
+
+<p>编译(<strong>注意这里我们需要安装openblas,具体过程不再这里讲述</strong>):</p>
+
+<pre><code>g++ -o netapp net_demo.cpp -I /usr/local/Cellar/caffe/include -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/build/lib -I /usr/local/Cellar/openblas/0.2.19_1/include  -lcaffe -lglog -lboost_system -lprotobuf
+</code></pre>
+
+<p><strong>注意到这里有一段<code>-I /usr/local/Cellar/openblas/0.2.19_1/include</code>这是为了连接到本地的<code>blas</code>库</strong></p>
+
+<p>运行 ./netapp :</p>
+
+<p>发现又报错了:<br/>
+<img src="media/14980135145677/14981000832074.jpg" alt=""/><br/>
+运行<code>install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/LZHcaffe/./netapp</code>命令,连接库文件.</p>
+
+<p>运行成功后,输出为:</p>
+
+<pre><code>...省略上面部分,之前已经见过了
+I0622 11:03:24.688719 3012948928 net.cpp:255] Network initialization done.
+Blob #0 : data
+Blob #1 : conv1
+Blob #2 : pool1
+Blob #3 : norm1
+Blob #4 : conv2
+Blob #5 : pool2
+Blob #6 : norm2
+Blob #7 : conv3
+Blob #8 : conv4
+Blob #9 : conv5
+Blob #10 : pool5
+Blob #11 : fc6
+Blob #12 : fc7
+Blob #13 : fc8
+Blob #14 : prob
+layer #0 : data
+layer #1 : conv1
+layer #2 : relu1
+layer #3 : pool1
+layer #4 : norm1
+layer #5 : conv2
+layer #6 : relu2
+layer #7 : pool2
+layer #8 : norm2
+layer #9 : conv3
+layer #10 : relu3
+layer #11 : conv4
+layer #12 : relu4
+layer #13 : conv5
+layer #14 : relu5
+layer #15 : pool5
+layer #16 : fc6
+layer #17 : relu6
+layer #18 : drop6
+layer #19 : fc7
+layer #20 : relu7
+layer #21 : drop7
+layer #22 : fc8
+layer #23 : prob
+
+</code></pre>
+
+<p>通过上面的简单例子,我们发现Net中既包括Layer对象,有包括Blob对象.其中Blob对象用于存放每个Layer输入/输出中间结果.Layer则根据Net描述对指定的输入Blob进行某些计算处理（卷积、下采样、全连接、非线性变换、计算代价函数等)，输出结果放到指定的输出Blob中。输入Blob和输出Blob可能为同一个。所有的Layer和Blob对象都用名字区分，同名的Blob表示同一个Blob对象，同名的Layer表示同一个Layer对象。<strong>而Blob和Layer同名则不代表它们有任何直接关系</strong>。</p>
+
+<p><font color=red>我们可以通过<code>has_blob()、has_layer()</code>函数来査询当前Net对象是否包含指定名字的Blob或Layer对象，如果返回值为真，则可以进-步调用<code>blob_by_name()、layer_by_name()</code>函数直接获取相应的Blob或Layer指针，进行些操作（如提取某层计算输出特征或某个Blob中的权值)。</font></p>
+
+<h2 id="toc_1">数据结构描述</h2>
+
+<p>我们这里先了解下<code>caffe.proto</code>:</p>
+
+<pre><code class="language-protobuf">
+message NetParameter {
+  optional string name = 1; // consider giving the network a name
+  // DEPRECATED. See InputParameter. The input blobs to the network.
+  repeated string input = 3;
+  // DEPRECATED. See InputParameter. The shape of the input blobs.(网络的输入Blob名称,可以多个Blob)
+  repeated BlobShape input_shape = 8;
+
+  // 4D input dimensions -- deprecated.  Use &quot;input_shape&quot; instead.
+  // If specified, for each input blob there should be four
+  // values specifying the num, channels, height and width of the input blob.
+  // Thus, there should be a total of (4 * #input) numbers.
+  //(旧版的维度信息)
+  repeated int32 input_dim = 4;
+
+  // Whether the network will force every layer to carry out backward operation.
+  // If set False, then whether to carry out backward is determined
+  // automatically according to the net structure and learning rates.
+  optional bool force_backward = 5 [default = false];
+  // The current &quot;state&quot; of the network, including the phase, level, and stage.
+  // Some layers may be included/excluded depending on this state and the states
+  // specified in the layers&#39; include and exclude fields.
+  optional NetState state = 6;
+
+  // Print debugging information about results while running Net::Forward,
+  // Net::Backward, and Net::Update.
+  optional bool debug_info = 7 [default = false];
+
+  // The layers that make up the net.  Each of their configurations, including
+  // connectivity and behavior, is specified as a LayerParameter.
+  repeated LayerParameter layer = 100;  // ID 100 so layers are printed last.
+
+  // DEPRECATED: use &#39;layer&#39; instead.
+  repeated V1LayerParameter layers = 2;
+}
+
+</code></pre>
+
+<blockquote>
+<p>看似很短的proto描述，实际上对应的真实网络prototxt可以很长很长，关键在于可重复多次出现的<code>LayerParameterlayer</code>这个字段。其他字段的功能基本都是辅助网络运行的，在代码中会看到更多的细节。</p>
+</blockquote>
+
+<h2 id="toc_2">Net的形成</h2>
+
+<p>我们将Blob比作Caffe砖石，Layer比作Caffe的墙面，那么Net更像是工匠手中的图纸,描述了每个墙面应当出现的位置,这样设计的房屋才足够牢固、抗震。为了达到这个目的,<strong>Net实现时必然有一套用于记录Layer、Blob的数据结构</strong>。在下表中公布一下这些数据结构的名字,错过与它们打交道的机会。</p>
+
+<table>
+<thead>
+<tr>
+<th>类对象</th>
+<th>含义</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>layers_</td>
+<td>记录Net prototxt中出现的每个Layer</td>
+</tr>
+<tr>
+<td>layer_names_</td>
+<td>记录Net prototxt中出现的每个Layer的名称</td>
+</tr>
+<tr>
+<td>layer_names_index_</td>
+<td>记录Net prototxt中每个Layer名称与顺序索引的对应关系</td>
+</tr>
+<tr>
+<td>layer_need_backward_</td>
+<td>记录Layer是否需要反向传播过程</td>
+</tr>
+<tr>
+<td>blobs_</td>
+<td>记录Net中所有Blob</td>
+</tr>
+<tr>
+<td>blob_names_</td>
+<td>记录每个Blob名称</td>
+</tr>
+<tr>
+<td>blob_names_index_</td>
+<td>记录每个Blob名称与顺序索引的对应关系</td>
+</tr>
+<tr>
+<td>blob_need_backward_</td>
+<td>记录每个Blob是否需要反向传播过程</td>
+</tr>
+<tr>
+<td>bottom_vecs_</td>
+<td>blobs_的影子,记录每个Layer的输入Blob</td>
+</tr>
+<tr>
+<td>bottom_id_vecs_</td>
+<td>与bottom_vecs_关联,用于在blobs_中定位每个Layer的每个输入Blob</td>
+</tr>
+<tr>
+<td>bottom_need_backward_</td>
+<td>与bottom_vecs_关联,标志每个Blob是否需要反向传播过程</td>
+</tr>
+<tr>
+<td>top_vecs_</td>
+<td>blobs_的影子,记录每个Layer的输出Blob</td>
+</tr>
+<tr>
+<td>top_id_vecs_</td>
+<td>与top_vecs_关联,用于在blobs_中定位每个Layer的每个输出Blob</td>
+</tr>
+<tr>
+<td>blob_loss_weights_</td>
+<td>Net中每个Blob对损失函数的投票因子,一般损失层为1，其他层为0</td>
+</tr>
+<tr>
+<td>net_input_blob_indices_</td>
+<td>Net输入Blob在blobs_中的索引</td>
+</tr>
+<tr>
+<td>net_output_blob_indices_</td>
+<td>Net输出Blob在blobs_中的索引</td>
+</tr>
+<tr>
+<td>net_input_blobs_</td>
+<td>Net 输入 Blob</td>
+</tr>
+<tr>
+<td>net_output_blobs_</td>
+<td>Net 输出 Blob</td>
+</tr>
+<tr>
+<td>params_</td>
+<td>Net权值Blob,用于存储网络权值</td>
+</tr>
+<tr>
+<td>param_display_names_</td>
+<td>Net中权值Blob的名称</td>
+</tr>
+<tr>
+<td>learnable_params_</td>
+<td>Net中可训练的权值Blob</td>
+</tr>
+<tr>
+<td>params_lr_</td>
+<td>learnable_params_中每个元素是否有学习速率倍乘因子</td>
+</tr>
+<tr>
+<td>has_params_lr_</td>
+<td>标志learnable_params_中每个元素是否有学习速率倍乘因子</td>
+</tr>
+<tr>
+<td>params_weight_decay_</td>
+<td>learnable_params_中每个元素的权值衰减倍乘因子</td>
+</tr>
+<tr>
+<td>has_params_decay_</td>
+<td>标志learnable_params_中每个元素是否有权值衰减倍乘因子</td>
+</tr>
+</tbody>
+</table>
+
+<p>看到上面有两类Blob:<strong>以param开头的权值Blob</strong>和<strong>以blob开头的Layer输入/输出Blob</strong>。<font color=red>它们虽然都是Blob类型，但在网络中的地位截然不同。权值Blob会随着学习过程而更新，归属于“模型”:Layer输入/输出Blob则只会随网络输入变化,归属于“数据”。深度学习的目的就是不断从“数据”中获取知识,存储到“模型”中,应用于后来的“数据”。</font></p>
+
+<p>Net声明位于<code>include/caffe/net.hpp</code>中，内容如下：</p>
+
+<pre><code class="language-c++">
+template &lt;typename Dtype&gt;
+class Net {
+ public:
+ //显示构造函数
+  explicit Net(const NetParameter&amp; param);
+  explicit Net(const string&amp; param_file, Phase phase,
+&gt;       const int level = 0, const vector&lt;string&gt;* stages = NULL);
+//析构函数
+  virtual ~Net() {}
+
+  /// @brief Initialize a network with a NetParameter.
+  void Init(const NetParameter&amp; param);
+
+  //运行前向传播,输入Blob已经领先填充
+  const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Forward(Dtype* loss = NULL);
+  /// @brief DEPRECATED; use Forward() instead.
+  const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; ForwardPrefilled(Dtype* loss = NULL) {
+    LOG_EVERY_N(WARNING, 1000) &lt;&lt; &quot;DEPRECATED: ForwardPrefilled() &quot;
+        &lt;&lt; &quot;will be removed in a future version. Use Forward().&quot;;
+    return Forward(loss);
+  }
+  
+   /**
+   * The From and To variants of Forward and Backward operate on the
+   * (topological) ordering by which the net is specified. For general DAG
+   * networks, note that (1) computing from one layer to another might entail
+   * extra computation on unrelated branches, and (2) computation starting in
+   * the middle may be incorrect if all of the layers of a fan-in are not
+   * included.
+   */
+   //前向传播的几种形式
+  Dtype ForwardFromTo(int start, int end);
+  Dtype ForwardFrom(int start);
+  Dtype ForwardTo(int end);
+  /// @brief DEPRECATED; set input blobs then use Forward() instead.
+  const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Forward(const vector&lt;Blob&lt;Dtype&gt;* &gt; &amp; bottom,
+      Dtype* loss = NULL);
+    //清零所有权值的diff域,应在反向传播之前运行
+    void ClearParamDiffs();
+    //几种不同形式的Net反向传播,无须指定输入/输出Blob,因为在前向传播过程中已经建立连接
+  void Backward();
+  void BackwardFromTo(int start, int end);
+  void BackwardFrom(int start);
+  void BackwardTo(int end);
+  //对Net中所有Layer自底向上进行变形，无须运行一次前向传播就可以计算各层所需的Blob尺寸
+  void Reshape();
+  //前向传播+反向传播，输入为Bottom Blob，输出为loss
+  Dtype ForwardBackward() {
+    Dtype loss;
+    Forward(&amp;loss);
+    Backward();
+    return loss;
+  }
+  //根据已经(由Solver)准备好的diff值更新网络权值
+   void Update();
+  /**
+   * @brief Shares weight data of owner blobs with shared blobs.
+   *
+   * Note: this is called by Net::Init, and thus should normally not be
+   * called manually.
+   */
+  void ShareWeights();
+
+  /**
+   * @brief For an already initialized net, implicitly copies (i.e., using no
+   *        additional memory) the pre-trained layers from another Net.
+   */
+   //从1个已训练好的Net获取共享权值
+  void ShareTrainedLayersWith(const Net* other);
+  // For an already initialized net, CopyTrainedLayersFrom() copies the already
+  // trained layers from another net parameter instance.
+  /**
+   * @brief For an already initialized net, copies the pre-trained layers from
+   *        another Net.
+   */
+  void CopyTrainedLayersFrom(const NetParameter&amp; param);
+  void CopyTrainedLayersFrom(const string trained_filename);
+  void CopyTrainedLayersFromBinaryProto(const string trained_filename);
+  void CopyTrainedLayersFromHDF5(const string trained_filename);
+  /// @brief Writes the net to a proto.
+  // 序列化一个 Net 到 ProtoBuffer
+  void ToProto(NetParameter* param, bool write_diff = false) const;
+  /// @brief Writes the net to an HDF5 file.
+  //序列化一个Net到HDF5
+  void ToHDF5(const string&amp; filename, bool write_diff = false) const;
+  
+  /// @brief returns the network name.
+  inline const string&amp; name() const { return name_; }
+  /// @brief returns the layer names
+  inline const vector&lt;string&gt;&amp; layer_names() const { return layer_names_; }
+  /// @brief returns the blob names
+  inline const vector&lt;string&gt;&amp; blob_names() const { return blob_names_; }
+  /// @brief returns the blobs
+  inline const vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt;&amp; blobs() const {
+    return blobs_;
+  }
+  /// @brief returns the layers
+  inline const vector&lt;shared_ptr&lt;Layer&lt;Dtype&gt; &gt; &gt;&amp; layers() const {
+    return layers_;
+  }
+  /// @brief returns the phase: TRAIN or TEST
+  inline Phase phase() const { return phase_; }
+  /**
+   * @brief returns the bottom vecs for each layer -- usually you won&#39;t
+   *        need this unless you do per-layer checks such as gradients.
+   */
+   //返回每个Layer的Bottom Blob
+  inline const vector&lt;vector&lt;Blob&lt;Dtype&gt;*&gt; &gt;&amp; bottom_vecs() const {
+    return bottom_vecs_;
+  }
+  /**
+   * @brief returns the top vecs for each layer -- usually you won&#39;t
+   *        need this unless you do per-layer checks such as gradients.
+   */
+   //返回每个Layer的Top Blob
+  inline const vector&lt;vector&lt;Blob&lt;Dtype&gt;*&gt; &gt;&amp; top_vecs() const {
+    return top_vecs_;
+  }
+  /// @brief returns the ids of the top blobs of layer i
+  inline const vector&lt;int&gt; &amp; top_ids(int i) const {
+    CHECK_GE(i, 0) &lt;&lt; &quot;Invalid layer id&quot;;
+    CHECK_LT(i, top_id_vecs_.size()) &lt;&lt; &quot;Invalid layer id&quot;;
+    return top_id_vecs_[i];
+  }
+  /// @brief returns the ids of the bottom blobs of layer i
+  inline const vector&lt;int&gt; &amp; bottom_ids(int i) const {
+    CHECK_GE(i, 0) &lt;&lt; &quot;Invalid layer id&quot;;
+    CHECK_LT(i, bottom_id_vecs_.size()) &lt;&lt; &quot;Invalid layer id&quot;;
+    return bottom_id_vecs_[i];
+  }
+  
+  inline const vector&lt;vector&lt;bool&gt; &gt;&amp; bottom_need_backward() const {
+    return bottom_need_backward_;
+  }
+  inline const vector&lt;Dtype&gt;&amp; blob_loss_weights() const {
+    return blob_loss_weights_;
+  }
+  //返回每个Layer是否需要反向传播计算
+  inline const vector&lt;bool&gt;&amp; layer_need_backward() const {
+    return layer_need_backward_;
+  }
+  /// @brief returns the parameters
+  inline const vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt;&amp; params() const {
+    return params_;
+  }
+  //返回所有可训练权值
+  inline const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; learnable_params() const {
+    return learnable_params_;
+  }
+  /// @brief returns the learnable parameter learning rate multipliers(倍乘因子)
+  inline const vector&lt;float&gt;&amp; params_lr() const { return params_lr_; }
+  inline const vector&lt;bool&gt;&amp; has_params_lr() const { return has_params_lr_; }
+  /// @brief returns the learnable parameter decay multipliers(返回可训练权值的衰减因子)
+  inline const vector&lt;float&gt;&amp; params_weight_decay() const {
+    return params_weight_decay_;
+  }
+  inline const vector&lt;bool&gt;&amp; has_params_decay() const {
+    return has_params_decay_;
+  }
+  //返回Layer名称与向量下标映射对
+  const map&lt;string, int&gt;&amp; param_names_index() const {
+    return param_names_index_;
+  }
+  //返回权值所有者
+  inline const vector&lt;int&gt;&amp; param_owners() const { return param_owners_; }
+  inline const vector&lt;string&gt;&amp; param_display_names() const {
+    return param_display_names_;
+  }
+  /// @brief Input and output blob numbers
+  inline int num_inputs() const { return net_input_blobs_.size(); }
+  inline int num_outputs() const { return net_output_blobs_.size(); }
+  //返回输入Blob
+  inline const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; input_blobs() const {
+    return net_input_blobs_;
+  }
+  //返回输出Blob
+  inline const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; output_blobs() const {
+    return net_output_blobs_;
+  }
+  //返回输入Blob下标
+  inline const vector&lt;int&gt;&amp; input_blob_indices() const {
+    return net_input_blob_indices_;
+  }
+  //返回输出Blob下标
+  inline const vector&lt;int&gt;&amp; output_blob_indices() const {
+    return net_output_blob_indices_;
+  }
+  //查找当前网络是否包含某一名称Blob
+  bool has_blob(const string&amp; blob_name) const;
+  //如果包含,那么就把它找出来
+  const shared_ptr&lt;Blob&lt;Dtype&gt; &gt; blob_by_name(const string&amp; blob_name) const;
+  //查找当前网络是都包含某一名称Layer
+  bool has_layer(const string&amp; layer_name) const;
+  //如果包含,那么就把它找出来
+  const shared_ptr&lt;Layer&lt;Dtype&gt; &gt; layer_by_name(const string&amp; layer_name) const;
+ //设置debug_info_
+  void set_debug_info(const bool value) { debug_info_ = value; }
+
+// Helpers for Init.(下面这些函数是Init的帮手)
+  /**
+   * @brief Remove layers that the user specified should be excluded given the current
+   *        phase, level, and stage.
+   */
+   //过滤掉用户指定的在某个阶段、级别、状态下不应包含的Layer
+  static void FilterNet(const NetParameter&amp; param,
+      NetParameter* param_filtered);
+  /// @brief return whether NetState state meets NetStateRule rule
+  //判断网络状态是否满足网络规则
+  static bool StateMeetsRule(const NetState&amp; state, const NetStateRule&amp; rule,
+      const string&amp; layer_name);
+
+  // Invoked at specific points during an iteration
+  class Callback {
+   protected:
+    virtual void run(int layer) = 0;
+
+    template &lt;typename T&gt;
+    friend class Net;
+  };
+  const vector&lt;Callback*&gt;&amp; before_forward() const { return before_forward_; }
+  void add_before_forward(Callback* value) {
+    before_forward_.push_back(value);
+  }
+  const vector&lt;Callback*&gt;&amp; after_forward() const { return after_forward_; }
+  void add_after_forward(Callback* value) {
+    after_forward_.push_back(value);
+  }
+  const vector&lt;Callback*&gt;&amp; before_backward() const { return before_backward_; }
+  void add_before_backward(Callback* value) {
+    before_backward_.push_back(value);
+  }
+  const vector&lt;Callback*&gt;&amp; after_backward() const { return after_backward_; }
+  void add_after_backward(Callback* value) {
+    after_backward_.push_back(value);
+  }
+  
+  protected:
+  // Helpers for Init.
+  /// @brief Append a new top blob to the net.
+  //为网络追加一个Top Blob
+  void AppendTop(const NetParameter&amp; param, const int layer_id,
+                 const int top_id, set&lt;string&gt;* available_blobs,
+                 map&lt;string, int&gt;* blob_name_to_idx);
+  /// @brief Append a new bottom blob to the net.
+  //为网络追加一个Bottom Blob
+  int AppendBottom(const NetParameter&amp; param, const int layer_id,
+                   const int bottom_id, set&lt;string&gt;* available_blobs,
+                   map&lt;string, int&gt;* blob_name_to_idx);
+  /// @brief Append a new parameter blob to the net.
+  //为网络追加一个权值Blob
+  void AppendParam(const NetParameter&amp; param, const int layer_id,
+                   const int param_id);
+
+  /// @brief Helper for displaying debug info in Forward.
+  void ForwardDebugInfo(const int layer_id);
+  /// @brief Helper for displaying debug info in Backward.
+  void BackwardDebugInfo(const int layer_id);
+  /// @brief Helper for displaying debug info in Update.
+  //显示权值更新调试信息
+  void UpdateDebugInfo(const int param_id);
+  
+  /// @brief The network name
+  string name_;
+  /// @brief The phase: TRAIN or TEST
+  Phase phase_;
+  /// @brief Individual layers in the net(网络中的独立层)
+  vector&lt;shared_ptr&lt;Layer&lt;Dtype&gt; &gt; &gt; layers_;
+  vector&lt;string&gt; layer_names_; //层名称
+  map&lt;string, int&gt; layer_names_index_;  //层名称与索引映射表
+  vector&lt;bool&gt; layer_need_backward_;    //标记某个层是否需要BP
+  /// @brief the blobs storing intermediate results between the layer.
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt; blobs_; //层与层中间传递数据的管道
+  vector&lt;string&gt; blob_names_;   //Blob名称
+  map&lt;string, int&gt; blob_names_index_;   //Blob名称与索引映射表
+  vector&lt;bool&gt; blob_need_backward_; //标记某个Blob是否需要BP
+  /// bottom_vecs stores the vectors containing the input for each layer.
+  /// They don&#39;t actually host the blobs (blobs_ does), so we simply store
+  /// pointers.
+  //bottom_vecs_存放每个层的输入Blob，实际上它并不是这些Blob的所有者(所有者为blobs_),只是存放了指针.
+  vector&lt;vector&lt;Blob&lt;Dtype&gt;*&gt; &gt; bottom_vecs_;
+  vector&lt;vector&lt;int&gt; &gt; bottom_id_vecs_;
+  vector&lt;vector&lt;bool&gt; &gt; bottom_need_backward_;
+  /// top_vecs stores the vectors containing the output for each layer
+  //top_vecs_存放每个层的输入Blob，实际上它并不是这些Blob的所有者(所有者为blobs_),只是存放了指针.
+  vector&lt;vector&lt;Blob&lt;Dtype&gt;*&gt; &gt; top_vecs_;
+  vector&lt;vector&lt;int&gt; &gt; top_id_vecs_;
+  /// Vector of weight in the loss (or objective) function of each net blob,
+  /// indexed by blob_id.
+  //每个Blob队全局损失函数的贡献权重
+  vector&lt;Dtype&gt; blob_loss_weights_;
+  vector&lt;vector&lt;int&gt; &gt; param_id_vecs_;
+  vector&lt;int&gt; param_owners_;
+  vector&lt;string&gt; param_display_names_;
+  vector&lt;pair&lt;int, int&gt; &gt; param_layer_indices_;
+  map&lt;string, int&gt; param_names_index_;
+  /// blob indices for the input and the output of the net
+  //网络输入/输出Blob的索引
+  vector&lt;int&gt; net_input_blob_indices_;
+  vector&lt;int&gt; net_output_blob_indices_;
+  vector&lt;Blob&lt;Dtype&gt;*&gt; net_input_blobs_;
+  vector&lt;Blob&lt;Dtype&gt;*&gt; net_output_blobs_;
+  /// The parameters in the network.(网络权值)
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt; params_;
+  //可训练的网络权值
+  vector&lt;Blob&lt;Dtype&gt;*&gt; learnable_params_;
+  /**
+   * The mapping from params_ -&gt; learnable_params_: we have
+   * learnable_param_ids_.size() == params_.size(),
+   * and learnable_params_[learnable_param_ids_[i]] == params_[i].get()
+   * if and only if params_[i] is an &quot;owner&quot;; otherwise, params_[i] is a sharer
+   * and learnable_params_[learnable_param_ids_[i]] gives its owner.
+   */
+   //从params到learnable_params_的映射
+   //当且仅当params_[i]为所有者时，learnable_param_ids_.size() == params__.size()以及 learnable_params_[learnable_parara_ids_[i]] == params_[i].get()成立
+   //否则,params_[i]只是1个共享者，learnable_params_[learnable_param_ids_[i]]给出了它的所有者
+  vector&lt;int&gt; learnable_param_ids_;
+  /// the learning rate multipliers for learnable_params_
+  vector&lt;float&gt; params_lr_;
+  vector&lt;bool&gt; has_params_lr_;
+  /// the weight decay multipliers for learnable_params_(权值衰减因子)
+  vector&lt;float&gt; params_weight_decay_;
+  vector&lt;bool&gt; has_params_decay_;
+  /// The bytes of memory used by this net(记录网络占用的内存大小)
+  size_t memory_used_;
+  /// Whether to compute and display debug info for the net.(是否显示调试信息)
+  bool debug_info_;
+  // Callbacks
+  vector&lt;Callback*&gt; before_forward_;
+  vector&lt;Callback*&gt; after_forward_;
+  vector&lt;Callback*&gt; before_backward_;
+  vector&lt;Callback*&gt; after_backward_;
+//禁用拷贝构造函数,赋值运算函数
+DISABLE_COPY_AND_ASSIGN(Net);
+};
+
+
+}  // namespace caffe
+
+#endif  // CAFFE_NET_HPP_
+</code></pre>
+
+<p>这里关于Net的头文件学习就到这里,后续学习相关的实现代码(cpp文件)</p>
+
+<h2 id="toc_3">机制和策略</h2>
+
+<p>首先caffe中的Net/Layer/Blob是一种分层设计模式</p>
+
+<p>在我们生活中普遍存在但又最容易被忽视的两个概念是：<font color=red>机制和策略</font>.</p>
+
+<p><strong>一般来说，对于某客观事物.机制回答了“它能干啥”这个问题，策略则回答了“它怎么用”这个问题。</strong></p>
+
+<p>回到Caffe源码上，我们发现Blob提供了数据容器的机制；而Layer则通过不同的策略使用该数据容器，实现多元化的计算处理过程，同时又提供了深度学习各种基本算法（卷积、下采样、损失函数计算等）的机制；Net则利用Layer这些机制，组合为完整的深度学习模型，提供了更加丰富的学习策略。后面我们还会看到，Net也是一种机制。</p>
+
+<p>在阅读源码时，时刻记得目标是希望看到高层策略，还是底层机制？</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/21</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Caffe%20%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.html'>Caffe 数据结构</a></span>
@@ -1091,681 +2150,547 @@ template class Blob&lt;unsigned int&gt;;
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="14969765744787.html">
+                <a class="clearlink" href="14974936829967.html">
                 
-                  <h1>caffe数据结构</h1>
+                  <h1>Caffe中Layer的学习</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<ul>
-<li>
-<a href="#toc_0">Blob</a>
-</li>
-<li>
-<a href="#toc_1">Blob的基本用法</a>
-</li>
-</ul>
+                        	<p>Layer是Caffe的基本计算单元，至少有一个输入Blob (Bottom Blob)和一个输出Blob (Top Blob),部分Layer带有权值(Weight)和偏置项（Bias),<strong>有两个运算方向</strong>：前向传播（Forward)和反向传播（Backward)，其中前向传播计算会对输入Blob进行某种处理（存权值和偏置项的Layer会利用这些对输入进行处理）,得到输出Blob;而反向传播计算则对输出Blob的diff进行某种处理，得到输入Blob的diff(有权值和偏置项的Layer可能也会计算权值Blob、偏置项Blob的diff)。</p>
 
+<h2 id="toc_0">layer中的数据结构描述</h2>
 
-<p>一个CNN网络是由多个Layer堆叠而成的.如图所示:<br/>
-<img src="media/14966518170972/14966520513325.jpg" alt=""/></p>
+<p>我们可以搜索caffe中关于<code>message LayerParameter</code>的类,来了解.<br/>
+如果你一开始找不到这个类在那个文件描述,可以用下面这个命令去搜索:</p>
 
-<p>caffe按照我们设计的图纸(prototxt),用Blob这些砖块建成一层层(Layer)楼房,最后通过方法SGD方法(Solver)进行简装修(Train),精装修(Finetune)实现的.我们这里就是学习这些基本概念.</p>
-
-<h2 id="toc_0">Blob</h2>
-
-<p>Caffe使用称为Blob的4维数组用于存储和交换数据.Blob提供了统一的存储器接口,持有一批图像或其它数据,权值,权值更新值. 其它机器学习框架也有类似的数据结构.</p>
-
-<p><strong>Blob在内存中为4维数组,分别为<code>(width_,height_,channels_,num_)</code>,width_和height_表示图像的宽和高,channel_表示颜色通道RGB,num_表示第几帧,用于存储数据或权值(data)和权值增量(diff),在进行网路计算时,每层的输入,输出都需要Blob对象缓冲.Blob是Caffe的基本存储单元.</strong></p>
-
-<h2 id="toc_1">Blob的基本用法</h2>
-
-<p>Blob是一个模板类,所以创建对象时需要制定模板参数.我们这里写一个简单的测试程序<code>blob_demo.cpp</code>将它放在<code>caffe</code>的安装目录下:</p>
-
-<pre><code class="language-c++">#include&lt;vector&gt;
-#include&lt;iostream&gt;
-#include&lt;caffe/blob.hpp&gt;
-using namespace caffe;
-using namespace std;
-int main(void)
-{
-    Blob&lt;float&gt; a;
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    a.Reshape(1,2,3,4);
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    return 0;
-}
+<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;message LayerParameter&quot; *
 </code></pre>
 
-<p>上面代码首先创建了整型Blob对象a,打印其维度信息,然后调用其<code>Reshape()</code>方法,再次打印其维度信息.</p>
+<p><img src="media/14974936829967/14974948024735.jpg" alt=""/><br/>
+得到它的路径.</p>
 
-<p>使用如下命令来编译上面的文件.</p>
+<p>我们发现是在<code>src/caffe/proto/caffe.proto</code>这个路径中.因为caffe使用<code>google_protobuf</code>数据类型来声明layer.关于<code>google_protobuf</code>的相关内容,之后可以研究一下.</p>
 
-<pre><code>g++ -o app blob_demo.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe
-</code></pre>
+<p>这里我们看一下源码:</p>
 
-<p>生成了可执行程序<code>app</code></p>
+<pre><code class="language-protobuf">//注意：如果你增加了1个新的LayerParameter域，一定记得更新一个可用ID
+// LayerParameter 下一个layer-specific ID: 147 (last added: recurrent_param)
+message LayerParameter {
+  optional string name = 1; // the layer name
+  optional string type = 2; // the layer type
+  repeated string bottom = 3; // 输入Blob(bottom Blob)的名称
+  repeated string top = 4; // 输出Blob(Top Blob)的名称
 
-<p>这个时候运行<code>app</code>的话可能会遇到下面这个错误:<br/>
-<img src="media/14966518170972/14968048615065.jpg" alt=""/><br/>
-这个因为<code>app</code>没有链接到这个动态库文件,执行下边这个命令链接:</p>
+  // 当前计算阶段（TRAIN 或 TEST)
+    optional Phase phase = 10;
 
-<pre><code>install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/./app
-</code></pre>
+  // 为每个Top Blob分配对损失函数的权重，毎个Layer都有默认值，要么为0,表示不参与目标函数计算：要么为1，表示参与损失函数计算
+  repeated float loss_weight = 5;
 
-<p><code>/usr/local/Cellar/caffe/build/lib/</code>为<code>@rpath/libcaffe.so.1.0.0</code>动态库的路径.</p>
+  // 指定训练参数（例如相对全局学习常数的缩放因子，以及用于权值共享 的名称或其他设置)
+  repeated ParamSpec param = 6;
 
-<p>执行后,再次运行会遇到错误:<br/>
-<img src="media/14966518170972/14968049981988.jpg" alt=""/></p>
+  // 承载了该层数值参数的Blob
+  repeated BlobProto blobs = 7;
+  //是否对Bottom Blob进行反向传播过程。该字段的维度应与 Bottom Blob个数一致
+  // Specifies whether to backpropagate to each bottom. If unspecified,
+  // Caffe will automatically infer whether each input needs backpropagation
+  // to compute parameter gradients. If set to true for some inputs,
+  // backpropagation to those inputs is forced; if set false for some inputs,
+  // backpropagation to those inputs is skipped.
+  //
+  // The size must be either 0 or equal to the number of bottoms.
+  repeated bool propagate_down = 11;
 
-<p>与上面类似,这是因为没有链接到<code>@rpath/libhdf5_hl.10.dylib</code><br/>
-执行下面这个命令:</p>
+ //控制某个层在某个时刻是否包含在网络中，基于当前NetState。你可以为include或exclude(不要同时）指定非零值。如果没有任何规则，那么该层一直包含在网络中：如果当前NetState满足了任何1个指定规则，耶么该层会被包含或排斥
+  // Rules controlling whether and when a layer is included in the network,
+  // based on the current NetState.  You may specify a non-zero number of rules
+  // to include OR exclude, but not both.  If no include or exclude rules are
+  // specified, the layer is always included.  If the current NetState meets
+  // ANY (i.e., one or more) of the specified rules, the layer is
+  // included/excluded.
+  repeated NetStateRule include = 8;
+  repeated NetStateRule exclude = 9;
 
-<pre><code>install_name_tool -add_rpath &#39;/Users/liangzhonghao/anaconda2/lib&#39;  /usr/local/Cellar/caffe/build/lib/libcaffe.so.1.0.0
-</code></pre>
+  // Parameters for data pre-processing.数据预处理参数
+  optional TransformationParameter transform_param = 100;
 
-<p>其中<code>/Users/liangzhonghao/anaconda2/lib</code>包含这个库文件.</p>
-
-<p>再次执行app,终于成功了!<br/>
-<img src="media/14966518170972/14968051024802.jpg" alt=""/></p>
-
-<p>创建了Blob对象之后,我们可以通过<code>mutable_cpu[gpu]_data[diff]</code>函数来修改其内部数值:</p>
-
-<p>代码为:</p>
-
-<pre><code class="language-c++">#include&lt;vector&gt;
-#include&lt;iostream&gt;
-#include&lt;caffe/blob.hpp&gt;
-using namespace caffe;
-using namespace std;
-int main(void)
-{
-    Blob&lt;float&gt; a;
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    a.Reshape(1,2,3,4);
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    
-    float *p=a.mutable_cpu_data();
-    for(int i=0;i&lt;a.count();i++){
-        p[i]=i;
-    }
-    for(int u=0;u&lt;a.num();u++){
-        for(int v=0;v&lt;a.channels();v++){
-            for(int w=0;w&lt;a.height();w++){
-                for(int x=0;x&lt;a.width();x++){
-                    cout&lt;&lt;&quot;a[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;a.data_at(u,v,w,x)&lt;&lt;endl;
-                }
-            }
-        }
-    }
-    return 0;
-}
-</code></pre>
-
-<p>跟上面一样继续编译和执行,这里按照上面的命令继续来编译的话,遇到了一个错误:<br/>
-<img src="media/14966518170972/14968061663863.jpg" alt=""/></p>
-
-<p>之后换成下边的命令执行后成功:</p>
-
-<pre><code>g++ -o app2 blob_demo.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe -lglog -lboost_system -lprotobuf
-</code></pre>
-
-<p>差别在于,后边加上了<code>-lglog -lboost_system -lprotobuf</code>命令,具体作用后续将研究(暂时不理解),继续运行后,又出现了错误:<br/>
-<img src="media/14966518170972/14968063024883.jpg" alt=""/></p>
-
-<p>同样是动态库的连接问题:<br/>
-运行命令:</p>
-
-<pre><code>install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/./app2
-</code></pre>
-
-<p>执行命令,然后运行<code>app2</code>.得到输出:<br/>
-<img src="media/14966518170972/14968063915684.jpg" alt=""/></p>
-
-<p><strong>可见,Blob下标的访问与c/c++高维数组几乎一致,而Blob好处在于可以直接同步CPU/GPU上的数据.</strong></p>
-
-<p>Blob还支持计算所有元素的绝对值之和(L1-范数),平方和(L2-范数):</p>
-
-<pre><code>cout&lt;&lt;&quot;ASUM = &quot;&lt;&lt;a.asum_data()&lt;&lt;endl;
-cout&lt;&lt;&quot;SUMSQ = &quot;&lt;&lt;a.sumsq_data()&lt;&lt;endl;
-</code></pre>
-
-<p>输出结果为:</p>
-
-<pre><code>ASUM = 276
-SUMSQ = 4324
-
-</code></pre>
-
-<p>除了data,我们还可以改diff部分,与data的操作基本一致:</p>
-
-<pre><code class="language-c++">#include&lt;vector&gt;
-#include&lt;iostream&gt;
-#include&lt;caffe/blob.hpp&gt;
-using namespace caffe;
-using namespace std;
-int main(void)
-{
-    Blob&lt;float&gt; a;
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    a.Reshape(1,2,3,4);
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    
-    float *p=a.mutable_cpu_data();
-    float *q=a.mutable_cpu_diff();
-    
-    for(int i=0;i&lt;a.count();i++){
-        p[i]= i;     //将data初始化为1,2,3....
-        q[i]= a.count()-1-i;   //将diff初始化为23,22,21,...
-    }
-    
-    a.Update();         //执行update操作,将diff与data融合,这也是CNN权值更新步骤的最终实施者
-   
-    for(int u=0;u&lt;a.num();u++){
-        for(int v=0;v&lt;a.channels();v++){
-            for(int w=0;w&lt;a.height();w++){
-                for(int x=0;x&lt;a.width();x++){
-                    cout&lt;&lt;&quot;a[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;a.data_at(u,v,w,x)&lt;&lt;endl;
-                }
-            }
-        }
-    }
-    
-    cout&lt;&lt;&quot;ASUM = &quot;&lt;&lt;a.asum_data()&lt;&lt;endl;
-    cout&lt;&lt;&quot;SUMSQ = &quot;&lt;&lt;a.sumsq_data()&lt;&lt;endl;
-    
-    return 0;
+  // Parameters shared by loss layers.所有损失层共享的参数
+  optional LossParameter loss_param = 101;
+  
+  
+  //特定类型层的参数。注意一些层实现时可能有多于一种的计算引擎，这些层包括一个引擎类型和引擎参数来选择实现.默认引擎是在编译阶段由引擎开关设置的
+  // Layer type-specific parameters.
+  //
+  // Note: certain layers may have more than one computational engine
+  // for their implementation. These layers include an Engine type and
+  // engine parameter for selecting the implementation.
+  // The default for the engine is set by the ENGINE switch at compile-time.
+  optional AccuracyParameter accuracy_param = 102;
+  optional ArgMaxParameter argmax_param = 103;
+  optional BatchNormParameter batch_norm_param = 139;
+  optional BiasParameter bias_param = 141;
+  optional ConcatParameter concat_param = 104;
+  optional ContrastiveLossParameter contrastive_loss_param = 105;
+  optional ConvolutionParameter convolution_param = 106;
+  optional CropParameter crop_param = 144;
+  optional DataParameter data_param = 107;
+  optional DropoutParameter dropout_param = 108;
+  optional DummyDataParameter dummy_data_param = 109;
+  optional EltwiseParameter eltwise_param = 110;
+  optional ELUParameter elu_param = 140;
+  optional EmbedParameter embed_param = 137;
+  optional ExpParameter exp_param = 111;
+  optional FlattenParameter flatten_param = 135;
+  optional HDF5DataParameter hdf5_data_param = 112;
+  optional HDF5OutputParameter hdf5_output_param = 113;
+  optional HingeLossParameter hinge_loss_param = 114;
+  optional ImageDataParameter image_data_param = 115;
+  optional InfogainLossParameter infogain_loss_param = 116;
+  optional InnerProductParameter inner_product_param = 117;
+  optional InputParameter input_param = 143;
+  optional LogParameter log_param = 134;
+  optional LRNParameter lrn_param = 118;
+  optional MemoryDataParameter memory_data_param = 119;
+  optional MVNParameter mvn_param = 120;
+  optional ParameterParameter parameter_param = 145;
+  optional PoolingParameter pooling_param = 121;
+  optional PowerParameter power_param = 122;
+  optional PReLUParameter prelu_param = 131;
+  optional PythonParameter python_param = 130;
+  optional RecurrentParameter recurrent_param = 146;
+  optional ReductionParameter reduction_param = 136;
+  optional ReLUParameter relu_param = 123;
+  optional ReshapeParameter reshape_param = 133;
+  optional ScaleParameter scale_param = 142;
+  optional SigmoidParameter sigmoid_param = 124;
+  optional SoftmaxParameter softmax_param = 125;
+  optional SPPParameter spp_param = 132;
+  optional SliceParameter slice_param = 126;
+  optional TanHParameter tanh_param = 127;
+  optional ThresholdParameter threshold_param = 128;
+  optional TileParameter tile_param = 138;
+  optional WindowDataParameter window_data_param = 129;
 }
 
 </code></pre>
 
-<p>然后执行以下命令编译,链接库文件:</p>
+<h2 id="toc_1">Layer是怎么炼成的</h2>
 
-<pre><code>g++ -o app blob_demo_diff.cpp -I /usr/local/Cellar/caffe/include/ -D CPU_ONLY -I /usr/local/Cellar/caffe/.build_release/src/ -L /usr/local/Cellar/caffe/.build_release/lib/ -lcaffe  -lglog -lboost_system -lprotobuf
+<p>Layer头文件位于<code>include/caffe/layer.hpp</code>中，我们来解析一下: </p>
 
-install_name_tool -add_rpath &#39;/usr/local/Cellar/caffe/build/lib/&#39;  /usr/local/Cellar/caffe/LZHcaffe/./app
-</code></pre>
+<pre><code class="language-c++">#ifndef CAFFE_LAYER_H_
+#define CAFFE_LAYER_H_
 
-<p><img src="media/14969765744787/14969953318311.jpg" alt=""/></p>
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
 
-<p>运行.app,结果为:<br/>
-<img src="media/14969765744787/14969953744774.jpg" alt=""/></p>
-
-<p>上面表明,在<code>Update()</code>函数中,实现了<code>data = data -diff</code>操作,这个主要是在CNN权值更新时会用到,后面继续学习.</p>
-
-<p>将Blob内部值保存到硬盘,或者冲硬盘载入到内存,可以分别通过<code>ToProto(),FromProto()</code>实现:</p>
-
-<pre><code class="language-c++">
-#include&lt;vector&gt;
-#include&lt;iostream&gt;
-#include&lt;caffe/blob.hpp&gt;
-#include&lt;caffe/util/io.hpp&gt;   //需要包含这个头文件
-using namespace caffe;
-using namespace std;
-int main(void)
-{
-    Blob&lt;float&gt; a;
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    a.Reshape(1,2,3,4);
-    cout&lt;&lt;&quot;Size:&quot;&lt;&lt;a.shape_string()&lt;&lt;endl;
-    
-    float *p=a.mutable_cpu_data();
-    float *q=a.mutable_cpu_diff();
-    
-    for(int i=0;i&lt;a.count();i++){
-        p[i]= i;     //将data初始化为1,2,3....
-        q[i]= a.count()-1-i;   //将diff初始化为23,22,21,...
-    }
-    
-    a.Update();         //执行update操作,将diff与data融合,这也是CNN权值更新步骤的最终实施者
-   
-    BlobProto bp;          //构造一个BlobProto对象
-    a.ToProto(&amp;bp,true);    //将a序列化,连同diff(默认不带)
-    WriteProtoToBinaryFile(bp,&quot;a.blob&quot;);     //写入磁盘文件&quot;a.blob&quot;
-    BlobProto bp2;           //构造一个新的BlobProto对象
-    ReadProtoFromBinaryFileOrDie(&quot;a.blob&quot;,&amp;bp2);    //读取磁盘文件
-    Blob&lt;float&gt; b;          //新建一个Blob对象b
-    b.FromProto(bp2,true);  //从序列化对象bp2中克隆b(连同形状)
-    
-    for(int u=0;u&lt;b.num();u++){
-        for(int v=0;v&lt;b.channels();v++){
-            for(int w=0;w&lt;b.height();w++){
-                for(int x=0;x&lt;b.width();x++){
-                    cout&lt;&lt;&quot;b[&quot;&lt;&lt;u&lt;&lt;&quot;][&quot;&lt;&lt;w&lt;&lt;&quot;][&quot;&lt;&lt;x&lt;&lt;&quot;]=&quot;&lt;&lt;b.data_at(u,v,w,x)&lt;&lt;endl;
-                }
-            }
-        }
-    }
-    
-    cout&lt;&lt;&quot;ASUM = &quot;&lt;&lt;b.asum_data()&lt;&lt;endl;
-    cout&lt;&lt;&quot;SUMSQ = &quot;&lt;&lt;b.sumsq_data()&lt;&lt;endl;
-    
-    
-    return 0;
-}
-
-</code></pre>
-
-<p>编译,连接库文件后(注意编译时末尾加入<code>&quot;-lglog -lboost_system -lprotobuf&quot;</code>选项),输出如下:</p>
-
-<p><img src="media/14969765744787/14969964533804.jpg" alt=""/></p>
-
-<p>可以发现与上面没有差别,只是在文件夹中多了一个<code>Blob.a</code>文件,<strong>所以<code>BlobProto</code>对象实现了硬盘与内存之间的数据通信.可以帮助保存中间权值和数据</strong></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14964511552671.html">
-                
-                  <h1>激活函数</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>深度神经网络之所以具有丰富的表达能力，除了有深层次的网络之外，还有一个重要因素即非线性处理单元,称为激活函数（Activation Function)或挤压函数（Squashing Function).<strong>所以我们必须要关注怎么在caffe中实现这些函数.</strong></p>
-
-<p>下图是一个神经元模型.\(\varphi(.)\)为激活函数.主要作用是将上一层的输入线性组合结果\(u_k\)动态范围压缩到特定值域(例如[-1,1]).一般来说具备非线性处理单元的深度神经网络(大于等于3层),理论上可以逼近任意函数.<br/>
-<img src="media/14964511552671/14964521741597.jpg" alt=""/></p>
-
-<p>其中几个常用的激活函数如下:<br/>
-1.Sigmoid函数,值域为(0,1)<br/>
-\[<br/>
-\varphi(x) = \frac{1}{1+e^{-ax}}<br/>
-\]<br/>
-<img src="media/14964511552671/14964523348860.jpg" alt=""/></p>
-
-<p>2.tanh函数,值域为(-1,1):<br/>
-\[<br/>
-\varphi(x) = \frac{1-e^{-2x}}{1+e^{-2x}}<br/>
-\]<br/>
-<img src="media/14964511552671/14964526906602.jpg" alt=""/></p>
-
-<p>3.ReLu(Rectified Linear Unit，规整化线性单元)函数,值域为\([0,+ \infty)\),是一种非饱和激活函数.<br/>
-\[<br/>
-\varphi(x) = max(0,x)<br/>
-\]<br/>
-<img src="media/14964511552671/14964530576767.jpg" alt=""/></p>
-
-<p>远不止上面这些激活函数,随着发展,陆续又出现了很多激活函数.这里不多介绍.后面还要自学很多这类相关知识.</p>
-
-<p>神经网络中最大的问题是梯度消失问题（Gradient Vanishing Problem),这在使用 <code>Sigmoid、tanh</code>等饱和激活函数情况下尤为严重(神经网络进行误差反向传播时，各层都要乘以激活函数的一阶导数\(G=e\cdot \varphi&#39;(x) \cdot x\)),梯度每传递一层都会衰减一次,网络层数较多时,梯度G就会不停的衰减至消失),使得训练网络时收敛极慢,而ReLU这类非饱和激活函数收敛速度就快很多.所以学习网络模型中一般都会选用类似ReLu这种死活函数.</p>
-
-<p>接下来我们学习在caffe用代码实现对应层的计算,包括前向传播计算和反向传播计算.Caffe的所有与激活函数相关的Layer类声明在<code>include/caffe/layers</code>文件夹中分别为<code>sigmoid_layer.hpp,relu_layer.hpp,tanh_layer.hpp</code>,我们将它们统称为<strong>非线性层</strong>,我们重点关注<code>ReLULayer,SigmoidLayer和TanHLayer</code>这三类.</p>
-
-<p>在前面我们测试的LeNet-5模型中使用了ReLu层,我们在<code>example/mnist/lenet_train_test.prototxt</code>中找到描述:</p>
-
-<pre><code>layer {
-  name: &quot;relu1&quot;
-  type: &quot;ReLU&quot;
-  bottom: &quot;ip1&quot;
-  top: &quot;ip1&quot;
-}
-</code></pre>
-
-<p>与卷积层、全连接层最大的不同,就是没有权值相关的参数，描述相对简单。另外两种层没有实际样例，怎么办呢？这时按照我们的Caffe源码阅读方法论.从<code>src/caffe/proto/caffe.proto</code>中获得灵感。</p>
-
-<pre><code class="language-c++">// ReLU层参数
-message ReLUParameter {
-  // Allow non-zero slope for negative inputs to speed up optimization
-  // Described in:
-  // Maas, A. L., Hannun, A. Y., &amp; Ng, A. Y. (2013). Rectifier nonlinearities
-  // improve neural network acoustic models. In ICML Workshop on Deep Learning
-  // for Audio, Speech, and Language Processing.
-  // Leaky ReLU参数，我们暂不关心
-  optional float negative_slope = 1 [default = 0];
-  enum Engine {     //计算引擎选择
-    DEFAULT = 0;
-    CAFFE = 1;      // Caffe 实现
-    CUDNN = 2;      // CUDNN 实现
-  }
-  optional Engine engine = 2 [default = DEFAULT];
-}
-</code></pre>
-
-<pre><code class="language-c++">// Sigmoid层参数
-message SigmoidParameter {
-  enum Engine {
-    DEFAULT = 0;
-    CAFFE = 1;
-    CUDNN = 2;
-  }
-  optional Engine engine = 1 [default = DEFAULT];
-}
-
-</code></pre>
-
-<pre><code class="language-c++">//  tanh 层参数
-message TanHParameter {
-  enum Engine {
-    DEFAULT = 0;
-    CAFFE = 1;
-    CUDNN = 2;
-  }
-  optional Engine engine = 1 [default = DEFAULT];
-}
-</code></pre>
-
-<p>非线性层的共同特点就是对前一层blob中的数值逐一进行非线性变换，并放回原blob中。激活函数的类声明如下:</p>
-
-<pre><code class="language-c++">namespace caffe {
-//非线性层的鼻祖NeuronLayer，派生于Layer类，特点是输出blob(y)与输入blob(x)尺寸相同
+#include &quot;caffe/blob.hpp&quot;
+#include &quot;caffe/common.hpp&quot;
+#include &quot;caffe/layer_factory.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
+#include &quot;caffe/util/math_functions.hpp&quot;
 
 /**
- * @brief An interface for layers that take one blob as input (@f$ x @f$)
- *        and produce one equally-sized blob as output (@f$ y @f$), where
- *        each element of the output depends only on the corresponding input
- *        element.
+ Forward declare boost::thread instead of including boost/thread.hpp
+ to avoid a boost/NVCC issues (#1009, #1010) on OSX.
+ */
+namespace boost { class mutex; }
+
+namespace caffe {
+
+/**
+ * @brief An interface for the units of computation which can be composed into a
+ *        Net.
+ *
+ * Layer%s must implement a Forward function, in which they take their input
+ * (bottom) Blob%s (if any) and compute their output Blob%s (if any).
+ * They may also implement a Backward function, in which they compute the error
+ * gradients with respect to their input Blob%s, given the error gradients with
+ * their output Blob%s.
  */
 template &lt;typename Dtype&gt;
-class NeuronLayer : public Layer&lt;Dtype&gt; {
+class Layer {
  public:
-  explicit NeuronLayer(const LayerParameter&amp; param)
-     : Layer&lt;Dtype&gt;(param) {}
+  /**
+   * You should not implement your own constructor. Any set up code should go
+   * to SetUp(), where the dimensions of the bottom blobs are provided to the
+   * layer.
+   */
+   //显式构造函数，从LayerParameter对象中加载配置
+  explicit Layer(const LayerParameter&amp; param)
+    : layer_param_(param) {
+      // Set phase(训练/预测) and copy blobs (if there are any).
+      phase_ = param.phase();
+      if (layer_param_.blobs_size() &gt; 0) {
+        //按 layer_param_设置本身Blob对象个数，并依次将每个Blob对象尺寸调整为与layer_param_中的Blob尺寸一致
+        blobs_.resize(layer_param_.blobs_size());
+        for (int i = 0; i &lt; layer_param_.blobs_size(); ++i) {
+          blobs_[i].reset(new Blob&lt;Dtype&gt;());
+          blobs_[i]-&gt;FromProto(layer_param_.blobs(i));
+        }
+      }
+    }
+    //析构函数
+  virtual ~Layer() {}
+
+  /**
+   * @brief Implements common layer setup functionality.
+   *
+   * @param bottom the preshaped input blobs
+   * @param top
+   *     the allocated but unshaped output blobs, to be shaped by Reshape
+   *
+   * Checks that the number of bottom and top blobs is correct.
+   * Calls LayerSetUp to do special layer setup for individual layer types,
+   * followed by Reshape to set up sizes of top blobs and internal buffers.
+   * Sets up the loss weight multiplier blobs for any non-zero loss weights.
+   * This method may not be overridden.
+   */
+   
+   //配置函数,实现常用层配置接口，不可被覆盖
+  void SetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    CheckBlobCounts(bottom, top);   //检查Blob
+    LayerSetUp(bottom, top);        //  与层类型相关的配置过程
+    Reshape(bottom, top);       //对Top Blob变形
+    SetLossWeights(top);        //设置损失权值因子Blob
+  }
+
+  /**
+   * @brief Does layer-specific setup: your layer should implement this function
+   *        as well as Reshape.
+   *
+   * @param bottom
+   *     the preshaped input blobs, whose data fields store the input data for
+   *     this layer
+   * @param top
+   *     the allocated but unshaped output blobs
+   *
+   * This method should do one-time layer specific setup. This includes reading
+   * and processing relevent parameters from the &lt;code&gt;layer_param_&lt;/code&gt;.
+   * Setting up the shapes of top blobs and internal buffers should be done in
+   * &lt;code&gt;Reshape&lt;/code&gt;, which will be called before the forward pass to
+   * adjust the top blob sizes.
+   */
+   
+   //层配置（虚）函数，做特定类型层相关的配置，由该类型层自己实现
+  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {}
+   
+   //变形（纯虚）函数，修改Top Blob以及内部Blob缓冲区的形状
   virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) = 0;
 
-  virtual inline int ExactNumBottomBlobs() const { return 1; }
-  virtual inline int ExactNumTopBlobs() const { return 1; }
-};
-
-}  // namespace caffe
-
-#endif  // CAFFE_NEURON_LAYER_HPP_
-</code></pre>
-
-<pre><code class="language-c++">namespace caffe {
-// ReLULayer，派生于NeuronLayer，实现了ReLu激活函数计算
-
-/**
- * @brief Rectified Linear Unit non-linearity @f$ y = \max(0, x) @f$.
- *        The simple max is fast to compute, and the function does not saturate.
- */
-template &lt;typename Dtype&gt;
-class ReLULayer : public NeuronLayer&lt;Dtype&gt; {
- public:
- //显式构造函数
  
-  /**
-   * @param param provides ReLUParameter relu_param,
-   *     with ReLULayer options:
-   *   - negative_slope (\b optional, default 0).
-   *     the value @f$ \nu @f$ by which negative values are multiplied.
-   */
-  explicit ReLULayer(const LayerParameter&amp; param)
-      : NeuronLayer&lt;Dtype&gt;(param) {}
-//返回类名字符串
-  virtual inline const char* type() const { return &quot;ReLU&quot;; }
-
- protected:
-  /**
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$
-   * @param top output Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the computed outputs @f$
-   *        y = \max(0, x)
-   *      @f$ by default.  If a non-zero negative_slope @f$ \nu @f$ is provided,
-   *      the computed outputs are @f$ y = \max(0, x) + \nu \min(0, x) @f$.
-   */
-   //前向传波函数
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+   //前向传播函数,给定Bottom Blob,计算Top Blob和loss,返回值为当前层loss
+   //该函数会调用相应设裕包装闲数，如Forward_cpu或Forward_gpu来实现真正的计算过程。如果该层有任意非零loss_weights参数，那么包装函数会计算并返回loss
+   //派生类应该实现Forward_cpu和Forward_gpu (可选〉
+  inline Dtype Forward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
       const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
 
-  /**
-   * @brief Computes the error gradient w.r.t. the ReLU inputs.
-   *
-   * @param top output Blob vector (length 1), providing the error gradient with
-   *      respect to the outputs
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      containing error gradients @f$ \frac{\partial E}{\partial y} @f$
-   *      with respect to computed outputs @f$ y @f$
-   * @param propagate_down see Layer::Backward.
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$; Backward fills their diff with
-   *      gradients @f$
-   *        \frac{\partial E}{\partial x} = \left\{
-   *        \begin{array}{lr}
-   *            0 &amp; \mathrm{if} \; x \le 0 \\
-   *            \frac{\partial E}{\partial y} &amp; \mathrm{if} \; x &gt; 0
-   *        \end{array} \right.
-   *      @f$ if propagate_down[0], by default.
-   *      If a non-zero negative_slope @f$ \nu @f$ is provided,
-   *      the computed gradients are @f$
-   *        \frac{\partial E}{\partial x} = \left\{
-   *        \begin{array}{lr}
-   *            \nu \frac{\partial E}{\partial y} &amp; \mathrm{if} \; x \le 0 \\
-   *            \frac{\partial E}{\partial y} &amp; \mathrm{if} \; x &gt; 0
-   *        \end{array} \right.
-   *      @f$.
-   */
-   
-   //反向传波函数
-  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-};
+  //反向传播函数，给定Top Blob误差梯度，汁算Bottom Blob误差梯度
+  //参数说明:
+  // top-Top Blob，其diff域包含来自上一层的误差梯度
+  // propagate_down -- 多路幵关，与Bottom Blob矢量维度相问，每个值表示是否将误差梯度传递到对应的 Bottom Blob
+  // bottom—Bottom Blob，其diff域需要由该函数计算得到
+  // 该函数会调用相应设备包装函数，如Backward_cpu或Backward_gpu来实现真正的计算过程，由派生类负责实现
+  inline void Backward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
 
-}  // namespace caffe
-
-#endif  // CAFFE_RELU_LAYER_HPP_
-</code></pre>
-
-<pre><code class="language-c++">namespace caffe {
-// SigmoidLayer,派生于NeuronLayer，实现了Sigmoid激活函数的计算
-/**
- * @brief Sigmoid function non-linearity @f$
- *         y = (1 + \exp(-x))^{-1}
- *     @f$, a classic choice in neural networks.
- *
- * Note that the gradient vanishes as the values move away from 0.
- * The ReLULayer is often a better choice for this reason.
- */
-template &lt;typename Dtype&gt;
-class SigmoidLayer : public NeuronLayer&lt;Dtype&gt; {
- public:
- //显式构造函数
-  explicit SigmoidLayer(const LayerParameter&amp; param)
-      : NeuronLayer&lt;Dtype&gt;(param) {}
-//返回类名字符串
-  virtual inline const char* type() const { return &quot;Sigmoid&quot;; }
-
- protected:
-  /**
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$
-   * @param top output Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the computed outputs @f$
-   *        y = (1 + \exp(-x))^{-1}
-   *      @f$
-   */
-   
-   //前向传播函数
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-
-  /**
-   * @brief Computes the error gradient w.r.t. the sigmoid inputs.
-   *
-   * @param top output Blob vector (length 1), providing the error gradient with
-   *      respect to the outputs
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      containing error gradients @f$ \frac{\partial E}{\partial y} @f$
-   *      with respect to computed outputs @f$ y @f$
-   * @param propagate_down see Layer::Backward.
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$; Backward fills their diff with
-   *      gradients @f$
-   *        \frac{\partial E}{\partial x}
-   *            = \frac{\partial E}{\partial y} y (1 - y)
-   *      @f$ if propagate_down[0]
-   */
-   
-   //反向传播函数
-  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-};
-
-}  // namespace caffe
-
-#endif  // CAFFE_SIGMOID_LAYER_HPP_
-</code></pre>
-
-<pre><code class="language-c++">namespace caffe {
-// TanHLayer，派生于NeuronLayer，实现了tanh激活函数计算
-/**
- * @brief TanH hyperbolic tangent non-linearity @f$
- *         y = \frac{\exp(2x) - 1}{\exp(2x) + 1}
- *     @f$, popular in auto-encoders.
- *
- * Note that the gradient vanishes as the values move away from 0.
- * The ReLULayer is often a better choice for this reason.
- */
-template &lt;typename Dtype&gt;
-class TanHLayer : public NeuronLayer&lt;Dtype&gt; {
- public:
- //显式构造函数
-  explicit TanHLayer(const LayerParameter&amp; param)
-      : NeuronLayer&lt;Dtype&gt;(param) {}
-//返回类名字符串
-  virtual inline const char* type() const { return &quot;TanH&quot;; }
-
- protected:
-  /**
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$
-   * @param top output Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the computed outputs @f$
-   *        y = \frac{\exp(2x) - 1}{\exp(2x) + 1}
-   *      @f$
-   */
-   
-   //前向传播函数
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-
-  /**
-   * @brief Computes the error gradient w.r.t. the sigmoid inputs.
-   *
-   * @param top output Blob vector (length 1), providing the error gradient with
-   *      respect to the outputs
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      containing error gradients @f$ \frac{\partial E}{\partial y} @f$
-   *      with respect to computed outputs @f$ y @f$
-   * @param propagate_down see Layer::Backward.
-   * @param bottom input Blob vector (length 1)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the inputs @f$ x @f$; Backward fills their diff with
-   *      gradients @f$
-   *        \frac{\partial E}{\partial x}
-   *            = \frac{\partial E}{\partial y}
-   *              \left(1 - \left[\frac{\exp(2x) - 1}{exp(2x) + 1} \right]^2 \right)
-   *            = \frac{\partial E}{\partial y} (1 - y^2)
-   *      @f$ if propagate_down[0]
-   */
-   
-   //反向传播函数
-  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-};
-
-}  // namespace caffe
-
-#endif  // CAFFE_TANH_LAYER_HPP_
-</code></pre>
-
-<p>上面类的声明比较简单,各自声明了Forward和Backward函数.下面对这些函数的实现进行解析.我们首先看下<code>src/caffe/layers/relu_layer.cpp</code>中前向传播函数的实现代码。</p>
-
-<pre><code class="language-c++">template &lt;typename Dtype&gt;
-void ReLULayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-    // (只读) 获得输人blob的data指针
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  // (读写）获得输出blob的data指针
-  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
-  //获得输入blob元素个数
-  const int count = bottom[0]-&gt;count();
-  // Leaky ReLU参数，从layer_param中获得，默认为0，即普通ReLU
-  Dtype negative_slope = this-&gt;layer_param_.relu_param().negative_slope();
-  //执行ReLU操作我们姑且认为negative_slop值为0,不考虑Leaky ReLU
-  for (int i = 0; i &lt; count; ++i) {
-    top_data[i] = std::max(bottom_data[i], Dtype(0))
-        + negative_slope * std::min(bottom_data[i], Dtype(0));
+  //返回Layer内部可训练的权值、偏置项Blob向量
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt;&amp; blobs() {
+    return blobs_;
   }
+
+  //返回Layer初始化参数（由ProtoBuffer提供)
+  const LayerParameter&amp; layer_param() const { return layer_param_; }
+
+  //将Layer初始化参数写入ProtoBuffer缓冲区
+  virtual void ToProto(LayerParameter* param, bool write_diff = false);
+
+  //返回与某个Top Blob相关的标量loss值
+  inline Dtype loss(const int top_index) const {
+    return (loss_.size() &gt; top_index) ? loss_[top_index] : Dtype(0);
+  }
+
+  //设置与某个Top Blob相关的标量loss值
+  inline void set_loss(const int top_index, const Dtype value) {
+    if (loss_.size() &lt;= top_index) {
+      loss_.resize(top_index + 1, Dtype(0));
+    }
+    loss_[top_index] = value;
+  }
+
+  //返回层类型字符串,便于识別,由派生类负责实现
+  virtual inline const char* type() const { return &quot;&quot;; }
+
+ //返回该Layer需要的输入Blob数目.-1表示不关心。由派生类负责实现
+  virtual inline int ExactNumBottomBlobs() const { return -1; }
+
+  virtual inline int MinBottomBlobs() const { return -1; }
+  
+  virtual inline int MaxBottomBlobs() const { return -1; }
+  //返回该Layer需要的输出Blob数目.-1表示不关心。由派生类负责实现
+  virtual inline int ExactNumTopBlobs() const { return -1; }
+ 
+  virtual inline int MinTopBlobs() const { return -1; }
+  
+  virtual inline int MaxTopBlobs() const { return -1; }
+  
+  //返回该Layer是否有相同的输入/输出Blob，由派生类负责实现
+  virtual inline bool EqualNumBottomTopBlobs() const { return false; }
+
+  //返回是否允许匿名Top Blob,即由该Layer自动创建。若为真，在Net::Init()函数中会创建足够多的匿名Top Blob来满足该 Layer ExactNumTopBlobs()、MinTopBlobs()需求
+  virtual inline bool AutoTopBlobs() const { return false; }
+
+  //返回某些Bottom Blob足否允许强制反向传播，如果AllowForceBackward(i) === false,将会忽略 force_backward 设定
+  virtual inline bool AllowForceBackward(const int bottom_index) const {
+    return true;
+  }
+
+  //指定该Layer是否计算相对权值或偏置项的梯度，具体相对谁由param_id指定
+  inline bool param_propagate_down(const int param_id) {
+    return (param_propagate_down_.size() &gt; param_id) ?
+        param_propagate_down_[param_id] : false;
+  }
+  
+  //设置该Layer是否计算相对权值或偏置项的梯度，具体相对谁由param_id指定
+  inline void set_param_propagate_down(const int param_id, const bool value) {
+    if (param_propagate_down_.size() &lt;= param_id) {
+      param_propagate_down_.resize(param_id + 1, true);
+    }
+    param_propagate_down_[param_id] = value;
+  }
+
+
+ protected:
+  /** The protobuf that stores the layer parameters */
+  LayerParameter layer_param_;
+  /** 当前所处阶段: TRAIN or TEST */
+  Phase phase_;
+  /** The vector that stores the learnable parameters as a set of blobs. */
+  //Layer 内部权值或偏置项，以 Blob 方式组织
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt; blobs_;
+  /** Vector indicating whether to compute the diff of each param blob. */
+  //标志位，是否计算对应参数的误差梯度
+  vector&lt;bool&gt; param_propagate_down_;
+
+  //标志位，在目标函数中，是否每个Top Blob都有非零权重
+  vector&lt;Dtype&gt; loss_;
+
+//下面4个函数，我们会在各个Layer派生类中经常看到
+
+  /** @brief Using the CPU device, compute the layer output. */
+  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) = 0;
+  /**
+   * @brief Using the GPU device, compute the layer output.
+   *        Fall back to Forward_cpu() if unavailable.
+   */
+  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    // LOG(WARNING) &lt;&lt; &quot;Using CPU code as backup.&quot;;
+    return Forward_cpu(bottom, top);
+  }
+
+  /**
+   * @brief Using the CPU device, compute the gradients for any parameters and
+   *        for the bottom blobs if propagate_down is true.
+   */
+  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) = 0;
+  /**
+   * @brief Using the GPU device, compute the gradients for any parameters and
+   *        for the bottom blobs if propagate_down is true.
+   *        Fall back to Backward_cpu() if unavailable.
+   */
+  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+    // LOG(WARNING) &lt;&lt; &quot;Using CPU code as backup.&quot;;
+    Backward_cpu(top, propagate_down, bottom);
+  }
+
+  /**
+   * Called by the parent Layer&#39;s SetUp to check that the number of bottom
+   * and top Blobs provided as input match the expected numbers specified by
+   * the {ExactNum,Min,Max}{Bottom,Top}Blobs() functions.
+   */
+   //校验输入/输出Blob数目是否满足Layer要求
+  virtual void CheckBlobCounts(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+                               const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    if (ExactNumBottomBlobs() &gt;= 0) {
+      CHECK_EQ(ExactNumBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes &quot; &lt;&lt; ExactNumBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (MinBottomBlobs() &gt;= 0) {
+      CHECK_LE(MinBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes at least &quot; &lt;&lt; MinBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (MaxBottomBlobs() &gt;= 0) {
+      CHECK_GE(MaxBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes at most &quot; &lt;&lt; MaxBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (ExactNumTopBlobs() &gt;= 0) {
+      CHECK_EQ(ExactNumTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces &quot; &lt;&lt; ExactNumTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (MinTopBlobs() &gt;= 0) {
+      CHECK_LE(MinTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces at least &quot; &lt;&lt; MinTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (MaxTopBlobs() &gt;= 0) {
+      CHECK_GE(MaxTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces at most &quot; &lt;&lt; MaxTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (EqualNumBottomTopBlobs()) {
+      CHECK_EQ(bottom.size(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces one top blob as output for each &quot;
+          &lt;&lt; &quot;bottom blob input.&quot;;
+    }
+  }
+
+  /**
+   * Called by SetUp to initialize the weights associated with any top blobs in
+   * the loss function. Store non-zero loss weights in the diff blob.
+   */
+   //该函数在Layer的Setup函数中被调用，主要目的是初始化与Top Blob相关的loss权重，放到Top Blob的diff域，实际由Forward()计算loss函数
+   //loss_weight == 0,表示当前层不参与loss函数汁算，大部分Layer属于这一类
+   //loss_weight ==1,表示当前层参与loss函数汁算，损失层（LossLayer) 属于这一类
+  inline void SetLossWeights(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  //从ProtoBuffer对象中获得Layer参数，这里需要用loss_weight参数
+    const int num_loss_weights = layer_param_.loss_weight_size();
+    //如果 ProtoBuffer中存在至少一个loss_weight参数,loss_weight参数个数应当与Top Blob数目相同，或者不要loss_weight参数
+    if (num_loss_weights) {
+      CHECK_EQ(top.size(), num_loss_weights) &lt;&lt; &quot;loss_weight must be &quot;
+          &quot;unspecified or specified once per top blob.&quot;;
+    //遍历每个Top Blob
+      for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      // 从 ProtoBuffer 对象拿到 loss_weight 实际值(0 或者1)
+        const Dtype loss_weight = layer_param_.loss_weight(top_id);
+        //若为0,跳过
+        if (loss_weight == Dtype(0)) { continue; }\
+        //若不为0,则对网络进行相关设置
+        this-&gt;set_loss(top_id, loss_weight);    //本地记录loss_weight值
+        const int count = top[top_id]-&gt;count();
+        Dtype* loss_multiplier = top[top_id]-&gt;mutable_cpu_diff();
+        //将loss_weight值入 Top Blob 的diff域，传递到其他需耍使用的地一方，实现远程同步
+        caffe_set(count, loss_weight, loss_multiplier);
+      }
+    }
+  }
+
+ private:
+ //禁用拷贝构造函数和賦值运算函数 
+  DISABLE_COPY_AND_ASSIGN(Layer);
+};  // class Layer
+
+// Forward and backward wrappers. You should implement the cpu and
+// gpu specific implementations instead, and should not change these
+// functions.
+//使用时只需在派生类中改写 Forward_cpu、Forward_gpu、Backward_cpu、Backward_gpu
+template &lt;typename Dtype&gt;
+inline Dtype Layer&lt;Dtype&gt;::Forward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  Dtype loss = 0;
+  Reshape(bottom, top);
+  switch (Caffe::mode()) {      //判断计算设备
+  case Caffe::CPU:      //在CPU上执行Forward计算
+    Forward_cpu(bottom, top);   //调用CPU版本的 Forward函数
+    //还没完，要计算loss (如果有的话)
+    for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      if (!this-&gt;loss(top_id)) { continue; }
+      const int count = top[top_id]-&gt;count();
+      // 若为 LossLayer，则已经通过Forward函数计算出全局损失函数，放在Top Blob data域
+      const Dtype* data = top[top_id]-&gt;cpu_data();
+      // 若loss_weight不为0,则己经在SetLossWeights函数中将loss权重放在Top Blob diff域
+      const Dtype* loss_weights = top[top_id]-&gt;cpu_diff();
+      // 计算加权后的loss之和，得到标量loss值
+      loss += caffe_cpu_dot(count, data, loss_weights);
+    }
+    break;
+  case Caffe::GPU:
+    Forward_gpu(bottom, top);
+#ifndef CPU_ONLY
+    for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      if (!this-&gt;loss(top_id)) { continue; }
+      const int count = top[top_id]-&gt;count();
+      const Dtype* data = top[top_id]-&gt;gpu_data();
+      const Dtype* loss_weights = top[top_id]-&gt;gpu_diff();
+      Dtype blob_loss = 0;
+      caffe_gpu_dot(count, data, loss_weights, &amp;blob_loss);
+      loss += blob_loss;
+    }
+#endif
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
+  }
+  return loss;
 }
-</code></pre>
-
-<p>不出所料，用一层for循环就搞定了,下面我们来看<strong>反向传播函数</strong>的实现代码.</p>
-
-<pre><code class="language-c++">template &lt;typename Dtype&gt;
-void ReLULayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+//反向传播函数,直接调用对应设备函数
+template &lt;typename Dtype&gt;
+inline void Layer&lt;Dtype&gt;::Backward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
     const vector&lt;bool&gt;&amp; propagate_down,
     const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
-    // 如果需要做反向传播计算
-  if (propagate_down[0]) {
-    //(只读）获得前一层的data指针
-    const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-    //(只读) 获得后一层的diff指针
-    const Dtype* top_diff = top[0]-&gt;cpu_diff();
-    //(读写) 获得前一层的diff指针
-    Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
-    //获得要参计算的元素总数
-    const int count = bottom[0]-&gt;count();
-    // Leaky ReLU参数，姑且认为是0
-    Dtype negative_slope = this-&gt;layer_param_.relu_param().negative_slope();
-    for (int i = 0; i &lt; count; ++i) {
-    // ReLU的导函数就是（bottom_data[i] &gt; 0)，根据求导链式法则，后一层的误差乘以导函数得到前一层的误差
-      bottom_diff[i] = top_diff[i] * ((bottom_data[i] &gt; 0)
-          + negative_slope * (bottom_data[i] &lt;= 0));
-    }
+  switch (Caffe::mode()) {
+  case Caffe::CPU:
+    Backward_cpu(top, propagate_down, bottom);
+    break;
+  case Caffe::GPU:
+    Backward_gpu(top, propagate_down, bottom);
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
   }
 }
+
+//将层配置参数序列化为ProtoBuffer
+template &lt;typename Dtype&gt;
+void Layer&lt;Dtype&gt;::ToProto(LayerParameter* param, bool write_diff) {
+  param-&gt;Clear();
+  param-&gt;CopyFrom(layer_param_);
+  param-&gt;clear_blobs();
+  for (int i = 0; i &lt; blobs_.size(); ++i) { //权值和偏置项也会保存
+    blobs_[i]-&gt;ToProto(param-&gt;add_blobs(), write_diff);
+  }
+}
+
+}  // namespace caffe
+
+#endif  // CAFFE_LAYER_H_
+
 </code></pre>
 
-<p>到这里可以看到ReLu计算非常简单(目前如此)</p>
+<p><code>Layer</code>源文件位于<code>src/caffe/layer.cpp</code>中:</p>
 
-<p>其它激活函数源码,之后也许用的比较少,这里不做多的介绍.</p>
+<pre><code class="language-c++">#include &quot;caffe/layer.hpp&quot;
 
-<p>所以,非线性层虽然公式表示较为复杂,但代码实现都非常简洁、直观，只要掌握了基本求导技巧，同样可以推导出非线性层其他类的反向传播公式.</p>
+namespace caffe {
+
+INSTANTIATE_CLASS(Layer);
+
+}  // namespace caffe
+
+</code></pre>
+
+<p>可见Layer大部分函数并没有实现，只有虚函数，真正的实现都在派生类中。具体代码可以进一步阅读 <code>src/caffe/丨ayers/*.cpp</code>。</p>
+
+<p>在使用 Layer 之前，需要先包含头文件<code>#include &lt;caffe/layer.hpp&gt;</code>，再通过<code>using namespace caffe;</code>使用命名空间caffe。如果代码中试图创建Layer对象，编译时会报错：</p>
+
+<p><code>error: cannot declare variable &#39;a^ to be of abstract type &#39;caffe：:Layer&lt;float&gt;</code></p>
+
+<p>这是因为Layer类是一个虚基类，不能直接创建对象。关于虚基类,这里不再过多说明.</p>
 
                         
                       </div>
@@ -1774,319 +2699,10 @@ void ReLULayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/6/3</span>
+                    <span class="date">2017/6/15</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='caffe%E6%A1%86%E6%9E%B6%E5%AD%A6%E4%B9%A0.html'>caffe框架学习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14957648679184.html">
-                
-                  <h1>UDP编程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>TCP是建立可靠连接，并且通信双方都可以以流的形式发送数据。相对TCP，UDP则是<strong>面向无连接</strong>的协议。</p>
-
-<p><font color=red>使用UDP协议时，不需要建立连接，只需要知道对方的IP地址和端口号，就可以直接发数据包。但是，能不能到达就不知道了。</p>
-
-<p>虽然用UDP传输数据不可靠，但它的优点是和TCP比，速度快，对于不要求可靠到达的数据，就可以使用UDP协议。</font></p>
-
-<p>我们来看看如何通过UDP协议传输数据。和TCP类似，使用<mark>UDP的通信双方也分为客户端和服务器</mark>。服务器首先需要绑定端口：</p>
-
-<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# 绑定端口:
-s.bind((&#39;127.0.0.1&#39;, 9999))
-</code></pre>
-
-<p>创建Socket时，<code>SOCK_DGRAM</code>指定了这个Socket的类型是UDP。绑定端口和TCP一样，但是不需要调用<code>listen()</code>方法，而是直接接收来自任何客户端的数据：</p>
-
-<pre><code class="language-py">print &#39;Bind UDP on 9999...&#39;
-while True:
-    # 接收数据:
-    data, addr = s.recvfrom(1024)
-    print &#39;Received from %s:%s.&#39; % addr
-    s.sendto(&#39;Hello, %s!&#39; % data, addr)
-</code></pre>
-
-<p><code>recvfrom()</code>方法返回数据和客户端的地址与端口，这样，服务器收到数据后，直接调用<code>sendto()</code>就可以把数据用UDP发给客户端。</p>
-
-<p>注意这里省掉了多线程，因为这个例子很简单。</p>
-
-<p>客户端使用UDP时，首先仍然创建基于UDP的Socket，然后，不需要调用<code>connect()</code>，直接通过<code>sendto()</code>给服务器发数据：</p>
-
-<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-for data in [&#39;Michael&#39;, &#39;Tracy&#39;, &#39;Sarah&#39;]:
-    # 发送数据:
-    s.sendto(data, (&#39;127.0.0.1&#39;, 9999))
-    # 接收数据:
-    print s.recv(1024)
-s.close()
-</code></pre>
-
-<p>客户端:<br/>
-<img src="media/14957648679184/14957678758780.jpg" alt=""/><br/>
-服务器:<br/>
-<img src="media/14957648679184/14957678951579.jpg" alt=""/><br/>
-客户端从服务器接收数据仍然调用<code>recv()</code>方法。</p>
-
-<h2 id="toc_0">小结</h2>
-
-<p>UDP的使用与TCP类似，但是不需要建立连接。此外，服务器绑定UDP端口和TCP端口互不冲突，也就是说，UDP的9999端口与TCP的9999端口可以各自绑定。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14957594179111.html">
-                
-                  <h1>网络编程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">TCP/IP</a>
-</li>
-<li>
-<a href="#toc_1">TCP编程</a>
-<ul>
-<li>
-<a href="#toc_2">客户端</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_3">服务器</a>
-</li>
-<li>
-<a href="#toc_4">小结</a>
-</li>
-</ul>
-
-
-<h2 id="toc_0">TCP/IP</h2>
-
-<p>现在的网络编程基本都是在一个统一的通用写一下来进行的,<code>互联网协议簇（Internet Protocol Suite）</code>就是通用协议标准。Internet是由inter和net两个单词组合起来的，原意就是连接“网络”的网络，有了Internet，任何私有网络，只要支持这个协议，就可以联入互联网。</p>
-
-<p>因为互联网协议包含了上百种协议标准，但是最重要的两个协议是TCP和IP协议，所以，大家把互联网的协议简称<strong>TCP/IP</strong>协议。</p>
-
-<p>通信的时候，双方必须知道对方的标识，好比发邮件必须知道对方的邮件地址。互联网上每个计算机的唯一标识就是IP地址，类似123.123.123.123。如果一台计算机同时接入到两个或更多的网络，比如路由器，它就会有两个或多个IP地址，所以，IP地址对应的实际上是计算机的网络接口，通常是网卡。</p>
-
-<p><strong>IP协议负责把数据从一台计算机通过网络发送到另一台计算机。数据被分割成一小块一小块，然后通过IP包发送出去。</strong>由于互联网链路复杂，两台计算机之间经常有多条线路，因此，<strong>路由器就负责决定如何把一个IP包转发出去。IP包的特点是按块发送，途径多个路由，但不保证能到达，也不保证顺序到达。</strong></p>
-
-<p><font color=red>TCP协议则是建立在IP协议之上的。TCP协议负责在两台计算机之间建立可靠连接，保证数据包按顺序到达。TCP协议会通过握手建立连接，然后，对每个IP包编号，确保对方按顺序收到，如果包丢掉了，就自动重发。</font></p>
-
-<p>许多常用的更高级的协议都是建立在TCP协议基础上的，比如用于浏览器的HTTP协议、发送邮件的SMTP协议等。</p>
-
-<p>一个IP包除了包含要传输的数据外，还包含源IP地址和目标IP地址，源端口和目标端口。</p>
-
-<p>端口有什么作用？在两台计算机通信时，只发IP地址是不够的，因为同一台计算机上跑着多个网络程序。一个IP包来了之后，到底是交给浏览器还是QQ，就需要<strong>端口号</strong>来区分。每个网络程序都向操作系统申请唯一的端口号，这样，两个进程在两台计算机之间建立网络连接就需要各自的IP地址和各自的端口号。(在进行tomcat设置的时候,类似也是需要设置端口号.)</p>
-
-<p>一个进程也可能同时与多个计算机建立链接，因此它会申请很多端口。</p>
-
-<h2 id="toc_1">TCP编程</h2>
-
-<p>Socket是网络编程的一个抽象概念。通常我们用一个Socket表示“打开了一个网络链接”，而打开一个Socket需要知道目标计算机的IP地址和端口号，再指定协议类型即可。</p>
-
-<h3 id="toc_2">客户端</h3>
-
-<p>大多数连接都是可靠的TCP连接。创建TCP连接时，主动发起连接的叫客户端，被动响应连接的叫服务器。</p>
-
-<p>我们要创建一个基于TCP连接的Socket，可以这样做：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import socket
-
-s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-
-s = connect((&#39;www.sina.com.cn&#39;,80))
-</code></pre>
-
-<p>创建Socket时，<code>AF_INET</code>指定使用<code>IPv4</code>协议，如果要用更先进的<code>IPv6</code>，就指定为<code>AF_INET6</code>。<code>SOCK_STREAM</code>指定使用面向流的TCP协议，这样，一个<code>Socket</code>对象就创建成功，但是还没有建立连接。</p>
-
-<p>客户端要主动发起TCP连接，必须知道服务器的IP地址和端口号。新浪网站的IP地址可以用域名<code>www.sina.com.cn</code>自动转换到IP地址，但是怎么知道新浪服务器的端口号呢？</p>
-
-<p>答案是作为服务器，提供什么样的服务，端口号就必须固定下来。由于我们想要访问网页，因此新浪提供网页服务的服务器必须把端口号固定在<code>80</code>端口，因为<code>80</code>端口是Web服务的标准端口。其他服务都有对应的标准端口号，例如SMTP服务是25端口，FTP服务是21端口，等等。端口号小于1024的是Internet标准服务的端口，端口号大于1024的，可以任意使用。</p>
-
-<p>因此，我们连接新浪服务器的代码如下：</p>
-
-<pre><code class="language-py">s.connect((&#39;www.sina.com.cn&#39;, 80))
-</code></pre>
-
-<p><strong>注意参数是一个tuple，包含地址和端口号。</strong></p>
-
-<p>建立TCP连接后，我们就可以向新浪服务器发送请求，要求返回首页的内容：</p>
-
-<pre><code class="language-py">s.send(&#39;GET / HTTP/1.1\r\nHost: www.sina.com.cn\r\nConnection: close\r\n\r\n&#39;)
-</code></pre>
-
-<p>TCP连接创建的是双向通道，双方都可以同时给对方发数据。但是谁先发谁后发，怎么协调，要根据具体的协议来决定。例如，HTTP协议规定客户端必须先发请求给服务器，服务器收到后才发数据给客户端。</p>
-
-<p>发送的文本格式必须符合HTTP标准，如果格式没问题，接下来就可以接收新浪服务器返回的数据了：</p>
-
-<pre><code class="language-py"># 接收数据:
-buffer = []
-while True:
-    # 每次最多接收1k字节:
-    d = s.recv(1024)
-    if d:
-        buffer.append(d)
-    else:
-        break
-data = &#39;&#39;.join(buffer)
-</code></pre>
-
-<p>接收数据时，调用<code>recv(max)</code>方法，一次最多接收指定的字节数，因此，在一个while循环中反复接收，直到<code>recv()</code>返回空数据，表示接收完毕，退出循环。</p>
-
-<p>当我们接收完数据后，调用<code>close()</code>方法关闭<code>Socket</code>，这样，一次完整的网络通信就结束了：</p>
-
-<pre><code class="language-py"># 关闭连接:
-s.close()
-</code></pre>
-
-<p>接收到的数据包括<code>HTTP头</code>和<code>网页本身</code>，我们只需要把HTTP头和网页分离一下，把<code>HTTP头</code>打印出来，网页内容保存到文件：</p>
-
-<pre><code class="language-py">header, html = data.split(&#39;\r\n\r\n&#39;, 1)
-print header
-# 把接收的数据写入文件:
-with open(&#39;sina.html&#39;, &#39;wb&#39;) as f:
-    f.write(html)
-</code></pre>
-
-<p>现在，只需要在浏览器中打开这个<code>sina.html</code>文件，就可以看到新浪的首页了。</p>
-
-<h2 id="toc_3">服务器</h2>
-
-<p>和客户端编程相比，服务器编程就要复杂一些。</p>
-
-<p>服务器进程首先要绑定一个端口并监听来自其他客户端的连接。如果某个客户端连接过来了，服务器就与该客户端建立Socket连接，随后的通信就靠这个Socket连接了。</p>
-
-<p>所以，服务器会打开固定端口（比如80）监听，每来一个客户端连接，就创建该Socket连接。由于服务器会有大量来自客户端的连接，所以，服务器要能够区分一个Socket连接是和哪个客户端绑定的。一个Socket依赖4项：服务器地址、服务器端口、客户端地址、客户端端口来唯一确定一个Socket。</p>
-
-<p>但是服务器还需要同时响应多个客户端的请求，所以，每个连接都需要一个新的进程或者新的线程来处理，否则，服务器一次就只能服务一个客户端了。</p>
-
-<p>我们来编写一个简单的服务器程序，它接收客户端连接，把客户端发过来的字符串加上<code>Hello</code>再发回去。</p>
-
-<p>首先，创建一个基于IPv4和TCP协议的Socket：</p>
-
-<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-</code></pre>
-
-<p>然后，我们要绑定监听的地址和端口。服务器可能有多块网卡，可以绑定到某一块网卡的IP地址上，也可以用<code>0.0.0.0</code>绑定到所有的网络地址，还可以用<code>127.0.0.1</code>绑定到本机地址。<code>127.0.0.1</code>是一个特殊的IP地址，表示本机地址，如果绑定到这个地址，客户端必须同时在本机运行才能连接，也就是说，外部的计算机无法连接进来。</p>
-
-<p>端口号需要预先指定。因为我们写的这个服务不是标准服务，所以用<code>9999</code>这个端口号。请注意，小于<code>1024</code>的端口号必须要有管理员权限才能绑定：</p>
-
-<pre><code class="language-py"># 监听端口:
-s.bind((&#39;127.0.0.1&#39;, 9999))
-</code></pre>
-
-<p>紧接着，调用listen()方法开始监听端口，传入的参数指定等待连接的最大数量：<br/>
-<code>py<br/>
-s.listen(5)<br/>
-print &#39;Waiting for connection...&#39;<br/>
-</code></p>
-
-<p>接下来，服务器程序通过一个永久循环来接受来自客户端的连接，<code>accept()</code>会等待并返回一个客户端的连接:</p>
-
-<pre><code class="language-py">while True:
-    # 接受一个新连接:
-    sock, addr = s.accept()
-    # 创建新线程来处理TCP连接:
-    t = threading.Thread(target=tcplink, args=(sock, addr))
-    t.start()
-</code></pre>
-
-<p>每个连接都必须创建新线程（或进程）来处理，否则，单线程在处理连接的过程中，无法接受其他客户端的连接：</p>
-
-<pre><code class="language-py">def tcplink(sock, addr):
-    print &#39;Accept new connection from %s:%s...&#39; % addr
-    sock.send(&#39;Welcome!&#39;)
-    while True:
-        data = sock.recv(1024)
-        time.sleep(1)
-        if data == &#39;exit&#39; or not data:
-            break
-        sock.send(&#39;Hello, %s!&#39; % data)
-    sock.close()
-    print &#39;Connection from %s:%s closed.&#39; % addr
-</code></pre>
-
-<p>连接建立后，服务器首先发一条欢迎消息，然后等待客户端数据，并加上<code>Hello</code>再发送给客户端。如果客户端发送了<code>exit</code>字符串，就直接关闭连接。</p>
-
-<p>要测试这个服务器程序，我们还需要编写一个客户端程序：</p>
-
-<pre><code class="language-py">s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# 建立连接:
-s.connect((&#39;127.0.0.1&#39;, 9999))
-# 接收欢迎消息:
-print s.recv(1024)
-for data in [&#39;Michael&#39;, &#39;Tracy&#39;, &#39;Sarah&#39;]:
-    # 发送数据:
-    s.send(data)
-    print s.recv(1024)
-s.send(&#39;exit&#39;)
-s.close()
-</code></pre>
-
-<p>我们需要打开两个命令行窗口，一个运行服务器程序，另一个运行客户端程序，就可以看到效果了：<br/>
-(先运行服务器端程序)<br/>
-执行了两次客户端程序:<br/>
-<img src="media/14957594179111/14957645115702.jpg" alt=""/><br/>
-服务端:<br/>
-<img src="media/14957594179111/14957645546966.jpg" alt=""/><br/>
-需要注意的是，客户端程序运行完毕就退出了，而服务器程序会永远运行下去，必须按Ctrl+C退出程序。</p>
-
-<h2 id="toc_4">小结</h2>
-
-<p>用TCP协议进行Socket编程在Python中十分简单，对于客户端，要主动连接服务器的IP和指定端口，对于服务器，要首先监听指定端口，然后，对每一个新的连接，创建一个线程或进程来处理。通常，服务器程序会无限运行下去。</p>
-
-<p>同一个端口，被一个Socket绑定了以后，就不能被别的Socket绑定了。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          					    <span class="posted-in"><a href='Caffe%20%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.html'>Caffe 数据结构</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -2188,31 +2804,31 @@ s.close()
 	      
 		      
 			      <li class="post">
-			        <a href="15127409536382.html">Happy Number</a>
+			        <a href="15128072112005.html">Relative Ranks</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127221024719.html">Find the Difference</a>
+			        <a href="15128043838038.html">Valid Anagram</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127198152754.html">Distribute Candies</a>
+			        <a href="15128026901484.html">Assign Cookies</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127166881202.html">Fizz Buzz</a>
+			        <a href="15128009688279.html">Ransom Note</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127150080101.html">Sum of Two Integers</a>
+			        <a href="15127898937133.html">Reverse String II</a>
 			      </li>
 		     
 		  
