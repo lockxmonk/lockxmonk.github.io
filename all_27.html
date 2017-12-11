@@ -117,116 +117,203 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="14932734930436.html">
+                <a class="clearlink" href="14940530686573.html">
                 
-                  <h1>I/O编程</h1>
+                  <h1>CNN卷积神经网络</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<ul>
-<li>
-<a href="#toc_0">文件读写</a>
+                        	<h2 id="toc_0">简介</h2>
+
+<p>卷积神经网络是近年发展起来，并引起广泛重视的一种高效识别方法。20世纪60年代，Hubel和Wiesel在研究猫脑皮层中用于局部敏感和方向选择的神经元时发现其独特的网络结构可以有效地降低反馈神经网络的复杂性，继而提出了卷积神经网络（Convolutional Neural Networks-简称CNN）。现在，CNN已经成为众多科学领域的研究热点之一，特别是在模式分类领域，<mark>由于该网络避免了对图像的复杂前期预处理，可以直接输入原始图像，因而得到了更为广泛的应用</mark>。</p>
+
+<p>一般地，CNN的基本结构包括两层：</p>
+
+<ol>
+<li><p>其一为<strong>特征提取层</strong>：每个神经元的输入与前一层的局部接受域相连，并提取该局部的特征。一旦该局部特征被提取后，它与其它特征间的位置关系也随之确定下来；</p></li>
+<li><p>其二是<strong>特征映射层</strong>：网络的每个计算层由多个特征映射组成，每个特征映射是一个平面，平面上所有神经元的权值相等。特征映射结构采用影响函数核小的sigmoid函数作为卷积网络的激活函数，使得特征映射具有位移不变性。此外，由于一个映射面上的神经元共享权值，因而减少了网络自由参数的个数。卷积神经网络中的每一个卷积层都紧跟着一个用来求局部平均与二次提取的计算层，这种特有的两次特征提取结构减小了特征分辨率。</p></li>
+</ol>
+
+<p>CNN主要<strong>用来识别位移、缩放及其他形式扭曲不变性的二维图形</strong>。由于CNN的特征检测层通过训练数据进行学习，所以在使用CNN时，避免了显示的特征抽取，而隐式地从训练数据中进行学习；</p>
+
+<p>再者由于同一特征映射面上的神经元权值相同，所以网络可以并行学习，这也是卷积网络相对于神经元彼此相连网络的一大优势。<font color=red>卷积神经网络以其局部权值共享的特殊结构在语音识别和图像处理方面有着独特的优越性，</font><strong>其布局更接近于实际的生物神经网络，权值共享降低了网络的复杂性，特别是多维输入向量的图像可以直接输入网络这一特点避免了特征提取和分类过程中数据重建的复杂度</strong>。</p>
+
+<h2 id="toc_1">卷积神经网络</h2>
+
+<p>在图像处理中，往往把图像表示为像素的向量，比如一个1000×1000的图像，可以表示为一个1000000的向量。在上一节中提到的神经网络中，如果隐含层数目与输入层一样，即也是1000000时，那么输入层到隐含层的参数数据为：\(1000000×1000000=10^{12}\)，这样就太多了，基本没法训练。所以图像处理要想练成神经网络大法，必先减少参数加快速度。就跟辟邪剑谱似的，普通人练得很挫，一旦自宫后内力变强剑法变快，就变的很牛了。</p>
+
+<h3 id="toc_2">局部感知</h3>
+
+<p>卷积神经网络有<mark>两种神器</mark>可以降低参数数目，<mark>第一种神器叫做局部感知野</mark>。一般认为人对外界的认知是从局部到全局的，而图像的空间联系也是局部的像素联系较为紧密，而距离较远的像素相关性则较弱。<strong>因而，每个神经元其实没有必要对全局图像进行感知，只需要对局部进行感知</strong>，然后在更高层将局部的信息综合起来就得到了全局的信息。<strong>网络部分连通的思想，也是受启发于生物学里面的视觉系统结构。视觉皮层的神经元就是局部接受信息的（即这些神经元只响应某些特定区域的刺激）。</strong>如下图所示：左图为全连接，右图为局部连接。</p>
+
+<p><img src="media/14940530686573/14940535875953.jpg" alt=""/></p>
+
+<p>在上右图中，假如每个神经元只和10×10个像素值相连，那么权值数据为1000000×100个参数，减少为原来的千分之一。而那10×10个像素值对应的10×10个参数，其实就相当于卷积操作。</p>
+
+<h3 id="toc_3">参数共享</h3>
+
+<p>但其实这样的话参数仍然过多，那么就启动第二级神器，<mark>即权值共享</mark>。在上面的局部连接中，每个神经元都对应100个参数，一共1000000个神经元，如果这1000000个神经元的100个参数都是相等的，那么参数数目就变为100了。</p>
+
+<p>怎么理解权值共享呢？我们可以这100个参数（也就是卷积操作）看成是提取特征的方式，该方式与位置无关。<font color=red>这其中隐含的原理则是：图像的一部分的统计特性与其他部分是一样的。这也意味着我们在这一部分学习的特征也能用在另一部分上，所以对于这个图像上的所有位置，我们都能使用同样的学习特征</font>。</p>
+
+<p>更直观一些，当从一个大尺寸图像中随机选取一小块，比如说 8×8 作为样本，并且从这个小块样本中学习到了一些特征，这时我们可以把从这个 8×8 样本中学习到的特征作为探测器，应用到这个图像的任意地方中去。特别是，我们可以用从 8×8 样本中所学习到的特征跟原本的大尺寸图像作卷积，从而对这个大尺寸图像上的任一位置获得一个不同特征的激活值。</p>
+
+<p>如下图所示，展示了一个33的卷积核在55的图像上做卷积的过程。每个卷积都是一种特征提取方式，就像一个筛子，将图像中符合条件（激活值越大越符合条件）的部分筛选出来</p>
+
+<p><img src="media/14940530686573/14940539862222.gif" alt=""/></p>
+
+<h3 id="toc_4">多卷积核</h3>
+
+<p>上面所述只有100个参数时，表明只有1个100*100的卷积核，显然，特征提取是不充分的，我们可以添加多个卷积核，比如32个卷积核，可以学习32种特征。在有多个卷积核时，如下图所示：<br/>
+<img src="media/14940530686573/14940546422731.jpg" alt=""/></p>
+
+<p>上图右，不同颜色表明不同的卷积核。每个卷积核都会将图像生成为另一幅图像。比如两个卷积核就可以将生成两幅图像，这两幅图像可以看做是一张图像的不同的通道。如下图所示，下图有个小错误，即将w1改为w0，w2改为w1即可。下文中仍以w1和w2称呼它们.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/6</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86.html'>基础知识</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14939712159345.html">
+                
+                  <h1>正则表达式</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>字符串是编程时涉及到的最多的一种数据结构，对字符串进行操作的需求几乎无处不在。比如判断一个字符串是否是合法的Email地址，虽然可以编程提取<code>@</code>前后的子串，再分别判断是否是单词和域名，但这样做不但麻烦，而且代码难以复用。</p>
+
+<p>正则表达式是一种用来匹配字符串的强有力的武器。它的设计思想是用一种描述性的语言来给字符串定义一个规则，凡是符合规则的字符串，我们就认为它“匹配”了，否则，该字符串就是不合法的。</p>
+
+<p>所以我们判断一个字符串是否是合法的Email的方法是：</p>
+
+<ol>
+<li><p>创建一个匹配Email的正则表达式；</p></li>
+<li><p>用该正则表达式去匹配用户的输入来判断是否合法。</p></li>
+</ol>
+
+<p>因为正则表达式也是用字符串表示的，所以，我们要首先了解如何用字符来描述字符。</p>
+
+<p>在正则表达式中，如果直接给出字符，就是精确匹配。用<code>\d</code>可以匹配一个数字，<code>\w</code>可以匹配一个字母或数字，所以：</p>
+
 <ul>
-<li>
-<a href="#toc_1">读文件</a>
-</li>
-<li>
-<a href="#toc_2">file-like Object</a>
-</li>
-<li>
-<a href="#toc_3">二进制文件</a>
-</li>
-<li>
-<a href="#toc_4">写文件</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_5">小结</a>
-</li>
+<li><p><code>&#39;00\d&#39;</code>可以匹配<code>&#39;007&#39;</code>，但无法匹配<code>&#39;00A&#39;</code>；</p></li>
+<li><p><code>&#39;\d\d\d&#39;</code>可以匹配<code>&#39;010&#39;</code>；</p></li>
+<li><p><code>&#39;\w\w\d&#39;</code>可以匹配<code>&#39;py3&#39;</code>；</p></li>
 </ul>
 
+<p><code>.</code><strong>可以匹配任意字符</strong>，所以：</p>
 
-<h2 id="toc_0">文件读写</h2>
+<ul>
+<li><code>&#39;py.&#39;</code>可以匹配<code>&#39;pyc&#39;</code>、<code>&#39;pyo&#39;</code>、<code>&#39;py!&#39;</code>等等。</li>
+</ul>
 
-<h3 id="toc_1">读文件</h3>
+<p>要匹配变长的字符，在正则表达式中，用<code>*</code>表示任意个字符（包括0个），用<code>+</code>表示至少一个字符，用<code>?</code>表示0个或1个字符，用<code>{n}</code>表示n个字符，用<code>{n,m}</code>表示n-m个字符：</p>
 
-<p>要以读文件的模式来打开一个文件对象，使用Python内置的<code>open（）</code>函数，传入文件名和标识符：</p>
+<p>来看一个复杂的例子：<code>\d{3}\s+\d{3,8}</code>。</p>
 
-<pre><code class="language-py">&gt;&gt;&gt; f = open(&#39;/Users/michael/test.txt&#39;, &#39;r&#39;)
+<p>我们来从左到右解读一下：</p>
+
+<ol>
+<li><p><code>\d{3}</code>表示匹配3个数字，例如<code>&#39;010&#39;</code>；</p></li>
+<li><p><code>\s</code>可以匹配一个空格（也包括Tab等空白符），所以<code>\s+</code>表示至少有一个空格，例如匹配<code>&#39; &#39;，&#39; &#39;</code>等；</p></li>
+<li><p><code>\d{3,8}</code>表示3-8个数字，例如<code>&#39;1234567&#39;</code>。</p></li>
+</ol>
+
+<p>综合起来，上面的正则表达式可以匹配以任意个空格隔开的带区号的电话号码。</p>
+
+<p>如果要匹配<code>&#39;010-12345&#39;</code>这样的号码呢？由于<code>&#39;-&#39;</code>是特殊字符，在正则表达式中，要用<code>&#39;\&#39;</code>转义，所以，上面的正则是<code>\d{3}\-\d{3,8}</code>。</p>
+
+<p>但是，仍然无法匹配<code>&#39;010 - 12345&#39;</code>，因为带有空格。所以我们需要更复杂的匹配方式。</p>
+
+<h2 id="toc_0">进阶</h2>
+
+<p>要做更精确地匹配，可以用<code>[]</code>表示范围，比如：</p>
+
+<ul>
+<li><p><code>[0-9a-zA-Z\_]</code>可以匹配一个数字、字母或者下划线；</p></li>
+<li><p><code>[0-9a-zA-Z\_]+</code>可以匹配至少由一个数字、字母或者下划线组成的字符串，比如<code>&#39;a100&#39;，&#39;0_Z&#39;，&#39;Py3000&#39;</code>等等；</p></li>
+<li><p><code>[a-zA-Z\_][0-9a-zA-Z\_]*</code>可以匹配由字母或下划线开头，后接任意个由一个数字、字母或者下划线组成的字符串，也就是Python合法的变量；</p></li>
+<li><p><code>[a-zA-Z\_][0-9a-zA-Z\_]{0, 19}</code>更精确地限制了变量的长度是1-20个字符（前面1个字符+后面最多19个字符）。</p></li>
+</ul>
+
+<p><code>A|B</code>可以匹配A或B，所以<code>(P|p)ython</code>可以匹配<code>&#39;Python&#39;</code>或者<code>&#39;python&#39;</code>。</p>
+
+<p><code>^</code>表示行的开头，<code>^\d</code>表示必须以数字开头。</p>
+
+<p><code>$</code>表示行的结束，<code>\d$</code>表示必须以数字结束。</p>
+
+<p>你可能注意到了，<code>py</code>也可以匹配&#39;python&#39;，但是加上<code>^py$</code>就变成了整行匹配，就只能匹配<code>&#39;py&#39;</code>了。</p>
+
+<h2 id="toc_1">re模块</h2>
+
+<p>有了准备知识，我们就可以在Python中使用正则表达式了。Python提供<code>re</code>模块，包含所有正则表达式的功能。由于Python的字符串本身也用<code>\</code>转义，所以要特别注意：</p>
+
+<pre><code class="language-py">s = &#39;ABC\\-001&#39; # Python的字符串
+# 对应的正则表达式字符串变成：
+# &#39;ABC\-001&#39;
 </code></pre>
 
-<p>标示符&#39;r&#39;表示读，这样，我们就成功地打开了一个文件。</p>
+<p>因此我们强烈建议使用Python的<code>r</code>前缀，就不用考虑转义的问题了：</p>
 
-<p>如果文件不存在，open()函数就会抛出一个IOError的错误，并且给出错误码和详细的信息告诉你文件不存在：<br/>
-<img src="media/14932734930436/14932737513488.jpg" alt=""/></p>
-
-<p>如果文件打开成功，接下来，调用<code>read()</code>方法可以一次读取文件的全部内容，Python把内容读到内存，用一个<code>str</code>对象表示：<br/>
-<img src="media/14932734930436/14932741526772.jpg" alt=""/></p>
-
-<p>由于文件读写时都有可能产生<code>IOError</code>，一旦出错，后面的<code>f.close()</code>就不会调用。所以，为了保证无论是否出错都能正确地关闭文件，我们可以使用<code>try ... finally</code>来实现。这种方法太麻烦。我们这里使用python所提供的方法：</p>
-
-<p>Python引入了with语句来自动帮我们调用<code>close()</code>方法：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;r&#39;) as f:
-    print f.read()
+<pre><code class="language-py">s = r&#39;ABC\-001&#39; # Python的字符串
+# 对应的正则表达式字符串不变：
+# &#39;ABC\-001&#39;
 </code></pre>
 
-<p><img src="media/14932734930436/14932743740546.jpg" alt=""/></p>
+<p>先看看如何判断正则表达式是否匹配：</p>
 
-<p>这和前面的<code>try ... finally</code>是一样的，但是代码更佳简洁，并且不必调用<code>f.close()</code>方法。</p>
+<pre><code class="language-py"># -*- coding: utf-8 -*
+import re
 
-<p>调用<code>read()</code>会一次性读取文件的全部内容，如果文件有10G，内存就爆了，所以，要保险起见，可以反复调用<code>read(size)</code>方法，每次最多读取<code>size</code>个字节的内容。另外，调用<code>readline()</code>可以每次读取一行内容，调用<code>readlines()</code>一次读取所有内容并按行返回<code>list</code>。因此，要根据需要决定怎么调用。</p>
+print re.match(r&#39;^\d{3}\-\d{3,8}$&#39;, &#39;010-12345&#39;)
+print re.match(r&#39;^\d{3}\-\d{3,8}$&#39;, &#39;010 12345&#39;)
 
-<p>如果文件很小，<code>read()</code>一次性读取最方便；如果不能确定文件大小，反复调用<code>read(size)</code>比较保险；如果是配置文件，调用<code>readlines()</code>最方便：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;r&#39;) as f:
-    for line in f.readlines():
-        print(line.strip())  #把末尾的&#39;\n&#39;删掉
 </code></pre>
 
-<p><img src="media/14932734930436/14932746986776.jpg" alt=""/></p>
+<p><code>match()</code>方法判断是否匹配，如果匹配成功，返回一个<code>Match</code>对象，否则返回<code>None</code>。<br/>
+<img src="media/14939712159345/14939732218646.jpg" alt=""/></p>
 
-<h3 id="toc_2">file-like Object</h3>
+<p>常见的判断方法就是：</p>
 
-<p>像<code>open()</code>函数返回的这种有个<code>read()</code>方法的对象，在Python中统称为file-like Object。除了file外，还可以是内存的字节流，网络流，自定义流等等。file-like Object不要求从特定类继承，只要写个<code>read()</code>方法就行。</p>
+<pre><code class="language-py"># -*- coding: utf-8 -*
+import re
 
-<p><code>StringIO</code>就是在内存中创建的file-like Object，常用作临时缓冲。</p>
+Spattern = r&#39;^\d{3}\-\d{3,8}$&#39;  #用户定义的正则表达式
+test = &#39;010-12345&#39;  #用户输入的字符串
+test2 = &#39;012 12345&#39;
+if re.match(Spattern , test):
+    print &#39;OK&#39;
+else:
+    print &#39;failed&#39;
 
-<h3 id="toc_3">二进制文件</h3>
-
-<p>前面讲的默认都是读取文本文件，并且是ASCII编码的文本文件。要读取二进制文件，比如图片、视频等等，用<code>rb</code>模式打开文件即可：<br/>
-<img src="media/14932734930436/14932760233490.jpg" alt=""/></p>
-
-<h3 id="toc_4">写文件</h3>
-
-<p>写文件和读文件是一样的，唯一区别是调用<code>open()</code>函数时，传入标识符<code>&#39;w&#39;</code>或者<code>&#39;wb&#39;</code>表示写文本文件或写二进制文件：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; f = open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;, &#39;w&#39;)
-&gt;&gt;&gt; f.write(&#39;Hello, world!Again！&#39;)
-&gt;&gt;&gt; f.close()
+if re.match(Spattern , test2):
+    print &#39;OK&#39;
+else:
+    print &#39;failed&#39;
 </code></pre>
 
-<p>这里推荐直接调用with方法：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;w&#39;) as f:
-    f.write(&#39;Hello, world!Again!&#39;)
-</code></pre>
-
-<p><img src="media/14932734930436/14932763793296.jpg" alt=""/></p>
-
-<p><font color=red><strong>要注意的是一旦写入文件，原来文件中的内容会被删除！</strong></font></p>
-
-<h2 id="toc_5">小结</h2>
-
-<p>在Python中，文件读写是通过<code>open()</code>函数打开的文件对象完成的。使用<code>with</code>语句操作文件IO是个好习惯。</p>
+<p><img src="media/14939712159345/14939734520573.jpg" alt=""/></p>
 
                         
                       </div>
@@ -235,7 +322,7 @@ with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;w&#3
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/4/27</span>
+                    <span class="date">2017/5/5</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
@@ -252,98 +339,28 @@ with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;w&#3
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="14932622908500.html">
+                <a class="clearlink" href="14938936328646.html">
                 
-                  <h1>文档测试</h1>
+                  <h1>图像去雾相关基础</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><strong>在python中我们可以执行那些在注释中的代码，来进行测试。</strong></p>
+                        	<h2 id="toc_0">暗原色</h2>
 
-<p>当我们编写注释时，如果写上这样的注释：</p>
+<p>暗原色先验理论指出，在无雾图像的 非天空区域里，若把图像分为多个子块，则在每个子块中都会 有某些像素点的一个颜色通道的亮度接近于 0</p>
 
-<pre><code class="language-py">def abs(n):
-    &#39;&#39;&#39;
-    Function to get absolute value of number.
+<p><img src="media/14938936328646/14938938844517.jpg" alt=""/><br/>
+<img src="media/14938936328646/14938939404387.jpg" alt=""/><br/>
+<img src="media/14938936328646/14938939611430.jpg" alt=""/></p>
 
-    Example:
+<h2 id="toc_1">HSV</h2>
 
-    &gt;&gt;&gt; abs(1)
-    1
-    &gt;&gt;&gt; abs(-1)
-    1
-    &gt;&gt;&gt; abs(0)
-    0
-    &#39;&#39;&#39;
-    return n if n &gt;= 0 else (-n)
-</code></pre>
+<p>HSL 和 HSV（也叫做 HSB）是对RGB 色彩空间中点的两种有关系的表示，它们尝试描述比 RGB 更准确的感知颜色联系，并仍保持在计算上简单。<code>HSL 表示hue（色相）、saturation（饱和度）、lightness（亮度）</code>，<strong>HSV 表示</strong> <code>hue、 saturation、value(色调) 而 HSB 表示hue、saturation、brightness（明度）</code>。</p>
 
-<p>无疑更明确地告诉函数的调用者该函数的期望输入和输出。</p>
+<p>HSL 和 HSV 二者都把颜色描述在圆柱体内的点，这个圆柱的中心轴取值为<strong>自底部的黑色到顶部的白色而在它们中间是的灰色</strong>，绕这个轴的<strong>角度</strong>对应于“色相”，<strong>到这个轴的距离</strong>对应于“饱和度”，而<strong>沿着这个轴的距离</strong>对应于“亮度”，“色调”或“明度”。</p>
 
-<p><strong>并且，Python内置的“文档测试”（doctest）模块可以直接提取注释中的代码并执行测试。</strong></p>
-
-<p><font color=red>doctest严格按照Python交互式命令行的输入和输出来判断测试结果是否正确。只有测试异常的时候，可以用...表示中间一大段烦人的输出。</font></p>
-
-<p>让我们用doctest来测试上次编写的<code>Dict</code>类：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Dict(dict):
-    
-    &quot;&quot;&quot;
-    Simple dict but also support access as x.y style
-
-    &gt;&gt;&gt; d1 = Dict()
-    &gt;&gt;&gt; d1[&#39;x&#39;] = 100
-    &gt;&gt;&gt; d1.x
-    100
-    &gt;&gt;&gt; d1.y = 200
-    &gt;&gt;&gt; d1[&#39;y&#39;]
-    200
-    &gt;&gt;&gt; d2 = Dict(a=1, b=2, c=&#39;3&#39;)
-    &gt;&gt;&gt; d2.c
-    &#39;3&#39;
-    &gt;&gt;&gt; d2[&#39;empty&#39;]
-    Traceback (most recent call last):
-        ...
-    KeyError: &#39;empty&#39;
-    &gt;&gt;&gt; d2.empty
-    Traceback (most recent call last):
-        ...
-    AttributeError: &#39;Dict&#39; object has no attribute &#39;empty&#39;
-    
-    &quot;&quot;&quot;
-    def __init__(self, **kw):
-        super(Dict, self).__init__(**kw)
-    def __getattr__(self,key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r&quot;&#39;Dict&#39; object has no attribute &#39;%s&#39;&quot; % key)
-        else:
-            pass
-        finally:
-            pass
-    def __setattr__(self,key,value):
-        self[key] = value
-if __name__ == &#39;__main__&#39;:
-    import doctest
-    doctest.testmod()
-</code></pre>
-
-<p>如果什么输出都没有，说明我们编写的<code>doctest</code>运行都是正确的。<br/>
-<img src="media/14932622908500/14932639594028.jpg" alt=""/><br/>
-如果我们把</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; d2.c
-    &#39;4&#39; #3改成4
-</code></pre>
-
-<p>运行后就会显示：</p>
-
-<p><img src="media/14932622908500/14932640459265.jpg" alt=""/></p>
-
-<p><strong>注意到最后两行代码。当模块正常导入时，doctest不会被执行。只有在命令行运行时，才执行doctest。所以，不必担心doctest会在非测试环境下执行。</strong></p>
+<p>HSV（色相，饱和度，明度）在概念上可以被认为是颜色的倒圆锥体（黑点在下顶点，白色在上底面圆心）</p>
 
                         
                       </div>
@@ -352,87 +369,7 @@ if __name__ == &#39;__main__&#39;:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/4/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14932573311953.html">
-                
-                  <h1>图像去雾相关论文总结</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">1.特征学习的单幅图像去雾算法 2016年</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_1">2.尺度自适应暗通道先验去雾方法</a>
-
-
-<h2 id="toc_0">1.特征学习的单幅图像去雾算法 2016年</h2>
-
-<p><strong>目的：</strong>为提高图像去雾的普适性，提出一种特征学习的单幅图像去雾方法。</p>
-
-<p><strong>方法：</strong>通过稀疏自动编码机对有雾图像进行<strong>多尺度的纹理结构特征提取</strong>，同时抽取各种与雾相关的颜色特征。然后采用多层神经网络进行样本训练，得到雾天条件下纹理结构特征及颜色特征与场景深度间的映射关系，并估算出有雾图像的场景深度图。最后结合大气散射模型，根据场景深度图复原无雾图像。</p>
-
-<p><strong>结论：对实验结果的定性及定量分 析表明，本文算法能有效获取有雾图像的场景深度，复原出视觉效果理想的无雾图像，且具有很好的场景普适性。</strong></p>
-
-<p><strong>理解</strong>：<font color=red>本文认为图像去雾的问题可进一步转化为场景深度d的求解问题。</font>本文通过自动编码机获取到图片中物体的纹理特征，然后用多尺度的方法分别提取<strong>颜色特征、暗原色特征、颜色衰减特征、纹理结构</strong>特征。<strong>四者结合对场景深度进行估计</strong>。</p>
-
-<p><strong>可以改进的</strong>：</p>
-
-<ol>
-<li><p>算法实时性不够强，效率比较低，可以考虑缩小图片尺寸，降低数据量，从而运用到视频去雾。</p></li>
-<li><p>对雾气分布不均匀的图像，效果不理想，需要结合不同的气象模型来建立更为鲁棒的物理模型。</p></li>
-</ol>
-
-<h1 id="toc_1">2.尺度自适应暗通道先验去雾方法</h1>
-
-<p><strong>目的：</strong><br/>
-针对暗通道先验去雾方法的尺度选择问题 提出了一种尺度自适应方法， 根据图像的颜色和边 缘特征将暗通道求解的尺度自适应地调整到一个合适的范围。</p>
-
-<p><strong>方法：</strong></p>
-
-<ol>
-<li><p>由颜色特征求解初始尺度：<font color=red>对于图像的不同区域采用不同的尺度求解暗通道: 在亮度较低或饱和度较高的区域，采用较小尺度; 在亮度较高且饱和度较低的区域，采用较大尺度;在景深突变处，采用较小尺度;在平滑区域，采用较大尺度。</font></p></li>
-<li><p>由边缘特征对尺度进行修正:由于“光晕”现象发生在景深突变处，如果在边缘附近采用较小的尺度，可使透射率的求解窗口\(Ω_r(x)\)尽量不跨越景深边界，从而减小“光晕”现象; 在非边缘处采用较大的尺度，可以增大 \(J_{dark}(x)→0\)的概率，使复原图像的背景更平滑，噪声和失真更小。 由边缘特征对初始尺度\(r_0(x)\)进行修正.</p></li>
-</ol>
-
-<p><strong>结论：</strong><br/>
-整个去雾过程参数自动配置，无需人工干预，兼顾不同尺度复原图像的优点，复原图像色彩自然，对比度提升显著，并有效抑制了“光晕”现象。对多种雾化场景图像的处理结果表明: <strong>文中方法对场景的适应性强， 在任何情况下的处理结果均能达到 DG 方法的最优结果，甚至更好。</strong></p>
-
-<p><strong>理解：</strong><br/>
-该论文主要是针对HE的去雾方法，对暗通道尺寸进行自适应确定，减少了人工干预的复杂度。</p>
-
-<p><strong>可以改进：</strong><br/>
-<font color=red>该算法在运行时间上可以改进，也可以利用机器学习的方法来提取图片特征，避免Canny算子的局限性造成的边缘提取误差。<br/>
-可以与上篇论文进行结合来提高上文尺度特征提取的效率。</font></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/27</span>
+                    <span class="date">2017/5/4</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
@@ -449,31 +386,142 @@ if __name__ == &#39;__main__&#39;:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="14928484245894.html">
+                <a class="clearlink" href="14938608177246.html">
                 
-                  <h1>文档测试</h1>
+                  <h1>分布式进程</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>如果你经常阅读Python的官方文档，可以看到很多文档都有示例代码。比如<a href="https://docs.python.org/2/library/re.html">re</a>模块就带了很多示例代码：</p>
+                        	<p>在Thread和Process中，应当优选Process，<font color=red><strong>因为Process更稳定，而且，Process可以分布到多台机器上，而Thread最多只能分布到同一台机器的多个CPU上。</strong></font></p>
 
-<pre><code>&gt;&gt;&gt; import re
-&gt;&gt;&gt; m = re.search(&#39;(?&lt;=abc)def&#39;, &#39;abcdef&#39;)
-&gt;&gt;&gt; m.group(0)
-&#39;def&#39;
+<p><strong>Python的<code>multiprocessing</code>模块不但支持多进程，其中<code>managers</code>子模块还支持把多进程分布到多台机器上。</strong><font color=red>一个服务进程可以作为调度者，将任务分布到其他多个进程中，依靠网络通信。由于<code>managers</code>模块封装很好，不必了解网络通信的细节，就可以很容易地编写分布式多进程程序。</font></p>
+
+<p>举个例子：如果我们<strong>已经有一个通过<code>Queue</code>通信的多进程程序在同一台机器上运行</strong>，现在，由于处理任务的进程任务繁重，希望把发送任务的进程和处理任务的进程分布到两台机器上。怎么用分布式进程实现？</p>
+
+<p>原有的<code>Queue</code>可以继续使用，<font color=red>但是，通过<code>managers</code>模块把<code>Queue</code>通过网络暴露出去，就可以让其他机器的进程访问<code>Queue</code>了。</font></p>
+
+<p>我们先看服务进程，服务进程负责启动<code>Queue</code>，把<code>Queue</code>注册到网络上，然后往<code>Queue</code>里面写入任务：</p>
+
+<pre><code class="language-py">#taskmanager.py
+#-*- coding: utf-8 -*-
+
+import random,time,Queue
+from multiprocessing.managers import BaseManager
+
+#发送任务的队列
+task_queue = Queue.Queue()
+#接受结果的队列
+result_queue = Queue.Queue()
+
+#从BaseManager继承的QueueManager:
+class QueueManager(BaseManager):
+    pass
+
+#把两个Queue都注册到网络上, callable参数关联了Queue对象:
+QueueManager.register(&#39;get_task_queue&#39;,callable=lambda:task_queue)
+QueueManager.register(&#39;get_result_queue&#39;,callable=lambda:result_queue)
+
+#绑定端口5000，设置验证码‘abc’：
+manager = QueueManager(address=(&#39;&#39;,5000),authkey=&#39;abc&#39;)
+#启动Queue
+manager.start()
+# 获得通过网络访问的Queue对象:
+task = manager.get_task_queue()
+result = manager.get_result_queue()
+#放几个任务进去
+for i in range(10):
+    n = random.randint(0, 10000)
+    print(&#39;Put task %d...&#39; %n)
+    task.put(n)
+
+#从result队列读取结果
+print(&#39;Try get results...&#39;)
+for i in range(10):
+    r = result.get(timeout=10)
+    print(&#39;Result:%s&#39;%r)
+#关闭
+manager.shutdown()
 </code></pre>
 
-<p>可以把这些示例代码在Python的交互式环境下输入并执行，结果与文档中的示例代码显示的一致。</p>
+<p>请注意，当我们在一台机器上写多进程程序时，创建的<code>Queue</code>可以直接拿来用，但是，在分布式多进程环境下，添加任务到<code>Queue</code>不可以直接对原始的<code>task_queue</code>进行操作，那样就绕过了<code>QueueManager</code>的封装，必须通过<code>manager.get_task_queue()</code>获得的<code>Queue</code>接口添加。</p>
 
-<p>这些代码与其他说明可以写在注释中，然后，由一些工具来自动生成文档。既然这些代码本身就可以粘贴出来直接运行，那么，可不可以自动执行写在注释中的这些代码呢？</p>
+<p>然后，在另一台机器上启动任务进程（本机上启动也可以）：</p>
 
-<p>答案是肯定的。</p>
+<pre><code class="language-py">#taskworker.py
+#-*- coding: utf-8 -*-
 
-<p>当我们编写注释时，如果写上这样的注释：</p>
+import time
+import sys
+import Queue
+from multiprocessing.managers import BaseManager
 
-<pre><code class="language-py">
+# 创建类似的QueueManager:
+
+
+class QueueManager(BaseManager):
+    pass
+
+# 由于这个QueueManager只从网络上获取Queue，所以注册时只提供名字:
+QueueManager.register(&#39;get_task_queue&#39;)
+QueueManager.register(&#39;get_result_queue&#39;)
+
+# 连接到服务器，也就是运行taskmanager.py的机器:
+server_addr = &#39;127.0.0.1&#39;
+print(&#39;Connect to server %s...&#39; % server_addr)
+
+# 端口和验证码注意保持与taskmanager.py设置的完全一致:
+m = QueueManager(address=(server_addr, 5000), authkey=&#39;abc&#39;)
+# 从网络连接:
+m.connect()
+# 获取Queue的对象:
+task = m.get_task_queue()
+result = m.get_result_queue()
+# 从task队列取任务,并把结果写入result队列:
+for i in range(10):
+    try:
+        n = task.get(timeout=1)
+        print(&#39;run task %d * %d...&#39; % (n, n))
+        r = &#39;%d * %d = %d&#39; % (n, n, n * n)
+        time.sleep(1)
+        result.put(r)
+    except Queue.Empty:
+        print(&#39;task queue is empty.&#39;)
+# 处理结束:
+print(&#39;worker exit.&#39;)
 </code></pre>
+
+<p>任务进程要通过网络连接到服务进程，所以要指定服务进程的IP。</p>
+
+<p>现在，可以试试分布式进程的工作效果了。先启动<code>taskmanager.py</code>服务进程：</p>
+
+<p>启动后：<br/>
+<img src="media/14938608177246/14938633989382.jpg" alt=""/><br/>
+等待result队列中的值。（目前为空)</p>
+
+<p><code>taskmanager</code>进程发送完任务后，开始等待<code>result</code>队列的结果。现在启动<code>taskworker.py</code>进程：</p>
+
+<p><img src="media/14938608177246/14938634594880.jpg" alt=""/></p>
+
+<p><code>taskworker</code>进程结束，在<code>taskmanager</code>进程中会继续打印出结果：</p>
+
+<p><img src="media/14938608177246/14938634810692.jpg" alt=""/></p>
+
+<p>这个简单的<code>Manager/Worker</code>模型有什么用？<font color=red><strong>其实这就是一个简单但真正的分布式计算</strong></font>，把代码稍加改造，启动多个worker，就可以把任务分布到几台甚至几十台机器上，比如把计算<code>n*n</code>的代码换成发送邮件，就实现了邮件队列的异步发送。</p>
+
+<p>Queue对象存储在哪？注意到<code>taskworker.py</code>中根本没有创建<code>Queue</code>的代码，所以，Queue对象存储在<code>taskmanager.py</code>进程中：</p>
+
+<p><img src="media/14938608177246/14938635737718.jpg" alt=""/></p>
+
+<p>而<code>Queue</code>之所以能通过网络访问，就是通过<code>QueueManager</code>实现的。由于<code>QueueManager</code>管理的不止一个<code>Queue</code>，所以，要给每个<code>Queue</code>的网络调用接口起个名字，比如<code>get_task_queue</code>。</p>
+
+<p><code>authkey</code>有什么用？这是为了保证两台机器正常通信，不被其他机器恶意干扰。如果<code>taskworker.py</code>的<code>authkey</code>和<code>taskmanager.py</code>的<code>authkey</code>不一致，肯定连接不上。</p>
+
+<h2 id="toc_0">小结</h2>
+
+<p>Python的分布式进程接口简单，封装良好，适合需要把繁重任务分布到多台机器的环境下。</p>
+
+<p><font color=red>注意Queue的作用是用来传递任务和接收结果，每个任务的描述数据量要尽量小。比如发送一个处理日志文件的任务，就不要发送几百兆的日志文件本身，而是发送日志文件存放的完整路径，由Worker进程再去共享的磁盘上读取文件。</font></p>
 
                         
                       </div>
@@ -482,204 +530,7 @@ if __name__ == &#39;__main__&#39;:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/4/22</span>
-                    
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14928429198094.html">
-                
-                  <h1>单元测试</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我们来编写一个<code>Dict</code>类，这个类的行为和<code>dict</code>一致，但是可以通过属性来访问，用起来就像下面这样：</p>
-
-<pre><code>&gt;&gt;&gt; d = Dict(a=1, b=2)
-&gt;&gt;&gt; d[&#39;a&#39;]
-1
-&gt;&gt;&gt; d.a
-1
-</code></pre>
-
-<p>mydict.py代码为：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Dict(dict):
-
-    def __init__(self, **kw):
-        super(Dict, self).__init__(**kw)
-
-    def __getattr__(self, key):
-        try:
-            return self[key]
-        except KeyError:
-            raise AttributeError(r &quot; &#39;Dict&#39; object has no atr &#39;%s&#39; &quot; % key)
-        else:
-            pass
-        finally:
-            pass
-
-    def __setattr__(self, key, value):
-        self[key] = value
-
-</code></pre>
-
-<p>为了编写单元测试，我们需要引入Python自带的<code>unittest</code>模块，编写<code>mydict_test.py</code>如下：</p>
-
-<pre><code class="language-py">import unittest
-
-from mydict import Dict
-
-
-class TestDict(unittest.TestCase):
-
-    def test_init(self):
-        d = Dict(a=1, b=&#39;test&#39;)
-        self.assertEquals(d.a, 1)
-        self.assertEquals(d.b, &#39;test&#39;)
-        self.assertTrue(isinstance(d, dict))
-
-    def test_key(self):
-        d = Dict()
-        d[&#39;key&#39;] = &#39;value&#39;
-        self.assertEquals(d.key, &#39;value&#39;)
-
-    def test_attr(self):
-        d = Dict()
-        d.key = &#39;value&#39;
-        self.assertTrue(&#39;key&#39; in d)
-        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
-
-    def test_keyerror(self):
-        d = Dict()
-        with self.assertRaises(KeyError):
-            value = d[&#39;empty&#39;]
-
-    def test_attrerror(self):
-        d = Dict()
-        with self.assertRaises(AttributeError)
-            value = d.empty
-
-</code></pre>
-
-<p>编写单元测试时，我们需要编写一个测试类，从<code>unittest.TestCase</code>继承。</p>
-
-<p>以<code>test</code>开头的方法就是测试方法，不以<code>test</code>开头的方法不被认为是测试方法，测试的时候不会被执行。</p>
-
-<p>对每一类测试都需要编写一个<code>test_xxx()</code>方法。由于<code>unittest.TestCase</code>提供了很多内置的条件判断，我们只需要调用这些方法就可以断言输出是否是我们所期望的。最常用的断言就是<code>assertEquals()：</code></p>
-
-<pre><code class="language-py">self.assertEquals(abs(-1), 1) # 断言函数返回的结果与1相等
-</code></pre>
-
-<p>另一种重要的断言就是期待抛出指定类型的<code>Error</code>，比如通过<code>d[&#39;empty&#39;]</code>访问不存在的key时，断言会抛出<code>KeyError</code>：</p>
-
-<pre><code class="language-py">with self.assertRaises(KeyError):
-    value = d[&#39;empty&#39;]
-</code></pre>
-
-<p>而通过<code>d.empty</code>访问不存在的<code>key</code>时，我们期待抛出<code>AttributeError</code>：</p>
-
-<pre><code class="language-py">with self.assertRaises(AttributeError):
-    value = d.empty
-</code></pre>
-
-<h2 id="toc_0">运行单元测试</h2>
-
-<p>一旦编写好单元测试，我们就可以运行单元测试。最简单的运行方式是在<code>mydict_test.py</code>的最后加上两行代码：</p>
-
-<pre><code class="language-py">if __name__ == &#39;__main__&#39;:
-    unittest.main()
-</code></pre>
-
-<p>这样就可以把<code>mydict_test.py</code>当做正常的python脚本运行：</p>
-
-<p><img src="media/14928429198094/14928450280463.jpg" alt=""/></p>
-
-<p>另一种更常见的方法是在命令行通过参数<code>-m unittest</code>直接运行单元测试:<br/>
-<img src="media/14928429198094/14928451217135.jpg" alt=""/></p>
-
-<p>这是推荐的做法，因为这样可以一次批量运行很多单元测试，并且，有很多工具可以自动来运行这些单元测试。</p>
-
-<h2 id="toc_1">setUp与tearDown</h2>
-
-<p>可以在单元测试中编写两个特殊的<code>setUp()</code>和<code>tearDown()</code>方法。这两个方法会分别在每<strong>调用一个测试方法的前后分别被执行</strong>。</p>
-
-<p><code>setUp()和tearDown()</code>方法有什么用呢？设想你的测试需要启动一个数据库，这时，就可以在<code>setUp()</code>方法中连接数据库，在<code>tearDown()</code>方法中关闭数据库，这样，不必在每个测试方法中重复相同的代码：</p>
-
-<pre><code class="language-py">import unittest
-
-from mydict import Dict
-
-class TestDict(unittest.TestCase):
-
-    def setUp(self):    
-        print &#39;setUp...&#39;
-
-    def tearDown(self):
-        print &#39;tearDown...&#39;
-    
-    def test_init(self):    
-        d = Dict(a=1, b=&#39;test&#39;)
-        self.assertEquals(d.a, 1)   
-        self.assertEquals(d.b, &#39;test&#39;)
-        self.assertTrue(isinstance(d, dict))
-
-    def test_key(self):
-        d = Dict()
-        d[&#39;key&#39;] = &#39;value&#39;
-        self.assertEquals(d.key, &#39;value&#39;)
-
-    def test_attr(self):
-        d = Dict()
-        d.key = &#39;value&#39;
-        self.assertTrue(&#39;key&#39; in d)
-        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
-
-    def test_keyerror(self):
-        d = Dict()
-        with self.assertRaises(KeyError):
-            value = d[&#39;empty&#39;]
-
-    def test_attrerror(self):
-        d = Dict()
-        with self.assertRaises(AttributeError):
-            value = d.empty
-
-if __name__ == &#39;__main__&#39;:
-     unittest.main()
-</code></pre>
-
-<p><img src="media/14928429198094/14928470586520.jpg" alt=""/></p>
-
-<h2 id="toc_2">总结</h2>
-
-<ol>
-<li><p>单元测试可以有效地测试某个程序模块的行为，是未来重构代码的信心保证。</p></li>
-<li><p>单元测试的测试用例要覆盖常用的输入组合、边界条件和异常。</p></li>
-<li><p>单元测试代码要非常简单，如果测试代码太复杂，那么测试代码本身就可能有bug。</p></li>
-<li><p>单元测试通过了并不意味着程序就没有bug了，但是不通过程序肯定有bug。</p></li>
-</ol>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/22</span>
+                    <span class="date">2017/5/4</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
@@ -696,140 +547,60 @@ if __name__ == &#39;__main__&#39;:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="14928307466218.html">
+                <a class="clearlink" href="14938589289379.html">
                 
-                  <h1>调试</h1>
+                  <h1>进程与线程</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<ul>
-<li>
-<a href="#toc_0">断言</a>
-</li>
-<li>
-<a href="#toc_1">logging</a>
-</li>
-<li>
-<a href="#toc_2">pdb</a>
-</li>
-<li>
-<a href="#toc_3">pdb.set_trace()</a>
-</li>
-<li>
-<a href="#toc_4">IDE</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_5">总结</a>
+                        	<p>我们已经熟悉多线程与多进程。他们各有优点与缺点，这里我们简单的说明一下：</p>
 
+<p>首先，要实现多任务，<font color=red>通常我们会设计Master-Worker模式，Master负责分配任务，Worker负责执行任务，因此，多任务环境下，通常是一个Master，多个Worker。</font></p>
 
-<p>程序能一次写完并正常运行的概率很小，基本不超过1%。总会有各种各样的bug需要修正。有的bug很简单，看看错误信息就知道，有的bug很复杂，我们需要知道出错时，哪些变量的值是正确的，哪些变量的值是错误的，因此，需要一整套调试程序的手段来修复bug。</p>
+<p><strong>如果用多进程实现Master-Worker，主进程就是Master，其他进程就是Worker。</strong></p>
 
-<p>第一种方法简单直接粗暴有效，就是用<code>print</code>把可能有问题的变量打印出来看看.（这种方法不详细说明了，基本每个写代码的人都比较熟悉这种方法）</p>
+<p><strong>如果用多线程实现Master-Worker，主线程就是Master，其他线程就是Worker。</strong></p>
 
-<h2 id="toc_0">断言</h2>
+<p>多进程模式最大的优点就是<strong>稳定性高</strong>，因为一个子进程崩溃了，不会影响主进程和其他子进程。（<strong>当然主进程挂了所有进程就全挂了，但是Master进程只负责分配任务，挂掉的概率低</strong>）著名的Apache最早就是采用多进程模式。</p>
 
-<p>凡是用<code>print</code>来辅助查看的地方，都可以用断言<code>（assert）</code>来替代：</p>
+<p>多进程模式的<font color=red>缺点是创建进程的代价大</font>，在Unix/Linux系统下，用fork调用还行，在Windows下创建进程开销巨大。另外，操作系统能同时运行的进程数也是有限的，在内存和CPU的限制下，如果有几千个进程同时运行，操作系统连调度都会成问题。</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def foo(s):
-    n=int(s)
-    assert n!=0,&#39;n is zero&#39;
-    return 10/n
-def main():
-    foo(&#39;0&#39;)
-main()
-</code></pre>
+<p>多线程模式通常比多进程快一点，但是也快不到哪去，而且，<font color=red>多线程模式致命的缺点就是任何一个线程挂掉都可能直接造成整个进程崩溃，因为所有线程共享进程的内存。</font>在Windows上，如果一个线程执行的代码出了问题，你经常可以看到这样的提示：“该程序执行了非法操作，即将关闭”，其实往往是某个线程出了问题，但是操作系统会强制结束整个进程。</p>
 
-<p><code>assert</code>的意思是，表达式<code>n != 0</code>应该是<code>True</code>，否则，后面的代码就会出错。</p>
+<p>在Windows下，多线程的效率比多进程要高，所以微软的IIS服务器默认采用多线程模式。由于多线程存在稳定性的问题，IIS的稳定性就不如Apache。为了缓解这个问题，IIS和Apache现在又有多进程+多线程的混合模式，真是把问题越搞越复杂。</p>
 
-<p>如果断言失败，<code>assert</code>语句本身就会抛出<code>AssertionError</code>：</p>
+<h2 id="toc_0">线程切换</h2>
 
-<p><img src="media/14928307466218/14928311015673.jpg" alt=""/><br/>
-启动Python解释器时可以用<code>-O</code>参数来关闭<code>assert</code></p>
+<p>无论是多进程还是多线程，只要数量一多，<strong>效率肯定上不去</strong>，为什么呢？</p>
 
-<pre><code>$ python -O err.py
-Traceback (most recent call last):
-  ...
-ZeroDivisionError: integer division or modulo by zero
-</code></pre>
+<p>因为多任务的执行，需要线程或进程的切换，<strong>操作系统在切换时会先保存当前执行的现场环境（CPU寄存器状态、内存页等），然后，把新任务的执行环境准备好（恢复上次的寄存器状态，切换内存页等），才能开始执行。</strong>这个切换过程虽然很快，但是也需要耗费时间。如果有几千个任务同时进行，操作系统可能就主要忙着切换任务，根本没有多少时间去执行任务了，这种情况最常见的就是硬盘狂响，点窗口无反应，系统处于假死状态。</p>
 
-<p>关闭后，你可以把所有的<code>assert</code>语句当成<code>pass</code>来看。</p>
+<p><strong>所以，多任务一旦多到一个限度，就会消耗掉系统所有的资源，结果效率急剧下降，所有任务都做不好。</strong></p>
 
-<h2 id="toc_1">logging</h2>
+<h2 id="toc_1">计算密集型和IO密集型</h2>
 
-<p>把<code>print</code>替换为<code>logging</code>是第3种方式，和<code>assert</code>比，<code>logging</code>不会抛出错误，而且可以输出到文件：</p>
+<p>是否采用多任务的第二个考虑是任务的类型。我们可以把任务分为<font color=red><strong>计算密集型和IO密集型。</strong></font></p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import logging
+<p>计算密集型任务的特点是要进行大量的计算，消耗CPU资源，比如计算圆周率、对视频进行高清解码等等，全靠CPU的运算能力。<font color=red><strong>这种计算密集型任务虽然也可以用多任务完成，但是任务越多，花在任务切换的时间就越多，CPU执行任务的效率就越低，所以，要最高效地利用CPU，计算密集型任务同时进行的数量应当等于CPU的核心数。</strong></font></p>
 
-s = &#39;0&#39;
-n = int(s)
-logging.info(&#39;n = %d&#39; % n)
-print 10 / n
-</code></pre>
+<p>计算密集型任务由于主要消耗CPU资源，因此，代码运行效率至关重要。<strong>Python这样的脚本语言运行效率很低，完全不适合计算密集型任务。对于计算密集型任务，最好用C语言编写。</strong></p>
 
-<p><code>logging.info()</code>就可以输出一段文本。运行，发现除了<code>ZeroDivisionError</code>，没有任何信息。<br/>
-<img src="media/14928307466218/14928313656997.jpg" alt=""/></p>
+<p>第二种任务的类型是IO密集型，涉及到网络、磁盘IO的任务都是IO密集型任务，这类任务的特点是CPU消耗很少，任务的大部分时间都在等待IO操作完成（因为IO的速度远远低于CPU和内存的速度）。<font color=red><strong>对于IO密集型任务，任务越多，CPU效率越高，但也有一个限度。常见的大部分任务都是IO密集型任务，比如Web应用。</strong></font></p>
 
-<p>加上：</p>
+<p>IO密集型任务执行期间，99%的时间都花在IO上，花在CPU上的时间很少，因此，用运行速度极快的C语言替换用Python这样运行速度极低的脚本语言，完全无法提升运行效率。<strong>对于IO密集型任务，最合适的语言就是开发效率最高（代码量最少）的语言，脚本语言是首选，C语言最差。</strong></p>
 
-<pre><code class="language-py">import logging
-logging.basicConfig(level=logging.INFO)
-</code></pre>
+<h2 id="toc_2">异步IO</h2>
 
-<p>之后显示：<br/>
-<img src="media/14928307466218/14928314465553.jpg" alt=""/><br/>
-这就是<code>logging</code>的好处，它允许你指定记录信息的级别，有<code>debug，info，warning，error</code>等几个级别，当我们指定<code>level=INFO</code>时，<code>logging.debug</code>就不起作用了。同理，指定<code>level=WARNING</code>后，<code>debug和info</code>就不起作用了。这样一来，你可以放心地输出不同级别的信息，也不用删除，最后统一控制输出哪个级别的信息。</p>
+<p>考虑到CPU和IO之间巨大的速度差异，一个任务在执行的过程中大部分时间都在等待IO操作，<strong>单进程单线程模型会导致别的任务无法并行执行，因此，我们才需要多进程模型或者多线程模型来支持多任务并发执行。</strong></p>
 
-<p><code>logging</code>的另一个好处是通过简单的配置，<strong>一条语句可以同时输出到不同的地方，比如console和文件</strong>。</p>
+<blockquote>
+<p><strong>使用了异步IO，在发起IO请求到实际使用数据这段时间 内，程序还可以继续做其他事情。</strong></p>
+</blockquote>
 
-<h2 id="toc_2">pdb</h2>
+<p>现代操作系统对IO操作已经做了巨大的改进，最大的特点就是支持异步IO。如果充分利用操作系统提供的异步IO支持，就可以用单进程单线程模型来执行多任务，这种全新的模型称为事件驱动模型，<strong>Nginx就是支持异步IO的Web服务器，它在单核CPU上采用单进程模型就可以高效地支持多任务。</strong>在多核CPU上，可以运行多个进程（数量与CPU核心数相同），充分利用多核CPU。由于系统总的进程数量十分有限，因此操作系统调度非常高效。用异步IO编程模型来实现多任务是一个主要的趋势。</p>
 
-<p>第4种方式是启动Python的调试器pdb，让程序以单步方式运行，可以随时查看运行状态。我们先准备好程序：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-s = &#39;0&#39;
-n = int(s)
-print 10 / n
-</code></pre>
-
-<p>然后启动：<br/>
-<img src="media/14928307466218/14928416845706.jpg" alt=""/></p>
-
-<p>输入命令<code>l</code>来查看代码,输入命令<code>n</code>可以单步执行代码,任何时候都可以输入命令<code>p</code> 变量名来查看变量,输入命令<code>q</code>结束调试，退出程序.</p>
-
-<h2 id="toc_3">pdb.set_trace()</h2>
-
-<p>这个方法也是用<code>pdb</code>，但是不需要单步执行，我们只需要<code>import pdb</code>，然后，在可能出错的地方放一个<code>pdb.set_trace()</code>，就可以设置一个断点：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import pdb
-
-s = &#39;0&#39;
-n = int(s)
-pdb.set_trace()  # 运行到这里会自动暂停
-print 10 / n
-
-</code></pre>
-
-<p><img src="media/14928307466218/14928418957951.jpg" alt=""/><br/>
-运行代码，程序会自动在<code>pdb.set_trace()</code>暂停并进入pdb调试环境，可以用命令<code>p</code>查看变量，或者用命令<code>c</code>继续运行</p>
-
-<p>这个方式比直接启动pdb单步调试效率要高很多，但也高不到哪去。</p>
-
-<h2 id="toc_4">IDE</h2>
-
-<p>如果想要有好的设置断点、单步执行体验，就需要一个支持调试功能的IDE。目前比较好的<strong>Python IDE有PyCharm</strong>：<br/>
-<a href="https://www.jetbrains.com/pycharm">https://www.jetbrains.com/pycharm</a></p>
-
-<p>写程序最痛苦的事情莫过于调试，程序往往会以你意想不到的流程来运行，你期待执行的语句其实根本没有执行，这时候，就需要调试了。</p>
-
-<h1 id="toc_5">总结</h1>
-
-<p><strong>虽然用IDE调试起来比较方便，但是最后你会发现，<code>logging</code>才是终极武器。</strong></p>
+<p><font color=red><strong>对应到Python语言，单进程的异步编程模型称为协程，有了协程的支持，就可以基于事件驱动编写高效的多任务程序。我们会在后面学习如何编写协程。</strong></font></p>
 
                         
                       </div>
@@ -838,7 +609,120 @@ print 10 / n
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/4/22</span>
+                    <span class="date">2017/5/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14937814533169.html">
+                
+                  <h1>ThreadLocal</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在多线程环境下，每个线程都有自己的数据。<strong>一个线程使用自己的局部变量比使用全局变量好，因为局部变量只有线程自己能看见，不会影响其他线程，而全局变量的修改必须加锁。</strong></p>
+
+<p>但是局部变量也有问题，就是在函数调用的时候，传递起来很麻烦：</p>
+
+<pre><code class="language-py">def process_student(name):
+    std = Student(name)
+    # std是局部变量，但是每个函数都要用它，因此必须传进去：
+    do_task_1(std)
+    do_task_2(std)
+
+def do_task_1(std):
+    do_subtask_1(std)
+    do_subtask_2(std)
+
+def do_task_2(std):
+    do_subtask_2(std)
+    do_subtask_2(std)
+</code></pre>
+
+<p>每个函数一层一层调用都这么传参数那还得了？用全局变量？也不行，因为每个线程处理不同的<code>Student</code>对象，不能共享。</p>
+
+<p>如果用一个全局<code>dict</code>存放所有的<code>Student</code>对象，然后以<code>thread</code>自身作为<code>key</code>获得线程对应的<code>Student</code>对象如何？</p>
+
+<pre><code class="language-py">global_dict = {}
+
+def std_thread(name):
+    std = Student(name)
+    # 把std放到全局变量global_dict中：
+    global_dict[threading.current_thread()] = std
+    do_task_1()
+    do_task_2()
+
+def do_task_1():
+    # 不传入std，而是根据当前线程查找：
+    std = global_dict[threading.current_thread()]
+    ...
+
+def do_task_2():
+    # 任何函数都可以查找出当前线程的std变量：
+    std = global_dict[threading.current_thread()]
+    ...
+</code></pre>
+
+<p>这种方式理论上是可行的，它最大的优点是消除了<code>std</code>对象在每层函数中的传递问题，但是，每个函数获取<code>std</code>的代码有点丑。</p>
+
+<p>有没有更简单的方式？</p>
+
+<p><code>ThreadLocal</code>应运而生，不用查找<code>dict</code>，<code>ThreadLocal</code>帮你自动做这件事：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import threading
+
+# 创建全局ThreadLocal对象
+local_school = threading.local()
+
+
+def process_student():
+    print &#39;Hello,%s(in %s)&#39; % (local_school.student, threading.current_thread().name)
+
+
+def process_thread(name):
+    # 绑定ThreadLocal的stutent：
+    local_school.student = name
+    process_student()
+
+t1 = threading.Thread(target=process_thread, args=(&#39;Alice&#39;,), name=&#39;Thread-A&#39;)
+t2 = threading.Thread(target=process_thread, args=(&#39;Bobs&#39;,), name=&#39;Thread-B&#39;)
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+</code></pre>
+
+<p><img src="media/14937814533169/14937825491356.jpg" alt=""/></p>
+
+<p>全局变量<code>local_school</code>就是一个<code>ThreadLocal</code>对象，每个<code>Thread</code>对它都可以读写<code>student</code>属性，但互不影响。你可以把<code>local_school</code>看成全局变量，但每个属性如<code>local_school.student</code>都是线程的局部变量，可以任意读写而互不干扰，也不用管理锁的问题，<code>ThreadLocal</code>内部会处理。</p>
+
+<p>可以理解为全局变量<code>local_school</code>是一个dict，不但可以用<code>local_school.student</code>，还可以绑定其他变量，如<code>local_school.teacher</code>等等。</p>
+
+<p><font color=red><strong><code>ThreadLocal</code>最常用的地方就是为每个线程绑定一个数据库连接，HTTP请求，用户身份信息等，这样一个线程的所有调用到的处理函数都可以非常方便地访问这些资源。</strong><br/>
+</font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/3</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
@@ -943,31 +827,31 @@ print 10 / n
 	      
 		      
 			      <li class="post">
-			        <a href="15128072112005.html">Relative Ranks</a>
+			        <a href="15129821006078.html">Sort Characters By Frequency</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128043838038.html">Valid Anagram</a>
+			        <a href="15129806433168.html">First Unique Character in a String</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128026901484.html">Assign Cookies</a>
+			        <a href="15129796221707.html">Minimum Moves to Equal Array Elements II</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128009688279.html">Ransom Note</a>
+			        <a href="15129788527282.html">Minimum Moves to Equal Array Elements</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127898937133.html">Reverse String II</a>
+			        <a href="15129760305793.html">Range Addition II</a>
 			      </li>
 		     
 		  

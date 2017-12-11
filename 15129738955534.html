@@ -1,0 +1,501 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Beauty Contest（旋转卡壳） - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
+        
+            <li><a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html">常见面试问题</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Beauty Contest（旋转卡壳）</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/12/11</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>Description<br/>
+Bessie, Farmer John&#39;s prize cow, has just won first place in a bovine beauty contest, earning the title &#39;Miss Cow World&#39;. As a result, Bessie will make a tour of N (2 &lt;= N &lt;= 50,000) farms around the world in order to spread goodwill between farmers and their cows. For simplicity, the world will be represented as a two-dimensional plane, where each farm is located at a pair of integer coordinates (x,y), each having a value in the range -10,000 ... 10,000. No two farms share the same pair of coordinates.</p>
+
+<p>Even though Bessie travels directly in a straight line between pairs of farms, the distance between some farms can be quite large, so she wants to bring a suitcase full of hay with her so she has enough food to eat on each leg of her journey. Since Bessie refills her suitcase at every farm she visits, she wants to determine the maximum possible distance she might need to travel so she knows the size of suitcase she must bring.Help Bessie by computing the maximum distance among all pairs of farms.</p>
+
+<p>Input<br/>
+ Line 1: A single integer, N</p>
+
+<p>Lines 2..N+1: Two space-separated integers x and y specifying coordinate of each farm</p>
+
+<p>Output<br/>
+Line 1: A single integer that is the squared distance between the pair of farms that are farthest apart from each other.</p>
+
+<p>Sample Input</p>
+
+<p>4<br/>
+0 0<br/>
+0 1<br/>
+1 1<br/>
+1 0</p>
+
+<p>Sample Output</p>
+
+<p>2</p>
+
+<h2 id="toc_0">算法思想</h2>
+
+<h3 id="toc_1">流程：</h3>
+
+<ol>
+<li><p>求凸包：最远点对一定在凸包上（可以反证法证之），所以找出凸包后在其上找最远点对就可以少考虑很多点。求凸包可用<code>andrew</code>算法，它是基于<code>graham</code>算法，且更快更稳定。不同于<code>graham</code>算法的逆时针排序，<code>andrew</code>算法采用了点的水平排序，然后分别求下凸包以及上凸包，这样下来整个的凸包便求好了。而且该算法可以解决凸包中有重合点、共线点等问题<img src="media/15129738955534/15129741482264.jpg" alt=""/></p></li>
+<li><p>旋转卡壳<br/>
+就是两个平行线正好把凸包卡住，其中卡着的点称为对踵点对.<br/>
+<img src="media/15129738955534/15129741907694.jpg" alt=""/></p></li>
+</ol>
+
+<p>那么怎么才能找到最远点对呢？<br/>
+<img src="media/15129738955534/15129742545712.jpg" alt=""/></p>
+
+<p>对于上图中的6个三角形的公共底边，可知当三角形的顶点在凸包上按逆时针旋转时，三角形的面积先由小变大再由大变小，即成单峰函数变化。所以在峰值时对应的凸包顶点距底边对应的两个对踵点的距离比其他情况大，这样，枚举每一个边并找到其面积单峰函数峰值对应的顶点，同时更新最大距离，旋转一趟下来便可以得到最后的结果。求面积单峰函数的峰值也很简单，就是通过叉积比较两个三角形的大小，当后者的面积比前者小时便找到了峰值，然后求距离更新最大值即可。</p>
+
+<pre><code class="language-c++">    #include &lt;cstdio&gt;  
+    #include &lt;vector&gt;  
+    #include &lt;algorithm&gt;  
+    #include &lt;cstring&gt;  
+    using namespace std;  
+    const int maxn = 50000 + 10;  
+    typedef int type_xy;  
+      
+    struct P  
+    {  
+        type_xy x, y;  
+        P() {}  
+        P(type_xy x, type_xy y) : x(x), y(y) {}  
+        P operator + (P p){ return P(x + p.x, y + p.y); }  
+        P operator - (P p){ return P(x - p.x, y - p.y); }  
+        P operator * (type_xy d){ return P(x*d, y*d); }  
+        bool operator &lt; (const P&amp; a) const  
+        {  
+            if (x != a.x) return x &lt; a.x;  
+            else return y &lt; a.y;  
+        }  
+        type_xy dot(P p) { return x*p.x + y*p.y; }  
+        type_xy det(P p) { return x*p.y - y*p.x; }  
+    };  
+      
+    int N;  
+    P ps[maxn];  
+      
+    //字典序比较  
+    bool cmp_x(const P&amp; p, const P&amp; q)  
+    {  
+        if (p.x != q.x)  
+            return p.x &lt; q.x;  
+        return p.y &lt; q.y;  
+    }  
+      
+    //求凸包  
+    vector&lt;P&gt; convex_hull(P* ps, int n)  
+    {  
+        sort(ps, ps + n, cmp_x);  
+        int k = 0;          //凸包的顶点数  
+        vector&lt;P&gt; qs(n * 2);        //构造中的凸包  
+        //构造凸包的下侧  
+        for (int i = 0; i &lt; n; i++){  
+            while (k &gt; 1 &amp;&amp; (qs[k - 1] - qs[k - 2]).det(ps[i] - qs[k - 1]) &lt;= 0)  
+                k--;  
+            qs[k++] = ps[i];  
+        }  
+        //构造凸包的上侧  
+        for (int i = n - 2, t = k; i &gt;= 0; i--){  
+            while (k &gt; t &amp;&amp; (qs[k - 1] - qs[k - 2]).det(ps[i] - qs[k - 1]) &lt;= 0)  
+                k--;  
+            qs[k++] = ps[i];  
+        }  
+        qs.resize(k - 1);  
+        return qs;  
+    }  
+      
+    //距离的平方  
+    double dist(P p, P q)  
+    {  
+        return (p - q).dot(p - q);  
+    }  
+      
+      
+    void solve()  
+    {  
+        vector&lt;P&gt; qs = convex_hull(ps, N);  
+        int n = qs.size();  
+        if (n == 2){         //特别处理凸包退化的情况  
+            printf(&quot;%.0f\n&quot;, dist(qs[0], qs[1]));  
+            return;  
+        }  
+        int i = 0, j = 0;           //某个方向上的对踵点对  
+        //求出x轴方向上的对踵点对  
+        for (int k = 0; k &lt; n; k++){  
+            if (!cmp_x(qs[i], qs[k]))  
+                i = k;  
+            if (cmp_x(qs[j], qs[k]))  
+                j = k;  
+        }  
+        double res = 0;  
+        int si = i, sj = j;  
+        while (i != sj || j != si){     //将方向逐步旋转180度  
+            res = max(res, dist(qs[i], qs[j]));  
+            //判断先转到边i-(i+1)的法线方向还是边j-(j+1)的法线方向  
+            if ((qs[(i + 1) % n] - qs[i]).det(qs[(j + 1) % n] - qs[j]) &lt; 0)  
+                i = (i + 1) % n;        //先转到边i-(i+1)的法线方向  
+            else  
+                j = (j + 1) % n;        //先转到边j-(j+1)的法线方向  
+        }  
+        printf(&quot;%.0f\n&quot;, res);  
+    }  
+      
+    int main()  
+    {  
+        while (scanf(&quot;%d&quot;, &amp;N) != EOF){  
+            for (int i = 0; i &lt; N; i++){  
+                scanf(&quot;%d%d&quot;, &amp;ps[i].x, &amp;ps[i].y);  
+            }  
+            solve();  
+        }  
+        return 0;  
+    }  
+</code></pre>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15129760305793.html" 
+          title="Previous Post: Range Addition II">&laquo; Range Addition II</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15129633578167.html" 
+          title="Next Post: Excel Sheet Column Title">Excel Sheet Column Title &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <div class="site-a-logo"><img src="/asset/img/logn.png" /></div>
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+<a target="_blank" class="github" target="_blank" href="https://github.com/lockxmonk" title="GitHub">GitHub</a>
+<a target="_blank" class="email" href="mailto:lzhabc007@163.com" title="Email">Email</a>
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
+        
+            <a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html"><strong>常见面试问题</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15129821006078.html">Sort Characters By Frequency</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15129806433168.html">First Unique Character in a String</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15129796221707.html">Minimum Moves to Equal Array Elements II</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15129788527282.html">Minimum Moves to Equal Array Elements</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15129760305793.html">Range Addition II</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+          <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1265629731'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s22.cnzz.com/z_stat.php%3Fid%3D1265629731%26online%3D1' type='text/javascript'%3E%3C/script%3E"));</script>    
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2017
+Powered by <a target="_blank" href="https://lockxmonk.github.io/index.html">LZH</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

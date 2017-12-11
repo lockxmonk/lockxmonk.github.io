@@ -117,41 +117,47 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15113344372070.html">
+                <a class="clearlink" href="15119407096444.html">
                 
-                  <h1>1-bit and 2-bit Characters</h1>
+                  <h1>Range Sum Query 2D - Immutable</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>We have two special characters. The first character can be represented by one bit <code>0</code>. The second character can be represented by two bits (<code>10 or 11</code>).</p>
+                        	<p>Given a 2D matrix matrix, find the sum of the elements inside the rectangle defined by its upper left corner (row1, col1) and lower right corner (row2, col2).<br/>
+<img src="media/15119407096444/15119407391245.jpg" alt=""/></p>
 
-<p>Now given a string represented by several bits. Return whether the last character must be a one-bit character or not. The given string will always end with a zero.<br/>
-<img src="media/15113344372070/15113344696565.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
+<pre><code class="language-c++">class NumMatrix {
+private:
+    int col,row;
+    vector&lt;vector&lt;int&gt;&gt; sums;
 public:
-    bool isOneBitCharacter(vector&lt;int&gt;&amp; bits) {
-        int i = 0;
-        int b = 0;
-        while(i&lt;bits.size()){            
-            if(bits[i]==1)
+    NumMatrix(vector&lt;vector&lt;int&gt;&gt; matrix) {
+        row = matrix.size();
+        col =row&gt;0 ? matrix[0].size():0;
+        sums = vector&lt;vector&lt;int&gt;&gt;(row+1, vector&lt;int&gt;(col+1,0));
+        for(int i=1;i&lt;=row;i++)
+        {
+            for(int j=1;j&lt;=col;j++)
             {
-                i=i+2;
-                b=0;
-            }else{
-                i++;
-                b=1;
+                sums[i][j] = sums[i-1][j]+sums[i][j-1]+matrix[i-1][j-1]-sums[i-1][j-1];
             }
-        };
-        if(b==0){
-            return 0;
-        }else {
-            return 1; 
         }
     }
+    
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        return sums[row2+1][col2+1]-sums[row2+1][col1]-sums[row1][col2+1]+sums[row1][col1];
+    }
 };
+
+/**
+ * Your NumMatrix object will be instantiated and called as such:
+ * NumMatrix obj = new NumMatrix(matrix);
+ * int param_1 = obj.sumRegion(row1,col1,row2,col2);
+ */
 </code></pre>
+
+<p><a href="https://leetcode.com/problems/range-sum-query-2d-immutable/description/">题目详细链接</a></p>
 
                         
                       </div>
@@ -160,7 +166,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/22</span>
+                    <span class="date">2017/11/29</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -177,93 +183,38 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15113342915297.html">
+                <a class="clearlink" href="15119406678576.html">
                 
-                  <h1>Add Digits</h1>
+                  <h1>Reshape the Matrix</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a non-negative integer num, repeatedly add all its digits until the result has only one digit.</p>
+                        	<p>In MATLAB, there is a very useful function called &#39;reshape&#39;, which can reshape a matrix into a new one with different size but keep its original data.</p>
 
-<p>For example:</p>
+<p>You&#39;re given a matrix represented by a two-dimensional array, and two positive integers r and c representing the row number and column number of the wanted reshaped matrix, respectively.</p>
 
-<p>Given <code>num = 38</code>, the process is like: <code>3 + 8 = 11</code>, <code>1 + 1 = 2</code>. Since <code>2</code> has only one digit, return it.</p>
+<p>The reshaped matrix need to be filled with all the elements of the original matrix in the same row-traversing order as they were.</p>
 
-<p>Follow up:<br/>
-Could you do it without any loop/recursion in O(1) runtime?</p>
+<p>If the &#39;reshape&#39; operation with given parameters is possible and legal, output the new reshaped matrix; Otherwise, output the original matrix.</p>
+
+<p><img src="media/15119406678576/15119406900999.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int addDigits(int num) {
-        // while(num/10&gt;0){
-        //     int sum = 0;
-        //     while(num&gt;0){
-        //         sum +=num%10;
-        //         num /=10;
-        //     }
-        //     num = sum;
-        // }
-        return 1+ (num-1)%9;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/22</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
+    vector&lt;vector&lt;int&gt;&gt; matrixReshape(vector&lt;vector&lt;int&gt;&gt;&amp; nums, int r, int c) {
+        int sumNum = nums.size() * nums[0].size();
+        int r1 = nums.size();
+        int c1 = nums[0].size();
+        if (sumNum != r*c) {
+            return nums;
+        }
+        vector&lt;vector&lt;int&gt;&gt; result = vector&lt;vector&lt;int&gt;&gt;(r,vector&lt;int&gt;(c,0));
+        int j = 0;
+        for (int i =0; i&lt;r*c; i++) {
+            result[i/c][i%c] = nums[i/c1][i%c1];
+        }
         
-			<div class="article">
-                <a class="clearlink" href="15113342227318.html">
-                
-                  <h1>Add Strings</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given two non-negative integers num1 and num2 represented as string, return the sum of num1 and num2.</p>
-
-<p>Note:</p>
-
-<p>The length of both <code>num1</code> and <code>num2</code> is &lt; 5100.<br/>
-Both <code>num1</code> and <code>num2</code> contains only digits <code>0-9</code>.<br/>
-Both <code>num1</code> and <code>num2</code> does not contain any leading zero.<br/>
-You must not use any built-in BigInteger library or convert the inputs to integer directly.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string addStrings(string num1, string num2) {
-        int fw = 0;
-        string result =&quot;&quot;;
-        for(int i = num1.size()-1,j = num2.size()-1;i&gt;=0||j&gt;=0;i--,j--){
-            int n1 = i&gt;=0 ? num1[i]-&#39;0&#39;:0;
-            int n2 = j&gt;=0 ? num2[j]-&#39;0&#39;:0;
-            int tmp = (n1+n2+fw)%10;
-            fw = (n1+n2+fw)/10;
-            result = char(tmp+&#39;0&#39;) + result;
-        }
-        if(fw){
-            result = char(fw +&#39;0&#39;)+ result;
-        }
         return result;
     }
 };
@@ -276,7 +227,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/22</span>
+                    <span class="date">2017/11/29</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -293,87 +244,50 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15097619961308.html">
+                <a class="clearlink" href="15114255869932.html">
                 
-                  <h1>贪心算法（构造霍夫曼树）</h1>
+                  <h1>Degree of an Array</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>霍夫曼树的构造是使用了变长编码来减少数据所占空间，一般我们只考虑<strong>前缀码</strong>，即没有任何码字是其它码字的前缀。</p>
+                        	<p>Given a non-empty array of non-negative integers <code>nums</code>, the degree of this array is defined as the maximum frequency of any one of its elements.</p>
 
-<p>我们的构造过程如下所示：</p>
+<p>Your task is to find the smallest possible length of a (contiguous) subarray of <code>nums</code>, that has the same degree as <code>nums</code>.</p>
 
-<p><img src="media/15097619961308/15097621720916.jpg" alt=""/></p>
+<p><img src="media/15114255869932/15114256313220.jpg" alt=""/></p>
 
-<p>这里我们根据上述表示，我们每次总是“贪心”的选择两个最小的值来求和，并插入队列中。所以我们可以构造一个最小优先队列来存储各字母的频率。算法代码如下：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//  HUFFMAN
-//
-//  Created by LZH on 2017/11/4.
-//  Copyright © 2017年 LZH. All rights reserved.
-//
-
-#include &lt;iostream&gt;
-#include &lt;queue&gt;
-#include &lt;vector&gt;
-using namespace std;
-
-typedef struct BitNode
-{
-    int frep;
-    struct BitNode *left;
-    struct BitNode *right;
-}Node;
-
-//定义比较结构
-struct cmp1{
-    bool operator ()(int &amp;a,int &amp;b){
-        return a&gt;b;//最小值优先
+<pre><code class="language-c++">class Solution {
+public:
+    int findShortestSubArray(vector&lt;int&gt;&amp; nums) {
+        
+        if (nums.size()&lt;2) {
+            return nums.size();
+        }
+        unordered_map&lt;int, int&gt;startIndex , number;
+        int len = nums.size();
+        int fre = 0;
+        for (int i=0; i&lt;nums.size(); i++) {
+            if (startIndex.count(nums[i])==0) {
+                startIndex[nums[i]]=i;
+            }
+            number[nums[i]]++;
+            if (number[nums[i]]==fre) {
+                len = min(i-startIndex[nums[i]]+1, len);
+            }
+            if (number[nums[i]]&gt;fre) {
+                len = i - startIndex[nums[i]] + 1;
+                fre = number[nums[i]];
+            }
+        }
+        
+        return len;
     }
 };
-//构造霍夫曼树
-void HUFFMAN(int c, priority_queue&lt;int, vector&lt;int&gt;, cmp1&gt; &amp;que1)
-{
-    int n = c;
-    for (int i=0; i&lt;n-1; i++) {
-        Node *newNodeZ = (Node*)malloc(sizeof(Node));
-        Node *newNodeX = (Node*)malloc(sizeof(Node));
-        Node *newNodeY = (Node*)malloc(sizeof(Node));
-        newNodeX-&gt;frep = que1.top();
-        que1.pop();
-        newNodeY-&gt;frep = que1.top();
-        que1.pop();
-        newNodeZ-&gt;left = newNodeX;
-        newNodeZ-&gt;right = newNodeY;
-        
-        newNodeZ-&gt;frep =newNodeX-&gt;frep + newNodeY-&gt;frep;
-        que1.push(newNodeZ-&gt;frep);
-    }
-}
-
-int main() {
-//    priority_queue&lt;int&gt; que; //构造优先队列
-    int b[6] = {9,5,12,13,16,45};
-//    vector&lt;int&gt; a(b,b+6);
-    priority_queue&lt;int , vector&lt;int&gt;, cmp1 &gt;que1; //最小优先队列
-    for (int i=0; i&lt;6; i++) {
-        que1.push(b[i]);
-    }
-    HUFFMAN(6, que1);
-    while (!que1.empty()) {
-        cout&lt;&lt;que1.top()&lt;&lt;&#39; &#39;;
-        que1.pop();
-    }
-    return 0;
-}
-
 </code></pre>
 
-<p>最后输出为100，返回了编码树的根节点。<br/>
-<img src="media/15097619961308/15097623765624.jpg" alt=""/></p>
+<p>该算法主要使用了两个<code>hash_map</code>:<br/>
+一个来记录数字所出现的次数，另一个记录数字最开始出现的位置。一旦有一个数字的频数超过了当前的<code>len</code>，则更新<code>len</code>，若两个数字出现的频率相等则取长度最小的。</p>
 
                         
                       </div>
@@ -382,10 +296,10 @@ int main() {
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/4</span>
+                    <span class="date">2017/11/23</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -399,100 +313,43 @@ int main() {
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15096800741665.html">
+                <a class="clearlink" href="15114222067093.html">
                 
-                  <h1>贪心算法（活动选择问题）</h1>
+                  <h1>Find Pivot Index</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15096800741665/15096801101097.jpg" alt=""/></p>
+                        	<p>Given an array of integers <code>nums</code>, write a method that returns the &quot;pivot&quot; index of this array.</p>
 
-<p>这个问题是一个典型的可以运用贪心算法的题目，我们在初始的选择一个活动之后，应该将之后的资源被其他任务尽量多的占用。所以我们应该第一个选择活动最快结束的活动，因为它剩下的资源可以被它之后开始的任务尽量多的使用。所以我们可以运用一种递归形式或者迭代算法来表达这个形式：</p>
+<p>We define the pivot index as the index where the sum of the numbers to the left of the index is equal to the sum of the numbers to the right of the index.</p>
 
-<pre><code class="language-c++">//
-//  main.cpp
-//  Greedy_Activity_Selector
-//
-//  Created by LZH on 2017/11/3.
-//  Copyright © 2017年 LZH. All rights reserved.
-//
+<p>If no such index exists, we should return -1. If there are multiple pivot indexes, you should return the left-most pivot index.</p>
 
-#include &lt;iostream&gt;
-#include &lt;vector&gt;
-using namespace std;
-void print(int n)
-{
-    cout&lt;&lt;n&lt;&lt;&#39; &#39;;
-}
+<p><img src="media/15114222067093/15114222397308.jpg" alt=""/></p>
 
-/**
- 迭代形式函数
-
- @param s 活动开始时间数组
- @param f 活动结束时间数组
- @param result  用于存储结果
- */
-void GREED_ACTIVITY_SELECTOR(vector&lt;int&gt; s , vector&lt;int&gt; f , vector&lt;int&gt; &amp;result)
-{
-    int n = s.size();
-    result.push_back(1);
-    int k=1;
-    for (int m=2; m&lt;=n; m++) {
-        if (s[m]&gt;=f[k]) {
-            result.push_back(m);
-            k = m;
+<pre><code class="language-c++">class Solution {
+public:
+    int pivotIndex(vector&lt;int&gt;&amp; nums) {
+        
+        if(nums.empty()) return -1;
+        
+        int sum = 0;
+        for(int i=0;i&lt;nums.size();i++) sum+=nums[i];
+    
+        int leftSum = 0;
+        for(int j=0;j&lt;nums.size();j++)
+        {
+            if (leftSum == sum - nums[j] -leftSum) {
+                return j;
         }
+            leftSum += nums[j];
+        }
+        
+        return -1;
     }
-}
-
-/**
- 尾递归形式函数
-
- @param s 活动开始时间数组
- @param f 活动结束时间数组
- @param k 从活动k开始计算
- @param n 共有n个活动
- @param result 用于存储结果
- */
-void RECURSIVE_ACTIVITY_SELECTOR(vector&lt;int&gt; s,vector&lt;int&gt; f, int k, int n, vector&lt;int&gt; &amp;result)
-{
-    int m = k+1;
-    while (m&lt;=n &amp;&amp; s[m]&lt;=f[k]) {
-        m++;
-    }
-    if (m&lt;=n) {
-        result.push_back(m);
-        RECURSIVE_ACTIVITY_SELECTOR(s, f, m, n ,result);
-    }
-}
-
-int main() {
-    int a[12] ={0,1,3,0,5,3,5,6,8,8,2,12};
-    int b[12] ={0,4,5,6,7,9,9,10,11,12,14,16};
-    vector&lt;int&gt; s(a,a+12);
-    vector&lt;int&gt; f(b,b+12);
-    vector&lt;int&gt; result;
-    RECURSIVE_ACTIVITY_SELECTOR(s, f, 0, 11, result);
-    GREED_ACTIVITY_SELECTOR(s, f, result);
-    for_each(result.begin(),result.end(),print);
-    return 0;
-}
-
+};
 </code></pre>
-
-<p>其中递归形式的流程如下图所示：<br/>
-<img src="media/15096800741665/15096804218816.jpg" alt=""/></p>
-
-<p>但两种算法运行时间类似都为\(\Theta(n)\)</p>
-
-<h2 id="toc_0">与动态规划的不同</h2>
-
-<p>贪心算法通过做出局部最优来构造全局最优解。换句话说，直接做出在当前问题下看起来最优的选择，而不必考虑子问题的解。</p>
-
-<p><strong><font color=red>在动态规划中，每个步骤都要进行一次选择，但选择通常依赖于子问题的解</font></strong>，因此，我们通常以自底向上的方式来求解动态规划问题，先求解较小的子问题，然后是较大的子问题。但是在贪心算法中，我们总是做出在当时看起来最佳的选择，然后求解剩下的唯一子问题。<strong><font color=red>贪心算法进行选择时可能依赖之前做出的选择，但不依赖于任何将来的选择或者是子问题的解。</font></strong>所以贪心算法在进行第一次选择时不求解任何子问题，自顶向下进行逐步选择，将给定的子问题实例变小。</p>
-
-<p>两者最典型的区别，可以用<code>分数背包</code>和<code>0-1背包</code>问题来举例，这里不做细说。</p>
 
                         
                       </div>
@@ -501,10 +358,10 @@ int main() {
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/3</span>
+                    <span class="date">2017/11/23</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -518,116 +375,28 @@ int main() {
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15088085969493.html">
+                <a class="clearlink" href="15114072257756.html">
                 
-                  <h1>最长公共子序列(动态规划)</h1>
+                  <h1>Best Time to Buy and Sell Stock II</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><strong>最长公共子序列问题（LCS）</strong>给定两个序列\(X=&lt;{x_1,x_2,...x_m}&gt;和Y=&lt;y_1,y_2,...y_n&gt;\),求X和Y长度最长的公共子序列。总共分三个步骤：</p>
+                        	<p>Say you have an array for which the \(i^{th}\) element is the price of a given stock on day i.</p>
 
-<h2 id="toc_0">步骤一：刻画最长公共子序列的特征</h2>
+<p>Design an algorithm to find the maximum profit. You may complete as many transactions as you like (ie, buy one and sell one share of the stock multiple times). However, you may not engage in multiple transactions at the same time (ie, you must sell the stock before you buy again).</p>
 
-<p><img src="media/15088085969493/15088091467243.jpg" alt=""/></p>
-
-<h2 id="toc_1">步骤二：一个递归解</h2>
-
-<p><img src="media/15088085969493/15088095444692.jpg" alt=""/></p>
-
-<h2 id="toc_2">步骤三：计算LCS的长度</h2>
-
-<p><img src="media/15088085969493/15088132625221.jpg" alt=""/></p>
-
-<p>上述过程我们有如下图来表示：<br/>
-<img src="media/15088085969493/15088133360817.jpg" alt=""/></p>
-
-<h2 id="toc_3">步骤4 构造LCS</h2>
-
-<p><img src="media/15088085969493/15088133035826.jpg" alt=""/></p>
-
-<p>这里我们用C++来构造这个算法：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//
-//  Created by LZH on 2017/10/30.
-//  Copyright © 2017年 梁中豪. All rights reserved.
-//
-
-
-#include &lt;iostream&gt;
-#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
-using namespace std;
-
-//计算LCS的长度
-void LCS_LENGTH(char *X ,char *Y ,int **b ,int **c ,int &amp;m ,int &amp;n)
-{
-    //    int m = sizeof(X)/sizeof(char);
-    //    int n = sizeof(Y)/sizeof(char);
-    
-    //    int b[m][n];
-    //    int c[m][n];
-    
-    for (int i=1; i&lt;m; i++) {
-        for (int j=1; j&lt;n; j++) {
-            if (X[i]==Y[j]) {
-                c[i][j] = c[i-1][j-1]+1;
-                b[i][j] = 1;
-            }
-            else if (c[i-1][j]&gt;=c[i][j-1])
-            {
-                c[i][j] = c[i-1][j];
-                b[i][j] = 2;
-            }
-            else
-            {
-                c[i][j] = c[i][j-1];
-                b[i][j] = 3;
-            }
+<pre><code class="language-c++">class Solution {
+public:
+    int maxProfit(vector&lt;int&gt;&amp; prices) {
+        int result = 0;
+        for(int i = 1;i&lt;prices.size();i++)
+        {
+            result += max(prices[i]-prices[i-1] , 0);
         }
+        return result;
     }
-}
-
-void PRINT_LCS(int **b,char *X,int i,int j)
-{
-    if (i==0 || j==0) {
-        return;
-    }
-    if (b[i][j]==1) {
-        PRINT_LCS(b, X, i-1, j-1);
-        cout &lt;&lt; X[i] &lt;&lt;endl;
-    }
-    else if (b[i][j]==2)
-    {
-        PRINT_LCS(b, X, i-1, j);
-    }
-    else
-    {
-        PRINT_LCS(b, X, i, j-1);
-    }
-}
-
-int main()
-{
-    char X[8] = {&#39;x&#39;,&#39;A&#39;,&#39;B&#39;,&#39;C&#39;,&#39;B&#39;,&#39;D&#39;,&#39;A&#39;,&#39;B&#39;};
-    char Y[7] = {&#39;y&#39;,&#39;B&#39;,&#39;D&#39;,&#39;C&#39;,&#39;A&#39;,&#39;B&#39;,&#39;A&#39;};
-    int m = sizeof(X)/sizeof(char);
-    int n = sizeof(Y)/sizeof(char);
-    int **b =new int*[m];
-    for (int i = 0; i&lt;m; i++) {
-        b[i] = new int[n];
-    }
-    
-    int **c = new int*[m];
-    for (int i = 0; i&lt;m; i++) {
-        c[i] = new int[n];
-    }
-    LCS_LENGTH(X,Y,b,c,m,n);
-    PRINT_LCS(b,X,m-1,n-1);
-    return 0;
-}
+};
 
 </code></pre>
 
@@ -638,10 +407,63 @@ int main()
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/10/24</span>
+                    <span class="date">2017/11/23</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15114062990936.html">
+                
+                  <h1>Best Time to Buy and Sell Stock</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Say you have an array for which the \(i^{th}\) element is the price of a given stock on day i.</p>
+
+<p>If you were only permitted to complete at most one transaction (ie, buy one and sell one share of the stock), design an algorithm to find the maximum profit.</p>
+
+<p><img src="media/15114062990936/15114063447573.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int maxProfit(vector&lt;int&gt;&amp; prices) {
+        int minPrice=INT_MAX;
+        int maxProfit = 0;
+        
+        for (int i=0; i&lt;prices.size(); i++) {
+            minPrice = min(prices[i], minPrice);
+            maxProfit = max(maxProfit, prices[i]-minPrice);
+        }
+        
+        return maxProfit;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -743,31 +565,31 @@ int main()
 	      
 		      
 			      <li class="post">
-			        <a href="15128072112005.html">Relative Ranks</a>
+			        <a href="15129821006078.html">Sort Characters By Frequency</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128043838038.html">Valid Anagram</a>
+			        <a href="15129806433168.html">First Unique Character in a String</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128026901484.html">Assign Cookies</a>
+			        <a href="15129796221707.html">Minimum Moves to Equal Array Elements II</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128009688279.html">Ransom Note</a>
+			        <a href="15129788527282.html">Minimum Moves to Equal Array Elements</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127898937133.html">Reverse String II</a>
+			        <a href="15129760305793.html">Range Addition II</a>
 			      </li>
 		     
 		  

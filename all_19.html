@@ -117,746 +117,73 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="14993030681229.html">
+                <a class="clearlink" href="15037310867483.html">
                 
-                  <h1>Caffe最优化求解过程</h1>
+                  <h1>第十九条 使用清晰而协调的命名方式</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<ul>
-<li>
-<a href="#toc_0">求解器是什么</a>
-</li>
-<li>
-<a href="#toc_1">求解器是如何实现的</a>
+                        	<p>我们在使用OC的时候，发现这门语言很繁琐，代码中一般有<code>“in“，”for”，“with”</code>等介词，其他编程语言则很少使用这些他们认为多余的字眼。以下面代码为例子：</p>
+
+<pre><code class="language-objc">NSString *text = @&quot;The quick brown fox jumped over the lazy dog&quot;;
+NSString *newText =
+[text stringByReplacingOccurrencesOfString: @&quot;fox&quot;,
+                                withString:@&quot;cat&quot;];
+</code></pre>
+
+<p>但是，<code>Objective-C</code>的命名方式虽然长一点，但是却非常淸晰。</p>
+
+<p><strong><font color=red>方法与变量名使用了“驼峰式大小写命名法&quot;（camel casing)——以小写字母开头，其后每个单词首字母大写。类名也用驼峰命名法，不过其首字母要大写，而且前面通常还有两三个前缀字母。</font></strong></p>
+
+<h2 id="toc_0">方法命名</h2>
+
+<p>方法名很长对冉繁琐，但是易于阅读，理解其中的意思。但是如果过长会起到反效果。例如：</p>
+
+<pre><code class="language-objc">-(EOCRectangle*)union:(EOCRectangle*)rectangle // Unclear 
+-(float) calculateTheArea // Too verbose
+
+//应该改成
+-(EOCRectangle*)unionRectangle:(EOCRectangle*)rectangle 
+-(float) area
+</code></pre>
+
+<p><strong>给方法命名时的注意事项可总结成下面几条规则：</strong></p>
+
+<blockquote>
 <ul>
-<li>
-<a href="#toc_2">算法描述</a>
-</li>
+<li>如果方法的返回值是新创建的，那么方法名的首个词应是返回值的类型，除非前面还 有修饰语，例如<code>localizedString</code>。属性的存取方法不遵循这种命名方式，因为一般认 为这些方法不会创建新对象，即便有时返回内部对象的一份拷贝，我们也认为那相当 于原有的对象。这些存取方法应该按照其所对应的属性来命名。</li>
+<li>应该把表示参数类型的名词放在参数前面。</li>
+<li>如果方法要在当前对象上执行操作，那么就应该包含动词；若执行操作时还需要参数, 则应该在动词后面加上一个或多个名词。</li>
+<li>不要使用str这种简称，应该用string这样的全称。</li>
+<li>Boolean属性应加is前缀。如果某方法返回非属性的Boolean值，那么应该根据其功 能，选用has或is当前缀。</li>
+<li>将get这个前缀留给那些借由“输出参数”来保存返回值的方法，比如说，把返回值 填充到“C语言式数组”（C_style array)里的那种方法就可以使用这个词做前缀。</li>
 </ul>
-</li>
-</ul>
+</blockquote>
 
+<h2 id="toc_1">类与协议的命名</h2>
 
-<p>将前面几天讲述的不同Layer组合起来就可以构建起完整的<code>CNN/DNN</code>。今天将从Caffe的Solver类入手，对Caffe训练时的流程做深入分析，也就是看Caffe实际是如何“动”起来的。</p>
+<p>应该为类与协议的名称加上前缀，以避免命名空间冲突（参见第15条)，而且应该像给 方法起名时那样把词句组织好，使其从左至右读起来较为通顺。例如，在<code>NSArray</code>的子类中，有一个用于表示可变数组的类，叫做<code>NSMutableArray</code>, <code>mutable</code>这个词放在<code>array</code>前面, 用以表明这是一种特殊的<code>array</code>(数组）。</p>
 
-<h2 id="toc_0">求解器是什么</h2>
-
-<p>从前两天内容我们学习到，Net己经完成部分学习任务（数据前向传播、误差反向传播),<mark>而CNN剩下有监督的优化过程、利用每层的梯度生成权值增量则由求解器(Solver)负责.</mark></p>
-
-<p>求解器负责对模型优化,它的KPI(Key Performance Indicator,关键绩效指你，某公司常用的一种员工绩效评定方式）就是让损失函数达到全局最小。</p>
-
-<p>求解器的特性如下:</p>
-
-<ul>
-<li>负责记录优化过程，创建用于学习的训练网络和用于评估学习效果的测试网络。</li>
-<li>调用Forward\(\rightarrow\)调用Backward\(\rightarrow\)更新权值，反复迭代优化模型。</li>
-<li>周期性的评估测试网络</li>
-<li>在优化过程中为模型,求解器状态打快照.</li>
-</ul>
-
-<p>为了让权值从初始化状态向着更好的模型前进，求解器在每次迭代中做了如下事情：</p>
-
-<ul>
-<li>调用Net的前向传播函数来计算输出和损失函数。</li>
-<li>调用Net的反向传播函数来计算梯度。</li>
-<li>根据求解器方法,将梯度转换为权值增量</li>
-<li>根据学习速率、历史权值、所用方法更新求解器状态。</li>
-</ul>
-
-<h2 id="toc_1">求解器是如何实现的</h2>
-
-<p>在卷积神经网络中,有两种类型的层需要学习:卷积层和全连接层（统称权值层，因为它们都有<code>weight</code>参数）。<mark>在设计求解器时，学习速率参数的设置也是针对这两个层的</mark>。</p>
-
-<p>在caffe中我们要适当把握度,控制收敛的参数---学习速率.</p>
-
-<p>我们来具体看一下Caffe是如何对权值学习做到“不偏不倚”的。</p>
-
-<h3 id="toc_2">算法描述</h3>
-
-<p>Caffe中的求解器有以下几种:</p>
+<p>例如iOS的UI库UIKit，其中协议与类的命名惯例为：</p>
 
 <ul>
-<li>随机梯度下降法（Stochastic Gradient Descent, SGD),最常用的一种</li>
-<li>AdaDelta</li>
-<li>自适应梯度法（Adaptive Gradient, ADAGRAD)</li>
-<li>Adam</li>
-<li>Nesterov加速梯度法（Nesterov’s Accelerated Gradient, NAG)</li>
-<li>RMSprop</li>
+<li>UIView    (类)</li>
+<li>UIViewController（类）</li>
+<li>UITableView （类）</li>
+<li>UITableViewController（类）</li>
+<li>UITableViewDelegate（协议）</li>
 </ul>
 
-<p><mark>求解器方法重点是最小化损失函数的全局优化问题</mark>,对于数据集D,优化目标是在全数据集D上损失函数平均值：<br/>
-\[<br/>
-L(W)=\frac{1}{|{D}|}\sum^{|D|}_{i}{f_w(X^{(i)}) + \lambda{r}(W)}<br/>
-\]</p>
-
-<p>其中，\(f_w(X^{(i)})\)是在数据实例\(X^{(i)\)上的损失函数，\(r(W)\)为规整项，\(\lambda\)为规整项的权重。数据集\(D\)可能非常大，工程上一般在每次迭代中使用这个目标函数的随机逼近，即小批量数据\(N&lt;&lt;|D|\)个数据实例:</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/7/6</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Caffe%E6%9C%80%E4%BC%98%E5%8C%96%E6%B1%82%E8%A7%A3%E8%BF%87%E7%A8%8B.html'>Caffe最优化求解过程</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14992368546707.html">
-                
-                  <h1>第10条:在既有类中使用关联对象存放自定义数据</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>有时需要在对象中存放相关信息。这时我们通常会从对象所属的类中继承一个子类，然后改用这个子类对象。然而并非所有情况下都能这么做，<mark>有时候类的实例可能是由某种机制所创建的，而开发者无法令这种机制创建出自己所写的子类实例</mark>。</p>
-
-<p><code>Objective-C</code>中有一项强大的特性可以解决此问题，这就是<code>“关联对象&quot;（Associated Object)</code>。</p>
-
-<p>可以给某对象关联许多其他对象，这些对象通过“键”来区分.存储对象值的时候，可以指明“存储策略”（storage policy),用以维护相应的“内存管理语义”。存储策略由名为<code>Objc_ASSOCiationPolicy</code>的枚举所定义，下表列出了该枚举的取值，同时还列出了与之等效属性：假如关联对象成为了属性，那么它就会具备对应的语义（第6条详解了“属性”这个概念).</p>
-
-<table>
-<thead>
-<tr>
-<th>关联类型</th>
-<th>等效的@property属性</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>OBJC_ASSOCIATION_ASSIGN</td>
-<td>assign</td>
-</tr>
-<tr>
-<td>OBJC_ASSOCIATION_RETAIN_NONATOMIC</td>
-<td>nonatomic, retain</td>
-</tr>
-<tr>
-<td>OBJC_ASSOCIATION_COPY_NONATOMIC</td>
-<td>nonatomic, copy</td>
-</tr>
-<tr>
-<td>OBJC_ASSOCIATION_RETAIN</td>
-<td>retain</td>
-</tr>
-<tr>
-<td>OBJC_ASSOCIATION_COPY</td>
-<td>copy</td>
-</tr>
-</tbody>
-</table>
-
-<p>下列方法可以管理关联对象：</p>
-
-<ul>
-<li><p>void objc_setAssociatedObject ( id object, void*key, id value, objc AssociationPolicypolicy)<br/>
-此方法以给定的键和策略为某对象设置关联对象值。</p></li>
-<li><p>id objc_getAssociatedObject(id object, void*key)<br/>
-此方法根据给定的键从某对象中获取相应的关联对象值。</p></li>
-<li><p>void objc removeAssociatedObjects(id object)<br/>
-此方法移除指定对象的全部关联对象。</p></li>
-</ul>
-
-<p>我们可以把某对象想象成<code>NSDictionary</code>,把关联到该对象的值理解为字典中的条目,于是，存取关联对象的值就相当于在NSDictionary对象上调用<code>[object setObject:value forKey:key]</code>与<code>[object objectForKey:key]</code>方法。然而两者之间有个重要差别：设置关联对象时用的键（key)是个&quot;不透明的指针&quot;(opaque pointer)”。如果在两个键上调用<code>“isEqual:”</code>方法的返回值是<code>YES</code>,那么<code>NSDictionary</code>就认为二者相等；然而在设置关联对象值时，若想令两个键匹配到同一个值，则二者必须是完全相同的指针才行。鉴于此，<font color=red>在设置关联对象值时，通常使用<mark>静态全局变量做键</mark></font>。</p>
-
-<h2 id="toc_0">关联对象用法举例</h2>
-
-<p>开发iOS时经常用到<code>UIAlertView</code>类，该类提供了一种标准视图，可向用户展示警告信息.当用户按下按钮关闭该视图时,需要用委托协议（delegate protocol)来处理此动作，但是，要想设置好这个委托机制，就得把创建警告视图和处理按钮动作的代码分开。由于代码分作两块，所以读起来有点乱。比方说，我们在使用<code>UIAlertView</code>时，一般都会这么写：</p>
-
-<pre><code class="language-objc">-(void)askUserAQuestion{
-    UIAlertView *alert = [[UIAlertView alloc]
-                            initWithTitle:@&quot;Question&quot;
-                                  message:@&quot;What do you want to do?&quot;
-                                 delegate:self
-                        cancelButtonTitle:@&quot;Cancel&quot;
-                        otherButtonTitles:@&quot;Continue&quot;, nil]；
-        [alert show];
-}
-
-// UIAlertViewDelegate protocol method
--(void)alertView:(UIAlertView *)alertView
-        clickedButtonAtlndex:(NSInteger)buttonIndex
-{
-    if (buttonlndex == 0) {
-        [self doCancel];
-    } else {
-        [self doContinue];
-    }
-}
-
-</code></pre>
-
-<p><font color=red>如果想在同一个类里处理多个警告信息视图，那么代码就会变得更为复杂，我们必须在 <code>delegate</code>方法中检査传人的<code>alertView</code>参数，并据此选用相应的逻辑。要是能在创建警告视图的时候直接把处理每个按钮的逻辑都写好，那就简单多了。这可以通过关联对象来做。创建完警告视图之后，设定一个与之关联的&quot;块&quot;(block)，等到执行<code>delegate</code>方法时再将其读出来。</font>此方案的实现代码如下：</p>
-
-<pre><code class="language-objc">
-#import &lt;objc/runtime.h&gt;
-
-static void *EOCMyAlertViewKey = &quot;EOCMyAlertViewKey&quot;;
-
--(void)askUserAQuestion {
-    UIAlertView *alert = [[UIAlertViewalloc]
-                            initWithTitle:@&quot;Question&quot;
-                                  message: @&quot;What do you want to do?&quot;
-                                 delegate:self
-                        cancelButtonTitle: @&quot;Cancel&quot;,
-                        otherButtonTitles: @&quot;Continue&quot;, nil];
-        void (^block)(NSInteger) = ^(NSInteger buttonIndex){
-            if (buttonlndex == 0) {
-                [self doCancel];
-            }else {
-                [self doContinue];
-            }
-        };
-        objc_setAssociatedObject(alert,
-                                 EOCMyAlertViewKey,
-                                 block,
-                                 OBJC_ASSOCIATION_COPY);
-        [alert show];
-}
-
-// UIAlertViewDelegate protocol method
--(void)alertView:(UIAlertView*)alertView
-       clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    void (^block)(NSInteger)=
-        objc_getAssociatedObject(alertView, EOCMyAlertViewKey);
-    block(buttonIndex);
-}
-
-
-</code></pre>
-
-<p>以这种方式改写之后，创建警告视图与处理操作结果的代码都放在一起了，这样比原来更易读慷，因为我们无须在两部分代码之间来回游走，即可明白警告视图的用处。但是,采用该方案时需注意：块可能要捕获(capture)某些变量，这也许会造成“保留环”（retain cycle)。第40条详述了此问题。</p>
-
-<p><mark>正如大家所见，这种做法很有用，但是只应该在其他办法行不通时才去考虑用它。若是<br/>
-滥用，则很快就会令代码失控，使其难于调试。</mark>“保留环”产生的原因很难査明，因为关联对象之间的关系并没有正式的定义（formal definition)，其内存管理语义是在关联的时候才定义的，而不是在接口中预先定好的。使用这种写法时要小心，不能仅仅因为某处可以用该写法就一定要用它。想创建这种<code>UIAlertView</code>还有个办法，那就是从中继承子类，把块保存为子类中的属性。笔者认为：若是需要多次用到alert视图，那么这种做法比使用关联对象要好。</p>
-
-<h2 id="toc_1">要点</h2>
-
-<ul>
-<li>可以通过&quot;关联对象&quot;机制来把两个对象连起来</li>
-<li>定义关联对象时可指定内存管理语义，用以模仿定义属性时所采用的“拥有关系”与“非拥有关系”。</li>
-<li>只有在其他做法不可行时才应选用关联对象，因为这种做法通常会引入难于査找的bug。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/7/5</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14992160809956.html">
-                
-                  <h1>SoftmaxWithLossLayer的实现</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我们找到<code>SoftmaxWithLossLayer.hpp</code>文件查看声明,如下:</p>
-
-<pre><code class="language-c++">
-//将实数预测向量通过Softmax计算获得每个类别的概率分布
-//这个类比单独SoftmaxLayer + MultinomialLogisticLossLayer在梯度数值计算上更加稳定
-//Test阶段，这个层可以直接用SoftmaxLayer代替
-/**
- *输入Blob 1为预测结果，形状为N x K x 1 x 1，K为总类别数目，N为批量数。取值范围为（-Inf, Inf)，
- *表示每个类别获得的分类score,值越大说明输入图像与该类别越接近
- *输入Blob 2为真实标签，形状为N x 1 x 1 x 1
- *输出Blob为计算得到的交叉熵分类损失E，形状为1 x 1 x 1 x 1
-**/
-template &lt;typename Dtype&gt;
-class SoftmaxWithLossLayer : public LossLayer&lt;Dtype&gt; {
- public:
-   /**
-    * @param param provides LossParameter loss_param, with options:
-    *  - ignore_label (optional)
-    *    Specify a label value that should be ignored when computing the loss.
-    *  - normalize (optional, default true)
-    *    If true, the loss is normalized by the number of (nonignored) labels
-    *    present; otherwise the loss is simply summed over spatial locations.
-    */
-    explicit SoftmaxWithLossLayer(const LayerParameter&amp; param)
-      : LossLayer&lt;Dtype&gt;(param) {}
-  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual inline const char* type() const { return &quot;SoftmaxWithLoss&quot;; }
-  virtual inline int ExactNumTopBlobs() const { return -1; }
-  virtual inline int MinTopBlobs() const { return 1; }
-  virtual inline int MaxTopBlobs() const { return 2; }
-
- protected:
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-      
-/**
-   * @brief Computes the softmax loss error gradient w.r.t. the predictions.
-   *
-   * Gradients cannot be computed with respect to the label inputs (bottom[1]),
-   * so this method ignores bottom[1] and requires !propagate_down[1], crashing
-   * if propagate_down[1] is set.
-   *
-   * @param top output Blob vector (length 1), providing the error gradient with
-   *      respect to the outputs
-   *   -# @f$ (1 \times 1 \times 1 \times 1) @f$
-   *      This Blob&#39;s diff will simply contain the loss_weight* @f$ \lambda @f$,
-   *      as @f$ \lambda @f$ is the coefficient of this layer&#39;s output
-   *      @f$\ell_i@f$ in the overall Net loss
-   *      @f$ E = \lambda_i \ell_i + \mbox{other loss terms}@f$; hence
-   *      @f$ \frac{\partial E}{\partial \ell_i} = \lambda_i @f$.
-   *      (*Assuming that this top Blob is not used as a bottom (input) by any
-   *      other layer of the Net.)
-   * @param propagate_down see Layer::Backward.
-   *      propagate_down[1] must be false as we can&#39;t compute gradients with
-   *      respect to the labels.
-   * @param bottom input Blob vector (length 2)
-   *   -# @f$ (N \times C \times H \times W) @f$
-   *      the predictions @f$ x @f$; Backward computes diff
-   *      @f$ \frac{\partial E}{\partial x} @f$
-   *   -# @f$ (N \times 1 \times 1 \times 1) @f$
-   *      the labels -- ignored as we can&#39;t compute their error gradients
-   */
-  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-      
-/// Read the normalization mode parameter and compute the normalizer based
-  /// on the blob size.  If normalization_mode is VALID, the count of valid
-  /// outputs will be read from valid_count, unless it is -1 in which case
-  /// all outputs are assumed to be valid.
-  virtual Dtype get_normalizer(
-      LossParameter_NormalizationMode normalization_mode, int valid_count);
-
-  /// The internal SoftmaxLayer used to map predictions to a distribution.(内置一个SoftmaxLayer对象)
-  shared_ptr&lt;Layer&lt;Dtype&gt; &gt; softmax_layer_;
-  /// prob stores the output probability predictions from the SoftmaxLayer.
-  Blob&lt;Dtype&gt; prob_;
-  /// bottom vector holder used in call to the underlying SoftmaxLayer::Forward
-  vector&lt;Blob&lt;Dtype&gt;*&gt; softmax_bottom_vec_;
-  /// top vector holder used in call to the underlying SoftmaxLayer::Forward
-  vector&lt;Blob&lt;Dtype&gt;*&gt; softmax_top_vec_;
-  /// Whether to ignore instances with a certain label.
-  bool has_ignore_label_;
-  /// The label indicating that an instance should be ignored.
-  int ignore_label_;
-  /// How to normalize the output loss.
-  LossParameter_NormalizationMode normalization_;
-
-  int softmax_axis_, outer_num_, inner_num_;
-};
-
-</code></pre>
-
-<p>之后我们来看实现的<code>.cpp</code>文件:</p>
-
-<p>第一个是SetUp函数.<br/>
-```c++</p>
-
-<p>template <typename Dtype><br/>
-void SoftmaxWithLossLayer<Dtype>::LayerSetUp(<br/>
-    const vector<Blob<Dtype><em>&gt;&amp; bottom, const vector<Blob<Dtype></em>&gt;&amp; top) {<br/>
-  LossLayer<Dtype>::LayerSetUp(bottom, top);<br/>
-  //创建时动态修改本层的LayerParameter参数，适应SoftmaxLayer<br/>
-  LayerParameter softmax_param(this-&gt;layer_param_);<br/>
-  softmax_param.set_type(&quot;Softmax&quot;);<br/>
-  softmax_layer_ = LayerRegistry<Dtype>::CreateLayer(softmax_param);<br/>
-  softmax_bottom_vec_.clear();<br/>
-  softmax_bottom_vec_.push_back(bottom[0]);<br/>
-  softmax_top_vec_.clear();<br/>
-  softmax_top_vec_.push_back(&amp;prob_);<br/>
-  softmax_layer_-&gt;SetUp(softmax_bottom_vec_, softmax_top_vec_);</p>
-
-<p>has_ignore_label_ =<br/>
-    this-&gt;layer_param_.loss_param().has_ignore_label();<br/>
-  if (has_ignore_label_) {<br/>
-    ignore_label_ = this-&gt;layer_param_.loss_param().ignore_label();<br/>
-  }<br/>
-  if (!this-&gt;layer_param_.loss_param().has_normalization() &amp;&amp;<br/>
-      this-&gt;layer_param_.loss_param().has_normalize()) {<br/>
-    normalization_ = this-&gt;layer_param_.loss_param().normalize() ?<br/>
-                     LossParameter_NormalizationMode_VALID :<br/>
-                     LossParameter_NormalizationMode_BATCH_SIZE;<br/>
-  } else {<br/>
-    normalization_ = this-&gt;layer_param_.loss_param().normalization();<br/>
-  }<br/>
-}</p>
-
-<pre><code>可见，在SetUp阶段，创建了内部SoftmaxLayer对象并配置了其输入/输出Blob，然后调用该对象的SetUp函数。
-
-
-下面看看`SoftmaxWithLossLayer`的前向传播函数：
-
-```c++
-
-template &lt;typename Dtype&gt;
-void SoftmaxWithLossLayer&lt;Dtype&gt;::Forward_cpu(
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-  // The forward pass computes the softmax prob values.(内部SoftmaxLayer的前向传播计算)
-  softmax_layer_-&gt;Forward(softmax_bottom_vec_, softmax_top_vec_);
-  //获得概率密度
-  const Dtype* prob_data = prob_.cpu_data();
-  //获得标签值
-  const Dtype* label = bottom[1]-&gt;cpu_data();
-  int dim = prob_.count() / outer_num_;
-  int count = 0;
-  Dtype loss = 0;
-  for (int i = 0; i &lt; outer_num_; ++i) {
-    for (int j = 0; j &lt; inner_num_; j++) {
-      const int label_value = static_cast&lt;int&gt;(label[i * inner_num_ + j]);
-      if (has_ignore_label_ &amp;&amp; label_value == ignore_label_) {
-        continue;
-      }
-      DCHECK_GE(label_value, 0);
-      DCHECK_LT(label_value, prob_.shape(softmax_axis_));
-      //计算损失函数-log(prob[label])
-      loss -= log(std::max(prob_data[i * dim + label_value * inner_num_ + j],
-                           Dtype(FLT_MIN)));
-      ++count;
-    }
-  }
-  //设置输出Blob值
-  top[0]-&gt;mutable_cpu_data()[0] = loss / get_normalizer(normalization_, count);
-  if (top.size() == 2) {
-    top[1]-&gt;ShareData(prob_);
-  }
-}
-
-
-</code></pre>
-
-<p>可见通过内部<code>SoftmaxLayer</code>对象非常简洁。我们再看一下 Backward计算:</p>
-
-<pre><code class="language-c++">
-template &lt;typename Dtype&gt;
-void SoftmaxWithLossLayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-    const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
-  if (propagate_down[1]) {
-   //label输入Blob不做反向传播
-    LOG(FATAL) &lt;&lt; this-&gt;type()
-               &lt;&lt; &quot; Layer cannot backpropagate to label inputs.&quot;;
-  }
-  if (propagate_down[0]) {
-    Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
-    const Dtype* prob_data = prob_.cpu_data();
-    //将概率密度拷贝输入Blob的diff域
-    caffe_copy(prob_.count(), prob_data, bottom_diff);
-    const Dtype* label = bottom[1]-&gt;cpu_data();
-    int dim = prob_.count() / outer_num_;
-    int count = 0;
-    for (int i = 0; i &lt; outer_num_; ++i) {
-      for (int j = 0; j &lt; inner_num_; ++j) {
-        const int label_value = static_cast&lt;int&gt;(label[i * inner_num_ + j]);
-        if (has_ignore_label_ &amp;&amp; label_value == ignore_label_) {
-          for (int c = 0; c &lt; bottom[0]-&gt;shape(softmax_axis_); ++c) {
-            bottom_diff[i * dim + c * inner_num_ + j] = 0;
-          }
-        } else {
-        //在输入Blob的diff域，计算当前槪率密度与理想概率密度(label 对应类别概率为1,其他类别 概肀为0)之差，实现误差反向传播
-          bottom_diff[i * dim + label_value * inner_num_ + j] -= 1;
-          ++count;
-        }
-      }
-    }
-    // Scale gradient(适当的缩放)
-    Dtype loss_weight = top[0]-&gt;cpu_diff()[0] /
-                        get_normalizer(normalization_, count);
-    caffe_scal(prob_.count(), loss_weight, bottom_diff);
-  }
-}
-</code></pre>
-
-<p>通过对Caffe损失层的研究，我们了解到，前向传播阶段数据逐层传播，到损失层计算预测概率密度和损失函数；而反向传播阶段则从损失层开始，由预测概率密度与理想概率密度(这就是有监督学习的佐证)<strong>差值</strong>得到误差（diff),然后将由下一节内容逐层反向传播。我们已经知道一个Blob是由data和diff两部分构成的，如果说数据读取层是data之源，那么损失层就是diff之源。</p>
-
-<h2 id="toc_0">反向传播的实现</h2>
-
-<p>Caffe Net数据结构中的&#39;Backward函数具体的声明和实现文件为<code>net.hpp</code>和<code>net.cpp</code>:</p>
-
-<pre><code class="language-c++">//从第start层反向传播到达第end层
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::BackwardFromTo(int start, int end) {
-  CHECK_GE(end, 0);
-  CHECK_LT(start, layers_.size());
-  for (int i = start; i &gt;= end; --i) {
-    for (int c = 0; c &lt; before_backward_.size(); ++c) {
-      before_backward_[c]-&gt;run(i);
-    }
-    if (layer_need_backward_[i]) {
-    //遍历每个居，调用相应的Backward函数
-      layers_[i]-&gt;Backward(
-          top_vecs_[i], bottom_need_backward_[i], bottom_vecs_[i]);
-      if (debug_info_) { BackwardDebugInfo(i); }
-    }
-    for (int c = 0; c &lt; after_backward_.size(); ++c) {
-      after_backward_[c]-&gt;run(i);
-    }
-  }
-}
-
-//从第start层幵始到第一层的反向传播过程
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::BackwardFrom(int start) {
-  BackwardFromTo(start, 0);
-}
-
-//从最后一层开始到第end层的反向传播过程
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::BackwardTo(int end) {
-  BackwardFromTo(layers_.size() - 1, end);
-}
-
-//整个网络的反向传播过程
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::Backward() {
-  BackwardFromTo(layers_.size() - 1, 0);
-  if (debug_info_) {
-  //如果打幵了调试信息开关(在prototxt中设定），则计算所有权值的data/diff的L1、L2范数，监控其变化情况，避免发散
-    Dtype asum_data = 0, asum_diff = 0, sumsq_data = 0, sumsq_diff = 0;
-    for (int i = 0; i &lt; learnable_params_.size(); ++i) {
-      asum_data += learnable_params_[i]-&gt;asum_data();
-      asum_diff += learnable_params_[i]-&gt;asum_diff();
-      sumsq_data += learnable_params_[i]-&gt;sumsq_data();
-      sumsq_diff += learnable_params_[i]-&gt;sumsq_diff();
-    }
-    const Dtype l2norm_data = std::sqrt(sumsq_data);
-    const Dtype l2norm_diff = std::sqrt(sumsq_diff);
-    LOG(ERROR) &lt;&lt; &quot;    [Backward] All net params (data, diff): &quot;
-               &lt;&lt; &quot;L1 norm = (&quot; &lt;&lt; asum_data &lt;&lt; &quot;, &quot; &lt;&lt; asum_diff &lt;&lt; &quot;); &quot;
-               &lt;&lt; &quot;L2 norm = (&quot; &lt;&lt; l2norm_data &lt;&lt; &quot;, &quot; &lt;&lt; l2norm_diff &lt;&lt; &quot;)&quot;;
-  }
-}
-
-//更新权值函数，在反向传播结束后调用
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::Update() {
-  for (int i = 0; i &lt; learnable_params_.size(); ++i) {
-  //调用内部Blob的Update()函数，具体计算为data = data - diff
-    learnable_params_[i]-&gt;Update();
-  }
-}
-
-//权值diff清零
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::ClearParamDiffs() {
-  for (int i = 0; i &lt; learnable_params_.size(); ++i) {
-    Blob&lt;Dtype&gt;* blob = learnable_params_[i];
-    switch (Caffe::mode()) {
-    case Caffe::CPU:
-      caffe_set(blob-&gt;count(), static_cast&lt;Dtype&gt;(0),
-                blob-&gt;mutable_cpu_diff());
-      break;
-    case Caffe::GPU:
-#ifndef CPU_ONLY
-      caffe_gpu_set(blob-&gt;count(), static_cast&lt;Dtype&gt;(0),
-                    blob-&gt;mutable_gpu_diff());
-#else
-      NO_GPU;
-#endif
-      break;
-    }
-  }
-}
-
-</code></pre>
-
-<p>到此,caffe基本的backward反向传播过程就清楚了,这样对于设计更复杂的有监督学习算法具有指导意义。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/7/5</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Caffe%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe反向传播计算</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14991530470817.html">
-                
-                  <h1>第九条 以"类族模式"隐藏实现细节</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>&quot;类族&quot;(class cluster,也叫类簇)是一种很有用的模式(pattern),可以隐藏&quot;抽象基类&quot;(abstract base class)背后的实现细节.</p>
-
-<p>Objective-C的系统框架中普遍使用此模式。比如，iOS的用户界面框架（user interface framework) UIKit中就有一个名为<code>UIButton</code>的类。想创建按钮，需<br/>
-要调用下面这个“类方法”（class method):</p>
-
-<pre><code class="language-objc">+ (UIButton*)buttonWithType:(UIButtonType)type;
-
-</code></pre>
-
-<p>该方法所返回的对象，其类型取决于传入的按钮类型（button type)。然而，不管返回什么类型的对象，它们都继承自同一个基类：<code>UIButton</code>。这么做的意义在于：<strong>UIButton类的使用者无须关心创建出来的按钮具体属于哪个子类，也不用考虑按钮的绘制方式等实现细节。</strong>使用者只需明白如何创建按钮，如何设置像“标题”（title)这样的属性，如何增加触摸动作的目标对象等问题就好。</p>
-
-<p><font color=red>我们使用&quot;类簇&quot;,是为了可以灵活应对多个类，将它们的实现细节隐藏在抽象基类后面，以保持接口简洁。用户无须自己创建子类实例，只需调用基类方法来创建即可。</font></p>
-
-<h2 id="toc_0">创建类簇</h2>
-
-<p>我们现在来看一个样例学习创建类簇.假设有一个处理雇员的类，每个雇员都有“名字”和<br/>
-“薪水”这两个属性，管理者可以命令其执行日常工作。但是，各种雇员的工作内容却不同。经理在带领雇员做项目时，无须关心每个人如何完成其工作，仅需指示其开工即可。</p>
-
-<p>首先要定义抽象类:</p>
-
-<pre><code class="language-objc">typedef NS_ENUM(NSUInteger, EOCEmployeeType) {
-    EOCEmployeeTypeDeveloper,
-    EOCEmployeeTypeDesigner,
-    EOCEmployeeTypeFinance,
-}；
-
-@interface EOCEmployee : NSObject
-
-@property (copy) NSString *name;
-@property NSUInteger salary;
-
-// Helper for creating Employee objects
-+ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type;
-//Make Employees do their respective day1s work
-- (void)doADaysWork;
-
-@end
-
-@implementation EOCEmployee
-+ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type {
-    switch (type) {
-        case EOCEmployeeTypeDeveloper:
-            return [EOCEmployeeDeveloper new];
-            break;
-        case EOCEmployeeTypeDesigner:
-            return (EOCEmployeeDesigner new];
-            break;
-        case EOCEmployeeTypeFinance:
-            return (EOCEmployeeFinance new];
-            break;
-        }
-}
--(void)doADaysWork {
-    // Subclasses implement this.
-}
-
-@end 
-
-</code></pre>
-
-<p>每个&quot;实体子类&quot;（concrete subclass) 都从基类继承而来。例如:</p>
-
-<pre><code class="language-objc">
-@interface EOCEmployeeDeveloper : EOCEmployee
-@end
-
-@implementation EOCEmployeeDeveloper
-
--(void)doADaysWork {    
-    [self writeCode];
-}
-
-@end
-
-</code></pre>
-
-<p>在本例中，基类实现了一个“类方法”，该方法根据待创建的雇员类别分配好对应的雇员类实例。这种“工厂模式”（Factory pattern)是创建类族的办法之一。</p>
-
-<p>OC这门语言没有办法致命某个基类是&quot;抽象的&quot;(abstract).于是,开发者通常会在文档中写明类的用法。这种情况下，基类接口一般都没有名为init的成员方法，这暗<br/>
-示该类的实例也许不应该由用户直接创建。还有一种办法可以确保用户不会使用基类实例,<br/>
-那就是在基类的doADaysWork方法中拋出异常。然而这种做法相当极端，很少有人用。</p>
-
-<p>如果对象所属的类位于某个类族中，那么在査询其类型信息（introspection)时就要当心了（参见第14条)。你可能觉得自己创建了某个类的实例，然而实际上创建的却是其子类的实例。在 <code>Employee</code> 这个例子中，<code>[employee isMemberOfClass:[EOCEmployee class]]</code>似乎会返回YES，但实际上返回的却是NO,因为<code>employee</code>并非Employee类的实例，而是其某个子类的实例。</p>
-
-<h2 id="toc_1">Cocoa里的类簇</h2>
-
-<p>系统框架中有许多类族。大部分<code>collection</code>类都是某个类簇中的抽象基类,例如<code>NSArray</code>与其可变版本<code>NSMutableArray</code>。这样看来，实际上有两个抽象基类，一个用于不可变数组，另一个用于可变数组。尽管具备公共接口的类有两个，但仍然可以合起来算作一个类族(传统类簇模式中,通常只有一个类具备&quot;公共接口&quot;,就是抽象基类)。<strong>不可变的类定义了对所有数组都通用的方法，而可变的类则定义了那些只适用于可变数组的方法。</strong>两个类共属同一类族，这意味着二者在实现各自类型的数组时可以共用实现代码，此外，还能够把可变数组复制为不可变数组，反之亦然。</p>
-
-<p>像NSArray这样的类的背后其实是个类族（对于大部分collection类而言都是这样)，明白这一点很重要，否则就可能会写出下面这种代码：</p>
-
-<pre><code class="language-objc">
-id maybeAnArray = /* ••• */;
-if ([maybeAnArray class) == [NSArray class]) {
-&quot;Will never be hit
-}
-
-</code></pre>
-
-<p>你要是知道<strong>NSArray是个类族</strong>，那就会明白上述代码错在哪里：其中的<code>if</code>语句永远不可能为真。[maybeAnArray class]所返回的类绝不可能是NSArray类本身，因为由NSArray的初始化方法所返回的那个实例其类型是隐藏在类族公共接口（public facade)后面的某个内部类型（internal type)。</p>
-
-<p>不过，仍然有办法可以判断出某个实例所属的类是否位于类族之中。我们不用刚才那种写法，而是改用类型信息查询方法（introspectionmethod)。本书第14条解释了这些方法的用法。若想判断某对象是否位于类族中，<strong>不要直接检测两个“类对象”是否等同，而应该采用下列代码</strong>：</p>
-
-<pre><code class="language-objc">id maybeAnArray = /* ••• */;
-if ([maybeAnArray isKindOfClass:[NSArray class])) {
-    &quot;Will be hit&quot;
-}
-</code></pre>
-
-<p>我们经常需要向类族中新增实体子类，不过这么做的时候得留心。在Employee这个例子中，若是没有“工厂方法”（factory method)的源代码，那就无法向其中新增雇员类别了。然而对于Cocoa中NSArray这样的类族来说，还是有办法新增子类的，但是需要遵守几条规则。这几条规则如下。</p>
-
-<ul>
-<li><p>子类应该继承自类族中的抽象基类。<br/>
-若要编写NSArray类族的子类，则需令其继承自不可变数组的基类或可变数组的基类。</p></li>
-<li><p>子类应该定义自己的数据存储方式。<br/>
-开发者编写NSArray子类时，经常在这个问题上受阻。子类必须用一个实例变量来存放数组中的对象。这似乎与大家预想的不同，我们以为NSArray自己肯定会保存那些对象，所以在子类中就无须再存一份了。但是大家要记住，<mark>NSArray本身只不过是包在其他隐藏对象外面的壳，它仅仅定义了所有数组都需具备的一些接口。对于这个自定义的数组子类来说，可以用NSArray来保存其实例</mark>。</p></li>
-<li><p>子类应当覆写超类文档中指明需要覆写的方法。<br/>
-在每个抽象基类中，都有一些子类必须覆写的方法。比如说，想要编写NSArray的子<br/>
-类，就需要实现<code>count</code>及<code>“objectAtlndex:”</code>方法。像<code>lastObject</code>这种方法则无须实现，因为基类可以根据前两个方法实现出这个方法。</p></li>
-</ul>
-
-<p>在类族中实现子类时所需遵循的规范一般都会定义于基类的文档之中，编码前应该先看看.</p>
+<p>最重要的一点就是，命名方式应该协调一致。</p>
 
 <h2 id="toc_2">要点</h2>
 
 <ul>
-<li>类族模式可以把实现细节隐藏在一套简单的公共接口后面。</li>
-<li>系统框架中经常使用类族。</li>
-<li>从类族的公共抽象基类中继承子类时要当心，若有开发文档，则应首先阅读。</li>
+<li>起名时应遵从标准的Objective-C命名规范，这样创建出来的接口更容易为开发者所理解。</li>
+<li>方法名要言简意赅，从左至右读起来要像个日常用语中的句子才好。</li>
+<li>方法名里不要使用缩略后的类型名称。</li>
+<li>给方法起名时的第一要务就是确保其风格与你自己的代码或所要集成的框架相符。</li>
 </ul>
 
                         
@@ -866,10 +193,10 @@ if ([maybeAnArray isKindOfClass:[NSArray class])) {
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/7/4</span>
+                    <span class="date">2017/8/26</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -883,458 +210,115 @@ if ([maybeAnArray isKindOfClass:[NSArray class])) {
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="14991304296690.html">
+                <a class="clearlink" href="15037148888105.html">
                 
-                  <h1>Caffe反向传播计算</h1>
+                  <h1>第十八条 尽量使用不可变对象</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<ul>
-<li>
-<a href="#toc_0">反向传播的特点</a>
-</li>
-<li>
-<a href="#toc_1">损失函数</a>
-<ul>
-<li>
-<a href="#toc_2">算法描述</a>
-</li>
-<li>
-<a href="#toc_3">参数描述</a>
-</li>
-<li>
-<a href="#toc_4">源码分析</a>
-</li>
-</ul>
-</li>
-</ul>
+                        	<p>我们在设计类的时候，运用属性来封装数据。并且使用属性时候，<strong>可以将属性直接设置为“只读”（read-only）</strong>。默认情况下是“可读也可写”的。</p>
 
+<p>不过，一般情况下我们要建模的数据未必需要改变。比方说，某数据所表示的对象源自一项只读的网络服务(web service),里面可能包含一系列需要显示在地图上的相关点，像这种对象就没必要改变其内容。即使修改了，新数据也不会推送回服务器.</p>
 
-<p>反向传播对电脑的计算能力要求很高,所以反向传播过程只有在训练环境下才需要计算,由于消耗时间较长,对计算资源要求较高,一般为离线服务.</p>
+<p>而且如果把可变对象（mutable object)放入<code>collection</code>之后又修改其内容，那么很容易就会破坏<code>set</code>的内部数据结构，使其失去固有的语义。</p>
 
-<h2 id="toc_0">反向传播的特点</h2>
+<p>我们来举例：</p>
 
-<p>CNN进行前向传播阶段，依次调用每个<code>Layer</code>的<code>Forward</code>函数，得到逐层的输出，<code>最后一层与目标函数比较得到损失函数，计算误差更新值，通过反向传播路径逐层到达第一层</code>，<strong>所有权值层在反向传播结束后一起更新</strong>。</p>
+<p>为了将<code>EOCPointOflnterest</code>做成不可变的类，需要把所有属性都声明为<code>readonly</code>:</p>
 
-<h2 id="toc_1">损失函数</h2>
-
-<p><mark>损失层(Loss Layer)是CNN的终点</mark>，接受两个Blob作为输入，其中一个为CNN的预测值;另一个是真实标签。损失层则将这两个输入进行一系列运算，得到当前网络的损失函数(Loss Function), —般记为\(L(\theta)\)，其中\(\theta\)表示当前网络权值构成的向量空间。机器学习的目的是在权值空间中找到让损失函数\(L(\theta)\)最小的权值\(\theta_{opt}\),可以采用一系列最优化方法（如后面将会介绍的SGD方法)逼近权值\(\theta_{opt}\)</p>
-
-<p><font color=red>损失函数是在前向传播计算中得到的，同时也是反向传播的起点.</font></p>
-
-<h3 id="toc_2">算法描述</h3>
-
-<p>Caffe中实现了多种损失层，分别用于不同场合。其中<code>SoftmaxWithLossLayer</code>实现了<code>Softmax+交叉熵</code>损失函数计算过程，适用于单label的分类问题：另外还有欧式损失函数（用于回归问题）、<code>Hinge</code>损失函数（最大间隔分类，SVM)、<code>Sigmoid+交叉熵</code>损失函数（用于多属性/多分类问题）等。今天我们只关注最基本的<code>SoftmaxWithLossLayer</code>,其他损失层的算法可以直接看Caffe相应源码。</p>
-
-<p>假设有K个类别,Softmax计算过程为:</p>
-
-<p>\[<br/>
-Softmax(a_i) = \frac{exp(a_i)}{\sum_j{exp(a_i)}} ,i=0,1,2,...K-1<br/>
-\]</p>
-
-<p><strong>Softmax的结果相当于输入图像被分到每个标签的概率分布。根据高等数学知识，该函数是单调增函数，即输入值越大，输出也越大，输入图像属于该标签的概率就越大。</strong></p>
-
-<p>对Softmax的结果计算交叉熵分类损失函数为：</p>
-
-<p>\[<br/>
-L(\theta) = -{\frac{1}{N}}\sum_ilog[Softmax(a_k)], i=0,1,2,...N-1<br/>
-\]</p>
-
-<p>其中,k为真实标签值，N为一个批量的大小.</p>
-
-<blockquote>
-<p>理想的分类器应当是除了真实标签的概率为1,其余标签概率均为0,这样计算得到其损失函数为<code>-ln(1) =0</code>损失函数越大，说明该分类器在真实标签上分类概率越小，性能也就越差,一个非常差的分类器，可能在真实标签上的分类概率接近于0,那么损失函数就接近于正无穷,我们称为训练发散，需要调小学习速率,在ImageNet-1000分类问题中，初始状态为均匀分布,每个类别的分类概率均为0.001，故此时计算损失函数值为-ln(O.OO1) = ln(1000) = 6.907755... 经常有同学问，“我的loss为什么总是在6.9左右（该现象被称为6.9高原反应），训练了好久都不下降呢？”说明还都没有训练收敛的迹象,尝试调大学习速率,或者修改权值初始化方式.</p>
-</blockquote>
-
-<h3 id="toc_3">参数描述</h3>
-
-<p>先看一下<code>caffe.proto</code>,找到有关<code>Softmax</code>的消息定义:</p>
-
-<pre><code class="language-protobuf">
-// Message that stores parameters used by SoftmaxLayer, SoftmaxWithLossLayer
-message SoftmaxParameter {
-  enum Engine {
-    DEFAULT = 0;
-    CAFFE = 1;
-    CUDNN = 2;  //使用cudnn引擎计算
-  }
-  optional Engine engine = 1 [default = DEFAULT]; // 默认为 0 
-
-  // The axis along which to perform the softmax -- may be negative to index
-  // from the end (e.g., -1 for the last axis).
-  // Any other axes will be evaluated as independent softmaxes.
-  // axis为可选参数，指定沿哪个维度计算Softmax,可以是负数，表示从后向前索引
-  optional int32 axis = 2 [default = 1];
-}
-
-</code></pre>
-
-<h3 id="toc_4">源码分析</h3>
-
-<p>损失层的基类声明于<code>include/caffe/layers/loss_layers.hpp</code>中：</p>
-
-<pre><code class="language-c++">/**
- * @brief An interface for Layer%s that take two Blob%s as input -- usually
- *        (1) predictions and (2) ground-truth labels -- and output a
- *        singleton Blob representing the loss.
- *
- * LossLayers are typically only capable of backpropagating to their first input
- * -- the predictions.
- */
- 
- 
- //损失层的鼻祖类，派生于Layer
-template &lt;typename Dtype&gt;
-class LossLayer : public Layer&lt;Dtype&gt; {
- public:
- //显式抅造函数
-  explicit LossLayer(const LayerParameter&amp; param)
-     : Layer&lt;Dtype&gt;(param) {}
-//层配置函数
-  virtual void LayerSetUp(
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-//变形函数
-  virtual void Reshape(
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-//接受沔个Blob作为输入
-  virtual inline int ExactNumBottomBlobs() const { return 2; }
-
-  /**
-   * @brief For convenience and backwards compatibility, instruct the Net to
-   *        automatically allocate a single top Blob for LossLayers, into which
-   *        they output their singleton loss, (even if the user didn&#39;t specify
-   *        one in the prototxt, etc.).
-   */
-   //为了方便和后向兼容，指导Net为损失层自动分配单个输出Blob.损失层则会将计算结果L(θ)保存在这里
-  virtual inline bool AutoTopBlobs() const { return true; }
-  //只有一个输出Blob
-  virtual inline int ExactNumTopBlobs() const { return 1; }
-  /**
-   * We usually cannot backpropagate to the labels; ignore force_backward for
-   * these inputs.
-   */
-  virtual inline bool AllowForceBackward(const int bottom_index) const {
-    return bottom_index != 1;
-  }
-};
-
-</code></pre>
-
-<p>用来计算 <code>Softmax</code> 损失函数的层 <code>SoftmaxLayer</code> 声明在 <code>include/caffe/layers/softmaxlayer.hpp</code>中：</p>
-
-<pre><code class="language-c++">/**
- * @brief Computes the softmax function.
- *
- * TODO(dox): thorough documentation for Forward, Backward, and proto params.
- */
- 
- //SoftmaxLayer直接派生于Layer
-template &lt;typename Dtype&gt;
-class SoftmaxLayer : public Layer&lt;Dtype&gt; {
- public:
- //显示构造函数
-  explicit SoftmaxLayer(const LayerParameter&amp; param)
-      : Layer&lt;Dtype&gt;(param) {}
-//变形函数
-  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-//返回类名字符串
-  virtual inline const char* type() const { return &quot;Softmax&quot;; }
-  //该层接受一个输入BLOB,传生一个输出Blob
-  virtual inline int ExactNumBottomBlobs() const { return 1; }
-  virtual inline int ExactNumTopBlobs() const { return 1; }
-
- protected:
- //前向传播函数
-  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
-  //反向传播函数
-  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-     const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
-//计算参数
-  int outer_num_;
-  int inner_num_;
-  int softmax_axis_;
-  /// sum_multiplier is used to carry out sum using BLAS(利用BLAS计算求和)
-  Blob&lt;Dtype&gt; sum_multiplier_;
-  /// scale is an intermediate Blob to hold temporary results.(用来临时存放中间结果的Blob)
-  Blob&lt;Dtype&gt; scale_;
-};
-
-</code></pre>
-
-<p>SoftmaxLayer实现在<code>src/caffe/layers/softmax_layer.cpp</code>中，我们深入内部来看一下具体实现：</p>
-
-<pre><code class="language-c++">//变形函数
-template &lt;typename Dtype&gt;
-void SoftmaxLayer&lt;Dtype&gt;::Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-//获得正确的维度索引
-  softmax_axis_ =
-      bottom[0]-&gt;CanonicalAxisIndex(this-&gt;layer_param_.softmax_param().axis());
-//是输出blob与输入blob形状相同
-  top[0]-&gt;ReshapeLike(*bottom[0]);
-  //sum_multiplier_这里都是1，用于辅助计算，可以看作一个行向量，或者行数为1的矩阵 类似于sum_multiplier_.Reshape(1, bottom[0]-&gt;channels(),bottom[0]-&gt;height(), bottom[0]-&gt;width());  
-  vector&lt;int&gt; mult_dims(1, bottom[0]-&gt;shape(softmax_axis_));
-  sum_multiplier_.Reshape(mult_dims);
-  Dtype* multiplier_data = sum_multiplier_.mutable_cpu_data();
-  //乘子初始化为1
-  caffe_set(sum_multiplier_.count(), Dtype(1), multiplier_data);
-  outer_num_ = bottom[0]-&gt;count(0, softmax_axis_);
-  inner_num_ = bottom[0]-&gt;count(softmax_axis_ + 1);
-  vector&lt;int&gt; scale_dims = bottom[0]-&gt;shape();
-  scale_dims[softmax_axis_] = 1;
-  //初始化scale_的形状
-  scale_.Reshape(scale_dims);
-}
-
-//前向计算，得到Softmax(a_k}值
-template &lt;typename Dtype&gt;
-void SoftmaxLayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
-    
-//获得输入/输出Blob数据指针
-  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
-  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
-  //中间临时值数据指针
-  Dtype* scale_data = scale_.mutable_cpu_data();
-  int channels = bottom[0]-&gt;shape(softmax_axis_);
-  int dim = bottom[0]-&gt;count() / outer_num_; //总的类别数目
-  caffe_copy(bottom[0]-&gt;count(), bottom_data, top_data); //将输入拷贝到输出缓冲区
-  // We need to subtract the max to avoid numerical issues, compute the exp,
-  // and then normalize.(遍历bottom_data查找最大值，存入scale_data)
-  for (int i = 0; i &lt; outer_num_; ++i) {
-    // initialize scale_data to the first plane(初始化scale_data为bottom_data首元素)
-    caffe_copy(inner_num_, bottom_data + i * dim, scale_data);
-    for (int j = 0; j &lt; channels; j++) {
-      for (int k = 0; k &lt; inner_num_; k++) {
-        scale_data[k] = std::max(scale_data[k],
-            bottom_data[i * dim + j * inner_num_ + k]);
-      }
-    }
-    // subtraction(输出缓冲区减去最大值a_k = a_k- max(a_i))
-    caffe_cpu_gemm&lt;Dtype&gt;(CblasNoTrans, CblasNoTrans, channels, inner_num_,
-        1, -1., sum_multiplier_.cpu_data(), scale_data, 1., top_data);
-    // exponentiation(求指数项exp(a_k))
-    caffe_exp&lt;Dtype&gt;(dim, top_data, top_data);
-    // sum after exp(累加求和1 + exp(a_k)，存放在scale_data中)
-    caffe_cpu_gemv&lt;Dtype&gt;(CblasTrans, channels, inner_num_, 1.,
-        top_data, sum_multiplier_.cpu_data(), 0., scale_data);
-    // division 求Softmax值，即exp(a_k)/(1 + exp(a_k))
-    for (int j = 0; j &lt; channels; j++) {
-    // top_data = top_data / scale_data
-      caffe_div(inner_num_, top_data, scale_data, top_data);
-      // 加偏移跳转指针
-      top_data += inner_num_;
-    }
-  }
-}
-//反向传播,与求导有关
-template &lt;typename Dtype&gt;
-void SoftmaxLayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
-    const vector&lt;bool&gt;&amp; propagate_down,
-    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
-//获得data,diff指针
-  const Dtype* top_diff = top[0]-&gt;cpu_diff();
-  const Dtype* top_data = top[0]-&gt;cpu_data();
-  Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
-  Dtype* scale_data = scale_.mutable_cpu_data();
-  int channels = top[0]-&gt;shape(softmax_axis_);
-  int dim = top[0]-&gt;count() / outer_num_;
-  caffe_copy(top[0]-&gt;count(), top_diff, bottom_diff);
-  for (int i = 0; i &lt; outer_num_; ++i) {
-    // compute dot(top_diff, top_data) and subtract them from the bottom diff
-    for (int k = 0; k &lt; inner_num_; ++k) {
-      scale_data[k] = caffe_cpu_strided_dot&lt;Dtype&gt;(channels,
-          bottom_diff + i * dim + k, inner_num_,
-          top_data + i * dim + k, inner_num_);
-    }
-    // subtraction
-    caffe_cpu_gemm&lt;Dtype&gt;(CblasNoTrans, CblasNoTrans, channels, inner_num_, 1,
-        -1., sum_multiplier_.cpu_data(), scale_data, 1., bottom_diff + i * dim);
-  }
-  // elementwise multiplication(逐点相乘)
-  caffe_mul(top[0]-&gt;count(), bottom_diff, top_data, bottom_diff);
-}
-
-
-</code></pre>
-
-<p>到这里我们就已经了解了<code>Softmax</code>函数的计算过程,后面我们在来看<code>SoftmaxWithLossLayer</code>的实现.</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/7/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Caffe%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe反向传播计算</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14990683410396.html">
-                
-                  <h1>第八条:理解"对象同等性"这一概念</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>根据“等同性”（equality)来比较对象是一个非常有用的功能。不过，按照<code>==</code>操作符比较出来的结果未必是我们想要的，因为该操作比较的是两个<mark>指针本身</mark>，而不是其所指的对象。应该使用NSObject协议中声明的<strong><mark>“isEqual”</mark></strong>：方法来判断两个对象的等同性。一般来说,两个类型不同的对象总是不相等的（unequal)。某些对象提供了特殊的“等同性判定方法”(equality-checking method),<strong>如果已经知道两个受测对象都属于同一个类，那么就可以使用这种方法</strong>。以下述代码为例：</p>
-
-<pre><code class="language-objc">
-NSString *foo = @&quot;Badger 123&quot;;
-NSString *bar = [NSStringstringWithFormat: @fTBadger %i&quot;, 123】；
-BOOL equalA = (foo == bar); //&lt; equal A - NO
-BOOL equalB = [foo isEqual: bar ] ; //&lt; equalB = YES
-BOOL equalC = [foo isEqualToString:bar]; //&lt; equalC = YES
-
-</code></pre>
-
-<p>上面可以看到<code>==</code>与等同性判断方法之间的差别。<code>NSString</code>类实现了一个自己独有的等同性判断方法，名叫<code>“isEqualToString:”</code>。传递给该方法的对象必须是<code>NSString</code>,否则结果未定义（undefined)。调用该方法比调用<code>“isEqual”</code>方法快，后者还要执行额外的步骤，因为它不知道受测对象的类型(前者指使用NSString所以快些)。</p>
-
-<p><code>NSObject</code>协议中有两个用于判断等同性的关键方法：</p>
-
-<pre><code class="language-objc">
-- (BOOL) isEqual: (id) object;
-- (NSUInteger) hash;
-
-</code></pre>
-
-<p><code>NSObject</code>类对这两个方法的默认实现是：当且仅当其<strong>“指针值&quot;（pointer value)(内存地址)完全相等时，这两个对象才相等。</strong>若想在自定义的对象中正确覆写这些方法，就必须先理解其约定<br/>
-(contract)。如果<code>“isEqual:”</code>方法判定两个对象相等，那么其<code>hash</code>方法也必须返回同一个值。但是，如果两个对象的hash方法返回同一个值，那么“isEqual:”方法未必会认为两者相等。</p>
-
-<p>比如有下面这个类：</p>
-
-<pre><code class="language-objc">
-@interface EOCPerson : NSObject
-@property (nonatomic, copy) NSString *firstName;
-@property (nonatomic, copy) NSString *lastName;
-@property (nonatomic, assign) NSUInteger age;
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@interface EOCPointOfInterest : NSObject
+@property (nonatomic, copy, readonly) NSString *identifier; 
+@property (nonatomic, copy, readonly) NSString* title;
+@property (nonatomic, assign, readonly) float latitude; 
+@property (nonatomic, assign, readonly) float longitude;
+-(id) initWithldentifier: (NSString*) identifier 
+                   title:(NSString*)title 
+                   latitude: (float) latitude 
+                   longitude: (float) longitude;
 @end
 
 </code></pre>
 
-<p>我们认为，如果两个<code>EOCPerson</code>的所有字段均相等，那么这两个对象就相等。于是<code>“isEqual:”</code>方法可以写成：</p>
+<p>这样后如果有人想要改变属性值，那么编译时就会报错。对象中的属性值可以读出，但是无法写入，这就能保证<code>EOCPointOfluterest</code>中的各个数据之间总是相互协调的。</p>
 
-<pre><code class="language-objc">
--(BOOL)isEqual:(id)object {
-    if (self == object) return YES;
-    if ( [self class] != [object class]) return NO;
-    EOCPerson ^otherPerson = (EOCPerson*)object;
-    if (! [_firstName isEqualToString:otherPerson.firstName))
-    return NO;
-    if (![_lastName isEqualToString:otherPerson.lastName])
-    return NO;
-    if (_age != otherPerson.age)
-    return NO;
-    return YES;
+<p>但是我们有时想要修改封装在对象内部的数据，不想令这些数据为外人所改动。这种情况下，通常做法是在对象内部将<code>readonly</code>属性重新声明为<code>readwrite</code>。当然，如果该属性是nonatomic 的，那么这样做可能会产生“竞争条件”（racecondition)。在对象内部写人某属性时，对象外的 观察者也许正读取该属性。若想避免此问题，我们可以在必要时通过<mark>“派发队列&quot;（dispatchqueue）等手段，将(包括对象内部的）所有数据存取操作都设为同步操作</mark>。<strong><font color=red>将属性在对象内部重新声明为<code>readwrite</code>这一操作可于<code>“class-continuation分类”</code>中完成，在公共接口中声明的属性可于此处重新声明，属性的其他特质必须保持不变，而<code>readonly</code>可扩展为<code>readwrite</code>。</font></strong></p>
+
+<p>其 <code>“class-continuation分类”</code>可以这样写：</p>
+
+<pre><code class="language-objc">// .m文件中
+#import &quot;EOCPointOfInterest.h&quot;
+
+@interface EOCPointOfInterest : NSObject
+@property (nonatomic, copy, readwrite) NSString *identifier; 
+@property (nonatomic, copy, readwrite) NSString* title;
+@property (nonatomic, assign, readwrite) float latitude; 
+@property (nonatomic, assign, readwrite) float longitude;
+
+@implementation EOCPointOfInterest
+
+/* ... */
+
+@end
+</code></pre>
+
+<p>现在，只能于<code>EOCPoimOflnterest</code>实现代码内部设置这些属性值了。但是我们其实可以同构KVC键值编码来设置这些属性值。不过，这样显然违背了我们的本意，绕过了提供的API。不推荐这种做法。</p>
+
+<p>我们定义类公共的API时，<strong><font color=red>要注意一件事情：对象里表示各种collection的那些属性究竞应该设成可变的，还是不可变的。</font></strong>例如，我们用某个类来表示个人信息，该类里还存放了一些引用，指向此人的诸位朋友。你可能想把这个人的全部朋友都放在一个“列表&quot;（list)里，并将其做成属性。假如开发者可以添加或删除此人的朋友，那么这个属性就需要用可变的<code>set</code>来实现。在这种情况下，通常应该提供一个<code>readonly</code>属性供外界使用，该属性将返回不可变的<code>set</code>, 而此<code>set</code>则是内部那个可变<code>set</code>的一份拷贝。比方说，下面这段代码就能够实现出这样一个类：</p>
+
+<pre><code class="language-objc">// EOCPerson.h
+#import &lt;Foundation/Foundation•h&gt;
+@interface EOCPerson : NSObject
+@property (nonatomic, copy, readonly) NSString *firstName; 
+@property (nonatomic, copy, readonly) NSString *lastName; 
+@property (nonatomic, strong, readonly) NSSet *friends;
+-(id)initWithFirstName:(NSString*)firstName
+          andLastName:(NSString*)lastName;
+-(void)addFriend:(EOCPerson*)person;
+-(void)removeFriend:(EOCPerson*)person;
+
+@end
+
+// EOCPerson.m #import &quot;EOCPerson•!!
+@interface EOCPerson ()
+@property (nonatomic, copy, readwrite) NSString *firstName; 
+@property (nonatomic, copy, readwrite) NSString *lastName;
+@end
+@implementation EOCPerson {
+    NSMutableSet *_internalFriends;
 }
 
-</code></pre>
+-(NSSet*)friends {
+    return [_internalFriends copy];
+}
+-(void)addFriend:(EOCPerson*)person {
+    [_internalFriends addObject:person];
+} 
 
-<p>首先，直接判断两个指针是否相等。若相等，则其均指向同一对象，所以受测的对象也必定相等。接下来，比较两对象所属的类。若不属于同一个类，则两对象不相等。<code>EOCPerson</code>对象当然不可能与<code>EOCDog</code>对象相等。不过，有时我们可能认为：一个EOCPerson实例可以与其子类（比如EOCSmithPerson)实例相等。在继承体系（inheritance hierarchy)中判断等同属性时,经常遭遇此类问题.所以实现&quot;isEqual:&quot;方法时要考虑到这种情况。最后，检测每个属性是否相等。只要其中有不相等的属性，就判定两对象不等，否则两对象相等。</p>
-
-<p>接下来,我们实现hash方法.回想一下，根据等同性约定：若两对象相等，则其哈希码(hash)也相等，但是两个哈希码相同的对象却未必相等。这是能否正确覆写“isEqual”方法的关键所在。下面这种写法完全可行：</p>
-
-<pre><code class="language-objc">
--(NSUInteger)hash {
-    return 1337;
+-(void)removeFriend:(EOCPerson*)person {
+    [_internalFriends removeObjectrperson];
 }
 
-</code></pre>
-
-<p>在<code>collection</code>中使用这种对象将产生性能问题，因为collection在检索哈希表（hash table)时，会用对象的哈希码做索引。假如某个<code>collection</code>是用<code>set</code>实现的，那么<code>set</code>可能会根据哈希码把对象分装到不同的数组中。在向<code>set</code>中添加新对象时，要根据其哈希码找到与之相关的那个数组，依次检査其中各个元素，看数组中已有的对象是否和将要添加的新对象相等。如果相等，那就说明要添加的对象已经在set里面了。如果令每个对象都返回相同的哈希码，那么在<code>set</code>中已有<code>1000000</code>个对象的情况下，若是继续向其中添加对象，则需将这<code>1 000000</code>个对象全部扫描一遍。</p>
-
-<p>我们看另一种计算哈希码的方法:</p>
-
-<pre><code class="language-objc">
--(NSUInteger)hash {
-    NSUInteger firstNameHash = [_firstName hash];
-    NSUInteger lastNameHash = [_lastName hash];
-    NSUInteger ageHash = _age;
-    return firstNameHash ^ lastNameHash ^ ageHash;
+-(id)initWithFirstName: (NSString*)firstName andLastName:(NSString*)lastName { 
+    if ((self = [super init】））{
+         _firstName = firstName;
+         _lastName = lastName;
+         _internalFriends = [NSMutableSet new];
+    }
+    return self;
 }
 
-</code></pre>
-
-<p>这种做法既能保持较高效率，又能使生成的哈希码至少位于一定范围之内，而不会过于频繁地重复。当然，此算法生成的哈希码还是会碰撞（collision),不过至少可以保证哈希码有多种可能的取值.<strong>编写hash方法时，应该用当前的对象做做实验，以便在减少碰撞频度与降低运算复杂程度之间取舍。</strong></p>
-
-<h2 id="toc_0">特定类所具有的等同性判定方法</h2>
-
-<p>除了刚才提到的<code>NSString</code>之外，<code>NSArray</code>与<code>NSDictionary</code>类也具有特殊的等同性判定方法，前者名为<code>“isEqualToArray:”</code>，后者名为<code>“isEqualToDictionary:”</code>。如果和其相比较的对象不是数组或字典，那么这两个方法会各自抛出异常。由于<code>Objective-C</code>在编译期不做强类型检査（strong type checking),这样容易不小心传入类型错误的对象，因此开发者应该保证所传对象的类型是正确的。</p>
-
-<p>如果我们觉得提供的判断方法不好用,可以自己来写一个,令代码看上<br/>
-去更美观、更易读,使自己编写的判定方法更容易读懂，而且不用再检査两个受测对象的类型了。</p>
-
-<p><strong>在编写判定方法时，也应一并覆写“isEqual:”方法。后者的常见实现方式为：如果受测的参数与接收该消息的对象都属于同一个类，那么就调用自已编写的判定方法，否则就交由超类来判断。</strong></p>
-
-<p>例如:</p>
-
-<pre><code class="language-objc">
-- (BOOL)isEqualToPerson:(EOCPerson*)otherPerson {
-if (self == object) return YES;
-    if (! [_firstName isEqualToString:otherPerson.firstName])
-        return NO;
-    if (![_lastName isEqualToString:otherPerson.lastName])
-        return NO;
-    if (_age != otherPerson.age)
-        return NO;
-    return YES;
-}
-
--(BOOL)isEqual:(id)object {
-    if ([self class] == [object class]) {
-        return [self isEqualToPerson:(EOCPerson*)object];
-    } else {
-        return [super isEqual:object】；
+@end
 
 </code></pre>
 
-<h2 id="toc_1">等同性判定的执行深度</h2>
-
-<p>创建等同性判定方法时，需要决定是根据整个对象来判断等同性，还是仅根据其中几个字段来判断。<code>NSArray</code>的检测方式为先看两个数组所含对象个数是否相同，若相同，则在每个对应位置的两个对象身上调用其<code>“isEqual”</code>方法。如果对应位置上的对象均相等，那么这两个数组就相等，这叫做<strong>“深度等同性判定”（deep equality)。</strong>不过有时候无须将所有数据<br/>
-逐个比较，只根据其中部分数据即可判明二者是否等同。</p>
-
-<p>比方说，我们假设<code>EOCPerson</code>类的实例是根据数据库里的数据创建而来，那么其中就可能会含有另外一个属性，此属性是<strong>“唯一标识符&quot;（unique identifier)</strong>,在数据库中用作“主键”</p>
-
-<pre><code class="language-objc">
-@property NSUInteger identifier;
-
-</code></pre>
-
-<p>在这种情况下，我们也许只会根据标识符来判断等同性，尤其是在此属性声明为<code>readonly</code>时更应该如此。因为只要两者标识符相同，就肯定表示同一个对象，因而必然相等。<br/>
-这样的话，无须逐个比较<code>EOCPerson</code>对象的每条数据，只要标识符相同，就说明这两个对象就是由同一个数据源所创建的，据此我们能够断定，其余数据也必然相同。</p>
-
-<h2 id="toc_2">容器中可变类的等同性</h2>
-
-<p>还有一种情况一定要注意，就是在容器中放入可变类对象的时候。把某个对象放入<code>collection</code>之后，就不应再改变其哈希码了。前面解释过，<code>collection</code>会把各个对象按照其哈希码分装到不同的“箱子数组”中。如果某对象在放入“箱子”之后哈希码又变了，那么其现在所处的这个箱子对它来说就是“错误”的。要想解决这个问题，<strong><mark>需要确保哈希码不是根据对象的“可变部分”（mutable portion)</mark></strong>计算出来的,或是保证放入<code>collection</code>之后就不再改变对象内容了。之后将在第18条中解释为何要将对象做成“不可变的&quot;（immutable)。</p>
-
-<h2 id="toc_3">要点:</h2>
+<h2 id="toc_0">要点</h2>
 
 <ul>
-<li>若想检测对象的等同性，请提供<code>“isEqual:”</code>与<code>hash</code>方法。</li>
-<li>相同的对象必须具有相同的哈希码，但是两个哈希码相同的对象却未必相同。</li>
-<li>不要盲目地逐个检测每条属性，而是应该依照具体需求来制定检测方案。</li>
-<li>编写hash方法时，应该使用计算速度快而且哈希码碰撞几率低的箅法。</li>
+<li>尽量创建不可变的对象。</li>
+<li>若某属性仅可于对象内部修改，则在<code>“class-continuation分类”</code>中将其由<code>readonly</code>属性扩展为<code>readwrite</code>属性</li>
+<li>不要把可变的<code>collection</code>作为属性公开，而应提供相关方法，以此修改对象中的可变<code>collection</code>。</li>
 </ul>
 
                         
@@ -1344,7 +328,455 @@ if (self == object) return YES;
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/7/3</span>
+                    <span class="date">2017/8/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15037100500253.html">
+                
+                  <h1>第十七条 实现description方法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>调试程序时，我们一般要将对象的属性<code>NSLog</code>出来：</p>
+
+<pre><code class="language-objc">NSLog(@&quot;object = %@&quot;,object);
+</code></pre>
+
+<p>如果我们输出的对象是数组，或者字典和其它数据是可以将数据打印出来。但是如果打印的是自定义的类，那么输出的对象就类似于：</p>
+
+<pre><code class="language-objc">object = &lt;EOCPerson:0x7fd9a1600600&gt;
+</code></pre>
+
+<p>上面这种信息很不实用，所以我们要在自己的类里覆写<code>description</code>方法，否则打印信息时就会调用<code>NSObject</code>类所实现的默认方法。此方法定义在<code>NSObject</code>协议里，不过<code>NSObject</code>类也实现了它。</p>
+
+<p>想输出更为有用的信息也很简单，只需覆写<code>description</code>方法并将描述此对象的字符串 返回即可。例如，有下面这个代表个人信息的类：</p>
+
+<pre><code class="language-objc">//EOCPerson.h
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface EOCPerson : NSObject
+
+@property(nonatomic, readonly, copy)NSString *firstname;
+@property (nonatomic, copy, readonly) NSString *lastName;
+
+-(id) initWithFirstName: (NSString*) firstName lastName:(NSString*) lastName;
+
+@end
+
+//EOCPerson.m
+#import &quot;EOCPerson.h&quot;
+
+@implementation EOCPerson
+
+-(id)initWithFirstName:(NSString *)firstName lastName:(NSString *)lastName{
+    if ((self = [super init])) {
+        _firstname = [firstName copy];
+        _lastName = [lastName copy];
+    }
+    return self;
+}
+//description方法
+-(NSString*)description{
+
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , \&quot;%@ %@\&quot;&gt;&quot; , [self class], self ,_firstname ,_lastName ];
+}
+
+@end
+
+
+</code></pre>
+
+<p>那么输出就是：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+#import &quot;EOCPerson.h&quot;
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        EOCPerson *person = [[EOCPerson alloc] initWithFirstName:@&quot;Liang&quot; lastName:@&quot;Zhonghao&quot;];
+        NSLog(@&quot;Person = %@&quot; , person);
+    }
+    return 0;
+}
+
+</code></pre>
+
+<p><img src="media/15037100500253/15037119639541.jpg" alt=""/></p>
+
+<blockquote>
+<p><strong>建议：在新实现的 description方法中，也应该像默认的实现那样，打印出类的名字和指针地址，因为这些内容 有时也许会用到。</strong></p>
+</blockquote>
+
+<p>我们也可以借助字典类型的<code>description</code>方法来将打印何种信息标识出来：</p>
+
+<pre><code class="language-objc">
+-(NSString*)description{
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , 
+    [self class],
+     self, 
+     @{@&quot;firstname&quot;:_firstname,
+       @&quot;lastname&quot;:_lastName}];
+}
+</code></pre>
+
+<p>输出为：<br/>
+<img src="media/15037100500253/15037132520686.jpg" alt=""/></p>
+
+<p><code>NSObject</code>协议中还有个方法要注意，那就是<code>debugDescription</code>,此方法的用意与 <code>description</code>非常相似。二者区别在于，<code>debugDescription</code>方法是开发者在调试器（debugger) 中以控制台命令打印对象时才调用的。在<code>NSObject</code>类的默认实现中，此方法只是直接调用了<code>description</code>。我们还拿上个例子来说明：</p>
+
+<p><img src="media/15037100500253/15037137809556.jpg" alt=""/></p>
+
+<p>我们在NSLog下面打一个断点，进入调试模式，之后向调试控制台里输入命令。LLDB的“po”命令 可以完成对象打印（print-object)工作，其输出如下：<br/>
+<img src="media/15037100500253/15037138780545.jpg" alt=""/></p>
+
+<p>当然我们可以把人名放在<code>EOCPerson</code>对象的普通描述信息中，而把更详尽的内容放在调试所用的描述信息里：</p>
+
+<pre><code class="language-objc">-(NSString*)description{
+    return [NSString stringWithFormat:@&quot;%@ : %@&gt;&quot; , _firstname ,_lastName ];
+}
+
+-(NSString*)debugDescription{
+    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , [self class], self , @{@&quot;firstname&quot;:_firstname,@&quot;lastname&quot;:_lastName}];
+}
+
+</code></pre>
+
+<p>运行之后如下：<br/>
+<img src="media/15037100500253/15037141337080.jpg" alt=""/></p>
+
+<p>你可能不想把类名与指针地址这种额外内容放在普通的描述信息里，但是却希望调试的 时候能够很方便地看到它们，在此情况下，就可以使用这种输出方式来实现。Foundation框架的<code>NSArray</code>类就是这么做的.</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>实现<code>description</code>方法返回一个有意义的字符串，用以描述该实例。</li>
+<li>若想在调试时打印出更详尽的对象描述信息，则应实现<code>debugDescription</code>方法。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15036443106558.html">
+                
+                  <h1>第十六条 提供"全能初始化方法"</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我们知道,所有的对象都要初始化但是有些对象可能有很多初始化方法(根据初始的信息来选择用哪个).我们以iOS的UI框架UIKit为例，其中有个类叫做<code>UITableViewCell</code>,初始化该类对象 时，需要指明其样式及标识符，标识符能够区分不同类型的单元格。由于这种对象的创 建成本较高，所以绘制表格时可依照标识符来复用，以提升程序效率。<strong><font color=red>我们把这种可为 对象提供必要信息以便其能完成工作的初始化方法叫做“全能初始化方法”（designated initializer)</font></strong></p>
+
+<p>我们看下面这个NSDate的例子：</p>
+
+<pre><code class="language-objc">-(id)init
+-(id)initWithString:(NSString*)string
+-(id)initWithTimelntervalSinceNow:(NSTimelnterval)seconds
+-(id)initWithTimelnterval:(NSTimelnterval)seconds
+                sinceDate:(NSDate*)refDate
+-(id)initWithTimeIntervalSinceReferenceDate:(NSTimelnterval)seconds
+-(id)initWithTimeIntervalSincel970:(NSTimelnterval)seconds
+</code></pre>
+
+<p><mark><strong>那么多的初始化方法中，我们要选一个全能初始化方法，让其他的初始化方法都来调用它。</strong></mark>，只有在全能初始化方法中，才会存储内部数据。这样的话，当底层数据存储机制改变时，只需修改此方法的代码就好，无须改动其他初始化方法。</p>
+
+<p>我们来用代码举例：</p>
+
+<p><em>首先定义一个表示矩形的类：</em></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@interface EOCRectangle : NSObject
+@property (nonatomic, assign, readonly) float width;
+@property (nonatomic, assign, readonly) float height; 
+@end
+</code></pre>
+
+<p>然后定义一个初始化方法：</p>
+
+<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight:(float)height
+{
+    if ((self = [super init])) {
+        _width = width;
+        _height = height;
+    }
+    return self;
+}
+</code></pre>
+
+<p>这样就会有一个问题，当有人用<code>[[EOCRectanglealloc]init]</code>来创建矩形时，因为<code>NSObject</code>中已经实现了<code>init</code>方法，如果把<code>alloc</code>方法分配好的<code>EOCRectangle</code>交由此方法来初始化，那么矩形的宽度与高度就是0,因为全部实例变量都设为0了。这种情况我们应该覆写<code>init</code>方法：</p>
+
+<pre><code class="language-objc">// Using default values
+-(id)init {
+    return [self initWithWidth:5.Of andHeight:10.Of];
+)
+// Throwing an exception
+-(id)init {
+    @throw [NSException
+    exceptionWithName:NSInternalInconsistencyException 
+    reason:@&quot;Must use initWithWidth:andHeight: instead.&quot; 
+    userInfo：nil]；
+}
+</code></pre>
+
+<p>还有一种情况，当我们创建名叫<code>EOCSquare</code>的类，令其成为<code>EOCRectangle</code>的子类时，新类的初始化方法写的时候要注意：</p>
+
+<pre><code class="language-objc">@import &quot;EOCRectangle.h&quot;
+@interface EOCSquare : EOCRectangle 
+-(id)initWithDimension:(float)dimension; 
+@end
+
+@implementation EOCSquare
+-(id)initWithDimension:(float)dimension {
+    return [super initwithwidth:dimension andHeightidimension];
+}
+@end
+</code></pre>
+
+<p>这了我们发现上面代码的初始化方法调用了父类的初始化方法，这样可能会导致一个问题：创建出一个”高度”和“宽度”不相等的正方形。所以：<strong><font color=red>如果子类的全能初始化方法与超类方法的名称不 同，那么总应覆写超类的全能初始化方法。</font></strong>在<code>EOCSquare</code>这个例子中，应该像下面这样覆写<code>EOCRectangle</code>的全能初始化方法：</p>
+
+<pre><code class="language-objc">-(id)initWithWidth:(float)width andHeight:(float)height { 
+    float dimension = MAX (width, height);  
+    return [self initWithDimension:dimension];
+}
+</code></pre>
+
+<p>覆写了这个方法之后，即便使用<code>init</code>来初始化<code>EOCSquare</code>对象，也能照常工作。原因在于, <code>EOCRectangle</code>类覆写了 <code>init</code>方法，并以默认值为参数，调用了该类的全能初始化方法。在用<code>init</code>方法初始化<code>EOCSquare</code>对象时，也会这么调用，不过由于<code>“initWithWidth:andHeight:”</code>已经在子类中覆写了，所以实际上执行的是<code>EOCSquare</code>类的这一份实现代码，而此代码又会调用本类的全能初始化方法。因此一切正常，调用者不可能创建出边长不相等的<code>EOCSquare</code>对象。</p>
+
+<p>当然如果我们不想覆写父类的全能初始化方法，认为这是调用者自己犯了错误。在这种情况下，常用的办法是覆写超类的全能初始化方法并于其中抛出异常：</p>
+
+<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight: (float) height {
+    @throw 
+        [NSException 
+            exceptionWithName:NSInternallnconsistencyException
+            reason: @&quot;Must use initWithDimension: instead.&quot;
+             userInfo：nil];
+</code></pre>
+
+<p><strong><mark>有时如果某个队形对象的实例有两种完全不同的创建方式，必须分开处理，所以就要编写多个全能初始化方法。</mark></strong>只要记住每个子类的全能初始化方法都应该调用其超类的对应方法，并逐层向上，应该先调用超类的相关方法，然后再执行与本类有关的任务。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>在类中提供一个全能初始化方法，并于文档里指明。其他初始化方法均应调用此方法。</li>
+<li><p>若全能初始化方法与超类不同，则需覆写超类中的对应方法。</p></li>
+<li><p>如果超类的初始化方法不适用于子类，那么应该覆写这个超类方法，并在其中抛出异常。</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/25</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15036306506140.html">
+                
+                  <h1>第十五条 用前缀避免命名空间冲突</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>oc与其他语言一个主要区别是没有那种内置的命名空间(namespace)机制. <mark>所以我们在编码时一定要注意命名冲突,尤其是潜在的命名冲突.</mark></p>
+
+<p>我们在创建应用程序时一定要注意,使用Cocoa创建应用程序时一定要注意,<strong><font color=red>Apple宣称保留使用&quot;两个字母前缀&quot;的权利</font></strong>,也就是说选用的前缀应该都是<strong><font color=red>三个字母</font></strong>.</p>
+
+<p>我们尤其应该注意,当你使用的一个三方库引入了一个你之前引入过的三方库.如果引入的这两个库的作者都没有给自己的库加前缀,那么应用程序很容易出现重复符号错误.</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li><p>选择与你公司,应用程序或二者有关联的名称作为类名的前缀,并在所有代码中均使用这一前缀.</p></li>
+<li><p>若自己所开发的程序库用到了第三方库,则应该为其中的名称加上前缀.</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/25</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15035622628066.html">
+                
+                  <h1>第十四条 理解"类对象"的用意</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>OC是一个极其动态的语言,那么运行期时,如何知道某个对象的类型呢? <mark>对象类型并非在编译期就绑定好了，而是要在运行期査找</mark>。而 且，还有个特殊的类型叫做id,它能指代任意的Objective-C对象类型。一般情况下，应该指明消息接收者的具体类型，这样的话，如果向其发送了无法解读的消息，那么编译器就会产生警告信息。而类型为<code>id</code>的对象则不然，编译器假定它能响应所有消息。</p>
+
+<p>“在运行期检视对象类型”这一操作也叫做<code>“类型信息査询”（introspection, “内省”）</code>，这 个强大而有用的特性内置于<code>Foundation</code>框架的<code>NSObject</code>协议里，凡是由公共根类（common root class，即NSObject与NSProxy)继承而来的对象都要遵从此协议。在程序中不要直接比较对象所属的类，明智的做法是调用“类型信息査询方法”</p>
+
+<p>我们先来了解Objective-C对象的本质:</p>
+
+<p><font color=red>每个Objective-C对象实例都是指向某块内存数据的指针。</font>所以在声明变量时，类型后面要跟一个字符：</p>
+
+<pre><code class="language-objc">NSString *pointerVariable = @&quot;Some string&quot;;
+</code></pre>
+
+<p>对于通用的对象类型id,由于其本身已经是指针了，所以我们能够这样写：</p>
+
+<pre><code class="language-objc">id genericTypedString = @&quot;Some string&quot;;
+</code></pre>
+
+<p>上面这种定义方式与用<code>NSString*</code>来定义相比，其语法意义相同。唯一区别在于，如果声明时指定了具体类型，那么在该类实例上调用其所没有的方法时，编译器会探知此情况,并发出警告信息。</p>
+
+<p>描述Objective-C对象所用的数据结构定义在运行期程序库的头文件里，<code>id</code>类型本身也<br/>
+在定义在这里：</p>
+
+<pre><code class="language-objc">typedef struct objc_object {
+    Class isa;
+} *id;
+</code></pre>
+
+<p><mark>由此可见，每个对象结构体的首个成员是<code>Class</code>类的变量。该变量定义了对象所属的类, 通常称为<code>“is a”</code>指针。例如，刚才的例子中所用的对象“是一个”（is a) NSString,所以其<code>“is a”</code>指针就指向<code>NSString</code>。</mark></p>
+
+<p><code>Class</code>对象也定义在运行期程序库的头文件中：</p>
+
+<pre><code class="language-objc">typedef struct objc_class *Class;
+struct objc_class {
+    Class isa;
+    Class super_class;
+    const char *name;
+    long version;
+    long info;
+    long instance_size;
+    struct objc_ivar_list *ivars;
+    struct objc_method_list **methodLists;
+    struct objc_cache *cache;
+    struct objc_protocol list *protocols;
+)；
+</code></pre>
+
+<p>此结构体存放类的<code>“元数据&quot;（metadata)</code>,例如类的实例实现了几个方法，具备多少个实例变量等信息。此结构体的首个变量也是<code>isa</code>指针，这说明<code>Class</code>本身亦为Objective-C对象。<font color=red> <strong>结构体里还有个变量叫做<code>superclass</code>,它定义了本类的超类。类对象所属的类型（也就是isa 指针所指向的类型）是另外一个类，叫做“元类&quot;（metaclass)，用来表述类对象本身所具备的元数据。“类方法”就定义于此处，因为这些方法可以理解成类对象的实例方法。</strong></font><mark>每个类仅有一个“类对象”，而每个“类对象”仅有一个与之相关的“元类”。</mark></p>
+
+<p>假设有个名为<code>SomeClass</code>的子类从<code>NSObject</code>中继承而来，则其继承体系如图所示。</p>
+
+<p><img src="media/15035622628066/15035642742167.jpg" alt=""/></p>
+
+<p><font color=red><strong>superclass 指针确立了继承关系，而 isa 指针描述了实例所属的类。</strong></font>通过这张布局关系图即可执行“类型信息査询”。我们可以査出对象是否能响应某个选择子，是否遵从某项协议，并且能看出此对象位于“类继承体系”（class hierarchy)的哪一部分。</p>
+
+<h2 id="toc_0">在类继承体系中查询类型信息</h2>
+
+<p>可以用类信息査询方法来检视类继承体系。<code>“isMemberOfClass:”</code>能够判断出对象是否为某个特定类的实例，而<code>“isKindOfClass:”</code>则能够判断出对象是否为某类或其派生类的实例,例如：</p>
+
+<pre><code class="language-objc">NSMutableDictionary *dict = [NSMutableDictionary new];
+[diet isMemberOfClass: [NSDictionary class] ] ; ///&lt; NO 
+[diet isMemberOfClass:[NSMutableDictionary class】】； ///&lt; YES 
+[diet isKindOfClass: [NSDictionary class】];///&lt; YES 
+[diet isKindOfClass2 [NSArray class]]; ///&lt; NO
+</code></pre>
+
+<p>像这样的类型信息査询方法使用isa指针获取对象所属的类，然后通过superclass指针 在继承体系中游走。由于对象是动态的，所以此特性显得极为重要。Objective-C与你可能熟 悉的其他语言不同，在此语言中，必须査询类型信息，方能完全了解对象的真实类型。</p>
+
+<p>由于Objective-C使用“动态类型系统&quot;（dynamic typing)，所以用于査询对象所属类的类 型信息査询功能非常有用。从<code>collection</code>中获取对象时，通常会査询类型信息，这些对象不 是“强类型的”（strongly typed),把它们从<code>collection</code>中取出来时，其类型通常是<code>id</code>。如果想 知道具体类型，那就可以使用类型信息査询方法。例如，想根据数组中存储的对象生成以逗 号分隔的字符串（comma-separated string),并将其存至文本文件，就可以使用下列代码：</p>
+
+<pre><code class="language-objc">-(NSString*)commaSeparatedStringFromObjects:(NSArray*)array {
+    NSMutablestring *string = [NSMutableStringnew]; 
+    for (id object in array) {
+        if ([object isKindOfClass:[NSStringclass]]) {
+            [string appendFormat:@&quot;%@,&quot;, object];
+        }else if ([object isKindOfClass:[NSNumberclass]）{
+            [string appendFormat:@&quot;%d&quot;, [object intValue]]；
+        } else if ([object isKindOfClass:[NSDataclass]])    {
+            NSString *base64Encoded = /* base64 encoded data */;
+            [string appendFormat: @&quot;%@&quot;, base64Encoded];
+        } else {
+              //Type not supported
+        }
+    }   
+    return string;
+}
+</code></pre>
+
+<p><mark>我们应该尽量使用类型信息査询方法，而不应该直接比较两个类对象是否等同(例如<code>if([object class] == [EOCSomeClass class])</code>)</mark>，因为前者可以正确处理那些使用了消息传递机制（参见第12条）的对象。比方 说，某个对象可能会把其收到的所有选择子都转发给另外一个对象。这样的对象叫做“代理” (proxy)，此种对象均以<code>NSProxy</code>为根类。</p>
+
+<p>通常情况下，如果在此种代理对象上调用class方法，那么返回的是代理对象本身（此类 是NSProxy的子类)，而非接受的代理的对象所属的类。然而，若是改用“isKindOfClass:” 这样的类型信息査询方法，那么代理对象就会把这条消息转给“接受代理的对象”（proxied object)。<font color=red>也就是说，这条消息的返回值与直接在接受代理的对象上面査询其类型所得的结果 相同。因此，这样査出来的类对象与通过class方法所返回的那个类对象不同，class方法所返回的类表示发起代理的对象，而非接受代理的对象。</font></p>
+
+<h2 id="toc_1">要点</h2>
+
+<ul>
+<li>每个实例都有一个指向Class对象的指针，用以表明其类型，而这些Class对象则构成了类的继承体系。</li>
+<li>如果对象类型无法在编译期确定，那么就应该使用类型信息査询方法来探知。</li>
+<li>尽量使用类型信息査询方法来确定对象类型，而不要直接比较类对象，因为某些对象可能实现了消息转发功能。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/24</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
@@ -1449,31 +881,31 @@ if (self == object) return YES;
 	      
 		      
 			      <li class="post">
-			        <a href="15128072112005.html">Relative Ranks</a>
+			        <a href="15129821006078.html">Sort Characters By Frequency</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128043838038.html">Valid Anagram</a>
+			        <a href="15129806433168.html">First Unique Character in a String</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128026901484.html">Assign Cookies</a>
+			        <a href="15129796221707.html">Minimum Moves to Equal Array Elements II</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128009688279.html">Ransom Note</a>
+			        <a href="15129788527282.html">Minimum Moves to Equal Array Elements</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127898937133.html">Reverse String II</a>
+			        <a href="15129760305793.html">Range Addition II</a>
 			      </li>
 		     
 		  

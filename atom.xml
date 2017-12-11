@@ -4,13 +4,419 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-12-08T21:49:54+08:00</updated>
+  <updated>2017-12-09T16:17:16+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Sort Characters By Frequency]]></title>
+    <link href="https://lockxmonk.github.io/15129821006078.html"/>
+    <updated>2017-12-11T16:48:20+08:00</updated>
+    <id>https://lockxmonk.github.io/15129821006078.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15129821006078/15129821362536.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string frequencySort(string s) {
+        unordered_map&lt;char, int&gt; map;
+        for (int i =0; i&lt;s.length(); i++) {
+            map[s[i]]++;
+        }
+
+        sort(s.begin(), s.end(), [&amp;map](char a ,char b){
+            return map[a]&gt;map[b] || (map[a] == map[b] &amp;&amp; a &gt; b);
+        });
+        
+        return s;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[First Unique Character in a String]]></title>
+    <link href="https://lockxmonk.github.io/15129806433168.html"/>
+    <updated>2017-12-11T16:24:03+08:00</updated>
+    <id>https://lockxmonk.github.io/15129806433168.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15129806433168/15129806517273.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int firstUniqChar(string s) {
+        unordered_map&lt;char, int&gt; map;
+        for (int i =0; i&lt;s.length(); i++) {
+            map[s[i]]++;
+        }
+        for (int i =0; i&lt;s.length(); i++) {
+            if (map[s[i]]==1) {
+                return i;
+            }
+        }
+        return -1;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Minimum Moves to Equal Array Elements II]]></title>
+    <link href="https://lockxmonk.github.io/15129796221707.html"/>
+    <updated>2017-12-11T16:07:02+08:00</updated>
+    <id>https://lockxmonk.github.io/15129796221707.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15129796221707/15129796318879.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int minMoves2(vector&lt;int&gt;&amp; nums) {
+        int n = nums.size();
+        if(n &lt;= 1) return 0;
+        sort(nums.begin(), nums.end());
+        int mid = nums.size()/2 ,res = 0;
+        for(int i = 0; i &lt; mid; ++i)
+        {
+            res+=nums[mid]-nums[i];
+        }
+        for (int j = n-1; j&gt;mid; j--) {
+            res+=nums[j]-nums[mid];
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Minimum Moves to Equal Array Elements]]></title>
+    <link href="https://lockxmonk.github.io/15129788527282.html"/>
+    <updated>2017-12-11T15:54:12+08:00</updated>
+    <id>https://lockxmonk.github.io/15129788527282.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15129788527282/15129788644532.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int minMoves(vector&lt;int&gt;&amp; nums) {
+        int n = nums.size();
+        if(n &lt;= 1)
+            return 0;
+        int mn = nums[0];   //mn为最小数字
+        int sum = nums[0];
+        for(int i = 1; i &lt; n; ++i)
+        {
+            mn = min(mn,nums[i]);
+            sum += nums[i];
+        }
+        return sum - mn*n;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Range Addition II]]></title>
+    <link href="https://lockxmonk.github.io/15129760305793.html"/>
+    <updated>2017-12-11T15:07:10+08:00</updated>
+    <id>https://lockxmonk.github.io/15129760305793.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15129760305793/15129772098038.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int maxCount(int m, int n, vector&lt;vector&lt;int&gt;&gt;&amp; ops) {
+        for (auto tmp:ops) {
+            m = min(m, tmp[0]);
+            n = min(n, tmp[1]);
+        }
+        return m*n;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Beauty Contest（旋转卡壳）]]></title>
+    <link href="https://lockxmonk.github.io/15129738955534.html"/>
+    <updated>2017-12-11T14:31:35+08:00</updated>
+    <id>https://lockxmonk.github.io/15129738955534.html</id>
+    <content type="html"><![CDATA[
+<p>Description<br/>
+Bessie, Farmer John&#39;s prize cow, has just won first place in a bovine beauty contest, earning the title &#39;Miss Cow World&#39;. As a result, Bessie will make a tour of N (2 &lt;= N &lt;= 50,000) farms around the world in order to spread goodwill between farmers and their cows. For simplicity, the world will be represented as a two-dimensional plane, where each farm is located at a pair of integer coordinates (x,y), each having a value in the range -10,000 ... 10,000. No two farms share the same pair of coordinates.</p>
+
+<p>Even though Bessie travels directly in a straight line between pairs of farms, the distance between some farms can be quite large, so she wants to bring a suitcase full of hay with her so she has enough food to eat on each leg of her journey. Since Bessie refills her suitcase at every farm she visits, she wants to determine the maximum possible distance she might need to travel so she knows the size of suitcase she must bring.Help Bessie by computing the maximum distance among all pairs of farms.</p>
+
+<p>Input<br/>
+ Line 1: A single integer, N</p>
+
+<p>Lines 2..N+1: Two space-separated integers x and y specifying coordinate of each farm</p>
+
+<p>Output<br/>
+Line 1: A single integer that is the squared distance between the pair of farms that are farthest apart from each other.</p>
+
+<p>Sample Input</p>
+
+<p>4<br/>
+0 0<br/>
+0 1<br/>
+1 1<br/>
+1 0</p>
+
+<p>Sample Output</p>
+
+<p>2</p>
+
+<h2 id="toc_0">算法思想</h2>
+
+<h3 id="toc_1">流程：</h3>
+
+<ol>
+<li><p>求凸包：最远点对一定在凸包上（可以反证法证之），所以找出凸包后在其上找最远点对就可以少考虑很多点。求凸包可用<code>andrew</code>算法，它是基于<code>graham</code>算法，且更快更稳定。不同于<code>graham</code>算法的逆时针排序，<code>andrew</code>算法采用了点的水平排序，然后分别求下凸包以及上凸包，这样下来整个的凸包便求好了。而且该算法可以解决凸包中有重合点、共线点等问题<img src="media/15129738955534/15129741482264.jpg" alt=""/></p></li>
+<li><p>旋转卡壳<br/>
+就是两个平行线正好把凸包卡住，其中卡着的点称为对踵点对.<br/>
+<img src="media/15129738955534/15129741907694.jpg" alt=""/></p></li>
+</ol>
+
+<p>那么怎么才能找到最远点对呢？<br/>
+<img src="media/15129738955534/15129742545712.jpg" alt=""/></p>
+
+<p>对于上图中的6个三角形的公共底边，可知当三角形的顶点在凸包上按逆时针旋转时，三角形的面积先由小变大再由大变小，即成单峰函数变化。所以在峰值时对应的凸包顶点距底边对应的两个对踵点的距离比其他情况大，这样，枚举每一个边并找到其面积单峰函数峰值对应的顶点，同时更新最大距离，旋转一趟下来便可以得到最后的结果。求面积单峰函数的峰值也很简单，就是通过叉积比较两个三角形的大小，当后者的面积比前者小时便找到了峰值，然后求距离更新最大值即可。</p>
+
+<pre><code class="language-c++">    #include &lt;cstdio&gt;  
+    #include &lt;vector&gt;  
+    #include &lt;algorithm&gt;  
+    #include &lt;cstring&gt;  
+    using namespace std;  
+    const int maxn = 50000 + 10;  
+    typedef int type_xy;  
+      
+    struct P  
+    {  
+        type_xy x, y;  
+        P() {}  
+        P(type_xy x, type_xy y) : x(x), y(y) {}  
+        P operator + (P p){ return P(x + p.x, y + p.y); }  
+        P operator - (P p){ return P(x - p.x, y - p.y); }  
+        P operator * (type_xy d){ return P(x*d, y*d); }  
+        bool operator &lt; (const P&amp; a) const  
+        {  
+            if (x != a.x) return x &lt; a.x;  
+            else return y &lt; a.y;  
+        }  
+        type_xy dot(P p) { return x*p.x + y*p.y; }  
+        type_xy det(P p) { return x*p.y - y*p.x; }  
+    };  
+      
+    int N;  
+    P ps[maxn];  
+      
+    //字典序比较  
+    bool cmp_x(const P&amp; p, const P&amp; q)  
+    {  
+        if (p.x != q.x)  
+            return p.x &lt; q.x;  
+        return p.y &lt; q.y;  
+    }  
+      
+    //求凸包  
+    vector&lt;P&gt; convex_hull(P* ps, int n)  
+    {  
+        sort(ps, ps + n, cmp_x);  
+        int k = 0;          //凸包的顶点数  
+        vector&lt;P&gt; qs(n * 2);        //构造中的凸包  
+        //构造凸包的下侧  
+        for (int i = 0; i &lt; n; i++){  
+            while (k &gt; 1 &amp;&amp; (qs[k - 1] - qs[k - 2]).det(ps[i] - qs[k - 1]) &lt;= 0)  
+                k--;  
+            qs[k++] = ps[i];  
+        }  
+        //构造凸包的上侧  
+        for (int i = n - 2, t = k; i &gt;= 0; i--){  
+            while (k &gt; t &amp;&amp; (qs[k - 1] - qs[k - 2]).det(ps[i] - qs[k - 1]) &lt;= 0)  
+                k--;  
+            qs[k++] = ps[i];  
+        }  
+        qs.resize(k - 1);  
+        return qs;  
+    }  
+      
+    //距离的平方  
+    double dist(P p, P q)  
+    {  
+        return (p - q).dot(p - q);  
+    }  
+      
+      
+    void solve()  
+    {  
+        vector&lt;P&gt; qs = convex_hull(ps, N);  
+        int n = qs.size();  
+        if (n == 2){         //特别处理凸包退化的情况  
+            printf(&quot;%.0f\n&quot;, dist(qs[0], qs[1]));  
+            return;  
+        }  
+        int i = 0, j = 0;           //某个方向上的对踵点对  
+        //求出x轴方向上的对踵点对  
+        for (int k = 0; k &lt; n; k++){  
+            if (!cmp_x(qs[i], qs[k]))  
+                i = k;  
+            if (cmp_x(qs[j], qs[k]))  
+                j = k;  
+        }  
+        double res = 0;  
+        int si = i, sj = j;  
+        while (i != sj || j != si){     //将方向逐步旋转180度  
+            res = max(res, dist(qs[i], qs[j]));  
+            //判断先转到边i-(i+1)的法线方向还是边j-(j+1)的法线方向  
+            if ((qs[(i + 1) % n] - qs[i]).det(qs[(j + 1) % n] - qs[j]) &lt; 0)  
+                i = (i + 1) % n;        //先转到边i-(i+1)的法线方向  
+            else  
+                j = (j + 1) % n;        //先转到边j-(j+1)的法线方向  
+        }  
+        printf(&quot;%.0f\n&quot;, res);  
+    }  
+      
+    int main()  
+    {  
+        while (scanf(&quot;%d&quot;, &amp;N) != EOF){  
+            for (int i = 0; i &lt; N; i++){  
+                scanf(&quot;%d%d&quot;, &amp;ps[i].x, &amp;ps[i].y);  
+            }  
+            solve();  
+        }  
+        return 0;  
+    }  
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Excel Sheet Column Title]]></title>
+    <link href="https://lockxmonk.github.io/15129633578167.html"/>
+    <updated>2017-12-11T11:35:57+08:00</updated>
+    <id>https://lockxmonk.github.io/15129633578167.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15129633578167/15129633692969.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string convertToTitle(int n) {
+        string res = &quot;&quot;;
+        while (n!=0) {
+            res = char(&#39;A&#39;+(--n)%26)+res;
+            n=n/26;
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Excel Sheet Column Number]]></title>
+    <link href="https://lockxmonk.github.io/15129586256568.html"/>
+    <updated>2017-12-11T10:17:05+08:00</updated>
+    <id>https://lockxmonk.github.io/15129586256568.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15129586256568/15129586339253.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int titleToNumber(string s) {
+        int res = 0;
+        for (int i=0; i&lt;s.length(); i++) {
+            res = res * 26 + (s[i] - &#39;A&#39; + 1);
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Flood Fill]]></title>
+    <link href="https://lockxmonk.github.io/15129573661731.html"/>
+    <updated>2017-12-11T09:56:06+08:00</updated>
+    <id>https://lockxmonk.github.io/15129573661731.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15129573661731/15129573748798.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    void fillColor(vector&lt;vector&lt;int&gt;&gt;&amp; image,int sr, int sc ,int tmp){
+        if (sr&gt;0&amp;&amp;image[sr-1][sc]==tmp) {
+            image[sr-1][sc]=image[sr][sc];
+            fillColor(image, sr-1, sc, tmp);
+        }
+        if (sr&lt;image.size()-1&amp;&amp;image[sr+1][sc]==tmp) {
+            image[sr+1][sc]=image[sr][sc];
+            fillColor(image, sr+1, sc, tmp);
+        }
+        if (sc&gt;0&amp;&amp;image[sr][sc-1]==tmp) {
+            image[sr][sc-1]=image[sr][sc];
+            fillColor(image, sr, sc-1, tmp);
+        }
+        if (sc&lt;image[0].size()-1&amp;&amp;image[sr][sc+1]==tmp) {
+            image[sr][sc+1]=image[sr][sc];
+            fillColor(image, sr, sc+1, tmp);
+        }
+    }
+
+    vector&lt;vector&lt;int&gt;&gt; floodFill(vector&lt;vector&lt;int&gt;&gt;&amp; image, int sr, int sc, int newColor) {
+        int tmp = image[sr][sc];
+        if (tmp == newColor) {
+            return image;
+        }
+        image[sr][sc] = newColor;
+        fillColor(image, sr, sc, tmp);
+        return image;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Construct the Rectangle]]></title>
+    <link href="https://lockxmonk.github.io/15129554975886.html"/>
+    <updated>2017-12-11T09:24:57+08:00</updated>
+    <id>https://lockxmonk.github.io/15129554975886.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15129554975886/15129555123983.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; constructRectangle(int area) {
+        for(int mid = sqrt(area); mid&gt;0; mid--)
+            if (!(area%mid))
+                return {area/mid, mid};
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Relative Ranks]]></title>
@@ -337,328 +743,6 @@ public:
     }
 };
 </code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Fizz Buzz]]></title>
-    <link href="https://lockxmonk.github.io/15127166881202.html"/>
-    <updated>2017-12-08T15:04:48+08:00</updated>
-    <id>https://lockxmonk.github.io/15127166881202.html</id>
-    <content type="html"><![CDATA[
-<p>Write a program that outputs the string representation of numbers from 1 to n.</p>
-
-<p>But for multiples of three it should output “Fizz” instead of the number and for the multiples of five output “Buzz”. For numbers which are multiples of both three and five output “FizzBuzz”.</p>
-
-<p><img src="media/15127166881202/15127167059726.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;string&gt; fizzBuzz(int n) {
-        vector&lt;string&gt; res;
-        for (int i=1; i&lt;=n; i++) {
-            if (i%3==0&amp;&amp;i%5==0) {
-                res.push_back(&quot;FizzBuzz&quot;);
-            }else if (i%5==0){
-                res.push_back(&quot;Buzz&quot;);
-            }else if(i%3==0){
-                res.push_back(&quot;Fizz&quot;);
-            }else{
-                res.push_back(to_string(i));
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Sum of Two Integers]]></title>
-    <link href="https://lockxmonk.github.io/15127150080101.html"/>
-    <updated>2017-12-08T14:36:48+08:00</updated>
-    <id>https://lockxmonk.github.io/15127150080101.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15127150080101/15127150099516.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int getSum(int a, int b) {
-        int sum = a;
-        while (b!=0) {
-            sum = a^b;
-            b = (a&amp;b)&lt;&lt;1;
-            a = sum;
-        }
-        return a;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Employee Importance]]></title>
-    <link href="https://lockxmonk.github.io/15127074753393.html"/>
-    <updated>2017-12-08T12:31:15+08:00</updated>
-    <id>https://lockxmonk.github.io/15127074753393.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15127074753393/15127075000371.jpg" alt=""/></p>
-
-<pre><code class="language-c++">/*
-// Employee info
-class Employee {
-public:
-    // It&#39;s the unique ID of each node.
-    // unique id of this employee
-    int id;
-    // the importance value of this employee
-    int importance;
-    // the id of direct subordinates
-    vector&lt;int&gt; subordinates;
-};
-*/
-class Solution {
-public:
-    int getImportance(vector&lt;Employee*&gt; employees, int id) {
-        unordered_map&lt;int ,Employee*&gt; map;
-        for(auto emp:employees){
-            map[emp-&gt;id] = emp;
-        }
-        return help(map,id);
-    }
-    
-    int help(unordered_map&lt;int, Employee*&gt;&amp; map, int id){
-        int sum = map[id]-&gt;importance;
-        for(auto element : map[id]-&gt;subordinates){
-            sum += help(map, element);
-        }
-        return sum;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Single Number]]></title>
-    <link href="https://lockxmonk.github.io/15127037334925.html"/>
-    <updated>2017-12-08T11:28:53+08:00</updated>
-    <id>https://lockxmonk.github.io/15127037334925.html</id>
-    <content type="html"><![CDATA[
-<p>Given an array of integers, every element appears twice except for one. Find that single one.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int singleNumber(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (nums[i]!=nums[i+1]) {
-                return nums[i];
-            }else{
-                i++;
-            }
-        }
-        return -1;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Nim Game]]></title>
-    <link href="https://lockxmonk.github.io/15126366447476.html"/>
-    <updated>2017-12-07T16:50:44+08:00</updated>
-    <id>https://lockxmonk.github.io/15126366447476.html</id>
-    <content type="html"><![CDATA[
-<p>You are playing the following Nim Game with your friend: There is a heap of stones on the table, each time one of you take turns to remove 1 to 3 stones. The one who removes the last stone will be the winner. You will take the first turn to remove the stones.</p>
-
-<p>Both of you are very clever and have optimal strategies for the game. Write a function to determine whether you can win the game given the number of stones in the heap.</p>
-
-<p>For example, if there are 4 stones in the heap, then you will never win the game: no matter 1, 2, or 3 stones you remove, the last stone will always be removed by your friend.</p>
-
-<p>列举1~n情况，每4个一循环.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool canWinNim(int n) {
-        return n%4!=0;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Next Greater Element I]]></title>
-    <link href="https://lockxmonk.github.io/15126354530210.html"/>
-    <updated>2017-12-07T16:30:53+08:00</updated>
-    <id>https://lockxmonk.github.io/15126354530210.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15126354530210/15126354552862.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; nextGreaterElement(vector&lt;int&gt;&amp; findNums, vector&lt;int&gt;&amp; nums) {
-        vector&lt;int&gt; res;
-        for(auto num1:findNums){
-            for (int i = 0; i&lt;nums.size(); i++) {
-                int log = 0;
-                if (nums[i]==num1) {
-                    for (int j = i; j&lt;nums.size(); j++) {
-                        if (nums[j]&gt;num1) {
-                            res.push_back(nums[j]);
-                            log = 1;
-                            break;
-                        }
-                    }
-                    if (log == 0) res.push_back(-1);
-                    break;
-                }
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Island Perimeter]]></title>
-    <link href="https://lockxmonk.github.io/15126325722591.html"/>
-    <updated>2017-12-07T15:42:52+08:00</updated>
-    <id>https://lockxmonk.github.io/15126325722591.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15126325722591/15126325750006.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int islandPerimeter(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
-        int squNum = 0 ,log = 0;
-        for (int i = 0; i&lt;grid.size(); i++) {
-            for (int j = 0; j&lt;grid[0].size(); j++) {
-                if (grid[i][j]==1) {
-                    squNum++;
-                    if (i!=0&amp;&amp;grid[i-1][j]==1) {
-                        log+=2;
-                    }
-                    if (j!=grid[0].size()-1&amp;&amp;grid[i][j+1]==1) {
-                        log+=2;
-                    }
-                }
-            }
-        }
-        return squNum*4-log;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Hamming Distance]]></title>
-    <link href="https://lockxmonk.github.io/15126119727244.html"/>
-    <updated>2017-12-07T09:59:32+08:00</updated>
-    <id>https://lockxmonk.github.io/15126119727244.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15126119727244/15126119824070.jpg" alt=""/></p>
-
-<p>利用按位异或操作<code>^</code>来标记不同的位置。<br/>
-<code>c++<br/>
-class Solution {<br/>
-public:<br/>
-    int hammingDistance(int x, int y) {<br/>
-        int tmp = x^y;<br/>
-        int res = 0;<br/>
-        while (tmp) {<br/>
-            if ((tmp&gt;&gt;1)&lt;&lt;1!=tmp) {<br/>
-                res++;<br/>
-            }<br/>
-            tmp&gt;&gt;=1;<br/>
-        }<br/>
-        return res;<br/>
-    }<br/>
-};<br/>
-</code></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Keyboard Row]]></title>
-    <link href="https://lockxmonk.github.io/15125498375074.html"/>
-    <updated>2017-12-06T16:43:57+08:00</updated>
-    <id>https://lockxmonk.github.io/15125498375074.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15125498375074/15125498549999.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;string&gt; findWords(vector&lt;string&gt;&amp; words) {
-        set&lt;char&gt; row1 = {&#39;q&#39;, &#39;w&#39;, &#39;e&#39;, &#39;r&#39;, &#39;t&#39;, &#39;y&#39;,&#39;u&#39;, &#39;i&#39;, &#39;o&#39;, &#39;p&#39;};
-        set&lt;char&gt; row2 = {&#39;a&#39;, &#39;s&#39;, &#39;d&#39;, &#39;f&#39;, &#39;g&#39;, &#39;h&#39;, &#39;j&#39;, &#39;k&#39;, &#39;l&#39;};
-        set&lt;char&gt; row3 = { &#39;z&#39;, &#39;x&#39;, &#39;c&#39;, &#39;v&#39;, &#39;b&#39; ,&#39;n&#39;, &#39;m&#39;};
-        vector&lt;set&lt;char&gt;&gt; rows = {row1,row2,row3};
-        vector&lt;string&gt; res;
-        for (auto str: words) {
-            int log = 0;
-            for (int i = 0; i&lt;rows.size(); i++) {
-                if (rows[i].count((char)tolower(str[0]))&gt;0) {
-                    log = i;
-                }
-            }
-            for (int j = 0; j&lt;str.length(); j++) {
-                if (rows[log].count((char)tolower(str[j]))==0) {
-                    break;
-                }
-                if (j==str.length()-1) {
-                    res.push_back(str);
-                }
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Repeated String Match]]></title>
-    <link href="https://lockxmonk.github.io/15125446581353.html"/>
-    <updated>2017-12-06T15:17:38+08:00</updated>
-    <id>https://lockxmonk.github.io/15125446581353.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15125446581353/15125446683319.jpg" alt=""/></p>
-
-<p>要考虑<code>&quot;abc&quot; &quot;abc&quot; &quot;abc&quot;</code>和<code>&quot;c abc a&quot;</code>的情况，所以<code>i&lt;=lenB/lenA+2</code><br/>
-<code>c++<br/>
-class Solution {<br/>
-public:<br/>
-    int repeatedStringMatch(string A, string B) {<br/>
-        int lenA = A.length(),lenB = B.length();<br/>
-        string tmp = A;<br/>
-        for (int i = 1; i&lt;=lenB/lenA+2; i++ , tmp+=A) {<br/>
-            if (tmp.find(B)!=string::npos) {<br/>
-                return i;<br/>
-            }<br/>
-        }<br/>
-        return -1;<br/>
-    }<br/>
-};<br/>
-</code></p>
 
 ]]></content>
   </entry>

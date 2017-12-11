@@ -117,48 +117,29 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15120236843494.html">
+                <a class="clearlink" href="15121120473287.html">
                 
-                  <h1>Summary Ranges</h1>
+                  <h1>Contains Duplicate II</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a sorted integer array without duplicates, return the summary of its ranges.求数组中，连续数字的区间。</p>
+                        	<p>Given an array of integers and an integer <code>k</code>, find out whether there are two distinct indices <code>i</code> and <code>j</code> in the array such that <code>nums[i] = nums[j]</code> and the absolute difference between <code>i</code> and <code>j</code> is at most <code>k</code>.</p>
 
-<p><img src="media/15120236843494/15120237048289.jpg" alt=""/></p>
+<p>判断数组中是否有重复的元素，并且下标之差不超过<code>k</code>。</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    vector&lt;string&gt; summaryRanges(vector&lt;int&gt;&amp; nums) {
-        
-        vector&lt;string&gt; result;
-        if(nums.size()==0) return result;
-        
-        int end = nums[0]+1;
-        int total = 0;
-        if (nums.size()==1) {
-            result.push_back(to_string(nums[0]));
-            return result;
-        }
-        nums.push_back(INT_MAX); //充当哨兵
-        for (int i=1; i&lt;nums.size(); i++) {
-            if (nums[i]==end) {
-                end++;
-                total++;
-                continue;
+    bool containsNearbyDuplicate(vector&lt;int&gt;&amp; nums, int k) {
+        unordered_map&lt;int, int&gt; hash;
+        for (int i=0; i&lt;nums.size(); i++) {
+            if (hash.find(nums[i])!=hash.end()&amp;&amp;i-hash[nums[i]]&lt;=k) {
+                return 1;
             }else{
-                end = nums[i]+1;
-                if (total==0) {
-                    result.push_back(to_string(nums[i-1]));
-                }else{
-                    string tmp = to_string(nums[i-1-total])+&quot;-&gt;&quot;+to_string(nums[i-1]);
-                    result.push_back(tmp);
-                }
-                total = 0;
+                hash[nums[i]] = i;
             }
         }
-        return result;
+        return 0;
     }
 };
 </code></pre>
@@ -170,7 +151,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/30</span>
+                    <span class="date">2017/12/1</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -187,38 +168,30 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15120100977395.html">
+                <a class="clearlink" href="15121110105671.html">
                 
-                  <h1>Majority Element</h1>
+                  <h1>Two Sum</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given an array of size n, find the majority element. The majority element is the element that appears more than <code>⌊ n/2 ⌋</code> times.</p>
+                        	<p><img src="media/15121110105671/15121110244234.jpg" alt=""/></p>
 
-<p>You may assume that the array is non-empty and the majority element always exist in the array.</p>
+<p><strong>运用hash表</strong></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int majorityElement(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        int total = 1;
-        int tmp = 1;
-        int result = nums[0];
-        if (nums.size()==1) {
-            return result;
-        }
-        nums.push_back(INT_MAX); //在最后增加一个边界哨兵
-        for (int i=1; i&lt;=nums.size(); i++) {
-            if (nums[i]==nums[i-1]) {
-                tmp++;
-            }else{
-                result = tmp&gt;total ? nums[i-1]:result;
-                total = max(tmp, total);
-                tmp = 1;
+    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; nums, int target) {
+        unordered_map&lt;int, int&gt; hash;
+        vector&lt;int&gt; result;
+        for (int i=0; i&lt;nums.size(); i++) {
+            int numToFind = target - nums[i];
+            if (hash.find(numToFind)!=hash.end()) {
+                result.push_back(hash[numToFind]);
+                result.push_back(i);
             }
+            hash[nums[i]] = i;
         }
-        
         return result;
     }
 };
@@ -231,7 +204,59 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/30</span>
+                    <span class="date">2017/12/1</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120990794732.html">
+                
+                  <h1>Maximum Average Subarray I</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15120990794732/15120991082558.jpg" alt=""/></p>
+
+<p><strong>解决方法：滑动窗口方案</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    double findMaxAverage(vector&lt;int&gt;&amp; nums, int k) {
+        double r = INT_MIN;
+        double sum = 0;
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if (i&lt;k) {
+                sum+=nums[i];
+            }else{
+                r = max(sum, r);
+                sum +=nums[i]-nums[i-k];
+            }
+        }
+        r = max(sum, r);
+        return r/double(k);
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -248,39 +273,85 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15120074710373.html">
+                <a class="clearlink" href="15120964350892.html">
                 
-                  <h1>Remove Duplicates from Sorted Array</h1>
+                  <h1>Pascal's Triangle</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a sorted array, remove the duplicates <code>in-place</code> such that each element appear only once and return the new length.</p>
+                        	<p>Given numRows, generate the first numRows of Pascal&#39;s triangle.</p>
 
-<p>Do not allocate extra space for another array, you must do this by modifying the input array <code>in-place</code> with O(1) extra memory.</p>
-
-<p><img src="media/15120074710373/15120081165110.jpg" alt=""/></p>
+<p>For example, given numRows = 5,<br/>
+Return<img src="media/15120964350892/15120964567125.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
-        int tmp = INT_MIN;
-        int log = 0;
+    vector&lt;vector&lt;int&gt;&gt; generate(int numRows) {
+        vector&lt;vector&lt;int&gt;&gt;result(numRows);
+        for (int i = 0; i&lt;numRows; i++) {
+            result[i].resize(i+1);
+            result[i][0] = result[i][i] = 1;
+        
+            for (int j = 1; j&lt;i; j++) {
+                result[i][j] = result[i-1][j-1]+result[i-1][j];
+            }
+        }
+        return result;
+        
+     }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120931328273.html">
+                
+                  <h1>Search Insert Position</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
+
+<p>You may assume no duplicates in the array.<br/>
+<img src="media/15120931328273/15120931550538.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
+        int result = 0;
         for (int i =0; i&lt;nums.size(); i++) {
-            if (tmp!=nums[i]) {
-                tmp = nums[i];
-            }else{
-                log++;
+            if (nums[i]&gt;=target) {
+                return i;
             }
-            nums[i-log] = nums[i];
         }
-        
-        return nums.size()-log;
+        return nums.size();
     }
 };
 </code></pre>
-
-<p><img src="media/15120074710373/15120082747602.jpg" alt=""/></p>
 
                         
                       </div>
@@ -289,8 +360,10 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/30</span>
-                    
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -304,149 +377,91 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15120073985530.html">
+                <a class="clearlink" href="15120924554362.html">
                 
-                  <h1>Remove Element</h1>
+                  <h1>Maximum Subarray</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given an array and a value, remove all instances of that value <strong>in-place</strong> and return the new length.</p>
+                        	<p>Find the contiguous subarray within an array (containing at least one number) which has the largest sum.</p>
 
-<p>Do not allocate extra space for another array, you must do this by modifying the input array <strong>in-place</strong> with O(1) extra memory.</p>
+<p>For example, given the array<code>[-2,1,-3,4,-1,2,1,-5,4]</code>,<br/>
+the contiguous subarray <code>[4,-1,2,1]</code> has the largest sum = <code>6</code>.</p>
 
-<p>The order of elements can be changed. It doesn&#39;t matter what you leave beyond the new length.</p>
-
-<p><img src="media/15120073985530/15120074297000.jpg" alt=""/></p>
+<p>第一种解法：分治法</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int removeElement(vector&lt;int&gt;&amp; nums, int val) {
-        int total = 0;
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (nums[i]==val) {
-                total++;
-            }else{
-                nums[i-total] = nums[i];
+    vector&lt;int&gt; findCrossSubArray(vector&lt;int&gt;&amp; nums, int mid, int low ,int high){
+        int sum = 0;
+        int leftSum = INT_MIN;
+        int maxLeft = 0;
+        for (int i = mid; i&gt;=low; i--) {
+            sum = sum+nums[i];
+            if (sum&gt;leftSum) {
+                leftSum = sum;
+                maxLeft = i;
             }
         }
-        return nums.size()-total;
-    }
-};
-</code></pre>
-
-<p><img src="media/15120073985530/15120074551545.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120064619713.html">
-                
-                  <h1>Move Zeroes</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array <code>nums</code>, write a function to move all 0&#39;s to the end of it while maintaining the relative order of the non-zero elements.</p>
-
-<p>For example, given <code>nums = [0, 1, 0, 3, 12]</code>, after calling your function, <code>nums</code> should be <code>[1, 3, 12, 0, 0]</code>.</p>
-
-<p><strong>Note:</strong><br/>
-1.  You must do this in-place without making a copy of the array.<br/>
-2.  Minimize the total number of operations.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    void moveZeroes(vector&lt;int&gt;&amp; nums) {
-        int log = 0; //索引0元素位置
-        int logNO = 0;  //索引非0应放元素位置
-        while (log&lt;nums.size()) {
-            if (nums[log]!=0) {
-                swap(nums[logNO], nums[log]);
-                logNO++;
+        sum = 0;
+        int rightSum = INT_MIN;
+        int maxRight = 0;
+        for (int j=mid+1; j&lt;=high; j++) {
+            sum = sum+nums[j];
+            if (sum&gt;rightSum) {
+                rightSum = sum;
+                maxRight = j;
             }
-            log++;
         }
+        
+        return {{maxLeft,maxRight,leftSum+rightSum}};
+    }
+
+    vector&lt;int&gt; findMaxSubArray(vector&lt;int&gt;&amp; nums,int low ,int high)
+    {
+        if (low==high) {
+            return {{low,high,nums[low]}};
+        }else{
+            int mid = (low+high)/2;
+            vector&lt;int&gt; leftSum = findMaxSubArray(nums, low, mid);
+            vector&lt;int&gt; rightSum = findMaxSubArray(nums, mid+1, high);
+            vector&lt;int&gt; crossSum = findCrossSubArray(nums, mid, low, high);
+            if (leftSum[2]&gt;=rightSum[2]&amp;&amp;leftSum[2]&gt;=crossSum[2]) {
+                return leftSum;
+            }else if(rightSum[2]&gt;=leftSum[2]&amp;&amp;rightSum[2]&gt;=crossSum[2])
+            {
+                return rightSum;
+            }
+            else return crossSum;
+        }
+    
+    }
+
+
+    int maxSubArray(vector&lt;int&gt;&amp; nums) {
+        int len = nums.size()-1;
+        vector&lt;int&gt; result = findMaxSubArray(nums, 0, len);
+        return result[2];
     }
 };
 </code></pre>
 
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15119708919827.html">
-                
-                  <h1>Find All Numbers Disappeared in an Array</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of integers where 1 ≤ a[i] ≤ n (n = size of array), some elements appear twice and others appear once.</p>
-
-<p>Find all the elements of [1, n] inclusive that do not appear in this array.</p>
-
-<p>Could you do it without extra space and in O(n) runtime? You may assume the returned list does not count as extra space.</p>
-
-<p><img src="media/15119708919827/15119710141999.jpg" alt=""/></p>
+<p>第二种解法：</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    vector&lt;int&gt; findDisappearedNumbers(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size();
-        for(int i=0; i&lt;len; i++) {
-            int m = abs(nums[i])-1;  // index start from 0
-            nums[m] = nums[m]&gt;0 ? -nums[m] : nums[m];
+    int maxSubArray(vector&lt;int&gt;&amp; nums) {
+        int ans=nums[0],i,j,sum=0;
+        for(i=0;i&lt;nums.size();i++){
+            sum+=nums[i];
+            ans=max(sum,ans);
+            sum=max(sum,0);
         }
-        vector&lt;int&gt; res;
-        for(int i = 0; i&lt;len; i++) {
-            if(nums[i] &gt; 0) res.push_back(i+1);
-        }
-        return res;
+        return ans;
     }
 };
 </code></pre>
-
-<p>该题用了一个特殊的方法，<strong>取负法</strong>。</p>
-
-<p><strong>含义是：将元素对应的位置取负。简单一句话可能不好理解，我们举个例子。假设在位置k放了元素i，则在取负的过程中i的取值有两种可能：为正，表示当前尚未遇到元素k将该位置取负；为负，表示当前已经有元素k出现，并将元素取负。但是我们不关心k，我们关心元素i。元素i既然出现，我们就看一下位置i：为正，表示这是元素i第一次出现，我们将位置i取负；为负，表示元素i已经出现过一次，我们不做任何操作。不管一个元素出现一次还是两次，只要出现它对应的位置就会被取负。当某个元素不出现的时候，该元素对应的位置始终访问不到，所以还是正值，通过这种方法我们就可以找到哪些元素没有出现。</strong> </p>
 
                         
                       </div>
@@ -455,7 +470,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/29</span>
+                    <span class="date">2017/12/1</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -560,31 +575,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15128072112005.html">Relative Ranks</a>
+			        <a href="15129821006078.html">Sort Characters By Frequency</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128043838038.html">Valid Anagram</a>
+			        <a href="15129806433168.html">First Unique Character in a String</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128026901484.html">Assign Cookies</a>
+			        <a href="15129796221707.html">Minimum Moves to Equal Array Elements II</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15128009688279.html">Ransom Note</a>
+			        <a href="15129788527282.html">Minimum Moves to Equal Array Elements</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15127898937133.html">Reverse String II</a>
+			        <a href="15129760305793.html">Range Addition II</a>
 			      </li>
 		     
 		  
