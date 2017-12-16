@@ -4,13 +4,136 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-12-09T16:17:16+08:00</updated>
+  <updated>2017-12-11T16:49:21+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[Longest Palindromic Substring]]></title>
+    <link href="https://lockxmonk.github.io/15130621165951.html"/>
+    <updated>2017-12-12T15:01:56+08:00</updated>
+    <id>https://lockxmonk.github.io/15130621165951.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15130621165951/15130621284508.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string longestPalindrome(string s) {
+        if (s.empty()) return &quot;&quot;;
+        if (s.size() == 1) return s;
+        int min_start = 0, max_len = 1;
+        for (int i = 0; i &lt; s.size();) {
+            if (s.size() - i &lt;= max_len / 2) break;
+            int j = i, k = i;
+            while (k &lt; s.size()-1 &amp;&amp; s[k+1] == s[k]) ++k; // Skip duplicate characters.
+            i = k+1;
+            while (k &lt; s.size()-1 &amp;&amp; j &gt; 0 &amp;&amp; s[k + 1] == s[j - 1]) { ++k; --j; } // Expand.
+            int new_len = k - j + 1;
+            if (new_len &gt; max_len) { min_start = j; max_len = new_len; }
+        }
+        return s.substr(min_start, max_len);
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Palindrome Pairs]]></title>
+    <link href="https://lockxmonk.github.io/15130603513802.html"/>
+    <updated>2017-12-12T14:32:31+08:00</updated>
+    <id>https://lockxmonk.github.io/15130603513802.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15130603513802/15130603727154.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool isPalindrome(string s) {
+        if (s.size() &lt;= 1) return true;
+        int i = 0;
+        int j = s.size() - 1;
+        while (i &lt; j) {
+            if (s[i++] != s[j--]) return false;
+        }
+
+        return true;
+    }
+
+    vector&lt;vector&lt;int&gt;&gt; palindromePairs(vector&lt;string&gt;&amp; words) {
+        vector&lt;vector&lt;int&gt;&gt; res;
+        if (!words.size()) return res;
+        unordered_map&lt;string, int&gt; word_idx;
+        for (int i = 0; i &lt; words.size(); ++i) {
+            word_idx[words[i]] = i;
+        }
+        vector&lt;int&gt; slu(2);
+        for (int i = 0; i &lt; words.size(); ++i) {
+            int len = words[i].length();
+            for (int l = 0; l &lt;= len; ++l) {
+                string left = words[i].substr(0, l);
+                string right = words[i].substr(l);
+                string rleft = left;
+                string rright = right;
+                reverse(rleft.begin(), rleft.end());
+                reverse(rright.begin(), rright.end());
+                if (word_idx.find(rleft) != word_idx.end()) {
+                    if (word_idx[rleft] != i &amp;&amp; isPalindrome(right)) {
+                        res.push_back({i,word_idx[rleft]});
+                    }
+
+                }
+                if (l != 0 &amp;&amp; word_idx.find(rright) != word_idx.end()) {
+                    if (word_idx[rright] != i &amp;&amp; isPalindrome(left)) {
+                        res.push_back({word_idx[rright],i});
+                    }
+
+                }
+
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Intersection of Two Arrays II]]></title>
+    <link href="https://lockxmonk.github.io/15130426368802.html"/>
+    <updated>2017-12-12T09:37:16+08:00</updated>
+    <id>https://lockxmonk.github.io/15130426368802.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15130426368802/15130427333668.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; intersect(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
+        unordered_map&lt;int, int&gt; map;
+        vector&lt;int&gt; res;
+        for(auto num1:nums1){
+            map[num1]++;
+        }
+
+        for(auto num2:nums2){
+            if (map[num2]&gt;0) {
+                map[num2]--;
+                res.push_back(num2);
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Sort Characters By Frequency]]></title>
@@ -649,97 +772,6 @@ public:
             st.pop();
         }
         return line;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Happy Number]]></title>
-    <link href="https://lockxmonk.github.io/15127409536382.html"/>
-    <updated>2017-12-08T21:49:13+08:00</updated>
-    <id>https://lockxmonk.github.io/15127409536382.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15127409536382/15127409821970.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int happy(int num){
-        int a = 0;
-        while (num!=0) {
-            a += int(pow(num%10, 2));
-            num/=10;
-        }
-        return a;
-    }
-
-
-    bool isHappy(int n) {
-        int slow, fast;
-        slow = fast = n;
-        do {
-            slow = happy(slow);
-            fast = happy(fast);
-            fast = happy(fast);
-        } while(slow != fast);
-
-        return slow==1?1:0;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Find the Difference]]></title>
-    <link href="https://lockxmonk.github.io/15127221024719.html"/>
-    <updated>2017-12-08T16:35:02+08:00</updated>
-    <id>https://lockxmonk.github.io/15127221024719.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15127221024719/15127221121271.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    char findTheDifference(string s, string t) {
-        char sum = 0;
-        for (char c: s) {
-            sum^=c;
-        }
-        for (char c: t) {
-            sum^=c;
-        }
-        return sum;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Distribute Candies]]></title>
-    <link href="https://lockxmonk.github.io/15127198152754.html"/>
-    <updated>2017-12-08T15:56:55+08:00</updated>
-    <id>https://lockxmonk.github.io/15127198152754.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15127198152754/15127198177167.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int distributeCandies(vector&lt;int&gt;&amp; candies) {
-        int res = 0;
-        unordered_map&lt;int, vector&lt;int&gt;&gt; map;
-        for (int i =0; i&lt;candies.size(); i++) {
-            map[candies[i]].push_back(candies[i]);
-        }
-        if (map.size()&lt;=candies.size()/2) {
-            return map.size();
-        }else{
-            return candies.size()/2;
-        }
     }
 };
 </code></pre>

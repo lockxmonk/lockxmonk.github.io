@@ -117,6 +117,393 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15043212815193.html">
+                
+                  <h1>第三十七条 理解“块”这一概念</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>首先，块与函数类似，只不过是直接定义在另一个函数里的，和定义它的那个函数共享同一 个范围内的东西。块用<code>“^”</code>符号来表示，后面跟着一对花括号，括号里面是块的实现代码。 例如，下面就是个简单的块：</p>
+
+<pre><code class="language-objc">^{
+    //Block implementation here
+}
+</code></pre>
+
+<p>块其实就是个值，而且自有其相关类型。与<code>int</code>、<code>float</code>或<code>Objective-C</code>对象一样，也可以把块赋给变量,然后像使用其他变量那样使用它。块类型的语法与函数指针近似。下面列出的这个块很简单，没有参数，也不返回值：</p>
+
+<pre><code class="language-objc">void (^someBlock) () = A {
+    //Block implementation here
+}；
+</code></pre>
+
+<p>这段代码定义了一个名为<code>someBlock</code>的变量。由于变量名写在正中间，所以看上去也许 =有点怪，不过一旦理解了语法，很容易就能读懂。块类型的语法结构如下：</p>
+
+<pre><code class="language-objc">return_type (^block_name)(parameters)
+</code></pre>
+
+<p>我们来举个例子，下面这种写法所定义的块，返回<code>int</code>值，并且接受两个<code>int</code>做参数：</p>
+
+<pre><code class="language-objc">int (^addBlock) (int a, int b) = ^(int a, int b){
+     return a + b;
+};
+</code></pre>
+
+<p>定义好之后，就可以像函数那样使用了。比方说，<code>addBlock</code>块可以这样用:</p>
+
+<pre><code class="language-objc">int add = addBlock (2, 5) ;  //&lt; add = 12
+</code></pre>
+
+<p>块的强大之处是：在声明它的范围里，所有变量都可以为其所捕获。这也就是说，那个范围里的全部变量，在块里依然可用。比如，下面这段代码所定义的块，就使用了块以外的变量：</p>
+
+<pre><code class="language-objc">int additional = 5;
+int (^addBlock) (int a, int b) = ^(int a, int b){ 
+    return a + b + additional;
+};
+
+int add = addBlock (2, 5);  //&lt; add = 12
+</code></pre>
+
+<p>默认情况下，为块所捕获的变量，是不可以在块里修改的。在本例中，假如块内的代码改动了<code>additional</code>变量的值，那么编译器就会报错。不过，声明变量的时候可以加上<code>__block</code> 修饰符，这样就可以在块内修改了。</p>
+
+<p>例如：</p>
+
+<pre><code class="language-objc">__block int additional = 5;
+int (^addBlock) (int a, int b) = ^(int a, int b){   
+    additional++;
+    return a + b + additional;
+};
+
+int add = addBlock (2, 5);  //&lt; add = 13
+</code></pre>
+
+<p>块的另一个用法是<code>“内联块”（inline block）</code>，例如：</p>
+
+<pre><code class="language-objc">NSArray *array = @[@0, @1, @2, @3, @4, @5];
+_block NSInteger count = 0;
+[array enumerateObjectsUsingBlock:
+    ^(NSNumber *number, NSUInteger idx, BOOL *stop){
+        if([number compare:@2] == NSOrderedAscending) { 
+        count++;
+    }
+}];
+//count = 2
+</code></pre>
+
+<p>这段范例代码也演示了<code>“内联块”（inline block)</code>的用法。传给<code>“numerateObjectsUsingBlock:”</code>方法的块并未先賦给局部变量,而是直接内联在函数调用里了。</p>
+
+<p>然后我们在声明和使用块的时候，要注意它的作用范围。定义块的时候，其所占的内存区域是分配在栈中的。这就是说，块只在定义它的那个范围内有效。比如下面这个：</p>
+
+<pre><code class="language-objc">void(^block)();
+if ( /* some condition */ ){
+    block = ^{
+        NSLog(@&quot;Block A&quot;);
+    };
+} else {
+    block = ^{
+        NSLog(@&quot;Block B&quot;);
+    };
+}
+block();
+</code></pre>
+
+<p>定义在<code>if</code>及<code>else</code>语句中的两个块都分配在栈内存中。编译器会给每个块分配好栈内存, 然而等离开了相应的范围之后，编译器有可能把分配给块的内存覆写掉。于是，这两个块只 能保证在对应的<code>if</code>或<code>else</code>语句范围内有效。这样写出来的代码可以编译，但是运行起来时而正确，时而错误。若编译器未覆写待执行的块，则程序照常运行，若覆写，则程序崩溃。</p>
+
+<p>我们为了解决这个问题可以给块对象发送<code>copy</code>消息以拷贝之。这样的话，就可以把块从栈复制到堆了。</p>
+
+<p>拷贝后的块，可以在定义它的那个范围之外使用。而且，一旦复制到堆上，块就成了带引用计数的对象了。后续的复制操作都不会真的执行复制，只是递增块对象的引用计数。如果不再使用这个块，那就应将其释放，在ARC环境下会自动释放。</p>
+
+<p>改动后跟下面一样：</p>
+
+<pre><code class="language-objc">void (^block)();
+if (/* some condition */ ){ 
+    block = [^{
+        NSLog(@,fBlock Aw);
+    } copy];
+} else {
+    block = [^{
+        NSLog(@&quot;Block B&quot;);
+    } copy];
+}
+block();
+</code></pre>
+
+<p>除了“桟块”和“堆块”之外，还有一类块叫做<strong><mark>“全局块”（global block)</mark></strong>。这种块不会捕捉任何状态（比如外围的变量等)，运行时也无须有状态来参与。块所使用的整个内存区域，在编译期已经完全确定了，因此，全局块可以声明在全局内存里，而不需要在每次用到 的时候于栈中创建。另外，全局块的拷贝操作是个空操作，因为全局块决不可能为系统所回收。这种块实际上相当于单例。下面就是个全局块：</p>
+
+<pre><code class="language-objc">void (^block)() = ^{
+    NSLog(@&quot;This is a block&quot;);
+};
+</code></pre>
+
+<p><mark>由于运行该块所需的全部信息都能在编译期确定，所以可把它做成全局块。</mark>这完全是种优化技术：若把如此简单的块当成复杂的块来处理，那就会在复制及丢弃该块时执行一些无谓的操作。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>块是<code>C、C++、Objective-C</code>中的词法闭包。</li>
+<li>块可接受参数，也可返回值。</li>
+<li>块可以分配在栈或堆上，也可以是全局的。分配在栈上的块可拷贝到堆里，这样的话，就和标准的<code>Objective-C</code>对象一样，具备引用计数了。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15043134527493.html">
+                
+                  <h1>通过协议提供匿名方法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>协议定义了一系列方法，遵从此协议的对象应该实现它们（如果这些方法不是可选的, 那么就必须实现)。于是，我们可以用协议把自己所写的<code>API</code>之中的实现细节隐藏起来，将返回的对象设计为遵从此协议的纯<code>id</code>类型。</p>
+
+<p>这样的话，想要隐藏的类名就不会出现在<code>API</code>之中了。若是接口背后有多个不同的实现类，而你又不想指明具体使用哪个类，那么可以考虑用这个办法——因为有时候这些类可能会变，有时候它们又无法容纳于标准的类继承体系中，因而不能以某个公共基类来统一表示。</p>
+
+<p>此概念经常称为<code>“匿名对象&quot;(anonymous object)</code>，这与其他语言中的“匿名对象”不同，在那些语言中，该词是指以内联形式所创建出来的无名类，而此词在<code>Objective-C</code>中则不是这个意思。</p>
+
+<p>我们之前说的委托与数据源对象，就用到了这个方法。例如在定义“受委托者（delegate）”属性时：</p>
+
+<pre><code class="language-objc">@property {nonatomic, weak) id &lt;EOCDelegate&gt; delegate;
+
+</code></pre>
+
+<p>由于该属性的类型是<code>id&lt;EOCDelegate&gt;</code>,所以实际上任何类的对象都能充当这一属性, 即便该类不继承自<code>NSObject</code>也可以，只要遵循<code>EOCDelegate</code>协议就行。对于具备此属性的类来说，<code>delegate</code>就是“匿名的”（ammymous)。如有需要，可在运行期査出此对象所属的类型（参见第14条）。然而这样做不太好，因为指定属性类型时所写的那个<code>EOCDelegate</code>契约已经表明此对象的具体类型无关紧要了。</p>
+
+<p>当然还有其它的用法，这里我们就不举例了。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>协议可在某种程度上提供匿名类型。具体的对象类型可以淡化成遵从某协议的<code>id</code>类型，协议里规定了对象所应实现的方法。</li>
+<li>使用匿名对象来隐藏类型名称（或类名）。</li>
+<li>如果具体类型不重要，重要的是对象能够响应（定义在协议里的）特定方法，那么可使用匿名对象来表示。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15042539845357.html">
+                
+                  <h1>KVO的简单实现</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>之间看有关<code>OC</code>和<code>iOS</code>的书都会看到<code>KVO</code>这个名词。所以今天来学习和实现一下。简单的说<code>KVO</code>即<code>Key-Value Observing</code>,它提供一种机制,当指定的对象的属性被修改后,则对象就会接受到通知。 </p>
+
+<p>它来源于设计模式中的观察者模式，其基本思想就是：</p>
+
+<blockquote>
+<p>一个目标对象管理所有依赖于它的观察者对象，并在它自身的状态改变时主动通知观察者对象。这个主动通知通常是通过调用各观察者对象所提供的接口方法来实现的。观察者模式较完美地将目标对象与观察者对象解耦。</p>
+</blockquote>
+
+<p>我们一般用到的都是自动实现<code>KVO</code>，所以我这里就不实现手动的<code>KVO</code>了。实现<code>KVO</code>需要两个主要的方法：</p>
+
+<pre><code class="language-objc">//注册观察者
+- (void)addObserver:(NSObject *)observer 
+        forKeyPath:(NSString *)keyPath 
+        options:(NSKeyValueObservingOptions)options 
+        context:(void *)context;
+        
+//当观察的对象属性有所改变就会通知观察者，该方法用来处理变更通知
+- (void)observeValueForKeyPath:(NSString *)keyPath 
+                     ofObject:(id)object 
+                        change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change 
+                        context:(void *)context;
+</code></pre>
+
+<p>这两个方法在<code>Foundation/NSKeyValueObserving.h</code>中，<code>NSObject，NSArray，NSSet</code>均实现了以上方法，因此我们不仅可以观察普通对象，还可以观察数组或结合类对象。</p>
+
+<p>我们来举例说明：</p>
+
+<p>创建一个观察者类：</p>
+
+<pre><code class="language-objc">//
+//  Observer.h
+//  KVO机制
+//
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface Observer : NSObject
+
+@end
+
+
+
+//  Observer.m
+//  KVO机制
+#import &quot;Observer.h&quot;
+
+@implementation Observer
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change context:(void *)context{
+    //判断发送过来的通知中更改的属性是否是name
+    if ([keyPath isEqualToString:@&quot;name&quot;]) {
+        //获取更改属性的类的信息
+        Class classInfo = (__bridge Class)context;
+        NSString *className = [NSString stringWithFormat:@&quot;%s&quot;, object_getClassName(classInfo)];
+        NSLog(@&quot; &gt;&gt; class : [%@] , Name changed&quot;, className);
+        NSLog(@&quot; &gt;&gt; old name is %@&quot;, [change objectForKey:@&quot;old&quot;]);
+        NSLog(@&quot; &gt;&gt; new name is %@&quot;, [change objectForKey:@&quot;new&quot;]);
+    
+    }else{
+        /*
+         *注意：在实现处理变更通知方法 observeValueForKeyPath 时，
+         *要将不能处理的 key 转发给 super 的 observeValueForKeyPath 来处理。
+         */
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
+@end
+
+</code></pre>
+
+<p>然后创建一个用于观察的<code>Target</code>类</p>
+
+<pre><code class="language-objc">//  Target.h
+//  KVO机制
+
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface Target : NSObject
+
+@property(nonatomic,assign) NSString *name;
+
+@end
+
+
+//  Target.m
+//  KVO机制
+
+
+#import &quot;Target.h&quot;
+
+@implementation Target
+//给name属性一个初始值，用于检测变化
+-(instancetype)init{
+    if (self = [super init]) {
+        _name = @&quot;yue&quot;;
+    }
+    return self;
+}
+@end
+</code></pre>
+
+<p>然后我们在<code>main.m</code>中添加观察者来执行：</p>
+
+<pre><code class="language-objc">//  main.m
+//  KVO机制
+
+
+#import &lt;Foundation/Foundation.h&gt;
+#import &quot;Observer.h&quot;
+#import &quot;Target.h&quot;
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        //分别创建实例
+        Observer *observer = [[Observer alloc]init];
+        Target *target = [[Target alloc]init];
+        
+        //target 增加一个观察者，用于观察name属性
+        [target addObserver:observer forKeyPath:@&quot;name&quot; options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:(__bridge void * _Nullable)([Target class])];
+        //更改name属性的值，响应观察者的动作
+        [target setName:@&quot;hao&quot;];
+        //移除name的观察者，防止内存泄露
+        [target removeObserver:observer forKeyPath:@&quot;name&quot;];
+    }
+    return 0;
+}
+
+</code></pre>
+
+<p>我们运行后结果如下：</p>
+
+<p><img src="media/15042539845357/15042556319090.jpg" alt=""/></p>
+
+<p>可以发现是<code>Target</code>类发送过来的通知，说明属性已经变更。</p>
+
+<p>下面我们来讨论一下传过来了的参数。其中<code>addObserver</code>方法中的<code>option：</code>参数用于指定应该包含哪种通知。其中主要有以下几种：</p>
+
+<ul>
+<li><strong>NSKeyValueObservingOptionNew</strong>：指出<code>change</code>字典应该包含有新的属性（如果适用）。</li>
+<li><strong>NSKeyValueObservingOptionOld</strong>：指出<code>change</code>字典应该包含有旧的属性（如果适用）。</li>
+<li><strong>NSKeyValueObservingOptionInitial</strong>：把初始化的值提供给处理方法，一旦注册，立马就会调用一次。通常它会带有新值，而不会带有旧值。</li>
+<li><strong>NSKeyValueObservingOptionPrior</strong>： 分2次调用。在值改变之前和值改变之后。</li>
+</ul>
+
+<p>其中<code>observeValueForKeyPath</code>方法中的<code>change</code>参数是一个字典型数据。会根据<code>option</code>参数的变化来生成不同的数据。一般会包含<code>new</code>和<code>old</code>两个<code>key</code>。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15042325338088.html">
                 
                   <h1>第27条 使用“class-continuation分类”隐藏实现细节</h1>
@@ -426,335 +813,6 @@ class SomeCppClass;
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15041689865677.html">
-                
-                  <h1>指针问题</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<pre><code>#include &lt;stdio.h&gt;  
-   
-int main() {  
-      
-    int num = 10;  
-    int *p1 = &amp;num//p1存储num的地址  
-    int **p2 = &amp;p1;//p2存储p1的地址  
-    int ***p3 = &amp;p2;//p3存储p2的地址  
-      
-    *p1 = 100;//*p1取出num变量  
-    **p2 = 200;//**p2取出num变量  
-    ***p3 = 300;//***p3也是取出num变量  
-    printf(&quot;num = %d\n&quot;,num);  
-    printf(&quot;num = %d\n&quot;,***p3);  
-      
-    return 0;  
-}  
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/31</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15041475233104.html">
-                
-                  <h1>消息转发机制的简单实现</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">第一种</h2>
-
-<p>首先我们来实现这两个方法：<br/><br/>
-+(BOOL)resolveInstanceMethod:    (SEL)sel</p>
-
-<p>+(BOOL)resolveClassMethod:(SEL)sel</p>
-
-<p>这两个方法用于方法的动态解析，当一个对象执行一个方法时，发现没有找到所对应的实现。这是就要靠上面的方法来动态添加实现了</p>
-
-<p>举例来说：</p>
-
-<pre><code class="language-objc">//
-//  Person.h
-//  消息转发
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface Person : NSObject
-//接口中声明一个方法
--(void)run;
-
-@end
-
-//
-//  Person.m
-//  消息转发
-
-
-#import &quot;Person.h&quot;
-#import &lt;objc/runtime.h&gt;
-@implementation Person //在部署的时候我们没有实现接口中声明的run方法
-
-
-//编写C函数实现代码
-void addrun (id self, SEL _cmd){
-    NSLog(@&quot;%@　%s&quot;,self,sel_getName(_cmd));
-}
-
-+(BOOL)resolveInstanceMethod:(SEL)sel{
-    if (sel ==@selector(run)) {
-    //如果响应run方法，我们动态将上面实现的addrun方法添加到当前类中。
-        class_addMethod(self, sel, (IMP)addrun, &quot;v@:&quot;);
-    }
-    
-    return [super resolveInstanceMethod:sel];
-}
-
-@end
-
-//  main.m
-//  消息转发
-
-
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;Person.h&quot;
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-    //执行代码
-        Person *man = [Person new];
-        [man run];
-    }
-    return 0;
-}
-</code></pre>
-
-<p>结果为：<img src="media/15041475233104/15041480973843.jpg" alt=""/><br/>
-说明执行了我们添加的那个方法，而并没有报错。</p>
-
-<h2 id="toc_1">第二种</h2>
-
-<p>我们可以动态的向类中添加方法来解决无选择子的问题，我们也可以选择转换接受者来选择可以处理该选择子的对象。</p>
-
-<p>首先当我们，没有处理第一种方法的时候，运行期系统会给我们第二个机会，询问是否有备用的接受者。我们就要实现<code>orwardingTargetForSelector</code>了</p>
-
-<p>我们举例来看：</p>
-
-<p>首先我们先创建一个新类Car，并且创建一个<code>run</code>方法：</p>
-
-<p><img src="media/15041475233104/15041487720558.jpg" alt=""/></p>
-
-<p>然后在Person.m中，不对<code>resolveInstanceMethod</code>进行任何处理，在<code>forwardingTargetForSelector</code>中返回一个<code>Car</code>实例：<br/>
-<img src="media/15041475233104/15041488721835.jpg" alt=""/></p>
-
-<p>然后继续执行<code>main.m</code>文件，运行为：<br/>
-<img src="media/15041475233104/15041489461207.jpg" alt=""/></p>
-
-<p>说明系统已经将所要实现方法的对象转换为<code>Car</code>的实例对象。</p>
-
-<h2 id="toc_2">第三种</h2>
-
-<p>如果前两种我们都没有实现的话，就会进入第三种，执行完整的消息转发机制。</p>
-
-<p>就会调用两个方法<code>methodSignatureForSelector</code>和<code>forwardInvocation</code></p>
-
-<p><code>methodSignatureForSelector</code>方法用来指定方法签名，返回<code>nil</code>表示不处理，否则会进入下一步调用<code>forwardInvocation</code>方法。其中这个签名就是给<code>forwardInvocation</code>中的参数<code>NSInvocation</code>调用的。</p>
-
-<p><img src="media/15041475233104/15041604848181.jpg" alt=""/></p>
-
-<p>开头我们要找的错误<code>unrecognized selector sent to instance</code>原因，原来就是因为<code>methodSignatureForSelector</code>这个方法中，由于没有找到<code>run</code>对应的实现方法，所以返回了一个空的方法签名，最终导致程序报错崩溃。</p>
-
-<p>所以我们需要做的是自己新建方法签名，再在<code>forwardInvocation</code>中用你要转发的那个对象调用这个对应的签名，这样也实现了消息转发。</p>
-
-<p>关于生成签名的类型<code>&quot;v@:&quot;</code>解释一下。每一个方法会默认隐藏两个参数，<code>self</code>、<code>_cmd</code>，<code>self</code>代表方法调用者，<code>_cmd</code>代表这个方法的<code>SEL</code>，签名类型就是用来描述这个方法的返回值、参数的，<code>v</code>代表返回值为<code>void</code>，<code>@</code>表示<code>self</code>，<code>:</code>表示<code>_cmd</code>。</p>
-
-<p><strong>所以第二个和第三个字符必须是<code>“@:”</code> ，第一个字符是返回类型.</strong></p>
-
-<p><strong>具体的可以看一下了解</strong>：<a href="https://developer.apple.com/library/etc/redirect/xcode/content/1189/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100">Type Encodeing</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/31</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15041406291157.html">
-                
-                  <h1>第24条 将类的实现代码分散到便于管理的数个分类之中</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>一个类里面经常会填满各种各样的方法，有时候将那么多方法放在一个类的实现文件里是合理的。但是我们如果通过OC的<code>分类</code>机制将类代码按逻辑划入几个分区中，这对于开发和调试都有帮助。</p>
-
-<p>我们来举个例子，我们对个人信息建模分类：</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-Sinterface EOCPerson : NSObject
-@property (nonatomic, copy, readonly) NSString *firstName; 
-@property (nonatomic, copy, readonly) NSString *lastName; 
-@property (nonatomic, strong, readonly) NSArray *friends;
-
--(id)initWithFirstName:(NSString*) firstName
-            andLastName:(NSString*)lastName;
-            
-/* Friendship methods */
--(void)addFriend:(EOCPerson*)person;
-- (void)removeFriend:(EOCPerson*)person;
--(BOOL)isFriendsWith:(EOCPerson*)person;
-
-/* Work methods */
--(void)performDaysWork;
--(void)takeVacationFromWork;
-
-/* Play methods */
--(void)goToTheCinema;
--(void)goToSportsGame;
-</code></pre>
-
-<p>在实现该类时，所有方法的代码可能会写在一个大文件里。显得很臃肿。所以可以用“分类”机制把刚才的类改写成下面这样：</p>
-
-<pre><code class="language-objc">@import &lt;Foundation/Foundation.h&gt;
-@interface EOCPerson : NSObject
-@property (nonatomic, strong, readonly) NSArray *friends;
-@property (nonatomic, copy, readonly) NSString *lastName;
-@property (nonatomic, copy, readonly) NSString *firstName; 
- 
--(id) initWithFirstName: (NSString*)firstName
-            andLastNames:(NSString*)lastName;
-
-@end
-
-@interface EOCPerson (Friendship)
--(void)addFriend:(EOCPerson*)person;
--(void)removeFriend:(EOCPerson*)person;
--(BOOL)isFriendsWith:(EOCPerson*)person; 
-@end
-
-@interface EOCPerson (Work)
--(void)performDaysWork;
--(void)takeVacationFromWork; 
-@end
-
-@interface EOCPerson (Play)
--(void)goToTheCinema;
--(void)goToSportsGame;
-@end
-</code></pre>
-
-<p>现在，类的实现代码按照方法分成了好几个部分。所以说，这项语言特性当然就叫做<code>“分类”</code>啦。</p>
-
-<p>但是这些代码还是在一个文件中声明的，所以我们还可以将其拆分为多个文件：</p>
-
-<ul>
-<li>  EOCPerson+Friendship(.h/.m)</li>
-<li> EOCPerson+Work(.h/.m)</li>
-<li> EOCPerson+Play(.h/.m)</li>
-</ul>
-
-<p>比方说，与交友功能相关的那个分类可以这样写：</p>
-
-<pre><code class="language-objc">// EOCPerson+Friendship.h
-#import &quot;EOCPerson.h&quot;
-@interface EOCPerson (Friendship)
--(void)addFriend:(EOCPerson*)person;
--(void)removeFriend:(EOCPerson*)person;
--(BOOL)isFriendsWith:(EOCPerson*)person;
-@end
-
-// EOCPerson+Friendship.m 
-
-#import EOCPerson+Friendship.h
-@implementation EOCPerson (Friendship)
--(void)addFriend:(EOCPerson*)person {
-    /*...*/
-}
--(void)removeFriend:(EOCPerson*)person {
-    /*...*/
-}
--(BOOL)isFriendsWith:(EOCPerson*)person {
-    /*...*/
-}
-@end
-</code></pre>
-
-<p>通过分类机制，可以把类代码分成很多个易于管理的小块，以便单独检视。<mark>使用分类机制之后，如果想用分类中的方法，那么要记得在引入<code>EOCPerson.h</code>时一并引入分类的头文件</mark>。</p>
-
-<p>这样使用分类之后，对于某个分类中的所有 方法来说，分类名称都会出现在其符号中。例如，<code>“addFriend:”</code>方法的“符号名”（symbol name)如下：</p>
-
-<pre><code class="language-objc">-[EOCPerson(Friendship) addFriend:]
-</code></pre>
-
-<p>也可以创建名为<code>Private</code>的分类把这种方法全都放在里面。这个分类里的方法一般只会在类或框架内部使用，而无须对外公布。这样一来，类的使用者有时可能会在査看回溯信息时发现<code>private</code>一词，就知道不应该直接调用此方法了。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>使用分类机制把类的实现代码划分成易于管理的小块。</li>
-<li>将应该视为“私有”的方法归入名叫<code>Private</code>的分类中，以隐藏实现细节。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/31</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -844,6 +902,24 @@ Sinterface EOCPerson : NSObject
 	      
 		      
 			      <li class="post">
+			        <a href="15130621165951.html">Longest Palindromic Substring</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15130603513802.html">Palindrome Pairs</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15130426368802.html">Intersection of Two Arrays II</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15129821006078.html">Sort Characters By Frequency</a>
 			      </li>
 		     
@@ -851,24 +927,6 @@ Sinterface EOCPerson : NSObject
 		      
 			      <li class="post">
 			        <a href="15129806433168.html">First Unique Character in a String</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129796221707.html">Minimum Moves to Equal Array Elements II</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129788527282.html">Minimum Moves to Equal Array Elements</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129760305793.html">Range Addition II</a>
 			      </li>
 		     
 		  

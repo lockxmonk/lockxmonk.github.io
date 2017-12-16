@@ -117,6 +117,182 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15113344881540.html">
+                
+                  <h1>Add Binary</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given two binary strings, return their sum (also a binary string).</p>
+
+<p>For example,<br/>
+a = <code>&quot;11&quot;</code><br/>
+b = <code>&quot;1&quot;</code><br/>
+Return <code>&quot;100&quot;</code>.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string addBinary(string a, string b) {
+        int fw = 0;
+        string result = &quot;&quot;;
+        for(int i = a.size()-1,j=b.size()-1;i&gt;=0||j&gt;=0;i--,j--){
+            int ag = i&gt;=0?a[i]-&#39;0&#39;:0;
+            int bg = j&gt;=0?b[j]-&#39;0&#39;:0;
+            int tmp = (ag+bg+fw)%2;
+            fw = (ag+bg+fw)/2;
+            
+            result = char(tmp+&#39;0&#39;)+result;
+        }
+        if(fw==1){
+            result = &#39;1&#39;+result;
+        }
+        
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15113344372070.html">
+                
+                  <h1>1-bit and 2-bit Characters</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>We have two special characters. The first character can be represented by one bit <code>0</code>. The second character can be represented by two bits (<code>10 or 11</code>).</p>
+
+<p>Now given a string represented by several bits. Return whether the last character must be a one-bit character or not. The given string will always end with a zero.<br/>
+<img src="media/15113344372070/15113344696565.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool isOneBitCharacter(vector&lt;int&gt;&amp; bits) {
+        int i = 0;
+        int b = 0;
+        while(i&lt;bits.size()){            
+            if(bits[i]==1)
+            {
+                i=i+2;
+                b=0;
+            }else{
+                i++;
+                b=1;
+            }
+        };
+        if(b==0){
+            return 0;
+        }else {
+            return 1; 
+        }
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15113342915297.html">
+                
+                  <h1>Add Digits</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a non-negative integer num, repeatedly add all its digits until the result has only one digit.</p>
+
+<p>For example:</p>
+
+<p>Given <code>num = 38</code>, the process is like: <code>3 + 8 = 11</code>, <code>1 + 1 = 2</code>. Since <code>2</code> has only one digit, return it.</p>
+
+<p>Follow up:<br/>
+Could you do it without any loop/recursion in O(1) runtime?</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int addDigits(int num) {
+        // while(num/10&gt;0){
+        //     int sum = 0;
+        //     while(num&gt;0){
+        //         sum +=num%10;
+        //         num /=10;
+        //     }
+        //     num = sum;
+        // }
+        return 1+ (num-1)%9;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15113342227318.html">
                 
                   <h1>Add Strings</h1>
@@ -265,6 +441,24 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15130621165951.html">Longest Palindromic Substring</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15130603513802.html">Palindrome Pairs</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15130426368802.html">Intersection of Two Arrays II</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15129821006078.html">Sort Characters By Frequency</a>
 			      </li>
 		     
@@ -272,24 +466,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15129806433168.html">First Unique Character in a String</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129796221707.html">Minimum Moves to Equal Array Elements II</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129788527282.html">Minimum Moves to Equal Array Elements</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129760305793.html">Range Addition II</a>
 			      </li>
 		     
 		  

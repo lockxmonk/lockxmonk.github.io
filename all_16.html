@@ -117,6 +117,330 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15055441842255.html">
+                
+                  <h1>第四十三条 掌握GCD和操作队列（NSOperation）的使用时机</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>虽然<code>GCD</code>很棒，但是我们有时候也应该选用正确的工具来使用。所以我们这里来介绍下<code>NSOperation</code>。</p>
+
+<p>很少有其他技术能与<code>GCD</code>的同步机制相媲美。对于那些只需执行一次的代码来说，使用<code>GCD</code>的<code>dispatch_once</code>最为方便。</p>
+
+<p>但是如果执行后台任务，<code>NSOperation</code>也许更适合。<code>NSOperation</code>是在<code>GCD</code>出现之前就有的一种技术。甚至现在操作队列在底层是用<code>GCD</code>来实现的。</p>
+
+<p>在两者的诸多差别中，<strong><font color=red>首先要注意：GCD是纯C的API,而操作队列则是Objective-C的对象。</font></strong>在<code>GCD</code>中，任务用块来表示，而块是个轻量级数据结构（参见第37条）。与之相 反，“操作&quot;（operation)则是个更为重量级的<code>Objective-C</code>对象。虽说如此，但<code>GCD</code>并不总是最佳方案。有时候采用对象所带来的开销微乎其微，使用完整对象所带来的好处反而大大超过其缺点。</p>
+
+<p>所以我们来介绍下它的好处：</p>
+
+<ul>
+<li><p>取消某个操作。如果使用操作队列，那么想要取消操作是很容易的。运行任务之前, 可以在<code>NSOperation</code>对象上调用<code>cancel</code>方法，该方法会设置对象内的标志位，用以表明此任务不需执行，不过，已经启动的任务无法取消。若是不使用操作队列，而是把块安排到<code>GCD</code>队列，那就无法取消了。那套架构是“安排好任务之后就不管了&quot;（fire and forget)。</p></li>
+<li><p>指定操作间的依赖关系。一个操作可以依赖其他多个操作。开发者能够指定操作之间的依赖体系，使特定的操作必须在另外一个操作顺利执行完毕后方可执行。比方说，从服务器端下载并处理文件的动作，可以用操作来表示，而在处理其他文件之前，必须先下载<code>“清单文件”（manifest file)</code>。后续的下载操作，都要依赖于先下载清单文件这一操作。如果操作队列允许并发的话，那么后续的多个下载操作就可以同时执行，但前提是它们所依赖的那个清单文件下载操作已经执行完毕。</p></li>
+<li><p>通过键值观测机制监控<code>NSOperation</code>对象的属性。<code>NSOperation</code>对象有许多属性都适合通过键值观测机制（简称KVO)来监听，比如可以通过<code>isCancelled</code>属性来判断任务是否已取消，又比如可以通过<code>isFinished</code>属性来判断任务是否已完成。如果想在某个任务变更其状态时得到通知，或是想用比<code>GCD</code>更为精细的方式来控制所要执行的 任务，那么键值观测机制会很有用。</p></li>
+<li><p>指定操作的优先级。操作的优先级表示此操作与队列中其他操作之间的优先关系。优先级高的操作先执行，优先级低的后执行。操作队列的<code>调度算法（scheduling algorithm)</code>虽<code>“不透明&quot;（opaque)</code>,但必然是经过一番深思熟虑才写成的。反之，<code>GCD</code>则没有直接实现此功能的办法。<code>GCD</code>的队列确实有优先级，不过那是针对整个队列来说的，而不是针对每个块来说的。而令开发者在<code>GCD</code>之上自己来编写调度算法，又不太合适。<strong><font color=red>因此，在优先级这一点上，操作队列所提供的功能要比GCD更为便利。</font></strong></p></li>
+</ul>
+
+<blockquote>
+<p><code>NSOperation</code>对象也有<code>“线程优先级”（thread priority)</code>,这决定了运行此操作的线程处在 何种优先级上。用<code>GCD</code>也可以实现此功能，然而采用操作队列更简单，只需设置一个属性。</p>
+</blockquote>
+
+<ul>
+<li>重用 <code>NSOperation</code>对象。系统内置了一些<code>NSOperation</code>的子类（比如<code>NSBlockOperation</code>)供开发者调用，要是不想用这些固有子类的话，那就得自己来创建了。这些类就是普通的<code>Objective-C</code>对象，能够存放任何信息。对象在执行时可以充分利用存于其中的信息，而且还可以随意调用定义在类中的方法。这就比派发队列中那些简单的块要强大许多。这些<code>NSOperation</code>类可以在代码中多次使用，它们符合软件开发中的“不重复”原则。</li>
+</ul>
+
+<p>正如大家所见，操作队列有很多地方胜过派发队列。操作队列提供了多种执行任务的方式，而且都是写好了的，直接就能使用。</p>
+
+<p>所以我们说，某些功能确实可以用高层的<code>Objective-C</code>方法来做，但这并不等于说它就一定比底层实现方案好。要想确定哪种方案更佳，最好还是测试一下性能。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>在解决多线程与任务管理问题时，派发队列并非唯一方案。</li>
+<li>操作队列提供了一套高层的<code>Objective-C API</code>，能实现纯<code>GCD</code>所具备的绝大部分功能，而且还能完成一些更为复杂的操作，那些操作若改用<code>GCD</code>来实现，则需另外编写代码。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/16</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Effective%20OC2.0.html'>Effective OC2.0</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15050942669581.html">
+                
+                  <h1>第四十二条 多用GCD，少用performSelector系列方法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><code>Objective-C</code>本质上是一门非常动态的语言（参见第11条)，<code>NSObject</code>定义了几个方法, <mark>令开发者可以随意调用任何方法。这几个方法可以推迟执行方法调用，也可以指定运行方法所用的线程。</mark>这些功能原来很有用，但是在出现了<code>GCD</code>之后，这些功能就尽量不要使用了，尽量用<code>GCD</code>来取代他们。</p>
+
+<p>其中他们又如下几个方法：</p>
+
+<pre><code class="language-objc">-(id)performSelector : (SEL) selector
+//可以传两个参数
+-(id)performSelector : (SEL) selector
+           withObject:（id）objectA
+           withObject:（id）objectB
+//传一个参数
+-(id)performSelector : (SEL) selector
+           withObject:（id）object
+</code></pre>
+
+<p>具体用法如：</p>
+
+<pre><code class="language-objc">[object performSelector: @selector(selectorName)];
+
+[object performSelector: @selector(setValue:)
+             withObject: newValue];
+</code></pre>
+
+<p>上面的用法，会有很多局限，比如在<code>ARC</code>下，会发出警告表示：<code>也许会内存泄露</code>，这是因为编译器并不知道将要的选择子是什么，因此，也就不了解其方法签名及返回值，甚至连是否有返回值都不清楚，而且由于编译器不知道方法名，所以就没办法运用<code>ARC</code>的内存管麵则来判定返回值是不是该释放。鉴于此，<code>ARC</code>采用了比较谨慎的做法，就是不添加释放操作。然而这么<br/>
+做可能导致内存泄漏，因为方法在返回对象时可能已经将其保留了。</p>
+
+<p>另一个局限性是：返回值只能是<code>void</code>或对象类型。尽管所要执行的 选择子也可以返回<code>void</code>，但是<code>performSelector</code>方法的返回值类型毕竟是<code>id</code>。如果想返回整数或浮点数等类型的值，那么就需要执行一些复杂的转换操作了，而这种转换很容易出错。</p>
+
+<p>第三个局限是：这个方法最多只能传递两个参数，当选择子得到参数超过两个时，只能运用字典来传送数据（但是容易增加开销和造成bug）。</p>
+
+<p>所以我们的解决方法是：我们使用<code>块</code>来代替，并且<code>performSelector</code>系列方法都可以使用<code>GCD</code>机制使用块来实现。我们来举几个例子说明：</p>
+
+<p>如果我们想要延后执行某个任务：</p>
+
+<pre><code class="language-objc">//Using performSelector:withObjectrafterDelay: 
+[self performSelector:@selector(doSomething)
+           withObject:nil 
+           afterDelay:5.0];
+
+//Using dispatch_after
+dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, (int64 t)(5.0 * NSEC PER SEC));
+
+dispatch_after(time, dispatch_get_main—queue(), ^(void){
+     [self doSomething];
+})；
+</code></pre>
+
+<p>后者想要在主线程执行某个任务：</p>
+
+<pre><code class="language-objc">// Using performSelectorOnMainThread: withObject .-waitUntilDone :
+[self performSelectorOnMainThread:@selector(doSomething)
+                      withObject:nil 
+                      waitUntilDone:NO];
+//Using dispatch_async
+// (or if waitUntilDone is YES, then dispatchasync) 
+dispatch_async(dispatch_get_main_queue(), ^{
+        [self doSomething];
+});
+</code></pre>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li><code>performSelector</code>系列方法在内存管理方面容易有疏失。它无法确定将要执行的选择子具体是什么，因而<code>ARC</code>编译器也就无法插入适当的内存管理方法。</li>
+<li><code>performSelector</code>系列方法所能处理的选择子太过局限了，选择子的返回值类型及发送给方法的参数个数都受到限制。</li>
+<li>如果想把任务放在另一个线程上执行，那么最好不要用<code>performSelector</code>系列方法，而是应该把任务封装到块里，然后调用大中枢派发机制的相关方法来实现。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/11</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15049238737460.html">
+                
+                  <h1>第四十一条 多用派发队列，少用同步锁</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在<code>OC</code>中，如果有多个线程要执行同一份代码，那么有时可能会出问题。这种情况下，通常要使用锁来实现某种同步机制。在<code>GCD</code>出现之前，有两种办法，第一种是采用内置的<code>“同步块”（synchronization block)</code>:</p>
+
+<pre><code class="language-objc">-(void)synchronizedMethod {
+    @synchronized(self) {
+    //Safe
+    }
+}
+</code></pre>
+
+<p>这种写法会根据给定的对象，自动创建一个锁，并等待块中的代码执行完毕。执行到这段代码结尾处，锁就释放了。在本例中，同步行为所针对的对象是<code>self</code>。这么写通常没错，因为它可以保证每个对象实例都能不受干扰地运行其<code>synchronizedMethod</code>方法。然而，滥用 <code>@SynChronized(self)</code>则会降低代码效率，因为共用同一个锁的那些同步块，都必须按顺序执行。若是在<code>self</code>对象上频繁加锁，那么程序可能要等另一段与此无关的代码执行完毕，才能继续执行当前代码，这样做其实并没有必要。</p>
+
+<p>另一种加锁的办法是<code>NSLock</code>对象：</p>
+
+<pre><code class="language-objc">_lock = [[NSLockalloc] init];
+
+-(void)synchronizedMethod {
+    [_lock lock];
+    //Safe
+    [_lock unlock];
+}
+</code></pre>
+
+<p>也可以使用<code>NSRecursiveLock</code>这种<code>“递归锁’（recursive lock)</code>，线程能够多次持有该锁，而不会出现<code>死锁(deadlock)</code>现象。</p>
+
+<p>虽然上面两种方法可以用，但是也有一些缺陷，比如：在某些情况下，同步快会导致死锁，另外，效率不是很高。而如果直接使用锁对象的话，一旦遇到死锁，就会非常麻烦。</p>
+
+<p><strong>所以我们一般使用GCD来替代，它的优点就是可以简单，高效的为代码加锁</strong>。属性因为需要经常性的同步，所以当要线程安全的时候，加上<code>“atomic”</code>特质来修饰属性。</p>
+
+<p>但是如果我们想要自己实现属性访问方法时，可以：</p>
+
+<pre><code class="language-objc">-(NSString*)someString {
+    @synchronized(self) {
+        return _someString;
+    }
+}
+-(void)setSomeString:(NSString*)someString { 
+    @synchronized(self) {
+        _someString = someString;
+    }
+}
+</code></pre>
+
+<p>但是滥用<code>@synchronized(self)</code>会很危险，因为所有同步块都会彼此抢夺同一个锁。要是有很多个属性都这么写的话，那么每个属性的同步块都要等其他所有同步块执行完毕才能执行，这也许并不是开发者想要的效果。我们只是想令每个属性各自独立地同步。</p>
+
+<p><strong><em>而且上述做法并不是绝对的线程安全。因为在两次访问操作之间，其他线程可能会写入新的属性值。</em></strong></p>
+
+<p>这里我们使用<code>“串行同步队列”（serial synchronization queue)</code>。将读取操作及写入操作都安排在同一个队列里，即可保证数据同步。：</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_queue_create(&quot;com.effectiveobjectivec.syncQueue&quot;, NULL);
+
+-(NSString*)someString {
+    _block NSString *localSomeString;
+    dispatch_sync(_syncQueue, ^{
+        localSomeString = _someString;
+    })；
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+    dispatch_sync(_syncQueue,^{
+        _someString = someString;
+    });
+}
+</code></pre>
+
+<p>此模式的思路是：把设置操作与获取操作都安排在序列化的队列里执行（串行同步队列并不会拓展新的线程），这样的话，所有针对属性的访问操作就都同步了。（关于GCD的串行队列/并发队列与iOS多线程这里不详细讲解了，后续深入探讨）。</p>
+
+<p>多个获取方法可以并发执行，而获取方法与设置方法之间不能并发执行，利用这个特点，还能写出更快一些的代码来。此时正可以体现出<code>GCD</code>写法的好处。用同步块或锁对象，是无法轻易实现出下面这种方案的。这次不用串行队列，而改用<code>并发队列（concurrentquene)</code>:</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+
+-(NSString*}someString {
+    __block NSString *localSomeString; 
+    dispatch_sync( _syncQueue, ^{
+        localSomeString = _someString;
+    })； 
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+        dispatch_async(syncQueue, ^{
+        _someString = someScring;
+    });
+}
+</code></pre>
+
+<p>光是上面这些代码还不够，所有读取操作与写入操作都会在同一个队列上执行，不过由于是并发队列，所以读取与写人操作可以随时执行。而我们恰恰不想让这些操作随意执行。这就要用到<code>栅栏（barrier)</code>，是<code>GCD</code>中的一个功能：</p>
+
+<pre><code class="language-objc">void dispatch_barrier_async(dispatch_queue_t queue,
+                            dispatch_block_t block);
+void dispatch_barrier_sync(dispatch_queue_t queue,
+                            dispatch_block_t block);
+</code></pre>
+
+<p><strong><font color=red>在队列中，栅栏块必须单独执行，不能与其他块并行。这只对并发队列有意义，因为串行队列中的块总是按顺序逐个来执行的。并发队列如果发现接下来要处理的块是个栅栏块 (barrier block)，那么就一直要等当前所有并发块都执行完毕，才会单独执行这个栅栏块。待栅栏块执行过后，再按正常方式继续向下处理。</font></strong></p>
+
+<p>在本例中，可以用栅栏块来实现属性的设置方法。在设置方法中使用了栅栏块之后，对属性的读取操作依然可以并发执行，但是写人操作却必须单独执行了。例如：</p>
+
+<pre><code class="language-objc">_syncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+
+-(NSString*}someString {
+    __block NSString *localSomeString; 
+    dispatch_sync( _syncQueue, ^{
+        localSomeString = _someString;
+    })； 
+    return localSomeString;
+}
+
+-(void)setSomeString:(NSString*)someString { 
+        dispatch_barrier_async(syncQueue, ^{
+        _someString = someScring;
+    });
+}
+</code></pre>
+
+<p><strong>执行的顺序如图所示：</strong><br/>
+<img src="media/15049238737460/15049413869385.jpg" alt=""/></p>
+
+<p>测试一下性能，你就会发现，这种做法肯定比使用串行队列要快。注意，设置函数也可以改用同步的<code>栅栏块(synchronous barrier)</code>来实现，那样做可能会更髙效，其原因刚才已经 解释过了。<strong><font color=red>最好还是测一测每种做法的性能，然后从中选出最适合当前场景的方案</font></strong>。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>派发队列可用来表述<code>同步语义（synchronization semantic)</code>,这种做法要比使用<code>@synchronized块</code>或<code>NSLock</code>对象更简单。</li>
+<li>将同步与异步派发结合起来，可以实现与普通加锁机制一样的同步行为，而这么做却不会阻塞执行异步派发的线程。</li>
+<li>使用同步队列及栅栏块，可以令同步行为更加髙效。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15045739362959.html">
                 
                   <h1>第四十条 用块引用其所属对象时不要出现保留环</h1>
@@ -480,393 +804,6 @@ typedef int(^EOCSomeBlock)(BOOL flag, int value);
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15043212815193.html">
-                
-                  <h1>第三十七条 理解“块”这一概念</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>首先，块与函数类似，只不过是直接定义在另一个函数里的，和定义它的那个函数共享同一 个范围内的东西。块用<code>“^”</code>符号来表示，后面跟着一对花括号，括号里面是块的实现代码。 例如，下面就是个简单的块：</p>
-
-<pre><code class="language-objc">^{
-    //Block implementation here
-}
-</code></pre>
-
-<p>块其实就是个值，而且自有其相关类型。与<code>int</code>、<code>float</code>或<code>Objective-C</code>对象一样，也可以把块赋给变量,然后像使用其他变量那样使用它。块类型的语法与函数指针近似。下面列出的这个块很简单，没有参数，也不返回值：</p>
-
-<pre><code class="language-objc">void (^someBlock) () = A {
-    //Block implementation here
-}；
-</code></pre>
-
-<p>这段代码定义了一个名为<code>someBlock</code>的变量。由于变量名写在正中间，所以看上去也许 =有点怪，不过一旦理解了语法，很容易就能读懂。块类型的语法结构如下：</p>
-
-<pre><code class="language-objc">return_type (^block_name)(parameters)
-</code></pre>
-
-<p>我们来举个例子，下面这种写法所定义的块，返回<code>int</code>值，并且接受两个<code>int</code>做参数：</p>
-
-<pre><code class="language-objc">int (^addBlock) (int a, int b) = ^(int a, int b){
-     return a + b;
-};
-</code></pre>
-
-<p>定义好之后，就可以像函数那样使用了。比方说，<code>addBlock</code>块可以这样用:</p>
-
-<pre><code class="language-objc">int add = addBlock (2, 5) ;  //&lt; add = 12
-</code></pre>
-
-<p>块的强大之处是：在声明它的范围里，所有变量都可以为其所捕获。这也就是说，那个范围里的全部变量，在块里依然可用。比如，下面这段代码所定义的块，就使用了块以外的变量：</p>
-
-<pre><code class="language-objc">int additional = 5;
-int (^addBlock) (int a, int b) = ^(int a, int b){ 
-    return a + b + additional;
-};
-
-int add = addBlock (2, 5);  //&lt; add = 12
-</code></pre>
-
-<p>默认情况下，为块所捕获的变量，是不可以在块里修改的。在本例中，假如块内的代码改动了<code>additional</code>变量的值，那么编译器就会报错。不过，声明变量的时候可以加上<code>__block</code> 修饰符，这样就可以在块内修改了。</p>
-
-<p>例如：</p>
-
-<pre><code class="language-objc">__block int additional = 5;
-int (^addBlock) (int a, int b) = ^(int a, int b){   
-    additional++;
-    return a + b + additional;
-};
-
-int add = addBlock (2, 5);  //&lt; add = 13
-</code></pre>
-
-<p>块的另一个用法是<code>“内联块”（inline block）</code>，例如：</p>
-
-<pre><code class="language-objc">NSArray *array = @[@0, @1, @2, @3, @4, @5];
-_block NSInteger count = 0;
-[array enumerateObjectsUsingBlock:
-    ^(NSNumber *number, NSUInteger idx, BOOL *stop){
-        if([number compare:@2] == NSOrderedAscending) { 
-        count++;
-    }
-}];
-//count = 2
-</code></pre>
-
-<p>这段范例代码也演示了<code>“内联块”（inline block)</code>的用法。传给<code>“numerateObjectsUsingBlock:”</code>方法的块并未先賦给局部变量,而是直接内联在函数调用里了。</p>
-
-<p>然后我们在声明和使用块的时候，要注意它的作用范围。定义块的时候，其所占的内存区域是分配在栈中的。这就是说，块只在定义它的那个范围内有效。比如下面这个：</p>
-
-<pre><code class="language-objc">void(^block)();
-if ( /* some condition */ ){
-    block = ^{
-        NSLog(@&quot;Block A&quot;);
-    };
-} else {
-    block = ^{
-        NSLog(@&quot;Block B&quot;);
-    };
-}
-block();
-</code></pre>
-
-<p>定义在<code>if</code>及<code>else</code>语句中的两个块都分配在栈内存中。编译器会给每个块分配好栈内存, 然而等离开了相应的范围之后，编译器有可能把分配给块的内存覆写掉。于是，这两个块只 能保证在对应的<code>if</code>或<code>else</code>语句范围内有效。这样写出来的代码可以编译，但是运行起来时而正确，时而错误。若编译器未覆写待执行的块，则程序照常运行，若覆写，则程序崩溃。</p>
-
-<p>我们为了解决这个问题可以给块对象发送<code>copy</code>消息以拷贝之。这样的话，就可以把块从栈复制到堆了。</p>
-
-<p>拷贝后的块，可以在定义它的那个范围之外使用。而且，一旦复制到堆上，块就成了带引用计数的对象了。后续的复制操作都不会真的执行复制，只是递增块对象的引用计数。如果不再使用这个块，那就应将其释放，在ARC环境下会自动释放。</p>
-
-<p>改动后跟下面一样：</p>
-
-<pre><code class="language-objc">void (^block)();
-if (/* some condition */ ){ 
-    block = [^{
-        NSLog(@,fBlock Aw);
-    } copy];
-} else {
-    block = [^{
-        NSLog(@&quot;Block B&quot;);
-    } copy];
-}
-block();
-</code></pre>
-
-<p>除了“桟块”和“堆块”之外，还有一类块叫做<strong><mark>“全局块”（global block)</mark></strong>。这种块不会捕捉任何状态（比如外围的变量等)，运行时也无须有状态来参与。块所使用的整个内存区域，在编译期已经完全确定了，因此，全局块可以声明在全局内存里，而不需要在每次用到 的时候于栈中创建。另外，全局块的拷贝操作是个空操作，因为全局块决不可能为系统所回收。这种块实际上相当于单例。下面就是个全局块：</p>
-
-<pre><code class="language-objc">void (^block)() = ^{
-    NSLog(@&quot;This is a block&quot;);
-};
-</code></pre>
-
-<p><mark>由于运行该块所需的全部信息都能在编译期确定，所以可把它做成全局块。</mark>这完全是种优化技术：若把如此简单的块当成复杂的块来处理，那就会在复制及丢弃该块时执行一些无谓的操作。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>块是<code>C、C++、Objective-C</code>中的词法闭包。</li>
-<li>块可接受参数，也可返回值。</li>
-<li>块可以分配在栈或堆上，也可以是全局的。分配在栈上的块可拷贝到堆里，这样的话，就和标准的<code>Objective-C</code>对象一样，具备引用计数了。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/2</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15043134527493.html">
-                
-                  <h1>通过协议提供匿名方法</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>协议定义了一系列方法，遵从此协议的对象应该实现它们（如果这些方法不是可选的, 那么就必须实现)。于是，我们可以用协议把自己所写的<code>API</code>之中的实现细节隐藏起来，将返回的对象设计为遵从此协议的纯<code>id</code>类型。</p>
-
-<p>这样的话，想要隐藏的类名就不会出现在<code>API</code>之中了。若是接口背后有多个不同的实现类，而你又不想指明具体使用哪个类，那么可以考虑用这个办法——因为有时候这些类可能会变，有时候它们又无法容纳于标准的类继承体系中，因而不能以某个公共基类来统一表示。</p>
-
-<p>此概念经常称为<code>“匿名对象&quot;(anonymous object)</code>，这与其他语言中的“匿名对象”不同，在那些语言中，该词是指以内联形式所创建出来的无名类，而此词在<code>Objective-C</code>中则不是这个意思。</p>
-
-<p>我们之前说的委托与数据源对象，就用到了这个方法。例如在定义“受委托者（delegate）”属性时：</p>
-
-<pre><code class="language-objc">@property {nonatomic, weak) id &lt;EOCDelegate&gt; delegate;
-
-</code></pre>
-
-<p>由于该属性的类型是<code>id&lt;EOCDelegate&gt;</code>,所以实际上任何类的对象都能充当这一属性, 即便该类不继承自<code>NSObject</code>也可以，只要遵循<code>EOCDelegate</code>协议就行。对于具备此属性的类来说，<code>delegate</code>就是“匿名的”（ammymous)。如有需要，可在运行期査出此对象所属的类型（参见第14条）。然而这样做不太好，因为指定属性类型时所写的那个<code>EOCDelegate</code>契约已经表明此对象的具体类型无关紧要了。</p>
-
-<p>当然还有其它的用法，这里我们就不举例了。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>协议可在某种程度上提供匿名类型。具体的对象类型可以淡化成遵从某协议的<code>id</code>类型，协议里规定了对象所应实现的方法。</li>
-<li>使用匿名对象来隐藏类型名称（或类名）。</li>
-<li>如果具体类型不重要，重要的是对象能够响应（定义在协议里的）特定方法，那么可使用匿名对象来表示。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/2</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15042539845357.html">
-                
-                  <h1>KVO的简单实现</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>之间看有关<code>OC</code>和<code>iOS</code>的书都会看到<code>KVO</code>这个名词。所以今天来学习和实现一下。简单的说<code>KVO</code>即<code>Key-Value Observing</code>,它提供一种机制,当指定的对象的属性被修改后,则对象就会接受到通知。 </p>
-
-<p>它来源于设计模式中的观察者模式，其基本思想就是：</p>
-
-<blockquote>
-<p>一个目标对象管理所有依赖于它的观察者对象，并在它自身的状态改变时主动通知观察者对象。这个主动通知通常是通过调用各观察者对象所提供的接口方法来实现的。观察者模式较完美地将目标对象与观察者对象解耦。</p>
-</blockquote>
-
-<p>我们一般用到的都是自动实现<code>KVO</code>，所以我这里就不实现手动的<code>KVO</code>了。实现<code>KVO</code>需要两个主要的方法：</p>
-
-<pre><code class="language-objc">//注册观察者
-- (void)addObserver:(NSObject *)observer 
-        forKeyPath:(NSString *)keyPath 
-        options:(NSKeyValueObservingOptions)options 
-        context:(void *)context;
-        
-//当观察的对象属性有所改变就会通知观察者，该方法用来处理变更通知
-- (void)observeValueForKeyPath:(NSString *)keyPath 
-                     ofObject:(id)object 
-                        change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change 
-                        context:(void *)context;
-</code></pre>
-
-<p>这两个方法在<code>Foundation/NSKeyValueObserving.h</code>中，<code>NSObject，NSArray，NSSet</code>均实现了以上方法，因此我们不仅可以观察普通对象，还可以观察数组或结合类对象。</p>
-
-<p>我们来举例说明：</p>
-
-<p>创建一个观察者类：</p>
-
-<pre><code class="language-objc">//
-//  Observer.h
-//  KVO机制
-//
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface Observer : NSObject
-
-@end
-
-
-
-//  Observer.m
-//  KVO机制
-#import &quot;Observer.h&quot;
-
-@implementation Observer
-
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change context:(void *)context{
-    //判断发送过来的通知中更改的属性是否是name
-    if ([keyPath isEqualToString:@&quot;name&quot;]) {
-        //获取更改属性的类的信息
-        Class classInfo = (__bridge Class)context;
-        NSString *className = [NSString stringWithFormat:@&quot;%s&quot;, object_getClassName(classInfo)];
-        NSLog(@&quot; &gt;&gt; class : [%@] , Name changed&quot;, className);
-        NSLog(@&quot; &gt;&gt; old name is %@&quot;, [change objectForKey:@&quot;old&quot;]);
-        NSLog(@&quot; &gt;&gt; new name is %@&quot;, [change objectForKey:@&quot;new&quot;]);
-    
-    }else{
-        /*
-         *注意：在实现处理变更通知方法 observeValueForKeyPath 时，
-         *要将不能处理的 key 转发给 super 的 observeValueForKeyPath 来处理。
-         */
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
-}
-
-@end
-
-</code></pre>
-
-<p>然后创建一个用于观察的<code>Target</code>类</p>
-
-<pre><code class="language-objc">//  Target.h
-//  KVO机制
-
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface Target : NSObject
-
-@property(nonatomic,assign) NSString *name;
-
-@end
-
-
-//  Target.m
-//  KVO机制
-
-
-#import &quot;Target.h&quot;
-
-@implementation Target
-//给name属性一个初始值，用于检测变化
--(instancetype)init{
-    if (self = [super init]) {
-        _name = @&quot;yue&quot;;
-    }
-    return self;
-}
-@end
-</code></pre>
-
-<p>然后我们在<code>main.m</code>中添加观察者来执行：</p>
-
-<pre><code class="language-objc">//  main.m
-//  KVO机制
-
-
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;Observer.h&quot;
-#import &quot;Target.h&quot;
-
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        //分别创建实例
-        Observer *observer = [[Observer alloc]init];
-        Target *target = [[Target alloc]init];
-        
-        //target 增加一个观察者，用于观察name属性
-        [target addObserver:observer forKeyPath:@&quot;name&quot; options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:(__bridge void * _Nullable)([Target class])];
-        //更改name属性的值，响应观察者的动作
-        [target setName:@&quot;hao&quot;];
-        //移除name的观察者，防止内存泄露
-        [target removeObserver:observer forKeyPath:@&quot;name&quot;];
-    }
-    return 0;
-}
-
-</code></pre>
-
-<p>我们运行后结果如下：</p>
-
-<p><img src="media/15042539845357/15042556319090.jpg" alt=""/></p>
-
-<p>可以发现是<code>Target</code>类发送过来的通知，说明属性已经变更。</p>
-
-<p>下面我们来讨论一下传过来了的参数。其中<code>addObserver</code>方法中的<code>option：</code>参数用于指定应该包含哪种通知。其中主要有以下几种：</p>
-
-<ul>
-<li><strong>NSKeyValueObservingOptionNew</strong>：指出<code>change</code>字典应该包含有新的属性（如果适用）。</li>
-<li><strong>NSKeyValueObservingOptionOld</strong>：指出<code>change</code>字典应该包含有旧的属性（如果适用）。</li>
-<li><strong>NSKeyValueObservingOptionInitial</strong>：把初始化的值提供给处理方法，一旦注册，立马就会调用一次。通常它会带有新值，而不会带有旧值。</li>
-<li><strong>NSKeyValueObservingOptionPrior</strong>： 分2次调用。在值改变之前和值改变之后。</li>
-</ul>
-
-<p>其中<code>observeValueForKeyPath</code>方法中的<code>change</code>参数是一个字典型数据。会根据<code>option</code>参数的变化来生成不同的数据。一般会包含<code>new</code>和<code>old</code>两个<code>key</code>。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -956,6 +893,24 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
+			        <a href="15130621165951.html">Longest Palindromic Substring</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15130603513802.html">Palindrome Pairs</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15130426368802.html">Intersection of Two Arrays II</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15129821006078.html">Sort Characters By Frequency</a>
 			      </li>
 		     
@@ -963,24 +918,6 @@ int main(int argc, const char * argv[]) {
 		      
 			      <li class="post">
 			        <a href="15129806433168.html">First Unique Character in a String</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129796221707.html">Minimum Moves to Equal Array Elements II</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129788527282.html">Minimum Moves to Equal Array Elements</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129760305793.html">Range Addition II</a>
 			      </li>
 		     
 		  

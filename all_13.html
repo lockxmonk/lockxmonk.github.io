@@ -117,6 +117,182 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15113344881540.html">
+                
+                  <h1>Add Binary</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given two binary strings, return their sum (also a binary string).</p>
+
+<p>For example,<br/>
+a = <code>&quot;11&quot;</code><br/>
+b = <code>&quot;1&quot;</code><br/>
+Return <code>&quot;100&quot;</code>.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string addBinary(string a, string b) {
+        int fw = 0;
+        string result = &quot;&quot;;
+        for(int i = a.size()-1,j=b.size()-1;i&gt;=0||j&gt;=0;i--,j--){
+            int ag = i&gt;=0?a[i]-&#39;0&#39;:0;
+            int bg = j&gt;=0?b[j]-&#39;0&#39;:0;
+            int tmp = (ag+bg+fw)%2;
+            fw = (ag+bg+fw)/2;
+            
+            result = char(tmp+&#39;0&#39;)+result;
+        }
+        if(fw==1){
+            result = &#39;1&#39;+result;
+        }
+        
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15113344372070.html">
+                
+                  <h1>1-bit and 2-bit Characters</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>We have two special characters. The first character can be represented by one bit <code>0</code>. The second character can be represented by two bits (<code>10 or 11</code>).</p>
+
+<p>Now given a string represented by several bits. Return whether the last character must be a one-bit character or not. The given string will always end with a zero.<br/>
+<img src="media/15113344372070/15113344696565.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool isOneBitCharacter(vector&lt;int&gt;&amp; bits) {
+        int i = 0;
+        int b = 0;
+        while(i&lt;bits.size()){            
+            if(bits[i]==1)
+            {
+                i=i+2;
+                b=0;
+            }else{
+                i++;
+                b=1;
+            }
+        };
+        if(b==0){
+            return 0;
+        }else {
+            return 1; 
+        }
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15113342915297.html">
+                
+                  <h1>Add Digits</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a non-negative integer num, repeatedly add all its digits until the result has only one digit.</p>
+
+<p>For example:</p>
+
+<p>Given <code>num = 38</code>, the process is like: <code>3 + 8 = 11</code>, <code>1 + 1 = 2</code>. Since <code>2</code> has only one digit, return it.</p>
+
+<p>Follow up:<br/>
+Could you do it without any loop/recursion in O(1) runtime?</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int addDigits(int num) {
+        // while(num/10&gt;0){
+        //     int sum = 0;
+        //     while(num&gt;0){
+        //         sum +=num%10;
+        //         num /=10;
+        //     }
+        //     num = sum;
+        // }
+        return 1+ (num-1)%9;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15113342227318.html">
                 
                   <h1>Add Strings</h1>
@@ -571,263 +747,6 @@ FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:aPath];
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15097619961308.html">
-                
-                  <h1>贪心算法（构造霍夫曼树）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>霍夫曼树的构造是使用了变长编码来减少数据所占空间，一般我们只考虑<strong>前缀码</strong>，即没有任何码字是其它码字的前缀。</p>
-
-<p>我们的构造过程如下所示：</p>
-
-<p><img src="media/15097619961308/15097621720916.jpg" alt=""/></p>
-
-<p>这里我们根据上述表示，我们每次总是“贪心”的选择两个最小的值来求和，并插入队列中。所以我们可以构造一个最小优先队列来存储各字母的频率。算法代码如下：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//  HUFFMAN
-//
-//  Created by LZH on 2017/11/4.
-//  Copyright © 2017年 LZH. All rights reserved.
-//
-
-#include &lt;iostream&gt;
-#include &lt;queue&gt;
-#include &lt;vector&gt;
-using namespace std;
-
-typedef struct BitNode
-{
-    int frep;
-    struct BitNode *left;
-    struct BitNode *right;
-}Node;
-
-//定义比较结构
-struct cmp1{
-    bool operator ()(int &amp;a,int &amp;b){
-        return a&gt;b;//最小值优先
-    }
-};
-//构造霍夫曼树
-void HUFFMAN(int c, priority_queue&lt;int, vector&lt;int&gt;, cmp1&gt; &amp;que1)
-{
-    int n = c;
-    for (int i=0; i&lt;n-1; i++) {
-        Node *newNodeZ = (Node*)malloc(sizeof(Node));
-        Node *newNodeX = (Node*)malloc(sizeof(Node));
-        Node *newNodeY = (Node*)malloc(sizeof(Node));
-        newNodeX-&gt;frep = que1.top();
-        que1.pop();
-        newNodeY-&gt;frep = que1.top();
-        que1.pop();
-        newNodeZ-&gt;left = newNodeX;
-        newNodeZ-&gt;right = newNodeY;
-        
-        newNodeZ-&gt;frep =newNodeX-&gt;frep + newNodeY-&gt;frep;
-        que1.push(newNodeZ-&gt;frep);
-    }
-}
-
-int main() {
-//    priority_queue&lt;int&gt; que; //构造优先队列
-    int b[6] = {9,5,12,13,16,45};
-//    vector&lt;int&gt; a(b,b+6);
-    priority_queue&lt;int , vector&lt;int&gt;, cmp1 &gt;que1; //最小优先队列
-    for (int i=0; i&lt;6; i++) {
-        que1.push(b[i]);
-    }
-    HUFFMAN(6, que1);
-    while (!que1.empty()) {
-        cout&lt;&lt;que1.top()&lt;&lt;&#39; &#39;;
-        que1.pop();
-    }
-    return 0;
-}
-
-</code></pre>
-
-<p>最后输出为100，返回了编码树的根节点。<br/>
-<img src="media/15097619961308/15097623765624.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15096800741665.html">
-                
-                  <h1>贪心算法（活动选择问题）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15096800741665/15096801101097.jpg" alt=""/></p>
-
-<p>这个问题是一个典型的可以运用贪心算法的题目，我们在初始的选择一个活动之后，应该将之后的资源被其他任务尽量多的占用。所以我们应该第一个选择活动最快结束的活动，因为它剩下的资源可以被它之后开始的任务尽量多的使用。所以我们可以运用一种递归形式或者迭代算法来表达这个形式：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//  Greedy_Activity_Selector
-//
-//  Created by LZH on 2017/11/3.
-//  Copyright © 2017年 LZH. All rights reserved.
-//
-
-#include &lt;iostream&gt;
-#include &lt;vector&gt;
-using namespace std;
-void print(int n)
-{
-    cout&lt;&lt;n&lt;&lt;&#39; &#39;;
-}
-
-/**
- 迭代形式函数
-
- @param s 活动开始时间数组
- @param f 活动结束时间数组
- @param result  用于存储结果
- */
-void GREED_ACTIVITY_SELECTOR(vector&lt;int&gt; s , vector&lt;int&gt; f , vector&lt;int&gt; &amp;result)
-{
-    int n = s.size();
-    result.push_back(1);
-    int k=1;
-    for (int m=2; m&lt;=n; m++) {
-        if (s[m]&gt;=f[k]) {
-            result.push_back(m);
-            k = m;
-        }
-    }
-}
-
-/**
- 尾递归形式函数
-
- @param s 活动开始时间数组
- @param f 活动结束时间数组
- @param k 从活动k开始计算
- @param n 共有n个活动
- @param result 用于存储结果
- */
-void RECURSIVE_ACTIVITY_SELECTOR(vector&lt;int&gt; s,vector&lt;int&gt; f, int k, int n, vector&lt;int&gt; &amp;result)
-{
-    int m = k+1;
-    while (m&lt;=n &amp;&amp; s[m]&lt;=f[k]) {
-        m++;
-    }
-    if (m&lt;=n) {
-        result.push_back(m);
-        RECURSIVE_ACTIVITY_SELECTOR(s, f, m, n ,result);
-    }
-}
-
-int main() {
-    int a[12] ={0,1,3,0,5,3,5,6,8,8,2,12};
-    int b[12] ={0,4,5,6,7,9,9,10,11,12,14,16};
-    vector&lt;int&gt; s(a,a+12);
-    vector&lt;int&gt; f(b,b+12);
-    vector&lt;int&gt; result;
-    RECURSIVE_ACTIVITY_SELECTOR(s, f, 0, 11, result);
-    GREED_ACTIVITY_SELECTOR(s, f, result);
-    for_each(result.begin(),result.end(),print);
-    return 0;
-}
-
-</code></pre>
-
-<p>其中递归形式的流程如下图所示：<br/>
-<img src="media/15096800741665/15096804218816.jpg" alt=""/></p>
-
-<p>但两种算法运行时间类似都为\(\Theta(n)\)</p>
-
-<h2 id="toc_0">与动态规划的不同</h2>
-
-<p>贪心算法通过做出局部最优来构造全局最优解。换句话说，直接做出在当前问题下看起来最优的选择，而不必考虑子问题的解。</p>
-
-<p><strong><font color=red>在动态规划中，每个步骤都要进行一次选择，但选择通常依赖于子问题的解</font></strong>，因此，我们通常以自底向上的方式来求解动态规划问题，先求解较小的子问题，然后是较大的子问题。但是在贪心算法中，我们总是做出在当时看起来最佳的选择，然后求解剩下的唯一子问题。<strong><font color=red>贪心算法进行选择时可能依赖之前做出的选择，但不依赖于任何将来的选择或者是子问题的解。</font></strong>所以贪心算法在进行第一次选择时不求解任何子问题，自顶向下进行逐步选择，将给定的子问题实例变小。</p>
-
-<p>两者最典型的区别，可以用<code>分数背包</code>和<code>0-1背包</code>问题来举例，这里不做细说。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/3</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15090074391982.html">
-                
-                  <h1>常见iOS面试题基础篇</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html'>常见面试问题</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -917,6 +836,24 @@ int main() {
 	      
 		      
 			      <li class="post">
+			        <a href="15130621165951.html">Longest Palindromic Substring</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15130603513802.html">Palindrome Pairs</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15130426368802.html">Intersection of Two Arrays II</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15129821006078.html">Sort Characters By Frequency</a>
 			      </li>
 		     
@@ -924,24 +861,6 @@ int main() {
 		      
 			      <li class="post">
 			        <a href="15129806433168.html">First Unique Character in a String</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129796221707.html">Minimum Moves to Equal Array Elements II</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129788527282.html">Minimum Moves to Equal Array Elements</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129760305793.html">Range Addition II</a>
 			      </li>
 		     
 		  

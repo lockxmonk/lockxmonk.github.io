@@ -117,6 +117,213 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15124550672696.html">
+                
+                  <h1>Student Attendance Record I</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15124550672696/15124551477663.jpg" alt=""/></p>
+
+<p>优化前：<br/>
+<code>c++<br/>
+bool checkRecord(string s) {<br/>
+    int logA = 0;<br/>
+    for (int i=0; i&lt;s.length(); i++) {<br/>
+        if (s[i]==&#39;A&#39;) {<br/>
+            logA++;<br/>
+            if (logA&gt;1) {<br/>
+                return 0;<br/>
+            }<br/>
+        }<br/>
+        if (i&gt;1&amp;&amp;s[i]==&#39;L&#39;&amp;&amp;s[i-1]==&#39;L&#39;&amp;&amp;s[i-2]==&#39;L&#39;) {<br/>
+            return 0;<br/>
+        }<br/>
+    }<br/>
+    return 1;<br/>
+}<br/>
+</code></p>
+
+<p>优化后：</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool checkRecord(string s) {
+        int count_A = 0;
+        int pos = 0;
+        while(pos&lt;s.length())
+        {
+            if(s[pos]==&#39;A&#39;)
+            {
+                count_A++;
+                pos++;
+                if(count_A&gt;1)
+                    return false;
+            }
+            else if(s[pos]==&#39;L&#39;)
+            {
+                int count = 0;
+                while(pos&lt;s.length()&amp;&amp;s[pos]==&#39;L&#39;)
+                {
+                    count++;
+                    pos++;
+                }
+                if(count&gt;2)
+                    return false;
+            }
+            else
+                pos++;
+            
+        }
+        return true;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/5</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15124490673294.html">
+                
+                  <h1>Baseball Game</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15124490673294/15124490974323.jpg" alt=""/><br/>
+<img src="media/15124490673294/15124491075954.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int calPoints(vector&lt;string&gt;&amp; ops) {
+        int sum = 0, score = 0;
+        vector&lt;int&gt; rounds;
+        for (string op : ops) {
+            if (op == &quot;C&quot;) {
+                sum -= rounds.back();
+                rounds.pop_back();
+                continue;
+            }
+            if (op == &quot;D&quot;) {
+                sum += score = rounds.back() * 2;
+            }
+            else if (op == &quot;+&quot;) {
+                sum += score = rounds[rounds.size() - 1] + rounds[rounds.size() - 2];
+            }
+            else {
+                sum += score = stoi(op);
+            }
+            rounds.push_back(score);
+        }
+        return sum;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/5</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15123924891077.html">
+                
+                  <h1>Implement strStr()</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15123924891077/15123924935113.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int strStr(string haystack, string needle) {
+        int j = 0;  //标记needle的初始位置
+        int h = haystack.length(), n = needle.length();
+        if (!n) {
+            return 0;
+        }
+        for (int i =0; i&lt;h-n+1; i++) {
+            int tmp = i;
+            while (tmp&lt;h &amp;&amp; j&lt;n &amp;&amp; haystack[tmp]==needle[j]) {
+                tmp++;
+                j++;
+            }
+            if (j==n) {
+                return i;
+            }else{
+                j=0;
+            }
+        }
+        return -1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15123884479504.html">
                 
                   <h1>String Compression</h1>
@@ -292,167 +499,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15123699886595.html">
-                
-                  <h1>Reverse String</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15123699886595/15123699978085.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string reverseString(string s) {
-        int str = 0;
-        int end = s.length()-1;
-        while (str&lt;=end) {
-            char tmp;
-            tmp = s[str];
-            s[str] = s[end];
-            s[end] = tmp;
-            str++;
-            end--;
-        }
-        return s;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15123539966341.html">
-                
-                  <h1>Reverse Words in a String III</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15123539966341/15123540495829.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string reverseWords(string s) {
-        string res;
-        int str = 0;
-        for (int i=0; i&lt;s.length(); i++) {
-            if (s[i]==&#39; &#39;||i==s.length()-1) {
-                int j = i==s.length()-1 ? i:i-1;
-                while (j&gt;=str) {
-                    char tmp = s[str];
-                    s[str] = s[j];
-                    s[j] = tmp;
-                    j--;
-                    str++;
-                }
-                str = i+1;
-            }
-        }
-
-        return s;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15122038176626.html">
-                
-                  <h1>Judge Route Circle</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15122038176626/15122038286763.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool judgeCircle(string moves) {
-        int UD = 0 ,LR = 0;
-        for(char a:moves){
-            if (a==&#39;U&#39;) {
-                UD++;
-            }else if (a==&#39;D&#39;){
-                UD--;
-            }else if (a==&#39;L&#39;){
-                LR++;
-            }else if (a==&#39;R&#39;){
-                LR--;
-            }
-        }
-        return (UD==0&amp;&amp;LR==0) ? 1:0;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/2</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -542,6 +588,24 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15130621165951.html">Longest Palindromic Substring</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15130603513802.html">Palindrome Pairs</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15130426368802.html">Intersection of Two Arrays II</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15129821006078.html">Sort Characters By Frequency</a>
 			      </li>
 		     
@@ -549,24 +613,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15129806433168.html">First Unique Character in a String</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129796221707.html">Minimum Moves to Equal Array Elements II</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129788527282.html">Minimum Moves to Equal Array Elements</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15129760305793.html">Range Addition II</a>
 			      </li>
 		     
 		  
