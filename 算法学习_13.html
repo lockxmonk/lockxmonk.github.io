@@ -117,117 +117,33 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15088085969493.html">
+                <a class="clearlink" href="15114062990936.html">
                 
-                  <h1>最长公共子序列(动态规划)</h1>
+                  <h1>Best Time to Buy and Sell Stock</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><strong>最长公共子序列问题（LCS）</strong>给定两个序列\(X=&lt;{x_1,x_2,...x_m}&gt;和Y=&lt;y_1,y_2,...y_n&gt;\),求X和Y长度最长的公共子序列。总共分三个步骤：</p>
+                        	<p>Say you have an array for which the \(i^{th}\) element is the price of a given stock on day i.</p>
 
-<h2 id="toc_0">步骤一：刻画最长公共子序列的特征</h2>
+<p>If you were only permitted to complete at most one transaction (ie, buy one and sell one share of the stock), design an algorithm to find the maximum profit.</p>
 
-<p><img src="media/15088085969493/15088091467243.jpg" alt=""/></p>
+<p><img src="media/15114062990936/15114063447573.jpg" alt=""/></p>
 
-<h2 id="toc_1">步骤二：一个递归解</h2>
-
-<p><img src="media/15088085969493/15088095444692.jpg" alt=""/></p>
-
-<h2 id="toc_2">步骤三：计算LCS的长度</h2>
-
-<p><img src="media/15088085969493/15088132625221.jpg" alt=""/></p>
-
-<p>上述过程我们有如下图来表示：<br/>
-<img src="media/15088085969493/15088133360817.jpg" alt=""/></p>
-
-<h2 id="toc_3">步骤4 构造LCS</h2>
-
-<p><img src="media/15088085969493/15088133035826.jpg" alt=""/></p>
-
-<p>这里我们用C++来构造这个算法：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//
-//  Created by LZH on 2017/10/30.
-//  Copyright © 2017年 梁中豪. All rights reserved.
-//
-
-
-#include &lt;iostream&gt;
-#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
-using namespace std;
-
-//计算LCS的长度
-void LCS_LENGTH(char *X ,char *Y ,int **b ,int **c ,int &amp;m ,int &amp;n)
-{
-    //    int m = sizeof(X)/sizeof(char);
-    //    int n = sizeof(Y)/sizeof(char);
-    
-    //    int b[m][n];
-    //    int c[m][n];
-    
-    for (int i=1; i&lt;m; i++) {
-        for (int j=1; j&lt;n; j++) {
-            if (X[i]==Y[j]) {
-                c[i][j] = c[i-1][j-1]+1;
-                b[i][j] = 1;
-            }
-            else if (c[i-1][j]&gt;=c[i][j-1])
-            {
-                c[i][j] = c[i-1][j];
-                b[i][j] = 2;
-            }
-            else
-            {
-                c[i][j] = c[i][j-1];
-                b[i][j] = 3;
-            }
+<pre><code class="language-c++">class Solution {
+public:
+    int maxProfit(vector&lt;int&gt;&amp; prices) {
+        int minPrice=INT_MAX;
+        int maxProfit = 0;
+        
+        for (int i=0; i&lt;prices.size(); i++) {
+            minPrice = min(prices[i], minPrice);
+            maxProfit = max(maxProfit, prices[i]-minPrice);
         }
+        
+        return maxProfit;
     }
-}
-
-void PRINT_LCS(int **b,char *X,int i,int j)
-{
-    if (i==0 || j==0) {
-        return;
-    }
-    if (b[i][j]==1) {
-        PRINT_LCS(b, X, i-1, j-1);
-        cout &lt;&lt; X[i] &lt;&lt;endl;
-    }
-    else if (b[i][j]==2)
-    {
-        PRINT_LCS(b, X, i-1, j);
-    }
-    else
-    {
-        PRINT_LCS(b, X, i, j-1);
-    }
-}
-
-int main()
-{
-    char X[8] = {&#39;x&#39;,&#39;A&#39;,&#39;B&#39;,&#39;C&#39;,&#39;B&#39;,&#39;D&#39;,&#39;A&#39;,&#39;B&#39;};
-    char Y[7] = {&#39;y&#39;,&#39;B&#39;,&#39;D&#39;,&#39;C&#39;,&#39;A&#39;,&#39;B&#39;,&#39;A&#39;};
-    int m = sizeof(X)/sizeof(char);
-    int n = sizeof(Y)/sizeof(char);
-    int **b =new int*[m];
-    for (int i = 0; i&lt;m; i++) {
-        b[i] = new int[n];
-    }
-    
-    int **c = new int*[m];
-    for (int i = 0; i&lt;m; i++) {
-        c[i] = new int[n];
-    }
-    LCS_LENGTH(X,Y,b,c,m,n);
-    PRINT_LCS(b,X,m-1,n-1);
-    return 0;
-}
-
+};
 </code></pre>
 
                         
@@ -237,10 +153,10 @@ int main()
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/10/24</span>
+                    <span class="date">2017/11/23</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -254,147 +170,30 @@ int main()
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15087194946164.html">
+                <a class="clearlink" href="15114035796843.html">
                 
-                  <h1>动态规划</h1>
+                  <h1>Array Partition I</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<ul>
-<li>
-<a href="#toc_0">钢条切割问题</a>
-<ul>
-<li>
-<a href="#toc_1">分治法</a>
-</li>
-<li>
-<a href="#toc_2">动态规划</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_3">总结</a>
+                        	<p>Given an array of <strong>2n</strong> integers, your task is to group these integers into n pairs of integer, say (a1, b1), (a2, b2), ..., (an, bn) which makes sum of min(ai, bi) for all i from 1 to n as large as possible.</p>
 
+<p><img src="media/15114035796843/15114036022226.jpg" alt=""/></p>
 
-<p>动态规划与分治法很类似，都是通过组合子问题的解来求解原问题。但是不同的是动态规划应用于子问题重叠的情况,即不同的子问题也具有公共的子子问题。分治法在这种情况下，会反复的求解那些公共子子问题。而动态规划算法对每个子子问题只求解一遍，将其保存在一个表格中，避免每次都计算。</p>
-
-<h2 id="toc_0">钢条切割问题</h2>
-
-<p>我们第一个动态规划问题是钢条切割问题。<br/>
-<img src="media/15087194946164/15087197999988.jpg" alt=""/></p>
-
-<h3 id="toc_1">分治法</h3>
-
-<p>我们来先看一下简答的分治法：</p>
-
-<pre><code class="language-objc">//
-//  main.m
-//  CUT-ROD
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface CUT_ROD:NSObject;
-
--(NSInteger)CUT_ROD:(NSArray*)P length:(NSInteger)n;
-
-@end
-
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        NSArray *c = @[@1,@5,@8,@9,@10,@17,@17,@20,@24,@30];
-        CUT_ROD *a = [CUT_ROD new];
-        NSInteger result = [a CUT_ROD:c length:10];
-        NSLog(@&quot;result is %ld&quot;,result);
-    }
-    return 0;
-}
-
-@implementation CUT_ROD
-//简单的分治法,会重复计算子子结果
--(NSInteger)CUT_ROD:(NSArray *)P length:(NSInteger)n{
-    if (n==0) {
-        return 0;
-    }
-    NSInteger q = -1;
-    for (NSInteger i=0; i&lt;n; i++) {
-        q = q&gt;([P[i] integerValue]+[self CUT_ROD:P length:n-i-1]) ? q:([P[i] integerValue]+[self CUT_ROD:P length:n-i-1]);
-    }
-    return q;
-}
-
-@end
-
-</code></pre>
-
-<p>上述代码使用递归来实现的，但是每次都要递归的重复来计算相同的子子问题，如图所示：<br/>
-<img src="media/15087194946164/15087246470673.jpg" alt=""/></p>
-
-<p>所以我们就在想，只要把求解得到的子子问题答案记录下，等到下次要用的时候直接调用它，就可以省下大量的时间。所以我们下面采用动态规划来写一遍。</p>
-
-<h3 id="toc_2">动态规划</h3>
-
-<p><strong><font color=red>动态规划是一个典型的时空权衡的例子，付出额外的内存空间来降低计算时间。</font></strong></p>
-
-<p>第一种方法：带备忘的自顶向下算法</p>
-
-<pre><code class="language-objc">//动态规划 带备忘的自顶向下
--(NSInteger)MEMOIZED_CUT_ROD:(NSArray *)P length:(NSInteger)n{
-    NSMutableArray *logArr =[[NSMutableArray alloc] initWithCapacity:11];
-    for (int i = 0; i&lt;=10; i++) {
-        [logArr addObject:@(-1)];
-    }
-    return [self MEMOIZED_CUT_ROD_AUX:P length:n log:logArr];
-}
--(NSInteger)MEMOIZED_CUT_ROD_AUX:(NSArray*)p length:(NSInteger)n log:(NSMutableArray*)r{
-    NSInteger q;
-    if ([r[n] integerValue]&gt;=0) {
-        return [r[n] integerValue];
-    }
-    if (n==0) {
-        q = 0;
-    }else{
-        q = -1;
-        for (NSInteger i = 0; i&lt;n; i++) {
-            q = q&gt;[p[i] integerValue] + [self MEMOIZED_CUT_ROD_AUX:p length:n-i-1 log:r] ? q : [p[i] integerValue] + [self MEMOIZED_CUT_ROD_AUX:p length:n-i-1 log:r];
+<pre><code class="language-c++">class Solution {
+public:
+    int arrayPairSum(vector&lt;int&gt;&amp; nums) {
+        
+        sort(nums.begin(),nums.end());
+        int result=0;
+        for (int i=0; i&lt;nums.size(); i+=2) {
+            result+=nums[i];
         }
+        return result;
     }
-    [r replaceObjectAtIndex:n withObject:@(q)];
-    return q;
-}
+};
 </code></pre>
-
-<p><code>MEMOIZED_CUT_ROD</code>方法引入<code>r</code>数组，记录每个长度的最优收益值，下面的方法将记录的值存入<code>r</code>数组中，并调用存入<code>r</code>的子子问题所得到收益值。</p>
-
-<p>第二个方法，字底向上版本，这个版本更为简单：</p>
-
-<pre><code class="language-objc">-(NSInteger)BOTTOM_UP_CUT_ROD:(NSArray *)P length:(NSInteger)n{
-    NSMutableArray *arrLog = [[NSMutableArray alloc] initWithCapacity:11];
-    for (int i = 0; i&lt;=10; i++) {
-        [arrLog addObject:@(0)];
-    }
-    NSInteger q = -1;
-    for (int j=0; j&lt;n; j++) {
-        q = -1;
-        for (int i=0; i&lt;=j; i++) {
-            NSLog(@&quot;%li&quot;,q);
-            q = q &gt; ([P[i] integerValue] + [arrLog[j-i] integerValue]) ? q : ([P[i] integerValue] + [arrLog[j-i] integerValue]);
-            NSLog(@&quot;%li&quot;,q);
-        }
-        [arrLog replaceObjectAtIndex:j+1 withObject:@(q)];
-    }
-    return [arrLog[n] integerValue];
-}
-</code></pre>
-
-<p>依次来求解长度从1到n的最大收益。</p>
-
-<h1 id="toc_3">总结</h1>
-
-<p>当我们思考一个动态规划的问题时，最好弄清涉及的子问题与他们的依赖关系。如上图的依赖图为：<br/>
-<img src="media/15087194946164/15087412491634.jpg" alt=""/></p>
 
                         
                       </div>
@@ -403,10 +202,281 @@ int main(int argc, const char * argv[]) {
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/10/23</span>
+                    <span class="date">2017/11/23</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15114026353930.html">
+                
+                  <h1>3Sum</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array S of n integers, are there elements a, b, c in S such that a + b + c = 0? Find all unique triplets in the array which gives the sum of zero.</p>
+
+<p><strong>Note:</strong> The solution set must not contain duplicate triplets.</p>
+
+<p><img src="media/15114026353930/15114026868536.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; threeSum(vector&lt;int&gt;&amp; nums) {
+        sort(nums.begin(),nums.end());
+        vector&lt;vector&lt;int&gt;&gt; result;
+        vector&lt;int&gt; tmpResult;
+        
+        int p,q,tmp;
+        for(int i = 0 ;i&lt;nums.size();i++)
+        {
+            if(i!=0&amp;&amp;nums[i]==nums[i-1]) continue;
+            int currentNum = nums[i];
+            p = i+1;
+            q = nums.size()-1;
+            
+            while(p&lt;q)
+            {
+                if(p!=i+1&amp;&amp;nums[p]==nums[p-1])
+                {
+                    p++;
+                    continue;
+                }
+                tmp = nums[q]+nums[p];
+                if(tmp==-currentNum)
+                {
+                    tmpResult.push_back(currentNum);
+                    tmpResult.push_back(nums[q]);
+                    tmpResult.push_back(nums[p]);
+                    result.push_back(tmpResult);
+                    tmpResult.clear();
+                    p++;
+                    q--;
+                }else if (tmp&gt;-currentNum)
+                {
+                    q--;
+                }else p++;
+            }
+        }
+        
+        return result;
+    }
+};
+</code></pre>
+
+<p><strong>two real problems .</strong></p>
+
+<ul>
+<li><p>how to find the sum?<br/>
+change it to a 2 sum problem. when you have one value, the sum of the other two is -value.<br/>
+2 sum problem has a O(n) solution. so the final is O(n<sup>2).</sup></p></li>
+<li><p>how to remove the duplicate?<br/>
+for same values, we only use the first one and pass the rest.</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15113375347657.html">
+                
+                  <h1>Arranging Coins</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>You have a total of n coins that you want to form in a staircase shape, where every k-th row must have exactly k coins.</p>
+
+<p>Given n, find the total number of full staircase rows that can be formed.</p>
+
+<p>n is a non-negative integer and fits within the range of a 32-bit signed integer.</p>
+
+<p><img src="media/15113375347657/15113375557158.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int arrangeCoins(int n) {
+        return floor(-0.5+sqrt((double)2*n+0.25));
+    }
+};
+</code></pre>
+
+<p>这道题的主要考虑<code>1+2+3+...+x&lt;=n</code>下，使x左边等式最接近n，并且不超过。</p>
+
+<p>推导为：</p>
+
+<pre><code>-&gt; 1+2+3+...+x = n
+-&gt; (1+x)x/2 = n
+-&gt; x^2+x = 2n
+-&gt; x^2+x+1/4 = 2n +1/4
+-&gt; (x+1/2)^2 = 2n +1/4
+-&gt; (x+0.5) = sqrt(2n+0.25)
+-&gt; x = -0.5 + sqrt(2n+0.25)
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15113344881540.html">
+                
+                  <h1>Add Binary</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given two binary strings, return their sum (also a binary string).</p>
+
+<p>For example,<br/>
+a = <code>&quot;11&quot;</code><br/>
+b = <code>&quot;1&quot;</code><br/>
+Return <code>&quot;100&quot;</code>.</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string addBinary(string a, string b) {
+        int fw = 0;
+        string result = &quot;&quot;;
+        for(int i = a.size()-1,j=b.size()-1;i&gt;=0||j&gt;=0;i--,j--){
+            int ag = i&gt;=0?a[i]-&#39;0&#39;:0;
+            int bg = j&gt;=0?b[j]-&#39;0&#39;:0;
+            int tmp = (ag+bg+fw)%2;
+            fw = (ag+bg+fw)/2;
+            
+            result = char(tmp+&#39;0&#39;)+result;
+        }
+        if(fw==1){
+            result = &#39;1&#39;+result;
+        }
+        
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15113344372070.html">
+                
+                  <h1>1-bit and 2-bit Characters</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>We have two special characters. The first character can be represented by one bit <code>0</code>. The second character can be represented by two bits (<code>10 or 11</code>).</p>
+
+<p>Now given a string represented by several bits. Return whether the last character must be a one-bit character or not. The given string will always end with a zero.<br/>
+<img src="media/15113344372070/15113344696565.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool isOneBitCharacter(vector&lt;int&gt;&amp; bits) {
+        int i = 0;
+        int b = 0;
+        while(i&lt;bits.size()){            
+            if(bits[i]==1)
+            {
+                i=i+2;
+                b=0;
+            }else{
+                i++;
+                b=1;
+            }
+        };
+        if(b==0){
+            return 0;
+        }else {
+            return 1; 
+        }
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -430,7 +500,7 @@ int main(int argc, const char * argv[]) {
 			  </div>
 			  <div class="large-6 columns">
 			<p class="text-right" style="padding-top:25px;">
-			
+			 <a href="算法学习_14.html">&raquo; Next Page</a> 
 			</p>
 			  </div>
 			</div>
@@ -508,31 +578,31 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
-			        <a href="15130621165951.html">Longest Palindromic Substring</a>
+			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15130603513802.html">Palindrome Pairs</a>
+			        <a href="15139938131506.html">Sum of many ints</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15130426368802.html">Intersection of Two Arrays II</a>
+			        <a href="15139334894228.html"> Longest Univalue Path</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15129821006078.html">Sort Characters By Frequency</a>
+			        <a href="15137396102567.html">Isomorphic Strings</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15129806433168.html">First Unique Character in a String</a>
+			        <a href="15136732474119.html">Path Sum II</a>
 			      </li>
 		     
 		  

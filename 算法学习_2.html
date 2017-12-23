@@ -117,21 +117,81 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15129554975886.html">
+                <a class="clearlink" href="15130426368802.html">
                 
-                  <h1>Construct the Rectangle</h1>
+                  <h1>Intersection of Two Arrays II</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15129554975886/15129555123983.jpg" alt=""/></p>
+                        	<p><img src="media/15130426368802/15130427333668.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    vector&lt;int&gt; constructRectangle(int area) {
-        for(int mid = sqrt(area); mid&gt;0; mid--)
-            if (!(area%mid))
-                return {area/mid, mid};
+    vector&lt;int&gt; intersect(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
+        unordered_map&lt;int, int&gt; map;
+        vector&lt;int&gt; res;
+        for(auto num1:nums1){
+            map[num1]++;
+        }
+
+        for(auto num2:nums2){
+            if (map[num2]&gt;0) {
+                map[num2]--;
+                res.push_back(num2);
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/12</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15129821006078.html">
+                
+                  <h1>Sort Characters By Frequency</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15129821006078/15129821362536.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string frequencySort(string s) {
+        unordered_map&lt;char, int&gt; map;
+        for (int i =0; i&lt;s.length(); i++) {
+            map[s[i]]++;
+        }
+
+        sort(s.begin(), s.end(), [&amp;map](char a ,char b){
+            return map[a]&gt;map[b] || (map[a] == map[b] &amp;&amp; a &gt; b);
+        });
+        
+        return s;
     }
 };
 </code></pre>
@@ -160,36 +220,78 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15128072112005.html">
+                <a class="clearlink" href="15129806433168.html">
                 
-                  <h1>Relative Ranks</h1>
+                  <h1>First Unique Character in a String</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given scores of <strong>N</strong> athletes, find their relative ranks and the people with the top three highest scores, who will be awarded medals: &quot;Gold Medal&quot;, &quot;Silver Medal&quot; and &quot;Bronze Medal&quot;.</p>
-
-<p><img src="media/15128072112005/15128073582183.jpg" alt=""/></p>
-
-<p><code>pair</code>的用法和优先队列的使用</p>
+                        	<p><img src="media/15129806433168/15129806517273.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    vector&lt;string&gt; findRelativeRanks(vector&lt;int&gt;&amp; nums) {
-        priority_queue&lt;pair&lt;int,int&gt; &gt; pq;
-        for(int i=0;i&lt;nums.size();i++)
-        {
-            pq.push(make_pair(nums[i],i));
+    int firstUniqChar(string s) {
+        unordered_map&lt;char, int&gt; map;
+        for (int i =0; i&lt;s.length(); i++) {
+            map[s[i]]++;
         }
-        vector&lt;string&gt; res(nums.size(),&quot;&quot;);
-        int count = 1;
-        for(int i=0; i&lt;nums.size();i++)
+        for (int i =0; i&lt;s.length(); i++) {
+            if (map[s[i]]==1) {
+                return i;
+            }
+        }
+        return -1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/11</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15129796221707.html">
+                
+                  <h1>Minimum Moves to Equal Array Elements II</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15129796221707/15129796318879.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int minMoves2(vector&lt;int&gt;&amp; nums) {
+        int n = nums.size();
+        if(n &lt;= 1) return 0;
+        sort(nums.begin(), nums.end());
+        int mid = nums.size()/2 ,res = 0;
+        for(int i = 0; i &lt; mid; ++i)
         {
-            if(count==1) {res[pq.top().second] = &quot;Gold Medal&quot;; count++;}
-            else if(count==2) {res[pq.top().second] = &quot;Silver Medal&quot;; count++;}
-            else if(count==3) {res[pq.top().second] = &quot;Bronze Medal&quot;; count++;}
-            else {res[pq.top().second] = to_string(count); count++;}
-            pq.pop();
+            res+=nums[mid]-nums[i];
+        }
+        for (int j = n-1; j&gt;mid; j--) {
+            res+=nums[j]-nums[mid];
         }
         return res;
     }
@@ -203,7 +305,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/9</span>
+                    <span class="date">2017/12/11</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -220,28 +322,29 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15128043838038.html">
+                <a class="clearlink" href="15129788527282.html">
                 
-                  <h1>Valid Anagram</h1>
+                  <h1>Minimum Moves to Equal Array Elements</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15128043838038/15128043943990.jpg" alt=""/></p>
+                        	<p><img src="media/15129788527282/15129788644532.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    bool isAnagram(string s, string t) {
-        if (s.length() != t.length()) return false;
-        unordered_map&lt;char, int&gt; map;
-        for (int i =0; i&lt;s.length(); i++) {
-            map[s[i]]++;
-            map[t[i]]--;
+    int minMoves(vector&lt;int&gt;&amp; nums) {
+        int n = nums.size();
+        if(n &lt;= 1)
+            return 0;
+        int mn = nums[0];   //mn为最小数字
+        int sum = nums[0];
+        for(int i = 1; i &lt; n; ++i)
+        {
+            mn = min(mn,nums[i]);
+            sum += nums[i];
         }
-        for(auto s:map){
-            if(s.second&lt;0) return 0;
-        }
-        return 1;
+        return sum - mn*n;
     }
 };
 </code></pre>
@@ -253,7 +356,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/9</span>
+                    <span class="date">2017/12/11</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -270,27 +373,23 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15128026901484.html">
+                <a class="clearlink" href="15129760305793.html">
                 
-                  <h1>Assign Cookies</h1>
+                  <h1>Range Addition II</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15128026901484/15128027017206.jpg" alt=""/></p>
+                        	<p><img src="media/15129760305793/15129772098038.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int findContentChildren(vector&lt;int&gt;&amp; g, vector&lt;int&gt;&amp; s) {
-        sort(g.begin(), g.end());
-        sort(s.begin(), s.end());
-        int logG=0;
-        for (int i=0; i&lt;s.size(); i++) {
-            if (g[logG]&lt;=s[i]&amp;&amp;logG&lt;g.size()) {
-                logG++;
-            }
+    int maxCount(int m, int n, vector&lt;vector&lt;int&gt;&gt;&amp; ops) {
+        for (auto tmp:ops) {
+            m = min(m, tmp[0]);
+            n = min(n, tmp[1]);
         }
-        return logG;
+        return m*n;
     }
 };
 </code></pre>
@@ -302,101 +401,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15128009688279.html">
-                
-                  <h1>Ransom Note</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15128009688279/15128009813033.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool canConstruct(string ransomNote, string magazine) {
-        unordered_map&lt;char, int&gt; map;
-        for (int i = 0; i&lt;magazine.length(); i++) {
-            map[magazine[i]]++;
-        }
-        for (int j = 0; j&lt;ransomNote.length(); j++) {
-            if(--map[ransomNote[j]]&lt;0) return 0;
-        }
-        return 1;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15127898937133.html">
-                
-                  <h1>Reverse String II</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15127898937133/15127899074799.jpg" alt=""/></p>
-
-<p>运用内置的<code>reverse</code>函数</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string reverseStr(string s, int k) {
-        for (int i = 0; i&lt;s.length(); i+=2*k) {
-            reverse(s.begin()+i, min(s.begin()+i+k, s.end()));
-        }
-        return s;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/9</span>
+                    <span class="date">2017/12/11</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -501,31 +506,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15130621165951.html">Longest Palindromic Substring</a>
+			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15130603513802.html">Palindrome Pairs</a>
+			        <a href="15139938131506.html">Sum of many ints</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15130426368802.html">Intersection of Two Arrays II</a>
+			        <a href="15139334894228.html"> Longest Univalue Path</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15129821006078.html">Sort Characters By Frequency</a>
+			        <a href="15137396102567.html">Isomorphic Strings</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15129806433168.html">First Unique Character in a String</a>
+			        <a href="15136732474119.html">Path Sum II</a>
 			      </li>
 		     
 		  

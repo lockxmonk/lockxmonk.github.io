@@ -4,13 +4,427 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-12-11T16:49:21+08:00</updated>
+  <updated>2017-12-12T15:08:14+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[![](media/15139993814636/15139993826350.jpg)]]></title>
+    <link href="https://lockxmonk.github.io/15139993814636.html"/>
+    <updated>2017-12-23T11:23:01+08:00</updated>
+    <id>https://lockxmonk.github.io/15139993814636.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15139993814636/15139994003399.jpg" alt=""/></p>
+
+<p>题目链接：<a href="https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc">https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc</a></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSString *vertMirror(NSString *strng) {
+    NSMutableString *res = [[NSMutableString alloc] init];
+    NSArray *stringArray = [strng componentsSeparatedByString:@&quot;\n&quot;];
+    for (NSString *tmpStr in stringArray) {
+        NSMutableString * reverseString = [NSMutableString string];
+        for(int i = 0 ; i &lt; tmpStr.length; i ++){
+            //倒序读取字符并且存到可变数组数组中
+            unichar c = [tmpStr characterAtIndex:tmpStr.length- i -1];
+            [reverseString appendFormat:@&quot;%c&quot;,c];
+        }
+        
+        if ([tmpStr isEqualToString:[stringArray lastObject]]) {
+            [res appendString:reverseString];
+            break;
+        }
+        
+        [reverseString appendString:@&quot;\n&quot;];
+        [res appendString:reverseString];
+    }
+    
+    return res;
+}
+
+NSString *horMirror(NSString *strng) {
+    NSMutableString *res = [[NSMutableString alloc] init];;
+    NSArray *stringAry = [strng componentsSeparatedByString:@&quot;\n&quot;];
+    for (int i = stringAry.count-1; i&gt;=0; i--) {
+        [res appendString:stringAry[i]];
+        if (i==0) {
+            break;
+        }
+        [res appendString:@&quot;\n&quot;];
+    }
+    return res;
+}
+
+NSString *oper(NSString *(*f)(NSString *), NSString *s) {
+    return f(s);
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Sum of many ints]]></title>
+    <link href="https://lockxmonk.github.io/15139938131506.html"/>
+    <updated>2017-12-23T09:50:13+08:00</updated>
+    <id>https://lockxmonk.github.io/15139938131506.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15139938131506/15139938214932.jpg" alt=""/></p>
+
+<p>题目链接：<a href="https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc">https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc</a></p>
+
+<p>注意<code>long long</code>类型。</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+long long f(long long n, long long m) {
+    long long sum = 0;
+    long long q = n/m;
+    long long p = n%m;
+    sum+= (m*(m-1)/2)*q;
+    sum+= (p+1)*p/2;
+    return sum;
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ Longest Univalue Path]]></title>
+    <link href="https://lockxmonk.github.io/15139334894228.html"/>
+    <updated>2017-12-22T17:04:49+08:00</updated>
+    <id>https://lockxmonk.github.io/15139334894228.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15139334894228/15139334918786.jpg" alt=""/></p>
+
+<pre><code class="language-c++">/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int dfs(TreeNode* node, int&amp; lup) {
+        int l = node-&gt;left ? dfs(node-&gt;left, lup) : 0;
+        int r = node-&gt;right ? dfs(node-&gt;right, lup) : 0;
+        int resl = node-&gt;left &amp;&amp; node-&gt;left-&gt;val == node-&gt;val ? l + 1 : 0;
+        int resr = node-&gt;right &amp;&amp; node-&gt;right-&gt;val == node-&gt;val ? r + 1 : 0;
+        lup = max(lup, resl + resr);
+        return max(resl, resr);
+    }
+
+    int longestUnivaluePath(TreeNode* root) {
+        int lup = 0;
+        if (root) dfs(root, lup);
+        return lup;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Isomorphic Strings]]></title>
+    <link href="https://lockxmonk.github.io/15137396102567.html"/>
+    <updated>2017-12-20T11:13:30+08:00</updated>
+    <id>https://lockxmonk.github.io/15137396102567.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15137396102567/15137396123443.jpg" alt=""/></p>
+
+<p>一开始写的代码，超时版本，用的集合。</p>
+
+<pre><code class="language-c++">bool isIsomorphic(string s, string t) {
+    unordered_map&lt;char, set&lt;int&gt;&gt; Smap;
+    unordered_map&lt;char, vector&lt;int&gt;&gt; Tmap;
+    for (int i = 0; i&lt;s.size(); i++) {
+        Smap[s[i]].insert(i);
+        Tmap[t[i]].push_back(i);
+    }
+    if (Smap.size()!=Tmap.size()) {
+        return 0;
+    }else{
+        for (int j = 0; j&lt;s.size(); j++) {
+            vector&lt;int&gt; a = Tmap[t[j]];
+            set&lt;int&gt; b = Smap[s[j]];
+            int len = b.size();
+            for (auto num : a) {
+                b.insert(num);
+                if (len!=b.size()) {
+                    return 0;
+                }
+            }
+        }
+    }
+    
+    return 1;
+}
+</code></pre>
+
+<p>修改后的版本。</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool isIsomorphic(string s, string t) {
+        int m1[256] = {0}, m2[256] = {0}, n = s.size();
+        for (int i = 0; i &lt; n; ++i) {
+            if (m1[s[i]] != m2[t[i]]) return false;  //判断两个字符串i位置的字符上次出现的位置是否一样。
+            m1[s[i]] = i + 1;   //记录上次该字符出现的位置
+            m2[t[i]] = i + 1;   //记录上次该字符出现的位置
+        }
+        return true;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Path Sum II]]></title>
+    <link href="https://lockxmonk.github.io/15136732474119.html"/>
+    <updated>2017-12-19T16:47:27+08:00</updated>
+    <id>https://lockxmonk.github.io/15136732474119.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15136732474119/15136732503183.jpg" alt=""/></p>
+
+<p>运用前序遍历</p>
+
+<pre><code class="language-c++">/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void findPaths(TreeNode* node, int sum, vector&lt;int&gt;&amp; path, vector&lt;vector&lt;int&gt; &gt;&amp; paths) {
+        if (!node) return;
+        path.push_back(node -&gt; val);
+        if (!(node -&gt; left) &amp;&amp; !(node -&gt; right) &amp;&amp; sum == node -&gt; val)
+            paths.push_back(path);
+        findPaths(node -&gt; left, sum - node -&gt; val, path, paths);
+        findPaths(node -&gt; right, sum - node -&gt; val, path, paths);
+        path.pop_back();
+    }
+
+    vector&lt;vector&lt;int&gt;&gt; pathSum(TreeNode* root, int sum) {
+        vector&lt;vector&lt;int&gt; &gt; paths;
+        vector&lt;int&gt; path;
+        findPaths(root, sum, path, paths);
+        return paths;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Path Sum]]></title>
+    <link href="https://lockxmonk.github.io/15136718150164.html"/>
+    <updated>2017-12-19T16:23:35+08:00</updated>
+    <id>https://lockxmonk.github.io/15136718150164.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15136718150164/15136718241722.jpg" alt=""/></p>
+
+<pre><code class="language-c++">/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    bool hasPathSum(TreeNode *root, int sum) {
+        if (root == NULL) return false;
+        if (root-&gt;val == sum &amp;&amp; root-&gt;left ==  NULL &amp;&amp; root-&gt;right == NULL) return true;
+        
+        return hasPathSum(root-&gt;left, sum-root-&gt;val) || hasPathSum(root-&gt;right, sum-root-&gt;val);
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Linked List Cycle II]]></title>
+    <link href="https://lockxmonk.github.io/15134129335933.html"/>
+    <updated>2017-12-16T16:28:53+08:00</updated>
+    <id>https://lockxmonk.github.io/15134129335933.html</id>
+    <content type="html"><![CDATA[
+<p>题目链接：<a href="https://leetcode.com/problems/linked-list-cycle-ii/description/">https://leetcode.com/problems/linked-list-cycle-ii/description/</a></p>
+
+<p>Given a linked list, return the node where the cycle begins. If there is no cycle, return null.</p>
+
+<p>Note: Do not modify the linked list.</p>
+
+<pre><code class="language-c++">/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode *detectCycle(ListNode *head) {
+        if (head==NULL||head-&gt;next==NULL) {
+            return NULL;
+        }
+        ListNode *slow = head;
+        ListNode *fast = head;
+        ListNode *entry = head;
+        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
+            fast = fast-&gt;next-&gt;next;
+            slow = slow-&gt;next;
+            if (fast==slow) {
+                while (slow!=entry) {
+                    slow = slow-&gt;next;
+                    entry = entry-&gt;next;
+                }
+                return entry;;
+            }
+        }
+        return NULL;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Linked List Cycle]]></title>
+    <link href="https://lockxmonk.github.io/15134088955356.html"/>
+    <updated>2017-12-16T15:21:35+08:00</updated>
+    <id>https://lockxmonk.github.io/15134088955356.html</id>
+    <content type="html"><![CDATA[
+<p>Given a linked list, determine if it has a cycle in it.</p>
+
+<p>Follow up:<br/>
+Can you solve it without using extra space?</p>
+
+<p><strong>使用快慢两个指针来判断是否有环，当有环的时候，快指针会停留在环内知道慢指针赶上与之相等。</strong></p>
+
+<pre><code class="language-c++">/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    bool hasCycle(ListNode *head) {
+        if (head==NULL||head-&gt;next==NULL) {
+            return 0;
+        }
+        ListNode *slow = head;
+        ListNode *fast = head;
+        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
+            fast = fast-&gt;next-&gt;next;
+            slow = slow-&gt;next;
+            if (fast==slow) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ Convert a Number to Hexadecimal]]></title>
+    <link href="https://lockxmonk.github.io/15131536329153.html"/>
+    <updated>2017-12-13T16:27:12+08:00</updated>
+    <id>https://lockxmonk.github.io/15131536329153.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15131536329153/15131536540833.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string toHex(int num) {
+        const string HEX =&quot;0123456789abcdef&quot;;
+        if (num==0) return &quot;0&quot;;
+        string res =&quot;&quot;;
+        int count  = 0;
+        while (num&amp;&amp;count++&lt;8) {
+            //&amp;0xf表示取二进制的低四位
+            res = HEX[(num&amp;0xf)]+res;
+            num&gt;&gt;=4;
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Number of Boomerangs]]></title>
+    <link href="https://lockxmonk.github.io/15131518267208.html"/>
+    <updated>2017-12-13T15:57:06+08:00</updated>
+    <id>https://lockxmonk.github.io/15131518267208.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15131518267208/15131518346128.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int numberOfBoomerangs(vector&lt;pair&lt;int, int&gt;&gt;&amp; points) {
+        int res = 0;
+        for (int i =0; i&lt;points.size(); i++) {
+            unordered_map&lt;long, int&gt; map(points.size());
+            for (int j = 0; j&lt;points.size(); j++) {
+                if (j==i) continue;
+                int dy = points[j].second - points[i].second;
+                int dx = points[j].first - points[i].first;
+
+                int dis = dy*dy + dx*dx;
+                map[dis]++;
+            }
+
+            for (auto p : map) {
+                if (p.second&gt;1) {
+                    /*
+                     * for all the groups of points,
+                     * number of ways to select 2 from n =
+                     * nP2 = n!/(n - 2)! = n * (n - 1)
+                     */
+                    res+=p.second*(p.second-1);
+                }
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Longest Palindromic Substring]]></title>
@@ -446,332 +860,6 @@ public:
             n=n/26;
         }
         return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Excel Sheet Column Number]]></title>
-    <link href="https://lockxmonk.github.io/15129586256568.html"/>
-    <updated>2017-12-11T10:17:05+08:00</updated>
-    <id>https://lockxmonk.github.io/15129586256568.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15129586256568/15129586339253.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int titleToNumber(string s) {
-        int res = 0;
-        for (int i=0; i&lt;s.length(); i++) {
-            res = res * 26 + (s[i] - &#39;A&#39; + 1);
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Flood Fill]]></title>
-    <link href="https://lockxmonk.github.io/15129573661731.html"/>
-    <updated>2017-12-11T09:56:06+08:00</updated>
-    <id>https://lockxmonk.github.io/15129573661731.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15129573661731/15129573748798.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    void fillColor(vector&lt;vector&lt;int&gt;&gt;&amp; image,int sr, int sc ,int tmp){
-        if (sr&gt;0&amp;&amp;image[sr-1][sc]==tmp) {
-            image[sr-1][sc]=image[sr][sc];
-            fillColor(image, sr-1, sc, tmp);
-        }
-        if (sr&lt;image.size()-1&amp;&amp;image[sr+1][sc]==tmp) {
-            image[sr+1][sc]=image[sr][sc];
-            fillColor(image, sr+1, sc, tmp);
-        }
-        if (sc&gt;0&amp;&amp;image[sr][sc-1]==tmp) {
-            image[sr][sc-1]=image[sr][sc];
-            fillColor(image, sr, sc-1, tmp);
-        }
-        if (sc&lt;image[0].size()-1&amp;&amp;image[sr][sc+1]==tmp) {
-            image[sr][sc+1]=image[sr][sc];
-            fillColor(image, sr, sc+1, tmp);
-        }
-    }
-
-    vector&lt;vector&lt;int&gt;&gt; floodFill(vector&lt;vector&lt;int&gt;&gt;&amp; image, int sr, int sc, int newColor) {
-        int tmp = image[sr][sc];
-        if (tmp == newColor) {
-            return image;
-        }
-        image[sr][sc] = newColor;
-        fillColor(image, sr, sc, tmp);
-        return image;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Construct the Rectangle]]></title>
-    <link href="https://lockxmonk.github.io/15129554975886.html"/>
-    <updated>2017-12-11T09:24:57+08:00</updated>
-    <id>https://lockxmonk.github.io/15129554975886.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15129554975886/15129555123983.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; constructRectangle(int area) {
-        for(int mid = sqrt(area); mid&gt;0; mid--)
-            if (!(area%mid))
-                return {area/mid, mid};
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Relative Ranks]]></title>
-    <link href="https://lockxmonk.github.io/15128072112005.html"/>
-    <updated>2017-12-09T16:13:31+08:00</updated>
-    <id>https://lockxmonk.github.io/15128072112005.html</id>
-    <content type="html"><![CDATA[
-<p>Given scores of <strong>N</strong> athletes, find their relative ranks and the people with the top three highest scores, who will be awarded medals: &quot;Gold Medal&quot;, &quot;Silver Medal&quot; and &quot;Bronze Medal&quot;.</p>
-
-<p><img src="media/15128072112005/15128073582183.jpg" alt=""/></p>
-
-<p><code>pair</code>的用法和优先队列的使用</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;string&gt; findRelativeRanks(vector&lt;int&gt;&amp; nums) {
-        priority_queue&lt;pair&lt;int,int&gt; &gt; pq;
-        for(int i=0;i&lt;nums.size();i++)
-        {
-            pq.push(make_pair(nums[i],i));
-        }
-        vector&lt;string&gt; res(nums.size(),&quot;&quot;);
-        int count = 1;
-        for(int i=0; i&lt;nums.size();i++)
-        {
-            if(count==1) {res[pq.top().second] = &quot;Gold Medal&quot;; count++;}
-            else if(count==2) {res[pq.top().second] = &quot;Silver Medal&quot;; count++;}
-            else if(count==3) {res[pq.top().second] = &quot;Bronze Medal&quot;; count++;}
-            else {res[pq.top().second] = to_string(count); count++;}
-            pq.pop();
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Valid Anagram]]></title>
-    <link href="https://lockxmonk.github.io/15128043838038.html"/>
-    <updated>2017-12-09T15:26:23+08:00</updated>
-    <id>https://lockxmonk.github.io/15128043838038.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15128043838038/15128043943990.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool isAnagram(string s, string t) {
-        if (s.length() != t.length()) return false;
-        unordered_map&lt;char, int&gt; map;
-        for (int i =0; i&lt;s.length(); i++) {
-            map[s[i]]++;
-            map[t[i]]--;
-        }
-        for(auto s:map){
-            if(s.second&lt;0) return 0;
-        }
-        return 1;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Assign Cookies]]></title>
-    <link href="https://lockxmonk.github.io/15128026901484.html"/>
-    <updated>2017-12-09T14:58:10+08:00</updated>
-    <id>https://lockxmonk.github.io/15128026901484.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15128026901484/15128027017206.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int findContentChildren(vector&lt;int&gt;&amp; g, vector&lt;int&gt;&amp; s) {
-        sort(g.begin(), g.end());
-        sort(s.begin(), s.end());
-        int logG=0;
-        for (int i=0; i&lt;s.size(); i++) {
-            if (g[logG]&lt;=s[i]&amp;&amp;logG&lt;g.size()) {
-                logG++;
-            }
-        }
-        return logG;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ransom Note]]></title>
-    <link href="https://lockxmonk.github.io/15128009688279.html"/>
-    <updated>2017-12-09T14:29:28+08:00</updated>
-    <id>https://lockxmonk.github.io/15128009688279.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15128009688279/15128009813033.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool canConstruct(string ransomNote, string magazine) {
-        unordered_map&lt;char, int&gt; map;
-        for (int i = 0; i&lt;magazine.length(); i++) {
-            map[magazine[i]]++;
-        }
-        for (int j = 0; j&lt;ransomNote.length(); j++) {
-            if(--map[ransomNote[j]]&lt;0) return 0;
-        }
-        return 1;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Reverse String II]]></title>
-    <link href="https://lockxmonk.github.io/15127898937133.html"/>
-    <updated>2017-12-09T11:24:53+08:00</updated>
-    <id>https://lockxmonk.github.io/15127898937133.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15127898937133/15127899074799.jpg" alt=""/></p>
-
-<p>运用内置的<code>reverse</code>函数</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string reverseStr(string s, int k) {
-        for (int i = 0; i&lt;s.length(); i+=2*k) {
-            reverse(s.begin()+i, min(s.begin()+i+k, s.end()));
-        }
-        return s;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Base 7]]></title>
-    <link href="https://lockxmonk.github.io/15127884486398.html"/>
-    <updated>2017-12-09T11:00:48+08:00</updated>
-    <id>https://lockxmonk.github.io/15127884486398.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15127884486398/15127884572899.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string convertToBase7(int num) {
-        int x = abs(num); string res;
-        do {
-          res = to_string(x%7)+res;
-        } while (x/=7);
-        
-        return (num&gt;=0? &quot;&quot; : &quot;-&quot;) + res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[License Key Formatting]]></title>
-    <link href="https://lockxmonk.github.io/15127864249320.html"/>
-    <updated>2017-12-09T10:27:04+08:00</updated>
-    <id>https://lockxmonk.github.io/15127864249320.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15127864249320/15127864500019.jpg" alt=""/></p>
-
-<p>第一版：</p>
-
-<pre><code class="language-c++">    int log = 0;
-    string ele=&quot;&quot;;
-    string re=&quot;&quot;;
-    for (int i = S.length()-1; i&gt;=0; i--) {
-        if (S[i]!=&#39;-&#39;) {
-            log++;
-            S[i]=toupper(S[i]);
-            ele = S[i]+ele;
-        }
-        if (log==K||i==0) {
-            if (i==0) {
-                re = ele+re;
-            }else{
-                re = &#39;-&#39;+ele+re;
-            }
-            log = 0;
-            ele = &quot;&quot;;
-        }
-    }
-    return re[0]==&#39;-&#39;?re.substr(1,re.length()-1):re;
-</code></pre>
-
-<p>第二版：运用栈</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string licenseKeyFormatting(string S, int K) {
-        stack&lt;string&gt; st;
-        string line;
-        for(int i=S.length()-1;i&gt;=0;i--){
-            if(S[i]==&#39;-&#39;) continue;
-            
-            if(line.length()&lt;K){
-                if(S[i]&gt;=&#39;a&#39; &amp;&amp; S[i]&lt;=&#39;z&#39;) line.insert(0, 1, S[i]-&#39;a&#39;+&#39;A&#39;);
-                else line.insert(0, 1, S[i]);
-                
-                if(line.length()==K){
-                    st.push(line);
-                    line=&quot;&quot;;
-                }
-            }
-        }
-        if(st.empty()) return line;
-        
-        if(line.length() == 0){
-            line += st.top();
-            st.pop();
-        }
-        while(!st.empty()){
-            line+=&#39;-&#39;;
-            line+=st.top();
-            st.pop();
-        }
-        return line;
     }
 };
 </code></pre>

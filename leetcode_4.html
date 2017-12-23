@@ -117,25 +117,270 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15127150080101.html">
+                <a class="clearlink" href="15128009688279.html">
                 
-                  <h1>Sum of Two Integers</h1>
+                  <h1>Ransom Note</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15127150080101/15127150099516.jpg" alt=""/></p>
+                        	<p><img src="media/15128009688279/15128009813033.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int getSum(int a, int b) {
-        int sum = a;
-        while (b!=0) {
-            sum = a^b;
-            b = (a&amp;b)&lt;&lt;1;
-            a = sum;
+    bool canConstruct(string ransomNote, string magazine) {
+        unordered_map&lt;char, int&gt; map;
+        for (int i = 0; i&lt;magazine.length(); i++) {
+            map[magazine[i]]++;
+        }
+        for (int j = 0; j&lt;ransomNote.length(); j++) {
+            if(--map[ransomNote[j]]&lt;0) return 0;
+        }
+        return 1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15127898937133.html">
+                
+                  <h1>Reverse String II</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15127898937133/15127899074799.jpg" alt=""/></p>
+
+<p>运用内置的<code>reverse</code>函数</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string reverseStr(string s, int k) {
+        for (int i = 0; i&lt;s.length(); i+=2*k) {
+            reverse(s.begin()+i, min(s.begin()+i+k, s.end()));
+        }
+        return s;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15127884486398.html">
+                
+                  <h1>Base 7</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15127884486398/15127884572899.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string convertToBase7(int num) {
+        int x = abs(num); string res;
+        do {
+          res = to_string(x%7)+res;
+        } while (x/=7);
+        
+        return (num&gt;=0? &quot;&quot; : &quot;-&quot;) + res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15127864249320.html">
+                
+                  <h1>License Key Formatting</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15127864249320/15127864500019.jpg" alt=""/></p>
+
+<p>第一版：</p>
+
+<pre><code class="language-c++">    int log = 0;
+    string ele=&quot;&quot;;
+    string re=&quot;&quot;;
+    for (int i = S.length()-1; i&gt;=0; i--) {
+        if (S[i]!=&#39;-&#39;) {
+            log++;
+            S[i]=toupper(S[i]);
+            ele = S[i]+ele;
+        }
+        if (log==K||i==0) {
+            if (i==0) {
+                re = ele+re;
+            }else{
+                re = &#39;-&#39;+ele+re;
+            }
+            log = 0;
+            ele = &quot;&quot;;
+        }
+    }
+    return re[0]==&#39;-&#39;?re.substr(1,re.length()-1):re;
+</code></pre>
+
+<p>第二版：运用栈</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string licenseKeyFormatting(string S, int K) {
+        stack&lt;string&gt; st;
+        string line;
+        for(int i=S.length()-1;i&gt;=0;i--){
+            if(S[i]==&#39;-&#39;) continue;
+            
+            if(line.length()&lt;K){
+                if(S[i]&gt;=&#39;a&#39; &amp;&amp; S[i]&lt;=&#39;z&#39;) line.insert(0, 1, S[i]-&#39;a&#39;+&#39;A&#39;);
+                else line.insert(0, 1, S[i]);
+                
+                if(line.length()==K){
+                    st.push(line);
+                    line=&quot;&quot;;
+                }
+            }
+        }
+        if(st.empty()) return line;
+        
+        if(line.length() == 0){
+            line += st.top();
+            st.pop();
+        }
+        while(!st.empty()){
+            line+=&#39;-&#39;;
+            line+=st.top();
+            st.pop();
+        }
+        return line;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15127409536382.html">
+                
+                  <h1>Happy Number</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15127409536382/15127409821970.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int happy(int num){
+        int a = 0;
+        while (num!=0) {
+            a += int(pow(num%10, 2));
+            num/=10;
         }
         return a;
+    }
+
+
+    bool isHappy(int n) {
+        int slow, fast;
+        slow = fast = n;
+        do {
+            slow = happy(slow);
+            fast = happy(fast);
+            fast = happy(fast);
+        } while(slow != fast);
+
+        return slow==1?1:0;
     }
 };
 </code></pre>
@@ -164,42 +409,24 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15127074753393.html">
+                <a class="clearlink" href="15127221024719.html">
                 
-                  <h1>Employee Importance</h1>
+                  <h1>Find the Difference</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15127074753393/15127075000371.jpg" alt=""/></p>
+                        	<p><img src="media/15127221024719/15127221121271.jpg" alt=""/></p>
 
-<pre><code class="language-c++">/*
-// Employee info
-class Employee {
+<pre><code class="language-c++">class Solution {
 public:
-    // It&#39;s the unique ID of each node.
-    // unique id of this employee
-    int id;
-    // the importance value of this employee
-    int importance;
-    // the id of direct subordinates
-    vector&lt;int&gt; subordinates;
-};
-*/
-class Solution {
-public:
-    int getImportance(vector&lt;Employee*&gt; employees, int id) {
-        unordered_map&lt;int ,Employee*&gt; map;
-        for(auto emp:employees){
-            map[emp-&gt;id] = emp;
+    char findTheDifference(string s, string t) {
+        char sum = 0;
+        for (char c: s) {
+            sum^=c;
         }
-        return help(map,id);
-    }
-    
-    int help(unordered_map&lt;int, Employee*&gt;&amp; map, int id){
-        int sum = map[id]-&gt;importance;
-        for(auto element : map[id]-&gt;subordinates){
-            sum += help(map, element);
+        for (char c: t) {
+            sum^=c;
         }
         return sum;
     }
@@ -214,215 +441,6 @@ public:
                   <div class="more-left left">
                   
                     <span class="date">2017/12/8</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15127037334925.html">
-                
-                  <h1>Single Number</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of integers, every element appears twice except for one. Find that single one.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int singleNumber(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (nums[i]!=nums[i+1]) {
-                return nums[i];
-            }else{
-                i++;
-            }
-        }
-        return -1;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/8</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15126366447476.html">
-                
-                  <h1>Nim Game</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>You are playing the following Nim Game with your friend: There is a heap of stones on the table, each time one of you take turns to remove 1 to 3 stones. The one who removes the last stone will be the winner. You will take the first turn to remove the stones.</p>
-
-<p>Both of you are very clever and have optimal strategies for the game. Write a function to determine whether you can win the game given the number of stones in the heap.</p>
-
-<p>For example, if there are 4 stones in the heap, then you will never win the game: no matter 1, 2, or 3 stones you remove, the last stone will always be removed by your friend.</p>
-
-<p>列举1~n情况，每4个一循环.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool canWinNim(int n) {
-        return n%4!=0;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/7</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15126354530210.html">
-                
-                  <h1>Next Greater Element I</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15126354530210/15126354552862.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; nextGreaterElement(vector&lt;int&gt;&amp; findNums, vector&lt;int&gt;&amp; nums) {
-        vector&lt;int&gt; res;
-        for(auto num1:findNums){
-            for (int i = 0; i&lt;nums.size(); i++) {
-                int log = 0;
-                if (nums[i]==num1) {
-                    for (int j = i; j&lt;nums.size(); j++) {
-                        if (nums[j]&gt;num1) {
-                            res.push_back(nums[j]);
-                            log = 1;
-                            break;
-                        }
-                    }
-                    if (log == 0) res.push_back(-1);
-                    break;
-                }
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/7</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15126325722591.html">
-                
-                  <h1>Island Perimeter</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15126325722591/15126325750006.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int islandPerimeter(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
-        int squNum = 0 ,log = 0;
-        for (int i = 0; i&lt;grid.size(); i++) {
-            for (int j = 0; j&lt;grid[0].size(); j++) {
-                if (grid[i][j]==1) {
-                    squNum++;
-                    if (i!=0&amp;&amp;grid[i-1][j]==1) {
-                        log+=2;
-                    }
-                    if (j!=grid[0].size()-1&amp;&amp;grid[i][j+1]==1) {
-                        log+=2;
-                    }
-                }
-            }
-        }
-        return squNum*4-log;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/7</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -527,31 +545,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15130621165951.html">Longest Palindromic Substring</a>
+			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15130603513802.html">Palindrome Pairs</a>
+			        <a href="15139938131506.html">Sum of many ints</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15130426368802.html">Intersection of Two Arrays II</a>
+			        <a href="15139334894228.html"> Longest Univalue Path</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15129821006078.html">Sort Characters By Frequency</a>
+			        <a href="15137396102567.html">Isomorphic Strings</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15129806433168.html">First Unique Character in a String</a>
+			        <a href="15136732474119.html">Path Sum II</a>
 			      </li>
 		     
 		  

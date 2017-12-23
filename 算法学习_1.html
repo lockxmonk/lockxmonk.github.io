@@ -117,29 +117,114 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15129788527282.html">
+                <a class="clearlink" href="15134129335933.html">
                 
-                  <h1>Minimum Moves to Equal Array Elements</h1>
+                  <h1>Linked List Cycle II</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15129788527282/15129788644532.jpg" alt=""/></p>
+                        	<p>题目链接：<a href="https://leetcode.com/problems/linked-list-cycle-ii/description/">https://leetcode.com/problems/linked-list-cycle-ii/description/</a></p>
 
-<pre><code class="language-c++">class Solution {
+<p>Given a linked list, return the node where the cycle begins. If there is no cycle, return null.</p>
+
+<p>Note: Do not modify the linked list.</p>
+
+<pre><code class="language-c++">/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
 public:
-    int minMoves(vector&lt;int&gt;&amp; nums) {
-        int n = nums.size();
-        if(n &lt;= 1)
+    ListNode *detectCycle(ListNode *head) {
+        if (head==NULL||head-&gt;next==NULL) {
+            return NULL;
+        }
+        ListNode *slow = head;
+        ListNode *fast = head;
+        ListNode *entry = head;
+        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
+            fast = fast-&gt;next-&gt;next;
+            slow = slow-&gt;next;
+            if (fast==slow) {
+                while (slow!=entry) {
+                    slow = slow-&gt;next;
+                    entry = entry-&gt;next;
+                }
+                return entry;;
+            }
+        }
+        return NULL;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/16</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15134088955356.html">
+                
+                  <h1>Linked List Cycle</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a linked list, determine if it has a cycle in it.</p>
+
+<p>Follow up:<br/>
+Can you solve it without using extra space?</p>
+
+<p><strong>使用快慢两个指针来判断是否有环，当有环的时候，快指针会停留在环内知道慢指针赶上与之相等。</strong></p>
+
+<pre><code class="language-c++">/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    bool hasCycle(ListNode *head) {
+        if (head==NULL||head-&gt;next==NULL) {
             return 0;
-        int mn = nums[0];   //mn为最小数字
-        int sum = nums[0];
-        for(int i = 1; i &lt; n; ++i)
-        {
-            mn = min(mn,nums[i]);
-            sum += nums[i];
         }
-        return sum - mn*n;
+        ListNode *slow = head;
+        ListNode *fast = head;
+        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
+            fast = fast-&gt;next-&gt;next;
+            slow = slow-&gt;next;
+            if (fast==slow) {
+                return 1;
+            }
+        }
+        return 0;
     }
 };
 </code></pre>
@@ -151,7 +236,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/11</span>
+                    <span class="date">2017/12/16</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -168,245 +253,26 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15129760305793.html">
+                <a class="clearlink" href="15131536329153.html">
                 
-                  <h1>Range Addition II</h1>
+                  <h1> Convert a Number to Hexadecimal</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15129760305793/15129772098038.jpg" alt=""/></p>
+                        	<p><img src="media/15131536329153/15131536540833.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int maxCount(int m, int n, vector&lt;vector&lt;int&gt;&gt;&amp; ops) {
-        for (auto tmp:ops) {
-            m = min(m, tmp[0]);
-            n = min(n, tmp[1]);
-        }
-        return m*n;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/11</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15129738955534.html">
-                
-                  <h1>Beauty Contest（旋转卡壳）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Description<br/>
-Bessie, Farmer John&#39;s prize cow, has just won first place in a bovine beauty contest, earning the title &#39;Miss Cow World&#39;. As a result, Bessie will make a tour of N (2 &lt;= N &lt;= 50,000) farms around the world in order to spread goodwill between farmers and their cows. For simplicity, the world will be represented as a two-dimensional plane, where each farm is located at a pair of integer coordinates (x,y), each having a value in the range -10,000 ... 10,000. No two farms share the same pair of coordinates.</p>
-
-<p>Even though Bessie travels directly in a straight line between pairs of farms, the distance between some farms can be quite large, so she wants to bring a suitcase full of hay with her so she has enough food to eat on each leg of her journey. Since Bessie refills her suitcase at every farm she visits, she wants to determine the maximum possible distance she might need to travel so she knows the size of suitcase she must bring.Help Bessie by computing the maximum distance among all pairs of farms.</p>
-
-<p>Input<br/>
- Line 1: A single integer, N</p>
-
-<p>Lines 2..N+1: Two space-separated integers x and y specifying coordinate of each farm</p>
-
-<p>Output<br/>
-Line 1: A single integer that is the squared distance between the pair of farms that are farthest apart from each other.</p>
-
-<p>Sample Input</p>
-
-<p>4<br/>
-0 0<br/>
-0 1<br/>
-1 1<br/>
-1 0</p>
-
-<p>Sample Output</p>
-
-<p>2</p>
-
-<h2 id="toc_0">算法思想</h2>
-
-<h3 id="toc_1">流程：</h3>
-
-<ol>
-<li><p>求凸包：最远点对一定在凸包上（可以反证法证之），所以找出凸包后在其上找最远点对就可以少考虑很多点。求凸包可用<code>andrew</code>算法，它是基于<code>graham</code>算法，且更快更稳定。不同于<code>graham</code>算法的逆时针排序，<code>andrew</code>算法采用了点的水平排序，然后分别求下凸包以及上凸包，这样下来整个的凸包便求好了。而且该算法可以解决凸包中有重合点、共线点等问题<img src="media/15129738955534/15129741482264.jpg" alt=""/></p></li>
-<li><p>旋转卡壳<br/>
-就是两个平行线正好把凸包卡住，其中卡着的点称为对踵点对.<br/>
-<img src="media/15129738955534/15129741907694.jpg" alt=""/></p></li>
-</ol>
-
-<p>那么怎么才能找到最远点对呢？<br/>
-<img src="media/15129738955534/15129742545712.jpg" alt=""/></p>
-
-<p>对于上图中的6个三角形的公共底边，可知当三角形的顶点在凸包上按逆时针旋转时，三角形的面积先由小变大再由大变小，即成单峰函数变化。所以在峰值时对应的凸包顶点距底边对应的两个对踵点的距离比其他情况大，这样，枚举每一个边并找到其面积单峰函数峰值对应的顶点，同时更新最大距离，旋转一趟下来便可以得到最后的结果。求面积单峰函数的峰值也很简单，就是通过叉积比较两个三角形的大小，当后者的面积比前者小时便找到了峰值，然后求距离更新最大值即可。</p>
-
-<pre><code class="language-c++">    #include &lt;cstdio&gt;  
-    #include &lt;vector&gt;  
-    #include &lt;algorithm&gt;  
-    #include &lt;cstring&gt;  
-    using namespace std;  
-    const int maxn = 50000 + 10;  
-    typedef int type_xy;  
-      
-    struct P  
-    {  
-        type_xy x, y;  
-        P() {}  
-        P(type_xy x, type_xy y) : x(x), y(y) {}  
-        P operator + (P p){ return P(x + p.x, y + p.y); }  
-        P operator - (P p){ return P(x - p.x, y - p.y); }  
-        P operator * (type_xy d){ return P(x*d, y*d); }  
-        bool operator &lt; (const P&amp; a) const  
-        {  
-            if (x != a.x) return x &lt; a.x;  
-            else return y &lt; a.y;  
-        }  
-        type_xy dot(P p) { return x*p.x + y*p.y; }  
-        type_xy det(P p) { return x*p.y - y*p.x; }  
-    };  
-      
-    int N;  
-    P ps[maxn];  
-      
-    //字典序比较  
-    bool cmp_x(const P&amp; p, const P&amp; q)  
-    {  
-        if (p.x != q.x)  
-            return p.x &lt; q.x;  
-        return p.y &lt; q.y;  
-    }  
-      
-    //求凸包  
-    vector&lt;P&gt; convex_hull(P* ps, int n)  
-    {  
-        sort(ps, ps + n, cmp_x);  
-        int k = 0;          //凸包的顶点数  
-        vector&lt;P&gt; qs(n * 2);        //构造中的凸包  
-        //构造凸包的下侧  
-        for (int i = 0; i &lt; n; i++){  
-            while (k &gt; 1 &amp;&amp; (qs[k - 1] - qs[k - 2]).det(ps[i] - qs[k - 1]) &lt;= 0)  
-                k--;  
-            qs[k++] = ps[i];  
-        }  
-        //构造凸包的上侧  
-        for (int i = n - 2, t = k; i &gt;= 0; i--){  
-            while (k &gt; t &amp;&amp; (qs[k - 1] - qs[k - 2]).det(ps[i] - qs[k - 1]) &lt;= 0)  
-                k--;  
-            qs[k++] = ps[i];  
-        }  
-        qs.resize(k - 1);  
-        return qs;  
-    }  
-      
-    //距离的平方  
-    double dist(P p, P q)  
-    {  
-        return (p - q).dot(p - q);  
-    }  
-      
-      
-    void solve()  
-    {  
-        vector&lt;P&gt; qs = convex_hull(ps, N);  
-        int n = qs.size();  
-        if (n == 2){         //特别处理凸包退化的情况  
-            printf(&quot;%.0f\n&quot;, dist(qs[0], qs[1]));  
-            return;  
-        }  
-        int i = 0, j = 0;           //某个方向上的对踵点对  
-        //求出x轴方向上的对踵点对  
-        for (int k = 0; k &lt; n; k++){  
-            if (!cmp_x(qs[i], qs[k]))  
-                i = k;  
-            if (cmp_x(qs[j], qs[k]))  
-                j = k;  
-        }  
-        double res = 0;  
-        int si = i, sj = j;  
-        while (i != sj || j != si){     //将方向逐步旋转180度  
-            res = max(res, dist(qs[i], qs[j]));  
-            //判断先转到边i-(i+1)的法线方向还是边j-(j+1)的法线方向  
-            if ((qs[(i + 1) % n] - qs[i]).det(qs[(j + 1) % n] - qs[j]) &lt; 0)  
-                i = (i + 1) % n;        //先转到边i-(i+1)的法线方向  
-            else  
-                j = (j + 1) % n;        //先转到边j-(j+1)的法线方向  
-        }  
-        printf(&quot;%.0f\n&quot;, res);  
-    }  
-      
-    int main()  
-    {  
-        while (scanf(&quot;%d&quot;, &amp;N) != EOF){  
-            for (int i = 0; i &lt; N; i++){  
-                scanf(&quot;%d%d&quot;, &amp;ps[i].x, &amp;ps[i].y);  
-            }  
-            solve();  
-        }  
-        return 0;  
-    }  
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/11</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15129633578167.html">
-                
-                  <h1>Excel Sheet Column Title</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15129633578167/15129633692969.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string convertToTitle(int n) {
-        string res = &quot;&quot;;
-        while (n!=0) {
-            res = char(&#39;A&#39;+(--n)%26)+res;
-            n=n/26;
+    string toHex(int num) {
+        const string HEX =&quot;0123456789abcdef&quot;;
+        if (num==0) return &quot;0&quot;;
+        string res =&quot;&quot;;
+        int count  = 0;
+        while (num&amp;&amp;count++&lt;8) {
+            //&amp;0xf表示取二进制的低四位
+            res = HEX[(num&amp;0xf)]+res;
+            num&gt;&gt;=4;
         }
         return res;
     }
@@ -420,7 +286,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/11</span>
+                    <span class="date">2017/12/13</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -437,21 +303,40 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15129586256568.html">
+                <a class="clearlink" href="15131518267208.html">
                 
-                  <h1>Excel Sheet Column Number</h1>
+                  <h1>Number of Boomerangs</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15129586256568/15129586339253.jpg" alt=""/></p>
+                        	<p><img src="media/15131518267208/15131518346128.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int titleToNumber(string s) {
+    int numberOfBoomerangs(vector&lt;pair&lt;int, int&gt;&gt;&amp; points) {
         int res = 0;
-        for (int i=0; i&lt;s.length(); i++) {
-            res = res * 26 + (s[i] - &#39;A&#39; + 1);
+        for (int i =0; i&lt;points.size(); i++) {
+            unordered_map&lt;long, int&gt; map(points.size());
+            for (int j = 0; j&lt;points.size(); j++) {
+                if (j==i) continue;
+                int dy = points[j].second - points[i].second;
+                int dx = points[j].first - points[i].first;
+
+                int dis = dy*dy + dx*dx;
+                map[dis]++;
+            }
+
+            for (auto p : map) {
+                if (p.second&gt;1) {
+                    /*
+                     * for all the groups of points,
+                     * number of ways to select 2 from n =
+                     * nP2 = n!/(n - 2)! = n * (n - 1)
+                     */
+                    res+=p.second*(p.second-1);
+                }
+            }
         }
         return res;
     }
@@ -465,7 +350,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/11</span>
+                    <span class="date">2017/12/13</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -482,44 +367,31 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15129573661731.html">
+                <a class="clearlink" href="15130621165951.html">
                 
-                  <h1>Flood Fill</h1>
+                  <h1>Longest Palindromic Substring</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15129573661731/15129573748798.jpg" alt=""/></p>
+                        	<p><img src="media/15130621165951/15130621284508.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    void fillColor(vector&lt;vector&lt;int&gt;&gt;&amp; image,int sr, int sc ,int tmp){
-        if (sr&gt;0&amp;&amp;image[sr-1][sc]==tmp) {
-            image[sr-1][sc]=image[sr][sc];
-            fillColor(image, sr-1, sc, tmp);
+    string longestPalindrome(string s) {
+        if (s.empty()) return &quot;&quot;;
+        if (s.size() == 1) return s;
+        int min_start = 0, max_len = 1;
+        for (int i = 0; i &lt; s.size();) {
+            if (s.size() - i &lt;= max_len / 2) break;
+            int j = i, k = i;
+            while (k &lt; s.size()-1 &amp;&amp; s[k+1] == s[k]) ++k; // Skip duplicate characters.
+            i = k+1;
+            while (k &lt; s.size()-1 &amp;&amp; j &gt; 0 &amp;&amp; s[k + 1] == s[j - 1]) { ++k; --j; } // Expand.
+            int new_len = k - j + 1;
+            if (new_len &gt; max_len) { min_start = j; max_len = new_len; }
         }
-        if (sr&lt;image.size()-1&amp;&amp;image[sr+1][sc]==tmp) {
-            image[sr+1][sc]=image[sr][sc];
-            fillColor(image, sr+1, sc, tmp);
-        }
-        if (sc&gt;0&amp;&amp;image[sr][sc-1]==tmp) {
-            image[sr][sc-1]=image[sr][sc];
-            fillColor(image, sr, sc-1, tmp);
-        }
-        if (sc&lt;image[0].size()-1&amp;&amp;image[sr][sc+1]==tmp) {
-            image[sr][sc+1]=image[sr][sc];
-            fillColor(image, sr, sc+1, tmp);
-        }
-    }
-
-    vector&lt;vector&lt;int&gt;&gt; floodFill(vector&lt;vector&lt;int&gt;&gt;&amp; image, int sr, int sc, int newColor) {
-        int tmp = image[sr][sc];
-        if (tmp == newColor) {
-            return image;
-        }
-        image[sr][sc] = newColor;
-        fillColor(image, sr, sc, tmp);
-        return image;
+        return s.substr(min_start, max_len);
     }
 };
 </code></pre>
@@ -531,7 +403,90 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/11</span>
+                    <span class="date">2017/12/12</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15130603513802.html">
+                
+                  <h1>Palindrome Pairs</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15130603513802/15130603727154.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool isPalindrome(string s) {
+        if (s.size() &lt;= 1) return true;
+        int i = 0;
+        int j = s.size() - 1;
+        while (i &lt; j) {
+            if (s[i++] != s[j--]) return false;
+        }
+
+        return true;
+    }
+
+    vector&lt;vector&lt;int&gt;&gt; palindromePairs(vector&lt;string&gt;&amp; words) {
+        vector&lt;vector&lt;int&gt;&gt; res;
+        if (!words.size()) return res;
+        unordered_map&lt;string, int&gt; word_idx;
+        for (int i = 0; i &lt; words.size(); ++i) {
+            word_idx[words[i]] = i;
+        }
+        vector&lt;int&gt; slu(2);
+        for (int i = 0; i &lt; words.size(); ++i) {
+            int len = words[i].length();
+            for (int l = 0; l &lt;= len; ++l) {
+                string left = words[i].substr(0, l);
+                string right = words[i].substr(l);
+                string rleft = left;
+                string rright = right;
+                reverse(rleft.begin(), rleft.end());
+                reverse(rright.begin(), rright.end());
+                if (word_idx.find(rleft) != word_idx.end()) {
+                    if (word_idx[rleft] != i &amp;&amp; isPalindrome(right)) {
+                        res.push_back({i,word_idx[rleft]});
+                    }
+
+                }
+                if (l != 0 &amp;&amp; word_idx.find(rright) != word_idx.end()) {
+                    if (word_idx[rright] != i &amp;&amp; isPalindrome(left)) {
+                        res.push_back({word_idx[rright],i});
+                    }
+
+                }
+
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/12</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -636,31 +591,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15130621165951.html">Longest Palindromic Substring</a>
+			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15130603513802.html">Palindrome Pairs</a>
+			        <a href="15139938131506.html">Sum of many ints</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15130426368802.html">Intersection of Two Arrays II</a>
+			        <a href="15139334894228.html"> Longest Univalue Path</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15129821006078.html">Sort Characters By Frequency</a>
+			        <a href="15137396102567.html">Isomorphic Strings</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15129806433168.html">First Unique Character in a String</a>
+			        <a href="15136732474119.html">Path Sum II</a>
 			      </li>
 		     
 		  
