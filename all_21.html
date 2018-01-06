@@ -117,260 +117,179 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15038831182450.html">
+                <a class="clearlink" href="15042325338088.html">
                 
-                  <h1>第二十条 为私有方法名加上前缀</h1>
+                  <h1>第27条 使用“class-continuation分类”隐藏实现细节</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>一个类所做的事情，通常要比外面看到的更多。编写类的实现代码时，我们经常要编写在内部使用的方法。<strong><font color=red>这里我们要注意，一定要为这种内部实现的方法加上前缀，这有助于调试，有利于区分私有方法和公共方法。区分私有和公共方法，主要是为了方便修改内部的私有方法和相关实现代码，防止随意修改公共API。</font></strong></p>
+                        	<h2 id="toc_0">第一种用途</h2>
 
-<p>我通常在私有方法前面加上<code>“_p”</code>，例如：</p>
+<p>类中经常会包含一些无须对外公布的方法及实例变最。其实这些内容也可以对外公布, 并且写明其为私有，开发者不应依赖它们。但是<code>OC</code>的动态性，使得不可能实现真正的私有方法或私有实例变量。</p>
 
-<pre><code class="language-objc">
--(void)p_privateMethod{
-    /*.....*/
+<p>但是我们最好还是只把确实需要对外公布的那部分内容公开。那么，这种不需对外公布但却应该具有的方法及实例变量应该怎么写呢？此时，这个特殊的<code>“class-continuation分类”</code>就派上用场了。</p>
+
+<p><font color=red><strong>“class-continuation分类”和普通的分类不同，它必须定义在其所接续的那个类的实现文件里。</strong></font></p>
+
+<p>例如：</p>
+
+<pre><code class="language-objc">//EOCPerson.m
+@interface EOCPerson () {
+    NSString * _anInstanceVariable;
 }
-</code></pre>
-
-<p>我们之所以要加上前缀，是因为OC不像java和c++语言可以在前面将方法声明为私有。每个对象都可以响应任何方法(由于其强大的动态特性造成的)。</p>
-
-<p>加前缀的时候要避免只用一个<code>“_”</code>，<strong><font color=red>因为苹果公司在自己的类中就是这么做的，所以我们要避开这种方式，防止造成继承一个类的时候，子类无意间覆写了父类的方法。</font></strong></p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>给私有方法的名称加上前缀，这样可以很容易地将其同公共方法区分开。</li>
-<li>不要单用一个下划线做私有方法的前缀，因为这种做法是预留给苹果公司用的。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15037310867483.html">
-                
-                  <h1>第十九条 使用清晰而协调的命名方式</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我们在使用OC的时候，发现这门语言很繁琐，代码中一般有<code>“in“，”for”，“with”</code>等介词，其他编程语言则很少使用这些他们认为多余的字眼。以下面代码为例子：</p>
-
-<pre><code class="language-objc">NSString *text = @&quot;The quick brown fox jumped over the lazy dog&quot;;
-NSString *newText =
-[text stringByReplacingOccurrencesOfString: @&quot;fox&quot;,
-                                withString:@&quot;cat&quot;];
-</code></pre>
-
-<p>但是，<code>Objective-C</code>的命名方式虽然长一点，但是却非常淸晰。</p>
-
-<p><strong><font color=red>方法与变量名使用了“驼峰式大小写命名法&quot;（camel casing)——以小写字母开头，其后每个单词首字母大写。类名也用驼峰命名法，不过其首字母要大写，而且前面通常还有两三个前缀字母。</font></strong></p>
-
-<h2 id="toc_0">方法命名</h2>
-
-<p>方法名很长对冉繁琐，但是易于阅读，理解其中的意思。但是如果过长会起到反效果。例如：</p>
-
-<pre><code class="language-objc">-(EOCRectangle*)union:(EOCRectangle*)rectangle // Unclear 
--(float) calculateTheArea // Too verbose
-
-//应该改成
--(EOCRectangle*)unionRectangle:(EOCRectangle*)rectangle 
--(float) area
-</code></pre>
-
-<p><strong>给方法命名时的注意事项可总结成下面几条规则：</strong></p>
-
-<blockquote>
-<ul>
-<li>如果方法的返回值是新创建的，那么方法名的首个词应是返回值的类型，除非前面还 有修饰语，例如<code>localizedString</code>。属性的存取方法不遵循这种命名方式，因为一般认 为这些方法不会创建新对象，即便有时返回内部对象的一份拷贝，我们也认为那相当 于原有的对象。这些存取方法应该按照其所对应的属性来命名。</li>
-<li>应该把表示参数类型的名词放在参数前面。</li>
-<li>如果方法要在当前对象上执行操作，那么就应该包含动词；若执行操作时还需要参数, 则应该在动词后面加上一个或多个名词。</li>
-<li>不要使用str这种简称，应该用string这样的全称。</li>
-<li>Boolean属性应加is前缀。如果某方法返回非属性的Boolean值，那么应该根据其功 能，选用has或is当前缀。</li>
-<li>将get这个前缀留给那些借由“输出参数”来保存返回值的方法，比如说，把返回值 填充到“C语言式数组”（C_style array)里的那种方法就可以使用这个词做前缀。</li>
-</ul>
-</blockquote>
-
-<h2 id="toc_1">类与协议的命名</h2>
-
-<p>应该为类与协议的名称加上前缀，以避免命名空间冲突（参见第15条)，而且应该像给 方法起名时那样把词句组织好，使其从左至右读起来较为通顺。例如，在<code>NSArray</code>的子类中，有一个用于表示可变数组的类，叫做<code>NSMutableArray</code>, <code>mutable</code>这个词放在<code>array</code>前面, 用以表明这是一种特殊的<code>array</code>(数组）。</p>
-
-<p>例如iOS的UI库UIKit，其中协议与类的命名惯例为：</p>
-
-<ul>
-<li>UIView    (类)</li>
-<li>UIViewController（类）</li>
-<li>UITableView （类）</li>
-<li>UITableViewController（类）</li>
-<li>UITableViewDelegate（协议）</li>
-</ul>
-
-<p>最重要的一点就是，命名方式应该协调一致。</p>
-
-<h2 id="toc_2">要点</h2>
-
-<ul>
-<li>起名时应遵从标准的Objective-C命名规范，这样创建出来的接口更容易为开发者所理解。</li>
-<li>方法名要言简意赅，从左至右读起来要像个日常用语中的句子才好。</li>
-<li>方法名里不要使用缩略后的类型名称。</li>
-<li>给方法起名时的第一要务就是确保其风格与你自己的代码或所要集成的框架相符。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15037148888105.html">
-                
-                  <h1>第十八条 尽量使用不可变对象</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我们在设计类的时候，运用属性来封装数据。并且使用属性时候，<strong>可以将属性直接设置为“只读”（read-only）</strong>。默认情况下是“可读也可写”的。</p>
-
-<p>不过，一般情况下我们要建模的数据未必需要改变。比方说，某数据所表示的对象源自一项只读的网络服务(web service),里面可能包含一系列需要显示在地图上的相关点，像这种对象就没必要改变其内容。即使修改了，新数据也不会推送回服务器.</p>
-
-<p>而且如果把可变对象（mutable object)放入<code>collection</code>之后又修改其内容，那么很容易就会破坏<code>set</code>的内部数据结构，使其失去固有的语义。</p>
-
-<p>我们来举例：</p>
-
-<p>为了将<code>EOCPointOflnterest</code>做成不可变的类，需要把所有属性都声明为<code>readonly</code>:</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-@interface EOCPointOfInterest : NSObject
-@property (nonatomic, copy, readonly) NSString *identifier; 
-@property (nonatomic, copy, readonly) NSString* title;
-@property (nonatomic, assign, readonly) float latitude; 
-@property (nonatomic, assign, readonly) float longitude;
--(id) initWithldentifier: (NSString*) identifier 
-                   title:(NSString*)title 
-                   latitude: (float) latitude 
-                   longitude: (float) longitude;
-@end
-
-</code></pre>
-
-<p>这样后如果有人想要改变属性值，那么编译时就会报错。对象中的属性值可以读出，但是无法写入，这就能保证<code>EOCPointOfluterest</code>中的各个数据之间总是相互协调的。</p>
-
-<p>但是我们有时想要修改封装在对象内部的数据，不想令这些数据为外人所改动。这种情况下，通常做法是在对象内部将<code>readonly</code>属性重新声明为<code>readwrite</code>。当然，如果该属性是nonatomic 的，那么这样做可能会产生“竞争条件”（racecondition)。在对象内部写人某属性时，对象外的 观察者也许正读取该属性。若想避免此问题，我们可以在必要时通过<mark>“派发队列&quot;（dispatchqueue）等手段，将(包括对象内部的）所有数据存取操作都设为同步操作</mark>。<strong><font color=red>将属性在对象内部重新声明为<code>readwrite</code>这一操作可于<code>“class-continuation分类”</code>中完成，在公共接口中声明的属性可于此处重新声明，属性的其他特质必须保持不变，而<code>readonly</code>可扩展为<code>readwrite</code>。</font></strong></p>
-
-<p>其 <code>“class-continuation分类”</code>可以这样写：</p>
-
-<pre><code class="language-objc">// .m文件中
-#import &quot;EOCPointOfInterest.h&quot;
-
-@interface EOCPointOfInterest : NSObject
-@property (nonatomic, copy, readwrite) NSString *identifier; 
-@property (nonatomic, copy, readwrite) NSString* title;
-@property (nonatomic, assign, readwrite) float latitude; 
-@property (nonatomic, assign, readwrite) float longitude;
-
-@implementation EOCPointOfInterest
-
-/* ... */
-
-@end
-</code></pre>
-
-<p>现在，只能于<code>EOCPoimOflnterest</code>实现代码内部设置这些属性值了。但是我们其实可以同构KVC键值编码来设置这些属性值。不过，这样显然违背了我们的本意，绕过了提供的API。不推荐这种做法。</p>
-
-<p>我们定义类公共的API时，<strong><font color=red>要注意一件事情：对象里表示各种collection的那些属性究竞应该设成可变的，还是不可变的。</font></strong>例如，我们用某个类来表示个人信息，该类里还存放了一些引用，指向此人的诸位朋友。你可能想把这个人的全部朋友都放在一个“列表&quot;（list)里，并将其做成属性。假如开发者可以添加或删除此人的朋友，那么这个属性就需要用可变的<code>set</code>来实现。在这种情况下，通常应该提供一个<code>readonly</code>属性供外界使用，该属性将返回不可变的<code>set</code>, 而此<code>set</code>则是内部那个可变<code>set</code>的一份拷贝。比方说，下面这段代码就能够实现出这样一个类：</p>
-
-<pre><code class="language-objc">// EOCPerson.h
-#import &lt;Foundation/Foundation•h&gt;
-@interface EOCPerson : NSObject
-@property (nonatomic, copy, readonly) NSString *firstName; 
-@property (nonatomic, copy, readonly) NSString *lastName; 
-@property (nonatomic, strong, readonly) NSSet *friends;
--(id)initWithFirstName:(NSString*)firstName
-          andLastName:(NSString*)lastName;
--(void)addFriend:(EOCPerson*)person;
--(void)removeFriend:(EOCPerson*)person;
-
-@end
-
-// EOCPerson.m #import &quot;EOCPerson•!!
-@interface EOCPerson ()
-@property (nonatomic, copy, readwrite) NSString *firstName; 
-@property (nonatomic, copy, readwrite) NSString *lastName;
+// Method declarations here 
 @end
 @implementation EOCPerson {
-    NSMutableSet *_internalFriends;
+    int _anotherInstanceVariable;
 }
+// Method implementations here 
+@end
+</code></pre>
 
--(NSSet*)friends {
-    return [_internalFriends copy];
-}
--(void)addFriend:(EOCPerson*)person {
-    [_internalFriends addObject:person];
-} 
+<p>我们这样定义的目的是将这些方法或者实例变量隐藏起来，只供本类使用。即便在公共接口里将其标注为private,也还是会泄漏实现细节。</p>
 
--(void)removeFriend:(EOCPerson*)person {
-    [_internalFriends removeObjectrperson];
-}
+<p>例如有个绝密的类，不想给其他人知道。 假设你所写的某个类拥有那个绝密类的实例，而这个实例变量又声明在公共接口里面：</p>
 
--(id)initWithFirstName: (NSString*)firstName andLastName:(NSString*)lastName { 
-    if ((self = [super init】））{
-         _firstName = firstName;
-         _lastName = lastName;
-         _internalFriends = [NSMutableSet new];
-    }
-    return self;
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+@class EOCSuperSecretClass;
+
+@interface EOCClass : NSObject {
+@private
+    EOCSuperSecretClass *_secretInstance;
+@end
+</code></pre>
+
+<p>这样别人就会知道有一个叫<code>EOCSuperSecretClass</code>的类了。</p>
+
+<p>所以我们通常应该这样：</p>
+
+<pre><code class="language-objc">// EOCClass.h
+#import &lt;Foundation/Foundation.h&gt;
+@interface EOCClass : NSObject 
+@end
+
+// EOCClass .m 
+#import &quot;EOCClass.h&quot;
+#import &quot;EOCSuperSecretClass.h&quot;
+@interface EOCClass ()  {
+    EOCSuperSecretClass *_secretInstance;
+@end
+
+@implementation EOCClass
+// Methods here
+@end
+</code></pre>
+
+<h2 id="toc_1">第二种用途</h2>
+
+<p>编写<code>Objective-C++</code>代码时 <code>“class-continuation分类”</code>也很有用。<code>Objective-C++</code>是 <code>OC</code>与<code>C++</code>的混合体，其代码可以用这两种语言来编写。由于兼容性原因，游戏后 端一般用<code>C++</code>来写。另外，有时候要使用的第三方库可能只有<code>C++</code>绑定，此时也必须使用 <code>C++</code>来编码。在这些情况下，使用<code>&quot;class-continuation分类&quot;</code>会很方便。假设某个类打算这样写：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt; 
+#include &quot;SomeCppClass.h&quot; 
+@interface EOCClass : NSObject { 
+@private
+    SomeCppClass _cppClass;
+@end
+</code></pre>
+
+<p>该类的实现文件可能叫做<code>EOCClass.mm</code>,其中<code>.mm</code>扩展名表示编译器应该将此文件按<code>Objective-C++</code>来编译，否则，就无法正确引人<code>SomeCppClass.h</code>了。然而请注意，名为<code>SomeCppClass</code>的这个<code>C++</code>类必须完全引入，因为编译器要完整地解析其定义方能得知<code>_cppClass</code>实例变量的大小。于是，只要是包含<code>EOCClass.h</code>的类，都必须编译为 <code>Objective-C++</code>才行，因为它们都引入了<code>SomeCppClass</code>类的头文件。这很快就会失控，最终 导致整个应用程序全部都要编译为ObjeCtive-C++。这样显然会增加编码的负担。</p>
+
+<p>也许我们会想用前向声明来避免导入<code>SomeCppClass.h</code>,比如：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt; 
+
+class SomeCppClass;
+
+@interface EOCClass : NSObject { 
+@private
+    SomeCppClass *_cppClass;
+@end
+</code></pre>
+
+<p>现在实例变量必须是指针，若不是，则编译器无法得知其大小，从而会报错。但所有指针的大小确实都是固定的，于是编译器只需知道其所指的类型即可。</p>
+
+<p>虽然我们这样做没有<code>#include &quot;SomeCppClass.h&quot;</code>但是我们前向声明该类时所用的<code>class</code>关键字还是<code>C++</code>下的关键字，所以仍然需要按照<code>OC</code>来编译才行。</p>
+
+<p>我们这里的解决方法还是一样，既然变量是<code>private</code>的，我们还是可以将它在<code>“class-continuation分类”</code>声明，改写成：</p>
+
+<pre><code class="language-objc">// EOCClass. h
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface EOCClass : NSObject
+
+
+// EOCClass.mm 
+#import &quot;EOCClass.h&quot;
+#include &quot;SomeCppClass.h&quot;
+
+@interface EOCClass ()  {
+    SomeCppClass _cppClass;
 }
+@end
+
+@implementation EOCClass 
+@end
+</code></pre>
+
+<p>改写后的<code>EOCClass</code>类，其头文件里就没有<code>C++</code>代码了，使用头文件的人甚至意识不到其底层实现代码中混有<code>C++</code>成分。某些系统库用到了这种模式，比如网页浏览器框架<code>WebKit</code>,其大部分代码都以<code>C++</code>编写，然而对外展示出来的却是一套整洁的<code>Objective-C</code>接口。<code>CoreAnimation</code>里面也用到了此模式，它的许多后端代码都用<code>C++</code>写成，但对外公布的却是一套纯<code>Objective-C</code>接口。</p>
+
+<h2 id="toc_2">第三种用法</h2>
+
+<p>就是将<code>public</code>接口中声明为“只读”的 属性扩展为“可读写”，以便在类的内部设置其值。</p>
+
+<p>例如：</p>
+
+<pre><code class="language-objc">// .h文件
+#import &lt;Foundation/Foundation.h&gt;
+@interface EOCPerson : NSObject
+
+@property (nonatomic, copy, readonly) NSString *firstName; 
+@property (nonatomic, copy, readonly) NSString *lastName;
+
+-(id) initWithFirstName : (NSString*) firstName
+                lastName: (NSString*) lastName;
 
 @end
 
 </code></pre>
 
-<h2 id="toc_0">要点</h2>
+<p>我们一般会在<code>“class-continuaticm分类”</code>中把这两个属性扩展为“可读写”：</p>
+
+<pre><code class="language-objc">@interface EOCPerson ()
+@property (nonatomic, copy, readwrite) NSString *firstName;
+@property (nonatomic, copy, readwrite) NSString *lastName;
+
+-(void)p_privateMethod;
+@end
+</code></pre>
+
+<p>只需要用上面几行代码就行了。现在<code>EOCPerson</code>的实现代码可以随意调用<code>“setFirstName:”</code>或<code>“setLastName:”</code>这两个设置方法，也可以用“点语法”来设置属性。这样做很有用，既能令外界无法修改对象，又能在其内部按照需要管理其数据。</p>
+
+<p>只会在类的实现代码中用到的私有方法也可以声明在<code>“class-continuation分类”</code>中。这么做比较合适，因为它描述了那些只在类实现代码中才会使用的方法。上述的私有方法加上了<code>p_</code>前缀。</p>
+
+<h2 id="toc_3">第四种用法</h2>
+
+<p>当我们想要把对象所遵守的协议视为私有，就可以在<code>“class-continuation分类”</code>中声明。例如：</p>
+
+<pre><code class="language-objc">#import &quot;EOCPerson•h&quot;
+#import &quot;EOCSecretDelegate.h&quot;
+@interface EOCPerson () &lt;EOCSecretDelegate&gt; 
+@end
+@implementation EOCPerson
+    /*.....*/
+@end
+</code></pre>
+
+<h2 id="toc_4">要点</h2>
 
 <ul>
-<li>尽量创建不可变的对象。</li>
-<li>若某属性仅可于对象内部修改，则在<code>“class-continuation分类”</code>中将其由<code>readonly</code>属性扩展为<code>readwrite</code>属性</li>
-<li>不要把可变的<code>collection</code>作为属性公开，而应提供相关方法，以此修改对象中的可变<code>collection</code>。</li>
+<li><p>通过<code>“class-continuation分类”</code>向类中新增实例变量。</p></li>
+<li><p>如果某属性在主接口中声明为“只读”，而类的内部又要用设置方法修改此属性，那么就在<code>“class-continuation分类”</code>中将其扩展为“可读写”</p></li>
+<li><p>把私有方法的原型声明在<code>“class-continuation分类”</code>里面。</p></li>
+<li><p>若想使类所遵循的协议不为人所知，则可于<code>“class-continuation分类”</code>中声明。 </p></li>
 </ul>
 
                         
@@ -380,10 +299,10 @@ NSString *newText =
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/8/26</span>
+                    <span class="date">2017/9/1</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -397,128 +316,281 @@ NSString *newText =
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15037100500253.html">
+                <a class="clearlink" href="15042285213204.html">
                 
-                  <h1>第十七条 实现description方法</h1>
+                  <h1>第26条 不要在分类中声明属性</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>调试程序时，我们一般要将对象的属性<code>NSLog</code>出来：</p>
+                        	<p>属性是封装数据的方式（参见第6条)。尽管从技术上说，分类里也可以声明属性，但这种做法还是要尽量避免。</p>
 
-<pre><code class="language-objc">NSLog(@&quot;object = %@&quot;,object);
+<p>原因在于，除了<code>“class-continuation分类”</code>（参见第27条）之外，其他分类都无法向类中新增实例变量，因此，它们无法把实现属性所需的实例变量合成出来。如果我们在分类中声明了一个<code>friends</code>属性。会提示我们</p>
+
+<blockquote>
+<p>warning: property  &#39;friends&#39; requires method &#39;friends&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
+
+<p>warning: property &#39;friends&#39; requires method &#39;setFriends:&#39; to be defined - use @dynamic or provide a method implementation in this category [-Wobjc-property-implementation]</p>
+</blockquote>
+
+<p>说明系统没有为我们自动合成属性的<code>set</code>和<code>get</code>方法。我们要自己在分类中去实现，可以把存取方法声明为<code>@dynamic</code>, 也就是说，这些方法等到运行期再提供，编译器目前是看不见的。如果决定使用消息转发机制（参见第12条）在运行期拦截方法调用，并提供其实现，那么或许可以采用这种做法。</p>
+
+<p>当然我们也可以使用关联对象的方法。<strong><mark>但是还是不建议我们在分类中定义封装数据的属性。</mark></strong></p>
+
+<p>正确做法是把所有属性都定义在主接口里。类所封装的全部数据都应该定义在主接口中，这里是唯一能够定义实例变量(也就是数据）的地方。而属性只是定义实例变量及相关存取方法所用的“语法糖”，所以也应遵循同实例变量一样的规则。<mark>至于分类机制,则应将其理解为一种手段，目标在于扩展类的功能，而非封装数据。</mark></p>
+
+<p>但是有时候，只读属性（readonly）可以在分类中使用，但是我们要手动实现它的<code>get</code>方法。当然我们不建议搞特殊。最好还是在主接口中声明。然后在分类中声明一个获取方法，来获取数据。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>把封装数据所用的全部属性都定义在主接口里。</li>
+<li>在<code>“class-contimiation分类”</code>之外的其他分类中，可以定义存取方法，但尽量不要定义属性。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15042274785369.html">
+                
+                  <h1>第25条 总是为第三方类的分类名称加前缀</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>分类机制通常用于向无源码的既有类中新增功能。这个特性极为强大，但在使用时也很容易忽视其中可能产生的问题。</p>
+
+<p>我们在分类中添加方法，系统在运行期时会将分类中的方法加入类中。运行期系统会把分类中所实现的每个方法都加入类的方法列表中。<strong><font color=red>如果类中本来就有此方法，而分类又实现了一次，那么分类中的方法会覆盖原来那一份实现代码。实际上可能会发生很多次榭盖，比如某个分类中的方法覆盖了“主实现”中的相关方法，而另外一个分类 中的方法又覆盖了这个分类中的方法。多次覆盖的结果以最后一个分类为准。</font></strong></p>
+
+<p>所以我们为了解决此问题，一般做法是：<strong><font color=red>以命名空间来区别各个分类的名称与其中所定义的方法。</font></strong>我们这里的命名空间只是在相关名称前都加上公用的前缀。</p>
+
+<p>所以我们举例来说就是这样的：</p>
+
+<pre><code class="language-objc">@interface NSString (ABC_HTTP)
+//Encode a string with URL encoding 
+-(NSString*) abc_urlEncodedStiring;
+
+// Decode a URL ©ncodeci string
+-(NSString*) abc_urlDecodedString;
+@end
 </code></pre>
 
-<p>如果我们输出的对象是数组，或者字典和其它数据是可以将数据打印出来。但是如果打印的是自定义的类，那么输出的对象就类似于：</p>
+<h2 id="toc_0">要点</h2>
 
-<pre><code class="language-objc">object = &lt;EOCPerson:0x7fd9a1600600&gt;
+<ul>
+<li>向第三方类中添加分类时，总应给其名称加上你专用的前缀。</li>
+<li>向第三方类中添加分类时，总应给其中的方法名加上你专用的前缀。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15041689865677.html">
+                
+                  <h1>指针问题</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<pre><code>#include &lt;stdio.h&gt;  
+   
+int main() {  
+      
+    int num = 10;  
+    int *p1 = &amp;num//p1存储num的地址  
+    int **p2 = &amp;p1;//p2存储p1的地址  
+    int ***p3 = &amp;p2;//p3存储p2的地址  
+      
+    *p1 = 100;//*p1取出num变量  
+    **p2 = 200;//**p2取出num变量  
+    ***p3 = 300;//***p3也是取出num变量  
+    printf(&quot;num = %d\n&quot;,num);  
+    printf(&quot;num = %d\n&quot;,***p3);  
+      
+    return 0;  
+}  
 </code></pre>
 
-<p>上面这种信息很不实用，所以我们要在自己的类里覆写<code>description</code>方法，否则打印信息时就会调用<code>NSObject</code>类所实现的默认方法。此方法定义在<code>NSObject</code>协议里，不过<code>NSObject</code>类也实现了它。</p>
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
 
-<p>想输出更为有用的信息也很简单，只需覆写<code>description</code>方法并将描述此对象的字符串 返回即可。例如，有下面这个代表个人信息的类：</p>
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15041475233104.html">
+                
+                  <h1>消息转发机制的简单实现</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">第一种</h2>
 
-<pre><code class="language-objc">//EOCPerson.h
+<p>首先我们来实现这两个方法：<br/><br/>
++(BOOL)resolveInstanceMethod:    (SEL)sel</p>
+
+<p>+(BOOL)resolveClassMethod:(SEL)sel</p>
+
+<p>这两个方法用于方法的动态解析，当一个对象执行一个方法时，发现没有找到所对应的实现。这是就要靠上面的方法来动态添加实现了</p>
+
+<p>举例来说：</p>
+
+<pre><code class="language-objc">//
+//  Person.h
+//  消息转发
+
 #import &lt;Foundation/Foundation.h&gt;
 
-@interface EOCPerson : NSObject
-
-@property(nonatomic, readonly, copy)NSString *firstname;
-@property (nonatomic, copy, readonly) NSString *lastName;
-
--(id) initWithFirstName: (NSString*) firstName lastName:(NSString*) lastName;
+@interface Person : NSObject
+//接口中声明一个方法
+-(void)run;
 
 @end
 
-//EOCPerson.m
-#import &quot;EOCPerson.h&quot;
+//
+//  Person.m
+//  消息转发
 
-@implementation EOCPerson
 
--(id)initWithFirstName:(NSString *)firstName lastName:(NSString *)lastName{
-    if ((self = [super init])) {
-        _firstname = [firstName copy];
-        _lastName = [lastName copy];
+#import &quot;Person.h&quot;
+#import &lt;objc/runtime.h&gt;
+@implementation Person //在部署的时候我们没有实现接口中声明的run方法
+
+
+//编写C函数实现代码
+void addrun (id self, SEL _cmd){
+    NSLog(@&quot;%@　%s&quot;,self,sel_getName(_cmd));
+}
+
++(BOOL)resolveInstanceMethod:(SEL)sel{
+    if (sel ==@selector(run)) {
+    //如果响应run方法，我们动态将上面实现的addrun方法添加到当前类中。
+        class_addMethod(self, sel, (IMP)addrun, &quot;v@:&quot;);
     }
-    return self;
-}
-//description方法
--(NSString*)description{
-
-    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , \&quot;%@ %@\&quot;&gt;&quot; , [self class], self ,_firstname ,_lastName ];
+    
+    return [super resolveInstanceMethod:sel];
 }
 
 @end
 
+//  main.m
+//  消息转发
 
-</code></pre>
 
-<p>那么输出就是：</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-#import &quot;EOCPerson.h&quot;
-
+#import &lt;Foundation/Foundation.h&gt;
+#import &quot;Person.h&quot;
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        EOCPerson *person = [[EOCPerson alloc] initWithFirstName:@&quot;Liang&quot; lastName:@&quot;Zhonghao&quot;];
-        NSLog(@&quot;Person = %@&quot; , person);
+    //执行代码
+        Person *man = [Person new];
+        [man run];
     }
     return 0;
 }
-
 </code></pre>
 
-<p><img src="media/15037100500253/15037119639541.jpg" alt=""/></p>
+<p>结果为：<img src="media/15041475233104/15041480973843.jpg" alt=""/><br/>
+说明执行了我们添加的那个方法，而并没有报错。</p>
 
-<blockquote>
-<p><strong>建议：在新实现的 description方法中，也应该像默认的实现那样，打印出类的名字和指针地址，因为这些内容 有时也许会用到。</strong></p>
-</blockquote>
+<h2 id="toc_1">第二种</h2>
 
-<p>我们也可以借助字典类型的<code>description</code>方法来将打印何种信息标识出来：</p>
+<p>我们可以动态的向类中添加方法来解决无选择子的问题，我们也可以选择转换接受者来选择可以处理该选择子的对象。</p>
 
-<pre><code class="language-objc">
--(NSString*)description{
-    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , 
-    [self class],
-     self, 
-     @{@&quot;firstname&quot;:_firstname,
-       @&quot;lastname&quot;:_lastName}];
-}
-</code></pre>
+<p>首先当我们，没有处理第一种方法的时候，运行期系统会给我们第二个机会，询问是否有备用的接受者。我们就要实现<code>orwardingTargetForSelector</code>了</p>
 
-<p>输出为：<br/>
-<img src="media/15037100500253/15037132520686.jpg" alt=""/></p>
+<p>我们举例来看：</p>
 
-<p><code>NSObject</code>协议中还有个方法要注意，那就是<code>debugDescription</code>,此方法的用意与 <code>description</code>非常相似。二者区别在于，<code>debugDescription</code>方法是开发者在调试器（debugger) 中以控制台命令打印对象时才调用的。在<code>NSObject</code>类的默认实现中，此方法只是直接调用了<code>description</code>。我们还拿上个例子来说明：</p>
+<p>首先我们先创建一个新类Car，并且创建一个<code>run</code>方法：</p>
 
-<p><img src="media/15037100500253/15037137809556.jpg" alt=""/></p>
+<p><img src="media/15041475233104/15041487720558.jpg" alt=""/></p>
 
-<p>我们在NSLog下面打一个断点，进入调试模式，之后向调试控制台里输入命令。LLDB的“po”命令 可以完成对象打印（print-object)工作，其输出如下：<br/>
-<img src="media/15037100500253/15037138780545.jpg" alt=""/></p>
+<p>然后在Person.m中，不对<code>resolveInstanceMethod</code>进行任何处理，在<code>forwardingTargetForSelector</code>中返回一个<code>Car</code>实例：<br/>
+<img src="media/15041475233104/15041488721835.jpg" alt=""/></p>
 
-<p>当然我们可以把人名放在<code>EOCPerson</code>对象的普通描述信息中，而把更详尽的内容放在调试所用的描述信息里：</p>
+<p>然后继续执行<code>main.m</code>文件，运行为：<br/>
+<img src="media/15041475233104/15041489461207.jpg" alt=""/></p>
 
-<pre><code class="language-objc">-(NSString*)description{
-    return [NSString stringWithFormat:@&quot;%@ : %@&gt;&quot; , _firstname ,_lastName ];
-}
+<p>说明系统已经将所要实现方法的对象转换为<code>Car</code>的实例对象。</p>
 
--(NSString*)debugDescription{
-    return [NSString stringWithFormat:@&quot;&lt;%@ : %p , %@&gt;&quot; , [self class], self , @{@&quot;firstname&quot;:_firstname,@&quot;lastname&quot;:_lastName}];
-}
+<h2 id="toc_2">第三种</h2>
 
-</code></pre>
+<p>如果前两种我们都没有实现的话，就会进入第三种，执行完整的消息转发机制。</p>
 
-<p>运行之后如下：<br/>
-<img src="media/15037100500253/15037141337080.jpg" alt=""/></p>
+<p>就会调用两个方法<code>methodSignatureForSelector</code>和<code>forwardInvocation</code></p>
 
-<p>你可能不想把类名与指针地址这种额外内容放在普通的描述信息里，但是却希望调试的 时候能够很方便地看到它们，在此情况下，就可以使用这种输出方式来实现。Foundation框架的<code>NSArray</code>类就是这么做的.</p>
+<p><code>methodSignatureForSelector</code>方法用来指定方法签名，返回<code>nil</code>表示不处理，否则会进入下一步调用<code>forwardInvocation</code>方法。其中这个签名就是给<code>forwardInvocation</code>中的参数<code>NSInvocation</code>调用的。</p>
 
-<h2 id="toc_0">要点</h2>
+<p><img src="media/15041475233104/15041604848181.jpg" alt=""/></p>
 
-<ul>
-<li>实现<code>description</code>方法返回一个有意义的字符串，用以描述该实例。</li>
-<li>若想在调试时打印出更详尽的对象描述信息，则应实现<code>debugDescription</code>方法。</li>
-</ul>
+<p>开头我们要找的错误<code>unrecognized selector sent to instance</code>原因，原来就是因为<code>methodSignatureForSelector</code>这个方法中，由于没有找到<code>run</code>对应的实现方法，所以返回了一个空的方法签名，最终导致程序报错崩溃。</p>
+
+<p>所以我们需要做的是自己新建方法签名，再在<code>forwardInvocation</code>中用你要转发的那个对象调用这个对应的签名，这样也实现了消息转发。</p>
+
+<p>关于生成签名的类型<code>&quot;v@:&quot;</code>解释一下。每一个方法会默认隐藏两个参数，<code>self</code>、<code>_cmd</code>，<code>self</code>代表方法调用者，<code>_cmd</code>代表这个方法的<code>SEL</code>，签名类型就是用来描述这个方法的返回值、参数的，<code>v</code>代表返回值为<code>void</code>，<code>@</code>表示<code>self</code>，<code>:</code>表示<code>_cmd</code>。</p>
+
+<p><strong>所以第二个和第三个字符必须是<code>“@:”</code> ，第一个字符是返回类型.</strong></p>
+
+<p><strong>具体的可以看一下了解</strong>：<a href="https://developer.apple.com/library/etc/redirect/xcode/content/1189/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100">Type Encodeing</a></p>
 
                         
                       </div>
@@ -527,10 +599,10 @@ int main(int argc, const char * argv[]) {
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/8/26</span>
+                    <span class="date">2017/8/31</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -544,108 +616,120 @@ int main(int argc, const char * argv[]) {
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15036443106558.html">
+                <a class="clearlink" href="15041406291157.html">
                 
-                  <h1>第十六条 提供"全能初始化方法"</h1>
+                  <h1>第24条 将类的实现代码分散到便于管理的数个分类之中</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>我们知道,所有的对象都要初始化但是有些对象可能有很多初始化方法(根据初始的信息来选择用哪个).我们以iOS的UI框架UIKit为例，其中有个类叫做<code>UITableViewCell</code>,初始化该类对象 时，需要指明其样式及标识符，标识符能够区分不同类型的单元格。由于这种对象的创 建成本较高，所以绘制表格时可依照标识符来复用，以提升程序效率。<strong><font color=red>我们把这种可为 对象提供必要信息以便其能完成工作的初始化方法叫做“全能初始化方法”（designated initializer)</font></strong></p>
+                        	<p>一个类里面经常会填满各种各样的方法，有时候将那么多方法放在一个类的实现文件里是合理的。但是我们如果通过OC的<code>分类</code>机制将类代码按逻辑划入几个分区中，这对于开发和调试都有帮助。</p>
 
-<p>我们看下面这个NSDate的例子：</p>
-
-<pre><code class="language-objc">-(id)init
--(id)initWithString:(NSString*)string
--(id)initWithTimelntervalSinceNow:(NSTimelnterval)seconds
--(id)initWithTimelnterval:(NSTimelnterval)seconds
-                sinceDate:(NSDate*)refDate
--(id)initWithTimeIntervalSinceReferenceDate:(NSTimelnterval)seconds
--(id)initWithTimeIntervalSincel970:(NSTimelnterval)seconds
-</code></pre>
-
-<p><mark><strong>那么多的初始化方法中，我们要选一个全能初始化方法，让其他的初始化方法都来调用它。</strong></mark>，只有在全能初始化方法中，才会存储内部数据。这样的话，当底层数据存储机制改变时，只需修改此方法的代码就好，无须改动其他初始化方法。</p>
-
-<p>我们来用代码举例：</p>
-
-<p><em>首先定义一个表示矩形的类：</em></p>
+<p>我们来举个例子，我们对个人信息建模分类：</p>
 
 <pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-@interface EOCRectangle : NSObject
-@property (nonatomic, assign, readonly) float width;
-@property (nonatomic, assign, readonly) float height; 
+Sinterface EOCPerson : NSObject
+@property (nonatomic, copy, readonly) NSString *firstName; 
+@property (nonatomic, copy, readonly) NSString *lastName; 
+@property (nonatomic, strong, readonly) NSArray *friends;
+
+-(id)initWithFirstName:(NSString*) firstName
+            andLastName:(NSString*)lastName;
+            
+/* Friendship methods */
+-(void)addFriend:(EOCPerson*)person;
+- (void)removeFriend:(EOCPerson*)person;
+-(BOOL)isFriendsWith:(EOCPerson*)person;
+
+/* Work methods */
+-(void)performDaysWork;
+-(void)takeVacationFromWork;
+
+/* Play methods */
+-(void)goToTheCinema;
+-(void)goToSportsGame;
+</code></pre>
+
+<p>在实现该类时，所有方法的代码可能会写在一个大文件里。显得很臃肿。所以可以用“分类”机制把刚才的类改写成下面这样：</p>
+
+<pre><code class="language-objc">@import &lt;Foundation/Foundation.h&gt;
+@interface EOCPerson : NSObject
+@property (nonatomic, strong, readonly) NSArray *friends;
+@property (nonatomic, copy, readonly) NSString *lastName;
+@property (nonatomic, copy, readonly) NSString *firstName; 
+ 
+-(id) initWithFirstName: (NSString*)firstName
+            andLastNames:(NSString*)lastName;
+
+@end
+
+@interface EOCPerson (Friendship)
+-(void)addFriend:(EOCPerson*)person;
+-(void)removeFriend:(EOCPerson*)person;
+-(BOOL)isFriendsWith:(EOCPerson*)person; 
+@end
+
+@interface EOCPerson (Work)
+-(void)performDaysWork;
+-(void)takeVacationFromWork; 
+@end
+
+@interface EOCPerson (Play)
+-(void)goToTheCinema;
+-(void)goToSportsGame;
 @end
 </code></pre>
 
-<p>然后定义一个初始化方法：</p>
+<p>现在，类的实现代码按照方法分成了好几个部分。所以说，这项语言特性当然就叫做<code>“分类”</code>啦。</p>
 
-<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight:(float)height
-{
-    if ((self = [super init])) {
-        _width = width;
-        _height = height;
-    }
-    return self;
-}
-</code></pre>
+<p>但是这些代码还是在一个文件中声明的，所以我们还可以将其拆分为多个文件：</p>
 
-<p>这样就会有一个问题，当有人用<code>[[EOCRectanglealloc]init]</code>来创建矩形时，因为<code>NSObject</code>中已经实现了<code>init</code>方法，如果把<code>alloc</code>方法分配好的<code>EOCRectangle</code>交由此方法来初始化，那么矩形的宽度与高度就是0,因为全部实例变量都设为0了。这种情况我们应该覆写<code>init</code>方法：</p>
+<ul>
+<li>  EOCPerson+Friendship(.h/.m)</li>
+<li> EOCPerson+Work(.h/.m)</li>
+<li> EOCPerson+Play(.h/.m)</li>
+</ul>
 
-<pre><code class="language-objc">// Using default values
--(id)init {
-    return [self initWithWidth:5.Of andHeight:10.Of];
-)
-// Throwing an exception
--(id)init {
-    @throw [NSException
-    exceptionWithName:NSInternalInconsistencyException 
-    reason:@&quot;Must use initWithWidth:andHeight: instead.&quot; 
-    userInfo：nil]；
-}
-</code></pre>
+<p>比方说，与交友功能相关的那个分类可以这样写：</p>
 
-<p>还有一种情况，当我们创建名叫<code>EOCSquare</code>的类，令其成为<code>EOCRectangle</code>的子类时，新类的初始化方法写的时候要注意：</p>
-
-<pre><code class="language-objc">@import &quot;EOCRectangle.h&quot;
-@interface EOCSquare : EOCRectangle 
--(id)initWithDimension:(float)dimension; 
+<pre><code class="language-objc">// EOCPerson+Friendship.h
+#import &quot;EOCPerson.h&quot;
+@interface EOCPerson (Friendship)
+-(void)addFriend:(EOCPerson*)person;
+-(void)removeFriend:(EOCPerson*)person;
+-(BOOL)isFriendsWith:(EOCPerson*)person;
 @end
 
-@implementation EOCSquare
--(id)initWithDimension:(float)dimension {
-    return [super initwithwidth:dimension andHeightidimension];
+// EOCPerson+Friendship.m 
+
+#import EOCPerson+Friendship.h
+@implementation EOCPerson (Friendship)
+-(void)addFriend:(EOCPerson*)person {
+    /*...*/
+}
+-(void)removeFriend:(EOCPerson*)person {
+    /*...*/
+}
+-(BOOL)isFriendsWith:(EOCPerson*)person {
+    /*...*/
 }
 @end
 </code></pre>
 
-<p>这了我们发现上面代码的初始化方法调用了父类的初始化方法，这样可能会导致一个问题：创建出一个”高度”和“宽度”不相等的正方形。所以：<strong><font color=red>如果子类的全能初始化方法与超类方法的名称不 同，那么总应覆写超类的全能初始化方法。</font></strong>在<code>EOCSquare</code>这个例子中，应该像下面这样覆写<code>EOCRectangle</code>的全能初始化方法：</p>
+<p>通过分类机制，可以把类代码分成很多个易于管理的小块，以便单独检视。<mark>使用分类机制之后，如果想用分类中的方法，那么要记得在引入<code>EOCPerson.h</code>时一并引入分类的头文件</mark>。</p>
 
-<pre><code class="language-objc">-(id)initWithWidth:(float)width andHeight:(float)height { 
-    float dimension = MAX (width, height);  
-    return [self initWithDimension:dimension];
-}
+<p>这样使用分类之后，对于某个分类中的所有 方法来说，分类名称都会出现在其符号中。例如，<code>“addFriend:”</code>方法的“符号名”（symbol name)如下：</p>
+
+<pre><code class="language-objc">-[EOCPerson(Friendship) addFriend:]
 </code></pre>
 
-<p>覆写了这个方法之后，即便使用<code>init</code>来初始化<code>EOCSquare</code>对象，也能照常工作。原因在于, <code>EOCRectangle</code>类覆写了 <code>init</code>方法，并以默认值为参数，调用了该类的全能初始化方法。在用<code>init</code>方法初始化<code>EOCSquare</code>对象时，也会这么调用，不过由于<code>“initWithWidth:andHeight:”</code>已经在子类中覆写了，所以实际上执行的是<code>EOCSquare</code>类的这一份实现代码，而此代码又会调用本类的全能初始化方法。因此一切正常，调用者不可能创建出边长不相等的<code>EOCSquare</code>对象。</p>
-
-<p>当然如果我们不想覆写父类的全能初始化方法，认为这是调用者自己犯了错误。在这种情况下，常用的办法是覆写超类的全能初始化方法并于其中抛出异常：</p>
-
-<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight: (float) height {
-    @throw 
-        [NSException 
-            exceptionWithName:NSInternallnconsistencyException
-            reason: @&quot;Must use initWithDimension: instead.&quot;
-             userInfo：nil];
-</code></pre>
-
-<p><strong><mark>有时如果某个队形对象的实例有两种完全不同的创建方式，必须分开处理，所以就要编写多个全能初始化方法。</mark></strong>只要记住每个子类的全能初始化方法都应该调用其超类的对应方法，并逐层向上，应该先调用超类的相关方法，然后再执行与本类有关的任务。</p>
+<p>也可以创建名为<code>Private</code>的分类把这种方法全都放在里面。这个分类里的方法一般只会在类或框架内部使用，而无须对外公布。这样一来，类的使用者有时可能会在査看回溯信息时发现<code>private</code>一词，就知道不应该直接调用此方法了。</p>
 
 <h2 id="toc_0">要点</h2>
 
 <ul>
-<li>在类中提供一个全能初始化方法，并于文档里指明。其他初始化方法均应调用此方法。</li>
-<li><p>若全能初始化方法与超类不同，则需覆写超类中的对应方法。</p></li>
-<li><p>如果超类的初始化方法不适用于子类，那么应该覆写这个超类方法，并在其中抛出异常。</p></li>
+<li>使用分类机制把类的实现代码划分成易于管理的小块。</li>
+<li>将应该视为“私有”的方法归入名叫<code>Private</code>的分类中，以隐藏实现细节。</li>
 </ul>
 
                         
@@ -655,54 +739,10 @@ int main(int argc, const char * argv[]) {
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/8/25</span>
+                    <span class="date">2017/8/31</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15036306506140.html">
-                
-                  <h1>第十五条 用前缀避免命名空间冲突</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>oc与其他语言一个主要区别是没有那种内置的命名空间(namespace)机制. <mark>所以我们在编码时一定要注意命名冲突,尤其是潜在的命名冲突.</mark></p>
-
-<p>我们在创建应用程序时一定要注意,使用Cocoa创建应用程序时一定要注意,<strong><font color=red>Apple宣称保留使用&quot;两个字母前缀&quot;的权利</font></strong>,也就是说选用的前缀应该都是<strong><font color=red>三个字母</font></strong>.</p>
-
-<p>我们尤其应该注意,当你使用的一个三方库引入了一个你之前引入过的三方库.如果引入的这两个库的作者都没有给自己的库加前缀,那么应用程序很容易出现重复符号错误.</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li><p>选择与你公司,应用程序或二者有关联的名称作为类名的前缀,并在所有代码中均使用这一前缀.</p></li>
-<li><p>若自己所开发的程序库用到了第三方库,则应该为其中的名称加上前缀.</p></li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/25</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -804,31 +844,31 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
-			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
+			        <a href="15152183997863.html">Where my anagrams at?</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139938131506.html">Sum of many ints</a>
+			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139334894228.html"> Longest Univalue Path</a>
+			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15137396102567.html">Isomorphic Strings</a>
+			        <a href="15145180239158.html">1's, 0's and wildcards</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15136732474119.html">Path Sum II</a>
+			        <a href="15143494387976.html">Simple Pig Latin</a>
 			      </li>
 		     
 		  

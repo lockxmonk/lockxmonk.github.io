@@ -117,586 +117,142 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="14927355881897.html">
+                <a class="clearlink" href="14936919183368.html">
                 
-                  <h1>使用元类</h1>
+                  <h1>多线程</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
                         	<ul>
 <li>
-<a href="#toc_0">metaclass</a>
+<a href="#toc_0">Lock</a>
+</li>
+<li>
+<a href="#toc_1">小结</a>
 </li>
 </ul>
 
 
-<p>动态语言和静态语言最大的不同，就是函数和类的定义，不是编译时定义的，而是<strong>运行时动态创建的</strong>。</p>
+<p>多任务可以由多进程完成，也可以由一个进程内的多线程完成。</p>
 
-<p>比方说我们要定义一个<code>Hello</code>的class：</p>
+<p>我们前面提到了进程是由若干线程组成的，一个进程至少有一个线程。</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Hello(object):
-    def hello(self, name=&#39;world&#39;):
-        print(&#39;Hello, %s.&#39; % name)
-h = Hello()
-h.hello()
-print (type(Hello))
-print (type(h))
-</code></pre>
+<p>由于线程是操作系统直接支持的执行单元，因此，高级语言通常都内置多线程的支持，Python也不例外，并且，Python的线程是真正的Posix Thread，而不是模拟出来的线程。</p>
 
-<p><img src="media/14927355881897/14927620006235.jpg" alt=""/></p>
+<p>Python的标准库提供了两个模块：<code>thread</code>和<code>threading</code>，<code>thread</code>是低级模块，<code>threading</code>是高级模块，对<code>thread</code>进行了封装。绝大多数情况下，我们只需要使用<code>threading</code>这个高级模块。</p>
 
-<p><font color=red><strong><code>type()</code>函数可以查看一个类型或变量的类型，<code>Hello</code>是一个class，它的类型就是<code>type</code>，而<code>h</code>是一个实例，它的类型就是<code>class Hello</code>。</strong></font></p>
-
-<p>我们说class的定义是运行时动态创建的，而<strong>创建class的方法就是使用<code>type()</code>函数</strong>。</p>
-
-<p><code>type()</code>函数既可以返回一个对象的类型，又可以创建出新的类型，比如，<strong>我们可以通过<code>type()</code>函数创建出Hello类，而无需通过<code>class Hello(object)...</code>的定义</strong>：</p>
+<p>启动一个线程就是把一个函数传入并创建<code>Thread</code>实例，然后调用<code>start()</code>开始执行：</p>
 
 <pre><code class="language-py"># -*- coding: utf-8 -*-
-def fn(self, name=&#39;world&#39;):   # 先定义函数
-    print(&#39;Hello, %s.&#39; % name)
+import time,threading
 
-Hello = type(&#39;Hello&#39;, (object,), dict(hello=fn))  # 创建Hello class
-h = Hello()
-h.hello()
-print(type(Hello))
-print(type(h))
+#新线程执行的代码
+def loop():
+    print &#39;thread %s is running...&#39; % threading.current_thread().name
+    n = 0
+    while n&lt;5:
+        n = n+1
+        print &#39;thread %s &gt;&gt;&gt; %s&#39; %(threading.current_thread().name,n)
+        time.sleep(1)
+    print &#39;thread %s ended.&#39; %threading.current_thread().name
 
+print &#39;thread %s is running...&#39; % threading.current_thread().name
+t= threading.Thread(target=loop,name=&#39;LoopThread&#39;)
+t.start()
+t.join()
+print &#39;thread %s ended.&#39; % threading.current_thread().name
 </code></pre>
 
-<p><img src="media/14927355881897/14927623112362.jpg" alt=""/></p>
+<p><img src="media/14936919183368/14936948712548.jpg" alt=""/></p>
 
-<p><strong>要创建一个class对象，type()函数依次传入3个参数：</strong></p>
+<p>由于任何进程默认就会启动一个线程，我们把该线程称为主线程，主线程又可以启动新的线程，Python的<code>threading</code>模块有个<code>current_thread()</code>函数，它永远返回当前线程的实例。主线程实例的名字叫<code>MainThread</code>，子线程的名字在创建时指定，我们用<code>LoopThread</code>命名子线程。名字仅仅在打印时用来显示，完全没有其他意义，如果不起名字Python就自动给线程命名为<code>Thread-1，Thread-2……</code></p>
 
-<ol>
-<li>class的名称；</li>
-<li>继承的父类集合，注意Python支持多重继承，如果只有一个父类，别忘了tuple的单元素写法；</li>
-<li>class的方法名称与函数绑定，这里我们把函数<code>fn</code>绑定到方法名<code>hello</code>上。</li>
-</ol>
+<h2 id="toc_0">Lock</h2>
 
-<p>通过<code>type()</code>函数创建的类和直接写class是完全一样的，因为Python解释器遇到class定义时，仅仅是扫描一下class定义的语法，然后调用<code>type()</code>函数创建出class。</p>
+<p>多线程和多进程最大的不同在于，多进程中，同一个变量，各自有一份拷贝存在于每个进程中，互不影响，<strong>而多线程中，所有变量都由所有线程共享，所以，任何一个变量都可以被任何一个线程修改，因此，线程之间共享数据最大的危险在于多个线程同时改一个变量，把内容给改乱了。</strong></p>
 
-<blockquote>
-<p>正常情况下，我们都用<code>class Xxx...</code>来定义类，但是，<code>type()</code>函数也允许我们动态创建出类来，也就是说，动态语言本身支持运行期动态创建类，这和静态语言有非常大的不同，要在静态语言运行期创建类，必须构造源代码字符串再调用编译器，或者借助一些工具生成字节码实现，本质上都是动态编译，会非常复杂。</p>
-</blockquote>
-
-<h2 id="toc_0">metaclass</h2>
-
-<p>除了使用<code>type()</code>动态创建类以外，要控制类的创建行为，还可以使用metaclass。<br/>
-简单的解释就是：先定义metaclass，就可以创建类，最后创建实例。</p>
-
-<p>所以，metaclass允许你创建类或者修改类。换句话说，你可以把类看成是metaclass创建出来的“实例”。</p>
-
-<p><strong>metaclass是Python面向对象里最难理解，也是最难使用的魔术代码。正常情况下，你不会碰到需要使用metaclass的情况，所以，以下内容看不懂也没关系，因为基本上你不会用到。</strong></p>
-
-<p>我们先看一个简单的例子，这个metaclass可以给我们自定义的MyList增加一个add方法：</p>
-
-<p>定义<code>ListMetaclass</code>，按照默认习惯，metaclass的类名总是以Metaclass结尾，以便清楚地表示这是一个metaclass：</p>
+<p>来看看多个线程同时操作一个变量怎么把内容给改乱了：</p>
 
 <pre><code class="language-py"># -*- coding: utf-8 -*-
+import time,threading
 
-# metaclass是创建类，所以必须从`type`类型派生：
-class ListMetaclass(type):
+# 假定这是你的银行存款:
+balance = 0
 
-    def __new__(cls, name, bases, attrs):
-        attrs[&#39;add&#39;] = lambda self, value: self.append(value)
-        return type.__new__(cls, name, bases, attrs)
+def change_it(n):
+    # 先存后取，结果应该为0:
+    global balance
+    balance = balance + n
+    balance = balance - n
 
+def run_thread(n):
+    for i in range(100000):
+        change_it(n)
 
-class MyList(list):
-    __metaclass__ = ListMetaclass  # 指示使用ListMetaclass来定制类
+t1 = threading.Thread(target=run_thread, args=(5,))
+t2 = threading.Thread(target=run_thread, args=(8,))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+print balance
 </code></pre>
 
-<p>当我们写下<code>__metaclass__ = ListMetaclass</code>语句时，魔术就生效了，它指示Python解释器在创建<code>MyList</code>时，要通过<code>ListMetaclass.__new__()</code>来创建，在此，我们可以修改类的定义，比如，加上新的方法，然后，返回修改后的定义。</p>
+<p><img src="media/14936919183368/14936957737021.jpg" alt=""/><br/>
+结果为<code>14</code>而不是<code>0</code></p>
 
-<p><code>__new__()</code><strong>方法接收到的参数依次是</strong>：</p>
+<p>我们定义了一个共享变量<code>balance</code>，初始值为0，并且启动两个线程，先存后取，理论上结果应该为0，但是，由于线程的调度是由操作系统决定的，当<code>t1、t2</code>交替执行时，只要循环次数足够多，<code>balance</code>的结果就不一定是0了。</p>
 
-<ol>
-<li><p>当前准备创建的类的对象；</p></li>
-<li><p>类的名字；</p></li>
-<li><p>类继承的父类集合；</p></li>
-<li><p>类的方法集合。</p></li>
-</ol>
+<p>我们为了得到准确的结果，在某个线程正在修改<code>balance</code>时就要为该线程上一把锁，直到锁释放，其它线程继续执行。创建一个锁就是通过<code>threading.Lock()</code>来实现：</p>
 
-<p>我们测试输出为：</p>
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import time,threading
 
-<pre><code class="language-py">L = MyList()
-L.add(1)
-print L
-</code></pre>
+# 假定这是你的银行存款:
+balance = 0
+lock=threading.Lock()
 
-<p><img src="media/14927355881897/14927637008533.jpg" alt=""/></p>
+def change_it(n):
+    # 先存后取，结果应该为0:
+    global balance
+    balance = balance + n
+    balance = balance - n
 
-<p>动态修改有什么意义？直接在MyList定义中写上add()方法不是更简单吗？正常情况下，确实应该直接写，通过metaclass修改纯属变态。</p>
-
-<p>但是，总会遇到需要通过metaclass修改类定义的。ORM就是一个典型的例子。</p>
-
-<p>ORM全称“Object Relational Mapping”，即对象-关系映射，就是把关系数据库的一行映射为一个对象，也就是一个类对应一个表，这样，写代码更简单，不用直接操作SQL语句。</p>
-
-<p>要编写一个ORM框架，所有的类都只能动态定义，因为只有使用者才能根据表的结构定义出对应的类来。</p>
-
-<p>具体方法参见<a href="http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001386820064557c69858840b4c48d2b8411bc2ea9099ba000">廖老师的教学网站</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/21</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
+def run_thread(n):
+    for i in range(100000):
+        #先获取锁
+        lock.acquire()
+        try:
+            change_it(n)
+        finally:
+            # 改完了一定要释放锁:
+            lock.release()
         
-			<div class="article">
-                <a class="clearlink" href="14926766188460.html">
-                
-                  <h1>面向对象高级编程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">使用__slots__</a>
-</li>
-<li>
-<a href="#toc_1">使用@property</a>
-</li>
-<li>
-<a href="#toc_2">多重继承</a>
-<ul>
-<li>
-<a href="#toc_3">Mixin</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_4">定制类</a>
-<ul>
-<li>
-<a href="#toc_5">__str__</a>
-</li>
-<li>
-<a href="#toc_6">__iter__</a>
-</li>
-<li>
-<a href="#toc_7">__getitem__</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_8">__getattr__</a>
-</li>
-<li>
-<a href="#toc_9">__call__</a>
-</li>
-</ul>
-
-
-<p>正常情况下，当我们定义了一个class，创建了一个class的实例后，我们可以给该实例绑定任何属性和方法，这就是动态语言的灵活性。</p>
-
-<p><strong><em>我们可以动态的给某一个实例绑定属性、方法。要绑定该类所有的实例的话，则可以将方法绑定到该类上。</em></strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-
-class Student(object):
-    &quot;&quot;&quot;docstring for Student&quot;&quot;&quot;
-    pass
-s = Student()
-s.name = &#39;梁中豪&#39;  # 动态给实例绑定一个属性
-
-from types import MethodType
-
-
-def set_age(self, age):  # 定义一个函数作为实例方法
-    self.age = age
-s.set_age = MethodType(set_age, s, Student)  # 给实例绑定一个方法
-s.set_age(25)
-
-# 为了给所有实例都绑定方法，可以给class绑定方法：
-
-
-def set_score(self, score):  # 定义一个函数作为实例方法
-    self.score = score
-Student.set_score = MethodType(set_score, None, Student)
-s.set_score(100) #给class绑定方法后，所有实例均可调用
-s2 = Student()
-s2.set_score(90)
-print s.name, s.age, s.score, s2.score
+t1 = threading.Thread(target=run_thread, args=(5,))
+t2 = threading.Thread(target=run_thread, args=(8,))
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+print balance
 </code></pre>
 
-<p><img src="media/14926766188460/14926773474695.jpg" alt=""/></p>
+<p><img src="media/14936919183368/14937055756329.jpg" alt=""/></p>
 
-<h2 id="toc_0">使用__slots__</h2>
+<p>当多个线程同时执行lock.acquire()时，只有一个线程能成功地获取锁，然后继续执行代码，其他线程就继续等待直到获得锁为止。</p>
 
-<p>如果我们想要限制class的属性怎么办？比如，只允许对Student实例添加<code>name和age</code>属性。那么可以使用一个特殊的<code>__slots__</code>变量。</p>
+<p>获得锁的线程用完后一定要释放锁，否则那些苦苦等待锁的线程将永远等待下去，成为死线程。所以我们用<code>try...finally</code>来确保锁一定会被释放。</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
+<h2 id="toc_1">小结</h2>
 
+<p>多线程编程，模型复杂，容易发生冲突，必须用锁加以隔离，同时，又要小心死锁的发生。</p>
 
-class Student(object):
-    &quot;&quot;&quot;docstring for Student&quot;&quot;&quot;
-    __slots__ = (&#39;name&#39;,&#39;age&#39;)
-    
-s = Student()
-s.name = &#39;梁中豪&#39;
-s.age = 21
-print s.name, s.age
-s.score = 90
-print s.score
+<p><strong>Python解释器由于设计时有GIL全局锁，导致了多线程无法利用多核。多线程的并发在Python中就是一个美丽的梦</strong></p>
 
-</code></pre>
-
-<p><img src="media/14926766188460/14926779162430.jpg" alt=""/></p>
-
-<p><font color=red>使用<code>__slots__</code>要注意，<code>__slots__</code>定义的属性仅对当前类起作用，对继承的子类是不起作用的. 除非在子类中也定义<code>__slots__</code>，这样，子类允许定义的属性就是自身的<code>__slots__</code>加上父类的<code>__slots__</code>。<br/>
+<p><font color=red>Python虽然不能利用多线程实现多核任务，但可以通过多进程实现多核任务。多个Python进程有各自独立的GIL锁，互不影响。<br/>
 </font></p>
 
-<h2 id="toc_1">使用@property</h2>
-
-<p>在绑定属性时，如果我们直接把属性暴露出去，虽然写起来很简单，但是，没办法检查参数，导致可以把成绩随便改。</p>
-
-<p>这显然不合逻辑。为了限制score的范围，可以通过一个<code>set_score()</code>方法来设置成绩，再通过一个<code>get_score()</code>来获取成绩，这样，在<code>set_score()</code>方法里，就可以检查参数：</p>
-
-<pre><code class="language-py">class Student(object):
-
-    def get_score(self):
-        return self._score
-
-    def set_score(self, value):
-        if not isinstance(value, int):
-            raise ValueError(&#39;score must be an integer!&#39;)
-        if value &lt; 0 or value &gt; 100:
-            raise ValueError(&#39;score must between 0 ~ 100!&#39;)
-        self._score = value
-s = Student()
-s.set_score(50)
-s.get_score()
-s.set_score(999)
-s.get_score()
-</code></pre>
-
-<p><img src="media/14926766188460/14927376402165.jpg" alt=""/></p>
-
-<p>上面的调用方法又略显复杂，没有直接用属性这么直接简单。</p>
-
-<p>对于类的方法，装饰器一样起作用。Python内置的<code>@property</code>装饰器就是负责把一个方法变成属性调用的：</p>
-
-<pre><code class="language-py">
-class Student(object):
-
-    @property
-    def score(self):
-        return self._score
-
-    @score.setter
-    def score(self, value):
-        if not isinstance(value, int):
-            raise ValueError(&#39;score must be an integer!&#39;)
-        if value &lt; 0 or value &gt; 100:
-            raise ValueError(&#39;score must between 0 ~ 100!&#39;)
-        self._score = value
-
-s = Student
-s.score = 60
-print s.score
-</code></pre>
-
-<p><code>@property</code>的实现比较复杂，我们先考察如何使用。把一个<code>getter</code>方法变成属性，只需要加上<code>@property</code>就可以了，此时，<code>@property</code>本身又创建了另一个装饰器<code>@score.setter</code>，负责把一个<code>setter</code>方法变成属性赋值</p>
-
-<p>如果只定义getter方法，不定义setter方法就是一个只读属性：</p>
-
-<pre><code class="language-py">class Student(object):
-
-    @property
-    def birth(self):
-        return self._birth
-
-    @birth.setter
-    def birth(self, value):
-        self._birth = value
-
-    @property
-    def age(self):
-        return 2014 - self._birth
-s = Student()
-s.birth = 23
-print s.birth
-</code></pre>
-
-<h2 id="toc_2">多重继承</h2>
-
-<p>继承是面向对象编程的一个重要的方式，因为通过继承，子类就可以扩展父类的功能。</p>
-
-<p>一个类可以继承多个类，称为多重继承，如下所示：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Animal(object):
-    &quot;&quot;&quot;docstring for Animal&quot;&quot;&quot;
-    pass
-
-
-class Mammal(Animal):
-    &quot;&quot;&quot;docstring for Mammal&quot;&quot;&quot;
-    print &#39;Mammal&#39;
-
-
-class Bird(Animal):
-    &quot;&quot;&quot;docstring for Bird&quot;&quot;&quot;
-    print &#39;Bird&#39;
-
-
-class Runable(object):
-    &quot;&quot;&quot;docstring for Runable&quot;&quot;&quot;
-
-    def run(self):
-        print &#39;Running...&#39;
-
-
-class Flyable(object):
-    &quot;&quot;&quot;docstring for Flyable&quot;&quot;&quot;
-
-    def fly(self):
-        print &#39;Flying...&#39;
-
-
-class Dog(Mammal, Runable):
-    &quot;&quot;&quot;docstring for Dog&quot;&quot;&quot;
-    pass
-
-
-class Bat(Mammal, Flyable):
-    &quot;&quot;&quot;docstring for Bat&quot;&quot;&quot;
-    pass
-</code></pre>
-
-<p>通过多重继承，一个子类就可以同时获得多个父类的所有功能。</p>
-
-<h3 id="toc_3">Mixin</h3>
-
-<p>在设计类的继承关系时，通常，主线都是单一继承下来的，例如，<code>Ostrich</code>继承自<code>Bird</code>。但是，如果需要“混入”额外的功能，通过多重继承就可以实现，比如，让<code>Ostrich</code>除了继承自<code>Bird</code>外，再同时继承<code>Runnable</code>。这种设计通常称之为<code>Mixin</code>。</p>
-
-<p>为了更好地看出继承关系，我们把Runnable和Flyable改为<code>RunnableMixin</code>和<code>FlyableMixin</code>。类似的，你还可以定义出肉食动物<code>CarnivorousMixin</code>和植食动物<code>HerbivoresMixin</code>，让某个动物同时拥有好几个<code>Mixin</code>：</p>
-
-<pre><code class="language-py">class Dog(Mammal, RunnableMixin, CarnivorousMixin):
-    pass
-</code></pre>
-
-<p>由于Python允许使用多重继承，因此，Mixin就是一种常见的设计。</p>
-
-<p><strong>只允许单一继承的语言（如Java）不能使用Mixin的设计</strong>。</p>
-
-<h2 id="toc_4">定制类</h2>
-
-<p>看到类似<code>__slots__</code>这种形如<code>__xxx__</code>的变量或者函数名就要注意，这些在Python中是有特殊用途的。</p>
-
-<p>类似有很多特殊变量来帮助我们定制类：</p>
-
-<h3 id="toc_5">__str__</h3>
-
-<p>我们先定义一个<code>Student</code>类，打印一个实例：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-    def __init__(self, name):
-        super(Students, self).__init__()
-        self.name = name
-print Students(&#39;LZH&#39;)
-</code></pre>
-
-<p><img src="media/14926766188460/14927559673818.jpg" alt=""/><br/>
-得到上图所示，我们可以定制所打印的内容。</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-    def __init__(self, name):
-        super(Students, self).__init__()
-        self.name = name
-    def __str__(self):
-        return &#39;Students object (name:%s)&#39; %self.name
-print Students(&#39;LZH&#39;)
-</code></pre>
-
-<p><img src="media/14926766188460/14927560929527.jpg" alt=""/><br/>
-这样打印出来的实例，不但好看，而且容易看出实例内部重要的数据。<br/>
-当然这只是负责定制<code>print</code>方法输出的内容。直接敲变量不用<code>print</code>，打印出来的实例还是不好看。</p>
-
-<p>这是因为直接显示变量调用的不是<code>__str__()</code>，而是<code>__repr__()</code>，两者的区别是<code>__str__()</code>返回用户看到的字符串，而<code>__repr__()</code>返回程序开发者看到的字符串，也就是说，<code>__repr__()</code>是为调试服务的。</p>
-
-<pre><code class="language-py">class Student(object):
-    def __init__(self, name):
-        self.name = name
-    def __str__(self):
-        return &#39;Student object (name=%s)&#39; % self.name
-    __repr__ = __str__  #因为两者方法几乎一样，所以可以直接偷懒将前者赋值给repr
-</code></pre>
-
-<h3 id="toc_6">__iter__</h3>
-
-<p>如果一个类想被用于<code>for ... in</code>循环，类似<code>list或tuple</code>那样，就必须实现一个<code>__iter__()</code>方法，该方法返回一个迭代对象，然后，Python的for循环就会不断调用该迭代对象的<code>next()</code>方法拿到循环的下一个值，直到遇到StopIteration错误时退出循环。</p>
-
-<p>我们以斐波那契数列为例，写一个Fib类，可以作用于for循环：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-
-class Fib(object):
-    &quot;&quot;&quot;docstring for Fib&quot;&quot;&quot;
-
-    def __init__(self):
-        self.a, self.b = 0, 1  # 初始化两个计数器a，b
-
-    def __iter__(self):
-        return self  # 实例本身就是迭代对象，故返回自己
-
-    def next(self):
-        self.a, self.b = self.b, self.a + self.b
-        if self.a &gt; 100:
-            raise StopIteration()
-        return self.a
-
-for n in Fib():
-    print n
-</code></pre>
-
-<p><img src="media/14926766188460/14927569583236.jpg" alt=""/></p>
-
-<h3 id="toc_7">__getitem__</h3>
-
-<p>上述要表现得像list那样按照下标取出元素，需要实现<code>__getitem__()</code>方法：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-class Fib(object):
-    &quot;&quot;&quot;docstring for Fib&quot;&quot;&quot;
-
-    def __getitem__(self, n):
-        a, b = 1, 1
-        for x in range(n):
-            a, b = b, a + b
-        print a
-
-f = Fib()
-f[0]
-f[2]
-f[4]
-
-</code></pre>
-
-<p><img src="media/14926766188460/14927581032895.jpg" alt=""/></p>
-
-<p>不能简单的直接执行切片方法，Fib会报错。原因是<code>__getitem__()</code>传入的参数可能是一个int，也可能是一个切片对象slice，所以要做判断：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-
-class Fib(object):
-    &quot;&quot;&quot;docstring for Fib&quot;&quot;&quot;
-
-    def __getitem__(self, n):
-        if isinstance(n, int):
-            a, b = 1, 1
-            for x in range(n):
-                a, b = b, a + b
-            print a
-        if isinstance(n, slice):
-            start = n.start
-            stop = n.stop
-            a, b = 1, 1
-            L = []
-            for x in range(stop):
-                if x &gt;= start:
-                    L.append(a)
-                a, b = b, a + b
-            print L
-
-f = Fib()
-f[5]
-f[1:5]
-</code></pre>
-
-<p><img src="media/14926766188460/14927591015675.jpg" alt=""/></p>
-
-<h2 id="toc_8">__getattr__</h2>
-
-<p>当定义好一个类后，若实例调用一个不存在的属性，则会报错，但是我们可以运用<code>__getattr__</code>动态返回一个属性。例如：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Student(object):
-
-    def __init__(self):
-        self.name = &#39;Michael&#39;
-
-    def __getattr__(self, attr):
-        if attr==&#39;score&#39;:
-            return 99
-
-s = Student()
-print s.name
-print s.score
-print s.age
-</code></pre>
-
-<p><img src="media/14926766188460/14927598715799.jpg" alt=""/><br/>
-只有在没有找到属性的情况下，才调用<code>__getattr__</code>，已有的属性，比如<code>name</code>，不会在<code>__getattr__</code>中查找。</p>
-
-<p>此外，注意到任意调用如<code>s.age</code>都会返回<code>None</code>，这是因为我们定义的<code>__getattr__</code>默认返回就是<code>None</code>。</p>
-
-<p><strong>这实际上可以把一个类的所有属性和方法调用全部动态化处理了，不需要任何特殊手段。例如动态的拼接api接口：</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Chain(object):
-
-    def __init__(self, path=&#39;&#39;):
-        self._path = path
-
-    def __getattr__(self, path):
-        return Chain(&#39;%s/%s&#39; % (self._path, path))
-
-    def __str__(self):
-        return self._path
-print Chain().status.user.timeline.list
-print Chain(&#39;LZH&#39;).status.user.timeline.list
-</code></pre>
-
-<p><img src="media/14926766188460/14927597036919.jpg" alt=""/></p>
-
-<h2 id="toc_9">__call__</h2>
-
-<p>任何类，只需要定义一个__call__()方法，就可以直接对实例进行调用。请看示例：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-    def __init__(self, name):
-        super(Students, self).__init__()
-        self.name = name
-    def __call__(self):
-        print (&#39;My name is %s.&#39; % self.name)
-
-s = Students(&#39;LZH&#39;)
-s()
-</code></pre>
-
-<p><img src="media/14926766188460/14927611817291.jpg" alt=""/></p>
-
                         
                       </div>
                   </div>
@@ -704,7 +260,7 @@ s()
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/4/20</span>
+                    <span class="date">2017/5/2</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
@@ -721,445 +277,203 @@ s()
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="14926712777578.html">
+                <a class="clearlink" href="14936863062791.html">
                 
-                  <h1>类和实例</h1>
+                  <h1>进程和线程</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
                         	<ul>
 <li>
-<a href="#toc_0">数据封装</a>
+<a href="#toc_0">多进程</a>
 </li>
 <li>
-<a href="#toc_1">访问限制</a>
+<a href="#toc_1">multiprocessing</a>
 </li>
 <li>
-<a href="#toc_2">继承和多态</a>
+<a href="#toc_2">Pool</a>
 </li>
 <li>
-<a href="#toc_3">获取对象信息</a>
+<a href="#toc_3">进程间通信</a>
 <ul>
 <li>
-<a href="#toc_4">使用type()</a>
-</li>
-<li>
-<a href="#toc_5">使用isinstance()</a>
-</li>
-<li>
-<a href="#toc_6">使用dir()</a>
+<a href="#toc_4">小结</a>
 </li>
 </ul>
 </li>
 </ul>
 
 
-<p>在Python中，定义类是通过<code>class</code>关键字：</p>
+<p>我们前面编写的所有的Python程序，都是执行单任务的进程，也就是只有一个线程。如果我们要同时执行多个任务怎么办</p>
 
-<pre><code class="language-py">class Student(object):
-    pass
-</code></pre>
+<p>一种是启动多个进程，每个进程虽然只有一个线程，但多个进程可以一块执行多个任务。</p>
 
-<p><code>class</code>后面紧接着是类名，即<code>Student</code>，类名通常是大写开头的单词，紧接着是<code>(object)</code>，表示该类是从哪个类继承下来的，继承的概念我们后面再讲，通常，<strong>如果没有合适的继承类，就使用object类，这是所有类最终都会继承的类</strong>。</p>
+<p><strong>还有一种方法是启动一个进程，在一个进程内启动多个线程，这样，多个线程也可以一块执行多个任务。</strong></p>
 
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
+<p>当然还有第三种方法，就是启动多个进程，每个进程再启动多个线程，这样同时执行的任务就更多了，当然这种模型更复杂，实际很少采用。</p>
 
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.name = name
-        self.score = score
-</code></pre>
+<p>总结一下就是，多任务的实现有3种方式：</p>
 
-<p>注意到<code>__init__</code>方法的第一个参数永远是self，表示创建的实例本身，因此，在<code>__init__</code>方法内部，就可以把各种属性绑定到<code>self</code>，因为<code>self</code>就指向创建的实例本身。</p>
-
-<p>和普通的函数相比，在类中定义的函数只有一点不同，<font color=red>就是第一个参数永远是实例变量self，并且，调用时，不用传递该参数。除此之外，类的方法和普通函数没有什么区别，所以，你仍然可以用默认参数、可变参数和关键字参数。</font></p>
-
-<h2 id="toc_0">数据封装</h2>
-
-<p>面向对象编程的一个重要特点就是数据封装，创建实例需要给出<code>name</code>和<code>score</code>，而如何打印，都是在Student类的内部定义的，这些数据和逻辑被“封装”起来了，调用很容易，但却不用知道内部实现的细节。</p>
-
-<p>例如下面增加一个成绩分类的方法：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.name = name
-        self.score = score
-
-    def print_score(self):
-        print &#39;%s:%s&#39; % (self.name, self.score)
-
-    def get_grade(self):
-        if self.score &gt;= 90:
-            print &#39;A&#39;
-        elif self.score &gt;= 60:
-            print &#39;B&#39;
-        else:
-            print &#39;C&#39;
-
-bart = Students(&#39;Bart&#39;, 59)
-lisa = Students(&#39;梁中豪&#39;, 100)
-bart.print_score()
-bart.get_grade()
-lisa.print_score()
-lisa.get_grade()
-</code></pre>
-
-<h2 id="toc_1">访问限制</h2>
-
-<p>在Class内部，可以有属性和方法，而外部代码可以通过直接调用实例变量的方法来操作数据，这样，就隐藏了内部的复杂逻辑。</p>
-
-<p>但是，从前面Student类的定义来看，外部代码还是可以自由地修改一个实例的<code>name</code>、<code>score</code>属性</p>
-
-<p>如果要让内部属性不被外部访问，可以把属性的名称前加上两个下划线<code>__</code>，<font color=red>在Python中，实例的变量名如果以<code>__</code>开头，就变成了一个私有变量（private），只有内部可以访问，外部不能访问，</font>所以，我们把Student类改一改：</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.__name = name
-        self.__score = score
-
-    def print_score(self):
-        print &#39;%s:%s&#39; % (self.__name, self.__score)
-
-   
-bart = Students(&#39;Bart&#39;, 59)
-lisa = Students(&#39;梁中豪&#39;, 100)
-bart.print_score()
-lisa.__name
-</code></pre>
-
-<p>改完后，对于外部代码来说，没什么变动，但是已经无法从外部访问实例变量.<code>__name</code>和实例变量<code>.__score</code>了：<br/>
-<img src="media/14926712777578/14926727380387.jpg" alt=""/><br/>
-如果又要允许外部代码修改score,可以给Student类增加set_score方法.这里跟java很像。不在过多叙述。</p>
-
-<h2 id="toc_2">继承和多态</h2>
-
-<p>在OOP程序设计中，当我们定义一个class的时候，可以从某个现有的class继承，新的class称为子类（Subclass），而被继承的class称为基类、父类或超类（Base class、Super class）。</p>
-
-<p>继承最大的好处是子类获得了父类的全部功能。由于<code>Animial</code>实现了<code>run()</code>方法，因此，<code>Dog</code>和<code>Cat</code>作为它的子类，什么事也没干，就自动拥有了<code>run()</code>方法，当然也可以对父类方法进行重写。</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Animal(object):
-    &quot;&quot;&quot;docstring for Animal&quot;&quot;&quot;
-
-    def run(self):
-        print &#39;Animal is running..&#39;
-
-
-class Dog(Animal):
-    pass
-
-
-class Cat(Animal):
-    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
-
-    def run(self):
-        print &#39;Cat is running..&#39;
-
-dog = Dog()
-dog.run()
-
-cat = Cat()
-cat.run()
-
-</code></pre>
-
-<p><img src="media/14926712777578/14926743181176.jpg" alt=""/></p>
-
-<h2 id="toc_3">获取对象信息</h2>
-
-<p>当我们拿到一个对象的引用时，如何知道这个对象是什么类型？</p>
-
-<h3 id="toc_4">使用type()</h3>
-
-<p>基本类型都可以用<code>type()</code>判断：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-print type(123),type(&#39;str&#39;),type(None)
-</code></pre>
-
-<p><img src="media/14926712777578/14926750871663.jpg" alt=""/></p>
-
-<p>Python把每种type类型都定义好了常量，放在types模块里，使用之前，需要先导入：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import types
-print type(&#39;abc&#39;)==types.StringType
-print type(u&#39;abc&#39;)==types.UnicodeType
-print type([])==types.ListType
-print type(str) == types.TypeType
-</code></pre>
-
-<p><img src="media/14926712777578/14926752976543.jpg" alt=""/><br/>
-<strong>最后注意到有一种类型就叫TypeType，所有类型本身的类型就是TypeType.比如<code>int，str</code>等</strong></p>
-
-<h3 id="toc_5">使用isinstance()</h3>
-
-<p>我们使用<code>isinstance()</code>来判断class的类型，例如：</p>
-
-<pre><code class="language-py">class Animals(object):
-    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
-    pass
-class Cat(Animals):
-    &quot;&quot;&quot;docstring for Cat&quot;&quot;&quot;
-    pass
-class Dog(Animals):
-    &quot;&quot;&quot;docstring for Dog&quot;&quot;&quot;
-    pass
-a = Animals()
-d = Dog()
-h = Cat()
-print isinstance(h, Cat),isinstance(d, Dog),isinstance(a, Animals)
-</code></pre>
-
-<p><img src="media/14926712777578/14926756201012.jpg" alt=""/></p>
-
-<p>当然也可以用<code>isinstance()</code>来判断基本类型</p>
-
-<h3 id="toc_6">使用dir()</h3>
-
-<p>如果要获得一个对象的所有属性和方法，可以使用<code>dir()</code>函数，它返回一个包含字符串的<code>list</code>，比如，获得一个str对象的所有属性和方法：</p>
-
-<pre><code class="language-py">&gt;&gt;&gt; dir(&#39;abc&#39;)
-</code></pre>
-
-<p><img src="media/14926712777578/14926758082813.jpg" alt=""/></p>
-
-<p><strong>仅仅把属性和方法列出来是不够的，配合<code>getattr()、setattr()以及hasattr()</code>，我们可以直接操作一个对象的状态：</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-class Animals(object):
-    &quot;&quot;&quot;docstring for Animals&quot;&quot;&quot;
-
-    def __init__(self):
-        self.x = 9
-
-    def power(self):
-        print self.x * self.x
-obj = Animals()
-
-print hasattr(obj, &#39;x&#39;)  # 有属性&#39;x&#39;吗？
-print hasattr(obj, &#39;y&#39;)  # 有属性&#39;y&#39;吗？
-print setattr(obj, &#39;y&#39;, 19)  # 设置一个属性&#39;y&#39;
-print getattr(obj, &#39;y&#39;)  # 获取属性&#39;y&#39;
-print obj.y
-</code></pre>
-
-<p><img src="media/14926712777578/14926764199501.jpg" alt=""/></p>
-
-<p>也可以获得对象的方法：</p>
-
-<pre><code class="language-py">fn = getattr(obj, &#39;power&#39;)
-print fn,fn(),
-</code></pre>
-
-<p><img src="media/14926712777578/14926765852729.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/20</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14926690841704.html">
-                
-                  <h1>面向对象编程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>采用面向对象的程序设计思想来设计一个简单的学生成绩打印，我们首选思考的不是程序的执行流程，而是<code>Student</code>这种数据类型应该被视为一个对象，这个对象拥有<code>name</code>和<code>score</code>这两个属性（Property）。如果要打印一个学生的成绩，首先必须创建出这个学生对应的对象，然后，给对象发一个<code>print_score</code>消息，让对象自己把自己的数据打印出来</p>
-
-<pre><code class="language-py">#-*- coding: utf-8 -*-
-class Students(object):
-    &quot;&quot;&quot;docstring for Students&quot;&quot;&quot;
-
-    def __init__(self, name, score):
-        super(Students, self).__init__()
-        self.name = name
-        self.score = score
-
-    def print_score(self):
-        print &#39;%s:%s&#39; % (self.name, self.score)
-
-
-bart = Students(&#39;Bart&#39;, 59)
-lisa = Students(&#39;梁中豪&#39;, 100)
-bart.print_score()
-lisa.print_score()
-</code></pre>
-
-<p><img src="media/14926690841704/14926708025078.jpg" alt=""/></p>
-
-<p><strong>面向对象三大特点：封装、继承、多态。</strong></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/20</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14926579397626.html">
-                
-                  <h1>使用_future_</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Python的每个新版本都会增加一些新的功能，或者对原来的功能作一些改动。有些改动是不兼容旧版本的，也就是在当前版本运行正常的代码，到下一个版本运行就可能不正常了。</p>
-
-<p>从Python 2.7到Python 3.x就有不兼容的一些改动，比如2.x里的字符串用<code>&#39;xxx&#39;</code>表示str，Unicode字符串用<code>u&#39;xxx&#39;</code>表示unicode，而在3.x中，所有字符串都被视为unicode，因此，写<code>u&#39;xxx&#39;和&#39;xxx&#39;</code>是完全一致的.还有在2.x中以<code>&#39;xxx&#39;</code>表示的str就必须写成<code>b&#39;xxx&#39;</code>，以此表示“二进制字符串”。</p>
-
-<p><font color=red>Python提供了<code>__future__模块</code>，把下一个新版本的特性导入到当前版本，于是我们就可以在当前版本中测试一些新版本的特性。</font>举例说明如下：</p>
-
-<p>为了适应Python 3.x的新的字符串的表示方法，在2.7版本的代码中，可以通过unicode_literals来使用Python 3.x的新的语法：</p>
-
-<pre><code class="language-py"># still running on Python 2.7
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
-
-print &#39;\&#39;xxx\&#39; is unicode?&#39;, isinstance(&#39;xxx&#39;, unicode)
-print &#39;u\&#39;xxx\&#39; is unicode?&#39;, isinstance(u&#39;xxx&#39;, unicode)
-print &#39;\&#39;xxx\&#39; is str?&#39;, isinstance(&#39;xxx&#39;, str)
-print &#39;b\&#39;xxx\&#39; is str?&#39;, isinstance(b&#39;xxx&#39;, str)
-</code></pre>
-
-<p><img src="media/14926579397626/14926584481460.jpg" alt=""/><br/>
-注意到上面的代码仍然在Python 2.7下运行，但结果显示去掉前缀u的<code>&#39;a string&#39;</code>仍是一个unicode，而加上前缀b的<code>b&#39;a string&#39;</code>才变成了str</p>
-
-<p>由于Python是由社区推动的开源并且免费的开发语言，不受商业公司控制，因此，<strong>Python的改进往往比较激进，不兼容的情况时有发生。Python为了确保你能顺利过渡到新版本，特别提供了__future__模块，让你在旧的版本中试验新版本的一些特性</strong>。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/20</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14925924499918.html">
-                
-                  <h1>使用第三方模块</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在Python中，安装第三方模块，是通过setuptools这个工具完成的。Python有两个封装了setuptools的包管理工具：<code>easy_install和pip</code>。<font color=red>目前官方推荐使用<code>pip</code>。</font></p>
-
-<p>Mac和linux本身自带pip，不用安装，在win下需要安装。这里不再过多叙述。</p>
-
-<p>这里试着安装一个第三方库：<strong>Python Imaging Library</strong>，这是Python下非常强大的处理图像的工具库。一般来说，第三方库都会在Python官方的<a href="http://pypi.python.org">http://pypi.python.org</a>网站注册，要安装一个第三方库，必须先知道该库的名称，可以在官网或者pypi上搜索，比如Python Imaging Library的名称叫PIL，因此，安装Python Imaging Library的命令就是：</p>
-
-<p><del>pip install PIL</del>（现在用pillow来代替PIL）</p>
-
-<pre><code>sudo pip install Pillow
-</code></pre>
-
-<p>处理图片的方法为：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-from PIL import Image
-
-im = Image.open(&#39;icon.png&#39;)
-print im.format, im.size, im.mode
-
-im.thumbnail((150,100))
-im.save(&#39;thumb.jpg&#39;,&#39;JPEG&#39;)
-</code></pre>
-
-<p><img src="media/14925924499918/14926575371706.jpg" alt=""/><br/>
-将原图<code>icon.png</code>:<br/>
-<img src="media/14925924499918/icon.png" alt="icon"/></p>
-
-<p>生成一个名为<code>thumb.jpg</code>的图片：<br/>
-<img src="media/14925924499918/thumb.jpg" alt="thumb"/></p>
+<ul>
+<li>多进程模式；</li>
+<li>多线程模式；</li>
+<li>多进程+多线程模式。</li>
+</ul>
 
 <blockquote>
-<p>这两张图暂时没有看出明显的区别，需要深入研究。</p>
+<p>线程是最小的执行单元，而进程由至少一个线程组成。如何调度进程和线程，完全由操作系统决定，程序自己不能决定什么时候执行，执行多长时间。</p>
 </blockquote>
 
-<p>默认情况下，Python解释器会搜索当前目录、所有已安装的内置模块和第三方模块，搜索路径存放在<code>sys</code>模块的<code>path</code>变量中：</p>
+<h2 id="toc_0">多进程</h2>
 
-<pre><code>&gt;&gt;&gt; import sys
-&gt;&gt;&gt; sys.path
-[&#39;&#39;, &#39;/Library/Python/2.7/site-packages/pip-8.1.1-py2.7.egg&#39;, 
-&#39;/System/Library/Frameworks/Python.framework/Versions/2.7/lib/python27.zip&#39;,... ]
+<p>Unix/Linux操作系统提供了一个<code>fork()</code>系统调用，它非常特殊。普通的函数调用，调用一次，返回一次，但是<code>fork()</code><font color=red>调用一次，返回两次，因为操作系统自动把当前进程（称为父进程）复制了一份（称为子进程），然后，分别在父进程和子进程内返回</font>。</p>
+
+<p>子进程永远返回<code>0</code>，而父进程返回子进程的ID。这样做的理由是，一个父进程可以fork出很多子进程，所以，父进程要记下每个子进程的ID，而子进程只需要调用<code>getppid()</code>就可以拿到父进程的ID。</p>
+
+<p>Python的<code>os</code>模块封装了常见的系统调用，其中就包括<code>fork</code>，可以在Python程序中轻松创建子进程：</p>
+
+<pre><code class="language-py">import os
+
+print &#39;Process (%s) start&#39; %os.getpid()
+
+pid = os.fork()
+if pid == 0:
+    print &#39;I am child process (%s) and my parent is %s.&#39; %(os.getpid(),os.getppid())
+else:
+    print &#39;I (%s) just created a child process (%s)&#39; %(os.getpid(),pid)
 </code></pre>
 
-<p>想要添加自己的搜索目录可以：</p>
+<p><img src="media/14936863062791/14936874189758.jpg" alt=""/></p>
 
-<pre><code class="language-py">&gt;&gt;&gt; import sys
-&gt;&gt;&gt; sys.path.append(&#39;/Users/michael/my_py_scripts&#39;)
+<p>第一次返回父进程，第二次返回子进程。所以分别打印出了不同的结果。</p>
+
+<p>有了<code>fork</code>调用，一个进程在接到新任务时就可以复制出一个子进程来处理新任务，常见的Apache服务器就是由父进程监听端口，每当有新的http请求时，就fork出子进程来处理新的http请求。</p>
+
+<h2 id="toc_1">multiprocessing</h2>
+
+<p>如果你打算编写多进程的服务程序，Unix/Linux无疑是正确的选择。由于Windows没有<code>fork</code>调用，难道在Windows上无法用Python编写多进程的程序？</p>
+
+<p>由于Python是跨平台的，自然也应该提供一个跨平台的多进程支持。<code>multiprocessing</code>模块就是跨平台版本的多进程模块。</p>
+
+<p><code>multiprocessing</code>模块提供了一个<code>Process</code>类来代表一个进程对象，下面的例子演示了启动一个子进程并等待其结束：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+from multiprocessing import Process
+
+import os
+
+# 子进程要执行的代码
+
+
+def run_proc(name):
+    print &#39;Run child process %s(%s)&#39; % (name, os.getpid())
+
+if __name__ == &#39;__main__&#39;:
+    print &#39;Parent process %s.&#39; % os.getpid()
+p = Process(target=run_proc, args=(&#39;test&#39;,))
+print &#39;Process will start.&#39;
+p.start()
+p.join()
+print &#39;Process end&#39;
 </code></pre>
 
-<p><font color=red>这种方法是在运行时修改，运行结束后失效。</font></p>
+<p><img src="media/14936863062791/14936889041171.jpg" alt=""/></p>
 
-<p>第二种方法是设置环境变量<code>PYTHONPATH</code>这里不做详述。</p>
+<p>创建子进程时，只需要传入一个执行函数和函数的参数，创建一个<code>Process</code>实例，用<code>start()</code>方法启动，这样创建进程比<code>fork()</code>还要简单。</p>
+
+<p><code>join()</code>方法可以等待子进程结束后再继续往下运行，通常用于进程间的同步。</p>
+
+<h2 id="toc_2">Pool</h2>
+
+<p>如果要启动大量的子进程，可以用进程池的方式批量创建子进程：</p>
+
+<pre><code class="language-py">from multiprocessing import Pool
+import os
+import time
+import random
+
+
+def long_time_task(name):
+    print &#39;Run task %s(%s)...&#39; % (name, os.getpid())
+    start = time.time()
+    time.sleep(random.random() * 3)
+    end = time.time()
+    print &#39;Task %s runs %0.2f seconds.&#39; % (name, (end - start))
+
+if __name__ == &#39;__main__&#39;:
+    print &#39;Parent process %s.&#39; % os.getpid()
+    p = Pool()
+    for i in range(9):
+        p.apply_async(long_time_task, args=(i,))
+    print &#39;Waiting for all subprocesses done...&#39;
+    p.close()
+    p.join()
+    print &#39;All subprocess done&#39;
+</code></pre>
+
+<p><img src="media/14936863062791/14936904615182.jpg" alt=""/></p>
+
+<p>代码解读：</p>
+
+<p>对<code>Pool</code>对象调用<code>join()</code>方法会等待所有子进程执行完毕，调用<code>join()</code>之前必须先调用<code>close()</code>，调用<code>close()</code>之后就不能继续添加新的<code>Process</code>了。</p>
+
+<p>请注意输出的结果，task 0~7是立刻执行的，而task 8要等待前面某个task完成后才执行，这是因为Pool的默认大小在我的电脑上是8，因此，最多同时执行8个进程。这是Pool有意设计的限制，并不是操作系统的限制。如果改成：<code>p = Pool(9)</code></p>
+
+<p>就可以同时跑9个进程。</p>
+
+<p>由于Pool的默认大小是CPU的核数，如果你不幸拥有8核CPU，你要提交至少9个子进程才能看到上面的等待效果。</p>
+
+<h2 id="toc_3">进程间通信</h2>
+
+<p><code>Process</code>之间肯定是需要通信的，操作系统提供了很多机制来实现进程间的通信。Python的<code>multiprocessing</code>模块包装了底层的机制，提供了<code>Queue</code>、<code>Pipes</code>等多种方式来交换数据。</p>
+
+<p>我们以<code>Queue</code>为例，在父进程中创建两个子进程，一个往<code>Queue</code>里写数据，一个从<code>Queue</code>里读数据：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+from multiprocessing import Process,Queue
+import os,time,random
+
+#写数据进程执行的代码
+def write(q):
+    for value in [&#39;A&#39;,&#39;B&#39;,&#39;C&#39;]:
+        print &#39;Put %s to quene...&#39; % value
+        q.put(value)
+        time.sleep(random.random())
+#读数据进程执行的代码
+def read(q):
+    while True:
+        value = q.get(True)
+        print &#39;Get %s from quene.&#39; %value
+
+if __name__==&#39;__main__&#39;:
+    #父进程创建Quene,并传给各个子进程：
+    q = Queue()
+    pw = Process(target=write,args=(q,))
+    pr = Process(target=read,args=(q,))
+    #启动子进程pw，写入：
+    pw.start()
+    #启动子进程pr，读取：
+    pr.start()
+    #等待pw结束：
+    pw.join()
+    #pr进程里是死循环，无法等待其结束，只能强行终止：
+    pr.terminate()
+
+</code></pre>
+
+<p><img src="media/14936863062791/14936917220576.jpg" alt=""/></p>
+
+<p>在Unix/Linux下，<code>multiprocessing</code>模块封装了<code>fork()</code>调用，使我们不需要关注<code>fork()</code>的细节。由于Windows没有fork调用，因此，<code>multiprocessing</code>需要“模拟”出fork的效果，父进程所有Python对象都必须通过<code>pickle</code>序列化再传到子进程去，所有，如果<code>multiprocessing</code>在Windows下调用失败了，要先考虑是不是pickle失败了。</p>
+
+<h3 id="toc_4">小结</h3>
+
+<p>在Unix/Linux下，可以使用<code>fork()</code>调用实现多进程。</p>
+
+<p>要实现跨平台的多进程，可以使用<code>multiprocessing</code>模块。</p>
+
+<p>进程间通信是通过<code>Queue、Pipes</code>等实现的。</p>
 
                         
                       </div>
@@ -1168,7 +482,660 @@ im.save(&#39;thumb.jpg&#39;,&#39;JPEG&#39;)
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/4/19</span>
+                    <span class="date">2017/5/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14933396433742.html">
+                
+                  <h1>序列化</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">JSON</a>
+</li>
+<li>
+<a href="#toc_1">JSON进阶</a>
+</li>
+<li>
+<a href="#toc_2">小结</a>
+</li>
+</ul>
+
+
+<p><strong>我们把变量从内存中变成可存储或传输的过程称之为序列化，在Python中叫pickling，在其他语言中也被称之为serialization，marshalling，flattening等等，都是一个意思。</strong></p>
+
+<p>序列化之后，就可以把序列化后的内容写入磁盘，或者通过网络传输到别的机器上。</p>
+
+<p>反过来，把变量内容从序列化的对象重新读到内存里称之为反序列化，即unpickling。</p>
+
+<p>Python提供两个模块来实现序列化：<code>cPickle</code>和<code>pickle</code>。这两个模块功能是一样的，区别在于<code>cPickle</code>是C语言写的，速度快，<code>pickle</code>是纯Python写的，速度慢，跟<code>cStringIO和StringIO</code>一个道理。用的时候，先尝试导入<code>cPickle</code>，如果失败，再导入<code>pickle</code>：</p>
+
+<pre><code class="language-py">try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+</code></pre>
+
+<p>我们尝试把一个对象序列化并写入文件：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+try:
+    import cPickle as pickle
+except ImportError: 
+    import pickle
+
+d = dict(name=&#39;LZH&#39;,age=20,score=88)
+print pickle.dumps(d)
+</code></pre>
+
+<p><img src="media/14933396433742/14933403797179.jpg" alt=""/></p>
+
+<p><code>pickle.dumps()</code>方法把任意对象序列化成一个<code>str</code>，然后，就可以把这个<code>str</code>写入文件。或者用另一个方法<code>pickle.dump()</code>直接把对象序列化后写入一个<code>file-like Object</code>：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+try:
+    import cPickle as pickle
+except ImportError: 
+    import pickle
+
+d = dict(name=&#39;梁中豪&#39;,age=20,score=88)
+f = open(&#39;test.txt&#39;,&#39;wb&#39;)  
+pickle.dump(d,f)
+f.close
+
+</code></pre>
+
+<p><img src="media/14933396433742/14933405542811.jpg" alt=""/></p>
+
+<p>我们可以读取文件中这些内容，并且将他们反序列化来显示原来的内容：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+try:
+    import cPickle as pickle
+except ImportError: 
+    import pickle
+
+#d = dict(name=&#39;梁中豪&#39;,age=20,score=88)
+f = open(&#39;test.txt&#39;,&#39;rb&#39;)  
+print pickle.load(f)
+f.close
+
+</code></pre>
+
+<p>可以先把内容读到一个<code>str</code>，然后用<code>pickle.loads()</code>方法反序列化出对象，也可以直接用<code>pickle.load()</code>方法从一个<code>file-like Object</code>中直接反序列化出对象</p>
+
+<p>Pickle的问题和所有其他编程语言特有的序列化问题一样，就是它只能用于Python，并且可能不同版本的Python彼此都不兼容，因此，只能用Pickle保存那些不重要的数据，不能成功地反序列化也没关系。</p>
+
+<p>下面我们用JSON来进行网络间的数据传递。</p>
+
+<h2 id="toc_0">JSON</h2>
+
+<p>如果我们要在不同的编程语言之间传递对象，<strong>就必须把对象序列化为标准格式，比如XML，但更好的方法是序列化为JSON，因为JSON表示出来就是一个字符串</strong>，可以被所有语言读取，也可以方便地存储到磁盘或者通过网络传输。JSON不仅是标准格式，并且比XML更快，而且可以直接在Web页面中读取，非常方便。</p>
+
+<p><strong><code>JSON</code>表示的对象就是标准的<code>JavaScript</code>语言的对象，<code>JSON</code>和Python内置的数据类型对应如下：</strong></p>
+
+<table>
+<thead>
+<tr>
+<th>Json类型</th>
+<th>Python类型</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>{}</td>
+<td>dict</td>
+</tr>
+<tr>
+<td>[]</td>
+<td>list</td>
+</tr>
+<tr>
+<td>string</td>
+<td>str或u&#39;unicode&#39;</td>
+</tr>
+<tr>
+<td>12345.56</td>
+<td>int或float</td>
+</tr>
+<tr>
+<td>true/false</td>
+<td>True/False</td>
+</tr>
+<tr>
+<td>null</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+
+<p>Python内置的<code>json</code>模块提供了非常完善的Python对象到JSON格式的转换。我们先看看如何把Python对象变成一个JSON：</p>
+
+<pre><code class="language-py">import json
+d = dict(name=&#39;Lichao&#39;, age=20, score=88)
+print json.dumps(d)
+
+</code></pre>
+
+<p><img src="media/14933396433742/14933496188910.jpg" alt=""/></p>
+
+<p><code>dumps()</code>方法返回一个<code>str</code>，内容就是标准的JSON。类似的，<code>dump()</code>方法可以直接把JSON写入一个<code>file-like Object</code>。</p>
+
+<p>要把JSON反序列化为Python对象，用<code>loads()</code>或者对应的<code>load()</code>方法，前者把JSON的字符串反序列化，后者从<code>file-like Object</code>中读取字符串并反序列化：</p>
+
+<pre><code class="language-py">import json
+json_str = &#39;{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Lichao&quot;}&#39;
+print json.loads(json_str)
+</code></pre>
+
+<p><img src="media/14933396433742/14933497889867.jpg" alt=""/></p>
+
+<p>有一点需要注意，就是反序列化得到的所有字符串对象默认都是<code>unicode</code>而不是<code>str</code>。由于JSON标准规定JSON编码是UTF-8，所以我们总是能正确地在Python的<code>str或unicode</code>与JSON的字符串之间转换。</p>
+
+<h2 id="toc_1">JSON进阶</h2>
+
+<p>Python的<code>dict</code>对象可以直接序列化为JSON的<code>{}</code>，不过，很多时候，我们更喜欢用<code>class</code>表示对象，比如定义<code>Student</code>类，然后序列化：</p>
+
+<pre><code class="language-py">import json
+
+
+class Student(object):
+
+    def __init__(self, name, age, score):
+        super(Student, self).__init__()
+        self.name = name
+        self.age = age
+        self.score = score
+
+s = Student(&#39;LiChao&#39;, 20, 88)
+print(json.dumps(s))
+</code></pre>
+
+<p><img src="media/14933396433742/14933605238135.jpg" alt=""/><br/>
+向上述那样调用，会报错，因为<code>Student</code>对象不是一个可序列化为JSON的对象。</p>
+
+<p>我们仔细看看<code>dumps()</code>方法的参数列表，可以发现，除了第一个必须的<code>obj</code>参数外，<code>dumps()</code>方法还提供了一大堆的可选参数。</p>
+
+<p>这些可选参数就是让我们来定制JSON序列化。前面的代码之所以无法把<code>Student</code>类实例序列化为JSON，是因为默认情况下，<code>dumps()</code>方法不知道如何将<code>Student</code>实例变为一个JSON的<code>{}</code>对象。</p>
+
+<p>可选参数<code>default</code>就是把任意一个对象变成一个可序列为JSON的对象，我们只需要为<code>Student</code>专门写一个转换函数，再把函数传进去即可：</p>
+
+<pre><code class="language-py">import json
+
+def student2dict(std):
+    return {
+    &#39;name&#39;:std.name,
+    &#39;age&#39;:std.age,
+    &#39;score&#39;:std.score
+    }
+
+class Student(object):
+
+    def __init__(self, name, age, score):
+        super(Student, self).__init__()
+        self.name = name
+        self.age = age
+        self.score = score
+
+s = Student(&#39;LiChao&#39;, 20, 88)
+print(json.dumps(s,default=student2dict))
+</code></pre>
+
+<p><img src="media/14933396433742/14933609788679.jpg" alt=""/></p>
+
+<p>这样，<code>Student</code>实例首先被<code>student2dict()</code>函数转换成<code>dict</code>，然后再被顺利序列化为<code>JSON</code>。</p>
+
+<p><strong>不过，下次如果遇到一个<code>Teacher</code>类的实例，照样无法序列化为<code>JSON</code>。我们可以偷个懒，把任意<code>class</code>的实例变为<code>dict</code>：</strong></p>
+
+<pre><code class="language-py">print(json.dumps(s, default=lambda obj: obj.__dict__))
+</code></pre>
+
+<p>因为通常<code>class</code>的实例都有一个<code>__dict__</code>属性，它就是一个dict，用来存储实例变量。也有少数例外，比如定义了<code>__slots__</code>的class。</p>
+
+<p>同样的道理，如果我们要把JSON反序列化为一个<code>Student</code>对象实例，<code>loads()</code>方法首先转换出一个dict对象，然后，我们传入的<code>object_hook</code>函数负责把<code>dict</code>转换为<code>Student</code>实例：</p>
+
+<pre><code class="language-py">import json
+
+def dict2students(d):
+    return Student(d[&#39;name&#39;],d[&#39;age&#39;],d[&#39;score&#39;])
+
+class Student(object):
+
+    def __init__(self, name, age, score):
+        super(Student, self).__init__()
+        self.name = name
+        self.age = age
+        self.score = score
+
+json_str = &#39;{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Bob&quot;}&#39;
+print(json.loads(json_str,object_hook=dict2students))
+</code></pre>
+
+<p><img src="media/14933396433742/14933619206509.jpg" alt=""/></p>
+
+<p>打印出的是反序列化的<code>Student</code>实例对象。</p>
+
+<h2 id="toc_2">小结</h2>
+
+<p>Python语言特定的序列化模块是<code>pickle</code>，但如果要把序列化搞得更通用、更符合Web标准，就可以使用<code>json</code>模块。</p>
+
+<p><code>json</code>模块的<code>dumps()和loads()</code>函数是定义得非常好的接口的典范。当我们使用时，只需要传入一个必须的参数。但是，当默认的序列化或反序列机制不满足我们的要求时，我们又可以传入更多的参数来定制序列化或反序列化的规则，既做到了接口简单易用，又做到了充分的扩展性和灵活性。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/28</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14932778418691.html">
+                
+                  <h1>操作文件和目录</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">环境变量</a>
+</li>
+<li>
+<a href="#toc_1">操作文件和目录</a>
+</li>
+<li>
+<a href="#toc_2">小结</a>
+</li>
+<li>
+<a href="#toc_3">练习：</a>
+</li>
+</ul>
+
+
+<p>如果我们要操作文件、目录，可以在命令行下面输入操作系统提供的各种命令来完成。比如<code>dir</code>、<code>cp</code>等命令</p>
+
+<p>Python内置的<code>os</code>模块也可以直接调用操作系统提供的接口函数。</p>
+
+<p>打开Python交互式命令行，我们来看看如何使用<code>os</code>模块的基本功能：</p>
+
+<p><img src="media/14932778418691/14932780434722.jpg" alt=""/></p>
+
+<p>注意<code>uname()</code>函数在Windows上不提供，也就是说，os模块的某些函数是跟操作系统相关的。</p>
+
+<h2 id="toc_0">环境变量</h2>
+
+<p>在操作系统中定义的环境变量，全部保存在<code>os.environ</code>这个<code>dict</code>中，可以直接查看：<br/>
+<img src="media/14932778418691/14932785335515.jpg" alt=""/></p>
+
+<p>要获取某个环境变量的值，可以调用<code>os.getenv()</code>函数：</p>
+
+<p><img src="media/14932778418691/14932786096064.jpg" alt=""/></p>
+
+<h2 id="toc_1">操作文件和目录</h2>
+
+<p>操作文件和目录的函数一部分放在os模块中，一部分放在<code>os.path</code>模块中，这一点要注意一下。查看、创建和删除目录可以这么调用：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+print os.path.abspath(&#39;.&#39;)
+print os.path.join(&#39;/Users/liangzhonghao/Desktop/&#39;,&#39;test&#39;)
+
+#os.mkdir(&#39;/Users/liangzhonghao/Desktop/python&#39;)
+os.rmdir(&#39;/Users/liangzhonghao/Desktop/python&#39;)
+</code></pre>
+
+<p><img src="media/14932778418691/14932791801381.jpg" alt=""/></p>
+
+<p><code>os.path.splitext()</code>可以直接让你得到文件扩展名，很多时候非常方便：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+print os.path.splitext(&#39;/Users/liangzhonghao/Desktop/text.txt&#39;)
+</code></pre>
+
+<p><img src="media/14932778418691/14932792804815.jpg" alt=""/></p>
+
+<p><strong>这些合并、拆分路径的函数并不要求目录和文件要真实存在，它们只对字符串进行操作。</strong></p>
+
+<p><code>os</code>模块有很多功能，例如重命名文件，删除文件。但是他没有复制文件的功能。因为复制文件并非是由操作系统提供的系统调用。</p>
+
+<p>幸运的是<code>shutil</code>模块提供了<code>copyfile()</code>的函数，你还可以在<code>shutil</code>模块中找到很多实用函数，它们可以看做是<code>os</code>模块的补充。</p>
+
+<p><strong>最后看看如何利用Python的特性来过滤文件</strong>。比如我们要列出当前目录下的所有目录，只需要一行代码：</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; [x for x in os.listdir(&#39;.&#39;) if os.path.isdir(x)]
+</code></pre>
+
+<p><img src="media/14932778418691/14932797710625.jpg" alt=""/></p>
+
+<p>要列出所有的.py文件，也只需一行代码：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+print [x for x in os.listdir(&#39;.&#39;) if os.path.isfile(x) and os.path.splitext(x)[1]==&#39;.py&#39;]
+</code></pre>
+
+<p><img src="media/14932778418691/14932798281538.jpg" alt=""/></p>
+
+<h2 id="toc_2">小结</h2>
+
+<p>Python的os模块封装了操作系统的目录和文件操作，要注意这些函数有的在os模块中，有的在<code>os.path</code>模块中</p>
+
+<h2 id="toc_3">练习：</h2>
+
+<p>编写一个<code>search(s)</code>的函数，能在当前目录以及当前目录的所有子目录下查找文件名包含指定字符串的文件，并打印出完整路径：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import os
+
+def search(s ,dir=os.path.abspath(&#39;.&#39;)):
+    for x in os.listdir(dir):
+        path = os.path.join(dir,x)
+        if s in x:
+            print path
+        elif os.path.isdir(path):
+            search(s,path)
+
+search(&#39;pr&#39;)
+
+</code></pre>
+
+<p><img src="media/14932778418691/14932810251430.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/27</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14932734930436.html">
+                
+                  <h1>I/O编程</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">文件读写</a>
+<ul>
+<li>
+<a href="#toc_1">读文件</a>
+</li>
+<li>
+<a href="#toc_2">file-like Object</a>
+</li>
+<li>
+<a href="#toc_3">二进制文件</a>
+</li>
+<li>
+<a href="#toc_4">写文件</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_5">小结</a>
+</li>
+</ul>
+
+
+<h2 id="toc_0">文件读写</h2>
+
+<h3 id="toc_1">读文件</h3>
+
+<p>要以读文件的模式来打开一个文件对象，使用Python内置的<code>open（）</code>函数，传入文件名和标识符：</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; f = open(&#39;/Users/michael/test.txt&#39;, &#39;r&#39;)
+</code></pre>
+
+<p>标示符&#39;r&#39;表示读，这样，我们就成功地打开了一个文件。</p>
+
+<p>如果文件不存在，open()函数就会抛出一个IOError的错误，并且给出错误码和详细的信息告诉你文件不存在：<br/>
+<img src="media/14932734930436/14932737513488.jpg" alt=""/></p>
+
+<p>如果文件打开成功，接下来，调用<code>read()</code>方法可以一次读取文件的全部内容，Python把内容读到内存，用一个<code>str</code>对象表示：<br/>
+<img src="media/14932734930436/14932741526772.jpg" alt=""/></p>
+
+<p>由于文件读写时都有可能产生<code>IOError</code>，一旦出错，后面的<code>f.close()</code>就不会调用。所以，为了保证无论是否出错都能正确地关闭文件，我们可以使用<code>try ... finally</code>来实现。这种方法太麻烦。我们这里使用python所提供的方法：</p>
+
+<p>Python引入了with语句来自动帮我们调用<code>close()</code>方法：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;r&#39;) as f:
+    print f.read()
+</code></pre>
+
+<p><img src="media/14932734930436/14932743740546.jpg" alt=""/></p>
+
+<p>这和前面的<code>try ... finally</code>是一样的，但是代码更佳简洁，并且不必调用<code>f.close()</code>方法。</p>
+
+<p>调用<code>read()</code>会一次性读取文件的全部内容，如果文件有10G，内存就爆了，所以，要保险起见，可以反复调用<code>read(size)</code>方法，每次最多读取<code>size</code>个字节的内容。另外，调用<code>readline()</code>可以每次读取一行内容，调用<code>readlines()</code>一次读取所有内容并按行返回<code>list</code>。因此，要根据需要决定怎么调用。</p>
+
+<p>如果文件很小，<code>read()</code>一次性读取最方便；如果不能确定文件大小，反复调用<code>read(size)</code>比较保险；如果是配置文件，调用<code>readlines()</code>最方便：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;r&#39;) as f:
+    for line in f.readlines():
+        print(line.strip())  #把末尾的&#39;\n&#39;删掉
+</code></pre>
+
+<p><img src="media/14932734930436/14932746986776.jpg" alt=""/></p>
+
+<h3 id="toc_2">file-like Object</h3>
+
+<p>像<code>open()</code>函数返回的这种有个<code>read()</code>方法的对象，在Python中统称为file-like Object。除了file外，还可以是内存的字节流，网络流，自定义流等等。file-like Object不要求从特定类继承，只要写个<code>read()</code>方法就行。</p>
+
+<p><code>StringIO</code>就是在内存中创建的file-like Object，常用作临时缓冲。</p>
+
+<h3 id="toc_3">二进制文件</h3>
+
+<p>前面讲的默认都是读取文本文件，并且是ASCII编码的文本文件。要读取二进制文件，比如图片、视频等等，用<code>rb</code>模式打开文件即可：<br/>
+<img src="media/14932734930436/14932760233490.jpg" alt=""/></p>
+
+<h3 id="toc_4">写文件</h3>
+
+<p>写文件和读文件是一样的，唯一区别是调用<code>open()</code>函数时，传入标识符<code>&#39;w&#39;</code>或者<code>&#39;wb&#39;</code>表示写文本文件或写二进制文件：</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; f = open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;, &#39;w&#39;)
+&gt;&gt;&gt; f.write(&#39;Hello, world!Again！&#39;)
+&gt;&gt;&gt; f.close()
+</code></pre>
+
+<p>这里推荐直接调用with方法：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+
+with open(&#39;/Users/liangzhonghao/Desktop/python学习/test.txt&#39;,&#39;w&#39;) as f:
+    f.write(&#39;Hello, world!Again!&#39;)
+</code></pre>
+
+<p><img src="media/14932734930436/14932763793296.jpg" alt=""/></p>
+
+<p><font color=red><strong>要注意的是一旦写入文件，原来文件中的内容会被删除！</strong></font></p>
+
+<h2 id="toc_5">小结</h2>
+
+<p>在Python中，文件读写是通过<code>open()</code>函数打开的文件对象完成的。使用<code>with</code>语句操作文件IO是个好习惯。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/27</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14932622908500.html">
+                
+                  <h1>文档测试</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><strong>在python中我们可以执行那些在注释中的代码，来进行测试。</strong></p>
+
+<p>当我们编写注释时，如果写上这样的注释：</p>
+
+<pre><code class="language-py">def abs(n):
+    &#39;&#39;&#39;
+    Function to get absolute value of number.
+
+    Example:
+
+    &gt;&gt;&gt; abs(1)
+    1
+    &gt;&gt;&gt; abs(-1)
+    1
+    &gt;&gt;&gt; abs(0)
+    0
+    &#39;&#39;&#39;
+    return n if n &gt;= 0 else (-n)
+</code></pre>
+
+<p>无疑更明确地告诉函数的调用者该函数的期望输入和输出。</p>
+
+<p><strong>并且，Python内置的“文档测试”（doctest）模块可以直接提取注释中的代码并执行测试。</strong></p>
+
+<p><font color=red>doctest严格按照Python交互式命令行的输入和输出来判断测试结果是否正确。只有测试异常的时候，可以用...表示中间一大段烦人的输出。</font></p>
+
+<p>让我们用doctest来测试上次编写的<code>Dict</code>类：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Dict(dict):
+    
+    &quot;&quot;&quot;
+    Simple dict but also support access as x.y style
+
+    &gt;&gt;&gt; d1 = Dict()
+    &gt;&gt;&gt; d1[&#39;x&#39;] = 100
+    &gt;&gt;&gt; d1.x
+    100
+    &gt;&gt;&gt; d1.y = 200
+    &gt;&gt;&gt; d1[&#39;y&#39;]
+    200
+    &gt;&gt;&gt; d2 = Dict(a=1, b=2, c=&#39;3&#39;)
+    &gt;&gt;&gt; d2.c
+    &#39;3&#39;
+    &gt;&gt;&gt; d2[&#39;empty&#39;]
+    Traceback (most recent call last):
+        ...
+    KeyError: &#39;empty&#39;
+    &gt;&gt;&gt; d2.empty
+    Traceback (most recent call last):
+        ...
+    AttributeError: &#39;Dict&#39; object has no attribute &#39;empty&#39;
+    
+    &quot;&quot;&quot;
+    def __init__(self, **kw):
+        super(Dict, self).__init__(**kw)
+    def __getattr__(self,key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(r&quot;&#39;Dict&#39; object has no attribute &#39;%s&#39;&quot; % key)
+        else:
+            pass
+        finally:
+            pass
+    def __setattr__(self,key,value):
+        self[key] = value
+if __name__ == &#39;__main__&#39;:
+    import doctest
+    doctest.testmod()
+</code></pre>
+
+<p>如果什么输出都没有，说明我们编写的<code>doctest</code>运行都是正确的。<br/>
+<img src="media/14932622908500/14932639594028.jpg" alt=""/><br/>
+如果我们把</p>
+
+<pre><code class="language-py">&gt;&gt;&gt; d2.c
+    &#39;4&#39; #3改成4
+</code></pre>
+
+<p>运行后就会显示：</p>
+
+<p><img src="media/14932622908500/14932640459265.jpg" alt=""/></p>
+
+<p><strong>注意到最后两行代码。当模块正常导入时，doctest不会被执行。只有在命令行运行时，才执行doctest。所以，不必担心doctest会在非测试环境下执行。</strong></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/27</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
@@ -1273,31 +1240,31 @@ im.save(&#39;thumb.jpg&#39;,&#39;JPEG&#39;)
 	      
 		      
 			      <li class="post">
-			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
+			        <a href="15152183997863.html">Where my anagrams at?</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139938131506.html">Sum of many ints</a>
+			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139334894228.html"> Longest Univalue Path</a>
+			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15137396102567.html">Isomorphic Strings</a>
+			        <a href="15145180239158.html">1's, 0's and wildcards</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15136732474119.html">Path Sum II</a>
+			        <a href="15143494387976.html">Simple Pig Latin</a>
 			      </li>
 		     
 		  

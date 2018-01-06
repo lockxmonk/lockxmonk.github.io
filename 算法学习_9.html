@@ -117,31 +117,29 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15122038176626.html">
+                <a class="clearlink" href="15124598875437.html">
                 
-                  <h1>Judge Route Circle</h1>
+                  <h1>Battleships in a Board</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15122038176626/15122038286763.jpg" alt=""/></p>
+                        	<p><img src="media/15124598875437/15124598979272.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    bool judgeCircle(string moves) {
-        int UD = 0 ,LR = 0;
-        for(char a:moves){
-            if (a==&#39;U&#39;) {
-                UD++;
-            }else if (a==&#39;D&#39;){
-                UD--;
-            }else if (a==&#39;L&#39;){
-                LR++;
-            }else if (a==&#39;R&#39;){
-                LR--;
+    int countBattleships(vector&lt;vector&lt;char&gt;&gt;&amp; board) {
+        int m = board.size();
+        int n = board[0].size();
+        int res = 0;
+        for (int i=0; i&lt;m; i++) {
+            for (int j =0; j&lt;n; j++) {
+                if ((board[i][j]==&#39;X&#39;)&amp;&amp;(i==0||board[i-1][j]!=&#39;X&#39;)&amp;&amp;(j==0||board[i][j-1]!=&#39;X&#39;)) {
+                    ++res;
+                }
             }
         }
-        return (UD==0&amp;&amp;LR==0) ? 1:0;
+        return res;
     }
 };
 </code></pre>
@@ -153,7 +151,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/2</span>
+                    <span class="date">2017/12/5</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -170,30 +168,69 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15122027653799.html">
+                <a class="clearlink" href="15124576449217.html">
                 
-                  <h1>Self Dividing Numbers</h1>
+                  <h1>Complex Number Multiplication</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15122027653799/15122027840243.jpg" alt=""/></p>
+                        	<p><img src="media/15124576449217/15124576549963.jpg" alt=""/></p>
+
+<p>第一次写的复杂版：</p>
+
+<pre><code class="language-c++">string complexNumberMultiply(string a, string b) {
+    int a1=0 ,b1=0 ,a2=0 ,b2=0;
+    for (int i = 0; i&lt;a.length(); i++) {
+        int log = 0;
+        if (a[i]==&#39;+&#39;) {
+            log = i;
+            string tmp;
+            for (int j=0; j&lt;i; j++) {
+                tmp+=a[j];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;a1);
+            tmp = &quot;&quot;;
+            for (int m = i+1; m&lt;a.length()-1; m++) {
+                tmp+=a[m];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;b1);
+        }
+    }
+    for (int i = 0; i&lt;b.length(); i++) {
+        int log = 0;
+        if (b[i]==&#39;+&#39;) {
+            log = i;
+            string tmp;
+            for (int j=0; j&lt;i; j++) {
+                tmp+=b[j];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;a2);
+            tmp = &quot;&quot;;
+            for (int m = i+1; m&lt;b.length()-1; m++) {
+                tmp+=b[m];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;b2);
+        }
+    }
+    string res = to_string(a1*a2-b1*b2)+&quot;+&quot;+to_string(a1*b2+a2*b1)+&quot;i&quot;;
+    return res;
+}
+</code></pre>
+
+<p>精简版：</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    vector&lt;int&gt; selfDividingNumbers(int left, int right) {
-        vector&lt;int&gt; v;
-        for (int i = left; i &lt;= right; ++i) {
-            int j= i;
-            bool ok = 1;
-            while (j) {
-                int d= (j%10);
-                if (d == 0 || i % d) ok = 0;
-                j/=10;
-            }
-            if (ok) v.push_back(i);
-        }
-        return v;
+    string complexNumberMultiply(string a, string b) {
+        int c,d,e,f;
+        char ret[100];
+        sscanf(a.c_str(),&quot;%d+%di&quot;,&amp;c,&amp;d);
+        sscanf(b.c_str(),&quot;%d+%di&quot;,&amp;e,&amp;f);
+        cout&lt;&lt;c&lt;&lt;&quot; &quot;&lt;&lt;d&lt;&lt;&quot; &quot;&lt;&lt;e&lt;&lt;&quot; &quot;&lt;&lt;f&lt;&lt;endl;
+        sprintf(ret,&quot;%d+%di&quot;,(c*e-f*d),(d*e+c*f));
+        string ans(ret);
+        return ans;
     }
 };
 </code></pre>
@@ -205,7 +242,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/2</span>
+                    <span class="date">2017/12/5</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -222,41 +259,64 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15122009526780.html">
+                <a class="clearlink" href="15124550672696.html">
                 
-                  <h1>Non-decreasing Array</h1>
+                  <h1>Student Attendance Record I</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15122009526780/15122009632510.jpg" alt=""/></p>
+                        	<p><img src="media/15124550672696/15124551477663.jpg" alt=""/></p>
 
-<p><strong>用到了<code>is_sorted</code>来判断是否升序排列</strong></p>
+<p>优化前：<br/>
+<code>c++<br/>
+bool checkRecord(string s) {<br/>
+    int logA = 0;<br/>
+    for (int i=0; i&lt;s.length(); i++) {<br/>
+        if (s[i]==&#39;A&#39;) {<br/>
+            logA++;<br/>
+            if (logA&gt;1) {<br/>
+                return 0;<br/>
+            }<br/>
+        }<br/>
+        if (i&gt;1&amp;&amp;s[i]==&#39;L&#39;&amp;&amp;s[i-1]==&#39;L&#39;&amp;&amp;s[i-2]==&#39;L&#39;) {<br/>
+            return 0;<br/>
+        }<br/>
+    }<br/>
+    return 1;<br/>
+}<br/>
+</code></p>
+
+<p>优化后：</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    bool checkPossibility(vector&lt;int&gt;&amp; nums) {
-        for (int i=0; i &lt; nums.size()-1; i++){
-            if (nums[i] &gt; nums[i+1]){
-                
-                int temp = nums[i];
-                //
-                // &quot;erase&quot; nums[i], then check if nums is sorted without nums[i]
-                //
-                nums[i] = nums[i+1];
-                if (is_sorted(nums.begin(), nums.end())) { return true; }
-                
-                //
-                // &quot;erase&quot; nums[i+1], then check if nums is sorted without nums[i+1]
-                //
-                nums[i+1] = nums[i] = temp;
-                if (is_sorted(nums.begin(), nums.end())) { return true; }
-                
-                //
-                // nums is NOT sorted (without nums[i] XOR without nums[i+1])
-                //
-                return false;
+    bool checkRecord(string s) {
+        int count_A = 0;
+        int pos = 0;
+        while(pos&lt;s.length())
+        {
+            if(s[pos]==&#39;A&#39;)
+            {
+                count_A++;
+                pos++;
+                if(count_A&gt;1)
+                    return false;
             }
+            else if(s[pos]==&#39;L&#39;)
+            {
+                int count = 0;
+                while(pos&lt;s.length()&amp;&amp;s[pos]==&#39;L&#39;)
+                {
+                    count++;
+                    pos++;
+                }
+                if(count&gt;2)
+                    return false;
+            }
+            else
+                pos++;
+            
         }
         return true;
     }
@@ -270,7 +330,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/2</span>
+                    <span class="date">2017/12/5</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -287,28 +347,39 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15121974728141.html">
+                <a class="clearlink" href="15124490673294.html">
                 
-                  <h1>Third Maximum Number</h1>
+                  <h1>Baseball Game</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15121974728141/15121974890265.jpg" alt=""/></p>
-
-<p><strong>利用set的自动排序和去除重复元素来解决问题。</strong></p>
+                        	<p><img src="media/15124490673294/15124490974323.jpg" alt=""/><br/>
+<img src="media/15124490673294/15124491075954.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int thirdMax(vector&lt;int&gt;&amp; nums) {
-        set&lt;int&gt; result;
-        for (int num:nums) {
-            result.insert(num);
-            if (result.size()&gt;3) {
-                result.erase(result.begin());
+    int calPoints(vector&lt;string&gt;&amp; ops) {
+        int sum = 0, score = 0;
+        vector&lt;int&gt; rounds;
+        for (string op : ops) {
+            if (op == &quot;C&quot;) {
+                sum -= rounds.back();
+                rounds.pop_back();
+                continue;
             }
+            if (op == &quot;D&quot;) {
+                sum += score = rounds.back() * 2;
+            }
+            else if (op == &quot;+&quot;) {
+                sum += score = rounds[rounds.size() - 1] + rounds[rounds.size() - 2];
+            }
+            else {
+                sum += score = stoi(op);
+            }
+            rounds.push_back(score);
         }
-        return result.size()&lt;3? *result.rbegin():*result.begin();
+        return sum;
     }
 };
 </code></pre>
@@ -320,7 +391,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/2</span>
+                    <span class="date">2017/12/5</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -337,33 +408,36 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15121892650067.html">
+                <a class="clearlink" href="15123924891077.html">
                 
-                  <h1>K-diff Pairs in an Array</h1>
+                  <h1>Implement strStr()</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15121892650067/15121892810535.jpg" alt=""/></p>
+                        	<p><img src="media/15123924891077/15123924935113.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int findPairs(vector&lt;int&gt;&amp; nums, int k) {
-        if (k&lt;0) {
+    int strStr(string haystack, string needle) {
+        int j = 0;  //标记needle的初始位置
+        int h = haystack.length(), n = needle.length();
+        if (!n) {
             return 0;
         }
-        unordered_set&lt;int&gt; result;  //用集合避免重复
-        unordered_map&lt;int, int&gt; hash;   //hash表来映射所需数值
-        for (int i = 0; i&lt;nums.size(); i++) {
-            if (hash.count(nums[i]+k)) {
-                result.insert(nums[i]+k);
+        for (int i =0; i&lt;h-n+1; i++) {
+            int tmp = i;
+            while (tmp&lt;h &amp;&amp; j&lt;n &amp;&amp; haystack[tmp]==needle[j]) {
+                tmp++;
+                j++;
             }
-            if (hash.count(nums[i]-k)) {
-                result.insert(nums[i]);
+            if (j==n) {
+                return i;
+            }else{
+                j=0;
             }
-            hash[nums[i]] += 1;
         }
-        return result.size();
+        return -1;
     }
 };
 </code></pre>
@@ -375,7 +449,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/2</span>
+                    <span class="date">2017/12/4</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -392,35 +466,47 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15121252648085.html">
+                <a class="clearlink" href="15123884479504.html">
                 
-                  <h1>Shortest Unsorted Continuous Subarray</h1>
+                  <h1>String Compression</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given an integer array, you need to find one <strong>continuous</strong> subarray that if you only sort this subarray in ascending order, then the whole array will be sorted in ascending order, too.</p>
+                        	<p>Given an array of characters, compress it in-place.</p>
 
-<p>You need to find the <strong>shortest</strong> such subarray and output its length.</p>
+<p>The length after compression must always be smaller than or equal to the original array.</p>
 
-<p><img src="media/15121252648085/15121252900217.jpg" alt=""/></p>
+<p>Every element of the array should be a character (not int) of length 1.</p>
+
+<p>After you are done modifying the input array in-place, return the new length of the array.</p>
+
+<p>Follow up:<br/>
+Could you solve it using only O(1) extra space?</p>
+
+<p><img src="media/15123884479504/15123884710226.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int findUnsortedSubarray(vector&lt;int&gt;&amp; nums) {
-        vector&lt;int&gt; sortNums = nums;
-        sort(sortNums.begin(), sortNums.end());
-        int str = 0,end = nums.size()-1;
-        while (nums[str]==sortNums[str]) {
-            if (str==end) {
-                return 0;
+    int compress(vector&lt;char&gt;&amp; chars) {
+        int tol = 1;    //统计相同字符的数量
+        for (int i = 0; i&lt;chars.size(); i++) {
+            while (i!=chars.size()-1 &amp;&amp; chars[i]==chars[i+1]) {
+                chars.erase(chars.begin()+i+1);
+                tol++;
             }
-            str++;
+            int log = 0; //标记插入数字是1的情况
+            int logNum = 0;  //统计插入的数字个数
+            while (log==1||tol!=1 &amp;&amp; tol&gt;0) {
+                chars.insert(chars.begin()+i+1, char(tol%10+&#39;0&#39;));
+                tol/=10;
+                log = tol==1?tol:0;
+                logNum++;
+            }
+            i+=logNum;
+            tol = 1;
         }
-        while (nums[end]==sortNums[end]) {
-            end--;
-        }
-        return end-str+1;
+        return chars.size();
     }
 };
 </code></pre>
@@ -432,7 +518,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/1</span>
+                    <span class="date">2017/12/4</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -537,31 +623,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
+			        <a href="15152183997863.html">Where my anagrams at?</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139938131506.html">Sum of many ints</a>
+			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139334894228.html"> Longest Univalue Path</a>
+			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15137396102567.html">Isomorphic Strings</a>
+			        <a href="15145180239158.html">1's, 0's and wildcards</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15136732474119.html">Path Sum II</a>
+			        <a href="15143494387976.html">Simple Pig Latin</a>
 			      </li>
 		     
 		  

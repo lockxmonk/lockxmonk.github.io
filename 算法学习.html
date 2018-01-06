@@ -117,246 +117,182 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15139993814636.html">
+                <a class="clearlink" href="15152183997863.html">
                 
-                  <h1>![](media/15139993814636/15139993826350.jpg)</h1>
+                  <h1>Where my anagrams at?</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15139993814636/15139994003399.jpg" alt=""/></p>
-
-<p>题目链接：<a href="https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc">https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc</a></p>
+                        	<p><img src="media/15152183997863/15152184280248.jpg" alt=""/></p>
 
 <pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
 
-NSString *vertMirror(NSString *strng) {
-    NSMutableString *res = [[NSMutableString alloc] init];
-    NSArray *stringArray = [strng componentsSeparatedByString:@&quot;\n&quot;];
-    for (NSString *tmpStr in stringArray) {
-        NSMutableString * reverseString = [NSMutableString string];
-        for(int i = 0 ; i &lt; tmpStr.length; i ++){
-            //倒序读取字符并且存到可变数组数组中
-            unichar c = [tmpStr characterAtIndex:tmpStr.length- i -1];
-            [reverseString appendFormat:@&quot;%c&quot;,c];
+NSArray *anagrams(NSString *s, NSArray *a) {
+    NSMapTable *map = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    for (int i = 0; i&lt;[s length]; i++) {
+        NSString *str = [s substringWithRange:NSMakeRange(i, 1)];
+        if ([map objectForKey:str]) {
+            [map setObject:@([[map objectForKey:str] intValue]+1) forKey:str];
+        }else{
+            [map setObject:@(1) forKey:str];
         }
-        
-        if ([tmpStr isEqualToString:[stringArray lastObject]]) {
-            [res appendString:reverseString];
-            break;
+    }
+    NSMutableArray *res = a.mutableCopy;
+    for (NSString *ele in a) {
+        if(ele.length!=s.length){
+            [res removeObject:ele];
+            continue;
         }
-        
-        [reverseString appendString:@&quot;\n&quot;];
-        [res appendString:reverseString];
-    }
-    
-    return res;
-}
-
-NSString *horMirror(NSString *strng) {
-    NSMutableString *res = [[NSMutableString alloc] init];;
-    NSArray *stringAry = [strng componentsSeparatedByString:@&quot;\n&quot;];
-    for (int i = stringAry.count-1; i&gt;=0; i--) {
-        [res appendString:stringAry[i]];
-        if (i==0) {
-            break;
-        }
-        [res appendString:@&quot;\n&quot;];
-    }
-    return res;
-}
-
-NSString *oper(NSString *(*f)(NSString *), NSString *s) {
-    return f(s);
-}
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15139938131506.html">
-                
-                  <h1>Sum of many ints</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15139938131506/15139938214932.jpg" alt=""/></p>
-
-<p>题目链接：<a href="https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc">https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc</a></p>
-
-<p>注意<code>long long</code>类型。</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-long long f(long long n, long long m) {
-    long long sum = 0;
-    long long q = n/m;
-    long long p = n%m;
-    sum+= (m*(m-1)/2)*q;
-    sum+= (p+1)*p/2;
-    return sum;
-}
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15139334894228.html">
-                
-                  <h1> Longest Univalue Path</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15139334894228/15139334918786.jpg" alt=""/></p>
-
-<pre><code class="language-c++">/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
-class Solution {
-public:
-    int dfs(TreeNode* node, int&amp; lup) {
-        int l = node-&gt;left ? dfs(node-&gt;left, lup) : 0;
-        int r = node-&gt;right ? dfs(node-&gt;right, lup) : 0;
-        int resl = node-&gt;left &amp;&amp; node-&gt;left-&gt;val == node-&gt;val ? l + 1 : 0;
-        int resr = node-&gt;right &amp;&amp; node-&gt;right-&gt;val == node-&gt;val ? r + 1 : 0;
-        lup = max(lup, resl + resr);
-        return max(resl, resr);
-    }
-
-    int longestUnivaluePath(TreeNode* root) {
-        int lup = 0;
-        if (root) dfs(root, lup);
-        return lup;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/22</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15137396102567.html">
-                
-                  <h1>Isomorphic Strings</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15137396102567/15137396123443.jpg" alt=""/></p>
-
-<p>一开始写的代码，超时版本，用的集合。</p>
-
-<pre><code class="language-c++">bool isIsomorphic(string s, string t) {
-    unordered_map&lt;char, set&lt;int&gt;&gt; Smap;
-    unordered_map&lt;char, vector&lt;int&gt;&gt; Tmap;
-    for (int i = 0; i&lt;s.size(); i++) {
-        Smap[s[i]].insert(i);
-        Tmap[t[i]].push_back(i);
-    }
-    if (Smap.size()!=Tmap.size()) {
-        return 0;
-    }else{
-        for (int j = 0; j&lt;s.size(); j++) {
-            vector&lt;int&gt; a = Tmap[t[j]];
-            set&lt;int&gt; b = Smap[s[j]];
-            int len = b.size();
-            for (auto num : a) {
-                b.insert(num);
-                if (len!=b.size()) {
-                    return 0;
+        NSMapTable *tmp = [map copy];
+        for (int j=0; j&lt;[ele length]; j++) {
+            NSString *tmpStr = [ele substringWithRange:NSMakeRange(j, 1)];
+            if ([tmp objectForKey:tmpStr]) {
+                int log =[[tmp objectForKey:tmpStr] intValue]-1;
+                if (log&lt;0){
+                    [res removeObject:ele];
+                    break;
                 }
+                [tmp setObject:@(log) forKey:tmpStr];
+            }else{
+                [res removeObject:ele];
+                break;
             }
         }
     }
-    
-    return 1;
+    return res;
 }
 </code></pre>
 
-<p>修改后的版本。</p>
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/6</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
 
-<pre><code class="language-c++">class Solution {
-public:
-    bool isIsomorphic(string s, string t) {
-        int m1[256] = {0}, m2[256] = {0}, n = s.size();
-        for (int i = 0; i &lt; n; ++i) {
-            if (m1[s[i]] != m2[t[i]]) return false;  //判断两个字符串i位置的字符上次出现的位置是否一样。
-            m1[s[i]] = i + 1;   //记录上次该字符出现的位置
-            m2[t[i]] = i + 1;   //记录上次该字符出现的位置
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15152039082618.html">
+                
+                  <h1>Perimeter of squares in a rectangle</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15152039082618/15152039109281.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+unsigned long long perimeter(int n) {
+    NSMutableArray *numQu = @[@0,@1].mutableCopy;
+    unsigned long long n0 = 0,n1=1;
+    for (int i = 2; i&lt;=n+1; i++) {
+        unsigned long long sum = n0+n1;
+        n0 = n1;
+        n1 = sum;
+        [numQu addObject:@(sum)];
+    }
+    unsigned long long tol = 0;
+    for (NSNumber* ele in numQu) {
+        tol+=[ele unsignedLongLongValue];
+    }
+    return tol*4;
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/6</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15145180239158.html">
+                
+                  <h1>1's, 0's and wildcards</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15145180239158/15145180364703.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSArray *changeTo(NSMutableArray*log, NSMutableArray*res){
+    if (log.count&gt;0) {
+        NSRange loc = {[[log lastObject] integerValue],1};
+        NSMutableArray *cop = res.mutableCopy;
+        for (NSString *tmp in res) {
+            [cop addObject:[tmp stringByReplacingCharactersInRange:loc withString:@&quot;0&quot;]];
+            [cop addObject:[tmp stringByReplacingCharactersInRange:loc withString:@&quot;1&quot;]];
+            [cop removeObject:tmp];
         }
-        return true;
+        [log removeLastObject];
+        return changeTo(log, cop);
+    }else{
+        return res;
     }
-};
+}
+
+NSArray *possibilities(NSString *s) {
+    NSMutableArray *log = @[].mutableCopy;
+    NSMutableArray *res = @[].mutableCopy;
+    for (int i = 0; i&lt;s.length; i++) {
+        if ([s characterAtIndex:i]==&#39;?&#39;) {
+            [log addObject:@(i)];
+        }
+    }
+    [res addObject:s];
+
+    NSArray *tol = changeTo(log , res);
+    
+    return tol;
+}
+</code></pre>
+
+<p>简化版：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSArray *possibilities(NSString *s) {
+  // NSLog(@&quot;User `possibilities` accidentally invoked!\n&quot;);
+  if ([s rangeOfString: @&quot;?&quot;].length == 0) return @[s];
+  NSString *r = [s stringByReplacingOccurrencesOfString: @&quot;?&quot; withString: @&quot;0&quot; options: 0 range: [s rangeOfString: @&quot;?&quot;]], *t = [s stringByReplacingOccurrencesOfString: @&quot;?&quot; withString: @&quot;1&quot; options: 0 range: [s rangeOfString: @&quot;?&quot;]];
+  return [possibilities(r) arrayByAddingObjectsFromArray: possibilities(t)];
+}
 </code></pre>
 
                         
@@ -366,10 +302,10 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/20</span>
+                    <span class="date">2017/12/29</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -383,45 +319,50 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15136732474119.html">
+                <a class="clearlink" href="15143494387976.html">
                 
-                  <h1>Path Sum II</h1>
+                  <h1>Simple Pig Latin</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15136732474119/15136732503183.jpg" alt=""/></p>
+                        	<p><img src="media/15143494387976/15143494406501.jpg" alt=""/></p>
 
-<p>运用前序遍历</p>
+<p>一开始的复杂版:</p>
 
-<pre><code class="language-c++">/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
-class Solution {
-public:
-    void findPaths(TreeNode* node, int sum, vector&lt;int&gt;&amp; path, vector&lt;vector&lt;int&gt; &gt;&amp; paths) {
-        if (!node) return;
-        path.push_back(node -&gt; val);
-        if (!(node -&gt; left) &amp;&amp; !(node -&gt; right) &amp;&amp; sum == node -&gt; val)
-            paths.push_back(path);
-        findPaths(node -&gt; left, sum - node -&gt; val, path, paths);
-        findPaths(node -&gt; right, sum - node -&gt; val, path, paths);
-        path.pop_back();
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSString *pigIt(NSString *s) {
+    NSMutableArray *str = [s componentsSeparatedByString:@&quot; &quot;].mutableCopy;
+    NSMutableString *res = @&quot;&quot;.mutableCopy;
+    for (NSString *tmp in str) {
+        unichar c = [tmp characterAtIndex:0];
+        if ((c&gt;=&#39;a&#39;&amp;&amp;c&lt;=&#39;z&#39;)||(c&gt;=&#39;A&#39;&amp;&amp;c&lt;=&#39;Z&#39;)) {
+            NSMutableString *change = tmp.mutableCopy;
+            [change appendFormat:@&quot;%c&quot;,c];
+            if ([tmp isEqualToString:[str lastObject]]) {
+                [change appendString:@&quot;ay&quot;];
+            }else{
+                [change appendString:@&quot;ay &quot;];
+            }
+            [res appendString:[change substringFromIndex:1]];
+        }else{
+            [res appendFormat:@&quot;%c&quot;,c];
+        }
     }
+    return res;
+}
+</code></pre>
 
-    vector&lt;vector&lt;int&gt;&gt; pathSum(TreeNode* root, int sum) {
-        vector&lt;vector&lt;int&gt; &gt; paths;
-        vector&lt;int&gt; path;
-        findPaths(root, sum, path, paths);
-        return paths;
-    }
-};
+<p>简化版</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSString *pigIt(NSString *s) {
+  NSMutableArray *result = [s componentsSeparatedByString: @&quot; &quot;];
+  for (size_t i = 0; i &lt; [result count]; i++) result[i] = [[[result[i] substringFromIndex: 1] stringByAppendingString: [result[i] substringToIndex: 1]] stringByAppendingString: @&quot;ay&quot;];
+  return [result componentsJoinedByString: @&quot; &quot;];
+}
 </code></pre>
 
                         
@@ -431,10 +372,10 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/19</span>
+                    <span class="date">2017/12/27</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -448,33 +389,30 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15136718150164.html">
+                <a class="clearlink" href="15143439533653.html">
                 
-                  <h1>Path Sum</h1>
+                  <h1>Sum without highest and lowest number</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15136718150164/15136718241722.jpg" alt=""/></p>
+                        	<p><img src="media/15143439533653/15143439550035.jpg" alt=""/></p>
 
-<pre><code class="language-c++">/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
-class Solution {
-public:
-    bool hasPathSum(TreeNode *root, int sum) {
-        if (root == NULL) return false;
-        if (root-&gt;val == sum &amp;&amp; root-&gt;left ==  NULL &amp;&amp; root-&gt;right == NULL) return true;
-        
-        return hasPathSum(root-&gt;left, sum-root-&gt;val) || hasPathSum(root-&gt;right, sum-root-&gt;val);
+<pre><code class="language-objc">int sum(int* numbers, int numbersCount)
+{
+    if(numbersCount&lt;=1) return 0;
+    int min = INT_MAX;
+    int max = INT_MIN;
+    int sum = 0;
+    for (int i = 0; i&lt;numbersCount; i++)
+    {
+        if(numbers[i]&gt;max) max = numbers[i];
+        if(numbers[i]&lt;min) min = numbers[i];
+        sum+= numbers[i];
     }
-};
+    return sum-min-max;
+}
+
 </code></pre>
 
                         
@@ -484,10 +422,71 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/19</span>
+                    <span class="date">2017/12/27</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15142765984953.html">
+                
+                  <h1>Find the missing term in an Arithmetic Progression</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15142765984953/15142766000094.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSNumber *findMissing(NSArray *list) {
+    int len = [list count];
+    int n = len+1;
+    int d1 = [list[1] intValue]-[list[0] intValue];
+    int d2 = [list[len-1] intValue]-[list[len-2] intValue];
+    int d = 0;
+    if (d1&lt;0) {
+        d = d1&gt;d2?d1:d2;
+    }else{
+        d = d1&lt;d2?d1:d2;
+    }
+    if (n == 3) {
+        return @(([[list firstObject] intValue]+[[list lastObject] intValue])/2);
+    }
+    int num = [[list firstObject] intValue];
+    for (int i = 0;i&lt;len;i++) {
+        if ([list[i] intValue]!=num) {
+            return @(num);
+        }
+        num+=d;
+    }
+    
+    return @(0);
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -589,31 +588,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
+			        <a href="15152183997863.html">Where my anagrams at?</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139938131506.html">Sum of many ints</a>
+			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139334894228.html"> Longest Univalue Path</a>
+			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15137396102567.html">Isomorphic Strings</a>
+			        <a href="15145180239158.html">1's, 0's and wildcards</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15136732474119.html">Path Sum II</a>
+			        <a href="15143494387976.html">Simple Pig Latin</a>
 			      </li>
 		     
 		  

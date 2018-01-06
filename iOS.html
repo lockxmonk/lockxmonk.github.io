@@ -117,6 +117,77 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15151211562254.html">
+                
+                  <h1>AFNetworking遇到的问题</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>由于<code>AFNetworking</code>运用了官方<code>NSURLSession</code>所以其中有一些坑</p>
+
+<h2 id="toc_0">1.苹果运用NSJSONSerialization解析，出现数字类型精度问题</h2>
+
+<p>当服务器给我传回来一个<code>3.0</code>的数字类型时，在安卓端是没有问题的，但是在iOS这里会出现<code>2.99999</code>这样的问题。</p>
+
+<p><font color=red><strong>出现这个问题的原因是：苹果在json解析时，默认为双精度的double类型。</strong></font></p>
+
+<pre><code>我们相处的解决方案有两种：
+1. 跟后台协商将数字型的值改为`字符型`
+2. 使用第三方的json解析。
+</code></pre>
+
+<p>最后我们使用的是第一种方法，因为第二种势必要修改了AFNetwork的源码，开发与维护成本相比较来说要大。</p>
+
+<h2 id="toc_1">2.json解析失败</h2>
+
+<p>由于AF默认的解析方式为<code>0</code>（返回的对象是不可变的，<code>NSDictionary</code>或<code>NSArray</code>）：<br/>
+<img src="media/15151211562254/15151222443779.jpg" alt=""/></p>
+
+<p>我们来看一下都有什么选项：<br/>
+<img src="media/15151211562254/15151222806031.jpg" alt=""/></p>
+
+<p>所以当我们服务器返回的json数据是<strong>碎片化</strong>的（最外层既不是<code>NSArray</code>也不是<code>NSDictionary</code>），那么解析的时候就会出错了。</p>
+
+<p>解决方法是：</p>
+
+<p><img src="media/15151211562254/15151327758647.jpg" alt=""/><br/>
+在0后添加<code>|</code>字符，增加这种情况，允许碎片化数据。</p>
+
+<h2 id="toc_2">3. 请求后response的状态码范围问题</h2>
+
+<p>正常项目中正常请求成功会返回200，但是服务器若是给你返回了500（我不知道后台为啥会返回这个码），问题就出现了：</p>
+
+<p>这是由于下面的原因：<br/>
+<img src="media/15151211562254/15151343155944.jpg" alt=""/><br/>
+会发现上图中可接受状态码的范围是200-300；</p>
+
+<p>具体解决方法就不说了。。。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/5</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15109904843500.html">
                 
                   <h1>AFNetworking的简单使用</h1>
@@ -1262,185 +1333,6 @@ RAC(self, createEnabled) = [RACSignal
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15042539845357.html">
-                
-                  <h1>KVO的简单实现</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>之间看有关<code>OC</code>和<code>iOS</code>的书都会看到<code>KVO</code>这个名词。所以今天来学习和实现一下。简单的说<code>KVO</code>即<code>Key-Value Observing</code>,它提供一种机制,当指定的对象的属性被修改后,则对象就会接受到通知。 </p>
-
-<p>它来源于设计模式中的观察者模式，其基本思想就是：</p>
-
-<blockquote>
-<p>一个目标对象管理所有依赖于它的观察者对象，并在它自身的状态改变时主动通知观察者对象。这个主动通知通常是通过调用各观察者对象所提供的接口方法来实现的。观察者模式较完美地将目标对象与观察者对象解耦。</p>
-</blockquote>
-
-<p>我们一般用到的都是自动实现<code>KVO</code>，所以我这里就不实现手动的<code>KVO</code>了。实现<code>KVO</code>需要两个主要的方法：</p>
-
-<pre><code class="language-objc">//注册观察者
-- (void)addObserver:(NSObject *)observer 
-        forKeyPath:(NSString *)keyPath 
-        options:(NSKeyValueObservingOptions)options 
-        context:(void *)context;
-        
-//当观察的对象属性有所改变就会通知观察者，该方法用来处理变更通知
-- (void)observeValueForKeyPath:(NSString *)keyPath 
-                     ofObject:(id)object 
-                        change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change 
-                        context:(void *)context;
-</code></pre>
-
-<p>这两个方法在<code>Foundation/NSKeyValueObserving.h</code>中，<code>NSObject，NSArray，NSSet</code>均实现了以上方法，因此我们不仅可以观察普通对象，还可以观察数组或结合类对象。</p>
-
-<p>我们来举例说明：</p>
-
-<p>创建一个观察者类：</p>
-
-<pre><code class="language-objc">//
-//  Observer.h
-//  KVO机制
-//
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface Observer : NSObject
-
-@end
-
-
-
-//  Observer.m
-//  KVO机制
-#import &quot;Observer.h&quot;
-
-@implementation Observer
-
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change context:(void *)context{
-    //判断发送过来的通知中更改的属性是否是name
-    if ([keyPath isEqualToString:@&quot;name&quot;]) {
-        //获取更改属性的类的信息
-        Class classInfo = (__bridge Class)context;
-        NSString *className = [NSString stringWithFormat:@&quot;%s&quot;, object_getClassName(classInfo)];
-        NSLog(@&quot; &gt;&gt; class : [%@] , Name changed&quot;, className);
-        NSLog(@&quot; &gt;&gt; old name is %@&quot;, [change objectForKey:@&quot;old&quot;]);
-        NSLog(@&quot; &gt;&gt; new name is %@&quot;, [change objectForKey:@&quot;new&quot;]);
-    
-    }else{
-        /*
-         *注意：在实现处理变更通知方法 observeValueForKeyPath 时，
-         *要将不能处理的 key 转发给 super 的 observeValueForKeyPath 来处理。
-         */
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-    }
-}
-
-@end
-
-</code></pre>
-
-<p>然后创建一个用于观察的<code>Target</code>类</p>
-
-<pre><code class="language-objc">//  Target.h
-//  KVO机制
-
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface Target : NSObject
-
-@property(nonatomic,assign) NSString *name;
-
-@end
-
-
-//  Target.m
-//  KVO机制
-
-
-#import &quot;Target.h&quot;
-
-@implementation Target
-//给name属性一个初始值，用于检测变化
--(instancetype)init{
-    if (self = [super init]) {
-        _name = @&quot;yue&quot;;
-    }
-    return self;
-}
-@end
-</code></pre>
-
-<p>然后我们在<code>main.m</code>中添加观察者来执行：</p>
-
-<pre><code class="language-objc">//  main.m
-//  KVO机制
-
-
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;Observer.h&quot;
-#import &quot;Target.h&quot;
-
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        //分别创建实例
-        Observer *observer = [[Observer alloc]init];
-        Target *target = [[Target alloc]init];
-        
-        //target 增加一个观察者，用于观察name属性
-        [target addObserver:observer forKeyPath:@&quot;name&quot; options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:(__bridge void * _Nullable)([Target class])];
-        //更改name属性的值，响应观察者的动作
-        [target setName:@&quot;hao&quot;];
-        //移除name的观察者，防止内存泄露
-        [target removeObserver:observer forKeyPath:@&quot;name&quot;];
-    }
-    return 0;
-}
-
-</code></pre>
-
-<p>我们运行后结果如下：</p>
-
-<p><img src="media/15042539845357/15042556319090.jpg" alt=""/></p>
-
-<p>可以发现是<code>Target</code>类发送过来的通知，说明属性已经变更。</p>
-
-<p>下面我们来讨论一下传过来了的参数。其中<code>addObserver</code>方法中的<code>option：</code>参数用于指定应该包含哪种通知。其中主要有以下几种：</p>
-
-<ul>
-<li><strong>NSKeyValueObservingOptionNew</strong>：指出<code>change</code>字典应该包含有新的属性（如果适用）。</li>
-<li><strong>NSKeyValueObservingOptionOld</strong>：指出<code>change</code>字典应该包含有旧的属性（如果适用）。</li>
-<li><strong>NSKeyValueObservingOptionInitial</strong>：把初始化的值提供给处理方法，一旦注册，立马就会调用一次。通常它会带有新值，而不会带有旧值。</li>
-<li><strong>NSKeyValueObservingOptionPrior</strong>： 分2次调用。在值改变之前和值改变之后。</li>
-</ul>
-
-<p>其中<code>observeValueForKeyPath</code>方法中的<code>change</code>参数是一个字典型数据。会根据<code>option</code>参数的变化来生成不同的数据。一般会包含<code>new</code>和<code>old</code>两个<code>key</code>。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1530,31 +1422,31 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
-			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
+			        <a href="15152183997863.html">Where my anagrams at?</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139938131506.html">Sum of many ints</a>
+			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139334894228.html"> Longest Univalue Path</a>
+			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15137396102567.html">Isomorphic Strings</a>
+			        <a href="15145180239158.html">1's, 0's and wildcards</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15136732474119.html">Path Sum II</a>
+			        <a href="15143494387976.html">Simple Pig Latin</a>
 			      </li>
 		     
 		  

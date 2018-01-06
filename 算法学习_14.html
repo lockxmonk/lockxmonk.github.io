@@ -117,34 +117,39 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15113342915297.html">
+                <a class="clearlink" href="15119406678576.html">
                 
-                  <h1>Add Digits</h1>
+                  <h1>Reshape the Matrix</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a non-negative integer num, repeatedly add all its digits until the result has only one digit.</p>
+                        	<p>In MATLAB, there is a very useful function called &#39;reshape&#39;, which can reshape a matrix into a new one with different size but keep its original data.</p>
 
-<p>For example:</p>
+<p>You&#39;re given a matrix represented by a two-dimensional array, and two positive integers r and c representing the row number and column number of the wanted reshaped matrix, respectively.</p>
 
-<p>Given <code>num = 38</code>, the process is like: <code>3 + 8 = 11</code>, <code>1 + 1 = 2</code>. Since <code>2</code> has only one digit, return it.</p>
+<p>The reshaped matrix need to be filled with all the elements of the original matrix in the same row-traversing order as they were.</p>
 
-<p>Follow up:<br/>
-Could you do it without any loop/recursion in O(1) runtime?</p>
+<p>If the &#39;reshape&#39; operation with given parameters is possible and legal, output the new reshaped matrix; Otherwise, output the original matrix.</p>
+
+<p><img src="media/15119406678576/15119406900999.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int addDigits(int num) {
-        // while(num/10&gt;0){
-        //     int sum = 0;
-        //     while(num&gt;0){
-        //         sum +=num%10;
-        //         num /=10;
-        //     }
-        //     num = sum;
-        // }
-        return 1+ (num-1)%9;
+    vector&lt;vector&lt;int&gt;&gt; matrixReshape(vector&lt;vector&lt;int&gt;&gt;&amp; nums, int r, int c) {
+        int sumNum = nums.size() * nums[0].size();
+        int r1 = nums.size();
+        int c1 = nums[0].size();
+        if (sumNum != r*c) {
+            return nums;
+        }
+        vector&lt;vector&lt;int&gt;&gt; result = vector&lt;vector&lt;int&gt;&gt;(r,vector&lt;int&gt;(c,0));
+        int j = 0;
+        for (int i =0; i&lt;r*c; i++) {
+            result[i/c][i%c] = nums[i/c1][i%c1];
+        }
+        
+        return result;
     }
 };
 </code></pre>
@@ -156,7 +161,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/22</span>
+                    <span class="date">2017/11/29</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -173,36 +178,258 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15113342227318.html">
+                <a class="clearlink" href="15114255869932.html">
                 
-                  <h1>Add Strings</h1>
+                  <h1>Degree of an Array</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given two non-negative integers num1 and num2 represented as string, return the sum of num1 and num2.</p>
+                        	<p>Given a non-empty array of non-negative integers <code>nums</code>, the degree of this array is defined as the maximum frequency of any one of its elements.</p>
 
-<p>Note:</p>
+<p>Your task is to find the smallest possible length of a (contiguous) subarray of <code>nums</code>, that has the same degree as <code>nums</code>.</p>
 
-<p>The length of both <code>num1</code> and <code>num2</code> is &lt; 5100.<br/>
-Both <code>num1</code> and <code>num2</code> contains only digits <code>0-9</code>.<br/>
-Both <code>num1</code> and <code>num2</code> does not contain any leading zero.<br/>
-You must not use any built-in BigInteger library or convert the inputs to integer directly.</p>
+<p><img src="media/15114255869932/15114256313220.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    string addStrings(string num1, string num2) {
-        int fw = 0;
-        string result =&quot;&quot;;
-        for(int i = num1.size()-1,j = num2.size()-1;i&gt;=0||j&gt;=0;i--,j--){
-            int n1 = i&gt;=0 ? num1[i]-&#39;0&#39;:0;
-            int n2 = j&gt;=0 ? num2[j]-&#39;0&#39;:0;
-            int tmp = (n1+n2+fw)%10;
-            fw = (n1+n2+fw)/10;
-            result = char(tmp+&#39;0&#39;) + result;
+    int findShortestSubArray(vector&lt;int&gt;&amp; nums) {
+        
+        if (nums.size()&lt;2) {
+            return nums.size();
         }
-        if(fw){
-            result = char(fw +&#39;0&#39;)+ result;
+        unordered_map&lt;int, int&gt;startIndex , number;
+        int len = nums.size();
+        int fre = 0;
+        for (int i=0; i&lt;nums.size(); i++) {
+            if (startIndex.count(nums[i])==0) {
+                startIndex[nums[i]]=i;
+            }
+            number[nums[i]]++;
+            if (number[nums[i]]==fre) {
+                len = min(i-startIndex[nums[i]]+1, len);
+            }
+            if (number[nums[i]]&gt;fre) {
+                len = i - startIndex[nums[i]] + 1;
+                fre = number[nums[i]];
+            }
+        }
+        
+        return len;
+    }
+};
+</code></pre>
+
+<p>该算法主要使用了两个<code>hash_map</code>:<br/>
+一个来记录数字所出现的次数，另一个记录数字最开始出现的位置。一旦有一个数字的频数超过了当前的<code>len</code>，则更新<code>len</code>，若两个数字出现的频率相等则取长度最小的。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15114222067093.html">
+                
+                  <h1>Find Pivot Index</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of integers <code>nums</code>, write a method that returns the &quot;pivot&quot; index of this array.</p>
+
+<p>We define the pivot index as the index where the sum of the numbers to the left of the index is equal to the sum of the numbers to the right of the index.</p>
+
+<p>If no such index exists, we should return -1. If there are multiple pivot indexes, you should return the left-most pivot index.</p>
+
+<p><img src="media/15114222067093/15114222397308.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int pivotIndex(vector&lt;int&gt;&amp; nums) {
+        
+        if(nums.empty()) return -1;
+        
+        int sum = 0;
+        for(int i=0;i&lt;nums.size();i++) sum+=nums[i];
+    
+        int leftSum = 0;
+        for(int j=0;j&lt;nums.size();j++)
+        {
+            if (leftSum == sum - nums[j] -leftSum) {
+                return j;
+        }
+            leftSum += nums[j];
+        }
+        
+        return -1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15114072257756.html">
+                
+                  <h1>Best Time to Buy and Sell Stock II</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Say you have an array for which the \(i^{th}\) element is the price of a given stock on day i.</p>
+
+<p>Design an algorithm to find the maximum profit. You may complete as many transactions as you like (ie, buy one and sell one share of the stock multiple times). However, you may not engage in multiple transactions at the same time (ie, you must sell the stock before you buy again).</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int maxProfit(vector&lt;int&gt;&amp; prices) {
+        int result = 0;
+        for(int i = 1;i&lt;prices.size();i++)
+        {
+            result += max(prices[i]-prices[i-1] , 0);
+        }
+        return result;
+    }
+};
+
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15114062990936.html">
+                
+                  <h1>Best Time to Buy and Sell Stock</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Say you have an array for which the \(i^{th}\) element is the price of a given stock on day i.</p>
+
+<p>If you were only permitted to complete at most one transaction (ie, buy one and sell one share of the stock), design an algorithm to find the maximum profit.</p>
+
+<p><img src="media/15114062990936/15114063447573.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int maxProfit(vector&lt;int&gt;&amp; prices) {
+        int minPrice=INT_MAX;
+        int maxProfit = 0;
+        
+        for (int i=0; i&lt;prices.size(); i++) {
+            minPrice = min(prices[i], minPrice);
+            maxProfit = max(maxProfit, prices[i]-minPrice);
+        }
+        
+        return maxProfit;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15114035796843.html">
+                
+                  <h1>Array Partition I</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of <strong>2n</strong> integers, your task is to group these integers into n pairs of integer, say (a1, b1), (a2, b2), ..., (an, bn) which makes sum of min(ai, bi) for all i from 1 to n as large as possible.</p>
+
+<p><img src="media/15114035796843/15114036022226.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int arrayPairSum(vector&lt;int&gt;&amp; nums) {
+        
+        sort(nums.begin(),nums.end());
+        int result=0;
+        for (int i=0; i&lt;nums.size(); i+=2) {
+            result+=nums[i];
         }
         return result;
     }
@@ -216,538 +443,10 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/22</span>
+                    <span class="date">2017/11/23</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15097619961308.html">
-                
-                  <h1>贪心算法（构造霍夫曼树）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>霍夫曼树的构造是使用了变长编码来减少数据所占空间，一般我们只考虑<strong>前缀码</strong>，即没有任何码字是其它码字的前缀。</p>
-
-<p>我们的构造过程如下所示：</p>
-
-<p><img src="media/15097619961308/15097621720916.jpg" alt=""/></p>
-
-<p>这里我们根据上述表示，我们每次总是“贪心”的选择两个最小的值来求和，并插入队列中。所以我们可以构造一个最小优先队列来存储各字母的频率。算法代码如下：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//  HUFFMAN
-//
-//  Created by LZH on 2017/11/4.
-//  Copyright © 2017年 LZH. All rights reserved.
-//
-
-#include &lt;iostream&gt;
-#include &lt;queue&gt;
-#include &lt;vector&gt;
-using namespace std;
-
-typedef struct BitNode
-{
-    int frep;
-    struct BitNode *left;
-    struct BitNode *right;
-}Node;
-
-//定义比较结构
-struct cmp1{
-    bool operator ()(int &amp;a,int &amp;b){
-        return a&gt;b;//最小值优先
-    }
-};
-//构造霍夫曼树
-void HUFFMAN(int c, priority_queue&lt;int, vector&lt;int&gt;, cmp1&gt; &amp;que1)
-{
-    int n = c;
-    for (int i=0; i&lt;n-1; i++) {
-        Node *newNodeZ = (Node*)malloc(sizeof(Node));
-        Node *newNodeX = (Node*)malloc(sizeof(Node));
-        Node *newNodeY = (Node*)malloc(sizeof(Node));
-        newNodeX-&gt;frep = que1.top();
-        que1.pop();
-        newNodeY-&gt;frep = que1.top();
-        que1.pop();
-        newNodeZ-&gt;left = newNodeX;
-        newNodeZ-&gt;right = newNodeY;
-        
-        newNodeZ-&gt;frep =newNodeX-&gt;frep + newNodeY-&gt;frep;
-        que1.push(newNodeZ-&gt;frep);
-    }
-}
-
-int main() {
-//    priority_queue&lt;int&gt; que; //构造优先队列
-    int b[6] = {9,5,12,13,16,45};
-//    vector&lt;int&gt; a(b,b+6);
-    priority_queue&lt;int , vector&lt;int&gt;, cmp1 &gt;que1; //最小优先队列
-    for (int i=0; i&lt;6; i++) {
-        que1.push(b[i]);
-    }
-    HUFFMAN(6, que1);
-    while (!que1.empty()) {
-        cout&lt;&lt;que1.top()&lt;&lt;&#39; &#39;;
-        que1.pop();
-    }
-    return 0;
-}
-
-</code></pre>
-
-<p>最后输出为100，返回了编码树的根节点。<br/>
-<img src="media/15097619961308/15097623765624.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15096800741665.html">
-                
-                  <h1>贪心算法（活动选择问题）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15096800741665/15096801101097.jpg" alt=""/></p>
-
-<p>这个问题是一个典型的可以运用贪心算法的题目，我们在初始的选择一个活动之后，应该将之后的资源被其他任务尽量多的占用。所以我们应该第一个选择活动最快结束的活动，因为它剩下的资源可以被它之后开始的任务尽量多的使用。所以我们可以运用一种递归形式或者迭代算法来表达这个形式：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//  Greedy_Activity_Selector
-//
-//  Created by LZH on 2017/11/3.
-//  Copyright © 2017年 LZH. All rights reserved.
-//
-
-#include &lt;iostream&gt;
-#include &lt;vector&gt;
-using namespace std;
-void print(int n)
-{
-    cout&lt;&lt;n&lt;&lt;&#39; &#39;;
-}
-
-/**
- 迭代形式函数
-
- @param s 活动开始时间数组
- @param f 活动结束时间数组
- @param result  用于存储结果
- */
-void GREED_ACTIVITY_SELECTOR(vector&lt;int&gt; s , vector&lt;int&gt; f , vector&lt;int&gt; &amp;result)
-{
-    int n = s.size();
-    result.push_back(1);
-    int k=1;
-    for (int m=2; m&lt;=n; m++) {
-        if (s[m]&gt;=f[k]) {
-            result.push_back(m);
-            k = m;
-        }
-    }
-}
-
-/**
- 尾递归形式函数
-
- @param s 活动开始时间数组
- @param f 活动结束时间数组
- @param k 从活动k开始计算
- @param n 共有n个活动
- @param result 用于存储结果
- */
-void RECURSIVE_ACTIVITY_SELECTOR(vector&lt;int&gt; s,vector&lt;int&gt; f, int k, int n, vector&lt;int&gt; &amp;result)
-{
-    int m = k+1;
-    while (m&lt;=n &amp;&amp; s[m]&lt;=f[k]) {
-        m++;
-    }
-    if (m&lt;=n) {
-        result.push_back(m);
-        RECURSIVE_ACTIVITY_SELECTOR(s, f, m, n ,result);
-    }
-}
-
-int main() {
-    int a[12] ={0,1,3,0,5,3,5,6,8,8,2,12};
-    int b[12] ={0,4,5,6,7,9,9,10,11,12,14,16};
-    vector&lt;int&gt; s(a,a+12);
-    vector&lt;int&gt; f(b,b+12);
-    vector&lt;int&gt; result;
-    RECURSIVE_ACTIVITY_SELECTOR(s, f, 0, 11, result);
-    GREED_ACTIVITY_SELECTOR(s, f, result);
-    for_each(result.begin(),result.end(),print);
-    return 0;
-}
-
-</code></pre>
-
-<p>其中递归形式的流程如下图所示：<br/>
-<img src="media/15096800741665/15096804218816.jpg" alt=""/></p>
-
-<p>但两种算法运行时间类似都为\(\Theta(n)\)</p>
-
-<h2 id="toc_0">与动态规划的不同</h2>
-
-<p>贪心算法通过做出局部最优来构造全局最优解。换句话说，直接做出在当前问题下看起来最优的选择，而不必考虑子问题的解。</p>
-
-<p><strong><font color=red>在动态规划中，每个步骤都要进行一次选择，但选择通常依赖于子问题的解</font></strong>，因此，我们通常以自底向上的方式来求解动态规划问题，先求解较小的子问题，然后是较大的子问题。但是在贪心算法中，我们总是做出在当时看起来最佳的选择，然后求解剩下的唯一子问题。<strong><font color=red>贪心算法进行选择时可能依赖之前做出的选择，但不依赖于任何将来的选择或者是子问题的解。</font></strong>所以贪心算法在进行第一次选择时不求解任何子问题，自顶向下进行逐步选择，将给定的子问题实例变小。</p>
-
-<p>两者最典型的区别，可以用<code>分数背包</code>和<code>0-1背包</code>问题来举例，这里不做细说。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/3</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15088085969493.html">
-                
-                  <h1>最长公共子序列(动态规划)</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><strong>最长公共子序列问题（LCS）</strong>给定两个序列\(X=&lt;{x_1,x_2,...x_m}&gt;和Y=&lt;y_1,y_2,...y_n&gt;\),求X和Y长度最长的公共子序列。总共分三个步骤：</p>
-
-<h2 id="toc_0">步骤一：刻画最长公共子序列的特征</h2>
-
-<p><img src="media/15088085969493/15088091467243.jpg" alt=""/></p>
-
-<h2 id="toc_1">步骤二：一个递归解</h2>
-
-<p><img src="media/15088085969493/15088095444692.jpg" alt=""/></p>
-
-<h2 id="toc_2">步骤三：计算LCS的长度</h2>
-
-<p><img src="media/15088085969493/15088132625221.jpg" alt=""/></p>
-
-<p>上述过程我们有如下图来表示：<br/>
-<img src="media/15088085969493/15088133360817.jpg" alt=""/></p>
-
-<h2 id="toc_3">步骤4 构造LCS</h2>
-
-<p><img src="media/15088085969493/15088133035826.jpg" alt=""/></p>
-
-<p>这里我们用C++来构造这个算法：</p>
-
-<pre><code class="language-c++">//
-//  main.cpp
-//
-//  Created by LZH on 2017/10/30.
-//  Copyright © 2017年 梁中豪. All rights reserved.
-//
-
-
-#include &lt;iostream&gt;
-#include &lt;stdio.h&gt;
-#include &lt;string.h&gt;
-using namespace std;
-
-//计算LCS的长度
-void LCS_LENGTH(char *X ,char *Y ,int **b ,int **c ,int &amp;m ,int &amp;n)
-{
-    //    int m = sizeof(X)/sizeof(char);
-    //    int n = sizeof(Y)/sizeof(char);
-    
-    //    int b[m][n];
-    //    int c[m][n];
-    
-    for (int i=1; i&lt;m; i++) {
-        for (int j=1; j&lt;n; j++) {
-            if (X[i]==Y[j]) {
-                c[i][j] = c[i-1][j-1]+1;
-                b[i][j] = 1;
-            }
-            else if (c[i-1][j]&gt;=c[i][j-1])
-            {
-                c[i][j] = c[i-1][j];
-                b[i][j] = 2;
-            }
-            else
-            {
-                c[i][j] = c[i][j-1];
-                b[i][j] = 3;
-            }
-        }
-    }
-}
-
-void PRINT_LCS(int **b,char *X,int i,int j)
-{
-    if (i==0 || j==0) {
-        return;
-    }
-    if (b[i][j]==1) {
-        PRINT_LCS(b, X, i-1, j-1);
-        cout &lt;&lt; X[i] &lt;&lt;endl;
-    }
-    else if (b[i][j]==2)
-    {
-        PRINT_LCS(b, X, i-1, j);
-    }
-    else
-    {
-        PRINT_LCS(b, X, i, j-1);
-    }
-}
-
-int main()
-{
-    char X[8] = {&#39;x&#39;,&#39;A&#39;,&#39;B&#39;,&#39;C&#39;,&#39;B&#39;,&#39;D&#39;,&#39;A&#39;,&#39;B&#39;};
-    char Y[7] = {&#39;y&#39;,&#39;B&#39;,&#39;D&#39;,&#39;C&#39;,&#39;A&#39;,&#39;B&#39;,&#39;A&#39;};
-    int m = sizeof(X)/sizeof(char);
-    int n = sizeof(Y)/sizeof(char);
-    int **b =new int*[m];
-    for (int i = 0; i&lt;m; i++) {
-        b[i] = new int[n];
-    }
-    
-    int **c = new int*[m];
-    for (int i = 0; i&lt;m; i++) {
-        c[i] = new int[n];
-    }
-    LCS_LENGTH(X,Y,b,c,m,n);
-    PRINT_LCS(b,X,m-1,n-1);
-    return 0;
-}
-
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/24</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15087194946164.html">
-                
-                  <h1>动态规划</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">钢条切割问题</a>
-<ul>
-<li>
-<a href="#toc_1">分治法</a>
-</li>
-<li>
-<a href="#toc_2">动态规划</a>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_3">总结</a>
-
-
-<p>动态规划与分治法很类似，都是通过组合子问题的解来求解原问题。但是不同的是动态规划应用于子问题重叠的情况,即不同的子问题也具有公共的子子问题。分治法在这种情况下，会反复的求解那些公共子子问题。而动态规划算法对每个子子问题只求解一遍，将其保存在一个表格中，避免每次都计算。</p>
-
-<h2 id="toc_0">钢条切割问题</h2>
-
-<p>我们第一个动态规划问题是钢条切割问题。<br/>
-<img src="media/15087194946164/15087197999988.jpg" alt=""/></p>
-
-<h3 id="toc_1">分治法</h3>
-
-<p>我们来先看一下简答的分治法：</p>
-
-<pre><code class="language-objc">//
-//  main.m
-//  CUT-ROD
-
-#import &lt;Foundation/Foundation.h&gt;
-
-@interface CUT_ROD:NSObject;
-
--(NSInteger)CUT_ROD:(NSArray*)P length:(NSInteger)n;
-
-@end
-
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        NSArray *c = @[@1,@5,@8,@9,@10,@17,@17,@20,@24,@30];
-        CUT_ROD *a = [CUT_ROD new];
-        NSInteger result = [a CUT_ROD:c length:10];
-        NSLog(@&quot;result is %ld&quot;,result);
-    }
-    return 0;
-}
-
-@implementation CUT_ROD
-//简单的分治法,会重复计算子子结果
--(NSInteger)CUT_ROD:(NSArray *)P length:(NSInteger)n{
-    if (n==0) {
-        return 0;
-    }
-    NSInteger q = -1;
-    for (NSInteger i=0; i&lt;n; i++) {
-        q = q&gt;([P[i] integerValue]+[self CUT_ROD:P length:n-i-1]) ? q:([P[i] integerValue]+[self CUT_ROD:P length:n-i-1]);
-    }
-    return q;
-}
-
-@end
-
-</code></pre>
-
-<p>上述代码使用递归来实现的，但是每次都要递归的重复来计算相同的子子问题，如图所示：<br/>
-<img src="media/15087194946164/15087246470673.jpg" alt=""/></p>
-
-<p>所以我们就在想，只要把求解得到的子子问题答案记录下，等到下次要用的时候直接调用它，就可以省下大量的时间。所以我们下面采用动态规划来写一遍。</p>
-
-<h3 id="toc_2">动态规划</h3>
-
-<p><strong><font color=red>动态规划是一个典型的时空权衡的例子，付出额外的内存空间来降低计算时间。</font></strong></p>
-
-<p>第一种方法：带备忘的自顶向下算法</p>
-
-<pre><code class="language-objc">//动态规划 带备忘的自顶向下
--(NSInteger)MEMOIZED_CUT_ROD:(NSArray *)P length:(NSInteger)n{
-    NSMutableArray *logArr =[[NSMutableArray alloc] initWithCapacity:11];
-    for (int i = 0; i&lt;=10; i++) {
-        [logArr addObject:@(-1)];
-    }
-    return [self MEMOIZED_CUT_ROD_AUX:P length:n log:logArr];
-}
--(NSInteger)MEMOIZED_CUT_ROD_AUX:(NSArray*)p length:(NSInteger)n log:(NSMutableArray*)r{
-    NSInteger q;
-    if ([r[n] integerValue]&gt;=0) {
-        return [r[n] integerValue];
-    }
-    if (n==0) {
-        q = 0;
-    }else{
-        q = -1;
-        for (NSInteger i = 0; i&lt;n; i++) {
-            q = q&gt;[p[i] integerValue] + [self MEMOIZED_CUT_ROD_AUX:p length:n-i-1 log:r] ? q : [p[i] integerValue] + [self MEMOIZED_CUT_ROD_AUX:p length:n-i-1 log:r];
-        }
-    }
-    [r replaceObjectAtIndex:n withObject:@(q)];
-    return q;
-}
-</code></pre>
-
-<p><code>MEMOIZED_CUT_ROD</code>方法引入<code>r</code>数组，记录每个长度的最优收益值，下面的方法将记录的值存入<code>r</code>数组中，并调用存入<code>r</code>的子子问题所得到收益值。</p>
-
-<p>第二个方法，字底向上版本，这个版本更为简单：</p>
-
-<pre><code class="language-objc">-(NSInteger)BOTTOM_UP_CUT_ROD:(NSArray *)P length:(NSInteger)n{
-    NSMutableArray *arrLog = [[NSMutableArray alloc] initWithCapacity:11];
-    for (int i = 0; i&lt;=10; i++) {
-        [arrLog addObject:@(0)];
-    }
-    NSInteger q = -1;
-    for (int j=0; j&lt;n; j++) {
-        q = -1;
-        for (int i=0; i&lt;=j; i++) {
-            NSLog(@&quot;%li&quot;,q);
-            q = q &gt; ([P[i] integerValue] + [arrLog[j-i] integerValue]) ? q : ([P[i] integerValue] + [arrLog[j-i] integerValue]);
-            NSLog(@&quot;%li&quot;,q);
-        }
-        [arrLog replaceObjectAtIndex:j+1 withObject:@(q)];
-    }
-    return [arrLog[n] integerValue];
-}
-</code></pre>
-
-<p>依次来求解长度从1到n的最大收益。</p>
-
-<h1 id="toc_3">总结</h1>
-
-<p>当我们思考一个动态规划的问题时，最好弄清涉及的子问题与他们的依赖关系。如上图的依赖图为：<br/>
-<img src="media/15087194946164/15087412491634.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95%E7%90%86%E8%AE%BA.html'>算法理论</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -771,7 +470,7 @@ int main(int argc, const char * argv[]) {
 			  </div>
 			  <div class="large-6 columns">
 			<p class="text-right" style="padding-top:25px;">
-			
+			 <a href="算法学习_15.html">&raquo; Next Page</a> 
 			</p>
 			  </div>
 			</div>
@@ -849,31 +548,31 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
-			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
+			        <a href="15152183997863.html">Where my anagrams at?</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139938131506.html">Sum of many ints</a>
+			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139334894228.html"> Longest Univalue Path</a>
+			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15137396102567.html">Isomorphic Strings</a>
+			        <a href="15145180239158.html">1's, 0's and wildcards</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15136732474119.html">Path Sum II</a>
+			        <a href="15143494387976.html">Simple Pig Latin</a>
 			      </li>
 		     
 		  

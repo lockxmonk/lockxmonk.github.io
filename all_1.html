@@ -117,50 +117,41 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15134129335933.html">
+                <a class="clearlink" href="15142765984953.html">
                 
-                  <h1>Linked List Cycle II</h1>
+                  <h1>Find the missing term in an Arithmetic Progression</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>题目链接：<a href="https://leetcode.com/problems/linked-list-cycle-ii/description/">https://leetcode.com/problems/linked-list-cycle-ii/description/</a></p>
+                        	<p><img src="media/15142765984953/15142766000094.jpg" alt=""/></p>
 
-<p>Given a linked list, return the node where the cycle begins. If there is no cycle, return null.</p>
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
 
-<p>Note: Do not modify the linked list.</p>
-
-<pre><code class="language-c++">/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    ListNode *detectCycle(ListNode *head) {
-        if (head==NULL||head-&gt;next==NULL) {
-            return NULL;
-        }
-        ListNode *slow = head;
-        ListNode *fast = head;
-        ListNode *entry = head;
-        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
-            fast = fast-&gt;next-&gt;next;
-            slow = slow-&gt;next;
-            if (fast==slow) {
-                while (slow!=entry) {
-                    slow = slow-&gt;next;
-                    entry = entry-&gt;next;
-                }
-                return entry;;
-            }
-        }
-        return NULL;
+NSNumber *findMissing(NSArray *list) {
+    int len = [list count];
+    int n = len+1;
+    int d1 = [list[1] intValue]-[list[0] intValue];
+    int d2 = [list[len-1] intValue]-[list[len-2] intValue];
+    int d = 0;
+    if (d1&lt;0) {
+        d = d1&gt;d2?d1:d2;
+    }else{
+        d = d1&lt;d2?d1:d2;
     }
-};
+    if (n == 3) {
+        return @(([[list firstObject] intValue]+[[list lastObject] intValue])/2);
+    }
+    int num = [[list firstObject] intValue];
+    for (int i = 0;i&lt;len;i++) {
+        if ([list[i] intValue]!=num) {
+            return @(num);
+        }
+        num+=d;
+    }
+    
+    return @(0);
+}
 </code></pre>
 
                         
@@ -170,10 +161,10 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/16</span>
+                    <span class="date">2017/12/26</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -187,96 +178,59 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15134088955356.html">
+                <a class="clearlink" href="15141803762335.html">
                 
-                  <h1>Linked List Cycle</h1>
+                  <h1>Valid Parentheses</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a linked list, determine if it has a cycle in it.</p>
+                        	<p><img src="media/15141803762335/15141803778513.jpg" alt=""/></p>
 
-<p>Follow up:<br/>
-Can you solve it without using extra space?</p>
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
 
-<p><strong>使用快慢两个指针来判断是否有环，当有环的时候，快指针会停留在环内知道慢指针赶上与之相等。</strong></p>
-
-<pre><code class="language-c++">/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    bool hasCycle(ListNode *head) {
-        if (head==NULL||head-&gt;next==NULL) {
-            return 0;
-        }
-        ListNode *slow = head;
-        ListNode *fast = head;
-        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
-            fast = fast-&gt;next-&gt;next;
-            slow = slow-&gt;next;
-            if (fast==slow) {
-                return 1;
-            }
-        }
+bool validParentheses(NSString *s) {
+    // TODO: Return a boolean value indicating whether the
+    // order of parentheses in the given string is valid
+    if (s.length==0) {
         return 0;
     }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/16</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15131536329153.html">
-                
-                  <h1> Convert a Number to Hexadecimal</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15131536329153/15131536540833.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string toHex(int num) {
-        const string HEX =&quot;0123456789abcdef&quot;;
-        if (num==0) return &quot;0&quot;;
-        string res =&quot;&quot;;
-        int count  = 0;
-        while (num&amp;&amp;count++&lt;8) {
-            //&amp;0xf表示取二进制的低四位
-            res = HEX[(num&amp;0xf)]+res;
-            num&gt;&gt;=4;
+    int sum = 0;
+    NSMutableArray *res = @[].mutableCopy;
+    for (int i = 0; i&lt;s.length; i++) {
+        if ([s characterAtIndex:i]==(unichar)&#39;(&#39;) {
+            [res addObject:@(&#39;(&#39;)];
+            sum++;
         }
-        return res;
+        if ([s characterAtIndex:i]==(unichar)&#39;)&#39;) {
+            if ([[res lastObject] isEqual:@(&#39;(&#39;)]) {
+                [res removeObjectAtIndex:res.count-1];
+            }else{
+                [res addObject:@(&#39;)&#39;)];
+            }
+            sum--;
+        }
     }
-};
+    if (sum!=0||[res count]!=0) {
+        return 0;
+    }
+    return 1;
+}
+</code></pre>
+
+<p>简化版：</p>
+
+<pre><code class="language-objc">
+#import &lt;Foundation/Foundation.h&gt;
+
+bool validParentheses(NSString *s) {
+  int brackets = 0;
+  for (int i = 0; i &lt; [s length]; i++) {
+    if ([s characterAtIndex: i] == &#39;(&#39;) brackets++;
+    else if ([s characterAtIndex: i] == &#39;)&#39;) if (--brackets &lt; 0) return false;
+  }
+  return !brackets;
+}
 </code></pre>
 
                         
@@ -286,10 +240,10 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/13</span>
+                    <span class="date">2017/12/25</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -303,180 +257,80 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15131518267208.html">
+                <a class="clearlink" href="15140206056964.html">
                 
-                  <h1>Number of Boomerangs</h1>
+                  <h1>Follow that Spy</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15131518267208/15131518346128.jpg" alt=""/></p>
+                        	<p><img src="media/15140206056964/15140206079284.jpg" alt=""/></p>
 
-<pre><code class="language-c++">class Solution {
-public:
-    int numberOfBoomerangs(vector&lt;pair&lt;int, int&gt;&gt;&amp; points) {
-        int res = 0;
-        for (int i =0; i&lt;points.size(); i++) {
-            unordered_map&lt;long, int&gt; map(points.size());
-            for (int j = 0; j&lt;points.size(); j++) {
-                if (j==i) continue;
-                int dy = points[j].second - points[i].second;
-                int dx = points[j].first - points[i].first;
+<p>自己的麻烦些的代码：用了<code>NSMapTable</code></p>
 
-                int dis = dy*dy + dx*dx;
-                map[dis]++;
-            }
-
-            for (auto p : map) {
-                if (p.second&gt;1) {
-                    /*
-                     * for all the groups of points,
-                     * number of ways to select 2 from n =
-                     * nP2 = n!/(n - 2)! = n * (n - 1)
-                     */
-                    res+=p.second*(p.second-1);
-                }
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+NSString *findRoutes(NSArray *routes){
+    if ([routes count]==1) {
+        return [NSString stringWithFormat:@&quot;%@, %@&quot;,routes[0][0],routes[0][1]];
+    }
+    NSMapTable *map = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableWeakMemory];
+    NSMapTable *tol = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableWeakMemory];
+    for (NSArray *tmp in routes) {
+        [map setObject:tmp[1] forKey:tmp[0]];
+        for (NSString* tmpTol in tmp) {
+            if ([tol objectForKey:tmpTol]) {
+                [tol setObject:@&quot;1&quot; forKey:tmpTol];
+            }else{
+                [tol setObject:@&quot;0&quot; forKey:tmpTol];
             }
         }
-        return res;
     }
-};
+    NSString *str = @&quot;&quot;;
+    NSString *end = @&quot;&quot;;
+    NSEnumerator *enumerator = [tol keyEnumerator];
+    for (NSString *tmp in enumerator) {
+        if ([[tol objectForKey:tmp] isEqualToString:@&quot;0&quot;]) {
+            if (![map objectForKey:tmp]) {
+                end = tmp;
+                continue;
+            }
+            str = tmp;
+        }
+    }
+    NSString *res = @&quot;&quot;;
+    res = [res stringByAppendingFormat:@&quot;%@, &quot;, str];
+    while ([map objectForKey:str]) {
+       res =  [res stringByAppendingFormat:@&quot;%@, &quot;, [map objectForKey:str]];
+       str = [map objectForKey:str];
+        if ([[map objectForKey:str] isEqualToString:end]) {
+            res = [res stringByAppendingString:end];
+            break;
+        }
+    }
+    return res;
+}
 </code></pre>
 
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
+<p>别人的简短代码：</p>
 
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15130621165951.html">
-                
-                  <h1>Longest Palindromic Substring</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15130621165951/15130621284508.jpg" alt=""/></p>
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+NSString *findRoutes(NSArray *routes){
 
-<pre><code class="language-c++">class Solution {
-public:
-    string longestPalindrome(string s) {
-        if (s.empty()) return &quot;&quot;;
-        if (s.size() == 1) return s;
-        int min_start = 0, max_len = 1;
-        for (int i = 0; i &lt; s.size();) {
-            if (s.size() - i &lt;= max_len / 2) break;
-            int j = i, k = i;
-            while (k &lt; s.size()-1 &amp;&amp; s[k+1] == s[k]) ++k; // Skip duplicate characters.
-            i = k+1;
-            while (k &lt; s.size()-1 &amp;&amp; j &gt; 0 &amp;&amp; s[k + 1] == s[j - 1]) { ++k; --j; } // Expand.
-            int new_len = k - j + 1;
-            if (new_len &gt; max_len) { min_start = j; max_len = new_len; }
-        }
-        return s.substr(min_start, max_len);
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/12</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15130603513802.html">
-                
-                  <h1>Palindrome Pairs</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15130603513802/15130603727154.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool isPalindrome(string s) {
-        if (s.size() &lt;= 1) return true;
-        int i = 0;
-        int j = s.size() - 1;
-        while (i &lt; j) {
-            if (s[i++] != s[j--]) return false;
-        }
-
-        return true;
-    }
-
-    vector&lt;vector&lt;int&gt;&gt; palindromePairs(vector&lt;string&gt;&amp; words) {
-        vector&lt;vector&lt;int&gt;&gt; res;
-        if (!words.size()) return res;
-        unordered_map&lt;string, int&gt; word_idx;
-        for (int i = 0; i &lt; words.size(); ++i) {
-            word_idx[words[i]] = i;
-        }
-        vector&lt;int&gt; slu(2);
-        for (int i = 0; i &lt; words.size(); ++i) {
-            int len = words[i].length();
-            for (int l = 0; l &lt;= len; ++l) {
-                string left = words[i].substr(0, l);
-                string right = words[i].substr(l);
-                string rleft = left;
-                string rright = right;
-                reverse(rleft.begin(), rleft.end());
-                reverse(rright.begin(), rright.end());
-                if (word_idx.find(rleft) != word_idx.end()) {
-                    if (word_idx[rleft] != i &amp;&amp; isPalindrome(right)) {
-                        res.push_back({i,word_idx[rleft]});
-                    }
-
-                }
-                if (l != 0 &amp;&amp; word_idx.find(rright) != word_idx.end()) {
-                    if (word_idx[rright] != i &amp;&amp; isPalindrome(left)) {
-                        res.push_back({word_idx[rright],i});
-                    }
-
-                }
-
+    NSMutableArray * routesM = [routes mutableCopy];
+    NSMutableArray * answer = [@[routes[0][0]] mutableCopy];
+    do{
+        for(int i = (int)routesM.count - 1; i &gt;= 0; i--){
+            if([[answer lastObject] isEqualToString:routesM[i][0]]){
+                [answer addObject:routesM[i][1]];
+                [routesM removeObjectAtIndex:i];
+            } else if([[answer firstObject] isEqualToString:routesM[i][1]]){
+                [answer insertObject:routesM[i][0] atIndex:0];
+                [routesM removeObjectAtIndex:i];
             }
         }
-        return res;
-    }
-};
+    } while (routesM.count &gt; 0);
+    return [answer componentsJoinedByString:@&quot;, &quot;];
+}
 </code></pre>
 
                         
@@ -486,10 +340,195 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/12</span>
+                    <span class="date">2017/12/23</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15140141868103.html">
+                
+                  <h1>Simple Fun #4: Phone Call</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15140141868103/15140147655873.jpg" alt=""/><br/>
+<img src="media/15140141868103/15140147745826.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+int phoneCall(int min1, int min2_10, int min11, int s) {
+    if (s&lt;min1) return 0;
+    int sum = 1;
+    sum+= (s-min1)&gt;min2_10*9 ? 9 : (s-min1)/min2_10;
+    sum+= (s-min1-9*min2_10)&lt;0 ? 0 : (s-min1-9*min2_10)/min11;
+    return sum;
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15140137962108.html">
+                
+                  <h1>Don't give me five!</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Don&#39;t give me five!</p>
+
+<p>In this kata you get the start number and the end number of a region and should return the count of all numbers except numbers with a 5 in it. The start and the end number are both inclusive!</p>
+
+<p>Examples:</p>
+
+<pre><code>1,9 -&gt; 1,2,3,4,6,7,8,9 -&gt; Result 8
+4,17 -&gt; 4,6,7,8,9,10,11,12,13,14,16,17 -&gt; Result 12
+</code></pre>
+
+<p>The result may contain fives. ;-)<br/>
+The start number will always be smaller than the end number. Both numbers can be also negative!</p>
+
+<p>I&#39;m very curious for your solutions and the way you solve it. Maybe someone of you will find an easy pure mathematics solution.</p>
+
+<p>Have fun coding it and please don&#39;t forget to vote and rank this kata! :-)</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+int dontGiveMeFive(int start, int end)
+{
+  int sum = 0;
+    for (int i = start; i&lt;=end; i++) {
+        if ([[NSString stringWithFormat:@&quot;%i&quot;,i] rangeOfString:@&quot;5&quot;].location!=NSNotFound) {
+            continue;
+        }
+        sum++;
+    }
+    return sum;
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15139993814636.html">
+                
+                  <h1>Moves in squared strings (I)</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15139993814636/15139993826350.jpg" alt=""/><br/>
+<img src="media/15139993814636/15139994003399.jpg" alt=""/></p>
+
+<p>题目链接：<a href="https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc">https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc</a></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSString *vertMirror(NSString *strng) {
+    NSMutableString *res = [[NSMutableString alloc] init];
+    NSArray *stringArray = [strng componentsSeparatedByString:@&quot;\n&quot;];
+    for (NSString *tmpStr in stringArray) {
+        NSMutableString * reverseString = [NSMutableString string];
+        for(int i = 0 ; i &lt; tmpStr.length; i ++){
+            //倒序读取字符并且存到可变数组数组中
+            unichar c = [tmpStr characterAtIndex:tmpStr.length- i -1];
+            [reverseString appendFormat:@&quot;%c&quot;,c];
+        }
+        
+        if ([tmpStr isEqualToString:[stringArray lastObject]]) {
+            [res appendString:reverseString];
+            break;
+        }
+        
+        [reverseString appendString:@&quot;\n&quot;];
+        [res appendString:reverseString];
+    }
+    
+    return res;
+}
+
+NSString *horMirror(NSString *strng) {
+    NSMutableString *res = [[NSMutableString alloc] init];;
+    NSArray *stringAry = [strng componentsSeparatedByString:@&quot;\n&quot;];
+    for (int i = stringAry.count-1; i&gt;=0; i--) {
+        [res appendString:stringAry[i]];
+        if (i==0) {
+            break;
+        }
+        [res appendString:@&quot;\n&quot;];
+    }
+    return res;
+}
+
+NSString *oper(NSString *(*f)(NSString *), NSString *s) {
+    return f(s);
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -591,31 +630,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
+			        <a href="15152183997863.html">Where my anagrams at?</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139938131506.html">Sum of many ints</a>
+			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139334894228.html"> Longest Univalue Path</a>
+			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15137396102567.html">Isomorphic Strings</a>
+			        <a href="15145180239158.html">1's, 0's and wildcards</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15136732474119.html">Path Sum II</a>
+			        <a href="15143494387976.html">Simple Pig Latin</a>
 			      </li>
 		     
 		  

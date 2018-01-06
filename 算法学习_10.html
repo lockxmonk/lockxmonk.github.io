@@ -117,61 +117,136 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15121123646545.html">
+                <a class="clearlink" href="15123785215963.html">
                 
-                  <h1>Can Place Flowers</h1>
+                  <h1>Count Binary Substrings</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Suppose you have a long flowerbed in which some of the plots are planted and some are not. However, flowers cannot be planted in adjacent plots - they would compete for water and both would die.</p>
-
-<p>Given a flowerbed (represented as an array containing 0 and 1, where 0 means empty and 1 means not empty), and a number n, return if n new flowers can be planted in it without violating the no-adjacent-flowers rule.</p>
-
-<p><img src="media/15121123646545/15121188914337.jpg" alt=""/></p>
-
-<p><strong>第一种：3格的滑动窗口</strong></p>
+                        	<p><img src="media/15123785215963/15123785359347.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
-        int str = 0 ,end = 2;
-        int tol = 0;
-        if (flowerbed.size()==1&amp;&amp;flowerbed[0]==0) {
-            tol++;
-        }else if(flowerbed[0]==0&amp;&amp;flowerbed[1]==0) {
-            flowerbed[0]=1;
-            tol++;
-        }
-        
-        while (end&lt;=flowerbed.size()-1) {
-            if (!(flowerbed[str]||flowerbed[str+1]||flowerbed[end])) {
-                flowerbed[str+1] = 1;
+    int countBinarySubstrings(string s) {
+        vector&lt;int&gt; res;
+        int tol = 1;
+        for (int i=1; i&lt;=s.length(); i++) {
+            if (s[i]==s[i-1]) {
                 tol++;
+            }else{
+                res.push_back(tol);
+                tol =1;
             }
+        }
+        int count = 0;
+        for(int i=1, n=res.size(); i&lt;n; ++i){
+            count += min(res[i-1], res[i]);
+        }
+        return count;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15123751997678.html">
+                
+                  <h1>Detect Capital</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15123751997678/15123752096895.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool detectCapitalUse(string word) {
+        int a[word.length()];
+        int r = 0;
+        for (int i = 0; i&lt;word.length(); i++) {
+            if (word[i]&gt;=&#39;A&#39;&amp;&amp;word[i]&lt;=&#39;Z&#39;) {
+                a[i] = 1;
+                r+=a[i];
+            }
+        }
+        if (r==word.length()||(a[0]==1&amp;&amp;r==1)||r==0) {
+            return true;
+        }
+        return false;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15123699886595.html">
+                
+                  <h1>Reverse String</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15123699886595/15123699978085.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string reverseString(string s) {
+        int str = 0;
+        int end = s.length()-1;
+        while (str&lt;=end) {
+            char tmp;
+            tmp = s[str];
+            s[str] = s[end];
+            s[end] = tmp;
             str++;
-            end++;
+            end--;
         }
-        if (flowerbed.size()&gt;=3&amp;&amp;flowerbed[flowerbed.size()-1]==0&amp;&amp;flowerbed[flowerbed.size()-2]==0) {
-            tol++;
-        }
-        return tol&gt;=n?1:0;
-    }
-};
-</code></pre>
-
-<p>第二种：</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
-        for (int i = 0; i &lt; flowerbed.size(); i++) {
-            if (!flowerbed[i] &amp;&amp; (i == 0 || !flowerbed[i - 1]) &amp;&amp; (i == flowerbed.size() - 1 || !flowerbed[i + 1])) {
-                flowerbed[i] = 1;
-                n--;
-            }
-        }
-        return n &lt;= 0;
+        return s;
     }
 };
 </code></pre>
@@ -183,7 +258,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/1</span>
+                    <span class="date">2017/12/4</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -200,29 +275,35 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15121120473287.html">
+                <a class="clearlink" href="15123539966341.html">
                 
-                  <h1>Contains Duplicate II</h1>
+                  <h1>Reverse Words in a String III</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given an array of integers and an integer <code>k</code>, find out whether there are two distinct indices <code>i</code> and <code>j</code> in the array such that <code>nums[i] = nums[j]</code> and the absolute difference between <code>i</code> and <code>j</code> is at most <code>k</code>.</p>
-
-<p>判断数组中是否有重复的元素，并且下标之差不超过<code>k</code>。</p>
+                        	<p><img src="media/15123539966341/15123540495829.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    bool containsNearbyDuplicate(vector&lt;int&gt;&amp; nums, int k) {
-        unordered_map&lt;int, int&gt; hash;
-        for (int i=0; i&lt;nums.size(); i++) {
-            if (hash.find(nums[i])!=hash.end()&amp;&amp;i-hash[nums[i]]&lt;=k) {
-                return 1;
-            }else{
-                hash[nums[i]] = i;
+    string reverseWords(string s) {
+        string res;
+        int str = 0;
+        for (int i=0; i&lt;s.length(); i++) {
+            if (s[i]==&#39; &#39;||i==s.length()-1) {
+                int j = i==s.length()-1 ? i:i-1;
+                while (j&gt;=str) {
+                    char tmp = s[str];
+                    s[str] = s[j];
+                    s[j] = tmp;
+                    j--;
+                    str++;
+                }
+                str = i+1;
             }
         }
-        return 0;
+
+        return s;
     }
 };
 </code></pre>
@@ -234,7 +315,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/1</span>
+                    <span class="date">2017/12/4</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -251,32 +332,31 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15120990794732.html">
+                <a class="clearlink" href="15122038176626.html">
                 
-                  <h1>Maximum Average Subarray I</h1>
+                  <h1>Judge Route Circle</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15120990794732/15120991082558.jpg" alt=""/></p>
-
-<p><strong>解决方法：滑动窗口方案</strong></p>
+                        	<p><img src="media/15122038176626/15122038286763.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    double findMaxAverage(vector&lt;int&gt;&amp; nums, int k) {
-        double r = INT_MIN;
-        double sum = 0;
-        for (int i = 0; i&lt;nums.size(); i++) {
-            if (i&lt;k) {
-                sum+=nums[i];
-            }else{
-                r = max(sum, r);
-                sum +=nums[i]-nums[i-k];
+    bool judgeCircle(string moves) {
+        int UD = 0 ,LR = 0;
+        for(char a:moves){
+            if (a==&#39;U&#39;) {
+                UD++;
+            }else if (a==&#39;D&#39;){
+                UD--;
+            }else if (a==&#39;L&#39;){
+                LR++;
+            }else if (a==&#39;R&#39;){
+                LR--;
             }
         }
-        r = max(sum, r);
-        return r/double(k);
+        return (UD==0&amp;&amp;LR==0) ? 1:0;
     }
 };
 </code></pre>
@@ -288,7 +368,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/1</span>
+                    <span class="date">2017/12/2</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -305,82 +385,30 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15120964350892.html">
+                <a class="clearlink" href="15122027653799.html">
                 
-                  <h1>Pascal's Triangle</h1>
+                  <h1>Self Dividing Numbers</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given numRows, generate the first numRows of Pascal&#39;s triangle.</p>
-
-<p>For example, given numRows = 5,<br/>
-Return<img src="media/15120964350892/15120964567125.jpg" alt=""/></p>
+                        	<p><img src="media/15122027653799/15122027840243.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    vector&lt;vector&lt;int&gt;&gt; generate(int numRows) {
-        vector&lt;vector&lt;int&gt;&gt;result(numRows);
-        for (int i = 0; i&lt;numRows; i++) {
-            result[i].resize(i+1);
-            result[i][0] = result[i][i] = 1;
-        
-            for (int j = 1; j&lt;i; j++) {
-                result[i][j] = result[i-1][j-1]+result[i-1][j];
+    vector&lt;int&gt; selfDividingNumbers(int left, int right) {
+        vector&lt;int&gt; v;
+        for (int i = left; i &lt;= right; ++i) {
+            int j= i;
+            bool ok = 1;
+            while (j) {
+                int d= (j%10);
+                if (d == 0 || i % d) ok = 0;
+                j/=10;
             }
+            if (ok) v.push_back(i);
         }
-        return result;
-        
-     }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120931328273.html">
-                
-                  <h1>Search Insert Position</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
-
-<p>You may assume no duplicates in the array.<br/>
-<img src="media/15120931328273/15120931550538.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
-        int result = 0;
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (nums[i]&gt;=target) {
-                return i;
-            }
-        }
-        return nums.size();
+        return v;
     }
 };
 </code></pre>
@@ -392,117 +420,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120924554362.html">
-                
-                  <h1>Maximum Subarray</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Find the contiguous subarray within an array (containing at least one number) which has the largest sum.</p>
-
-<p>For example, given the array<code>[-2,1,-3,4,-1,2,1,-5,4]</code>,<br/>
-the contiguous subarray <code>[4,-1,2,1]</code> has the largest sum = <code>6</code>.</p>
-
-<p>第一种解法：分治法</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; findCrossSubArray(vector&lt;int&gt;&amp; nums, int mid, int low ,int high){
-        int sum = 0;
-        int leftSum = INT_MIN;
-        int maxLeft = 0;
-        for (int i = mid; i&gt;=low; i--) {
-            sum = sum+nums[i];
-            if (sum&gt;leftSum) {
-                leftSum = sum;
-                maxLeft = i;
-            }
-        }
-        sum = 0;
-        int rightSum = INT_MIN;
-        int maxRight = 0;
-        for (int j=mid+1; j&lt;=high; j++) {
-            sum = sum+nums[j];
-            if (sum&gt;rightSum) {
-                rightSum = sum;
-                maxRight = j;
-            }
-        }
-        
-        return {{maxLeft,maxRight,leftSum+rightSum}};
-    }
-
-    vector&lt;int&gt; findMaxSubArray(vector&lt;int&gt;&amp; nums,int low ,int high)
-    {
-        if (low==high) {
-            return {{low,high,nums[low]}};
-        }else{
-            int mid = (low+high)/2;
-            vector&lt;int&gt; leftSum = findMaxSubArray(nums, low, mid);
-            vector&lt;int&gt; rightSum = findMaxSubArray(nums, mid+1, high);
-            vector&lt;int&gt; crossSum = findCrossSubArray(nums, mid, low, high);
-            if (leftSum[2]&gt;=rightSum[2]&amp;&amp;leftSum[2]&gt;=crossSum[2]) {
-                return leftSum;
-            }else if(rightSum[2]&gt;=leftSum[2]&amp;&amp;rightSum[2]&gt;=crossSum[2])
-            {
-                return rightSum;
-            }
-            else return crossSum;
-        }
-    
-    }
-
-
-    int maxSubArray(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size()-1;
-        vector&lt;int&gt; result = findMaxSubArray(nums, 0, len);
-        return result[2];
-    }
-};
-</code></pre>
-
-<p>第二种解法：</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maxSubArray(vector&lt;int&gt;&amp; nums) {
-        int ans=nums[0],i,j,sum=0;
-        for(i=0;i&lt;nums.size();i++){
-            sum+=nums[i];
-            ans=max(sum,ans);
-            sum=max(sum,0);
-        }
-        return ans;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
+                    <span class="date">2017/12/2</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -607,31 +525,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
+			        <a href="15152183997863.html">Where my anagrams at?</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139938131506.html">Sum of many ints</a>
+			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139334894228.html"> Longest Univalue Path</a>
+			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15137396102567.html">Isomorphic Strings</a>
+			        <a href="15145180239158.html">1's, 0's and wildcards</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15136732474119.html">Path Sum II</a>
+			        <a href="15143494387976.html">Simple Pig Latin</a>
 			      </li>
 		     
 		  

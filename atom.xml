@@ -4,7 +4,7 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2017-12-12T15:08:14+08:00</updated>
+  <updated>2018-01-06T09:59:12+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
@@ -13,12 +13,510 @@
   <generator uri="http://www.mweb.im/">MWeb</generator>
   
   <entry>
-    <title type="html"><![CDATA[![](media/15139993814636/15139993826350.jpg)]]></title>
+    <title type="html"><![CDATA[Where my anagrams at?]]></title>
+    <link href="https://lockxmonk.github.io/15152183997863.html"/>
+    <updated>2018-01-06T13:59:59+08:00</updated>
+    <id>https://lockxmonk.github.io/15152183997863.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15152183997863/15152184280248.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSArray *anagrams(NSString *s, NSArray *a) {
+    NSMapTable *map = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableStrongMemory];
+    for (int i = 0; i&lt;[s length]; i++) {
+        NSString *str = [s substringWithRange:NSMakeRange(i, 1)];
+        if ([map objectForKey:str]) {
+            [map setObject:@([[map objectForKey:str] intValue]+1) forKey:str];
+        }else{
+            [map setObject:@(1) forKey:str];
+        }
+    }
+    NSMutableArray *res = a.mutableCopy;
+    for (NSString *ele in a) {
+        if(ele.length!=s.length){
+            [res removeObject:ele];
+            continue;
+        }
+        NSMapTable *tmp = [map copy];
+        for (int j=0; j&lt;[ele length]; j++) {
+            NSString *tmpStr = [ele substringWithRange:NSMakeRange(j, 1)];
+            if ([tmp objectForKey:tmpStr]) {
+                int log =[[tmp objectForKey:tmpStr] intValue]-1;
+                if (log&lt;0){
+                    [res removeObject:ele];
+                    break;
+                }
+                [tmp setObject:@(log) forKey:tmpStr];
+            }else{
+                [res removeObject:ele];
+                break;
+            }
+        }
+    }
+    return res;
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Perimeter of squares in a rectangle]]></title>
+    <link href="https://lockxmonk.github.io/15152039082618.html"/>
+    <updated>2018-01-06T09:58:28+08:00</updated>
+    <id>https://lockxmonk.github.io/15152039082618.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15152039082618/15152039109281.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+unsigned long long perimeter(int n) {
+    NSMutableArray *numQu = @[@0,@1].mutableCopy;
+    unsigned long long n0 = 0,n1=1;
+    for (int i = 2; i&lt;=n+1; i++) {
+        unsigned long long sum = n0+n1;
+        n0 = n1;
+        n1 = sum;
+        [numQu addObject:@(sum)];
+    }
+    unsigned long long tol = 0;
+    for (NSNumber* ele in numQu) {
+        tol+=[ele unsignedLongLongValue];
+    }
+    return tol*4;
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AFNetworking遇到的问题]]></title>
+    <link href="https://lockxmonk.github.io/15151211562254.html"/>
+    <updated>2018-01-05T10:59:16+08:00</updated>
+    <id>https://lockxmonk.github.io/15151211562254.html</id>
+    <content type="html"><![CDATA[
+<p>由于<code>AFNetworking</code>运用了官方<code>NSURLSession</code>所以其中有一些坑</p>
+
+<h2 id="toc_0">1.苹果运用NSJSONSerialization解析，出现数字类型精度问题</h2>
+
+<p>当服务器给我传回来一个<code>3.0</code>的数字类型时，在安卓端是没有问题的，但是在iOS这里会出现<code>2.99999</code>这样的问题。</p>
+
+<p><font color=red><strong>出现这个问题的原因是：苹果在json解析时，默认为双精度的double类型。</strong></font></p>
+
+<pre><code>我们相处的解决方案有两种：
+1. 跟后台协商将数字型的值改为`字符型`
+2. 使用第三方的json解析。
+</code></pre>
+
+<p>最后我们使用的是第一种方法，因为第二种势必要修改了AFNetwork的源码，开发与维护成本相比较来说要大。</p>
+
+<h2 id="toc_1">2.json解析失败</h2>
+
+<p>由于AF默认的解析方式为<code>0</code>（返回的对象是不可变的，<code>NSDictionary</code>或<code>NSArray</code>）：<br/>
+<img src="media/15151211562254/15151222443779.jpg" alt=""/></p>
+
+<p>我们来看一下都有什么选项：<br/>
+<img src="media/15151211562254/15151222806031.jpg" alt=""/></p>
+
+<p>所以当我们服务器返回的json数据是<strong>碎片化</strong>的（最外层既不是<code>NSArray</code>也不是<code>NSDictionary</code>），那么解析的时候就会出错了。</p>
+
+<p>解决方法是：</p>
+
+<p><img src="media/15151211562254/15151327758647.jpg" alt=""/><br/>
+在0后添加<code>|</code>字符，增加这种情况，允许碎片化数据。</p>
+
+<h2 id="toc_2">3. 请求后response的状态码范围问题</h2>
+
+<p>正常项目中正常请求成功会返回200，但是服务器若是给你返回了500（我不知道后台为啥会返回这个码），问题就出现了：</p>
+
+<p>这是由于下面的原因：<br/>
+<img src="media/15151211562254/15151343155944.jpg" alt=""/><br/>
+会发现上图中可接受状态码的范围是200-300；</p>
+
+<p>具体解决方法就不说了。。。</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[1's, 0's and wildcards]]></title>
+    <link href="https://lockxmonk.github.io/15145180239158.html"/>
+    <updated>2017-12-29T11:27:03+08:00</updated>
+    <id>https://lockxmonk.github.io/15145180239158.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15145180239158/15145180364703.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSArray *changeTo(NSMutableArray*log, NSMutableArray*res){
+    if (log.count&gt;0) {
+        NSRange loc = {[[log lastObject] integerValue],1};
+        NSMutableArray *cop = res.mutableCopy;
+        for (NSString *tmp in res) {
+            [cop addObject:[tmp stringByReplacingCharactersInRange:loc withString:@&quot;0&quot;]];
+            [cop addObject:[tmp stringByReplacingCharactersInRange:loc withString:@&quot;1&quot;]];
+            [cop removeObject:tmp];
+        }
+        [log removeLastObject];
+        return changeTo(log, cop);
+    }else{
+        return res;
+    }
+}
+
+NSArray *possibilities(NSString *s) {
+    NSMutableArray *log = @[].mutableCopy;
+    NSMutableArray *res = @[].mutableCopy;
+    for (int i = 0; i&lt;s.length; i++) {
+        if ([s characterAtIndex:i]==&#39;?&#39;) {
+            [log addObject:@(i)];
+        }
+    }
+    [res addObject:s];
+
+    NSArray *tol = changeTo(log , res);
+    
+    return tol;
+}
+</code></pre>
+
+<p>简化版：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSArray *possibilities(NSString *s) {
+  // NSLog(@&quot;User `possibilities` accidentally invoked!\n&quot;);
+  if ([s rangeOfString: @&quot;?&quot;].length == 0) return @[s];
+  NSString *r = [s stringByReplacingOccurrencesOfString: @&quot;?&quot; withString: @&quot;0&quot; options: 0 range: [s rangeOfString: @&quot;?&quot;]], *t = [s stringByReplacingOccurrencesOfString: @&quot;?&quot; withString: @&quot;1&quot; options: 0 range: [s rangeOfString: @&quot;?&quot;]];
+  return [possibilities(r) arrayByAddingObjectsFromArray: possibilities(t)];
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Simple Pig Latin]]></title>
+    <link href="https://lockxmonk.github.io/15143494387976.html"/>
+    <updated>2017-12-27T12:37:18+08:00</updated>
+    <id>https://lockxmonk.github.io/15143494387976.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15143494387976/15143494406501.jpg" alt=""/></p>
+
+<p>一开始的复杂版:</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSString *pigIt(NSString *s) {
+    NSMutableArray *str = [s componentsSeparatedByString:@&quot; &quot;].mutableCopy;
+    NSMutableString *res = @&quot;&quot;.mutableCopy;
+    for (NSString *tmp in str) {
+        unichar c = [tmp characterAtIndex:0];
+        if ((c&gt;=&#39;a&#39;&amp;&amp;c&lt;=&#39;z&#39;)||(c&gt;=&#39;A&#39;&amp;&amp;c&lt;=&#39;Z&#39;)) {
+            NSMutableString *change = tmp.mutableCopy;
+            [change appendFormat:@&quot;%c&quot;,c];
+            if ([tmp isEqualToString:[str lastObject]]) {
+                [change appendString:@&quot;ay&quot;];
+            }else{
+                [change appendString:@&quot;ay &quot;];
+            }
+            [res appendString:[change substringFromIndex:1]];
+        }else{
+            [res appendFormat:@&quot;%c&quot;,c];
+        }
+    }
+    return res;
+}
+</code></pre>
+
+<p>简化版</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSString *pigIt(NSString *s) {
+  NSMutableArray *result = [s componentsSeparatedByString: @&quot; &quot;];
+  for (size_t i = 0; i &lt; [result count]; i++) result[i] = [[[result[i] substringFromIndex: 1] stringByAppendingString: [result[i] substringToIndex: 1]] stringByAppendingString: @&quot;ay&quot;];
+  return [result componentsJoinedByString: @&quot; &quot;];
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Sum without highest and lowest number]]></title>
+    <link href="https://lockxmonk.github.io/15143439533653.html"/>
+    <updated>2017-12-27T11:05:53+08:00</updated>
+    <id>https://lockxmonk.github.io/15143439533653.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15143439533653/15143439550035.jpg" alt=""/></p>
+
+<pre><code class="language-objc">int sum(int* numbers, int numbersCount)
+{
+    if(numbersCount&lt;=1) return 0;
+    int min = INT_MAX;
+    int max = INT_MIN;
+    int sum = 0;
+    for (int i = 0; i&lt;numbersCount; i++)
+    {
+        if(numbers[i]&gt;max) max = numbers[i];
+        if(numbers[i]&lt;min) min = numbers[i];
+        sum+= numbers[i];
+    }
+    return sum-min-max;
+}
+
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Find the missing term in an Arithmetic Progression]]></title>
+    <link href="https://lockxmonk.github.io/15142765984953.html"/>
+    <updated>2017-12-26T16:23:18+08:00</updated>
+    <id>https://lockxmonk.github.io/15142765984953.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15142765984953/15142766000094.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSNumber *findMissing(NSArray *list) {
+    int len = [list count];
+    int n = len+1;
+    int d1 = [list[1] intValue]-[list[0] intValue];
+    int d2 = [list[len-1] intValue]-[list[len-2] intValue];
+    int d = 0;
+    if (d1&lt;0) {
+        d = d1&gt;d2?d1:d2;
+    }else{
+        d = d1&lt;d2?d1:d2;
+    }
+    if (n == 3) {
+        return @(([[list firstObject] intValue]+[[list lastObject] intValue])/2);
+    }
+    int num = [[list firstObject] intValue];
+    for (int i = 0;i&lt;len;i++) {
+        if ([list[i] intValue]!=num) {
+            return @(num);
+        }
+        num+=d;
+    }
+    
+    return @(0);
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Valid Parentheses]]></title>
+    <link href="https://lockxmonk.github.io/15141803762335.html"/>
+    <updated>2017-12-25T13:39:36+08:00</updated>
+    <id>https://lockxmonk.github.io/15141803762335.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15141803762335/15141803778513.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+bool validParentheses(NSString *s) {
+    // TODO: Return a boolean value indicating whether the
+    // order of parentheses in the given string is valid
+    if (s.length==0) {
+        return 0;
+    }
+    int sum = 0;
+    NSMutableArray *res = @[].mutableCopy;
+    for (int i = 0; i&lt;s.length; i++) {
+        if ([s characterAtIndex:i]==(unichar)&#39;(&#39;) {
+            [res addObject:@(&#39;(&#39;)];
+            sum++;
+        }
+        if ([s characterAtIndex:i]==(unichar)&#39;)&#39;) {
+            if ([[res lastObject] isEqual:@(&#39;(&#39;)]) {
+                [res removeObjectAtIndex:res.count-1];
+            }else{
+                [res addObject:@(&#39;)&#39;)];
+            }
+            sum--;
+        }
+    }
+    if (sum!=0||[res count]!=0) {
+        return 0;
+    }
+    return 1;
+}
+</code></pre>
+
+<p>简化版：</p>
+
+<pre><code class="language-objc">
+#import &lt;Foundation/Foundation.h&gt;
+
+bool validParentheses(NSString *s) {
+  int brackets = 0;
+  for (int i = 0; i &lt; [s length]; i++) {
+    if ([s characterAtIndex: i] == &#39;(&#39;) brackets++;
+    else if ([s characterAtIndex: i] == &#39;)&#39;) if (--brackets &lt; 0) return false;
+  }
+  return !brackets;
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Follow that Spy]]></title>
+    <link href="https://lockxmonk.github.io/15140206056964.html"/>
+    <updated>2017-12-23T17:16:45+08:00</updated>
+    <id>https://lockxmonk.github.io/15140206056964.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15140206056964/15140206079284.jpg" alt=""/></p>
+
+<p>自己的麻烦些的代码：用了<code>NSMapTable</code></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+NSString *findRoutes(NSArray *routes){
+    if ([routes count]==1) {
+        return [NSString stringWithFormat:@&quot;%@, %@&quot;,routes[0][0],routes[0][1]];
+    }
+    NSMapTable *map = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableWeakMemory];
+    NSMapTable *tol = [NSMapTable mapTableWithKeyOptions:NSMapTableStrongMemory valueOptions:NSMapTableWeakMemory];
+    for (NSArray *tmp in routes) {
+        [map setObject:tmp[1] forKey:tmp[0]];
+        for (NSString* tmpTol in tmp) {
+            if ([tol objectForKey:tmpTol]) {
+                [tol setObject:@&quot;1&quot; forKey:tmpTol];
+            }else{
+                [tol setObject:@&quot;0&quot; forKey:tmpTol];
+            }
+        }
+    }
+    NSString *str = @&quot;&quot;;
+    NSString *end = @&quot;&quot;;
+    NSEnumerator *enumerator = [tol keyEnumerator];
+    for (NSString *tmp in enumerator) {
+        if ([[tol objectForKey:tmp] isEqualToString:@&quot;0&quot;]) {
+            if (![map objectForKey:tmp]) {
+                end = tmp;
+                continue;
+            }
+            str = tmp;
+        }
+    }
+    NSString *res = @&quot;&quot;;
+    res = [res stringByAppendingFormat:@&quot;%@, &quot;, str];
+    while ([map objectForKey:str]) {
+       res =  [res stringByAppendingFormat:@&quot;%@, &quot;, [map objectForKey:str]];
+       str = [map objectForKey:str];
+        if ([[map objectForKey:str] isEqualToString:end]) {
+            res = [res stringByAppendingString:end];
+            break;
+        }
+    }
+    return res;
+}
+</code></pre>
+
+<p>别人的简短代码：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+NSString *findRoutes(NSArray *routes){
+
+    NSMutableArray * routesM = [routes mutableCopy];
+    NSMutableArray * answer = [@[routes[0][0]] mutableCopy];
+    do{
+        for(int i = (int)routesM.count - 1; i &gt;= 0; i--){
+            if([[answer lastObject] isEqualToString:routesM[i][0]]){
+                [answer addObject:routesM[i][1]];
+                [routesM removeObjectAtIndex:i];
+            } else if([[answer firstObject] isEqualToString:routesM[i][1]]){
+                [answer insertObject:routesM[i][0] atIndex:0];
+                [routesM removeObjectAtIndex:i];
+            }
+        }
+    } while (routesM.count &gt; 0);
+    return [answer componentsJoinedByString:@&quot;, &quot;];
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Simple Fun #4: Phone Call]]></title>
+    <link href="https://lockxmonk.github.io/15140141868103.html"/>
+    <updated>2017-12-23T15:29:46+08:00</updated>
+    <id>https://lockxmonk.github.io/15140141868103.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15140141868103/15140147655873.jpg" alt=""/><br/>
+<img src="media/15140141868103/15140147745826.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+int phoneCall(int min1, int min2_10, int min11, int s) {
+    if (s&lt;min1) return 0;
+    int sum = 1;
+    sum+= (s-min1)&gt;min2_10*9 ? 9 : (s-min1)/min2_10;
+    sum+= (s-min1-9*min2_10)&lt;0 ? 0 : (s-min1-9*min2_10)/min11;
+    return sum;
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Don't give me five!]]></title>
+    <link href="https://lockxmonk.github.io/15140137962108.html"/>
+    <updated>2017-12-23T15:23:16+08:00</updated>
+    <id>https://lockxmonk.github.io/15140137962108.html</id>
+    <content type="html"><![CDATA[
+<p>Don&#39;t give me five!</p>
+
+<p>In this kata you get the start number and the end number of a region and should return the count of all numbers except numbers with a 5 in it. The start and the end number are both inclusive!</p>
+
+<p>Examples:</p>
+
+<pre><code>1,9 -&gt; 1,2,3,4,6,7,8,9 -&gt; Result 8
+4,17 -&gt; 4,6,7,8,9,10,11,12,13,14,16,17 -&gt; Result 12
+</code></pre>
+
+<p>The result may contain fives. ;-)<br/>
+The start number will always be smaller than the end number. Both numbers can be also negative!</p>
+
+<p>I&#39;m very curious for your solutions and the way you solve it. Maybe someone of you will find an easy pure mathematics solution.</p>
+
+<p>Have fun coding it and please don&#39;t forget to vote and rank this kata! :-)</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+int dontGiveMeFive(int start, int end)
+{
+  int sum = 0;
+    for (int i = start; i&lt;=end; i++) {
+        if ([[NSString stringWithFormat:@&quot;%i&quot;,i] rangeOfString:@&quot;5&quot;].location!=NSNotFound) {
+            continue;
+        }
+        sum++;
+    }
+    return sum;
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Moves in squared strings (I)]]></title>
     <link href="https://lockxmonk.github.io/15139993814636.html"/>
     <updated>2017-12-23T11:23:01+08:00</updated>
     <id>https://lockxmonk.github.io/15139993814636.html</id>
     <content type="html"><![CDATA[
-<p><img src="media/15139993814636/15139994003399.jpg" alt=""/></p>
+<p><img src="media/15139993814636/15139993826350.jpg" alt=""/><br/>
+<img src="media/15139993814636/15139994003399.jpg" alt=""/></p>
 
 <p>题目链接：<a href="https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc">https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc</a></p>
 
@@ -375,489 +873,6 @@ public:
             //&amp;0xf表示取二进制的低四位
             res = HEX[(num&amp;0xf)]+res;
             num&gt;&gt;=4;
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Number of Boomerangs]]></title>
-    <link href="https://lockxmonk.github.io/15131518267208.html"/>
-    <updated>2017-12-13T15:57:06+08:00</updated>
-    <id>https://lockxmonk.github.io/15131518267208.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15131518267208/15131518346128.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int numberOfBoomerangs(vector&lt;pair&lt;int, int&gt;&gt;&amp; points) {
-        int res = 0;
-        for (int i =0; i&lt;points.size(); i++) {
-            unordered_map&lt;long, int&gt; map(points.size());
-            for (int j = 0; j&lt;points.size(); j++) {
-                if (j==i) continue;
-                int dy = points[j].second - points[i].second;
-                int dx = points[j].first - points[i].first;
-
-                int dis = dy*dy + dx*dx;
-                map[dis]++;
-            }
-
-            for (auto p : map) {
-                if (p.second&gt;1) {
-                    /*
-                     * for all the groups of points,
-                     * number of ways to select 2 from n =
-                     * nP2 = n!/(n - 2)! = n * (n - 1)
-                     */
-                    res+=p.second*(p.second-1);
-                }
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Longest Palindromic Substring]]></title>
-    <link href="https://lockxmonk.github.io/15130621165951.html"/>
-    <updated>2017-12-12T15:01:56+08:00</updated>
-    <id>https://lockxmonk.github.io/15130621165951.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15130621165951/15130621284508.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string longestPalindrome(string s) {
-        if (s.empty()) return &quot;&quot;;
-        if (s.size() == 1) return s;
-        int min_start = 0, max_len = 1;
-        for (int i = 0; i &lt; s.size();) {
-            if (s.size() - i &lt;= max_len / 2) break;
-            int j = i, k = i;
-            while (k &lt; s.size()-1 &amp;&amp; s[k+1] == s[k]) ++k; // Skip duplicate characters.
-            i = k+1;
-            while (k &lt; s.size()-1 &amp;&amp; j &gt; 0 &amp;&amp; s[k + 1] == s[j - 1]) { ++k; --j; } // Expand.
-            int new_len = k - j + 1;
-            if (new_len &gt; max_len) { min_start = j; max_len = new_len; }
-        }
-        return s.substr(min_start, max_len);
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Palindrome Pairs]]></title>
-    <link href="https://lockxmonk.github.io/15130603513802.html"/>
-    <updated>2017-12-12T14:32:31+08:00</updated>
-    <id>https://lockxmonk.github.io/15130603513802.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15130603513802/15130603727154.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool isPalindrome(string s) {
-        if (s.size() &lt;= 1) return true;
-        int i = 0;
-        int j = s.size() - 1;
-        while (i &lt; j) {
-            if (s[i++] != s[j--]) return false;
-        }
-
-        return true;
-    }
-
-    vector&lt;vector&lt;int&gt;&gt; palindromePairs(vector&lt;string&gt;&amp; words) {
-        vector&lt;vector&lt;int&gt;&gt; res;
-        if (!words.size()) return res;
-        unordered_map&lt;string, int&gt; word_idx;
-        for (int i = 0; i &lt; words.size(); ++i) {
-            word_idx[words[i]] = i;
-        }
-        vector&lt;int&gt; slu(2);
-        for (int i = 0; i &lt; words.size(); ++i) {
-            int len = words[i].length();
-            for (int l = 0; l &lt;= len; ++l) {
-                string left = words[i].substr(0, l);
-                string right = words[i].substr(l);
-                string rleft = left;
-                string rright = right;
-                reverse(rleft.begin(), rleft.end());
-                reverse(rright.begin(), rright.end());
-                if (word_idx.find(rleft) != word_idx.end()) {
-                    if (word_idx[rleft] != i &amp;&amp; isPalindrome(right)) {
-                        res.push_back({i,word_idx[rleft]});
-                    }
-
-                }
-                if (l != 0 &amp;&amp; word_idx.find(rright) != word_idx.end()) {
-                    if (word_idx[rright] != i &amp;&amp; isPalindrome(left)) {
-                        res.push_back({word_idx[rright],i});
-                    }
-
-                }
-
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Intersection of Two Arrays II]]></title>
-    <link href="https://lockxmonk.github.io/15130426368802.html"/>
-    <updated>2017-12-12T09:37:16+08:00</updated>
-    <id>https://lockxmonk.github.io/15130426368802.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15130426368802/15130427333668.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; intersect(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
-        unordered_map&lt;int, int&gt; map;
-        vector&lt;int&gt; res;
-        for(auto num1:nums1){
-            map[num1]++;
-        }
-
-        for(auto num2:nums2){
-            if (map[num2]&gt;0) {
-                map[num2]--;
-                res.push_back(num2);
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Sort Characters By Frequency]]></title>
-    <link href="https://lockxmonk.github.io/15129821006078.html"/>
-    <updated>2017-12-11T16:48:20+08:00</updated>
-    <id>https://lockxmonk.github.io/15129821006078.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15129821006078/15129821362536.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string frequencySort(string s) {
-        unordered_map&lt;char, int&gt; map;
-        for (int i =0; i&lt;s.length(); i++) {
-            map[s[i]]++;
-        }
-
-        sort(s.begin(), s.end(), [&amp;map](char a ,char b){
-            return map[a]&gt;map[b] || (map[a] == map[b] &amp;&amp; a &gt; b);
-        });
-        
-        return s;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[First Unique Character in a String]]></title>
-    <link href="https://lockxmonk.github.io/15129806433168.html"/>
-    <updated>2017-12-11T16:24:03+08:00</updated>
-    <id>https://lockxmonk.github.io/15129806433168.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15129806433168/15129806517273.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int firstUniqChar(string s) {
-        unordered_map&lt;char, int&gt; map;
-        for (int i =0; i&lt;s.length(); i++) {
-            map[s[i]]++;
-        }
-        for (int i =0; i&lt;s.length(); i++) {
-            if (map[s[i]]==1) {
-                return i;
-            }
-        }
-        return -1;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Minimum Moves to Equal Array Elements II]]></title>
-    <link href="https://lockxmonk.github.io/15129796221707.html"/>
-    <updated>2017-12-11T16:07:02+08:00</updated>
-    <id>https://lockxmonk.github.io/15129796221707.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15129796221707/15129796318879.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int minMoves2(vector&lt;int&gt;&amp; nums) {
-        int n = nums.size();
-        if(n &lt;= 1) return 0;
-        sort(nums.begin(), nums.end());
-        int mid = nums.size()/2 ,res = 0;
-        for(int i = 0; i &lt; mid; ++i)
-        {
-            res+=nums[mid]-nums[i];
-        }
-        for (int j = n-1; j&gt;mid; j--) {
-            res+=nums[j]-nums[mid];
-        }
-        return res;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Minimum Moves to Equal Array Elements]]></title>
-    <link href="https://lockxmonk.github.io/15129788527282.html"/>
-    <updated>2017-12-11T15:54:12+08:00</updated>
-    <id>https://lockxmonk.github.io/15129788527282.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15129788527282/15129788644532.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int minMoves(vector&lt;int&gt;&amp; nums) {
-        int n = nums.size();
-        if(n &lt;= 1)
-            return 0;
-        int mn = nums[0];   //mn为最小数字
-        int sum = nums[0];
-        for(int i = 1; i &lt; n; ++i)
-        {
-            mn = min(mn,nums[i]);
-            sum += nums[i];
-        }
-        return sum - mn*n;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Range Addition II]]></title>
-    <link href="https://lockxmonk.github.io/15129760305793.html"/>
-    <updated>2017-12-11T15:07:10+08:00</updated>
-    <id>https://lockxmonk.github.io/15129760305793.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15129760305793/15129772098038.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maxCount(int m, int n, vector&lt;vector&lt;int&gt;&gt;&amp; ops) {
-        for (auto tmp:ops) {
-            m = min(m, tmp[0]);
-            n = min(n, tmp[1]);
-        }
-        return m*n;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Beauty Contest（旋转卡壳）]]></title>
-    <link href="https://lockxmonk.github.io/15129738955534.html"/>
-    <updated>2017-12-11T14:31:35+08:00</updated>
-    <id>https://lockxmonk.github.io/15129738955534.html</id>
-    <content type="html"><![CDATA[
-<p>Description<br/>
-Bessie, Farmer John&#39;s prize cow, has just won first place in a bovine beauty contest, earning the title &#39;Miss Cow World&#39;. As a result, Bessie will make a tour of N (2 &lt;= N &lt;= 50,000) farms around the world in order to spread goodwill between farmers and their cows. For simplicity, the world will be represented as a two-dimensional plane, where each farm is located at a pair of integer coordinates (x,y), each having a value in the range -10,000 ... 10,000. No two farms share the same pair of coordinates.</p>
-
-<p>Even though Bessie travels directly in a straight line between pairs of farms, the distance between some farms can be quite large, so she wants to bring a suitcase full of hay with her so she has enough food to eat on each leg of her journey. Since Bessie refills her suitcase at every farm she visits, she wants to determine the maximum possible distance she might need to travel so she knows the size of suitcase she must bring.Help Bessie by computing the maximum distance among all pairs of farms.</p>
-
-<p>Input<br/>
- Line 1: A single integer, N</p>
-
-<p>Lines 2..N+1: Two space-separated integers x and y specifying coordinate of each farm</p>
-
-<p>Output<br/>
-Line 1: A single integer that is the squared distance between the pair of farms that are farthest apart from each other.</p>
-
-<p>Sample Input</p>
-
-<p>4<br/>
-0 0<br/>
-0 1<br/>
-1 1<br/>
-1 0</p>
-
-<p>Sample Output</p>
-
-<p>2</p>
-
-<h2 id="toc_0">算法思想</h2>
-
-<h3 id="toc_1">流程：</h3>
-
-<ol>
-<li><p>求凸包：最远点对一定在凸包上（可以反证法证之），所以找出凸包后在其上找最远点对就可以少考虑很多点。求凸包可用<code>andrew</code>算法，它是基于<code>graham</code>算法，且更快更稳定。不同于<code>graham</code>算法的逆时针排序，<code>andrew</code>算法采用了点的水平排序，然后分别求下凸包以及上凸包，这样下来整个的凸包便求好了。而且该算法可以解决凸包中有重合点、共线点等问题<img src="media/15129738955534/15129741482264.jpg" alt=""/></p></li>
-<li><p>旋转卡壳<br/>
-就是两个平行线正好把凸包卡住，其中卡着的点称为对踵点对.<br/>
-<img src="media/15129738955534/15129741907694.jpg" alt=""/></p></li>
-</ol>
-
-<p>那么怎么才能找到最远点对呢？<br/>
-<img src="media/15129738955534/15129742545712.jpg" alt=""/></p>
-
-<p>对于上图中的6个三角形的公共底边，可知当三角形的顶点在凸包上按逆时针旋转时，三角形的面积先由小变大再由大变小，即成单峰函数变化。所以在峰值时对应的凸包顶点距底边对应的两个对踵点的距离比其他情况大，这样，枚举每一个边并找到其面积单峰函数峰值对应的顶点，同时更新最大距离，旋转一趟下来便可以得到最后的结果。求面积单峰函数的峰值也很简单，就是通过叉积比较两个三角形的大小，当后者的面积比前者小时便找到了峰值，然后求距离更新最大值即可。</p>
-
-<pre><code class="language-c++">    #include &lt;cstdio&gt;  
-    #include &lt;vector&gt;  
-    #include &lt;algorithm&gt;  
-    #include &lt;cstring&gt;  
-    using namespace std;  
-    const int maxn = 50000 + 10;  
-    typedef int type_xy;  
-      
-    struct P  
-    {  
-        type_xy x, y;  
-        P() {}  
-        P(type_xy x, type_xy y) : x(x), y(y) {}  
-        P operator + (P p){ return P(x + p.x, y + p.y); }  
-        P operator - (P p){ return P(x - p.x, y - p.y); }  
-        P operator * (type_xy d){ return P(x*d, y*d); }  
-        bool operator &lt; (const P&amp; a) const  
-        {  
-            if (x != a.x) return x &lt; a.x;  
-            else return y &lt; a.y;  
-        }  
-        type_xy dot(P p) { return x*p.x + y*p.y; }  
-        type_xy det(P p) { return x*p.y - y*p.x; }  
-    };  
-      
-    int N;  
-    P ps[maxn];  
-      
-    //字典序比较  
-    bool cmp_x(const P&amp; p, const P&amp; q)  
-    {  
-        if (p.x != q.x)  
-            return p.x &lt; q.x;  
-        return p.y &lt; q.y;  
-    }  
-      
-    //求凸包  
-    vector&lt;P&gt; convex_hull(P* ps, int n)  
-    {  
-        sort(ps, ps + n, cmp_x);  
-        int k = 0;          //凸包的顶点数  
-        vector&lt;P&gt; qs(n * 2);        //构造中的凸包  
-        //构造凸包的下侧  
-        for (int i = 0; i &lt; n; i++){  
-            while (k &gt; 1 &amp;&amp; (qs[k - 1] - qs[k - 2]).det(ps[i] - qs[k - 1]) &lt;= 0)  
-                k--;  
-            qs[k++] = ps[i];  
-        }  
-        //构造凸包的上侧  
-        for (int i = n - 2, t = k; i &gt;= 0; i--){  
-            while (k &gt; t &amp;&amp; (qs[k - 1] - qs[k - 2]).det(ps[i] - qs[k - 1]) &lt;= 0)  
-                k--;  
-            qs[k++] = ps[i];  
-        }  
-        qs.resize(k - 1);  
-        return qs;  
-    }  
-      
-    //距离的平方  
-    double dist(P p, P q)  
-    {  
-        return (p - q).dot(p - q);  
-    }  
-      
-      
-    void solve()  
-    {  
-        vector&lt;P&gt; qs = convex_hull(ps, N);  
-        int n = qs.size();  
-        if (n == 2){         //特别处理凸包退化的情况  
-            printf(&quot;%.0f\n&quot;, dist(qs[0], qs[1]));  
-            return;  
-        }  
-        int i = 0, j = 0;           //某个方向上的对踵点对  
-        //求出x轴方向上的对踵点对  
-        for (int k = 0; k &lt; n; k++){  
-            if (!cmp_x(qs[i], qs[k]))  
-                i = k;  
-            if (cmp_x(qs[j], qs[k]))  
-                j = k;  
-        }  
-        double res = 0;  
-        int si = i, sj = j;  
-        while (i != sj || j != si){     //将方向逐步旋转180度  
-            res = max(res, dist(qs[i], qs[j]));  
-            //判断先转到边i-(i+1)的法线方向还是边j-(j+1)的法线方向  
-            if ((qs[(i + 1) % n] - qs[i]).det(qs[(j + 1) % n] - qs[j]) &lt; 0)  
-                i = (i + 1) % n;        //先转到边i-(i+1)的法线方向  
-            else  
-                j = (j + 1) % n;        //先转到边j-(j+1)的法线方向  
-        }  
-        printf(&quot;%.0f\n&quot;, res);  
-    }  
-      
-    int main()  
-    {  
-        while (scanf(&quot;%d&quot;, &amp;N) != EOF){  
-            for (int i = 0; i &lt; N; i++){  
-                scanf(&quot;%d%d&quot;, &amp;ps[i].x, &amp;ps[i].y);  
-            }  
-            solve();  
-        }  
-        return 0;  
-    }  
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Excel Sheet Column Title]]></title>
-    <link href="https://lockxmonk.github.io/15129633578167.html"/>
-    <updated>2017-12-11T11:35:57+08:00</updated>
-    <id>https://lockxmonk.github.io/15129633578167.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15129633578167/15129633692969.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string convertToTitle(int n) {
-        string res = &quot;&quot;;
-        while (n!=0) {
-            res = char(&#39;A&#39;+(--n)%26)+res;
-            n=n/26;
         }
         return res;
     }

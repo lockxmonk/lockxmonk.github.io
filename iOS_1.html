@@ -117,6 +117,185 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15042539845357.html">
+                
+                  <h1>KVO的简单实现</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>之间看有关<code>OC</code>和<code>iOS</code>的书都会看到<code>KVO</code>这个名词。所以今天来学习和实现一下。简单的说<code>KVO</code>即<code>Key-Value Observing</code>,它提供一种机制,当指定的对象的属性被修改后,则对象就会接受到通知。 </p>
+
+<p>它来源于设计模式中的观察者模式，其基本思想就是：</p>
+
+<blockquote>
+<p>一个目标对象管理所有依赖于它的观察者对象，并在它自身的状态改变时主动通知观察者对象。这个主动通知通常是通过调用各观察者对象所提供的接口方法来实现的。观察者模式较完美地将目标对象与观察者对象解耦。</p>
+</blockquote>
+
+<p>我们一般用到的都是自动实现<code>KVO</code>，所以我这里就不实现手动的<code>KVO</code>了。实现<code>KVO</code>需要两个主要的方法：</p>
+
+<pre><code class="language-objc">//注册观察者
+- (void)addObserver:(NSObject *)observer 
+        forKeyPath:(NSString *)keyPath 
+        options:(NSKeyValueObservingOptions)options 
+        context:(void *)context;
+        
+//当观察的对象属性有所改变就会通知观察者，该方法用来处理变更通知
+- (void)observeValueForKeyPath:(NSString *)keyPath 
+                     ofObject:(id)object 
+                        change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change 
+                        context:(void *)context;
+</code></pre>
+
+<p>这两个方法在<code>Foundation/NSKeyValueObserving.h</code>中，<code>NSObject，NSArray，NSSet</code>均实现了以上方法，因此我们不仅可以观察普通对象，还可以观察数组或结合类对象。</p>
+
+<p>我们来举例说明：</p>
+
+<p>创建一个观察者类：</p>
+
+<pre><code class="language-objc">//
+//  Observer.h
+//  KVO机制
+//
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface Observer : NSObject
+
+@end
+
+
+
+//  Observer.m
+//  KVO机制
+#import &quot;Observer.h&quot;
+
+@implementation Observer
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary&lt;NSKeyValueChangeKey,id&gt; *)change context:(void *)context{
+    //判断发送过来的通知中更改的属性是否是name
+    if ([keyPath isEqualToString:@&quot;name&quot;]) {
+        //获取更改属性的类的信息
+        Class classInfo = (__bridge Class)context;
+        NSString *className = [NSString stringWithFormat:@&quot;%s&quot;, object_getClassName(classInfo)];
+        NSLog(@&quot; &gt;&gt; class : [%@] , Name changed&quot;, className);
+        NSLog(@&quot; &gt;&gt; old name is %@&quot;, [change objectForKey:@&quot;old&quot;]);
+        NSLog(@&quot; &gt;&gt; new name is %@&quot;, [change objectForKey:@&quot;new&quot;]);
+    
+    }else{
+        /*
+         *注意：在实现处理变更通知方法 observeValueForKeyPath 时，
+         *要将不能处理的 key 转发给 super 的 observeValueForKeyPath 来处理。
+         */
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
+}
+
+@end
+
+</code></pre>
+
+<p>然后创建一个用于观察的<code>Target</code>类</p>
+
+<pre><code class="language-objc">//  Target.h
+//  KVO机制
+
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface Target : NSObject
+
+@property(nonatomic,assign) NSString *name;
+
+@end
+
+
+//  Target.m
+//  KVO机制
+
+
+#import &quot;Target.h&quot;
+
+@implementation Target
+//给name属性一个初始值，用于检测变化
+-(instancetype)init{
+    if (self = [super init]) {
+        _name = @&quot;yue&quot;;
+    }
+    return self;
+}
+@end
+</code></pre>
+
+<p>然后我们在<code>main.m</code>中添加观察者来执行：</p>
+
+<pre><code class="language-objc">//  main.m
+//  KVO机制
+
+
+#import &lt;Foundation/Foundation.h&gt;
+#import &quot;Observer.h&quot;
+#import &quot;Target.h&quot;
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        //分别创建实例
+        Observer *observer = [[Observer alloc]init];
+        Target *target = [[Target alloc]init];
+        
+        //target 增加一个观察者，用于观察name属性
+        [target addObserver:observer forKeyPath:@&quot;name&quot; options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld context:(__bridge void * _Nullable)([Target class])];
+        //更改name属性的值，响应观察者的动作
+        [target setName:@&quot;hao&quot;];
+        //移除name的观察者，防止内存泄露
+        [target removeObserver:observer forKeyPath:@&quot;name&quot;];
+    }
+    return 0;
+}
+
+</code></pre>
+
+<p>我们运行后结果如下：</p>
+
+<p><img src="media/15042539845357/15042556319090.jpg" alt=""/></p>
+
+<p>可以发现是<code>Target</code>类发送过来的通知，说明属性已经变更。</p>
+
+<p>下面我们来讨论一下传过来了的参数。其中<code>addObserver</code>方法中的<code>option：</code>参数用于指定应该包含哪种通知。其中主要有以下几种：</p>
+
+<ul>
+<li><strong>NSKeyValueObservingOptionNew</strong>：指出<code>change</code>字典应该包含有新的属性（如果适用）。</li>
+<li><strong>NSKeyValueObservingOptionOld</strong>：指出<code>change</code>字典应该包含有旧的属性（如果适用）。</li>
+<li><strong>NSKeyValueObservingOptionInitial</strong>：把初始化的值提供给处理方法，一旦注册，立马就会调用一次。通常它会带有新值，而不会带有旧值。</li>
+<li><strong>NSKeyValueObservingOptionPrior</strong>： 分2次调用。在值改变之前和值改变之后。</li>
+</ul>
+
+<p>其中<code>observeValueForKeyPath</code>方法中的<code>change</code>参数是一个字典型数据。会根据<code>option</code>参数的变化来生成不同的数据。一般会包含<code>new</code>和<code>old</code>两个<code>key</code>。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15041689865677.html">
                 
                   <h1>指针问题</h1>
@@ -592,133 +771,6 @@ int main(int argc, const char * argv[]) {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14948283904445.html">
-                
-                  <h1>在RN中利用原生Document Interaction Controller来预览和打开文档</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>在react-native开发中有一个功能需求为，打开之前已经下载到Documents中的文件。一开始本想用webview来加载文件。后来发现有<code>UIDocumentInteractionController</code>这个api来更好的完成这个功能。</p>
-
-<p>首先在RN引用的类中加入<code>UIDocumentInteractionControllerDelegate</code>我们要用到这个来呈现预览视图：</p>
-
-<p>NativeUtil.h</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-#import &quot;RCTBridgeModule.h&quot;
-#import &quot;UIView+React.h&quot;       //要引入这个头文件，在rn中创建和加载原声视图
-
-
-@interface NativeUtil : NSObject &lt;RCTBridgeModule,UIDocumentInteractionControllerDelegate&gt;
-
-@end
-</code></pre>
-
-<p>在NativeUtil.m中实现该委托。定义一个暴露给RN的方法，在js中调用：</p>
-
-<pre><code class="language-objc">RCT_EXPORT_METHOD(ShowFileChooser: (RCTResponseSenderBlock)callback){
-  
-    NSString *filePath = @&quot;ceshi007&quot;;           callback(@[[NSNull null],filePath]);    //测试callback，从native向rn传值。
-
-
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);           //获取应用本沙盒内的目录。
-    NSString *documentpath = paths[0];      //获取document的路径
-    NSString *fileName = [documentpath stringByAppendingPathComponent:@&quot;Screenshot_2016-12-15-21-29-07-50.png&quot;];            //指定上述图片的路径。
-  NSURL *fileURL = [NSURL fileURLWithPath:fileName];
-  dispatch_async(dispatch_get_main_queue(), ^{              //运行主线程来加载界面，并初始化UIDocumentInteractionController
-    UIDocumentInteractionController *documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:fileURL];
-    documentInteractionController.delegate =self ;
-    [documentInteractionController presentPreviewAnimated:YES];             //present出来文件的预览界面。
-  });
-  
-}
-</code></pre>
-
-<p>之后定义<code>(UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller</code>方法，要加载出来预览的界面，上述方法必须实现，且返回一个当前的页面的ViewController。用于作为预览视图的父ViewController来弹出modal。</p>
-
-<pre><code class="language-objc">- (UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller{
-  UIViewController *newVC =[self getPresentedViewController];  //获取当前屏幕中present出来的viewcontroller。
-   return newVC;
-};
-</code></pre>
-
-<p>这里我们是在一个非视图类创建并在加载一个视图，所以我们要先获取到当前界面的<code>ViewController</code>，将被展示的<code>view</code>加到当前<code>view</code>的子视图，或用当前view <code>presentViewController</code>，或<code>pushViewContrller</code>。这里我从网上找到了两个方法：</p>
-
-<pre><code class="language-objc">//获取当前屏幕显示的viewcontroller
-- (UIViewController *)getCurrentVC  
-{  
-    UIViewController *result = nil;  
-      
-    UIWindow * window = [[UIApplication sharedApplication] keyWindow];  
-    if (window.windowLevel != UIWindowLevelNormal)  
-    {  
-        NSArray *windows = [[UIApplication sharedApplication] windows];  
-        for(UIWindow * tmpWin in windows)  
-        {  
-            if (tmpWin.windowLevel == UIWindowLevelNormal)  
-            {  
-                window = tmpWin;  
-                break;  
-            }  
-        }  
-    }  
-      
-    UIView *frontView = [[window subviews] objectAtIndex:0];  
-    id nextResponder = [frontView nextResponder];  
-      
-    if ([nextResponder isKindOfClass:[UIViewController class]])  
-        result = nextResponder;  
-    else  
-        result = window.rootViewController;  
-      
-    return result;  
-} 
-</code></pre>
-
-<pre><code class="language-objc">//获取当前屏幕中present出来的viewcontroller
-- (UIViewController *)getPresentedViewController  
-{  
-    UIViewController *appRootVC = [UIApplication sharedApplication].keyWindow.rootViewController;  
-    UIViewController *topVC = appRootVC;  
-    if (topVC.presentedViewController) {  
-        topVC = topVC.presentedViewController;  
-    }  
-      
-    return topVC;  
-}
-</code></pre>
-
-<blockquote>
-<p>在RN中，使用modal组件之后，弹出的modal视图的viewcontroller相当于present出来的viewcontroller.</p>
-</blockquote>
-
-<p>之后使用<code>[self getPresentedViewController]</code>就可以获得<code>viewcontroller</code>来加载视图。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/15</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -730,7 +782,7 @@ int main(int argc, const char * argv[]) {
 			  </div>
 			  <div class="large-6 columns">
 			<p class="text-right" style="padding-top:25px;">
-			
+			 <a href="iOS_2.html">&raquo; Next Page</a> 
 			</p>
 			  </div>
 			</div>
@@ -808,31 +860,31 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
-			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
+			        <a href="15152183997863.html">Where my anagrams at?</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139938131506.html">Sum of many ints</a>
+			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139334894228.html"> Longest Univalue Path</a>
+			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15137396102567.html">Isomorphic Strings</a>
+			        <a href="15145180239158.html">1's, 0's and wildcards</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15136732474119.html">Path Sum II</a>
+			        <a href="15143494387976.html">Simple Pig Latin</a>
 			      </li>
 		     
 		  

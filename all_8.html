@@ -117,36 +117,25 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15123924891077.html">
+                <a class="clearlink" href="15126366447476.html">
                 
-                  <h1>Implement strStr()</h1>
+                  <h1>Nim Game</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15123924891077/15123924935113.jpg" alt=""/></p>
+                        	<p>You are playing the following Nim Game with your friend: There is a heap of stones on the table, each time one of you take turns to remove 1 to 3 stones. The one who removes the last stone will be the winner. You will take the first turn to remove the stones.</p>
+
+<p>Both of you are very clever and have optimal strategies for the game. Write a function to determine whether you can win the game given the number of stones in the heap.</p>
+
+<p>For example, if there are 4 stones in the heap, then you will never win the game: no matter 1, 2, or 3 stones you remove, the last stone will always be removed by your friend.</p>
+
+<p>列举1~n情况，每4个一循环.</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int strStr(string haystack, string needle) {
-        int j = 0;  //标记needle的初始位置
-        int h = haystack.length(), n = needle.length();
-        if (!n) {
-            return 0;
-        }
-        for (int i =0; i&lt;h-n+1; i++) {
-            int tmp = i;
-            while (tmp&lt;h &amp;&amp; j&lt;n &amp;&amp; haystack[tmp]==needle[j]) {
-                tmp++;
-                j++;
-            }
-            if (j==n) {
-                return i;
-            }else{
-                j=0;
-            }
-        }
-        return -1;
+    bool canWinNim(int n) {
+        return n%4!=0;
     }
 };
 </code></pre>
@@ -158,7 +147,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/4</span>
+                    <span class="date">2017/12/7</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -175,262 +164,36 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15123884479504.html">
+                <a class="clearlink" href="15126354530210.html">
                 
-                  <h1>String Compression</h1>
+                  <h1>Next Greater Element I</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given an array of characters, compress it in-place.</p>
-
-<p>The length after compression must always be smaller than or equal to the original array.</p>
-
-<p>Every element of the array should be a character (not int) of length 1.</p>
-
-<p>After you are done modifying the input array in-place, return the new length of the array.</p>
-
-<p>Follow up:<br/>
-Could you solve it using only O(1) extra space?</p>
-
-<p><img src="media/15123884479504/15123884710226.jpg" alt=""/></p>
+                        	<p><img src="media/15126354530210/15126354552862.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int compress(vector&lt;char&gt;&amp; chars) {
-        int tol = 1;    //统计相同字符的数量
-        for (int i = 0; i&lt;chars.size(); i++) {
-            while (i!=chars.size()-1 &amp;&amp; chars[i]==chars[i+1]) {
-                chars.erase(chars.begin()+i+1);
-                tol++;
-            }
-            int log = 0; //标记插入数字是1的情况
-            int logNum = 0;  //统计插入的数字个数
-            while (log==1||tol!=1 &amp;&amp; tol&gt;0) {
-                chars.insert(chars.begin()+i+1, char(tol%10+&#39;0&#39;));
-                tol/=10;
-                log = tol==1?tol:0;
-                logNum++;
-            }
-            i+=logNum;
-            tol = 1;
-        }
-        return chars.size();
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15123785215963.html">
-                
-                  <h1>Count Binary Substrings</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15123785215963/15123785359347.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int countBinarySubstrings(string s) {
+    vector&lt;int&gt; nextGreaterElement(vector&lt;int&gt;&amp; findNums, vector&lt;int&gt;&amp; nums) {
         vector&lt;int&gt; res;
-        int tol = 1;
-        for (int i=1; i&lt;=s.length(); i++) {
-            if (s[i]==s[i-1]) {
-                tol++;
-            }else{
-                res.push_back(tol);
-                tol =1;
-            }
-        }
-        int count = 0;
-        for(int i=1, n=res.size(); i&lt;n; ++i){
-            count += min(res[i-1], res[i]);
-        }
-        return count;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15123751997678.html">
-                
-                  <h1>Detect Capital</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15123751997678/15123752096895.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool detectCapitalUse(string word) {
-        int a[word.length()];
-        int r = 0;
-        for (int i = 0; i&lt;word.length(); i++) {
-            if (word[i]&gt;=&#39;A&#39;&amp;&amp;word[i]&lt;=&#39;Z&#39;) {
-                a[i] = 1;
-                r+=a[i];
-            }
-        }
-        if (r==word.length()||(a[0]==1&amp;&amp;r==1)||r==0) {
-            return true;
-        }
-        return false;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15123699886595.html">
-                
-                  <h1>Reverse String</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15123699886595/15123699978085.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string reverseString(string s) {
-        int str = 0;
-        int end = s.length()-1;
-        while (str&lt;=end) {
-            char tmp;
-            tmp = s[str];
-            s[str] = s[end];
-            s[end] = tmp;
-            str++;
-            end--;
-        }
-        return s;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15123539966341.html">
-                
-                  <h1>Reverse Words in a String III</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15123539966341/15123540495829.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string reverseWords(string s) {
-        string res;
-        int str = 0;
-        for (int i=0; i&lt;s.length(); i++) {
-            if (s[i]==&#39; &#39;||i==s.length()-1) {
-                int j = i==s.length()-1 ? i:i-1;
-                while (j&gt;=str) {
-                    char tmp = s[str];
-                    s[str] = s[j];
-                    s[j] = tmp;
-                    j--;
-                    str++;
+        for(auto num1:findNums){
+            for (int i = 0; i&lt;nums.size(); i++) {
+                int log = 0;
+                if (nums[i]==num1) {
+                    for (int j = i; j&lt;nums.size(); j++) {
+                        if (nums[j]&gt;num1) {
+                            res.push_back(nums[j]);
+                            log = 1;
+                            break;
+                        }
+                    }
+                    if (log == 0) res.push_back(-1);
+                    break;
                 }
-                str = i+1;
             }
         }
-
-        return s;
+        return res;
     }
 };
 </code></pre>
@@ -442,7 +205,225 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/4</span>
+                    <span class="date">2017/12/7</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15126325722591.html">
+                
+                  <h1>Island Perimeter</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15126325722591/15126325750006.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int islandPerimeter(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        int squNum = 0 ,log = 0;
+        for (int i = 0; i&lt;grid.size(); i++) {
+            for (int j = 0; j&lt;grid[0].size(); j++) {
+                if (grid[i][j]==1) {
+                    squNum++;
+                    if (i!=0&amp;&amp;grid[i-1][j]==1) {
+                        log+=2;
+                    }
+                    if (j!=grid[0].size()-1&amp;&amp;grid[i][j+1]==1) {
+                        log+=2;
+                    }
+                }
+            }
+        }
+        return squNum*4-log;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/7</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15126119727244.html">
+                
+                  <h1>Hamming Distance</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15126119727244/15126119824070.jpg" alt=""/></p>
+
+<p>利用按位异或操作<code>^</code>来标记不同的位置。<br/>
+<code>c++<br/>
+class Solution {<br/>
+public:<br/>
+    int hammingDistance(int x, int y) {<br/>
+        int tmp = x^y;<br/>
+        int res = 0;<br/>
+        while (tmp) {<br/>
+            if ((tmp&gt;&gt;1)&lt;&lt;1!=tmp) {<br/>
+                res++;<br/>
+            }<br/>
+            tmp&gt;&gt;=1;<br/>
+        }<br/>
+        return res;<br/>
+    }<br/>
+};<br/>
+</code></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/7</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15125498375074.html">
+                
+                  <h1>Keyboard Row</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15125498375074/15125498549999.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;string&gt; findWords(vector&lt;string&gt;&amp; words) {
+        set&lt;char&gt; row1 = {&#39;q&#39;, &#39;w&#39;, &#39;e&#39;, &#39;r&#39;, &#39;t&#39;, &#39;y&#39;,&#39;u&#39;, &#39;i&#39;, &#39;o&#39;, &#39;p&#39;};
+        set&lt;char&gt; row2 = {&#39;a&#39;, &#39;s&#39;, &#39;d&#39;, &#39;f&#39;, &#39;g&#39;, &#39;h&#39;, &#39;j&#39;, &#39;k&#39;, &#39;l&#39;};
+        set&lt;char&gt; row3 = { &#39;z&#39;, &#39;x&#39;, &#39;c&#39;, &#39;v&#39;, &#39;b&#39; ,&#39;n&#39;, &#39;m&#39;};
+        vector&lt;set&lt;char&gt;&gt; rows = {row1,row2,row3};
+        vector&lt;string&gt; res;
+        for (auto str: words) {
+            int log = 0;
+            for (int i = 0; i&lt;rows.size(); i++) {
+                if (rows[i].count((char)tolower(str[0]))&gt;0) {
+                    log = i;
+                }
+            }
+            for (int j = 0; j&lt;str.length(); j++) {
+                if (rows[log].count((char)tolower(str[j]))==0) {
+                    break;
+                }
+                if (j==str.length()-1) {
+                    res.push_back(str);
+                }
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/6</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15125446581353.html">
+                
+                  <h1>Repeated String Match</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15125446581353/15125446683319.jpg" alt=""/></p>
+
+<p>要考虑<code>&quot;abc&quot; &quot;abc&quot; &quot;abc&quot;</code>和<code>&quot;c abc a&quot;</code>的情况，所以<code>i&lt;=lenB/lenA+2</code><br/>
+<code>c++<br/>
+class Solution {<br/>
+public:<br/>
+    int repeatedStringMatch(string A, string B) {<br/>
+        int lenA = A.length(),lenB = B.length();<br/>
+        string tmp = A;<br/>
+        for (int i = 1; i&lt;=lenB/lenA+2; i++ , tmp+=A) {<br/>
+            if (tmp.find(B)!=string::npos) {<br/>
+                return i;<br/>
+            }<br/>
+        }<br/>
+        return -1;<br/>
+    }<br/>
+};<br/>
+</code></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/6</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -547,31 +528,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
+			        <a href="15152183997863.html">Where my anagrams at?</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139938131506.html">Sum of many ints</a>
+			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139334894228.html"> Longest Univalue Path</a>
+			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15137396102567.html">Isomorphic Strings</a>
+			        <a href="15145180239158.html">1's, 0's and wildcards</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15136732474119.html">Path Sum II</a>
+			        <a href="15143494387976.html">Simple Pig Latin</a>
 			      </li>
 		     
 		  

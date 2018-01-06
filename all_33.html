@@ -117,131 +117,726 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="14922429288489.html">
+                <a class="clearlink" href="14932573311953.html">
                 
-                  <h1>使用模块</h1>
+                  <h1>图像去雾相关论文总结</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
                         	<ul>
 <li>
-<a href="#toc_0">模块介绍</a>
+<a href="#toc_0">1.特征学习的单幅图像去雾算法 2016年</a>
+</li>
+</ul>
 </li>
 <li>
-<a href="#toc_1">模块的使用</a>
+<a href="#toc_1">2.尺度自适应暗通道先验去雾方法</a>
+
+
+<h2 id="toc_0">1.特征学习的单幅图像去雾算法 2016年</h2>
+
+<p><strong>目的：</strong>为提高图像去雾的普适性，提出一种特征学习的单幅图像去雾方法。</p>
+
+<p><strong>方法：</strong>通过稀疏自动编码机对有雾图像进行<strong>多尺度的纹理结构特征提取</strong>，同时抽取各种与雾相关的颜色特征。然后采用多层神经网络进行样本训练，得到雾天条件下纹理结构特征及颜色特征与场景深度间的映射关系，并估算出有雾图像的场景深度图。最后结合大气散射模型，根据场景深度图复原无雾图像。</p>
+
+<p><strong>结论：对实验结果的定性及定量分 析表明，本文算法能有效获取有雾图像的场景深度，复原出视觉效果理想的无雾图像，且具有很好的场景普适性。</strong></p>
+
+<p><strong>理解</strong>：<font color=red>本文认为图像去雾的问题可进一步转化为场景深度d的求解问题。</font>本文通过自动编码机获取到图片中物体的纹理特征，然后用多尺度的方法分别提取<strong>颜色特征、暗原色特征、颜色衰减特征、纹理结构</strong>特征。<strong>四者结合对场景深度进行估计</strong>。</p>
+
+<p><strong>可以改进的</strong>：</p>
+
+<ol>
+<li><p>算法实时性不够强，效率比较低，可以考虑缩小图片尺寸，降低数据量，从而运用到视频去雾。</p></li>
+<li><p>对雾气分布不均匀的图像，效果不理想，需要结合不同的气象模型来建立更为鲁棒的物理模型。</p></li>
+</ol>
+
+<h1 id="toc_1">2.尺度自适应暗通道先验去雾方法</h1>
+
+<p><strong>目的：</strong><br/>
+针对暗通道先验去雾方法的尺度选择问题 提出了一种尺度自适应方法， 根据图像的颜色和边 缘特征将暗通道求解的尺度自适应地调整到一个合适的范围。</p>
+
+<p><strong>方法：</strong></p>
+
+<ol>
+<li><p>由颜色特征求解初始尺度：<font color=red>对于图像的不同区域采用不同的尺度求解暗通道: 在亮度较低或饱和度较高的区域，采用较小尺度; 在亮度较高且饱和度较低的区域，采用较大尺度;在景深突变处，采用较小尺度;在平滑区域，采用较大尺度。</font></p></li>
+<li><p>由边缘特征对尺度进行修正:由于“光晕”现象发生在景深突变处，如果在边缘附近采用较小的尺度，可使透射率的求解窗口\(Ω_r(x)\)尽量不跨越景深边界，从而减小“光晕”现象; 在非边缘处采用较大的尺度，可以增大 \(J_{dark}(x)→0\)的概率，使复原图像的背景更平滑，噪声和失真更小。 由边缘特征对初始尺度\(r_0(x)\)进行修正.</p></li>
+</ol>
+
+<p><strong>结论：</strong><br/>
+整个去雾过程参数自动配置，无需人工干预，兼顾不同尺度复原图像的优点，复原图像色彩自然，对比度提升显著，并有效抑制了“光晕”现象。对多种雾化场景图像的处理结果表明: <strong>文中方法对场景的适应性强， 在任何情况下的处理结果均能达到 DG 方法的最优结果，甚至更好。</strong></p>
+
+<p><strong>理解：</strong><br/>
+该论文主要是针对HE的去雾方法，对暗通道尺寸进行自适应确定，减少了人工干预的复杂度。</p>
+
+<p><strong>可以改进：</strong><br/>
+<font color=red>该算法在运行时间上可以改进，也可以利用机器学习的方法来提取图片特征，避免Canny算子的局限性造成的边缘提取误差。<br/>
+可以与上篇论文进行结合来提高上文尺度特征提取的效率。</font></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/27</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14928484245894.html">
+                
+                  <h1>文档测试</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>如果你经常阅读Python的官方文档，可以看到很多文档都有示例代码。比如<a href="https://docs.python.org/2/library/re.html">re</a>模块就带了很多示例代码：</p>
+
+<pre><code>&gt;&gt;&gt; import re
+&gt;&gt;&gt; m = re.search(&#39;(?&lt;=abc)def&#39;, &#39;abcdef&#39;)
+&gt;&gt;&gt; m.group(0)
+&#39;def&#39;
+</code></pre>
+
+<p>可以把这些示例代码在Python的交互式环境下输入并执行，结果与文档中的示例代码显示的一致。</p>
+
+<p>这些代码与其他说明可以写在注释中，然后，由一些工具来自动生成文档。既然这些代码本身就可以粘贴出来直接运行，那么，可不可以自动执行写在注释中的这些代码呢？</p>
+
+<p>答案是肯定的。</p>
+
+<p>当我们编写注释时，如果写上这样的注释：</p>
+
+<pre><code class="language-py">
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/22</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14928429198094.html">
+                
+                  <h1>单元测试</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我们来编写一个<code>Dict</code>类，这个类的行为和<code>dict</code>一致，但是可以通过属性来访问，用起来就像下面这样：</p>
+
+<pre><code>&gt;&gt;&gt; d = Dict(a=1, b=2)
+&gt;&gt;&gt; d[&#39;a&#39;]
+1
+&gt;&gt;&gt; d.a
+1
+</code></pre>
+
+<p>mydict.py代码为：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Dict(dict):
+
+    def __init__(self, **kw):
+        super(Dict, self).__init__(**kw)
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(r &quot; &#39;Dict&#39; object has no atr &#39;%s&#39; &quot; % key)
+        else:
+            pass
+        finally:
+            pass
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+</code></pre>
+
+<p>为了编写单元测试，我们需要引入Python自带的<code>unittest</code>模块，编写<code>mydict_test.py</code>如下：</p>
+
+<pre><code class="language-py">import unittest
+
+from mydict import Dict
+
+
+class TestDict(unittest.TestCase):
+
+    def test_init(self):
+        d = Dict(a=1, b=&#39;test&#39;)
+        self.assertEquals(d.a, 1)
+        self.assertEquals(d.b, &#39;test&#39;)
+        self.assertTrue(isinstance(d, dict))
+
+    def test_key(self):
+        d = Dict()
+        d[&#39;key&#39;] = &#39;value&#39;
+        self.assertEquals(d.key, &#39;value&#39;)
+
+    def test_attr(self):
+        d = Dict()
+        d.key = &#39;value&#39;
+        self.assertTrue(&#39;key&#39; in d)
+        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
+
+    def test_keyerror(self):
+        d = Dict()
+        with self.assertRaises(KeyError):
+            value = d[&#39;empty&#39;]
+
+    def test_attrerror(self):
+        d = Dict()
+        with self.assertRaises(AttributeError)
+            value = d.empty
+
+</code></pre>
+
+<p>编写单元测试时，我们需要编写一个测试类，从<code>unittest.TestCase</code>继承。</p>
+
+<p>以<code>test</code>开头的方法就是测试方法，不以<code>test</code>开头的方法不被认为是测试方法，测试的时候不会被执行。</p>
+
+<p>对每一类测试都需要编写一个<code>test_xxx()</code>方法。由于<code>unittest.TestCase</code>提供了很多内置的条件判断，我们只需要调用这些方法就可以断言输出是否是我们所期望的。最常用的断言就是<code>assertEquals()：</code></p>
+
+<pre><code class="language-py">self.assertEquals(abs(-1), 1) # 断言函数返回的结果与1相等
+</code></pre>
+
+<p>另一种重要的断言就是期待抛出指定类型的<code>Error</code>，比如通过<code>d[&#39;empty&#39;]</code>访问不存在的key时，断言会抛出<code>KeyError</code>：</p>
+
+<pre><code class="language-py">with self.assertRaises(KeyError):
+    value = d[&#39;empty&#39;]
+</code></pre>
+
+<p>而通过<code>d.empty</code>访问不存在的<code>key</code>时，我们期待抛出<code>AttributeError</code>：</p>
+
+<pre><code class="language-py">with self.assertRaises(AttributeError):
+    value = d.empty
+</code></pre>
+
+<h2 id="toc_0">运行单元测试</h2>
+
+<p>一旦编写好单元测试，我们就可以运行单元测试。最简单的运行方式是在<code>mydict_test.py</code>的最后加上两行代码：</p>
+
+<pre><code class="language-py">if __name__ == &#39;__main__&#39;:
+    unittest.main()
+</code></pre>
+
+<p>这样就可以把<code>mydict_test.py</code>当做正常的python脚本运行：</p>
+
+<p><img src="media/14928429198094/14928450280463.jpg" alt=""/></p>
+
+<p>另一种更常见的方法是在命令行通过参数<code>-m unittest</code>直接运行单元测试:<br/>
+<img src="media/14928429198094/14928451217135.jpg" alt=""/></p>
+
+<p>这是推荐的做法，因为这样可以一次批量运行很多单元测试，并且，有很多工具可以自动来运行这些单元测试。</p>
+
+<h2 id="toc_1">setUp与tearDown</h2>
+
+<p>可以在单元测试中编写两个特殊的<code>setUp()</code>和<code>tearDown()</code>方法。这两个方法会分别在每<strong>调用一个测试方法的前后分别被执行</strong>。</p>
+
+<p><code>setUp()和tearDown()</code>方法有什么用呢？设想你的测试需要启动一个数据库，这时，就可以在<code>setUp()</code>方法中连接数据库，在<code>tearDown()</code>方法中关闭数据库，这样，不必在每个测试方法中重复相同的代码：</p>
+
+<pre><code class="language-py">import unittest
+
+from mydict import Dict
+
+class TestDict(unittest.TestCase):
+
+    def setUp(self):    
+        print &#39;setUp...&#39;
+
+    def tearDown(self):
+        print &#39;tearDown...&#39;
+    
+    def test_init(self):    
+        d = Dict(a=1, b=&#39;test&#39;)
+        self.assertEquals(d.a, 1)   
+        self.assertEquals(d.b, &#39;test&#39;)
+        self.assertTrue(isinstance(d, dict))
+
+    def test_key(self):
+        d = Dict()
+        d[&#39;key&#39;] = &#39;value&#39;
+        self.assertEquals(d.key, &#39;value&#39;)
+
+    def test_attr(self):
+        d = Dict()
+        d.key = &#39;value&#39;
+        self.assertTrue(&#39;key&#39; in d)
+        self.assertEquals(d[&#39;key&#39;], &#39;value&#39;)
+
+    def test_keyerror(self):
+        d = Dict()
+        with self.assertRaises(KeyError):
+            value = d[&#39;empty&#39;]
+
+    def test_attrerror(self):
+        d = Dict()
+        with self.assertRaises(AttributeError):
+            value = d.empty
+
+if __name__ == &#39;__main__&#39;:
+     unittest.main()
+</code></pre>
+
+<p><img src="media/14928429198094/14928470586520.jpg" alt=""/></p>
+
+<h2 id="toc_2">总结</h2>
+
+<ol>
+<li><p>单元测试可以有效地测试某个程序模块的行为，是未来重构代码的信心保证。</p></li>
+<li><p>单元测试的测试用例要覆盖常用的输入组合、边界条件和异常。</p></li>
+<li><p>单元测试代码要非常简单，如果测试代码太复杂，那么测试代码本身就可能有bug。</p></li>
+<li><p>单元测试通过了并不意味着程序就没有bug了，但是不通过程序肯定有bug。</p></li>
+</ol>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14928307466218.html">
+                
+                  <h1>调试</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">断言</a>
 </li>
 <li>
-<a href="#toc_2">别名</a>
+<a href="#toc_1">logging</a>
 </li>
 <li>
-<a href="#toc_3">作用域</a>
+<a href="#toc_2">pdb</a>
+</li>
+<li>
+<a href="#toc_3">pdb.set_trace()</a>
+</li>
+<li>
+<a href="#toc_4">IDE</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_5">总结</a>
+
+
+<p>程序能一次写完并正常运行的概率很小，基本不超过1%。总会有各种各样的bug需要修正。有的bug很简单，看看错误信息就知道，有的bug很复杂，我们需要知道出错时，哪些变量的值是正确的，哪些变量的值是错误的，因此，需要一整套调试程序的手段来修复bug。</p>
+
+<p>第一种方法简单直接粗暴有效，就是用<code>print</code>把可能有问题的变量打印出来看看.（这种方法不详细说明了，基本每个写代码的人都比较熟悉这种方法）</p>
+
+<h2 id="toc_0">断言</h2>
+
+<p>凡是用<code>print</code>来辅助查看的地方，都可以用断言<code>（assert）</code>来替代：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def foo(s):
+    n=int(s)
+    assert n!=0,&#39;n is zero&#39;
+    return 10/n
+def main():
+    foo(&#39;0&#39;)
+main()
+</code></pre>
+
+<p><code>assert</code>的意思是，表达式<code>n != 0</code>应该是<code>True</code>，否则，后面的代码就会出错。</p>
+
+<p>如果断言失败，<code>assert</code>语句本身就会抛出<code>AssertionError</code>：</p>
+
+<p><img src="media/14928307466218/14928311015673.jpg" alt=""/><br/>
+启动Python解释器时可以用<code>-O</code>参数来关闭<code>assert</code></p>
+
+<pre><code>$ python -O err.py
+Traceback (most recent call last):
+  ...
+ZeroDivisionError: integer division or modulo by zero
+</code></pre>
+
+<p>关闭后，你可以把所有的<code>assert</code>语句当成<code>pass</code>来看。</p>
+
+<h2 id="toc_1">logging</h2>
+
+<p>把<code>print</code>替换为<code>logging</code>是第3种方式，和<code>assert</code>比，<code>logging</code>不会抛出错误，而且可以输出到文件：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import logging
+
+s = &#39;0&#39;
+n = int(s)
+logging.info(&#39;n = %d&#39; % n)
+print 10 / n
+</code></pre>
+
+<p><code>logging.info()</code>就可以输出一段文本。运行，发现除了<code>ZeroDivisionError</code>，没有任何信息。<br/>
+<img src="media/14928307466218/14928313656997.jpg" alt=""/></p>
+
+<p>加上：</p>
+
+<pre><code class="language-py">import logging
+logging.basicConfig(level=logging.INFO)
+</code></pre>
+
+<p>之后显示：<br/>
+<img src="media/14928307466218/14928314465553.jpg" alt=""/><br/>
+这就是<code>logging</code>的好处，它允许你指定记录信息的级别，有<code>debug，info，warning，error</code>等几个级别，当我们指定<code>level=INFO</code>时，<code>logging.debug</code>就不起作用了。同理，指定<code>level=WARNING</code>后，<code>debug和info</code>就不起作用了。这样一来，你可以放心地输出不同级别的信息，也不用删除，最后统一控制输出哪个级别的信息。</p>
+
+<p><code>logging</code>的另一个好处是通过简单的配置，<strong>一条语句可以同时输出到不同的地方，比如console和文件</strong>。</p>
+
+<h2 id="toc_2">pdb</h2>
+
+<p>第4种方式是启动Python的调试器pdb，让程序以单步方式运行，可以随时查看运行状态。我们先准备好程序：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+s = &#39;0&#39;
+n = int(s)
+print 10 / n
+</code></pre>
+
+<p>然后启动：<br/>
+<img src="media/14928307466218/14928416845706.jpg" alt=""/></p>
+
+<p>输入命令<code>l</code>来查看代码,输入命令<code>n</code>可以单步执行代码,任何时候都可以输入命令<code>p</code> 变量名来查看变量,输入命令<code>q</code>结束调试，退出程序.</p>
+
+<h2 id="toc_3">pdb.set_trace()</h2>
+
+<p>这个方法也是用<code>pdb</code>，但是不需要单步执行，我们只需要<code>import pdb</code>，然后，在可能出错的地方放一个<code>pdb.set_trace()</code>，就可以设置一个断点：</p>
+
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+import pdb
+
+s = &#39;0&#39;
+n = int(s)
+pdb.set_trace()  # 运行到这里会自动暂停
+print 10 / n
+
+</code></pre>
+
+<p><img src="media/14928307466218/14928418957951.jpg" alt=""/><br/>
+运行代码，程序会自动在<code>pdb.set_trace()</code>暂停并进入pdb调试环境，可以用命令<code>p</code>查看变量，或者用命令<code>c</code>继续运行</p>
+
+<p>这个方式比直接启动pdb单步调试效率要高很多，但也高不到哪去。</p>
+
+<h2 id="toc_4">IDE</h2>
+
+<p>如果想要有好的设置断点、单步执行体验，就需要一个支持调试功能的IDE。目前比较好的<strong>Python IDE有PyCharm</strong>：<br/>
+<a href="https://www.jetbrains.com/pycharm">https://www.jetbrains.com/pycharm</a></p>
+
+<p>写程序最痛苦的事情莫过于调试，程序往往会以你意想不到的流程来运行，你期待执行的语句其实根本没有执行，这时候，就需要调试了。</p>
+
+<h1 id="toc_5">总结</h1>
+
+<p><strong>虽然用IDE调试起来比较方便，但是最后你会发现，<code>logging</code>才是终极武器。</strong></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14928231077736.html">
+                
+                  <h1>错误、调试和测试</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">错误处理</a>
+<ul>
+<li>
+<a href="#toc_1">try</a>
+</li>
+<li>
+<a href="#toc_2">调用堆栈</a>
+</li>
+<li>
+<a href="#toc_3">记录错误</a>
+</li>
+<li>
+<a href="#toc_4">抛出错误</a>
+</li>
+</ul>
 </li>
 </ul>
 
 
-<h2 id="toc_0">模块介绍</h2>
+<p>Python内置了一套异常处理机制，来帮助我们进行错误处理。</p>
 
-<p>python中的文件关联模块和java语言类似，一个<code>abc.py</code>的文件就是一个名字叫abc的模块，一个<code>xyz.py</code>的文件就是一个名字叫xyz的模块。</p>
+<p>此外，我们也需要跟踪程序的执行，查看变量的值是否正确，这个过程称为调试。Python的<strong><em>pdb</em></strong>可以让我们以单步方式执行代码。</p>
 
-<p>现在，假设我们的<code>abc和xyz</code>这两个模块名字与其他模块冲突了，于是我们可以通过包来组织模块，避免冲突。方法是选择一个顶层包名，比如<code>mycompany</code>，按照如下目录存放：<br/>
-<img src="media/14922429288489/14922430767659.jpg" alt=""/></p>
+<p>最后，编写测试也很重要。有了良好的测试，就可以在程序修改后反复运行，确保程序输出符合我们编写的测试。</p>
 
-<p>引入了包以后，只要顶层的包名不与别人冲突，那所有模块都不会与别人冲突。现在，abc.py模块的名字就变成了mycompany.abc，类似的，xyz.py的模块名变成了mycompany.xyz。</p>
+<h2 id="toc_0">错误处理</h2>
 
-<p>请注意，每一个包目录下面都会有一个<code>__init__.py</code>的文件，这个文件是必须存在的，否则，Python就把这个目录当成普通目录，而不是一个包。<code>__init__.py</code>可以是空文件，也可以有Python代码，因为<code>__init__.py</code>本身就是一个模块，而它的模块名就是<code>mycompany</code>。</p>
+<p>在程序运行的过程中，如果发生了错误，可以事先约定返回一个错误代码，这样，就可以知道是否有错，以及出错的原因。在操作系统提供的调用中，返回错误码非常常见。比如打开文件的函数<code>open()</code>，成功时返回文件描述符（就是一个整数），出错时返回<code>-1</code>。</p>
 
-<p>类似的，可以有多级目录，组成多级层次的包结构，比如如下的目录结构：<br/>
-<img src="media/14922429288489/14922431763848.jpg" alt=""/></p>
+<p>用错误码来表示是否出错十分不便，因为函数本身应该返回的正常结果和错误码混在一起，造成调用者必须用大量的代码来判断是否出错。</p>
 
-<h2 id="toc_1">模块的使用</h2>
+<p>所以高级语言通常都内置了一套<code>try...except...finally...</code>的错误处理机制，Python也不例外。</p>
 
-<p>Python本身就内置了很多非常有用的模块，只要安装完毕，这些模块就可以立刻使用。</p>
+<h3 id="toc_1">try</h3>
 
-<p>我们以内建的<code>sys</code>模块为例，编写一个<code>hello</code>的模块：</p>
+<p>当我们认为某些代码可能会出错时，就可以用<code>try</code>来运行这段代码，如果执行出错，则后续代码不会继续执行，而是直接跳转至错误处理代码，即<code>except</code>语句块，执行完<code>except</code>后，如果有<code>finally</code>语句块，则执行<code>finally</code>语句块，至此，执行完毕。</p>
 
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-
-
-&#39;a test module&#39;
-
-_author_ = &#39;梁中豪&#39;
-
-import sys
-
-def test():
-    args = sys.argv
-    if len(args)==1:
-        print &#39;Hello ,world!&#39;
-    elif len(args)==2:
-        print &#39;Hello ,%s!&#39; % args[1]
-    else:
-        print &#39;Too many arguments!&#39;
-if __name__==&#39;_main_&#39;:
-    test()
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+try:
+    print &#39;try...&#39;
+    r = 10 / 0
+    print &#39;result:&#39;, r
+except ZeroDivisionError, e:
+    print &#39;except:&#39;, e
+finally:
+    print &#39;finally...&#39;
+print &#39;END&#39;
 </code></pre>
 
-<p>第1行注释表示.py文件本身使用标准UTF-8编码；</p>
+<p><img src="media/14928231077736/14928238871411.jpg" alt=""/><br/>
+从输出可以看到，当错误发生时，后续语句<code>print &#39;result:&#39;, r</code>不会被执行，<code>except</code>由于捕获到<code>ZeroDivisionError</code>，因此被执行。最后，<code>finally</code>语句被执行。然后，程序继续按照流程往下走。</p>
 
-<p>第4行是一个字符串，表示模块的文档注释，任何模块代码的第一个字符串都被视为模块的文档注释；</p>
+<p>你还可以猜测，错误应该有很多种类，如果发生了不同类型的错误，应该由不同的<code>except</code>语句块处理。没错，可以有多个<code>except</code>来捕获不同类型的错误：</p>
 
-<p>第6行使用__author__变量把作者写进去，这样当你公开源代码后别人就可以瞻仰你的大名；</p>
-
-<p>以上就是Python模块的标准文件模板，当然也可以全部删掉不写，但是，按标准办事肯定没错。</p>
-
-<p>后面开始就是真正的代码部分。</p>
-
-<p>使用sys模块的第一步，就是导入该模块：<code>import sys</code><br/>
-导入<code>sys</code>模块后，我们就有了变量<code>sys</code>指向该模块，利用<code>sys</code>这个变量，就可以访问<code>sys</code>模块的所有功能。</p>
-
-<p><code>sys</code>模块有一个<code>argv</code>变量，用<code>list</code>存储了命令行的所有参数。<code>argv</code>至少有一个元素，因为第一个参数永远是该.py文件的名称，例如：</p>
-
-<p>运行<code>python hello.py</code>获得的<code>sys.argv</code>就是<code>[&#39;hello.py&#39;]</code>；</p>
-
-<p>运行<code>python hello.py Michael</code>获得的<code>sys.argv</code>就是<code>[&#39;hello.py&#39;, &#39;Michael]</code>。</p>
-
-<p>最后，注意到这两行代码：</p>
-
-<pre><code class="language-py">if __name__==&#39;__main__&#39;:
-    test()
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+try:
+    print &#39;try...&#39;
+    r = 10 / int(0)
+    print &#39;result:&#39;, r
+except ValueError as e:
+    print &#39;ValueError:&#39;,e
+except ZeroDivisionError as e:
+    print &#39;ZeroDivisionError:&#39;, e
+else:
+    print &#39;no error&#39;
+finally:
+    print &#39;finally...&#39;
+print &#39;END&#39;
 </code></pre>
 
-<p>当我们在命令行运行<code>hello</code>模块文件时，Python解释器把一个特殊变量<code>__name__置为__main__</code>，而如果在其他地方导入该<code>hello</code>模块时，if判断将失败，因此，这种if测试可以让一个模块通过命令行运行时执行一些额外的代码，最常见的就是运行测试。</p>
+<p><img src="media/14928231077736/14928249482640.jpg" alt=""/></p>
 
-<p>可以启动python交互环境，导入hello模块来测试下：</p>
-
-<pre><code>$ python
-Python 2.7.5 (default, Aug 25 2013, 00:04:04) 
-[GCC 4.2.1 Compatible Apple LLVM 5.0 (clang-500.0.68)] on darwin
-Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
-&gt;&gt;&gt; import hello
-&gt;&gt;&gt; hello.test()
-Hello, world!
-</code></pre>
-
-<h2 id="toc_2">别名</h2>
-
-<p>导入模块时，可以使用别名，这样，可以在运行时根据当前环境选择最合适的模块。比如Python标准库一般会提供<code>StringIO</code>和<code>cStringIO</code>两个库，这两个库的接口和功能是一样的，但是<code>cStringIO</code>是C写的，速度更快，所以，你会经常看到这样的写法：</p>
+<p>Python的错误其实也是class，所有的错误类型都继承自<code>BaseException</code>，所以在使用<code>except</code>时需要注意的是，它不但捕获该类型的错误，还把其子类也“一网打尽”。比如：</p>
 
 <pre><code class="language-py">try:
-    import cStringIO as StringIO
-except ImportError: # 导入失败会捕获到ImportError
-    import StringIO
+    foo()
+except StandardError, e:
+    print &#39;StandardError&#39;
+except ValueError, e:
+    print &#39;ValueError&#39;
 </code></pre>
 
-<p>这样就可以优先导入<code>cStringIO</code>。如果有些平台不提供<code>cStringIO</code>，还可以降级使用<code>StringIO</code>。导入<code>cStringIO</code>时，用<code>import ... as ...</code>指定了别名<code>StringIO</code>，因此，后续代码引用<code>StringIO</code>即可正常工作。</p>
+<p>第二个<code>except</code>永远也捕获不到<code>ValueError</code>，因为<code>ValueError是StandardError</code>的子类，如果有，也被第一个<code>except</code>给捕获了。</p>
 
-<h2 id="toc_3">作用域</h2>
+<p>Python所有的错误都是从<code>BaseException</code>类派生的，常见的错误类型和继承关系看这里：</p>
 
-<p>在一个模块中，我们可能会定义很多函数和变量，但有的函数和变量我们希望给别人使用，有的函数和变量我们希望仅仅在模块内部使用。在Python中，是通过<code>_</code>前缀来实现的。</p>
+<p><img src="media/14928231077736/14928254735561.jpg" alt=""/></p>
 
-<p>正常的函数和变量名是公开的（public），可以被直接引用，比如：<code>abc，x123，PI</code>等；</p>
+<p>使用<code>try...except</code>捕获错误还有一个巨大的好处，就是可以跨越多层调用，比如函数<code>main()调用bar()，bar()调用foo()，结果foo()</code>出错了，这时，只要<code>main()</code>捕获到了，就可以处理：</p>
 
-<p>类似<code>__xxx__</code>这样的变量是特殊变量，可以被直接引用，但是有特殊用途，比如上面的<code>__author__</code>，<code>__name__</code>就是特殊变量，<code>hello</code>模块定义的文档注释也可以用特殊变量<code>__doc__</code>访问，<strong><em>我们自己的变量一般不要用这种变量名</em></strong>；</p>
+<pre><code class="language-py">def foo(s):
+    return 10 / int(s)
 
-<p><font color=red>类似<code>_xxx</code>和<code>__xxx</code>这样的函数或变量就是非公开的（private），不应该被直接引用，比如<code>_abc，__abc</code>等；</font></p>
+def bar(s):
+    return foo(s) * 2
 
-<p>之所以我们说，<code>private</code>函数和变量“不应该”被直接引用，而不是“不能”被直接引用，是因为Python并没有一种方法可以完全限制访问<code>private</code>函数或变量，但是，从编程习惯上不应该引用<code>private</code>函数或变量。</p>
+def main():
+    try:
+        bar(&#39;0&#39;)
+    except StandardError, e:
+        print &#39;Error!&#39;
+    finally:
+        print &#39;finally...&#39;
+
+print main()
+
+</code></pre>
+
+<p><img src="media/14928231077736/14928272805670.jpg" alt=""/></p>
+
+<p>也就是说，不需要在每个可能出错的地方去捕获错误，只要在合适的层次去捕获错误就可以了。这样一来，就大大减少了写<code>try...except...finally</code>的麻烦。</p>
+
+<h3 id="toc_2">调用堆栈</h3>
+
+<p>如果错误没有被捕获，它就会一直往上抛，最后被Python解释器捕获，打印一个错误信息，然后程序退出：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+def foo(s):
+    return 10 / int(s)
+
+def bar(s):
+    return foo(s) * 2
+
+def main():
+    bar(&#39;0&#39;)
+
+main()
+</code></pre>
+
+<p><img src="media/14928231077736/14928281628836.jpg" alt=""/><br/>
+出错并不可怕，可怕的是不知道哪里出错了。解读错误信息是定位错误的关键。我们从上往下可以看到整个错误的调用函数链。</p>
+
+<p>从上往下依次查看错误。</p>
+
+<h3 id="toc_3">记录错误</h3>
+
+<p>如果不捕获错误，自然可以让Python解释器来打印出错误堆栈，但程序也被结束了。既然我们能捕获错误，就可以把错误堆栈打印出来，然后分析错误原因，同时，让程序继续执行下去。</p>
+
+<p>Python内置的<code>logging</code>模块可以非常容易地记录错误信息：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+import logging
+
+def foo(s):
+    return 10 / int(s)
+
+def bar(s):
+    return foo(s) * 2
+
+def main():
+    try:
+        bar(&#39;0&#39;)
+    except StandardError as e:
+        logging.exception(e)
+    else:
+        pass
+    finally:
+        pass
+main()
+print &#39;END&#39;
+</code></pre>
+
+<p><strong>同样是出错，但程序打印完错误信息后会继续执行，并正常退出</strong>：<br/>
+<img src="media/14928231077736/14928284148150.jpg" alt=""/><br/>
+最后打印出了“END”</p>
+
+<p>通过配置，<code>logging</code>还可以把错误记录到日志文件里，方便事后排查。</p>
+
+<h3 id="toc_4">抛出错误</h3>
+
+<p>因为错误是class，捕获一个错误就是捕获到该class的一个实例。因此，错误并不是凭空产生的，而是有意创建并抛出的。Python的内置函数会抛出很多类型的错误，我们自己编写的函数也可以抛出错误。</p>
+
+<p>如果要抛出错误，首先根据需要，可以定义一个错误的<code>class</code>，选择好继承关系，然后，用<code>raise</code>语句抛出一个错误的实例</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+class FooError(StandardError):
+    pass
+
+def foo(s):
+    n = int(s)
+    if n == 0:
+        raise FooError(&#39;invaild value: %s&#39; % s)
+    return 10/0
+foo(0)
+</code></pre>
+
+<p><img src="media/14928231077736/14928288600479.jpg" alt=""/></p>
+
+<p><strong>只有在必要的时候才定义我们自己的错误类型。如果可以选择Python已有的内置的错误类型（比如ValueError，TypeError），尽量使用Python内置的错误类型。</strong></p>
+
+<p>最后，我们来看另一种错误处理的方式：</p>
+
+<pre><code class="language-py">#-*- coding: utf-8 -*-
+def foo(s):
+    n = int(s)
+    return 10 / n
+
+def bar(s):
+    try:
+        return foo(s) * 2
+    except StandardError, e:
+        print &#39;Error!&#39;
+        raise
+
+def main():
+    bar(&#39;0&#39;)
+
+main()
+</code></pre>
+
+<p><img src="media/14928231077736/14928306395157.jpg" alt=""/></p>
+
+<p>在bar()函数中，我们明明已经捕获了错误，但是，打印一个<code>Error</code>!后，又把错误通过<code>raise</code>语句抛出去了，这不有病么？</p>
+
+<p>其实这种错误处理方式不但没病，而且相当常见。捕获错误目的只是记录一下，便于后续追踪。但是，由于当前函数不知道应该怎么处理该错误，所以，最恰当的方式是继续往上抛，让顶层调用者去处理。</p>
+
+<p>raise语句如果不带参数，就会把当前错误原样抛出。此外，在except中raise一个Error，还可以把一种类型的错误转化成另一种类型：</p>
+
+<pre><code class="language-py">try:
+    10 / 0
+except ZeroDivisionError:
+    raise ValueError(&#39;input error!&#39;)
+</code></pre>
+
+<p>只要是合理的转换逻辑就可以，但是，决不应该把一个<code>IOError</code>转换成毫不相干的<code>ValueError</code></p>
 
                         
                       </div>
@@ -250,7 +845,7 @@ except ImportError: # 导入失败会捕获到ImportError
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/4/15</span>
+                    <span class="date">2017/4/22</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
@@ -267,250 +862,126 @@ except ImportError: # 导入失败会捕获到ImportError
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="14922391300067.html">
+                <a class="clearlink" href="14927355881897.html">
                 
-                  <h1>偏函数</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Python的<code>functools</code>模块提供了很多有用的功能，其中一个就是偏函数（Partial function）。要注意，这里的偏函数和数学意义上的偏函数不一样。</p>
-
-<p><code>int()</code>函数可以把字符串转换为整数<br/>
-例如：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-num = int(&#39;12345&#39;)
-num1 = int(&#39;12345&#39;, base=8)
-num2 = int(&#39;12345&#39;, 16)
-print num, num1, num2
-</code></pre>
-
-<p><img src="media/14922391300067/14922396420577.jpg" alt=""/></p>
-
-<p>其中<code>base</code>参数可以指定转换的进制</p>
-
-<p>假设要转换大量的二进制字符串，每次都传入<code>int(x, base=2)</code>非常麻烦，于是，我们想到，可以定义一个<code>int2()</code>的函数，默认把<code>base=2</code>传进去：</p>
-
-<pre><code class="language-py">def int2(x,base=2):
-    return int(x,base)
-
-</code></pre>
-
-<p>这样我们转换二进制就很方便，<code>functools.partial</code>就是帮助我们创建一个偏函数的，不需要我们自己定义<code>int2()</code>，可以直接使用下面的代码创建一个新的函数<code>int2</code>：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import functools
-int2 = functools.partial(int, base=8)
-num = int2(&#39;10000&#39;)
-num1 = int2(&#39;10000&#39;,base=2)
-print num,num1  
-</code></pre>
-
-<p><img src="media/14922391300067/14922410514665.jpg" alt=""/></p>
-
-<p>创建偏函数时，实际上可以接收函数对象、<code>*args和**kw</code>这3个参数:</p>
-
-<pre><code class="language-py">int2 = functools.partial(int, base=2)
-#相当于下面
-kw = { base: 2 }
-int(&#39;10010&#39;, **kw)
-
-max2 = functools.partial(max, 10)
-#相当于下面，实际上会把10作为*args的一部分自动加到左边
-args = (10, 5, 6, 7)
-max(*args)
-</code></pre>
-
-<blockquote>
-<p>总结：当函数的参数个数太多，需要简化时，使用<code>functools.partial</code>可以创建一个新的函数，这个新函数可以固定住原函数的部分参数，从而在调用时更简单。</p>
-</blockquote>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/15</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14921577512970.html">
-                
-                  <h1>支持向量机</h1>
+                  <h1>使用元类</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
                         	<ul>
 <li>
-<a href="#toc_0">线性可支持性良机与硬间隔最大化</a>
-<ul>
-<li>
-<a href="#toc_1">线性可支持向量机</a>
-</li>
-<li>
-<a href="#toc_2">函数间隔和几何间隔</a>
-</li>
-</ul>
-</li>
-<li>
-<a href="#toc_3">间隔最大化</a>
-<ul>
-<li>
-<ul>
-<li>
-<a href="#toc_4">1. 最大间隔分离超平面</a>
-</li>
-<li>
-<a href="#toc_5">2.最大间隔分离超平面的存在唯一性</a>
-</li>
-<li>
-<a href="#toc_6">3.支持向量和间隔边界</a>
-</li>
-</ul>
-</li>
-</ul>
+<a href="#toc_0">metaclass</a>
 </li>
 </ul>
 
 
-<p>支持向量机（support vector machines，SVM)是一种二类分类模型。它的基本模型是定义在特征空间上的间隔最大的线性分类器，间隔最大使它有别于感知机；支持向量机还包括核技巧，这使它成为实质上的非线性分类器.<font color=red>支持向量机的学习策略就是间隔最大化，可形式化为一个求解凸二次规划（convex quadratic programming)的问题，也等价于正则化的合页损失函数的最小化问题.</font>支持向量机的<strong><em>学习算法是求解凸二次规划的最优化算法</em></strong>.</p>
+<p>动态语言和静态语言最大的不同，就是函数和类的定义，不是编译时定义的，而是<strong>运行时动态创建的</strong>。</p>
 
-<p>支持向量机学习方法包含构建由简至繁的模型：线性可分支持向量机（linear support vector machine in linearly separable ease)、线性支持向量机（linear support vector machine)及非线性支持向量机（ncm-linear support vector machine).简单模型是复杂模型的基础，也是复杂模型的特殊情况.当训练数据线性可分时，通过硬间隔最大化（hard margin maximization)，学习一个线性的分类器，<strong><em>即线性可分支持向量机，又称为硬间隔支持向量机</em></strong>；当训练数据近似线性可分时，通过软间隔最大化（soft margin maximization)，也学习一个线性的分类器，<strong><em>即线性支持向量机，又称为软间隔支持向量机</em></strong>；<strong><em>当训练数据线性不可分时，通过使用核技巧 (kernel trick)及软间隔最大化，学习非线性支持向量机</em></strong>.</p>
+<p>比方说我们要定义一个<code>Hello</code>的class：</p>
 
-<p>当输入空间为欧氏空间或离散集合、特征空间为希尔伯特空间时，<strong><em>核函数(kernel fimcticm)表示将输入从输入空间映射到特征空间得到的特征向量之间的内积.</em></strong>通过使用核函数可以学习非线性支持向量机，等价于隐式地在高维的特征空间中学习线性支持向量机.这样的方法称为核技巧.<strong>核方法（kernel method)是比支持向量机更为一般的机器学习方法</strong>.</p>
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+class Hello(object):
+    def hello(self, name=&#39;world&#39;):
+        print(&#39;Hello, %s.&#39; % name)
+h = Hello()
+h.hello()
+print (type(Hello))
+print (type(h))
+</code></pre>
 
-<p>Cortes与Vapnik提出线性支持向量机，Boser、Guyon与Vapnik又引入核技巧，提出非线性支持向量机.</p>
+<p><img src="media/14927355881897/14927620006235.jpg" alt=""/></p>
 
-<p>本次一次学习3类支持向量机、核函数以及一种跨苏学习方法——序列最小最优化算法(SMO)</p>
+<p><font color=red><strong><code>type()</code>函数可以查看一个类型或变量的类型，<code>Hello</code>是一个class，它的类型就是<code>type</code>，而<code>h</code>是一个实例，它的类型就是<code>class Hello</code>。</strong></font></p>
 
-<h2 id="toc_0">线性可支持性良机与硬间隔最大化</h2>
+<p>我们说class的定义是运行时动态创建的，而<strong>创建class的方法就是使用<code>type()</code>函数</strong>。</p>
 
-<h3 id="toc_1">线性可支持向量机</h3>
+<p><code>type()</code>函数既可以返回一个对象的类型，又可以创建出新的类型，比如，<strong>我们可以通过<code>type()</code>函数创建出Hello类，而无需通过<code>class Hello(object)...</code>的定义</strong>：</p>
 
-<p>考虑一个二类分类问题，假设输入空间与特征空间为两个不同的空间.输入空间为欧氏空间或离散集合，特征空间为欧氏空间或希尔伯特空间.线性可分支持向量机、线性支持向量机假设这两个空间的元素一一对应，并将输入空间中的输入映射为特征空间中的特征向量.非线性支持向量机利用一个从输入空间到特征空间的非线性映射将输入映射为特征向量.所以，输入都由输入空间转换到特征空间，支持向量机的学习是在特征空间进行的.</p>
+<pre><code class="language-py"># -*- coding: utf-8 -*-
+def fn(self, name=&#39;world&#39;):   # 先定义函数
+    print(&#39;Hello, %s.&#39; % name)
 
-<p>假设给定一个特征空间上的训练数据集：<br/>
-\(T={\{x_1,y_1},(x_2,y_2),...(x_N,y_N)\}\)<br/>
-,其中，\(x_i \in \mathcal{X}=R^n,y_i \in \mathcal{Y}={\{+1,-1}\},i=1,2,...N,x_i\)为第i个特征向量，也成为实例，\(y_i为x_i的类标记，当y_i=+1时，称x_i为正例；当y_i=-1时，称x_i为负例,(x_i,y_i)成为样本点，再假设训练数据集是线性可分的\)</p>
+Hello = type(&#39;Hello&#39;, (object,), dict(hello=fn))  # 创建Hello class
+h = Hello()
+h.hello()
+print(type(Hello))
+print(type(h))
 
-<p>学习的目标是在特征空间中找到一个分离超平面，能将实例分到不同的类，分离超平面对应于方程\(w*x+b=0\),它由法向量w和截距b决定，可用(w,b)来表示.分离超平面将特征空间划分为两部分，一部分是正类，一部分是负类.法向量指向的一侧为正类，另一侧为负类.</p>
+</code></pre>
 
-<p>一般地，当训练数据集线性可分时，存在无穷个分离超平面可将两类数据正确分开.感知机利用误分类最小的策略，求得分离超平面，不过这时的解有无穷多个,<font color=red>线性可分支持向量机利用间隔最大化求最优分离超平面，这时，解是唯一的.</font></p>
+<p><img src="media/14927355881897/14927623112362.jpg" alt=""/></p>
 
-<p><strong><em>下面给出线性可支持向量机的定义</em></strong>：<br/>
-<img src="media/14921577512970/14922239390041.jpg" alt=""/></p>
+<p><strong>要创建一个class对象，type()函数依次传入3个参数：</strong></p>
 
-<p>考虑如图7.1所示的二维特征空间中的分类问题.图中“。”表示正例，“x” 表示负例。训练数据集线性可分，这时有许多直线能将两类数据正确划分.线性可分支持向量机对应着将两类数据正确划分并且间隔最大的直线，如图7.1所示.<br/>
-<img src="media/14921577512970/14922248209178.jpg" alt=""/></p>
+<ol>
+<li>class的名称；</li>
+<li>继承的父类集合，注意Python支持多重继承，如果只有一个父类，别忘了tuple的单元素写法；</li>
+<li>class的方法名称与函数绑定，这里我们把函数<code>fn</code>绑定到方法名<code>hello</code>上。</li>
+</ol>
 
-<p>间隔最大及相应的约束最优化问题将在下面叙述.这里先介绍<font color=red>函数间隔和几何间隔的概念</font>.</p>
-
-<h3 id="toc_2">函数间隔和几何间隔</h3>
-
-<p>在图7.1中，有A,B,C三个点，表示3个实例，均在分离超平面的正类一侧，预测它们的类.点A距分离超平面较远，若预测该点为正类，就比较确信预测是正确的；点C距分离超平面较近，若预测该点为正类就不那么确信；点B介于点A与C之间，预测其为正类的确信度也在A与C之间.</p>
-
-<p>一般来说，一个点距离分离超平面的远近可以表示分类预测的确信程度.在超平面w*x+ b = 0确定的情况下，|w*x+b丨能够相对地表示点x距离超平面的远近.而w*+b的符号与类标记y的符号是否一致能够表示分类是否正确.所以可用量y(w*x+b)来表示分类的正确性及确信度，这就是函数间隔（fimctional margin)的概念.</p>
-
-<p><strong>下面给出函数间隔的定义：</strong></p>
-
-<p><img src="media/14921577512970/14925656291102.jpg" alt=""/></p>
-
-<p>函数间隔可以表示分类预测的正确性及确信度.<strong><em>但是选择分离超平面时，只有函数间隔还不够.因为只要成比例地改变w和例如将它们改为2w和2b,超平面并没有改变，但函数间隔却成为原来的2倍</em></strong>.这一事实启示我们，可以对分离超平面的法向量w加某些约束，如规范化，||w||=1，使得间隔是确定的.这时函数间隔成为几何间隔（geometric margin).</p>
-
-<p>下图给出了超平面（w，b）及其法向量w，点A表示某一实例\(x_i\)，其类标记为\(y_i =+1\)，点A与超平面（w，b）的距离由线段AB给出，记作\(\gamma_i\)。<br/>
-<img src="media/14921577512970/14925666238039.jpg" alt=""/><br/>
-一般的，当样本点\((x_i,y_i)\)被超平面\((w,b)\)正确分类是，点\(x_i\)与超平面\((w,b)\)的距离是：<br/>
-<img src="media/14921577512970/14925667203290.jpg" alt=""/><br/>
-所以：由这一事实导出几何间隔的概念。<br/>
-<img src="media/14921577512970/14925667539444.jpg" alt=""/></p>
-
-<p>下面具体给出几何间隔的定义：<br/>
-<img src="media/14921577512970/14925669395725.jpg" alt=""/></p>
-
-<p>从函数间隔和几何间隔的定义（式(7.3)〜式(7.6))可知，函数间隔和几何间隔有下面的关系：<br/>
-<img src="media/14921577512970/14925676726509.jpg" alt=""/></p>
-
-<p><strong><em>如果||w||=1,那么函数间隔和几何间隔相等.如果超平面参数w和b成比例地改变（超平面没有改变)，函数间隔也按此比例改变，而几何间隔不变.</em></strong></p>
-
-<h2 id="toc_3">间隔最大化</h2>
-
-<p>支持向量机学习的基本想法是求解能够正确划分训练数据集并且<strong><em>几何间隔</em></strong>最大的分离超平面.对线性可分的训练数据集而言，线性可分分离超平面有无穷多个（等价于感知机)，<strong><em>但是几何间隔最大的分离超平面是唯一的</em></strong>.这里的间隔最大化又称为硬间隔最大化（与将要讨论的训练数据集近似线性可分时的软间隔最大化相对应).</p>
-
-<p><font color=red>间隔最大化的直观解释是：对训练数据集找到几何间隔最大的超平面意味着以充分大的确信度对训练数据进行分类.也就是说，不仅将正负实例点分开，而且对最难分的实例点（离超平面最近的点）也有足够大的确信度将它们分开.这样的超平面应该对未知的新实例有很好的分类预测能力.</font></p>
-
-<h4 id="toc_4">1. 最大间隔分离超平面</h4>
-
-<p>下面考虑如何求得一个几何间隔最大的分离超平面，即最大间隔分离超平面.具体地，这个问题可以表示为下面的约束最优化问题：<br/>
-<img src="media/14921577512970/14925687970547.jpg" alt=""/><br/>
-即我们希望最大化超平面(w,b)关于训练数据集的几何间隔\(\gamma\),约束条件表示的是超平面(w, b)关于每个训练样本点的几何间隔至少是\(\gamma\).</p>
-
-<p>考虑几何间隔和函数间隔的关系式(7.8),可将这个问题改写为:<br/>
-<img src="media/14921577512970/14925690130129.jpg" alt=""/><br/>
-这是一个凸二次规划（convex quadratic programming)问题，凸优化问题是指约束最优化问题。</p>
-
-<p>凸优化问题是指约束最优化问题：<br/>
-    <img src="media/14921577512970/14925706995554.jpg" alt=""/></p>
-
-<p>当目标函数f(w)是二次函数且约束函数\(g_i(w)\)是仿射函数时，上述凸最优化问题成为凸二次规划问题。</p>
+<p>通过<code>type()</code>函数创建的类和直接写class是完全一样的，因为Python解释器遇到class定义时，仅仅是扫描一下class定义的语法，然后调用<code>type()</code>函数创建出class。</p>
 
 <blockquote>
-<p>仿射函数即由1阶多项式构成的函数，一般形式为 f(x)=Ax+b，这里A是一个 m×k 矩阵，x是一个k向量,b是一个m向量，实际上反映了一种从 k维到m维的空间映射关系。</p>
+<p>正常情况下，我们都用<code>class Xxx...</code>来定义类，但是，<code>type()</code>函数也允许我们动态创建出类来，也就是说，动态语言本身支持运行期动态创建类，这和静态语言有非常大的不同，要在静态语言运行期创建类，必须构造源代码字符串再调用编译器，或者借助一些工具生成字节码实现，本质上都是动态编译，会非常复杂。</p>
 </blockquote>
 
-<p>如果求出了约束最优化问题(7.13)〜(7.14)的解\(w^*,b^*\)，那么就可以得到最大间隔分离超平面\(w^*·x + b = 0\)及分类决策函数\(f(x)=sign(w^*+b^*)\),即线性可分支持向量机模型.</p>
+<h2 id="toc_0">metaclass</h2>
 
-<p>根据上面所得出的结论，就有下面的支持向量机的学习算法————<strong>最大间隔法(maximum margin method )</strong></p>
+<p>除了使用<code>type()</code>动态创建类以外，要控制类的创建行为，还可以使用metaclass。<br/>
+简单的解释就是：先定义metaclass，就可以创建类，最后创建实例。</p>
 
-<p><img src="media/14921577512970/14925717155289.jpg" alt=""/></p>
+<p>所以，metaclass允许你创建类或者修改类。换句话说，你可以把类看成是metaclass创建出来的“实例”。</p>
 
-<h4 id="toc_5">2.最大间隔分离超平面的存在唯一性</h4>
+<p><strong>metaclass是Python面向对象里最难理解，也是最难使用的魔术代码。正常情况下，你不会碰到需要使用metaclass的情况，所以，以下内容看不懂也没关系，因为基本上你不会用到。</strong></p>
 
-<p>线性可分训练数据集的最大间隔分离超平面是存在且唯一的。</p>
+<p>我们先看一个简单的例子，这个metaclass可以给我们自定义的MyList增加一个add方法：</p>
 
-<p><strong>定理7.1 (最大间隔分离趄平面的存在唯一性）</strong>若训练数据集T线性可分，则可将训练数据集中的样本点完全正确分开的最大间隔分离超平面存在且唯一.</p>
+<p>定义<code>ListMetaclass</code>，按照默认习惯，metaclass的类名总是以Metaclass结尾，以便清楚地表示这是一个metaclass：</p>
 
-<blockquote>
-<p>这里关于唯一性的证明不在总结。相关资料可以阅读《统计学习方法》p101.</p>
-</blockquote>
+<pre><code class="language-py"># -*- coding: utf-8 -*-
 
-<h4 id="toc_6">3.支持向量和间隔边界</h4>
+# metaclass是创建类，所以必须从`type`类型派生：
+class ListMetaclass(type):
 
-<p><font color=red>在线性可分情况下，训练数据集的样本点中与分离超平面距离最近的样本点的实例称为支持向量（support vector).</font>支持向量是使约束条件式(7.14)等号成立的点，即：<br/>
-<img src="media/14921577512970/14925722828338.jpg" alt=""/><br/>
-对\(y_i=+1\)的正例点，支持向量在超平面：<br/>
-<img src="media/14921577512970/14925723574226.jpg" alt=""/></p>
+    def __new__(cls, name, bases, attrs):
+        attrs[&#39;add&#39;] = lambda self, value: self.append(value)
+        return type.__new__(cls, name, bases, attrs)
 
-<p>对\(y_i=-1\)的负例点，支持向量在超平面：<br/>
-<img src="media/14921577512970/14925723990202.jpg" alt=""/></p>
 
-<p>如下图所示，在\(H_1和H_2上的点就是支持向量\)<br/>
-<img src="media/14921577512970/14925724626444.jpg" alt=""/></p>
+class MyList(list):
+    __metaclass__ = ListMetaclass  # 指示使用ListMetaclass来定制类
+</code></pre>
 
-<p>注意到\(H_1\)和\(H_2\)平行，并且没有实例点落在它们中间.在\(H_1\)与\(H_2\)之间形成一条长带，分离超平面与它们平行且位于它们中央.长带的宽度，即\(H_1\)与\(H_2\)之间的距离称为间隔（margin).间隔依赖于分离超平面的法向量w，等于\(\frac{2}{||w||}\).<br/>
-\(H_1\)和\(H_2\)称为间隔边界.</p>
+<p>当我们写下<code>__metaclass__ = ListMetaclass</code>语句时，魔术就生效了，它指示Python解释器在创建<code>MyList</code>时，要通过<code>ListMetaclass.__new__()</code>来创建，在此，我们可以修改类的定义，比如，加上新的方法，然后，返回修改后的定义。</p>
 
-<p><font color=red>在决定分离超平面时只有支持向量起作用，而其他实例点并不起作用</font>。如果移动支持向量将改变所求的解；但是如果在间隔边界以外移动其他实例点，<strong>甚至去掉这些点，则解是不会改变的</strong>.<font color=red>由于支持向量在确定分离超平面中起着决定性作用，所以将这种分类模型称为支持向量机</font>.支持向量的个数一般很少，所以支 持向量机由很少的“重要的”训练样本确定.</p>
+<p><code>__new__()</code><strong>方法接收到的参数依次是</strong>：</p>
 
-<p><strong>下面举例说明：</strong></p>
+<ol>
+<li><p>当前准备创建的类的对象；</p></li>
+<li><p>类的名字；</p></li>
+<li><p>类继承的父类集合；</p></li>
+<li><p>类的方法集合。</p></li>
+</ol>
 
-<p><img src="media/14921577512970/14925909777337.jpg" alt=""/></p>
+<p>我们测试输出为：</p>
+
+<pre><code class="language-py">L = MyList()
+L.add(1)
+print L
+</code></pre>
+
+<p><img src="media/14927355881897/14927637008533.jpg" alt=""/></p>
+
+<p>动态修改有什么意义？直接在MyList定义中写上add()方法不是更简单吗？正常情况下，确实应该直接写，通过metaclass修改纯属变态。</p>
+
+<p>但是，总会遇到需要通过metaclass修改类定义的。ORM就是一个典型的例子。</p>
+
+<p>ORM全称“Object Relational Mapping”，即对象-关系映射，就是把关系数据库的一行映射为一个对象，也就是一个类对应一个表，这样，写代码更简单，不用直接操作SQL语句。</p>
+
+<p>要编写一个ORM框架，所有的类都只能动态定义，因为只有使用者才能根据表的结构定义出对应的类来。</p>
+
+<p>具体方法参见<a href="http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001386820064557c69858840b4c48d2b8411bc2ea9099ba000">廖老师的教学网站</a></p>
 
                         
                       </div>
@@ -519,217 +990,7 @@ max(*args)
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/4/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14921570225186.html">
-                
-                  <h1>拟牛顿法（最大熵模型的学习）</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	
-
-<p>最大熵模型学习还可以应用牛顿法或者拟牛顿法。<br/>
-对于最大熵模型而言，<br/>
-<img src="media/14921570225186/14921574471740.jpg" alt=""/><br/>
-<img src="media/14921570225186/14921574611293.jpg" alt=""/><br/>
-相应的拟牛顿法BFGS算法如下。<br/>
-<img src="media/14921570225186/14921576945600.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html'>统计学习方法</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14921324340299.html">
-                
-                  <h1>装饰器</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>函数也是一个对象，而且函数对象可以被赋值给变量，所以，通过变量也能调用该函数。</p>
-
-<p>函数对象有一个<code>__name__</code>属性，可以拿到函数的名字：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def now():
-    print &#39;1992-12-14&#39;
-f = now
-f()
-print now.__name__,f.__name__
-
-</code></pre>
-
-<p><img src="media/14921324340299/14921328219891.jpg" alt=""/></p>
-
-<p><strong>现在，假设我们要增强<code>now()</code>函数的功能，比如，在函数调用前后自动打印日志，但又不希望修改<code>now()</code>函数的定义，这种在代码运行期间动态增加功能的方式，称之为“装饰器”<code>（Decorator）</code>。</strong></p>
-
-<p>本质上，<code>decorator</code>就是一个返回函数的高阶函数。所以，我们要定义一个能打印日志的<code>decorator</code>，可以定义如下：</p>
-
-<pre><code class="language-py">def log(func):
-    def wrapper(*args, **kw):
-        print &#39;call %s():&#39; % func.__name__
-        return func(*args, **kw)
-    return wrapper
-</code></pre>
-
-<p>观察上面的log，因为它是一个decorator，所以接受一个函数作为参数，并返回一个函数。我们要借助Python的@语法，把decorator置于函数的定义处：</p>
-
-<pre><code>@log
-def now():
-    print &#39;2013-12-25&#39;
-</code></pre>
-
-<p><img src="media/14921324340299/14921338711853.jpg" alt=""/></p>
-
-<p><strong>练习题：请编写一个decorator，能在函数调用的前后打印出&#39;begin call&#39;和&#39;end call&#39;的日志。</strong></p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-def log(func):
-    def wrapper(*args, **kw):
-        print  &#39;begin call&#39;
-        res =  func(*args, **kw)
-        print &#39;end call2&#39;
-        return res
-    return wrapper
-@log
-def now():
-    print &#39;test&#39;
-now()
-</code></pre>
-
-<p><img src="media/14921324340299/14921348025676.jpg" alt=""/></p>
-
-<p><strong>练习题：再思考一下能否写出一个@log的decorator，使它既支持：</strong></p>
-
-<pre><code class="language-py">@log
-def f():
-    pass
-</code></pre>
-
-<p><strong>又支持</strong></p>
-
-<pre><code class="language-py">@log(&#39;execute&#39;)
-def f():
-    pass
-</code></pre>
-
-<p>解答：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-import functools
-
-def log(text):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args ,**kw):
-            if len(text)&gt;0:
-                print &#39;%s %s()&#39; % (text, func.__name__)
-            else:
-                print &#39;%s()&#39; % func.__name__
-            return func(*args,**kw)
-        return wrapper
-    return decorator
-
-@log(&#39;sdfsf&#39;)
-def now():
-    print &#39;test&#39;
-now()
-</code></pre>
-
-<p><img src="media/14921324340299/14921357641252.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14921312042142.html">
-                
-                  <h1>匿名函数</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>当我们在传入函数时，有些时候，不需要显式地定义函数，直接传入匿名函数更方便。</p>
-
-<p>关键字<code>lambda</code>表示匿名函数</p>
-
-<p><strong>匿名函数有个限制，就是只能有一个表达式，不用写<code>return</code>，返回值就是该表达式的结果。</strong></p>
-
-<p>例如：</p>
-
-<pre><code class="language-py"># -*- coding: utf-8 -*-
-print map(lambda x:x*x, [1,2,3,4,5,6])
-</code></pre>
-
-<p><img src="media/14921312042142/14921315287449.jpg" alt=""/></p>
-
-<p><font color=red>其中冒号前面的x表示函数参数。</font></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/4/14</span>
+                    <span class="date">2017/4/21</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
@@ -834,31 +1095,31 @@ print map(lambda x:x*x, [1,2,3,4,5,6])
 	      
 		      
 			      <li class="post">
-			        <a href="15139993814636.html">![](media/15139993814636/15139993826350.jpg)</a>
+			        <a href="15152183997863.html">Where my anagrams at?</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139938131506.html">Sum of many ints</a>
+			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15139334894228.html"> Longest Univalue Path</a>
+			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15137396102567.html">Isomorphic Strings</a>
+			        <a href="15145180239158.html">1's, 0's and wildcards</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15136732474119.html">Path Sum II</a>
+			        <a href="15143494387976.html">Simple Pig Latin</a>
 			      </li>
 		     
 		  
