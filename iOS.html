@@ -117,6 +117,43 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15153763176511.html">
+                
+                  <h1>KVO自己的理解</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ol>
+<li>KVO利用runtime，生成了一个对象的子类，并生成子类对象替换原来对象的isa指针，重写了set方法。</li>
+<li>KVO是基于KVC的，可以明显的发现在改变容器的时候，通过KVC改变改变容器中的值或者使用set方法时，会触发KVO通知函数，而简单的使用addObject：方法时却没有触发，这是因为KVO只响应set方法。<font color=red>可以说kvc是kvo的入口</font></li>
+<li>直接使用KVO在项目中不是很好用，代码结构比较松散，需要自己封装或使用其它三方框架。</li>
+</ol>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/8</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15151211562254.html">
                 
                   <h1>AFNetworking遇到的问题</h1>
@@ -1223,116 +1260,6 @@ mas_remake -&gt; [&lt;#view#&gt; mas_remakeConstraints:^(MASConstraintMaker *mak
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15082052235459.html">
-                
-                  <h1>ReactiveCocoa初步了解</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><code>ReactiveObjC</code>是一个受到函数响应式编程启发而开发的OC框架，对应的<code>Swift</code>框架叫做<code>ReactiveCocoa or ReactiveSwift</code>。简称为<code>RAC</code>。</p>
-
-<p>不同于使用那些被替代和修改的可编辑变量，RAC提供了一个<code>signals (represented by RACSignal)</code>用于捕获当前或者未来的值。这种做法工作起来类似于<code>KVO</code>，但是却没有那么繁琐。</p>
-
-<p><font color=red><strong>RAC的一大优势就是提供了一个统一的方法去解决异步表现，这些表现包括：委托方法，回调函数块，target-action机制，通知和KVO。</strong></font></p>
-
-<p>有如下例子：</p>
-
-<pre><code class="language-objc">//当self.name改变后，输出新的名字到控制台
-//
-//无论何时改变了值，RACObserve(self, username)都会创造了一个新的RACSignal用于发送当前self.name
-// 不管在什么时候signal发送了一个新的值，-subscribeNext: 都将执行块方法.
-[RACObserve(self, username) subscribeNext:^(NSString *newName) {
-    NSLog(@&quot;%@&quot;, newName);
-}];
-</code></pre>
-
-<p>但是不想KVO通知，signals是可以被链接和操作的：</p>
-
-<pre><code class="language-objc">// 只输出以&quot;j&quot;开头的名字.
-//
-// -filter returns a new RACSignal that only sends a new value when its block
-// returns YES.
-[[RACObserve(self, username)
-    filter:^(NSString *newName) {
-        return [newName hasPrefix:@&quot;j&quot;];
-    }]
-    subscribeNext:^(NSString *newName) {
-        NSLog(@&quot;%@&quot;, newName);
-    }];
-</code></pre>
-
-<p>其实上面代码也可以复杂的写成：</p>
-
-<pre><code class="language-objc">RACSignal *usernameSourceSignal = self.username;
-  
-RACSignal *filteredUsername =[usernameSourceSignal
-  filter:^(NSString *newName) {
-        return [newName hasPrefix:@&quot;j&quot;];
-    }];
-  
-[filteredUsername subscribeNext:^(NSString *newName) {
-        NSLog(@&quot;%@&quot;, newName);
-    }];
-</code></pre>
-
-<p>这是因为<code>RACSignal</code>的每个操作都会返回一个<code>RACsignal</code>，这在术语上叫做<code>连贯接口（fluent interface）</code>。这个功能可以让你直接构建管道，而不用每一步都使用本地变量。</p>
-
-<p><code>Signals</code>也可以被使用去获取状态。区别于观察属性和设置其他属性来反应新的值，<code>RAC</code>可以按照信号和操作来表达属性：</p>
-
-<pre><code class="language-objc">// Creates a one-way binding so that self.createEnabled will be
-// true whenever self.password and self.passwordConfirmation
-// are equal.
-//
-// RAC() is a macro that makes the binding look nicer.
-//
-// +combineLatest:reduce: takes an array of signals, executes the block with the
-// latest value from each signal whenever any of them changes, and returns a new
-// RACSignal that sends the return value of that block as values.
-RAC(self, createEnabled) = [RACSignal
-    combineLatest:@[ RACObserve(self, password), RACObserve(self, passwordConfirmation) ]
-    reduce:^(NSString *password, NSString *passwordConfirm) {
-        return @([passwordConfirm isEqualToString:password]);
-    }];
-</code></pre>
-
-<p>还有许多用法这就不举例了，详细用例可以查看<a href="https://github.com/ReactiveCocoa/ReactiveObjC#introduction">官方文档</a></p>
-
-<h2 id="toc_0">使用时机</h2>
-
-<p>刚开始，可能很难理解<code>RAC</code>,因为这个<code>ReactiveObjC</code>很抽象，很难了解什么时机应该使用它，怎样去解决问题。这里有几个推荐的使用时机：</p>
-
-<ul>
-<li>解决异步或者时间驱动的数据源</li>
-<li>链接依赖操作（尤其在网络处理方面）</li>
-<li>并行独立的工作</li>
-<li>简化集合的转变</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/17</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1422,31 +1349,31 @@ RAC(self, createEnabled) = [RACSignal
 	      
 		      
 			      <li class="post">
-			        <a href="15152183997863.html">Where my anagrams at?</a>
+			        <a href="15162636130743.html">First Missing Positive</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
+			        <a href="15162583169716.html">Find the Duplicate Number</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
+			        <a href="15162440984880.html">Set Mismatch</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15145180239158.html">1's, 0's and wildcards</a>
+			        <a href="15162401864030.html">Find Anagram Mappings</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15143494387976.html">Simple Pig Latin</a>
+			        <a href="15162389890253.html">Length of Last Word</a>
 			      </li>
 		     
 		  

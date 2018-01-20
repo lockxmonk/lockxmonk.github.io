@@ -117,22 +117,29 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15129633578167.html">
+                <a class="clearlink" href="15130426368802.html">
                 
-                  <h1>Excel Sheet Column Title</h1>
+                  <h1>Intersection of Two Arrays II</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15129633578167/15129633692969.jpg" alt=""/></p>
+                        	<p><img src="media/15130426368802/15130427333668.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    string convertToTitle(int n) {
-        string res = &quot;&quot;;
-        while (n!=0) {
-            res = char(&#39;A&#39;+(--n)%26)+res;
-            n=n/26;
+    vector&lt;int&gt; intersect(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
+        unordered_map&lt;int, int&gt; map;
+        vector&lt;int&gt; res;
+        for(auto num1:nums1){
+            map[num1]++;
+        }
+
+        for(auto num2:nums2){
+            if (map[num2]&gt;0) {
+                map[num2]--;
+                res.push_back(num2);
+            }
         }
         return res;
     }
@@ -146,7 +153,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/11</span>
+                    <span class="date">2017/12/12</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -163,242 +170,28 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15129586256568.html">
+                <a class="clearlink" href="15129821006078.html">
                 
-                  <h1>Excel Sheet Column Number</h1>
+                  <h1>Sort Characters By Frequency</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15129586256568/15129586339253.jpg" alt=""/></p>
+                        	<p><img src="media/15129821006078/15129821362536.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int titleToNumber(string s) {
-        int res = 0;
-        for (int i=0; i&lt;s.length(); i++) {
-            res = res * 26 + (s[i] - &#39;A&#39; + 1);
-        }
-        return res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/11</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15129573661731.html">
-                
-                  <h1>Flood Fill</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15129573661731/15129573748798.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    void fillColor(vector&lt;vector&lt;int&gt;&gt;&amp; image,int sr, int sc ,int tmp){
-        if (sr&gt;0&amp;&amp;image[sr-1][sc]==tmp) {
-            image[sr-1][sc]=image[sr][sc];
-            fillColor(image, sr-1, sc, tmp);
-        }
-        if (sr&lt;image.size()-1&amp;&amp;image[sr+1][sc]==tmp) {
-            image[sr+1][sc]=image[sr][sc];
-            fillColor(image, sr+1, sc, tmp);
-        }
-        if (sc&gt;0&amp;&amp;image[sr][sc-1]==tmp) {
-            image[sr][sc-1]=image[sr][sc];
-            fillColor(image, sr, sc-1, tmp);
-        }
-        if (sc&lt;image[0].size()-1&amp;&amp;image[sr][sc+1]==tmp) {
-            image[sr][sc+1]=image[sr][sc];
-            fillColor(image, sr, sc+1, tmp);
-        }
-    }
-
-    vector&lt;vector&lt;int&gt;&gt; floodFill(vector&lt;vector&lt;int&gt;&gt;&amp; image, int sr, int sc, int newColor) {
-        int tmp = image[sr][sc];
-        if (tmp == newColor) {
-            return image;
-        }
-        image[sr][sc] = newColor;
-        fillColor(image, sr, sc, tmp);
-        return image;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/11</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15129554975886.html">
-                
-                  <h1>Construct the Rectangle</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15129554975886/15129555123983.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; constructRectangle(int area) {
-        for(int mid = sqrt(area); mid&gt;0; mid--)
-            if (!(area%mid))
-                return {area/mid, mid};
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/11</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15128072112005.html">
-                
-                  <h1>Relative Ranks</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given scores of <strong>N</strong> athletes, find their relative ranks and the people with the top three highest scores, who will be awarded medals: &quot;Gold Medal&quot;, &quot;Silver Medal&quot; and &quot;Bronze Medal&quot;.</p>
-
-<p><img src="media/15128072112005/15128073582183.jpg" alt=""/></p>
-
-<p><code>pair</code>的用法和优先队列的使用</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;string&gt; findRelativeRanks(vector&lt;int&gt;&amp; nums) {
-        priority_queue&lt;pair&lt;int,int&gt; &gt; pq;
-        for(int i=0;i&lt;nums.size();i++)
-        {
-            pq.push(make_pair(nums[i],i));
-        }
-        vector&lt;string&gt; res(nums.size(),&quot;&quot;);
-        int count = 1;
-        for(int i=0; i&lt;nums.size();i++)
-        {
-            if(count==1) {res[pq.top().second] = &quot;Gold Medal&quot;; count++;}
-            else if(count==2) {res[pq.top().second] = &quot;Silver Medal&quot;; count++;}
-            else if(count==3) {res[pq.top().second] = &quot;Bronze Medal&quot;; count++;}
-            else {res[pq.top().second] = to_string(count); count++;}
-            pq.pop();
-        }
-        return res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15128043838038.html">
-                
-                  <h1>Valid Anagram</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15128043838038/15128043943990.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool isAnagram(string s, string t) {
-        if (s.length() != t.length()) return false;
+    string frequencySort(string s) {
         unordered_map&lt;char, int&gt; map;
         for (int i =0; i&lt;s.length(); i++) {
             map[s[i]]++;
-            map[t[i]]--;
         }
-        for(auto s:map){
-            if(s.second&lt;0) return 0;
-        }
-        return 1;
+
+        sort(s.begin(), s.end(), [&amp;map](char a ,char b){
+            return map[a]&gt;map[b] || (map[a] == map[b] &amp;&amp; a &gt; b);
+        });
+        
+        return s;
     }
 };
 </code></pre>
@@ -410,7 +203,205 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/9</span>
+                    <span class="date">2017/12/11</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15129806433168.html">
+                
+                  <h1>First Unique Character in a String</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15129806433168/15129806517273.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int firstUniqChar(string s) {
+        unordered_map&lt;char, int&gt; map;
+        for (int i =0; i&lt;s.length(); i++) {
+            map[s[i]]++;
+        }
+        for (int i =0; i&lt;s.length(); i++) {
+            if (map[s[i]]==1) {
+                return i;
+            }
+        }
+        return -1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/11</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15129796221707.html">
+                
+                  <h1>Minimum Moves to Equal Array Elements II</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15129796221707/15129796318879.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int minMoves2(vector&lt;int&gt;&amp; nums) {
+        int n = nums.size();
+        if(n &lt;= 1) return 0;
+        sort(nums.begin(), nums.end());
+        int mid = nums.size()/2 ,res = 0;
+        for(int i = 0; i &lt; mid; ++i)
+        {
+            res+=nums[mid]-nums[i];
+        }
+        for (int j = n-1; j&gt;mid; j--) {
+            res+=nums[j]-nums[mid];
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/11</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15129788527282.html">
+                
+                  <h1>Minimum Moves to Equal Array Elements</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15129788527282/15129788644532.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int minMoves(vector&lt;int&gt;&amp; nums) {
+        int n = nums.size();
+        if(n &lt;= 1)
+            return 0;
+        int mn = nums[0];   //mn为最小数字
+        int sum = nums[0];
+        for(int i = 1; i &lt; n; ++i)
+        {
+            mn = min(mn,nums[i]);
+            sum += nums[i];
+        }
+        return sum - mn*n;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/11</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15129760305793.html">
+                
+                  <h1>Range Addition II</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15129760305793/15129772098038.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int maxCount(int m, int n, vector&lt;vector&lt;int&gt;&gt;&amp; ops) {
+        for (auto tmp:ops) {
+            m = min(m, tmp[0]);
+            n = min(n, tmp[1]);
+        }
+        return m*n;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/11</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -515,31 +506,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15152183997863.html">Where my anagrams at?</a>
+			        <a href="15162636130743.html">First Missing Positive</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
+			        <a href="15162583169716.html">Find the Duplicate Number</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
+			        <a href="15162440984880.html">Set Mismatch</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15145180239158.html">1's, 0's and wildcards</a>
+			        <a href="15162401864030.html">Find Anagram Mappings</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15143494387976.html">Simple Pig Latin</a>
+			        <a href="15162389890253.html">Length of Last Word</a>
 			      </li>
 		     
 		  

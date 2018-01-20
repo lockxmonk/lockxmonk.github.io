@@ -117,49 +117,87 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15120236843494.html">
+                <a class="clearlink" href="15120990794732.html">
                 
-                  <h1>Summary Ranges</h1>
+                  <h1>Maximum Average Subarray I</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a sorted integer array without duplicates, return the summary of its ranges.求数组中，连续数字的区间。</p>
+                        	<p><img src="media/15120990794732/15120991082558.jpg" alt=""/></p>
 
-<p><img src="media/15120236843494/15120237048289.jpg" alt=""/></p>
+<p><strong>解决方法：滑动窗口方案</strong></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    vector&lt;string&gt; summaryRanges(vector&lt;int&gt;&amp; nums) {
-        
-        vector&lt;string&gt; result;
-        if(nums.size()==0) return result;
-        
-        int end = nums[0]+1;
-        int total = 0;
-        if (nums.size()==1) {
-            result.push_back(to_string(nums[0]));
-            return result;
-        }
-        nums.push_back(INT_MAX); //充当哨兵
-        for (int i=1; i&lt;nums.size(); i++) {
-            if (nums[i]==end) {
-                end++;
-                total++;
-                continue;
+    double findMaxAverage(vector&lt;int&gt;&amp; nums, int k) {
+        double r = INT_MIN;
+        double sum = 0;
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if (i&lt;k) {
+                sum+=nums[i];
             }else{
-                end = nums[i]+1;
-                if (total==0) {
-                    result.push_back(to_string(nums[i-1]));
-                }else{
-                    string tmp = to_string(nums[i-1-total])+&quot;-&gt;&quot;+to_string(nums[i-1]);
-                    result.push_back(tmp);
-                }
-                total = 0;
+                r = max(sum, r);
+                sum +=nums[i]-nums[i-k];
+            }
+        }
+        r = max(sum, r);
+        return r/double(k);
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120964350892.html">
+                
+                  <h1>Pascal's Triangle</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given numRows, generate the first numRows of Pascal&#39;s triangle.</p>
+
+<p>For example, given numRows = 5,<br/>
+Return<img src="media/15120964350892/15120964567125.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; generate(int numRows) {
+        vector&lt;vector&lt;int&gt;&gt;result(numRows);
+        for (int i = 0; i&lt;numRows; i++) {
+            result[i].resize(i+1);
+            result[i][0] = result[i][i] = 1;
+        
+            for (int j = 1; j&lt;i; j++) {
+                result[i][j] = result[i-1][j-1]+result[i-1][j];
             }
         }
         return result;
-    }
+        
+     }
 };
 </code></pre>
 
@@ -170,7 +208,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/30</span>
+                    <span class="date">2017/12/1</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -187,160 +225,28 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15120100977395.html">
+                <a class="clearlink" href="15120931328273.html">
                 
-                  <h1>Majority Element</h1>
+                  <h1>Search Insert Position</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given an array of size n, find the majority element. The majority element is the element that appears more than <code>⌊ n/2 ⌋</code> times.</p>
+                        	<p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
 
-<p>You may assume that the array is non-empty and the majority element always exist in the array.</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int majorityElement(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        int total = 1;
-        int tmp = 1;
-        int result = nums[0];
-        if (nums.size()==1) {
-            return result;
-        }
-        nums.push_back(INT_MAX); //在最后增加一个边界哨兵
-        for (int i=1; i&lt;=nums.size(); i++) {
-            if (nums[i]==nums[i-1]) {
-                tmp++;
-            }else{
-                result = tmp&gt;total ? nums[i-1]:result;
-                total = max(tmp, total);
-                tmp = 1;
-            }
-        }
-        
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15119708919827.html">
-                
-                  <h1>Find All Numbers Disappeared in an Array</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of integers where 1 ≤ a[i] ≤ n (n = size of array), some elements appear twice and others appear once.</p>
-
-<p>Find all the elements of [1, n] inclusive that do not appear in this array.</p>
-
-<p>Could you do it without extra space and in O(n) runtime? You may assume the returned list does not count as extra space.</p>
-
-<p><img src="media/15119708919827/15119710141999.jpg" alt=""/></p>
+<p>You may assume no duplicates in the array.<br/>
+<img src="media/15120931328273/15120931550538.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    vector&lt;int&gt; findDisappearedNumbers(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size();
-        for(int i=0; i&lt;len; i++) {
-            int m = abs(nums[i])-1;  // index start from 0
-            nums[m] = nums[m]&gt;0 ? -nums[m] : nums[m];
-        }
-        vector&lt;int&gt; res;
-        for(int i = 0; i&lt;len; i++) {
-            if(nums[i] &gt; 0) res.push_back(i+1);
-        }
-        return res;
-    }
-};
-</code></pre>
-
-<p>该题用了一个特殊的方法，<strong>取负法</strong>。</p>
-
-<p><strong>含义是：将元素对应的位置取负。简单一句话可能不好理解，我们举个例子。假设在位置k放了元素i，则在取负的过程中i的取值有两种可能：为正，表示当前尚未遇到元素k将该位置取负；为负，表示当前已经有元素k出现，并将元素取负。但是我们不关心k，我们关心元素i。元素i既然出现，我们就看一下位置i：为正，表示这是元素i第一次出现，我们将位置i取负；为负，表示元素i已经出现过一次，我们不做任何操作。不管一个元素出现一次还是两次，只要出现它对应的位置就会被取负。当某个元素不出现的时候，该元素对应的位置始终访问不到，所以还是正值，通过这种方法我们就可以找到哪些元素没有出现。</strong> </p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/29</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15119656914314.html">
-                
-                  <h1>Max Area of Island</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a non-empty 2D array <code>grid</code> of 0&#39;s and 1&#39;s, an island is a group of 1&#39;s (representing land) connected 4-directionally (horizontal or vertical.) You may assume all four edges of the grid are surrounded by water.</p>
-
-<p>Find the maximum area of an island in the given 2D array. (If there is no island, the maximum area is 0.)<br/>
-<img src="media/15119656914314/15119657218724.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int areaNum(vector&lt;vector&lt;int&gt;&gt;&amp; grid, int m ,int n){
-        if (m&lt;grid.size()&amp;&amp;m&gt;=0&amp;&amp;n&lt;grid[0].size()&amp;&amp;n&gt;=0&amp;&amp;grid[m][n]==1) {
-            //将经过的位置标记为0，避免循环检验
-            grid[m][n] = 0;
-            return 1+ areaNum(grid, m+1, n)+areaNum(grid, m, n+1)+areaNum(grid, m-1, n)+areaNum(grid, m, n-1);
-        }
-        return 0;
-    }
-    
-    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
         int result = 0;
-        for (int i =0; i&lt;grid.size(); i++) {
-            for (int j=0; j&lt;grid[0].size(); j++) {
-                if (grid[i][j]==1) {
-                    result = max(result, areaNum(grid, i, j));
-                }
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (nums[i]&gt;=target) {
+                return i;
             }
         }
-        return result;
+        return nums.size();
     }
 };
 </code></pre>
@@ -352,7 +258,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/29</span>
+                    <span class="date">2017/12/1</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -369,31 +275,88 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15119430001845.html">
+                <a class="clearlink" href="15120924554362.html">
                 
-                  <h1>Max Consecutive Ones</h1>
+                  <h1>Maximum Subarray</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a binary array, find the maximum number of consecutive 1s in this array.<br/>
-<img src="media/15119430001845/15119430248541.jpg" alt=""/></p>
+                        	<p>Find the contiguous subarray within an array (containing at least one number) which has the largest sum.</p>
+
+<p>For example, given the array<code>[-2,1,-3,4,-1,2,1,-5,4]</code>,<br/>
+the contiguous subarray <code>[4,-1,2,1]</code> has the largest sum = <code>6</code>.</p>
+
+<p>第一种解法：分治法</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int findMaxConsecutiveOnes(vector&lt;int&gt;&amp; nums) {
-        int sum1 = 0;
-        int tmp = 0;
-        for (int i=0; i&lt;nums.size(); i++) {
-        if (nums[i]==1) {
-            tmp++;
-        }else{
-            tmp = 0;
+    vector&lt;int&gt; findCrossSubArray(vector&lt;int&gt;&amp; nums, int mid, int low ,int high){
+        int sum = 0;
+        int leftSum = INT_MIN;
+        int maxLeft = 0;
+        for (int i = mid; i&gt;=low; i--) {
+            sum = sum+nums[i];
+            if (sum&gt;leftSum) {
+                leftSum = sum;
+                maxLeft = i;
+            }
         }
-            sum1 = max(tmp, sum1);
+        sum = 0;
+        int rightSum = INT_MIN;
+        int maxRight = 0;
+        for (int j=mid+1; j&lt;=high; j++) {
+            sum = sum+nums[j];
+            if (sum&gt;rightSum) {
+                rightSum = sum;
+                maxRight = j;
+            }
+        }
+        
+        return {{maxLeft,maxRight,leftSum+rightSum}};
+    }
+
+    vector&lt;int&gt; findMaxSubArray(vector&lt;int&gt;&amp; nums,int low ,int high)
+    {
+        if (low==high) {
+            return {{low,high,nums[low]}};
+        }else{
+            int mid = (low+high)/2;
+            vector&lt;int&gt; leftSum = findMaxSubArray(nums, low, mid);
+            vector&lt;int&gt; rightSum = findMaxSubArray(nums, mid+1, high);
+            vector&lt;int&gt; crossSum = findCrossSubArray(nums, mid, low, high);
+            if (leftSum[2]&gt;=rightSum[2]&amp;&amp;leftSum[2]&gt;=crossSum[2]) {
+                return leftSum;
+            }else if(rightSum[2]&gt;=leftSum[2]&amp;&amp;rightSum[2]&gt;=crossSum[2])
+            {
+                return rightSum;
+            }
+            else return crossSum;
         }
     
-        return sum1;
+    }
+
+
+    int maxSubArray(vector&lt;int&gt;&amp; nums) {
+        int len = nums.size()-1;
+        vector&lt;int&gt; result = findMaxSubArray(nums, 0, len);
+        return result[2];
+    }
+};
+</code></pre>
+
+<p>第二种解法：</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int maxSubArray(vector&lt;int&gt;&amp; nums) {
+        int ans=nums[0],i,j,sum=0;
+        for(i=0;i&lt;nums.size();i++){
+            sum+=nums[i];
+            ans=max(sum,ans);
+            sum=max(sum,0);
+        }
+        return ans;
     }
 };
 </code></pre>
@@ -405,7 +368,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/29</span>
+                    <span class="date">2017/12/1</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -422,47 +385,28 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15119407096444.html">
+                <a class="clearlink" href="15120258790187.html">
                 
-                  <h1>Range Sum Query 2D - Immutable</h1>
+                  <h1>Given an integer array, find three numbers whose product is maximum and output the maximum product.</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a 2D matrix matrix, find the sum of the elements inside the rectangle defined by its upper left corner (row1, col1) and lower right corner (row2, col2).<br/>
-<img src="media/15119407096444/15119407391245.jpg" alt=""/></p>
+                        	<p><img src="media/15120258790187/15120319341000.jpg" alt=""/></p>
 
-<pre><code class="language-c++">class NumMatrix {
-private:
-    int col,row;
-    vector&lt;vector&lt;int&gt;&gt; sums;
+<pre><code class="language-c++">class Solution {
 public:
-    NumMatrix(vector&lt;vector&lt;int&gt;&gt; matrix) {
-        row = matrix.size();
-        col =row&gt;0 ? matrix[0].size():0;
-        sums = vector&lt;vector&lt;int&gt;&gt;(row+1, vector&lt;int&gt;(col+1,0));
-        for(int i=1;i&lt;=row;i++)
-        {
-            for(int j=1;j&lt;=col;j++)
-            {
-                sums[i][j] = sums[i-1][j]+sums[i][j-1]+matrix[i-1][j-1]-sums[i-1][j-1];
-            }
-        }
-    }
-    
-    int sumRegion(int row1, int col1, int row2, int col2) {
-        return sums[row2+1][col2+1]-sums[row2+1][col1]-sums[row1][col2+1]+sums[row1][col1];
+    int maximumProduct(vector&lt;int&gt;&amp; nums) {
+        sort(nums.begin(), nums.end());
+        int len = nums.size();
+        int tmp1 = nums[len-1]*nums[len-2]*nums[len-3];
+        int tmp2 = nums[len-1]*nums[0]*nums[1];
+        return max(tmp1, tmp2);
     }
 };
-
-/**
- * Your NumMatrix object will be instantiated and called as such:
- * NumMatrix obj = new NumMatrix(matrix);
- * int param_1 = obj.sumRegion(row1,col1,row2,col2);
- */
 </code></pre>
 
-<p><a href="https://leetcode.com/problems/range-sum-query-2d-immutable/description/">题目详细链接</a></p>
+<p>主要考虑含有负数的情况。</p>
 
                         
                       </div>
@@ -471,7 +415,63 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/11/29</span>
+                    <span class="date">2017/11/30</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15120258181532.html">
+                
+                  <h1>Two Sum II - Input array is sorted</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of integers that is already <strong><em>sorted in ascending order</em></strong>, find two numbers such that they add up to a specific target number.</p>
+
+<p>The function twoSum should return indices of the two numbers such that they add up to the target, where index1 must be less than index2. Please note that your returned answers (both index1 and index2) are not zero-based.</p>
+
+<p>You may assume that each input would have exactly one solution and you may not use the same element twice.</p>
+
+<p><img src="media/15120258181532/15120258628279.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; numbers, int target) {
+        int str = 0;
+        int end = numbers.size()-1;
+        while (numbers[str]+numbers[end]!=target) {
+            if (numbers[str]+numbers[end]&gt;target) {
+                end--;
+            }else{
+                str++;
+            }
+        }
+        return vector&lt;int&gt;({str+1,end+1});
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/30</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -576,31 +576,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15152183997863.html">Where my anagrams at?</a>
+			        <a href="15162636130743.html">First Missing Positive</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
+			        <a href="15162583169716.html">Find the Duplicate Number</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
+			        <a href="15162440984880.html">Set Mismatch</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15145180239158.html">1's, 0's and wildcards</a>
+			        <a href="15162401864030.html">Find Anagram Mappings</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15143494387976.html">Simple Pig Latin</a>
+			        <a href="15162389890253.html">Length of Last Word</a>
 			      </li>
 		     
 		  

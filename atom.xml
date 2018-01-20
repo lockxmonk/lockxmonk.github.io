@@ -4,13 +4,241 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2018-01-06T09:59:12+08:00</updated>
+  <updated>2018-01-06T14:00:48+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[First Missing Positive]]></title>
+    <link href="https://lockxmonk.github.io/15162636130743.html"/>
+    <updated>2018-01-18T16:20:13+08:00</updated>
+    <id>https://lockxmonk.github.io/15162636130743.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15162636130743/15162636149442.jpg" alt=""/></p>
+
+<pre><code class="language-objc">class Solution {
+public:
+    int firstMissingPositive(vector&lt;int&gt;&amp; nums) {
+        unordered_map&lt;int, int&gt; map;
+        int min = INT_MAX, max = 0, res = 1;
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if (nums[i]&lt;=min&amp;&amp;nums[i]&gt;=0) {
+                min = nums[i];
+            }else if (nums[i]&lt;0) min = 0;
+            if (nums[i]&gt;=max) max = nums[i];
+            map[nums[i]]++;
+        }
+        for (int j=min; j&lt;=max; j++) {
+            if (j==0) continue;
+            if (min&gt;=2) {
+                return 1;
+            }
+            if (map[j]==0) {
+                res = j;
+                break;
+            }
+            if (j==max) {
+                res = max+1;
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Find the Duplicate Number]]></title>
+    <link href="https://lockxmonk.github.io/15162583169716.html"/>
+    <updated>2018-01-18T14:51:56+08:00</updated>
+    <id>https://lockxmonk.github.io/15162583169716.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15162583169716/15162583183298.jpg" alt=""/></p>
+
+<pre><code class="language-objc">class Solution {
+public:
+    int findDuplicate(vector&lt;int&gt;&amp; nums) {
+        unordered_map&lt;int, int&gt; map;
+        int res = 0;
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if (map[nums[i]]==0) {
+                map[nums[i]]++;
+            }else{
+                res = nums[i];
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Set Mismatch]]></title>
+    <link href="https://lockxmonk.github.io/15162440984880.html"/>
+    <updated>2018-01-18T10:54:58+08:00</updated>
+    <id>https://lockxmonk.github.io/15162440984880.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15162440984880/15162441100081.jpg" alt=""/></p>
+
+<pre><code class="language-objc">class Solution {
+public:
+    vector&lt;int&gt; findErrorNums(vector&lt;int&gt;&amp; nums) {
+        int len = nums.size();
+        vector&lt;int&gt; res;
+        vector&lt;int&gt; a(len+1);   //因为数组从0开始，所以除去0，在后面加上1位
+
+        for (int i = 0; i&lt;len; i++) {
+            if (a[nums[i]]==0) {
+                a[nums[i]]+=1;
+            }else{
+                res.push_back(nums[i]);
+            }
+        }
+
+        for (int j = 1; j&lt;=len; j++) {
+            if (a[j]==0) {
+                res.push_back(j);
+            }
+        }
+
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Find Anagram Mappings]]></title>
+    <link href="https://lockxmonk.github.io/15162401864030.html"/>
+    <updated>2018-01-18T09:49:46+08:00</updated>
+    <id>https://lockxmonk.github.io/15162401864030.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15162401864030/15162401885331.jpg" alt=""/></p>
+
+<pre><code class="language-objc">class Solution {
+public:
+    vector&lt;int&gt; anagramMappings(vector&lt;int&gt;&amp; A, vector&lt;int&gt;&amp; B) {
+        unordered_map&lt;int, int&gt; map;
+        vector&lt;int&gt; res;
+        for (int i = 0; i&lt;B.size(); i++) {
+            map[B[i]]=i;
+        }
+        for (int j = 0; j&lt;A.size(); j++) {
+            res.push_back(map[A[j]]);
+        }
+        return res;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Length of Last Word]]></title>
+    <link href="https://lockxmonk.github.io/15162389890253.html"/>
+    <updated>2018-01-18T09:29:49+08:00</updated>
+    <id>https://lockxmonk.github.io/15162389890253.html</id>
+    <content type="html"><![CDATA[
+<pre><code>![](media/15162389890253/15162389958774.jpg)
+</code></pre>
+
+<pre><code class="language-objc">class Solution {
+public:
+    int lengthOfLastWord(string s) {
+        int len = s.size();
+        int cout = 0;
+        for (int i=len-1; i&gt;=0; i--) {
+            if(cout&gt;0&amp;&amp;s[i]==&#39; &#39;) break;
+
+            if (s[i]==&#39; &#39;) {
+                continue;
+            }else{
+                cout++;
+            }
+
+        }
+        return cout;
+    }
+};
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Find matching parenthesis]]></title>
+    <link href="https://lockxmonk.github.io/15155525710565.html"/>
+    <updated>2018-01-10T10:49:31+08:00</updated>
+    <id>https://lockxmonk.github.io/15155525710565.html</id>
+    <content type="html"><![CDATA[
+<p><img src="media/15155525710565/15155525754064.jpg" alt=""/><br/>
+<img src="media/15155525710565/15155525919147.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+int findParenMatch(NSString *s, int n) {
+    int res = -1;
+    NSString *tmp = [s substringWithRange:NSMakeRange(n, 1)];
+    if ([tmp isEqualToString:@&quot;(&quot;]) {
+        int logF = 0;
+        for (int i = n+1; i&lt;s.length; i++) {
+            NSString *tmpStrF = [s substringWithRange:NSMakeRange(i, 1)];
+            if ([tmpStrF isEqualToString:@&quot;(&quot;]) logF++;
+            if ([tmpStrF isEqualToString:@&quot;)&quot;]) {
+                logF--;
+                if (logF&lt;0) {
+                    res = i;
+                    break;
+                }
+            }
+        }
+    }else if ([tmp isEqualToString:@&quot;)&quot;]){
+        int logB = 0;
+        for (int i = n-1; i&gt;=0; i--) {
+            NSString *tmpStrB = [s substringWithRange:NSMakeRange(i, 1)];
+            if ([tmpStrB isEqualToString:@&quot;)&quot;]) logB++;
+            if ([tmpStrB isEqualToString:@&quot;(&quot;]) {
+                logB--;
+                if (logB&lt;0) {
+                    res = i;
+                    break;
+                }
+            }
+        }
+    }
+    return res;
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[KVO自己的理解]]></title>
+    <link href="https://lockxmonk.github.io/15153763176511.html"/>
+    <updated>2018-01-08T09:51:57+08:00</updated>
+    <id>https://lockxmonk.github.io/15153763176511.html</id>
+    <content type="html"><![CDATA[
+<ol>
+<li>KVO利用runtime，生成了一个对象的子类，并生成子类对象替换原来对象的isa指针，重写了set方法。</li>
+<li>KVO是基于KVC的，可以明显的发现在改变容器的时候，通过KVC改变改变容器中的值或者使用set方法时，会触发KVO通知函数，而简单的使用addObject：方法时却没有触发，这是因为KVO只响应set方法。<font color=red>可以说kvc是kvo的入口</font></li>
+<li>直接使用KVO在项目中不是很好用，代码结构比较松散，需要自己封装或使用其它三方框架。</li>
+</ol>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Where my anagrams at?]]></title>
@@ -588,295 +816,6 @@ long long f(long long n, long long m) {
     sum+= (p+1)*p/2;
     return sum;
 }
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ Longest Univalue Path]]></title>
-    <link href="https://lockxmonk.github.io/15139334894228.html"/>
-    <updated>2017-12-22T17:04:49+08:00</updated>
-    <id>https://lockxmonk.github.io/15139334894228.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15139334894228/15139334918786.jpg" alt=""/></p>
-
-<pre><code class="language-c++">/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
-class Solution {
-public:
-    int dfs(TreeNode* node, int&amp; lup) {
-        int l = node-&gt;left ? dfs(node-&gt;left, lup) : 0;
-        int r = node-&gt;right ? dfs(node-&gt;right, lup) : 0;
-        int resl = node-&gt;left &amp;&amp; node-&gt;left-&gt;val == node-&gt;val ? l + 1 : 0;
-        int resr = node-&gt;right &amp;&amp; node-&gt;right-&gt;val == node-&gt;val ? r + 1 : 0;
-        lup = max(lup, resl + resr);
-        return max(resl, resr);
-    }
-
-    int longestUnivaluePath(TreeNode* root) {
-        int lup = 0;
-        if (root) dfs(root, lup);
-        return lup;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Isomorphic Strings]]></title>
-    <link href="https://lockxmonk.github.io/15137396102567.html"/>
-    <updated>2017-12-20T11:13:30+08:00</updated>
-    <id>https://lockxmonk.github.io/15137396102567.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15137396102567/15137396123443.jpg" alt=""/></p>
-
-<p>一开始写的代码，超时版本，用的集合。</p>
-
-<pre><code class="language-c++">bool isIsomorphic(string s, string t) {
-    unordered_map&lt;char, set&lt;int&gt;&gt; Smap;
-    unordered_map&lt;char, vector&lt;int&gt;&gt; Tmap;
-    for (int i = 0; i&lt;s.size(); i++) {
-        Smap[s[i]].insert(i);
-        Tmap[t[i]].push_back(i);
-    }
-    if (Smap.size()!=Tmap.size()) {
-        return 0;
-    }else{
-        for (int j = 0; j&lt;s.size(); j++) {
-            vector&lt;int&gt; a = Tmap[t[j]];
-            set&lt;int&gt; b = Smap[s[j]];
-            int len = b.size();
-            for (auto num : a) {
-                b.insert(num);
-                if (len!=b.size()) {
-                    return 0;
-                }
-            }
-        }
-    }
-    
-    return 1;
-}
-</code></pre>
-
-<p>修改后的版本。</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool isIsomorphic(string s, string t) {
-        int m1[256] = {0}, m2[256] = {0}, n = s.size();
-        for (int i = 0; i &lt; n; ++i) {
-            if (m1[s[i]] != m2[t[i]]) return false;  //判断两个字符串i位置的字符上次出现的位置是否一样。
-            m1[s[i]] = i + 1;   //记录上次该字符出现的位置
-            m2[t[i]] = i + 1;   //记录上次该字符出现的位置
-        }
-        return true;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Path Sum II]]></title>
-    <link href="https://lockxmonk.github.io/15136732474119.html"/>
-    <updated>2017-12-19T16:47:27+08:00</updated>
-    <id>https://lockxmonk.github.io/15136732474119.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15136732474119/15136732503183.jpg" alt=""/></p>
-
-<p>运用前序遍历</p>
-
-<pre><code class="language-c++">/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
-class Solution {
-public:
-    void findPaths(TreeNode* node, int sum, vector&lt;int&gt;&amp; path, vector&lt;vector&lt;int&gt; &gt;&amp; paths) {
-        if (!node) return;
-        path.push_back(node -&gt; val);
-        if (!(node -&gt; left) &amp;&amp; !(node -&gt; right) &amp;&amp; sum == node -&gt; val)
-            paths.push_back(path);
-        findPaths(node -&gt; left, sum - node -&gt; val, path, paths);
-        findPaths(node -&gt; right, sum - node -&gt; val, path, paths);
-        path.pop_back();
-    }
-
-    vector&lt;vector&lt;int&gt;&gt; pathSum(TreeNode* root, int sum) {
-        vector&lt;vector&lt;int&gt; &gt; paths;
-        vector&lt;int&gt; path;
-        findPaths(root, sum, path, paths);
-        return paths;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Path Sum]]></title>
-    <link href="https://lockxmonk.github.io/15136718150164.html"/>
-    <updated>2017-12-19T16:23:35+08:00</updated>
-    <id>https://lockxmonk.github.io/15136718150164.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15136718150164/15136718241722.jpg" alt=""/></p>
-
-<pre><code class="language-c++">/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
-class Solution {
-public:
-    bool hasPathSum(TreeNode *root, int sum) {
-        if (root == NULL) return false;
-        if (root-&gt;val == sum &amp;&amp; root-&gt;left ==  NULL &amp;&amp; root-&gt;right == NULL) return true;
-        
-        return hasPathSum(root-&gt;left, sum-root-&gt;val) || hasPathSum(root-&gt;right, sum-root-&gt;val);
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Linked List Cycle II]]></title>
-    <link href="https://lockxmonk.github.io/15134129335933.html"/>
-    <updated>2017-12-16T16:28:53+08:00</updated>
-    <id>https://lockxmonk.github.io/15134129335933.html</id>
-    <content type="html"><![CDATA[
-<p>题目链接：<a href="https://leetcode.com/problems/linked-list-cycle-ii/description/">https://leetcode.com/problems/linked-list-cycle-ii/description/</a></p>
-
-<p>Given a linked list, return the node where the cycle begins. If there is no cycle, return null.</p>
-
-<p>Note: Do not modify the linked list.</p>
-
-<pre><code class="language-c++">/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    ListNode *detectCycle(ListNode *head) {
-        if (head==NULL||head-&gt;next==NULL) {
-            return NULL;
-        }
-        ListNode *slow = head;
-        ListNode *fast = head;
-        ListNode *entry = head;
-        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
-            fast = fast-&gt;next-&gt;next;
-            slow = slow-&gt;next;
-            if (fast==slow) {
-                while (slow!=entry) {
-                    slow = slow-&gt;next;
-                    entry = entry-&gt;next;
-                }
-                return entry;;
-            }
-        }
-        return NULL;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Linked List Cycle]]></title>
-    <link href="https://lockxmonk.github.io/15134088955356.html"/>
-    <updated>2017-12-16T15:21:35+08:00</updated>
-    <id>https://lockxmonk.github.io/15134088955356.html</id>
-    <content type="html"><![CDATA[
-<p>Given a linked list, determine if it has a cycle in it.</p>
-
-<p>Follow up:<br/>
-Can you solve it without using extra space?</p>
-
-<p><strong>使用快慢两个指针来判断是否有环，当有环的时候，快指针会停留在环内知道慢指针赶上与之相等。</strong></p>
-
-<pre><code class="language-c++">/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    bool hasCycle(ListNode *head) {
-        if (head==NULL||head-&gt;next==NULL) {
-            return 0;
-        }
-        ListNode *slow = head;
-        ListNode *fast = head;
-        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
-            fast = fast-&gt;next-&gt;next;
-            slow = slow-&gt;next;
-            if (fast==slow) {
-                return 1;
-            }
-        }
-        return 0;
-    }
-};
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ Convert a Number to Hexadecimal]]></title>
-    <link href="https://lockxmonk.github.io/15131536329153.html"/>
-    <updated>2017-12-13T16:27:12+08:00</updated>
-    <id>https://lockxmonk.github.io/15131536329153.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15131536329153/15131536540833.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string toHex(int num) {
-        const string HEX =&quot;0123456789abcdef&quot;;
-        if (num==0) return &quot;0&quot;;
-        string res =&quot;&quot;;
-        int count  = 0;
-        while (num&amp;&amp;count++&lt;8) {
-            //&amp;0xf表示取二进制的低四位
-            res = HEX[(num&amp;0xf)]+res;
-            num&gt;&gt;=4;
-        }
-        return res;
-    }
-};
 </code></pre>
 
 ]]></content>

@@ -117,26 +117,28 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15127221024719.html">
+                <a class="clearlink" href="15128043838038.html">
                 
-                  <h1>Find the Difference</h1>
+                  <h1>Valid Anagram</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15127221024719/15127221121271.jpg" alt=""/></p>
+                        	<p><img src="media/15128043838038/15128043943990.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    char findTheDifference(string s, string t) {
-        char sum = 0;
-        for (char c: s) {
-            sum^=c;
+    bool isAnagram(string s, string t) {
+        if (s.length() != t.length()) return false;
+        unordered_map&lt;char, int&gt; map;
+        for (int i =0; i&lt;s.length(); i++) {
+            map[s[i]]++;
+            map[t[i]]--;
         }
-        for (char c: t) {
-            sum^=c;
+        for(auto s:map){
+            if(s.second&lt;0) return 0;
         }
-        return sum;
+        return 1;
     }
 };
 </code></pre>
@@ -148,7 +150,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/8</span>
+                    <span class="date">2017/12/9</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -165,85 +167,27 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15127198152754.html">
+                <a class="clearlink" href="15128026901484.html">
                 
-                  <h1>Distribute Candies</h1>
+                  <h1>Assign Cookies</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15127198152754/15127198177167.jpg" alt=""/></p>
+                        	<p><img src="media/15128026901484/15128027017206.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int distributeCandies(vector&lt;int&gt;&amp; candies) {
-        int res = 0;
-        unordered_map&lt;int, vector&lt;int&gt;&gt; map;
-        for (int i =0; i&lt;candies.size(); i++) {
-            map[candies[i]].push_back(candies[i]);
-        }
-        if (map.size()&lt;=candies.size()/2) {
-            return map.size();
-        }else{
-            return candies.size()/2;
-        }
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/8</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15127166881202.html">
-                
-                  <h1>Fizz Buzz</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Write a program that outputs the string representation of numbers from 1 to n.</p>
-
-<p>But for multiples of three it should output “Fizz” instead of the number and for the multiples of five output “Buzz”. For numbers which are multiples of both three and five output “FizzBuzz”.</p>
-
-<p><img src="media/15127166881202/15127167059726.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;string&gt; fizzBuzz(int n) {
-        vector&lt;string&gt; res;
-        for (int i=1; i&lt;=n; i++) {
-            if (i%3==0&amp;&amp;i%5==0) {
-                res.push_back(&quot;FizzBuzz&quot;);
-            }else if (i%5==0){
-                res.push_back(&quot;Buzz&quot;);
-            }else if(i%3==0){
-                res.push_back(&quot;Fizz&quot;);
-            }else{
-                res.push_back(to_string(i));
+    int findContentChildren(vector&lt;int&gt;&amp; g, vector&lt;int&gt;&amp; s) {
+        sort(g.begin(), g.end());
+        sort(s.begin(), s.end());
+        int logG=0;
+        for (int i=0; i&lt;s.size(); i++) {
+            if (g[logG]&lt;=s[i]&amp;&amp;logG&lt;g.size()) {
+                logG++;
             }
         }
-        return res;
+        return logG;
     }
 };
 </code></pre>
@@ -255,7 +199,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/8</span>
+                    <span class="date">2017/12/9</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -272,25 +216,26 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15127150080101.html">
+                <a class="clearlink" href="15128009688279.html">
                 
-                  <h1>Sum of Two Integers</h1>
+                  <h1>Ransom Note</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15127150080101/15127150099516.jpg" alt=""/></p>
+                        	<p><img src="media/15128009688279/15128009813033.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int getSum(int a, int b) {
-        int sum = a;
-        while (b!=0) {
-            sum = a^b;
-            b = (a&amp;b)&lt;&lt;1;
-            a = sum;
+    bool canConstruct(string ransomNote, string magazine) {
+        unordered_map&lt;char, int&gt; map;
+        for (int i = 0; i&lt;magazine.length(); i++) {
+            map[magazine[i]]++;
         }
-        return a;
+        for (int j = 0; j&lt;ransomNote.length(); j++) {
+            if(--map[ransomNote[j]]&lt;0) return 0;
+        }
+        return 1;
     }
 };
 </code></pre>
@@ -302,7 +247,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/8</span>
+                    <span class="date">2017/12/9</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -319,93 +264,163 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15127074753393.html">
+                <a class="clearlink" href="15127898937133.html">
                 
-                  <h1>Employee Importance</h1>
+                  <h1>Reverse String II</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15127074753393/15127075000371.jpg" alt=""/></p>
+                        	<p><img src="media/15127898937133/15127899074799.jpg" alt=""/></p>
 
-<pre><code class="language-c++">/*
-// Employee info
-class Employee {
-public:
-    // It&#39;s the unique ID of each node.
-    // unique id of this employee
-    int id;
-    // the importance value of this employee
-    int importance;
-    // the id of direct subordinates
-    vector&lt;int&gt; subordinates;
-};
-*/
-class Solution {
-public:
-    int getImportance(vector&lt;Employee*&gt; employees, int id) {
-        unordered_map&lt;int ,Employee*&gt; map;
-        for(auto emp:employees){
-            map[emp-&gt;id] = emp;
-        }
-        return help(map,id);
-    }
-    
-    int help(unordered_map&lt;int, Employee*&gt;&amp; map, int id){
-        int sum = map[id]-&gt;importance;
-        for(auto element : map[id]-&gt;subordinates){
-            sum += help(map, element);
-        }
-        return sum;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/8</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15127037334925.html">
-                
-                  <h1>Single Number</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of integers, every element appears twice except for one. Find that single one.</p>
+<p>运用内置的<code>reverse</code>函数</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int singleNumber(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (nums[i]!=nums[i+1]) {
-                return nums[i];
+    string reverseStr(string s, int k) {
+        for (int i = 0; i&lt;s.length(); i+=2*k) {
+            reverse(s.begin()+i, min(s.begin()+i+k, s.end()));
+        }
+        return s;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15127884486398.html">
+                
+                  <h1>Base 7</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15127884486398/15127884572899.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string convertToBase7(int num) {
+        int x = abs(num); string res;
+        do {
+          res = to_string(x%7)+res;
+        } while (x/=7);
+        
+        return (num&gt;=0? &quot;&quot; : &quot;-&quot;) + res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15127864249320.html">
+                
+                  <h1>License Key Formatting</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15127864249320/15127864500019.jpg" alt=""/></p>
+
+<p>第一版：</p>
+
+<pre><code class="language-c++">    int log = 0;
+    string ele=&quot;&quot;;
+    string re=&quot;&quot;;
+    for (int i = S.length()-1; i&gt;=0; i--) {
+        if (S[i]!=&#39;-&#39;) {
+            log++;
+            S[i]=toupper(S[i]);
+            ele = S[i]+ele;
+        }
+        if (log==K||i==0) {
+            if (i==0) {
+                re = ele+re;
             }else{
-                i++;
+                re = &#39;-&#39;+ele+re;
+            }
+            log = 0;
+            ele = &quot;&quot;;
+        }
+    }
+    return re[0]==&#39;-&#39;?re.substr(1,re.length()-1):re;
+</code></pre>
+
+<p>第二版：运用栈</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string licenseKeyFormatting(string S, int K) {
+        stack&lt;string&gt; st;
+        string line;
+        for(int i=S.length()-1;i&gt;=0;i--){
+            if(S[i]==&#39;-&#39;) continue;
+            
+            if(line.length()&lt;K){
+                if(S[i]&gt;=&#39;a&#39; &amp;&amp; S[i]&lt;=&#39;z&#39;) line.insert(0, 1, S[i]-&#39;a&#39;+&#39;A&#39;);
+                else line.insert(0, 1, S[i]);
+                
+                if(line.length()==K){
+                    st.push(line);
+                    line=&quot;&quot;;
+                }
             }
         }
-        return -1;
+        if(st.empty()) return line;
+        
+        if(line.length() == 0){
+            line += st.top();
+            st.pop();
+        }
+        while(!st.empty()){
+            line+=&#39;-&#39;;
+            line+=st.top();
+            st.pop();
+        }
+        return line;
     }
 };
 </code></pre>
@@ -417,7 +432,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/8</span>
+                    <span class="date">2017/12/9</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -522,31 +537,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15152183997863.html">Where my anagrams at?</a>
+			        <a href="15162636130743.html">First Missing Positive</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15152039082618.html">Perimeter of squares in a rectangle</a>
+			        <a href="15162583169716.html">Find the Duplicate Number</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15151211562254.html">AFNetworking遇到的问题</a>
+			        <a href="15162440984880.html">Set Mismatch</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15145180239158.html">1's, 0's and wildcards</a>
+			        <a href="15162401864030.html">Find Anagram Mappings</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15143494387976.html">Simple Pig Latin</a>
+			        <a href="15162389890253.html">Length of Last Word</a>
 			      </li>
 		     
 		  
