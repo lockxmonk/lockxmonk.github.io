@@ -117,48 +117,167 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15134129335933.html">
+                <a class="clearlink" href="15139993814636.html">
                 
-                  <h1>Linked List Cycle II</h1>
+                  <h1>Moves in squared strings (I)</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>题目链接：<a href="https://leetcode.com/problems/linked-list-cycle-ii/description/">https://leetcode.com/problems/linked-list-cycle-ii/description/</a></p>
+                        	<p><img src="media/15139993814636/15139993826350.jpg" alt=""/><br/>
+<img src="media/15139993814636/15139994003399.jpg" alt=""/></p>
 
-<p>Given a linked list, return the node where the cycle begins. If there is no cycle, return null.</p>
+<p>题目链接：<a href="https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc">https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc</a></p>
 
-<p>Note: Do not modify the linked list.</p>
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSString *vertMirror(NSString *strng) {
+    NSMutableString *res = [[NSMutableString alloc] init];
+    NSArray *stringArray = [strng componentsSeparatedByString:@&quot;\n&quot;];
+    for (NSString *tmpStr in stringArray) {
+        NSMutableString * reverseString = [NSMutableString string];
+        for(int i = 0 ; i &lt; tmpStr.length; i ++){
+            //倒序读取字符并且存到可变数组数组中
+            unichar c = [tmpStr characterAtIndex:tmpStr.length- i -1];
+            [reverseString appendFormat:@&quot;%c&quot;,c];
+        }
+        
+        if ([tmpStr isEqualToString:[stringArray lastObject]]) {
+            [res appendString:reverseString];
+            break;
+        }
+        
+        [reverseString appendString:@&quot;\n&quot;];
+        [res appendString:reverseString];
+    }
+    
+    return res;
+}
+
+NSString *horMirror(NSString *strng) {
+    NSMutableString *res = [[NSMutableString alloc] init];;
+    NSArray *stringAry = [strng componentsSeparatedByString:@&quot;\n&quot;];
+    for (int i = stringAry.count-1; i&gt;=0; i--) {
+        [res appendString:stringAry[i]];
+        if (i==0) {
+            break;
+        }
+        [res appendString:@&quot;\n&quot;];
+    }
+    return res;
+}
+
+NSString *oper(NSString *(*f)(NSString *), NSString *s) {
+    return f(s);
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15139938131506.html">
+                
+                  <h1>Sum of many ints</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15139938131506/15139938214932.jpg" alt=""/></p>
+
+<p>题目链接：<a href="https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc">https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc</a></p>
+
+<p>注意<code>long long</code>类型。</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+long long f(long long n, long long m) {
+    long long sum = 0;
+    long long q = n/m;
+    long long p = n%m;
+    sum+= (m*(m-1)/2)*q;
+    sum+= (p+1)*p/2;
+    return sum;
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15139334894228.html">
+                
+                  <h1> Longest Univalue Path</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15139334894228/15139334918786.jpg" alt=""/></p>
 
 <pre><code class="language-c++">/**
- * Definition for singly-linked list.
- * struct ListNode {
+ * Definition for a binary tree node.
+ * struct TreeNode {
  *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
  * };
  */
 class Solution {
 public:
-    ListNode *detectCycle(ListNode *head) {
-        if (head==NULL||head-&gt;next==NULL) {
-            return NULL;
-        }
-        ListNode *slow = head;
-        ListNode *fast = head;
-        ListNode *entry = head;
-        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
-            fast = fast-&gt;next-&gt;next;
-            slow = slow-&gt;next;
-            if (fast==slow) {
-                while (slow!=entry) {
-                    slow = slow-&gt;next;
-                    entry = entry-&gt;next;
-                }
-                return entry;;
-            }
-        }
-        return NULL;
+    int dfs(TreeNode* node, int&amp; lup) {
+        int l = node-&gt;left ? dfs(node-&gt;left, lup) : 0;
+        int r = node-&gt;right ? dfs(node-&gt;right, lup) : 0;
+        int resl = node-&gt;left &amp;&amp; node-&gt;left-&gt;val == node-&gt;val ? l + 1 : 0;
+        int resr = node-&gt;right &amp;&amp; node-&gt;right-&gt;val == node-&gt;val ? r + 1 : 0;
+        lup = max(lup, resl + resr);
+        return max(resl, resr);
+    }
+
+    int longestUnivaluePath(TreeNode* root) {
+        int lup = 0;
+        if (root) dfs(root, lup);
+        return lup;
     }
 };
 </code></pre>
@@ -170,7 +289,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/16</span>
+                    <span class="date">2017/12/22</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -187,294 +306,121 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15134088955356.html">
+                <a class="clearlink" href="15137396102567.html">
                 
-                  <h1>Linked List Cycle</h1>
+                  <h1>Isomorphic Strings</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>Given a linked list, determine if it has a cycle in it.</p>
+                        	<p><img src="media/15137396102567/15137396123443.jpg" alt=""/></p>
 
-<p>Follow up:<br/>
-Can you solve it without using extra space?</p>
+<p>一开始写的代码，超时版本，用的集合。</p>
 
-<p><strong>使用快慢两个指针来判断是否有环，当有环的时候，快指针会停留在环内知道慢指针赶上与之相等。</strong></p>
-
-<pre><code class="language-c++">/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    bool hasCycle(ListNode *head) {
-        if (head==NULL||head-&gt;next==NULL) {
-            return 0;
-        }
-        ListNode *slow = head;
-        ListNode *fast = head;
-        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
-            fast = fast-&gt;next-&gt;next;
-            slow = slow-&gt;next;
-            if (fast==slow) {
-                return 1;
-            }
-        }
+<pre><code class="language-c++">bool isIsomorphic(string s, string t) {
+    unordered_map&lt;char, set&lt;int&gt;&gt; Smap;
+    unordered_map&lt;char, vector&lt;int&gt;&gt; Tmap;
+    for (int i = 0; i&lt;s.size(); i++) {
+        Smap[s[i]].insert(i);
+        Tmap[t[i]].push_back(i);
+    }
+    if (Smap.size()!=Tmap.size()) {
         return 0;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/16</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15131536329153.html">
-                
-                  <h1> Convert a Number to Hexadecimal</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15131536329153/15131536540833.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string toHex(int num) {
-        const string HEX =&quot;0123456789abcdef&quot;;
-        if (num==0) return &quot;0&quot;;
-        string res =&quot;&quot;;
-        int count  = 0;
-        while (num&amp;&amp;count++&lt;8) {
-            //&amp;0xf表示取二进制的低四位
-            res = HEX[(num&amp;0xf)]+res;
-            num&gt;&gt;=4;
-        }
-        return res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15131518267208.html">
-                
-                  <h1>Number of Boomerangs</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15131518267208/15131518346128.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int numberOfBoomerangs(vector&lt;pair&lt;int, int&gt;&gt;&amp; points) {
-        int res = 0;
-        for (int i =0; i&lt;points.size(); i++) {
-            unordered_map&lt;long, int&gt; map(points.size());
-            for (int j = 0; j&lt;points.size(); j++) {
-                if (j==i) continue;
-                int dy = points[j].second - points[i].second;
-                int dx = points[j].first - points[i].first;
-
-                int dis = dy*dy + dx*dx;
-                map[dis]++;
-            }
-
-            for (auto p : map) {
-                if (p.second&gt;1) {
-                    /*
-                     * for all the groups of points,
-                     * number of ways to select 2 from n =
-                     * nP2 = n!/(n - 2)! = n * (n - 1)
-                     */
-                    res+=p.second*(p.second-1);
+    }else{
+        for (int j = 0; j&lt;s.size(); j++) {
+            vector&lt;int&gt; a = Tmap[t[j]];
+            set&lt;int&gt; b = Smap[s[j]];
+            int len = b.size();
+            for (auto num : a) {
+                b.insert(num);
+                if (len!=b.size()) {
+                    return 0;
                 }
             }
         }
-        return res;
     }
-};
+    
+    return 1;
+}
 </code></pre>
 
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/13</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15130621165951.html">
-                
-                  <h1>Longest Palindromic Substring</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15130621165951/15130621284508.jpg" alt=""/></p>
+<p>修改后的版本。</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    string longestPalindrome(string s) {
-        if (s.empty()) return &quot;&quot;;
-        if (s.size() == 1) return s;
-        int min_start = 0, max_len = 1;
-        for (int i = 0; i &lt; s.size();) {
-            if (s.size() - i &lt;= max_len / 2) break;
-            int j = i, k = i;
-            while (k &lt; s.size()-1 &amp;&amp; s[k+1] == s[k]) ++k; // Skip duplicate characters.
-            i = k+1;
-            while (k &lt; s.size()-1 &amp;&amp; j &gt; 0 &amp;&amp; s[k + 1] == s[j - 1]) { ++k; --j; } // Expand.
-            int new_len = k - j + 1;
-            if (new_len &gt; max_len) { min_start = j; max_len = new_len; }
+    bool isIsomorphic(string s, string t) {
+        int m1[256] = {0}, m2[256] = {0}, n = s.size();
+        for (int i = 0; i &lt; n; ++i) {
+            if (m1[s[i]] != m2[t[i]]) return false;  //判断两个字符串i位置的字符上次出现的位置是否一样。
+            m1[s[i]] = i + 1;   //记录上次该字符出现的位置
+            m2[t[i]] = i + 1;   //记录上次该字符出现的位置
         }
-        return s.substr(min_start, max_len);
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/12</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15130603513802.html">
-                
-                  <h1>Palindrome Pairs</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15130603513802/15130603727154.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool isPalindrome(string s) {
-        if (s.size() &lt;= 1) return true;
-        int i = 0;
-        int j = s.size() - 1;
-        while (i &lt; j) {
-            if (s[i++] != s[j--]) return false;
-        }
-
         return true;
     }
+};
+</code></pre>
 
-    vector&lt;vector&lt;int&gt;&gt; palindromePairs(vector&lt;string&gt;&amp; words) {
-        vector&lt;vector&lt;int&gt;&gt; res;
-        if (!words.size()) return res;
-        unordered_map&lt;string, int&gt; word_idx;
-        for (int i = 0; i &lt; words.size(); ++i) {
-            word_idx[words[i]] = i;
-        }
-        vector&lt;int&gt; slu(2);
-        for (int i = 0; i &lt; words.size(); ++i) {
-            int len = words[i].length();
-            for (int l = 0; l &lt;= len; ++l) {
-                string left = words[i].substr(0, l);
-                string right = words[i].substr(l);
-                string rleft = left;
-                string rright = right;
-                reverse(rleft.begin(), rleft.end());
-                reverse(rright.begin(), rright.end());
-                if (word_idx.find(rleft) != word_idx.end()) {
-                    if (word_idx[rleft] != i &amp;&amp; isPalindrome(right)) {
-                        res.push_back({i,word_idx[rleft]});
-                    }
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
 
-                }
-                if (l != 0 &amp;&amp; word_idx.find(rright) != word_idx.end()) {
-                    if (word_idx[rright] != i &amp;&amp; isPalindrome(left)) {
-                        res.push_back({word_idx[rright],i});
-                    }
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15136732474119.html">
+                
+                  <h1>Path Sum II</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15136732474119/15136732503183.jpg" alt=""/></p>
 
-                }
+<p>运用前序遍历</p>
 
-            }
-        }
-        return res;
+<pre><code class="language-c++">/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    void findPaths(TreeNode* node, int sum, vector&lt;int&gt;&amp; path, vector&lt;vector&lt;int&gt; &gt;&amp; paths) {
+        if (!node) return;
+        path.push_back(node -&gt; val);
+        if (!(node -&gt; left) &amp;&amp; !(node -&gt; right) &amp;&amp; sum == node -&gt; val)
+            paths.push_back(path);
+        findPaths(node -&gt; left, sum - node -&gt; val, path, paths);
+        findPaths(node -&gt; right, sum - node -&gt; val, path, paths);
+        path.pop_back();
+    }
+
+    vector&lt;vector&lt;int&gt;&gt; pathSum(TreeNode* root, int sum) {
+        vector&lt;vector&lt;int&gt; &gt; paths;
+        vector&lt;int&gt; path;
+        findPaths(root, sum, path, paths);
+        return paths;
     }
 };
 </code></pre>
@@ -486,7 +432,60 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/12</span>
+                    <span class="date">2017/12/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15136718150164.html">
+                
+                  <h1>Path Sum</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15136718150164/15136718241722.jpg" alt=""/></p>
+
+<pre><code class="language-c++">/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    bool hasPathSum(TreeNode *root, int sum) {
+        if (root == NULL) return false;
+        if (root-&gt;val == sum &amp;&amp; root-&gt;left ==  NULL &amp;&amp; root-&gt;right == NULL) return true;
+        
+        return hasPathSum(root-&gt;left, sum-root-&gt;val) || hasPathSum(root-&gt;right, sum-root-&gt;val);
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/19</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -591,31 +590,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15162636130743.html">First Missing Positive</a>
+			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162583169716.html">Find the Duplicate Number</a>
+			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162440984880.html">Set Mismatch</a>
+			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162401864030.html">Find Anagram Mappings</a>
+			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162389890253.html">Length of Last Word</a>
+			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

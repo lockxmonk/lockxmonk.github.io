@@ -117,6 +117,279 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15162583169716.html">
+                
+                  <h1>Find the Duplicate Number</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15162583169716/15162583183298.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findDuplicate(vector&lt;int&gt;&amp; nums) {
+        unordered_map&lt;int, int&gt; map;
+        int res = 0;
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if (map[nums[i]]==0) {
+                map[nums[i]]++;
+            }else{
+                res = nums[i];
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/18</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15162440984880.html">
+                
+                  <h1>Set Mismatch</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15162440984880/15162441100081.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; findErrorNums(vector&lt;int&gt;&amp; nums) {
+        int len = nums.size();
+        vector&lt;int&gt; res;
+        vector&lt;int&gt; a(len+1);   //因为数组从0开始，所以除去0，在后面加上1位
+
+        for (int i = 0; i&lt;len; i++) {
+            if (a[nums[i]]==0) {
+                a[nums[i]]+=1;
+            }else{
+                res.push_back(nums[i]);
+            }
+        }
+
+        for (int j = 1; j&lt;=len; j++) {
+            if (a[j]==0) {
+                res.push_back(j);
+            }
+        }
+
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/18</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15162401864030.html">
+                
+                  <h1>Find Anagram Mappings</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15162401864030/15162401885331.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; anagramMappings(vector&lt;int&gt;&amp; A, vector&lt;int&gt;&amp; B) {
+        unordered_map&lt;int, int&gt; map;
+        vector&lt;int&gt; res;
+        for (int i = 0; i&lt;B.size(); i++) {
+            map[B[i]]=i;
+        }
+        for (int j = 0; j&lt;A.size(); j++) {
+            res.push_back(map[A[j]]);
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/18</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15162389890253.html">
+                
+                  <h1>Length of Last Word</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<pre><code>![](media/15162389890253/15162389958774.jpg)
+</code></pre>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int lengthOfLastWord(string s) {
+        int len = s.size();
+        int cout = 0;
+        for (int i=len-1; i&gt;=0; i--) {
+            if(cout&gt;0&amp;&amp;s[i]==&#39; &#39;) break;
+
+            if (s[i]==&#39; &#39;) {
+                continue;
+            }else{
+                cout++;
+            }
+
+        }
+        return cout;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/18</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15139334894228.html">
+                
+                  <h1> Longest Univalue Path</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15139334894228/15139334918786.jpg" alt=""/></p>
+
+<pre><code class="language-c++">/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    int dfs(TreeNode* node, int&amp; lup) {
+        int l = node-&gt;left ? dfs(node-&gt;left, lup) : 0;
+        int r = node-&gt;right ? dfs(node-&gt;right, lup) : 0;
+        int resl = node-&gt;left &amp;&amp; node-&gt;left-&gt;val == node-&gt;val ? l + 1 : 0;
+        int resr = node-&gt;right &amp;&amp; node-&gt;right-&gt;val == node-&gt;val ? r + 1 : 0;
+        lup = max(lup, resl + resr);
+        return max(resl, resr);
+    }
+
+    int longestUnivaluePath(TreeNode* root) {
+        int lup = 0;
+        if (root) dfs(root, lup);
+        return lup;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15137396102567.html">
                 
                   <h1>Isomorphic Strings</h1>
@@ -179,310 +452,6 @@ public:
                   <div class="more-left left">
                   
                     <span class="date">2017/12/20</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15136732474119.html">
-                
-                  <h1>Path Sum II</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15136732474119/15136732503183.jpg" alt=""/></p>
-
-<p>运用前序遍历</p>
-
-<pre><code class="language-c++">/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
-class Solution {
-public:
-    void findPaths(TreeNode* node, int sum, vector&lt;int&gt;&amp; path, vector&lt;vector&lt;int&gt; &gt;&amp; paths) {
-        if (!node) return;
-        path.push_back(node -&gt; val);
-        if (!(node -&gt; left) &amp;&amp; !(node -&gt; right) &amp;&amp; sum == node -&gt; val)
-            paths.push_back(path);
-        findPaths(node -&gt; left, sum - node -&gt; val, path, paths);
-        findPaths(node -&gt; right, sum - node -&gt; val, path, paths);
-        path.pop_back();
-    }
-
-    vector&lt;vector&lt;int&gt;&gt; pathSum(TreeNode* root, int sum) {
-        vector&lt;vector&lt;int&gt; &gt; paths;
-        vector&lt;int&gt; path;
-        findPaths(root, sum, path, paths);
-        return paths;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/19</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15136718150164.html">
-                
-                  <h1>Path Sum</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15136718150164/15136718241722.jpg" alt=""/></p>
-
-<pre><code class="language-c++">/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
-class Solution {
-public:
-    bool hasPathSum(TreeNode *root, int sum) {
-        if (root == NULL) return false;
-        if (root-&gt;val == sum &amp;&amp; root-&gt;left ==  NULL &amp;&amp; root-&gt;right == NULL) return true;
-        
-        return hasPathSum(root-&gt;left, sum-root-&gt;val) || hasPathSum(root-&gt;right, sum-root-&gt;val);
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/19</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15134129335933.html">
-                
-                  <h1>Linked List Cycle II</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>题目链接：<a href="https://leetcode.com/problems/linked-list-cycle-ii/description/">https://leetcode.com/problems/linked-list-cycle-ii/description/</a></p>
-
-<p>Given a linked list, return the node where the cycle begins. If there is no cycle, return null.</p>
-
-<p>Note: Do not modify the linked list.</p>
-
-<pre><code class="language-c++">/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    ListNode *detectCycle(ListNode *head) {
-        if (head==NULL||head-&gt;next==NULL) {
-            return NULL;
-        }
-        ListNode *slow = head;
-        ListNode *fast = head;
-        ListNode *entry = head;
-        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
-            fast = fast-&gt;next-&gt;next;
-            slow = slow-&gt;next;
-            if (fast==slow) {
-                while (slow!=entry) {
-                    slow = slow-&gt;next;
-                    entry = entry-&gt;next;
-                }
-                return entry;;
-            }
-        }
-        return NULL;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/16</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15134088955356.html">
-                
-                  <h1>Linked List Cycle</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a linked list, determine if it has a cycle in it.</p>
-
-<p>Follow up:<br/>
-Can you solve it without using extra space?</p>
-
-<p><strong>使用快慢两个指针来判断是否有环，当有环的时候，快指针会停留在环内知道慢指针赶上与之相等。</strong></p>
-
-<pre><code class="language-c++">/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    bool hasCycle(ListNode *head) {
-        if (head==NULL||head-&gt;next==NULL) {
-            return 0;
-        }
-        ListNode *slow = head;
-        ListNode *fast = head;
-        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
-            fast = fast-&gt;next-&gt;next;
-            slow = slow-&gt;next;
-            if (fast==slow) {
-                return 1;
-            }
-        }
-        return 0;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/16</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15131536329153.html">
-                
-                  <h1> Convert a Number to Hexadecimal</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15131536329153/15131536540833.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string toHex(int num) {
-        const string HEX =&quot;0123456789abcdef&quot;;
-        if (num==0) return &quot;0&quot;;
-        string res =&quot;&quot;;
-        int count  = 0;
-        while (num&amp;&amp;count++&lt;8) {
-            //&amp;0xf表示取二进制的低四位
-            res = HEX[(num&amp;0xf)]+res;
-            num&gt;&gt;=4;
-        }
-        return res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/13</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -587,31 +556,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15162636130743.html">First Missing Positive</a>
+			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162583169716.html">Find the Duplicate Number</a>
+			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162440984880.html">Set Mismatch</a>
+			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162401864030.html">Find Anagram Mappings</a>
+			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162389890253.html">Length of Last Word</a>
+			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

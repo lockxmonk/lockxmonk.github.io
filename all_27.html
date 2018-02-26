@@ -117,197 +117,143 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="14988713979681.html">
+                <a class="clearlink" href="14992368546707.html">
                 
-                  <h1>Net初始化时的三个登记注册函数</h1>
+                  <h1>第10条:在既有类中使用关联对象存放自定义数据</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>我们已经知道<code>Init()</code>函数完成了非常关键的网络初始化和层初始化操作.虽然代码很长.但是只要抓住几个核心对象,了解其功能并密切关注其动态,即可掌握<code>Init()</code>函数的执行流程和具体意义.</p>
+                        	<p>有时需要在对象中存放相关信息。这时我们通常会从对象所属的类中继承一个子类，然后改用这个子类对象。然而并非所有情况下都能这么做，<mark>有时候类的实例可能是由某种机制所创建的，而开发者无法令这种机制创建出自己所写的子类实例</mark>。</p>
 
-<p>在<code>Init()</code>中调用了<mark>三个登记注册函数</mark>:</p>
+<p><code>Objective-C</code>中有一项强大的特性可以解决此问题，这就是<code>“关联对象&quot;（Associated Object)</code>。</p>
 
-<p><strong>AppendTop</strong>:</p>
+<p>可以给某对象关联许多其他对象，这些对象通过“键”来区分.存储对象值的时候，可以指明“存储策略”（storage policy),用以维护相应的“内存管理语义”。存储策略由名为<code>Objc_ASSOCiationPolicy</code>的枚举所定义，下表列出了该枚举的取值，同时还列出了与之等效属性：假如关联对象成为了属性，那么它就会具备对应的语义（第6条详解了“属性”这个概念).</p>
 
-<pre><code class="language-c++">
-// Helper for Net::Init: add a new top blob to the net.
-//登记每层输出Blob
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::AppendTop(const NetParameter&amp; param, const int layer_id,
-                           const int top_id, set&lt;string&gt;* available_blobs,
-                           map&lt;string, int&gt;* blob_name_to_idx) {
-  shared_ptr&lt;LayerParameter&gt; layer_param(
-      new LayerParameter(param.layer(layer_id)));
-  const string&amp; blob_name = (layer_param-&gt;top_size() &gt; top_id) ?
-      layer_param-&gt;top(top_id) : &quot;(automatic)&quot;;
-  // Check if we are doing in-place computation(检查是否为原位计算)
-  if (blob_name_to_idx &amp;&amp; layer_param-&gt;bottom_size() &gt; top_id &amp;&amp;
-      blob_name == layer_param-&gt;bottom(top_id)) {
-    // In-place computation(是原位计算)
-    LOG_IF(INFO, Caffe::root_solver())
-        &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name &lt;&lt; &quot; (in-place)&quot;;
-    top_vecs_[layer_id].push_back(blobs_[(*blob_name_to_idx)[blob_name]].get());
-    top_id_vecs_[layer_id].push_back((*blob_name_to_idx)[blob_name]);
-  } else if (blob_name_to_idx &amp;&amp;
-             blob_name_to_idx-&gt;find(blob_name) != blob_name_to_idx-&gt;end()) {
-    // If we are not doing in-place computation but have duplicated blobs,
-    // raise an error.
-    LOG(FATAL) &lt;&lt; &quot;Top blob &#39;&quot; &lt;&lt; blob_name
-               &lt;&lt; &quot;&#39; produced by multiple sources.&quot;;
-  } else {
-    // Normal output.(正常输出)
-    if (Caffe::root_solver()) {
-      LOG(INFO) &lt;&lt; layer_param-&gt;name() &lt;&lt; &quot; -&gt; &quot; &lt;&lt; blob_name;
-    }
-    shared_ptr&lt;Blob&lt;Dtype&gt; &gt; blob_pointer(new Blob&lt;Dtype&gt;());
-    //新建一个Blob,插入到Net::blobs_最后
-    const int blob_id = blobs_.size();
-    blobs_.push_back(blob_pointer);
-    blob_names_.push_back(blob_name);
-    blob_need_backward_.push_back(false);
-    if (blob_name_to_idx) { (*blob_name_to_idx)[blob_name] = blob_id; }
-    top_id_vecs_[layer_id].push_back(blob_id);
-    top_vecs_[layer_id].push_back(blob_pointer.get());
-  }
-  if (available_blobs) { available_blobs-&gt;insert(blob_name); }
+<table>
+<thead>
+<tr>
+<th>关联类型</th>
+<th>等效的@property属性</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>OBJC_ASSOCIATION_ASSIGN</td>
+<td>assign</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_RETAIN_NONATOMIC</td>
+<td>nonatomic, retain</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_COPY_NONATOMIC</td>
+<td>nonatomic, copy</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_RETAIN</td>
+<td>retain</td>
+</tr>
+<tr>
+<td>OBJC_ASSOCIATION_COPY</td>
+<td>copy</td>
+</tr>
+</tbody>
+</table>
+
+<p>下列方法可以管理关联对象：</p>
+
+<ul>
+<li><p>void objc_setAssociatedObject ( id object, void*key, id value, objc AssociationPolicypolicy)<br/>
+此方法以给定的键和策略为某对象设置关联对象值。</p></li>
+<li><p>id objc_getAssociatedObject(id object, void*key)<br/>
+此方法根据给定的键从某对象中获取相应的关联对象值。</p></li>
+<li><p>void objc removeAssociatedObjects(id object)<br/>
+此方法移除指定对象的全部关联对象。</p></li>
+</ul>
+
+<p>我们可以把某对象想象成<code>NSDictionary</code>,把关联到该对象的值理解为字典中的条目,于是，存取关联对象的值就相当于在NSDictionary对象上调用<code>[object setObject:value forKey:key]</code>与<code>[object objectForKey:key]</code>方法。然而两者之间有个重要差别：设置关联对象时用的键（key)是个&quot;不透明的指针&quot;(opaque pointer)”。如果在两个键上调用<code>“isEqual:”</code>方法的返回值是<code>YES</code>,那么<code>NSDictionary</code>就认为二者相等；然而在设置关联对象值时，若想令两个键匹配到同一个值，则二者必须是完全相同的指针才行。鉴于此，<font color=red>在设置关联对象值时，通常使用<mark>静态全局变量做键</mark></font>。</p>
+
+<h2 id="toc_0">关联对象用法举例</h2>
+
+<p>开发iOS时经常用到<code>UIAlertView</code>类，该类提供了一种标准视图，可向用户展示警告信息.当用户按下按钮关闭该视图时,需要用委托协议（delegate protocol)来处理此动作，但是，要想设置好这个委托机制，就得把创建警告视图和处理按钮动作的代码分开。由于代码分作两块，所以读起来有点乱。比方说，我们在使用<code>UIAlertView</code>时，一般都会这么写：</p>
+
+<pre><code class="language-objc">-(void)askUserAQuestion{
+    UIAlertView *alert = [[UIAlertView alloc]
+                            initWithTitle:@&quot;Question&quot;
+                                  message:@&quot;What do you want to do?&quot;
+                                 delegate:self
+                        cancelButtonTitle:@&quot;Cancel&quot;
+                        otherButtonTitles:@&quot;Continue&quot;, nil]；
+        [alert show];
 }
 
-</code></pre>
-
-<p><strong>AppendBottom</strong>:</p>
-
-<pre><code class="language-c++">
-// Helper for Net::Init: add a new bottom blob to the net.
-//登记每层输入Blob
-template &lt;typename Dtype&gt;
-int Net&lt;Dtype&gt;::AppendBottom(const NetParameter&amp; param, const int layer_id,
-    const int bottom_id, set&lt;string&gt;* available_blobs,
-    map&lt;string, int&gt;* blob_name_to_idx) {
-  const LayerParameter&amp; layer_param = param.layer(layer_id);
-  const string&amp; blob_name = layer_param.bottom(bottom_id);
-  if (available_blobs-&gt;find(blob_name) == available_blobs-&gt;end()) {
-    LOG(FATAL) &lt;&lt; &quot;Unknown bottom blob &#39;&quot; &lt;&lt; blob_name &lt;&lt; &quot;&#39; (layer &#39;&quot;
-               &lt;&lt; layer_param.name() &lt;&lt; &quot;&#39;, bottom index &quot; &lt;&lt; bottom_id &lt;&lt; &quot;)&quot;;
-  }
-  const int blob_id = (*blob_name_to_idx)[blob_name];
-  LOG_IF(INFO, Caffe::root_solver())
-      &lt;&lt; layer_names_[layer_id] &lt;&lt; &quot; &lt;- &quot; &lt;&lt; blob_name;
-  bottom_vecs_[layer_id].push_back(blobs_[blob_id].get());
-  bottom_id_vecs_[layer_id].push_back(blob_id);
-  available_blobs-&gt;erase(blob_name);
-  bool need_backward = blob_need_backward_[blob_id];
-  // Check if the backpropagation on bottom_id should be skipped(检查是否可以跳过反向传播)
-  if (layer_param.propagate_down_size() &gt; 0) {
-    need_backward = layer_param.propagate_down(bottom_id);
-  }
-  bottom_need_backward_[layer_id].push_back(need_backward);
-  return blob_id;
-}
-
-</code></pre>
-
-<p><strong>AppendParam</strong>:</p>
-
-<pre><code class="language-c++">
-//登记每层权值Blob
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::AppendParam(const NetParameter&amp; param, const int layer_id,
-                             const int param_id) {
-  const LayerParameter&amp; layer_param = layers_[layer_id]-&gt;layer_param();
-  const int param_size = layer_param.param_size();
-  string param_name =
-      (param_size &gt; param_id) ? layer_param.param(param_id).name() : &quot;&quot;;
-  if (param_name.size()) {
-    param_display_names_.push_back(param_name);
-  } else {
-    ostringstream param_display_name;
-    param_display_name &lt;&lt; param_id;
-    param_display_names_.push_back(param_display_name.str());
-  }
-  const int net_param_id = params_.size();
-  params_.push_back(layers_[layer_id]-&gt;blobs()[param_id]);
-  param_id_vecs_[layer_id].push_back(net_param_id);
-  param_layer_indices_.push_back(make_pair(layer_id, param_id));
-  ParamSpec default_param_spec;
-  const ParamSpec* param_spec = (layer_param.param_size() &gt; param_id) ?
-      &amp;layer_param.param(param_id) : &amp;default_param_spec;
-  if (!param_size || !param_name.size() || (param_name.size() &amp;&amp;
-      param_names_index_.find(param_name) == param_names_index_.end())) {
-    // This layer &quot;owns&quot; this parameter blob -- it is either anonymous
-    // (i.e., not given a param_name) or explicitly given a name that we
-    // haven&#39;t already seen.
-    //该层拥有权值Blob
-    param_owners_.push_back(-1);
-    if (param_name.size()) {
-      param_names_index_[param_name] = net_param_id;
-    }
-    const int learnable_param_id = learnable_params_.size();
-    learnable_params_.push_back(params_[net_param_id].get());
-    learnable_param_ids_.push_back(learnable_param_id);
-    has_params_lr_.push_back(param_spec-&gt;has_lr_mult());
-    has_params_decay_.push_back(param_spec-&gt;has_decay_mult());
-    params_lr_.push_back(param_spec-&gt;lr_mult());
-    params_weight_decay_.push_back(param_spec-&gt;decay_mult());
-  } else {
-    // Named param blob with name we&#39;ve seen before: share params(该层共享权值Blob)
-    const int owner_net_param_id = param_names_index_[param_name];
-    param_owners_.push_back(owner_net_param_id);
-    const pair&lt;int, int&gt;&amp; owner_index =
-        param_layer_indices_[owner_net_param_id];
-    const int owner_layer_id = owner_index.first;
-    const int owner_param_id = owner_index.second;
-    LOG_IF(INFO, Caffe::root_solver()) &lt;&lt; &quot;Sharing parameters &#39;&quot; &lt;&lt; param_name
-        &lt;&lt; &quot;&#39; owned by &quot;
-        &lt;&lt; &quot;layer &#39;&quot; &lt;&lt; layer_names_[owner_layer_id] &lt;&lt; &quot;&#39;, param &quot;
-        &lt;&lt; &quot;index &quot; &lt;&lt; owner_param_id;
-    Blob&lt;Dtype&gt;* this_blob = layers_[layer_id]-&gt;blobs()[param_id].get();
-    Blob&lt;Dtype&gt;* owner_blob =
-        layers_[owner_layer_id]-&gt;blobs()[owner_param_id].get();
-    const int param_size = layer_param.param_size();
-    if (param_size &gt; param_id &amp;&amp; (layer_param.param(param_id).share_mode() ==
-                                  ParamSpec_DimCheckMode_PERMISSIVE)) {
-      // Permissive dimension checking -- only check counts are the same.
-      CHECK_EQ(this_blob-&gt;count(), owner_blob-&gt;count())
-          &lt;&lt; &quot;Cannot share param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; owned by layer &#39;&quot;
-          &lt;&lt; layer_names_[owner_layer_id] &lt;&lt; &quot;&#39; with layer &#39;&quot;
-          &lt;&lt; layer_names_[layer_id] &lt;&lt; &quot;&#39;; count mismatch.  Owner layer param &quot;
-          &lt;&lt; &quot;shape is &quot; &lt;&lt; owner_blob-&gt;shape_string() &lt;&lt; &quot;; sharing layer &quot;
-          &lt;&lt; &quot;shape is &quot; &lt;&lt; this_blob-&gt;shape_string();
+// UIAlertViewDelegate protocol method
+-(void)alertView:(UIAlertView *)alertView
+        clickedButtonAtlndex:(NSInteger)buttonIndex
+{
+    if (buttonlndex == 0) {
+        [self doCancel];
     } else {
-      // Strict dimension checking -- all dims must be the same.(严格检查)
-      CHECK(this_blob-&gt;shape() == owner_blob-&gt;shape())
-          &lt;&lt; &quot;Cannot share param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; owned by layer &#39;&quot;
-          &lt;&lt; layer_names_[owner_layer_id] &lt;&lt; &quot;&#39; with layer &#39;&quot;
-          &lt;&lt; layer_names_[layer_id] &lt;&lt; &quot;&#39;; shape mismatch.  Owner layer param &quot;
-          &lt;&lt; &quot;shape is &quot; &lt;&lt; owner_blob-&gt;shape_string() &lt;&lt; &quot;; sharing layer &quot;
-          &lt;&lt; &quot;expects shape &quot; &lt;&lt; this_blob-&gt;shape_string();
+        [self doContinue];
     }
-    const int learnable_param_id = learnable_param_ids_[owner_net_param_id];
-    learnable_param_ids_.push_back(learnable_param_id);
-    if (param_spec-&gt;has_lr_mult()) {
-      if (has_params_lr_[learnable_param_id]) {
-        CHECK_EQ(param_spec-&gt;lr_mult(), params_lr_[learnable_param_id])
-            &lt;&lt; &quot;Shared param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; has mismatched lr_mult.&quot;;
-      } else {
-        has_params_lr_[learnable_param_id] = true;
-        params_lr_[learnable_param_id] = param_spec-&gt;lr_mult();
-      }
-    }
-    if (param_spec-&gt;has_decay_mult()) {
-      if (has_params_decay_[learnable_param_id]) {
-        CHECK_EQ(param_spec-&gt;decay_mult(),
-                 params_weight_decay_[learnable_param_id])
-            &lt;&lt; &quot;Shared param &#39;&quot; &lt;&lt; param_name &lt;&lt; &quot;&#39; has mismatched decay_mult.&quot;;
-      } else {
-        has_params_decay_[learnable_param_id] = true;
-        params_weight_decay_[learnable_param_id] = param_spec-&gt;decay_mult();
-      }
-    }
-  }
 }
 
 </code></pre>
+
+<p><font color=red>如果想在同一个类里处理多个警告信息视图，那么代码就会变得更为复杂，我们必须在 <code>delegate</code>方法中检査传人的<code>alertView</code>参数，并据此选用相应的逻辑。要是能在创建警告视图的时候直接把处理每个按钮的逻辑都写好，那就简单多了。这可以通过关联对象来做。创建完警告视图之后，设定一个与之关联的&quot;块&quot;(block)，等到执行<code>delegate</code>方法时再将其读出来。</font>此方案的实现代码如下：</p>
+
+<pre><code class="language-objc">
+#import &lt;objc/runtime.h&gt;
+
+static void *EOCMyAlertViewKey = &quot;EOCMyAlertViewKey&quot;;
+
+-(void)askUserAQuestion {
+    UIAlertView *alert = [[UIAlertViewalloc]
+                            initWithTitle:@&quot;Question&quot;
+                                  message: @&quot;What do you want to do?&quot;
+                                 delegate:self
+                        cancelButtonTitle: @&quot;Cancel&quot;,
+                        otherButtonTitles: @&quot;Continue&quot;, nil];
+        void (^block)(NSInteger) = ^(NSInteger buttonIndex){
+            if (buttonlndex == 0) {
+                [self doCancel];
+            }else {
+                [self doContinue];
+            }
+        };
+        objc_setAssociatedObject(alert,
+                                 EOCMyAlertViewKey,
+                                 block,
+                                 OBJC_ASSOCIATION_COPY);
+        [alert show];
+}
+
+// UIAlertViewDelegate protocol method
+-(void)alertView:(UIAlertView*)alertView
+       clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    void (^block)(NSInteger)=
+        objc_getAssociatedObject(alertView, EOCMyAlertViewKey);
+    block(buttonIndex);
+}
+
+
+</code></pre>
+
+<p>以这种方式改写之后，创建警告视图与处理操作结果的代码都放在一起了，这样比原来更易读慷，因为我们无须在两部分代码之间来回游走，即可明白警告视图的用处。但是,采用该方案时需注意：块可能要捕获(capture)某些变量，这也许会造成“保留环”（retain cycle)。第40条详述了此问题。</p>
+
+<p><mark>正如大家所见，这种做法很有用，但是只应该在其他办法行不通时才去考虑用它。若是<br/>
+滥用，则很快就会令代码失控，使其难于调试。</mark>“保留环”产生的原因很难査明，因为关联对象之间的关系并没有正式的定义（formal definition)，其内存管理语义是在关联的时候才定义的，而不是在接口中预先定好的。使用这种写法时要小心，不能仅仅因为某处可以用该写法就一定要用它。想创建这种<code>UIAlertView</code>还有个办法，那就是从中继承子类，把块保存为子类中的属性。笔者认为：若是需要多次用到alert视图，那么这种做法比使用关联对象要好。</p>
+
+<h2 id="toc_1">要点</h2>
+
+<ul>
+<li>可以通过&quot;关联对象&quot;机制来把两个对象连起来</li>
+<li>定义关联对象时可指定内存管理语义，用以模仿定义属性时所采用的“拥有关系”与“非拥有关系”。</li>
+<li>只有在其他做法不可行时才应选用关联对象，因为这种做法通常会引入难于査找的bug。</li>
+</ul>
 
                         
                       </div>
@@ -316,10 +262,10 @@ void Net&lt;Dtype&gt;::AppendParam(const NetParameter&amp; param, const int laye
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/7/1</span>
+                    <span class="date">2017/7/5</span>
                     <span>posted in&nbsp;</span> 
           				  
-          					    <span class="posted-in"><a href='Caffe%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe前向传播计算</a></span>
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -333,116 +279,962 @@ void Net&lt;Dtype&gt;::AppendParam(const NetParameter&amp; param, const int laye
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="14988067800935.html">
+                <a class="clearlink" href="14992160809956.html">
                 
-                  <h1>第七条 在对象内部尽量直接访问实例变量</h1>
+                  <h1>SoftmaxWithLossLayer的实现</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p>在对象之外访问实例变量时，总是应该通过<strong>属性</strong>来做,然而在对象内部访问实例变量时,除了几种特殊情况之外，<font color=red><strong>强烈建议大家在读取实例变量的时候采用<mark>直接访问</mark>的形式，而在设置实例变量的时候通过属性来做</strong></font>。</p>
+                        	<p>我们找到<code>SoftmaxWithLossLayer.hpp</code>文件查看声明,如下:</p>
 
-<p>下面举个例子:</p>
+<pre><code class="language-c++">
+//将实数预测向量通过Softmax计算获得每个类别的概率分布
+//这个类比单独SoftmaxLayer + MultinomialLogisticLossLayer在梯度数值计算上更加稳定
+//Test阶段，这个层可以直接用SoftmaxLayer代替
+/**
+ *输入Blob 1为预测结果，形状为N x K x 1 x 1，K为总类别数目，N为批量数。取值范围为（-Inf, Inf)，
+ *表示每个类别获得的分类score,值越大说明输入图像与该类别越接近
+ *输入Blob 2为真实标签，形状为N x 1 x 1 x 1
+ *输出Blob为计算得到的交叉熵分类损失E，形状为1 x 1 x 1 x 1
+**/
+template &lt;typename Dtype&gt;
+class SoftmaxWithLossLayer : public LossLayer&lt;Dtype&gt; {
+ public:
+   /**
+    * @param param provides LossParameter loss_param, with options:
+    *  - ignore_label (optional)
+    *    Specify a label value that should be ignored when computing the loss.
+    *  - normalize (optional, default true)
+    *    If true, the loss is normalized by the number of (nonignored) labels
+    *    present; otherwise the loss is simply summed over spatial locations.
+    */
+    explicit SoftmaxWithLossLayer(const LayerParameter&amp; param)
+      : LossLayer&lt;Dtype&gt;(param) {}
+  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  virtual inline const char* type() const { return &quot;SoftmaxWithLoss&quot;; }
+  virtual inline int ExactNumTopBlobs() const { return -1; }
+  virtual inline int MinTopBlobs() const { return 1; }
+  virtual inline int MaxTopBlobs() const { return 2; }
+
+ protected:
+  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+      
+/**
+   * @brief Computes the softmax loss error gradient w.r.t. the predictions.
+   *
+   * Gradients cannot be computed with respect to the label inputs (bottom[1]),
+   * so this method ignores bottom[1] and requires !propagate_down[1], crashing
+   * if propagate_down[1] is set.
+   *
+   * @param top output Blob vector (length 1), providing the error gradient with
+   *      respect to the outputs
+   *   -# @f$ (1 \times 1 \times 1 \times 1) @f$
+   *      This Blob&#39;s diff will simply contain the loss_weight* @f$ \lambda @f$,
+   *      as @f$ \lambda @f$ is the coefficient of this layer&#39;s output
+   *      @f$\ell_i@f$ in the overall Net loss
+   *      @f$ E = \lambda_i \ell_i + \mbox{other loss terms}@f$; hence
+   *      @f$ \frac{\partial E}{\partial \ell_i} = \lambda_i @f$.
+   *      (*Assuming that this top Blob is not used as a bottom (input) by any
+   *      other layer of the Net.)
+   * @param propagate_down see Layer::Backward.
+   *      propagate_down[1] must be false as we can&#39;t compute gradients with
+   *      respect to the labels.
+   * @param bottom input Blob vector (length 2)
+   *   -# @f$ (N \times C \times H \times W) @f$
+   *      the predictions @f$ x @f$; Backward computes diff
+   *      @f$ \frac{\partial E}{\partial x} @f$
+   *   -# @f$ (N \times 1 \times 1 \times 1) @f$
+   *      the labels -- ignored as we can&#39;t compute their error gradients
+   */
+  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
+  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
+      
+/// Read the normalization mode parameter and compute the normalizer based
+  /// on the blob size.  If normalization_mode is VALID, the count of valid
+  /// outputs will be read from valid_count, unless it is -1 in which case
+  /// all outputs are assumed to be valid.
+  virtual Dtype get_normalizer(
+      LossParameter_NormalizationMode normalization_mode, int valid_count);
+
+  /// The internal SoftmaxLayer used to map predictions to a distribution.(内置一个SoftmaxLayer对象)
+  shared_ptr&lt;Layer&lt;Dtype&gt; &gt; softmax_layer_;
+  /// prob stores the output probability predictions from the SoftmaxLayer.
+  Blob&lt;Dtype&gt; prob_;
+  /// bottom vector holder used in call to the underlying SoftmaxLayer::Forward
+  vector&lt;Blob&lt;Dtype&gt;*&gt; softmax_bottom_vec_;
+  /// top vector holder used in call to the underlying SoftmaxLayer::Forward
+  vector&lt;Blob&lt;Dtype&gt;*&gt; softmax_top_vec_;
+  /// Whether to ignore instances with a certain label.
+  bool has_ignore_label_;
+  /// The label indicating that an instance should be ignored.
+  int ignore_label_;
+  /// How to normalize the output loss.
+  LossParameter_NormalizationMode normalization_;
+
+  int softmax_axis_, outer_num_, inner_num_;
+};
+
+</code></pre>
+
+<p>之后我们来看实现的<code>.cpp</code>文件:</p>
+
+<p>第一个是SetUp函数.<br/>
+```c++</p>
+
+<p>template <typename Dtype><br/>
+void SoftmaxWithLossLayer<Dtype>::LayerSetUp(<br/>
+    const vector<Blob<Dtype><em>&gt;&amp; bottom, const vector<Blob<Dtype></em>&gt;&amp; top) {<br/>
+  LossLayer<Dtype>::LayerSetUp(bottom, top);<br/>
+  //创建时动态修改本层的LayerParameter参数，适应SoftmaxLayer<br/>
+  LayerParameter softmax_param(this-&gt;layer_param_);<br/>
+  softmax_param.set_type(&quot;Softmax&quot;);<br/>
+  softmax_layer_ = LayerRegistry<Dtype>::CreateLayer(softmax_param);<br/>
+  softmax_bottom_vec_.clear();<br/>
+  softmax_bottom_vec_.push_back(bottom[0]);<br/>
+  softmax_top_vec_.clear();<br/>
+  softmax_top_vec_.push_back(&amp;prob_);<br/>
+  softmax_layer_-&gt;SetUp(softmax_bottom_vec_, softmax_top_vec_);</p>
+
+<p>has_ignore_label_ =<br/>
+    this-&gt;layer_param_.loss_param().has_ignore_label();<br/>
+  if (has_ignore_label_) {<br/>
+    ignore_label_ = this-&gt;layer_param_.loss_param().ignore_label();<br/>
+  }<br/>
+  if (!this-&gt;layer_param_.loss_param().has_normalization() &amp;&amp;<br/>
+      this-&gt;layer_param_.loss_param().has_normalize()) {<br/>
+    normalization_ = this-&gt;layer_param_.loss_param().normalize() ?<br/>
+                     LossParameter_NormalizationMode_VALID :<br/>
+                     LossParameter_NormalizationMode_BATCH_SIZE;<br/>
+  } else {<br/>
+    normalization_ = this-&gt;layer_param_.loss_param().normalization();<br/>
+  }<br/>
+}</p>
+
+<pre><code>可见，在SetUp阶段，创建了内部SoftmaxLayer对象并配置了其输入/输出Blob，然后调用该对象的SetUp函数。
+
+
+下面看看`SoftmaxWithLossLayer`的前向传播函数：
+
+```c++
+
+template &lt;typename Dtype&gt;
+void SoftmaxWithLossLayer&lt;Dtype&gt;::Forward_cpu(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  // The forward pass computes the softmax prob values.(内部SoftmaxLayer的前向传播计算)
+  softmax_layer_-&gt;Forward(softmax_bottom_vec_, softmax_top_vec_);
+  //获得概率密度
+  const Dtype* prob_data = prob_.cpu_data();
+  //获得标签值
+  const Dtype* label = bottom[1]-&gt;cpu_data();
+  int dim = prob_.count() / outer_num_;
+  int count = 0;
+  Dtype loss = 0;
+  for (int i = 0; i &lt; outer_num_; ++i) {
+    for (int j = 0; j &lt; inner_num_; j++) {
+      const int label_value = static_cast&lt;int&gt;(label[i * inner_num_ + j]);
+      if (has_ignore_label_ &amp;&amp; label_value == ignore_label_) {
+        continue;
+      }
+      DCHECK_GE(label_value, 0);
+      DCHECK_LT(label_value, prob_.shape(softmax_axis_));
+      //计算损失函数-log(prob[label])
+      loss -= log(std::max(prob_data[i * dim + label_value * inner_num_ + j],
+                           Dtype(FLT_MIN)));
+      ++count;
+    }
+  }
+  //设置输出Blob值
+  top[0]-&gt;mutable_cpu_data()[0] = loss / get_normalizer(normalization_, count);
+  if (top.size() == 2) {
+    top[1]-&gt;ShareData(prob_);
+  }
+}
+
+
+</code></pre>
+
+<p>可见通过内部<code>SoftmaxLayer</code>对象非常简洁。我们再看一下 Backward计算:</p>
+
+<pre><code class="language-c++">
+template &lt;typename Dtype&gt;
+void SoftmaxWithLossLayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+    const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+  if (propagate_down[1]) {
+   //label输入Blob不做反向传播
+    LOG(FATAL) &lt;&lt; this-&gt;type()
+               &lt;&lt; &quot; Layer cannot backpropagate to label inputs.&quot;;
+  }
+  if (propagate_down[0]) {
+    Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
+    const Dtype* prob_data = prob_.cpu_data();
+    //将概率密度拷贝输入Blob的diff域
+    caffe_copy(prob_.count(), prob_data, bottom_diff);
+    const Dtype* label = bottom[1]-&gt;cpu_data();
+    int dim = prob_.count() / outer_num_;
+    int count = 0;
+    for (int i = 0; i &lt; outer_num_; ++i) {
+      for (int j = 0; j &lt; inner_num_; ++j) {
+        const int label_value = static_cast&lt;int&gt;(label[i * inner_num_ + j]);
+        if (has_ignore_label_ &amp;&amp; label_value == ignore_label_) {
+          for (int c = 0; c &lt; bottom[0]-&gt;shape(softmax_axis_); ++c) {
+            bottom_diff[i * dim + c * inner_num_ + j] = 0;
+          }
+        } else {
+        //在输入Blob的diff域，计算当前槪率密度与理想概率密度(label 对应类别概率为1,其他类别 概肀为0)之差，实现误差反向传播
+          bottom_diff[i * dim + label_value * inner_num_ + j] -= 1;
+          ++count;
+        }
+      }
+    }
+    // Scale gradient(适当的缩放)
+    Dtype loss_weight = top[0]-&gt;cpu_diff()[0] /
+                        get_normalizer(normalization_, count);
+    caffe_scal(prob_.count(), loss_weight, bottom_diff);
+  }
+}
+</code></pre>
+
+<p>通过对Caffe损失层的研究，我们了解到，前向传播阶段数据逐层传播，到损失层计算预测概率密度和损失函数；而反向传播阶段则从损失层开始，由预测概率密度与理想概率密度(这就是有监督学习的佐证)<strong>差值</strong>得到误差（diff),然后将由下一节内容逐层反向传播。我们已经知道一个Blob是由data和diff两部分构成的，如果说数据读取层是data之源，那么损失层就是diff之源。</p>
+
+<h2 id="toc_0">反向传播的实现</h2>
+
+<p>Caffe Net数据结构中的&#39;Backward函数具体的声明和实现文件为<code>net.hpp</code>和<code>net.cpp</code>:</p>
+
+<pre><code class="language-c++">//从第start层反向传播到达第end层
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::BackwardFromTo(int start, int end) {
+  CHECK_GE(end, 0);
+  CHECK_LT(start, layers_.size());
+  for (int i = start; i &gt;= end; --i) {
+    for (int c = 0; c &lt; before_backward_.size(); ++c) {
+      before_backward_[c]-&gt;run(i);
+    }
+    if (layer_need_backward_[i]) {
+    //遍历每个居，调用相应的Backward函数
+      layers_[i]-&gt;Backward(
+          top_vecs_[i], bottom_need_backward_[i], bottom_vecs_[i]);
+      if (debug_info_) { BackwardDebugInfo(i); }
+    }
+    for (int c = 0; c &lt; after_backward_.size(); ++c) {
+      after_backward_[c]-&gt;run(i);
+    }
+  }
+}
+
+//从第start层幵始到第一层的反向传播过程
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::BackwardFrom(int start) {
+  BackwardFromTo(start, 0);
+}
+
+//从最后一层开始到第end层的反向传播过程
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::BackwardTo(int end) {
+  BackwardFromTo(layers_.size() - 1, end);
+}
+
+//整个网络的反向传播过程
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::Backward() {
+  BackwardFromTo(layers_.size() - 1, 0);
+  if (debug_info_) {
+  //如果打幵了调试信息开关(在prototxt中设定），则计算所有权值的data/diff的L1、L2范数，监控其变化情况，避免发散
+    Dtype asum_data = 0, asum_diff = 0, sumsq_data = 0, sumsq_diff = 0;
+    for (int i = 0; i &lt; learnable_params_.size(); ++i) {
+      asum_data += learnable_params_[i]-&gt;asum_data();
+      asum_diff += learnable_params_[i]-&gt;asum_diff();
+      sumsq_data += learnable_params_[i]-&gt;sumsq_data();
+      sumsq_diff += learnable_params_[i]-&gt;sumsq_diff();
+    }
+    const Dtype l2norm_data = std::sqrt(sumsq_data);
+    const Dtype l2norm_diff = std::sqrt(sumsq_diff);
+    LOG(ERROR) &lt;&lt; &quot;    [Backward] All net params (data, diff): &quot;
+               &lt;&lt; &quot;L1 norm = (&quot; &lt;&lt; asum_data &lt;&lt; &quot;, &quot; &lt;&lt; asum_diff &lt;&lt; &quot;); &quot;
+               &lt;&lt; &quot;L2 norm = (&quot; &lt;&lt; l2norm_data &lt;&lt; &quot;, &quot; &lt;&lt; l2norm_diff &lt;&lt; &quot;)&quot;;
+  }
+}
+
+//更新权值函数，在反向传播结束后调用
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::Update() {
+  for (int i = 0; i &lt; learnable_params_.size(); ++i) {
+  //调用内部Blob的Update()函数，具体计算为data = data - diff
+    learnable_params_[i]-&gt;Update();
+  }
+}
+
+//权值diff清零
+template &lt;typename Dtype&gt;
+void Net&lt;Dtype&gt;::ClearParamDiffs() {
+  for (int i = 0; i &lt; learnable_params_.size(); ++i) {
+    Blob&lt;Dtype&gt;* blob = learnable_params_[i];
+    switch (Caffe::mode()) {
+    case Caffe::CPU:
+      caffe_set(blob-&gt;count(), static_cast&lt;Dtype&gt;(0),
+                blob-&gt;mutable_cpu_diff());
+      break;
+    case Caffe::GPU:
+#ifndef CPU_ONLY
+      caffe_gpu_set(blob-&gt;count(), static_cast&lt;Dtype&gt;(0),
+                    blob-&gt;mutable_gpu_diff());
+#else
+      NO_GPU;
+#endif
+      break;
+    }
+  }
+}
+
+</code></pre>
+
+<p>到此,caffe基本的backward反向传播过程就清楚了,这样对于设计更复杂的有监督学习算法具有指导意义。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/7/5</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe反向传播计算</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14991530470817.html">
+                
+                  <h1>第九条 以"类族模式"隐藏实现细节</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>&quot;类族&quot;(class cluster,也叫类簇)是一种很有用的模式(pattern),可以隐藏&quot;抽象基类&quot;(abstract base class)背后的实现细节.</p>
+
+<p>Objective-C的系统框架中普遍使用此模式。比如，iOS的用户界面框架（user interface framework) UIKit中就有一个名为<code>UIButton</code>的类。想创建按钮，需<br/>
+要调用下面这个“类方法”（class method):</p>
+
+<pre><code class="language-objc">+ (UIButton*)buttonWithType:(UIButtonType)type;
+
+</code></pre>
+
+<p>该方法所返回的对象，其类型取决于传入的按钮类型（button type)。然而，不管返回什么类型的对象，它们都继承自同一个基类：<code>UIButton</code>。这么做的意义在于：<strong>UIButton类的使用者无须关心创建出来的按钮具体属于哪个子类，也不用考虑按钮的绘制方式等实现细节。</strong>使用者只需明白如何创建按钮，如何设置像“标题”（title)这样的属性，如何增加触摸动作的目标对象等问题就好。</p>
+
+<p><font color=red>我们使用&quot;类簇&quot;,是为了可以灵活应对多个类，将它们的实现细节隐藏在抽象基类后面，以保持接口简洁。用户无须自己创建子类实例，只需调用基类方法来创建即可。</font></p>
+
+<h2 id="toc_0">创建类簇</h2>
+
+<p>我们现在来看一个样例学习创建类簇.假设有一个处理雇员的类，每个雇员都有“名字”和<br/>
+“薪水”这两个属性，管理者可以命令其执行日常工作。但是，各种雇员的工作内容却不同。经理在带领雇员做项目时，无须关心每个人如何完成其工作，仅需指示其开工即可。</p>
+
+<p>首先要定义抽象类:</p>
+
+<pre><code class="language-objc">typedef NS_ENUM(NSUInteger, EOCEmployeeType) {
+    EOCEmployeeTypeDeveloper,
+    EOCEmployeeTypeDesigner,
+    EOCEmployeeTypeFinance,
+}；
+
+@interface EOCEmployee : NSObject
+
+@property (copy) NSString *name;
+@property NSUInteger salary;
+
+// Helper for creating Employee objects
++ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type;
+//Make Employees do their respective day1s work
+- (void)doADaysWork;
+
+@end
+
+@implementation EOCEmployee
++ (EOCEmployee*)employeeWithType:(EOCEmployeeType)type {
+    switch (type) {
+        case EOCEmployeeTypeDeveloper:
+            return [EOCEmployeeDeveloper new];
+            break;
+        case EOCEmployeeTypeDesigner:
+            return (EOCEmployeeDesigner new];
+            break;
+        case EOCEmployeeTypeFinance:
+            return (EOCEmployeeFinance new];
+            break;
+        }
+}
+-(void)doADaysWork {
+    // Subclasses implement this.
+}
+
+@end 
+
+</code></pre>
+
+<p>每个&quot;实体子类&quot;（concrete subclass) 都从基类继承而来。例如:</p>
+
+<pre><code class="language-objc">
+@interface EOCEmployeeDeveloper : EOCEmployee
+@end
+
+@implementation EOCEmployeeDeveloper
+
+-(void)doADaysWork {    
+    [self writeCode];
+}
+
+@end
+
+</code></pre>
+
+<p>在本例中，基类实现了一个“类方法”，该方法根据待创建的雇员类别分配好对应的雇员类实例。这种“工厂模式”（Factory pattern)是创建类族的办法之一。</p>
+
+<p>OC这门语言没有办法致命某个基类是&quot;抽象的&quot;(abstract).于是,开发者通常会在文档中写明类的用法。这种情况下，基类接口一般都没有名为init的成员方法，这暗<br/>
+示该类的实例也许不应该由用户直接创建。还有一种办法可以确保用户不会使用基类实例,<br/>
+那就是在基类的doADaysWork方法中拋出异常。然而这种做法相当极端，很少有人用。</p>
+
+<p>如果对象所属的类位于某个类族中，那么在査询其类型信息（introspection)时就要当心了（参见第14条)。你可能觉得自己创建了某个类的实例，然而实际上创建的却是其子类的实例。在 <code>Employee</code> 这个例子中，<code>[employee isMemberOfClass:[EOCEmployee class]]</code>似乎会返回YES，但实际上返回的却是NO,因为<code>employee</code>并非Employee类的实例，而是其某个子类的实例。</p>
+
+<h2 id="toc_1">Cocoa里的类簇</h2>
+
+<p>系统框架中有许多类族。大部分<code>collection</code>类都是某个类簇中的抽象基类,例如<code>NSArray</code>与其可变版本<code>NSMutableArray</code>。这样看来，实际上有两个抽象基类，一个用于不可变数组，另一个用于可变数组。尽管具备公共接口的类有两个，但仍然可以合起来算作一个类族(传统类簇模式中,通常只有一个类具备&quot;公共接口&quot;,就是抽象基类)。<strong>不可变的类定义了对所有数组都通用的方法，而可变的类则定义了那些只适用于可变数组的方法。</strong>两个类共属同一类族，这意味着二者在实现各自类型的数组时可以共用实现代码，此外，还能够把可变数组复制为不可变数组，反之亦然。</p>
+
+<p>像NSArray这样的类的背后其实是个类族（对于大部分collection类而言都是这样)，明白这一点很重要，否则就可能会写出下面这种代码：</p>
+
+<pre><code class="language-objc">
+id maybeAnArray = /* ••• */;
+if ([maybeAnArray class) == [NSArray class]) {
+&quot;Will never be hit
+}
+
+</code></pre>
+
+<p>你要是知道<strong>NSArray是个类族</strong>，那就会明白上述代码错在哪里：其中的<code>if</code>语句永远不可能为真。[maybeAnArray class]所返回的类绝不可能是NSArray类本身，因为由NSArray的初始化方法所返回的那个实例其类型是隐藏在类族公共接口（public facade)后面的某个内部类型（internal type)。</p>
+
+<p>不过，仍然有办法可以判断出某个实例所属的类是否位于类族之中。我们不用刚才那种写法，而是改用类型信息查询方法（introspectionmethod)。本书第14条解释了这些方法的用法。若想判断某对象是否位于类族中，<strong>不要直接检测两个“类对象”是否等同，而应该采用下列代码</strong>：</p>
+
+<pre><code class="language-objc">id maybeAnArray = /* ••• */;
+if ([maybeAnArray isKindOfClass:[NSArray class])) {
+    &quot;Will be hit&quot;
+}
+</code></pre>
+
+<p>我们经常需要向类族中新增实体子类，不过这么做的时候得留心。在Employee这个例子中，若是没有“工厂方法”（factory method)的源代码，那就无法向其中新增雇员类别了。然而对于Cocoa中NSArray这样的类族来说，还是有办法新增子类的，但是需要遵守几条规则。这几条规则如下。</p>
+
+<ul>
+<li><p>子类应该继承自类族中的抽象基类。<br/>
+若要编写NSArray类族的子类，则需令其继承自不可变数组的基类或可变数组的基类。</p></li>
+<li><p>子类应该定义自己的数据存储方式。<br/>
+开发者编写NSArray子类时，经常在这个问题上受阻。子类必须用一个实例变量来存放数组中的对象。这似乎与大家预想的不同，我们以为NSArray自己肯定会保存那些对象，所以在子类中就无须再存一份了。但是大家要记住，<mark>NSArray本身只不过是包在其他隐藏对象外面的壳，它仅仅定义了所有数组都需具备的一些接口。对于这个自定义的数组子类来说，可以用NSArray来保存其实例</mark>。</p></li>
+<li><p>子类应当覆写超类文档中指明需要覆写的方法。<br/>
+在每个抽象基类中，都有一些子类必须覆写的方法。比如说，想要编写NSArray的子<br/>
+类，就需要实现<code>count</code>及<code>“objectAtlndex:”</code>方法。像<code>lastObject</code>这种方法则无须实现，因为基类可以根据前两个方法实现出这个方法。</p></li>
+</ul>
+
+<p>在类族中实现子类时所需遵循的规范一般都会定义于基类的文档之中，编码前应该先看看.</p>
+
+<h2 id="toc_2">要点</h2>
+
+<ul>
+<li>类族模式可以把实现细节隐藏在一套简单的公共接口后面。</li>
+<li>系统框架中经常使用类族。</li>
+<li>从类族的公共抽象基类中继承子类时要当心，若有开发文档，则应首先阅读。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/7/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14991304296690.html">
+                
+                  <h1>Caffe反向传播计算</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ul>
+<li>
+<a href="#toc_0">反向传播的特点</a>
+</li>
+<li>
+<a href="#toc_1">损失函数</a>
+<ul>
+<li>
+<a href="#toc_2">算法描述</a>
+</li>
+<li>
+<a href="#toc_3">参数描述</a>
+</li>
+<li>
+<a href="#toc_4">源码分析</a>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>反向传播对电脑的计算能力要求很高,所以反向传播过程只有在训练环境下才需要计算,由于消耗时间较长,对计算资源要求较高,一般为离线服务.</p>
+
+<h2 id="toc_0">反向传播的特点</h2>
+
+<p>CNN进行前向传播阶段，依次调用每个<code>Layer</code>的<code>Forward</code>函数，得到逐层的输出，<code>最后一层与目标函数比较得到损失函数，计算误差更新值，通过反向传播路径逐层到达第一层</code>，<strong>所有权值层在反向传播结束后一起更新</strong>。</p>
+
+<h2 id="toc_1">损失函数</h2>
+
+<p><mark>损失层(Loss Layer)是CNN的终点</mark>，接受两个Blob作为输入，其中一个为CNN的预测值;另一个是真实标签。损失层则将这两个输入进行一系列运算，得到当前网络的损失函数(Loss Function), —般记为\(L(\theta)\)，其中\(\theta\)表示当前网络权值构成的向量空间。机器学习的目的是在权值空间中找到让损失函数\(L(\theta)\)最小的权值\(\theta_{opt}\),可以采用一系列最优化方法（如后面将会介绍的SGD方法)逼近权值\(\theta_{opt}\)</p>
+
+<p><font color=red>损失函数是在前向传播计算中得到的，同时也是反向传播的起点.</font></p>
+
+<h3 id="toc_2">算法描述</h3>
+
+<p>Caffe中实现了多种损失层，分别用于不同场合。其中<code>SoftmaxWithLossLayer</code>实现了<code>Softmax+交叉熵</code>损失函数计算过程，适用于单label的分类问题：另外还有欧式损失函数（用于回归问题）、<code>Hinge</code>损失函数（最大间隔分类，SVM)、<code>Sigmoid+交叉熵</code>损失函数（用于多属性/多分类问题）等。今天我们只关注最基本的<code>SoftmaxWithLossLayer</code>,其他损失层的算法可以直接看Caffe相应源码。</p>
+
+<p>假设有K个类别,Softmax计算过程为:</p>
+
+<p>\[<br/>
+Softmax(a_i) = \frac{exp(a_i)}{\sum_j{exp(a_i)}} ,i=0,1,2,...K-1<br/>
+\]</p>
+
+<p><strong>Softmax的结果相当于输入图像被分到每个标签的概率分布。根据高等数学知识，该函数是单调增函数，即输入值越大，输出也越大，输入图像属于该标签的概率就越大。</strong></p>
+
+<p>对Softmax的结果计算交叉熵分类损失函数为：</p>
+
+<p>\[<br/>
+L(\theta) = -{\frac{1}{N}}\sum_ilog[Softmax(a_k)], i=0,1,2,...N-1<br/>
+\]</p>
+
+<p>其中,k为真实标签值，N为一个批量的大小.</p>
+
+<blockquote>
+<p>理想的分类器应当是除了真实标签的概率为1,其余标签概率均为0,这样计算得到其损失函数为<code>-ln(1) =0</code>损失函数越大，说明该分类器在真实标签上分类概率越小，性能也就越差,一个非常差的分类器，可能在真实标签上的分类概率接近于0,那么损失函数就接近于正无穷,我们称为训练发散，需要调小学习速率,在ImageNet-1000分类问题中，初始状态为均匀分布,每个类别的分类概率均为0.001，故此时计算损失函数值为-ln(O.OO1) = ln(1000) = 6.907755... 经常有同学问，“我的loss为什么总是在6.9左右（该现象被称为6.9高原反应），训练了好久都不下降呢？”说明还都没有训练收敛的迹象,尝试调大学习速率,或者修改权值初始化方式.</p>
+</blockquote>
+
+<h3 id="toc_3">参数描述</h3>
+
+<p>先看一下<code>caffe.proto</code>,找到有关<code>Softmax</code>的消息定义:</p>
+
+<pre><code class="language-protobuf">
+// Message that stores parameters used by SoftmaxLayer, SoftmaxWithLossLayer
+message SoftmaxParameter {
+  enum Engine {
+    DEFAULT = 0;
+    CAFFE = 1;
+    CUDNN = 2;  //使用cudnn引擎计算
+  }
+  optional Engine engine = 1 [default = DEFAULT]; // 默认为 0 
+
+  // The axis along which to perform the softmax -- may be negative to index
+  // from the end (e.g., -1 for the last axis).
+  // Any other axes will be evaluated as independent softmaxes.
+  // axis为可选参数，指定沿哪个维度计算Softmax,可以是负数，表示从后向前索引
+  optional int32 axis = 2 [default = 1];
+}
+
+</code></pre>
+
+<h3 id="toc_4">源码分析</h3>
+
+<p>损失层的基类声明于<code>include/caffe/layers/loss_layers.hpp</code>中：</p>
+
+<pre><code class="language-c++">/**
+ * @brief An interface for Layer%s that take two Blob%s as input -- usually
+ *        (1) predictions and (2) ground-truth labels -- and output a
+ *        singleton Blob representing the loss.
+ *
+ * LossLayers are typically only capable of backpropagating to their first input
+ * -- the predictions.
+ */
+ 
+ 
+ //损失层的鼻祖类，派生于Layer
+template &lt;typename Dtype&gt;
+class LossLayer : public Layer&lt;Dtype&gt; {
+ public:
+ //显式抅造函数
+  explicit LossLayer(const LayerParameter&amp; param)
+     : Layer&lt;Dtype&gt;(param) {}
+//层配置函数
+  virtual void LayerSetUp(
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+//变形函数
+  virtual void Reshape(
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+//接受沔个Blob作为输入
+  virtual inline int ExactNumBottomBlobs() const { return 2; }
+
+  /**
+   * @brief For convenience and backwards compatibility, instruct the Net to
+   *        automatically allocate a single top Blob for LossLayers, into which
+   *        they output their singleton loss, (even if the user didn&#39;t specify
+   *        one in the prototxt, etc.).
+   */
+   //为了方便和后向兼容，指导Net为损失层自动分配单个输出Blob.损失层则会将计算结果L(θ)保存在这里
+  virtual inline bool AutoTopBlobs() const { return true; }
+  //只有一个输出Blob
+  virtual inline int ExactNumTopBlobs() const { return 1; }
+  /**
+   * We usually cannot backpropagate to the labels; ignore force_backward for
+   * these inputs.
+   */
+  virtual inline bool AllowForceBackward(const int bottom_index) const {
+    return bottom_index != 1;
+  }
+};
+
+</code></pre>
+
+<p>用来计算 <code>Softmax</code> 损失函数的层 <code>SoftmaxLayer</code> 声明在 <code>include/caffe/layers/softmaxlayer.hpp</code>中：</p>
+
+<pre><code class="language-c++">/**
+ * @brief Computes the softmax function.
+ *
+ * TODO(dox): thorough documentation for Forward, Backward, and proto params.
+ */
+ 
+ //SoftmaxLayer直接派生于Layer
+template &lt;typename Dtype&gt;
+class SoftmaxLayer : public Layer&lt;Dtype&gt; {
+ public:
+ //显示构造函数
+  explicit SoftmaxLayer(const LayerParameter&amp; param)
+      : Layer&lt;Dtype&gt;(param) {}
+//变形函数
+  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+//返回类名字符串
+  virtual inline const char* type() const { return &quot;Softmax&quot;; }
+  //该层接受一个输入BLOB,传生一个输出Blob
+  virtual inline int ExactNumBottomBlobs() const { return 1; }
+  virtual inline int ExactNumTopBlobs() const { return 1; }
+
+ protected:
+ //前向传播函数
+  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+  //反向传播函数
+  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
+  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+     const vector&lt;bool&gt;&amp; propagate_down, const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
+//计算参数
+  int outer_num_;
+  int inner_num_;
+  int softmax_axis_;
+  /// sum_multiplier is used to carry out sum using BLAS(利用BLAS计算求和)
+  Blob&lt;Dtype&gt; sum_multiplier_;
+  /// scale is an intermediate Blob to hold temporary results.(用来临时存放中间结果的Blob)
+  Blob&lt;Dtype&gt; scale_;
+};
+
+</code></pre>
+
+<p>SoftmaxLayer实现在<code>src/caffe/layers/softmax_layer.cpp</code>中，我们深入内部来看一下具体实现：</p>
+
+<pre><code class="language-c++">//变形函数
+template &lt;typename Dtype&gt;
+void SoftmaxLayer&lt;Dtype&gt;::Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+//获得正确的维度索引
+  softmax_axis_ =
+      bottom[0]-&gt;CanonicalAxisIndex(this-&gt;layer_param_.softmax_param().axis());
+//是输出blob与输入blob形状相同
+  top[0]-&gt;ReshapeLike(*bottom[0]);
+  //sum_multiplier_这里都是1，用于辅助计算，可以看作一个行向量，或者行数为1的矩阵 类似于sum_multiplier_.Reshape(1, bottom[0]-&gt;channels(),bottom[0]-&gt;height(), bottom[0]-&gt;width());  
+  vector&lt;int&gt; mult_dims(1, bottom[0]-&gt;shape(softmax_axis_));
+  sum_multiplier_.Reshape(mult_dims);
+  Dtype* multiplier_data = sum_multiplier_.mutable_cpu_data();
+  //乘子初始化为1
+  caffe_set(sum_multiplier_.count(), Dtype(1), multiplier_data);
+  outer_num_ = bottom[0]-&gt;count(0, softmax_axis_);
+  inner_num_ = bottom[0]-&gt;count(softmax_axis_ + 1);
+  vector&lt;int&gt; scale_dims = bottom[0]-&gt;shape();
+  scale_dims[softmax_axis_] = 1;
+  //初始化scale_的形状
+  scale_.Reshape(scale_dims);
+}
+
+//前向计算，得到Softmax(a_k}值
+template &lt;typename Dtype&gt;
+void SoftmaxLayer&lt;Dtype&gt;::Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    
+//获得输入/输出Blob数据指针
+  const Dtype* bottom_data = bottom[0]-&gt;cpu_data();
+  Dtype* top_data = top[0]-&gt;mutable_cpu_data();
+  //中间临时值数据指针
+  Dtype* scale_data = scale_.mutable_cpu_data();
+  int channels = bottom[0]-&gt;shape(softmax_axis_);
+  int dim = bottom[0]-&gt;count() / outer_num_; //总的类别数目
+  caffe_copy(bottom[0]-&gt;count(), bottom_data, top_data); //将输入拷贝到输出缓冲区
+  // We need to subtract the max to avoid numerical issues, compute the exp,
+  // and then normalize.(遍历bottom_data查找最大值，存入scale_data)
+  for (int i = 0; i &lt; outer_num_; ++i) {
+    // initialize scale_data to the first plane(初始化scale_data为bottom_data首元素)
+    caffe_copy(inner_num_, bottom_data + i * dim, scale_data);
+    for (int j = 0; j &lt; channels; j++) {
+      for (int k = 0; k &lt; inner_num_; k++) {
+        scale_data[k] = std::max(scale_data[k],
+            bottom_data[i * dim + j * inner_num_ + k]);
+      }
+    }
+    // subtraction(输出缓冲区减去最大值a_k = a_k- max(a_i))
+    caffe_cpu_gemm&lt;Dtype&gt;(CblasNoTrans, CblasNoTrans, channels, inner_num_,
+        1, -1., sum_multiplier_.cpu_data(), scale_data, 1., top_data);
+    // exponentiation(求指数项exp(a_k))
+    caffe_exp&lt;Dtype&gt;(dim, top_data, top_data);
+    // sum after exp(累加求和1 + exp(a_k)，存放在scale_data中)
+    caffe_cpu_gemv&lt;Dtype&gt;(CblasTrans, channels, inner_num_, 1.,
+        top_data, sum_multiplier_.cpu_data(), 0., scale_data);
+    // division 求Softmax值，即exp(a_k)/(1 + exp(a_k))
+    for (int j = 0; j &lt; channels; j++) {
+    // top_data = top_data / scale_data
+      caffe_div(inner_num_, top_data, scale_data, top_data);
+      // 加偏移跳转指针
+      top_data += inner_num_;
+    }
+  }
+}
+//反向传播,与求导有关
+template &lt;typename Dtype&gt;
+void SoftmaxLayer&lt;Dtype&gt;::Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+    const vector&lt;bool&gt;&amp; propagate_down,
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+//获得data,diff指针
+  const Dtype* top_diff = top[0]-&gt;cpu_diff();
+  const Dtype* top_data = top[0]-&gt;cpu_data();
+  Dtype* bottom_diff = bottom[0]-&gt;mutable_cpu_diff();
+  Dtype* scale_data = scale_.mutable_cpu_data();
+  int channels = top[0]-&gt;shape(softmax_axis_);
+  int dim = top[0]-&gt;count() / outer_num_;
+  caffe_copy(top[0]-&gt;count(), top_diff, bottom_diff);
+  for (int i = 0; i &lt; outer_num_; ++i) {
+    // compute dot(top_diff, top_data) and subtract them from the bottom diff
+    for (int k = 0; k &lt; inner_num_; ++k) {
+      scale_data[k] = caffe_cpu_strided_dot&lt;Dtype&gt;(channels,
+          bottom_diff + i * dim + k, inner_num_,
+          top_data + i * dim + k, inner_num_);
+    }
+    // subtraction
+    caffe_cpu_gemm&lt;Dtype&gt;(CblasNoTrans, CblasNoTrans, channels, inner_num_, 1,
+        -1., sum_multiplier_.cpu_data(), scale_data, 1., bottom_diff + i * dim);
+  }
+  // elementwise multiplication(逐点相乘)
+  caffe_mul(top[0]-&gt;count(), bottom_diff, top_data, bottom_diff);
+}
+
+
+</code></pre>
+
+<p>到这里我们就已经了解了<code>Softmax</code>函数的计算过程,后面我们在来看<code>SoftmaxWithLossLayer</code>的实现.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/7/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe反向传播计算</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14990683410396.html">
+                
+                  <h1>第八条:理解"对象同等性"这一概念</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>根据“等同性”（equality)来比较对象是一个非常有用的功能。不过，按照<code>==</code>操作符比较出来的结果未必是我们想要的，因为该操作比较的是两个<mark>指针本身</mark>，而不是其所指的对象。应该使用NSObject协议中声明的<strong><mark>“isEqual”</mark></strong>：方法来判断两个对象的等同性。一般来说,两个类型不同的对象总是不相等的（unequal)。某些对象提供了特殊的“等同性判定方法”(equality-checking method),<strong>如果已经知道两个受测对象都属于同一个类，那么就可以使用这种方法</strong>。以下述代码为例：</p>
+
+<pre><code class="language-objc">
+NSString *foo = @&quot;Badger 123&quot;;
+NSString *bar = [NSStringstringWithFormat: @fTBadger %i&quot;, 123】；
+BOOL equalA = (foo == bar); //&lt; equal A - NO
+BOOL equalB = [foo isEqual: bar ] ; //&lt; equalB = YES
+BOOL equalC = [foo isEqualToString:bar]; //&lt; equalC = YES
+
+</code></pre>
+
+<p>上面可以看到<code>==</code>与等同性判断方法之间的差别。<code>NSString</code>类实现了一个自己独有的等同性判断方法，名叫<code>“isEqualToString:”</code>。传递给该方法的对象必须是<code>NSString</code>,否则结果未定义（undefined)。调用该方法比调用<code>“isEqual”</code>方法快，后者还要执行额外的步骤，因为它不知道受测对象的类型(前者指使用NSString所以快些)。</p>
+
+<p><code>NSObject</code>协议中有两个用于判断等同性的关键方法：</p>
+
+<pre><code class="language-objc">
+- (BOOL) isEqual: (id) object;
+- (NSUInteger) hash;
+
+</code></pre>
+
+<p><code>NSObject</code>类对这两个方法的默认实现是：当且仅当其<strong>“指针值&quot;（pointer value)(内存地址)完全相等时，这两个对象才相等。</strong>若想在自定义的对象中正确覆写这些方法，就必须先理解其约定<br/>
+(contract)。如果<code>“isEqual:”</code>方法判定两个对象相等，那么其<code>hash</code>方法也必须返回同一个值。但是，如果两个对象的hash方法返回同一个值，那么“isEqual:”方法未必会认为两者相等。</p>
+
+<p>比如有下面这个类：</p>
 
 <pre><code class="language-objc">
 @interface EOCPerson : NSObject
 @property (nonatomic, copy) NSString *firstName;
 @property (nonatomic, copy) NSString *lastName;
-
-// Convenience for firstName + ” ” 十 lastName:
--(NSString*)fullName;
--(void)setFullName:(NSString*) fullName;
+@property (nonatomic, assign) NSUInteger age;
 @end
 
 </code></pre>
 
-<p><code>fullName与setFullName</code>这两个“便捷方法”可以这样来实现:</p>
+<p>我们认为，如果两个<code>EOCPerson</code>的所有字段均相等，那么这两个对象就相等。于是<code>“isEqual:”</code>方法可以写成：</p>
 
 <pre><code class="language-objc">
--(NSString*)fullName {
-    return [NSString stringWithFormat: @&quot;%@ %@&quot;,
-            self.firstName, self.lastName];
-/** The following assumes all full names have exactly 2
-*   parts. The method could be rewritten to support more
-* exotic names.
-*/
--(void)setFullName: (NSString*)fullName {
-    NSArray *components = [fullName componentsSeparatedByString:@&quot; &quot;];
-
-    self.firstName = [components objectAtIndex: 0];
-    self.lastName = [components objectAtIndex:1];
+-(BOOL)isEqual:(id)object {
+    if (self == object) return YES;
+    if ( [self class] != [object class]) return NO;
+    EOCPerson ^otherPerson = (EOCPerson*)object;
+    if (! [_firstName isEqualToString:otherPerson.firstName))
+    return NO;
+    if (![_lastName isEqualToString:otherPerson.lastName])
+    return NO;
+    if (_age != otherPerson.age)
+    return NO;
+    return YES;
 }
 
 </code></pre>
 
-<p>然后我们改写上面的例子:</p>
+<p>首先，直接判断两个指针是否相等。若相等，则其均指向同一对象，所以受测的对象也必定相等。接下来，比较两对象所属的类。若不属于同一个类，则两对象不相等。<code>EOCPerson</code>对象当然不可能与<code>EOCDog</code>对象相等。不过，有时我们可能认为：一个EOCPerson实例可以与其子类（比如EOCSmithPerson)实例相等。在继承体系（inheritance hierarchy)中判断等同属性时,经常遭遇此类问题.所以实现&quot;isEqual:&quot;方法时要考虑到这种情况。最后，检测每个属性是否相等。只要其中有不相等的属性，就判定两对象不等，否则两对象相等。</p>
+
+<p>接下来,我们实现hash方法.回想一下，根据等同性约定：若两对象相等，则其哈希码(hash)也相等，但是两个哈希码相同的对象却未必相等。这是能否正确覆写“isEqual”方法的关键所在。下面这种写法完全可行：</p>
 
 <pre><code class="language-objc">
--(NSString*)fullName {
-    return [NSString stringWithFormat: @&quot;%@ %@&quot;,
-            _firstName, _lastName];
-
--(void)setFullName:(NSString*)fullName {
-        NSArray *components = [fullName componentsSeparatedByString:@&quot; &quot;];
-
-    _firstName = [components objectAtIndex: 0];
-    _lastName = [components objectAtIndex:1];
+-(NSUInteger)hash {
+    return 1337;
 }
 
 </code></pre>
 
-<p>这两种写法各有优点和缺点:</p>
+<p>在<code>collection</code>中使用这种对象将产生性能问题，因为collection在检索哈希表（hash table)时，会用对象的哈希码做索引。假如某个<code>collection</code>是用<code>set</code>实现的，那么<code>set</code>可能会根据哈希码把对象分装到不同的数组中。在向<code>set</code>中添加新对象时，要根据其哈希码找到与之相关的那个数组，依次检査其中各个元素，看数组中已有的对象是否和将要添加的新对象相等。如果相等，那就说明要添加的对象已经在set里面了。如果令每个对象都返回相同的哈希码，那么在<code>set</code>中已有<code>1000000</code>个对象的情况下，若是继续向其中添加对象，则需将这<code>1 000000</code>个对象全部扫描一遍。</p>
+
+<p>我们看另一种计算哈希码的方法:</p>
+
+<pre><code class="language-objc">
+-(NSUInteger)hash {
+    NSUInteger firstNameHash = [_firstName hash];
+    NSUInteger lastNameHash = [_lastName hash];
+    NSUInteger ageHash = _age;
+    return firstNameHash ^ lastNameHash ^ ageHash;
+}
+
+</code></pre>
+
+<p>这种做法既能保持较高效率，又能使生成的哈希码至少位于一定范围之内，而不会过于频繁地重复。当然，此算法生成的哈希码还是会碰撞（collision),不过至少可以保证哈希码有多种可能的取值.<strong>编写hash方法时，应该用当前的对象做做实验，以便在减少碰撞频度与降低运算复杂程度之间取舍。</strong></p>
+
+<h2 id="toc_0">特定类所具有的等同性判定方法</h2>
+
+<p>除了刚才提到的<code>NSString</code>之外，<code>NSArray</code>与<code>NSDictionary</code>类也具有特殊的等同性判定方法，前者名为<code>“isEqualToArray:”</code>，后者名为<code>“isEqualToDictionary:”</code>。如果和其相比较的对象不是数组或字典，那么这两个方法会各自抛出异常。由于<code>Objective-C</code>在编译期不做强类型检査（strong type checking),这样容易不小心传入类型错误的对象，因此开发者应该保证所传对象的类型是正确的。</p>
+
+<p>如果我们觉得提供的判断方法不好用,可以自己来写一个,令代码看上<br/>
+去更美观、更易读,使自己编写的判定方法更容易读懂，而且不用再检査两个受测对象的类型了。</p>
+
+<p><strong>在编写判定方法时，也应一并覆写“isEqual:”方法。后者的常见实现方式为：如果受测的参数与接收该消息的对象都属于同一个类，那么就调用自已编写的判定方法，否则就交由超类来判断。</strong></p>
+
+<p>例如:</p>
+
+<pre><code class="language-objc">
+- (BOOL)isEqualToPerson:(EOCPerson*)otherPerson {
+if (self == object) return YES;
+    if (! [_firstName isEqualToString:otherPerson.firstName])
+        return NO;
+    if (![_lastName isEqualToString:otherPerson.lastName])
+        return NO;
+    if (_age != otherPerson.age)
+        return NO;
+    return YES;
+}
+
+-(BOOL)isEqual:(id)object {
+    if ([self class] == [object class]) {
+        return [self isEqualToPerson:(EOCPerson*)object];
+    } else {
+        return [super isEqual:object】；
+
+</code></pre>
+
+<h2 id="toc_1">等同性判定的执行深度</h2>
+
+<p>创建等同性判定方法时，需要决定是根据整个对象来判断等同性，还是仅根据其中几个字段来判断。<code>NSArray</code>的检测方式为先看两个数组所含对象个数是否相同，若相同，则在每个对应位置的两个对象身上调用其<code>“isEqual”</code>方法。如果对应位置上的对象均相等，那么这两个数组就相等，这叫做<strong>“深度等同性判定”（deep equality)。</strong>不过有时候无须将所有数据<br/>
+逐个比较，只根据其中部分数据即可判明二者是否等同。</p>
+
+<p>比方说，我们假设<code>EOCPerson</code>类的实例是根据数据库里的数据创建而来，那么其中就可能会含有另外一个属性，此属性是<strong>“唯一标识符&quot;（unique identifier)</strong>,在数据库中用作“主键”</p>
+
+<pre><code class="language-objc">
+@property NSUInteger identifier;
+
+</code></pre>
+
+<p>在这种情况下，我们也许只会根据标识符来判断等同性，尤其是在此属性声明为<code>readonly</code>时更应该如此。因为只要两者标识符相同，就肯定表示同一个对象，因而必然相等。<br/>
+这样的话，无须逐个比较<code>EOCPerson</code>对象的每条数据，只要标识符相同，就说明这两个对象就是由同一个数据源所创建的，据此我们能够断定，其余数据也必然相同。</p>
+
+<h2 id="toc_2">容器中可变类的等同性</h2>
+
+<p>还有一种情况一定要注意，就是在容器中放入可变类对象的时候。把某个对象放入<code>collection</code>之后，就不应再改变其哈希码了。前面解释过，<code>collection</code>会把各个对象按照其哈希码分装到不同的“箱子数组”中。如果某对象在放入“箱子”之后哈希码又变了，那么其现在所处的这个箱子对它来说就是“错误”的。要想解决这个问题，<strong><mark>需要确保哈希码不是根据对象的“可变部分”（mutable portion)</mark></strong>计算出来的,或是保证放入<code>collection</code>之后就不再改变对象内容了。之后将在第18条中解释为何要将对象做成“不可变的&quot;（immutable)。</p>
+
+<h2 id="toc_3">要点:</h2>
 
 <ul>
-<li><p>由于不经过Objective-C的<strong>“方法派发” (method dispatch，之后第11条）</strong>步骤，所以直接访问实例变量的速度当然比较快。在这种情况下，编译器所生成的代码会直接访问保存对象实例变量的那块内存。</p></li>
-<li><p>直接访问实例变童时，不会调用其“设置方法”,这就绕过了为相关属性所定义的“内<br/>
-存管理语义”。比方说，如果在ARC下直接访问一个声明为copy的属性，那么并不<br/>
-会拷贝该属性，只会保留新值并释放旧值。</p></li>
-<li><p>如果直接访问实例变量，那么不会触发‘键值观测’（Key-Value Observing，KVO)通知。这样做是否会产生问题，还取决于具体的对象行为。</p></li>
-<li><p>通过属性来访问有助于排査与之相关的错误，因为可以给“获取方法”和/或“设置<br/>
-方法”中新增“断点&quot;（breakpoint),监控该属性的调用者及其访问时机。</p></li>
-</ul>
-
-<p>因为各有好处,这里我们就找一个折中方案:<mark>写入实例变量时，通过其“设置方法”来做</mark>，而在<mark>读取实例变量时，则直接访问之</mark>。此办法既能提高读取操作的速度，又能控制对属性的写入操作。之所以要通过“设置方法”来写人实例变量，其首要原因在于，这样做能够确保相关属性的“内存管理语义”得以贯彻。但是，选用这种做法时，需注意几个问题:</p>
-
-<p><strong>第一个要注意的地方就是</strong>，在初始化方法中应该如何设置属性值。这种情况下总是应<br/>
-该<mark>直接访问实例变量</mark>，因为子类可能会<strong>“覆写”（override)设置方法</strong>。假设<code>EOCPerson</code>有一个子类叫做<code>EOCSmithPerson</code>，这个子类专门表示那些姓“Smith”的人。该子类可能会覆写<code>lastName</code>属性所对应的设置方法：</p>
-
-<pre><code class="language-objc">
--(void)setLastName:(NSString*)lastName {
-    if (![lastName isEqualToString:@&quot;Smith&quot;]){
-      [NSException raise:NSInvalidArgumentException
-                  format:@&quot;Last name must be Smith&quot;];
-}
-    self.lastName = lastname; //这里没有直接访问,而是用的点语法.(最好直接访问)
-}
-
-</code></pre>
-
-<p>在基类<code>EOCPerson</code>的默认初始化方法中，可能会将姓氏设为空字符串。此时若是通过<br/>
-“设置方法”来做，那么<strong>调用的将会是子类的设置方法，从而拋出异常</strong>。但是，某些情况下却又必须在初始化方法中调用设置方法:如果待初始化的实例变量声明在超类中，而我们又无法在子类中直接访问此实例变量的话，那么就需要调用“设置方法”了。</p>
-
-<p><strong>第二个注意问题</strong>是<strong>&quot;惰性初始化&quot;（lazy initialization)</strong>。在这种情况下，必须通过“获取方法”来访问属性，否则，实例变量就永远不会初始化。比方说，<code>EOCPerson</code>类也许会用一个属性来表示人脑中的信息，这个属性所指代的对象相当复杂。由于此属性不常用,而且创建该属性的成本较高，所以，<mark>我们可能会在“获取方法”中对其执行惰性初始化</mark>:</p>
-
-<pre><code class="language-objc">
--(EOCBrain)brain {
-    if (!_brain) {
-        brain = [Brain new];    //若没有调用获取方法,这句话永远也不会执行,去初始化
-    }
-    return _brain;
-
-</code></pre>
-
-<p>若没有调用“获取方法”就直接访问实例变量，则会看到尚未设置好的<code>brain</code>,所以说,<br/>
-如果使用了“惰性初始化”技术，那么必须通过存取方法来访问<code>brain</code>属性。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li><p>在对象内部读取数据时,应该直接通过实例变量来读，而写入数据时，则应通过属性<br/>
-来写。</p></li>
-<li><p>在初始化方法及<code>dealloc</code>方法中，总是应该直接通过实例变量来读写数据。</p></li>
-<li><p>有时会使用惰性初始化技术配置某份数据,这种情况下，需要通过属性的&quot;获取方法&quot;来读取数据。</p></li>
+<li>若想检测对象的等同性，请提供<code>“isEqual:”</code>与<code>hash</code>方法。</li>
+<li>相同的对象必须具有相同的哈希码，但是两个哈希码相同的对象却未必相同。</li>
+<li>不要盲目地逐个检测每条属性，而是应该依照具体需求来制定检测方案。</li>
+<li>编写hash方法时，应该使用计算速度快而且哈希码碰撞几率低的箅法。</li>
 </ul>
 
                         
@@ -452,7 +1244,7 @@ void Net&lt;Dtype&gt;::AppendParam(const NetParameter&amp; param, const int laye
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/6/30</span>
+                    <span class="date">2017/7/3</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
@@ -469,329 +1261,78 @@ void Net&lt;Dtype&gt;::AppendParam(const NetParameter&amp; param, const int laye
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="14987856817486.html">
+                <a class="clearlink" href="14990441879389.html">
                 
-                  <h1>Caffe前向传播计算</h1>
+                  <h1>Net Forward实现</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<ul>
-<li>
-<a href="#toc_0">前向传播的特点</a>
-</li>
-<li>
-<a href="#toc_1">前向传播的实现</a>
-</li>
-<li>
-<a href="#toc_2">DAG(有向无环图)构造过程</a>
-</li>
-</ul>
-
-
-<p>使用传统的BP算法进行CNN训练时包括两个阶段：前向传播计算（Forward)和反向传播计算（Backward)。今天我们将注意力放在前向传播阶段。</p>
-
-<p>前向传播阶段在实际应用中最常见，<mark><strong>比如大量的在线系统（语音识别、文字识别、图像分类和检索等)都是仅前向传播阶段的应用</strong></mark>;一些嵌入式系统（视觉机器人、无人机、智能语音 机器人）受限于计算资源，仅实现前向传播阶段，而<mark><strong>反向传播计算则由计算性能更强大的服务器完成</strong></mark>.</p>
-
-<h2 id="toc_0">前向传播的特点</h2>
-
-<p>在前向传播阶段，数据源起于数据读取层，经过若干处理层，到达最后一层(可能是损失 层或特征层）。</p>
-
-<p>网络中的权值在前向传播阶段<mark><strong>不发生变化</strong></mark>，可以看作常量。</p>
-
-<p>网络路径是一个<mark>有向无环图（DirectedAcyclineGraph，DAG)</mark>。从最初的节点出发，经历若干处理层，不存在循环结构，因此数据流会直向前推进到达终点。</p>
-
-<p>我们可以使用数据流分析方法对前向传播过程进行研究：</p>
-
-<p>从输入数据集中取一个样本\((X,Y)\),其中X为数据，Y为标签。将X送入网络,逐层计算,得到相应的网络处理输出\(O\)。网络执行的计算可以用公式表达为：<br/>
-\[<br/>
-O = F_n(...(F_2(F_1(XW_1)W_2)...)W_n)<br/>
-\]</p>
-
-<p>其中,\(F_i ,i=1,2,...n\)表示非线性变换，而\(W_i=1,2,…n\),表示各个权值层权值。</p>
-
-<p>得到网络输出\(O\)后，可以用\((Y,O)\)评估网络质量。理想的网络满足\(Y==O\)。</p>
-
-<h2 id="toc_1">前向传播的实现</h2>
-
-<p>在Caffe中CNN前向传播过程由Net + Layer组合完成，中间结果和最终结果则使用Blob承载。下面我们深入代码来观察这一过程。</p>
-
-<h2 id="toc_2">DAG(有向无环图)构造过程</h2>
-
-<p>首先我们从Net构造函数开始.</p>
+                        	<p>掌握了上次Net的初始化代码以及方法,我们下面来看一下他的<code>Forward</code>代码:</p>
 
 <pre><code class="language-c++">
-//从NetParameter对象构造
 template &lt;typename Dtype&gt;
-Net&lt;Dtype&gt;::Net(const NetParameter&amp; param) {
-  Init(param);
-}
-
-//从net.prototxt文件构造
-template &lt;typename Dtype&gt;
-Net&lt;Dtype&gt;::Net(const string&amp; param_file, Phase phase,
-    const int level, const vector&lt;string&gt;* stages) {
-  NetParameter param;
-  ReadNetParamsFromTextFileOrDie(param_file, &amp;param);
-  // Set phase, stages and level
-  param.mutable_state()-&gt;set_phase(phase);
-  if (stages != NULL) {
-    for (int i = 0; i &lt; stages-&gt;size(); i++) {
-      param.mutable_state()-&gt;add_stage((*stages)[i]);
+Dtype Net&lt;Dtype&gt;::ForwardFromTo(int start, int end) {
+//计算从第start到end层的前向传播过程
+  CHECK_GE(start, 0);
+  CHECK_LT(end, layers_.size());
+  Dtype loss = 0;
+  for (int i = start; i &lt;= end; ++i) {
+    for (int c = 0; c &lt; before_forward_.size(); ++c) {
+      before_forward_[c]-&gt;run(i);
+    }
+// LOG(ERROR) &lt;&lt; &quot;Forwarding &quot; &lt;&lt;layer_names_[i];
+// 调用每个Layer的Forward()函数，得到每层loss
+    Dtype layer_loss = layers_[i]-&gt;Forward(bottom_vecs_[i], top_vecs_[i]);
+    loss += layer_loss;
+    if (debug_info_) { ForwardDebugInfo(i); }
+    for (int c = 0; c &lt; after_forward_.size(); ++c) {
+      after_forward_[c]-&gt;run(i);
     }
   }
-  param.mutable_state()-&gt;set_level(level);
-  Init(param);
+  //返回loss值
+  return loss;
+}
+
+template &lt;typename Dtype&gt;
+Dtype Net&lt;Dtype&gt;::ForwardFrom(int start) {
+//计算从start开始到最后一层的前向传播过程
+  return ForwardFromTo(start, layers_.size() - 1);
+}
+
+template &lt;typename Dtype&gt;
+Dtype Net&lt;Dtype&gt;::ForwardTo(int end) {
+//计算从第1层到第end层的前向传播过程
+  return ForwardFromTo(0, end);
+}
+
+template &lt;typename Dtype&gt;
+const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Net&lt;Dtype&gt;::Forward(Dtype* loss) {
+//计算整个网络前向传播过程,返回损失值(可选)和网络输出Blob
+  if (loss != NULL) {
+    *loss = ForwardFromTo(0, layers_.size() - 1);
+  } else {
+    ForwardFromTo(0, layers_.size() - 1);
+  }
+  return net_output_blobs_;
+}
+
+template &lt;typename Dtype&gt;
+const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; Net&lt;Dtype&gt;::Forward(
+    const vector&lt;Blob&lt;Dtype&gt;*&gt; &amp; bottom, Dtype* loss) {
+    //接受输入Blob作为Net输入，计算前向传播,得到损失值（可选）和网络输出Blob
+  LOG_EVERY_N(WARNING, 1000) &lt;&lt; &quot;DEPRECATED: Forward(bottom, loss) &quot;
+      &lt;&lt; &quot;will be removed in a future version. Use Forward(loss).&quot;;
+  // Copy bottom to net bottoms(直接将输入Blob拷贝到net_input_blobs_中)
+  for (int i = 0; i &lt; bottom.size(); ++i) {
+    net_input_blobs_[i]-&gt;CopyFrom(*bottom[i]);
+  }
+  return Forward(loss);
 }
 
 </code></pre>
 
-<p>从上面的构造函数看到，二者都调用了Init()函数。传递给该函数的参数param是 NetParameter对象，我们已经之前的例程中使用过，了解过其数据结构描述(caffe.proto)。 我们可以从<code>net.prototxt</code>文件读取到内存中，初始化一个NetParameter对象，然后传递给<code>Init()</code>函数.</p>
-
-<p>接着追踪<code>Init()</code>函数:</p>
-
-<pre><code class="language-c++">//这个函数很长
-template &lt;typename Dtype&gt;
-void Net&lt;Dtype&gt;::Init(const NetParameter&amp; in_param) {
-  // Set phase from the state.
-  phase_ = in_param.state().phase();
-  // Filter layers based on their include/exclude rules and
-  // the current NetState.
-  NetParameter filtered_param;
-  //过滤一些参数,仅仅保留当前阶段参数.
-  FilterNet(in_param, &amp;filtered_param);
-  LOG_IF(INFO, Caffe::root_solver())
-      &lt;&lt; &quot;Initializing net from parameters: &quot; &lt;&lt; std::endl
-      &lt;&lt; filtered_param.DebugString();
-  // Create a copy of filtered_param with splits added where necessary.(创建一个拷贝,之后就用这个拷贝)
-  NetParameter param;
-  InsertSplits(filtered_param, &amp;param);
-  // Basically, build all the layers and set up their connections.(构建所有Layer并将它们连接)
-  name_ = param.name(); //网络名
-  map&lt;string, int&gt; blob_name_to_idx;    //Blob名与索引的映射
-  set&lt;string&gt; available_blobs;  //已有Blob名集合
-  memory_used_ = 0;     //统计内存占用
-  // For each layer, set up its input and output
-  //对每个 Layer 设置输入 Blob (BottomBlob)和输出 Blob (TopBlob)
-  bottom_vecs_.resize(param.layer_size()); //有多少层，就有多少个输入 Blob 
-  top_vecs_.resize(param.layer_size()); //有多少层，就有多少个输出Blob 
-  bottom_id_vecs_.resize(param.layer_size()); //记录每个层的输入Blob索引
-  param_id_vecs_.resize(param.layer_size());    // 记录每个层的权值Blob索引
-  top_id_vecs_.resize(param.layer_size());  // 记录每个层的输出Blob索引
-  bottom_need_backward_.resize(param.layer_size()); //记录每个Blob是否需要反向传播过程
-  
-  //遍历每个层
-  for (int layer_id = 0; layer_id &lt; param.layer_size(); ++layer_id) {
-    // Inherit phase from net if unset.(每个层的阶段标记.如果在层描述中未指定阶段，就使用Net的阶段)
-    if (!param.layer(layer_id).has_phase()) {
-      param.mutable_layer(layer_id)-&gt;set_phase(phase_);
-    }
-    // Setup layer.
-    //获取层参数
-    const LayerParameter&amp; layer_param = param.layer(layer_id);
-    if (layer_param.propagate_down_size() &gt; 0) {
-      CHECK_EQ(layer_param.propagate_down_size(),
-          layer_param.bottom_size())
-          &lt;&lt; &quot;propagate_down param must be specified &quot;
-          &lt;&lt; &quot;either 0 or bottom_size times &quot;;
-    }
-    // Layer工厂，专业制造各种Layer，然后添加到Net类的layers_对象中 
-    // 注意到这Layer的LayerParameter都继承自NetParameter
-NetParameterlayers_.push_back(LayerRegistry&lt;Dtype&gt;::CreateLayer(layer_param));
-    layer_names_.push_back(layer_param.name());
-    LOG_IF(INFO, Caffe::root_solver())
-        &lt;&lt; &quot;Creating Layer &quot; &lt;&lt; layer_param.name();
-    bool need_backward = false;     //判断该层是否需要反向传播
-
-    // Figure out this layer&#39;s input and output(确定该Layer的输入Blob和输出Blob)
-    for (int bottom_id = 0; bottom_id &lt; layer_param.bottom_size();
-         ++bottom_id) {
-         //遍历所有输入Blob,记录到Blob名集合、Blob名到索引映射中
-      const int blob_id = AppendBottom(param, layer_id, bottom_id, &amp;available_blobs, &amp;blob_name_to_idx);
-      // If a blob needs backward, this layer should provide it.
-      need_backward |= blob_need_backward_[blob_id];
-    }
-    //输出Blob做同样的事
-    int num_top = layer_param.top_size();
-    for (int top_id = 0; top_id &lt; num_top; ++top_id) {
-      AppendTop(param, layer_id, top_id, &amp;available_blobs, &amp;blob_name_to_idx);
-      // Collect Input layer tops as Net inputs.(收集输入层(InputLayer)信息，如果有，其输出blob将作为整个Net的输入)
-      if (layer_param.type() == &quot;Input&quot;) {
-        const int blob_id = blobs_.size() - 1;
-        net_input_blob_indices_.push_back(blob_id);
-        net_input_blobs_.push_back(blobs_[blob_id].get());
-      }
-    }
-    // If the layer specifies that AutoTopBlobs() -&gt; true and the LayerParameter
-    // specified fewer than the required number (as specified by
-    // ExactNumTopBlobs() or MinTopBlobs()), allocate them here.
-    Layer&lt;Dtype&gt;* layer = layers_[layer_id].get();
-    if (layer-&gt;AutoTopBlobs()) {
-      const int needed_num_top =
-          std::max(layer-&gt;MinTopBlobs(), layer-&gt;ExactNumTopBlobs());
-      for (; num_top &lt; needed_num_top; ++num_top) {
-        // Add &quot;anonymous&quot; top blobs -- do not modify available_blobs or
-        // blob_name_to_idx as we don&#39;t want these blobs to be usable as input
-        // to other layers.
-        AppendTop(param, layer_id, num_top, NULL, NULL);
-      }
-    }
-    
-    
-    // After this layer is connected, set it up.(Layer连接设置完毕，调用各个Layer的SetUp()函数)
-    layers_[layer_id]-&gt;SetUp(bottom_vecs_[layer_id], top_vecs_[layer_id]);
-    LOG_IF(INFO, Caffe::root_solver())
-        &lt;&lt; &quot;Setting up &quot; &lt;&lt; layer_names_[layer_id];
-        //设置输出Blob对损失函数的投票因子
-    for (int top_id = 0; top_id &lt; top_vecs_[layer_id].size(); ++top_id) {
-      if (blob_loss_weights_.size() &lt;= top_id_vecs_[layer_id][top_id]) {
-        blob_loss_weights_.resize(top_id_vecs_[layer_id][top_id] + 1, Dtype(0));
-      }
-      blob_loss_weights_[top_id_vecs_[layer_id][top_id]] = layer-&gt;loss(top_id);
-      //打印每层输出Blob尺寸信息
-      LOG_IF(INFO, Caffe::root_solver())
-          &lt;&lt; &quot;Top shape: &quot; &lt;&lt; top_vecs_[layer_id][top_id]-&gt;shape_string();
-      if (layer-&gt;loss(top_id)) {
-        LOG_IF(INFO, Caffe::root_solver())
-            &lt;&lt; &quot;    with loss weight &quot; &lt;&lt; layer-&gt;loss(top_id);      //除了损失层的loss_weight为1,其它层都是0
-      }
-      //统计每个输出Blob内存占用量
-      memory_used_ += top_vecs_[layer_id][top_id]-&gt;count();
-    }
-    //打印所有输出Blob内存占用量
-    LOG_IF(INFO, Caffe::root_solver())
-        &lt;&lt; &quot;Memory required for data: &quot; &lt;&lt; memory_used_ * sizeof(Dtype);
-        
-    //下面开始初始化各层权值Blob
-    const int param_size = layer_param.param_size();
-    const int num_param_blobs = layers_[layer_id]-&gt;blobs().size();
-    //保证参数配置需要的权值Blob数目不大于实际对象的权值Blob数
-    CHECK_LE(param_size, num_param_blobs)
-        &lt;&lt; &quot;Too many params specified for layer &quot; &lt;&lt; layer_param.name();
-    ParamSpec default_param_spec;
-    //每个权值层(卷基层,全连接层)都要经历下面的过程
-    for (int param_id = 0; param_id &lt; num_param_blobs; ++param_id) {
-      const ParamSpec* param_spec = (param_id &lt; param_size) ?
-          &amp;layer_param.param(param_id) : &amp;default_param_spec;
-      const bool param_need_backward = param_spec-&gt;lr_mult() != 0;
-      //设置权值层param(lr_mult:0)可以禁止其反向传播过程，即冻结权值
-      need_backward |= param_need_backward;
-      layers_[layer_id]-&gt;set_param_propagate_down(param_id,
-                                                  param_need_backward);
-    }
-    for (int param_id = 0; param_id &lt; num_param_blobs; ++param_id) {
-    //记录权值Blob到Net后台数据库
-      AppendParam(param, layer_id, param_id);
-    }
-    // Finally, set the backward flag
-    layer_need_backward_.push_back(need_backward);
-    if (need_backward) {
-      for (int top_id = 0; top_id &lt; top_id_vecs_[layer_id].size(); ++top_id) {
-        blob_need_backward_[top_id_vecs_[layer_id][top_id]] = true;
-      }
-    }
-  }
-  // Go through the net backwards to determine which blobs contribute to the
-  // loss.  We can skip backward computation for blobs that don&#39;t contribute
-  // to the loss.
-  // Also checks if all bottom blobs don&#39;t need backward computation (possible
-  // because the skip_propagate_down param) and so we can skip bacward
-  // computation for the entire layer
-  set&lt;string&gt; blobs_under_loss;
-  set&lt;string&gt; blobs_skip_backp;
-  for (int layer_id = layers_.size() - 1; layer_id &gt;= 0; --layer_id) {
-    bool layer_contributes_loss = false;
-    bool layer_skip_propagate_down = true;
-    for (int top_id = 0; top_id &lt; top_vecs_[layer_id].size(); ++top_id) {
-      const string&amp; blob_name = blob_names_[top_id_vecs_[layer_id][top_id]];
-      if (layers_[layer_id]-&gt;loss(top_id) ||
-          (blobs_under_loss.find(blob_name) != blobs_under_loss.end())) {
-        layer_contributes_loss = true;
-      }
-      if (blobs_skip_backp.find(blob_name) == blobs_skip_backp.end()) {
-        layer_skip_propagate_down = false;
-      }
-      if (layer_contributes_loss &amp;&amp; !layer_skip_propagate_down)
-        break;
-    }
-    // If this layer can skip backward computation, also all his bottom blobs
-    // don&#39;t need backpropagation
-    if (layer_need_backward_[layer_id] &amp;&amp; layer_skip_propagate_down) {
-      layer_need_backward_[layer_id] = false;
-      for (int bottom_id = 0; bottom_id &lt; bottom_vecs_[layer_id].size();
-               ++bottom_id) {
-        bottom_need_backward_[layer_id][bottom_id] = false;
-      }
-    }
-    if (!layer_contributes_loss) { layer_need_backward_[layer_id] = false; }
-    if (Caffe::root_solver()) {
-      if (layer_need_backward_[layer_id]) {
-        LOG(INFO) &lt;&lt; layer_names_[layer_id] &lt;&lt; &quot; needs backward computation.&quot;;
-      } else {
-        LOG(INFO) &lt;&lt; layer_names_[layer_id]
-            &lt;&lt; &quot; does not need backward computation.&quot;;
-      }
-    }
-    for (int bottom_id = 0; bottom_id &lt; bottom_vecs_[layer_id].size();
-         ++bottom_id) {
-      if (layer_contributes_loss) {
-        const string&amp; blob_name =
-            blob_names_[bottom_id_vecs_[layer_id][bottom_id]];
-        blobs_under_loss.insert(blob_name);
-      } else {
-        bottom_need_backward_[layer_id][bottom_id] = false;
-      }
-      if (!bottom_need_backward_[layer_id][bottom_id]) {
-        const string&amp; blob_name =
-                   blob_names_[bottom_id_vecs_[layer_id][bottom_id]];
-        blobs_skip_backp.insert(blob_name);
-      }
-    }
-  }
-  // Handle force_backward if needed.
-  if (param.force_backward()) {
-    for (int layer_id = 0; layer_id &lt; layers_.size(); ++layer_id) {
-      layer_need_backward_[layer_id] = true;
-      for (int bottom_id = 0;
-           bottom_id &lt; bottom_need_backward_[layer_id].size(); ++bottom_id) {
-        bottom_need_backward_[layer_id][bottom_id] =
-            bottom_need_backward_[layer_id][bottom_id] ||
-            layers_[layer_id]-&gt;AllowForceBackward(bottom_id);
-        blob_need_backward_[bottom_id_vecs_[layer_id][bottom_id]] =
-            blob_need_backward_[bottom_id_vecs_[layer_id][bottom_id]] ||
-            bottom_need_backward_[layer_id][bottom_id];
-      }
-      for (int param_id = 0; param_id &lt; layers_[layer_id]-&gt;blobs().size();
-           ++param_id) {
-        layers_[layer_id]-&gt;set_param_propagate_down(param_id, true);
-      }
-    }
-  }
-  // In the end, all remaining blobs are considered output blobs.(所有剩下的Blob都被看作输出Blob)
-  for (set&lt;string&gt;::iterator it = available_blobs.begin();
-      it != available_blobs.end(); ++it) {
-    LOG_IF(INFO, Caffe::root_solver())
-        &lt;&lt; &quot;This network produces output &quot; &lt;&lt; *it;
-    net_output_blobs_.push_back(blobs_[blob_name_to_idx[*it]].get());
-    net_output_blob_indices_.push_back(blob_name_to_idx[*it]);
-  }
-  //将Blob名称与Blob id对应关系登记到Net后台数据库
-  for (size_t blob_id = 0; blob_id &lt; blob_names_.size(); ++blob_id) {
-    blob_names_index_[blob_names_[blob_id]] = blob_id;
-  }
-  //将Layer名称与Layer id对应关系登记到Net后台数据库
-  for (size_t layer_id = 0; layer_id &lt; layer_names_.size(); ++layer_id) {
-    layer_names_index_[layer_names_[layer_id]] = layer_id;
-  }
-  ShareWeights();
-  debug_info_ = param.debug_info();
-  LOG_IF(INFO, Caffe::root_solver()) &lt;&lt; &quot;Network initialization done.&quot;;
-}
-
-
-</code></pre>
-
-<p>到这里我们大概了解了一个Net初始化的过程,关于其中三个登记注册函数,后面继续学习.</p>
+<p>到这里 我们就初步了解了所有的前向传波函数,应该能够在脑海中形成DAG数据流动图,后面学习反向传播过程.</p>
 
                         
                       </div>
@@ -800,777 +1341,10 @@ NetParameterlayers_.push_back(LayerRegistry&lt;Dtype&gt;::CreateLayer(layer_para
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/6/30</span>
+                    <span class="date">2017/7/3</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Caffe%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD%E8%AE%A1%E7%AE%97.html'>Caffe前向传播计算</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14986374781793.html">
-                
-                  <h1>第六条 理解"属性" 这一概念</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>用Objective-C等面向对象语言编程时，“对象”（object)就是“基本构造单元&quot;（building block),开发者可以通过对象来存储并传递数据。在对象之间传递数据并执行任务的过程就叫做“消息传递”（Messaging)。若想编写出髙效且易维护的代码，就一定要熟悉这两个特性的工作原理。</p>
-
-<p>当应用程序运行起来以后,为其提供相关支持的代码叫做<strong>“Objective-C运行期环境”(Objective-C runtime)</strong>,它提供了一些使得对象之间能够传递消息的重要函数，并且包含创建类实例所用的全部逻辑。在理解了运行期环境中各个部分协同工作的原理之后，你的开发水<br/>
-平将会进一步提升。</p>
-
-<h2 id="toc_0">属性</h2>
-
-<p>“属性”（property)是Objecive-C的一项特性，用于封装对象中的数据。Objective-C对象通常会把其所需要的数据保存为各种实例变量。实例变量一般通过“存取方法”（access method)来访问。其中，“获取方法&quot;（getter)用于读取变量值，&quot;设置方法&quot;（setter)用于写入变量值。这个概念已经定型，并且经由“属性”这一特性而成为Objective-C 2.0的一部分,开发者可以令编译器自动编写与属性相关的存取方法。此特性引入了一种新的“点语法”（dot syntax),使开发者可以更为容易地依照类对象来访问存放于其中的数据。你也许已经使用过“属性”这个概念了，不过你未必知道其全部细节。而且，还有很多与属性有关的麻烦事。<strong>第6条将会告诉大家有哪些问题可以用属性来解决，并指出其中所体现出来的关键特性。</strong>在描述个人信息的类中，也许会存放人名、生日、地址等内容。可以在类接口的public<br/>
-区段中声明一些实例变量：</p>
-
-<pre><code class="language-objc">
-@interface EOCPerson : NSObject {
-@public
-    NSString *_firstName;
-    NSString *_lastName;
-@private
-    NSString *_someInternalData;
-}
-@end
-
-</code></pre>
-
-<p>这种写法在其他语言中,java或者c++中比较常见,但是编写Objective-C代码时却很少这么做。这种写法的问题是：<strong>对象布局在编译期（compile time)就已经固定了。只要碰到访问firstName变量的代码，编译器就把其替换为“偏移量”（offset),这个偏移量是“硬编码”（hardcode),表示该变M距离存放对象的<br/>
-内存区域的起始地址有多远。</strong></p>
-
-<p>这种写法的问题是,如果又增加一个实例变量,就麻烦了,例如:</p>
-
-<pre><code class="language-objc">
-@interface EOCPerson : NSObject {
-@public
-    NSString *_dataOfBirth;
-    NSString *_firstName;
-    NSString *_lastName;
-@private
-    NSString *_someInternalData;
-}
-@end
-
-</code></pre>
-
-<p>原来表示<code>_firstName</code>的偏移量现在却指向<code>dateOfBirth</code>了。把偏移量硬编码于其中的那些代码都会读取到错误的值。</p>
-
-<p><strong>如果代码使用了编译期计算出来的偏移量，那么在修改类定义之后必须重新编译，否则就会出错。</strong></p>
-
-<p>例如，某个代码库中的代码使用了一份旧的类定义。如果和其相链接的代码使用了新的类定义，那么运行时就会出现不兼容现象（incompatibility)。各种编程语言都有应对<br/>
-此问题的办法。<strong>Objective-C的做法是，把实例变量当做一种存储偏移量所用的“特殊变量”(special variable),交由“类对象”（class object)保管。偏移量会在运行期査找，如果类的定义变了，那么存储的偏移量也就变了</strong>，这样的话，无论何时访问实例变量，总能使用正确的偏移最。甚至可以在运行期向类中新增实例变量，这就是稳固的<strong>“应用程序二进制接口”（Application Binary Interface，ABI)</strong>。有了这种“稳固的”（nonfragile)的ABI，我们就可以在“class-continuation分类”或实现文件中定义实例变量了。所以说，<font color=red><strong>不一定要在接口中把全部实例变量都声明好，可以将某些变量从接口的public区段里移走，以便保护与类实现有关的内部信息</strong></font>。</p>
-
-<p>下面我们就要来讨论另一种解决方法,也就是&quot;属性&quot;,<strong>我们尽量不要直接访问实例变量，而应该通过存取方法来做。虽说属性最终还是得通过实例变量来实现，但它却提供了一种简洁的抽象机制。</strong>你可以自己编写存取方法，然而在正规的Objective-C编码风格中，存取方法有着严格的命名规范。正因为有了这种严格的命名规范，所以Objective-C这门语言才能根据名称自动创建出存取方法。这时<code>@property</code>语法就派上用场了。</p>
-
-<p>在对象接口的定义中，<strong><font color=red>可以使用属性，这是一种标准的写法，能够访问封装在对象里的数据。因此，也可以把属性当做一种简称，其意思是说：编译器会自动写出一套存取方法,用以访问给定类型中具有给定名称的变量。</font></strong>,例如下面这个类：</p>
-
-<pre><code class="language-objc">
-@interface EOCPerson : NSObject
-@property NSString *firstName;
-@property NSString *lastName;
-
-@end
-
-</code></pre>
-
-<p>对于该类的使用者来说，上述代码写出来的类与下面这种写法等效：</p>
-
-<pre><code class="language-objc">
-@interface EOCPerson : NSObject
-- (NSString*)firstName;
-- (void) setFirstName: (NSString*) firstName;
-- (NSString*)lastName;
-- (void)setLastName:(NSString*)lastName;
-@end
-
-</code></pre>
-
-<p>要访问属性我们可以使用<strong>点语法</strong>,与c语言类似.使用“点语法”和直接调用存取方法之间没有丝毫差别:</p>
-
-<pre><code class="language-objc">
-EOCPerson *aPerson = [Person new];
-aPerson.firstName = @&quot;Bob&quot;; //Same as:
-[aPerson setFirstName:@&quot;Bob&quot;];
-
-NSString *lastName = aPerson.lastName; //Same as:
-NSString *lastName = [aPerson lastName];
-
-</code></pre>
-
-<p>如果使用了属性的话,编译器会自动编写这些属性的访问方法.此过程叫做“自动合成”（autosynthesis)。需要强调的是，这个过程由编译器在编译期执行，所以编辑器里看不到这些“合成方法&quot;（synthesized method)的源代码。</p>
-
-<p>编译器还会自动向类中添加适当的实例变量,并且在属性名前面加下划线，以此作为实例变量的名字.在前例中，会生成两个实例变量，其名称分别为<code>_firstName与_lastName</code>。也可以在类的实现代码里通过<code>@synthesize</code>语法来指定实例变量的名字：</p>
-
-<pre><code class="language-objc">
-@implementation EOCPerson
-@synthesize firstName = _myFirstName;
-@synthesize lastName = _myLastName;
-@end
-
-</code></pre>
-
-<p>前述语法会将生成的实例变量命名为<code>_myFirstName与_myLastName</code>,而不再使用默认的名字。</p>
-
-<p>若不想令编译器自动合成存取方法，则可以自己实现。如果你只实现了其中一个存取方法，那么另外一个还是会由编译器来合成。还有一种办法能阻止编译器自动合成存取方<br/>
-法，就是使用<code>@dynamic</code>关键字,<strong>它会告诉编译器:不要自动创建实现属性所用的实例变量，也不要为其创建存取方法。</strong>而且，在编译访问属性的代码时，即使编译器发现没有定义存取方法，<strong>也不会报错</strong>，它相信这些方法能在运行期找到。比方说，如果从CoreData框架中的<code>NSManagedObject</code>类里继承了一个子类，那么就需要在运行期动态创建存取方法。继承<code>NSManagedObject</code>时之所以要这样做，是因为子类的某些属性不是实例变量，其数据来自后端的数据库中。所以:</p>
-
-<pre><code class="language-objc">
-@interface EOCPerson : NSManagedObject
-@property NSString *firstName;
-@property NSString *lastName;
-@end
-
-@implementation EOCPerson
-@dynamic firstName, lastName;
-
-@end
-</code></pre>
-
-<blockquote>
-<p>编译器不会为上面这个类自动合成存取方法或实例变量。如果用代码访问其中的属性，编译器也不会发出警示信息.</p>
-</blockquote>
-
-<h2 id="toc_1">属性特质</h2>
-
-<p>使用属性时还有一个问题要注意，就是其各种特质（attribute)设定也会影响编译器所生成的存取方法。比如下面这个属性就指定了三项特质：</p>
-
-<pre><code class="language-objc">
-@property (nonatomic, readwrite, copy) NSString * 
-firstName;
-
-</code></pre>
-
-<p><font color=red>属性可以拥有的特质分为四类：</font></p>
-
-<ol>
-<li><p>原子性:<br/>
-在默认情况下，由编译器所合成的方法会通过锁定机制确保其原子性（atomicity) 。如果属性具备nonatomic特质，则不使用同步锁。请注意，尽管没有名为“atomic”的特质（如果某属性不具备nonatomic特质，那它就是“原子的”（atomic)),但是仍然可以在属性特质中写明这一点，编译器不会报错。若是自己定义存取方法，那么就应该遵从与属性特质相符的原子性。</p></li>
-<li><p>读/写权限:</p>
-
-<ul>
-<li>    具备<strong>readwrite</strong>(读写）特质的属性拥有“获取方法”（getter)与“设置方法&quot;（setter)。若该属性由<code>@synthesize</code>实现，则编译器会自动生成这两个方法。</li>
-<li>    具备<strong>readonly</strong>(只读）特质的属性仅拥有获取方法<font color=red>，<strong>只有当该属性由<code>@synthesize</code>实现时，编译器才会为其合成获取方法</strong></font>。你可以用此特质把某个属性对外公开为只读属性,然后在<code>“class-cominuaticm分类”</code>中将其重新定义为读写属性。后面再详述这种做法。</li>
-</ul></li>
-<li><p>内存管理语义:<br/>
-属性用于封装数据，而数据则要有<code>“具体的所有权语义”（concrete ownership semantic)</code>。下面这一组特质<strong>仅会影响“设置方法”(setter)</strong>。例如，用“设置方法”设定一个新值时，它是应该<code>“保留&quot;(retain)</code>此值呢，还是只将其赋给底层实例变量就好？<strong>编译器在合成存取方法时，要根据此特质来决定所生成的代码。如果自己编写存取方法，那么就必须同有关属性所具备的特质相符</strong>。</p>
-
-<ul>
-<li>    <strong>assign</strong>  “设置方法”只会执行针对“纯量类型”（scalar type，例如CGFloat或NSImeger等）的简单赋值操作。</li>
-<li>    <strong>strong</strong>  此特质表明该属性定义了一种“拥有关系”（owning relationship)。为这种属性设置新值时，设置方法会先保留新值，并释放旧值，然后再将新值设置上去。</li>
-<li>    <strong>weak</strong>  此特质表明该属性定义了一种“非拥有关系”（nonowning relationship)。<strong>为这种属性设置新值时，设置方法既不保留新值，也不释放旧值</strong>。此特质同assign类似,然而在属性所指的对象遭到摧毁时，属性值也会清空（nil out)。</li>
-<li>    <strong>unsafe_unretained</strong>  此特质的语义和assign相同，但是它适用于“对象类型”（object type),该特质表达一种“非拥有关系”（“不保留”，unretained),<strong>当目标对象遭到摧毁时，属性值不会自动清空（“不安全”，unsafe),这一点与weak有区别</strong>。</li>
-<li>    <strong>copy</strong>  <font color=red>此特质所表达的所属关系与strong类似。然而设置方法并不保留新值,而是将其“拷贝”（copy)。<strong>当属性类型为<code>NSString*</code>时，经常用此特质来保护其封装性,因为传递给设置方法的新值有可能指向一个<code>NSMutableString类</code>的实例。这个类是<code>NSString的子类</code>，表示一种可以修改其值的字符串，此时若是不拷贝字符串，那么设置完属性之后，字符串的值就可能会在对象不知情的情况下遭人更改。</strong></font>所以，这时就要拷贝一份“不可变”（immutable)的字符串，确保对象中的字符串值不会无意间变动。只要实现属性所用的对象是“可变的”（mutable)，就应该在设置新属性值时拷贝一份.</li>
-</ul></li>
-<li><p>方法名:<br/>
-可通过如下特质来指定存取方法的方法名：</p></li>
-</ol>
-
-<ul>
-<li><strong>getter=<name></strong>  指定“获取方法”的方法名。如果某属性是<code>Boolean</code>型，而你想为其获取方法加上<code>“is”</code>前缀，那么就可以用这个办法来指定。比如说，在<code>UISwitch</code>类中，表示“开关&quot;（switch)是否打开的属性就是这样定义的：</li>
-</ul>
-
-<pre><code class="language-objc">
-@property (nonatomic, getter=isOn) BOOL on;
-
-</code></pre>
-
-<ul>
-<li><p><strong>setter=<name></strong> 指定&quot;设置方法&quot;的方法名.(不太常见)</p>
-
-<p>通过上述特质，可以微调由编译器所合成的存取方法。不过需要注意：<font color=red>若是自己来实现这些存取方法，那么应该保证其具备相关属性所声明的特质</font>。比方说，如果将某个属性声明为<code>copy</code>，那么就应该在“设置方法”中拷贝相关对象，否则会误导该属性的使用者，而且，<br/>
-若是不遵从这一约定，还会令程序产生bug。</p></li>
-</ul>
-
-<p>如果想在其他方法里设置属性值，那么同样要遵守属性定义中所宣称的语义。例如，我们扩充一下前面提到的<code>EOCPerson</code>类。由于字符串值可能会改变，所以要把相关属性的“内存管理语义&quot;声明为<code>copy</code>。该类中新增了一个<strong>‘初始化方法’(initializer)</strong>,用于设置“名&quot;(first name)和“姓”（last name)的初始值：</p>
-
-<pre><code class="language-objc">
-@interface EOCPerson : NSManagedObject
-@property (copy) NSString *firstName;
-©property (copy) NSString *lastName;
-
-- (id)initWithFirstName: (NSString*)firstName
-                lastName:(NSString*)lastName;
-@end
-
-</code></pre>
-
-<p><strong><font color=red>在实现这个自定义的初始化方法时，一定要遵循属性定义中宣称的“copy”语义</font></strong>，因为“属性定义”就相当于“类”和“待设置的属性值”之间所达成的契约。初始化方法的实现代码可以这样写：</p>
-
-<pre><code class="language-objc">
-- (id)initWithFirstName: (NSString*) firstName
-                lastName:(NSString*)lastName
-{
-    if ((self = [super init])) {
-        _firstName = [firstName copy];
-         _lastName = [lastName copy];
-    }
-return self;
-}
-
-</code></pre>
-
-<p>这里也许会有疑问:为何不调用属性所对应的“设置方法”呢？如果用了“设置方法”的话，不是总能保证准确的语义吗？<font color=red>后面第7条学习中将会详细解释为什么决不应该在init(或dealloc)方法中调用存取方法</font>。</p>
-
-<p>要是看过第18条的话，你就会明白，应该尽量使用不可变的对象。如果将这一条套用到<code>EOCPerson</code>类身上，那就等于说，其两个属性都应该设为“只读”。用初始化方法设置好属性值之后，就不能再改变了。在本例中，仍需声明属性的“内存管理语义”。于是可以把属性的定义改成这样：</p>
-
-<pre><code class="language-objc">
-@property (copy, readonly) NSString *firstName;
-@property (copy, readonly) NSString *lastName;
-
-</code></pre>
-
-<p>由于是只读属性，所以编译器不会为其创建对应的“设置方法”，即便如此，我们还是要写上这些属性的语义，以此表明初始化方法在设置这些属性值时所用的方式。要是不写明语义的话，该类的调用者就不知道初始化方法里会拷贝这些属性，他们有可能会在调用初始化方法之前自行拷贝属性值。这种操作是多余而且低效的。</p>
-
-<p><code>atomic与nonatomic</code>的区别就是是否具有原子性,具备atomic特质的获取方法会通过锁定机制来确保其操作的原子性。避免两个进程同时访问同一属性时,读取到其它线程没有修改好的属性值.</p>
-
-<p>在ios开发中,其中所有属性都声明为ncmatomic。这样做的历史原因是：<font color=red>在iOS中使用同步锁的开销较大，这会带来性能问题。</font>一般情况下并不要求属性必须是“原子的”，因为这并不能保证“线程安全&quot;（thread safety),若要实现“线程安全”的操作，还需采用更为深层的锁定机制才行。</p>
-
-<h2 id="toc_2">要点:</h2>
-
-<ul>
-<li> 可以用<code>@property</code>语法来定义对象中所封装的数据。</li>
-<li> 通过“特质”来指定存储数据所需的正确语义。</li>
-<li> 在设置属性所对应的实例变量时，一定要遵从该属性所声明的语义。</li>
-<li> <font color=red>开发iOS程序时应该使用<code>nonatomic</code>属性，因为<code>atomic</code>属性会严重影响性能。</font></li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%BA%8C%E7%AB%A0%20%E5%AF%B9%E8%B1%A1,%E6%B6%88%E6%81%AF,%E8%BF%90%E8%A1%8C%E6%9C%9F.html'>第二章 对象,消息,运行期</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14986110416063.html">
-                
-                  <h1>Caffe模型</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">内存中的表示</a>
-</li>
-<li>
-<a href="#toc_1">磁盘上表示</a>
-</li>
-<li>
-<a href="#toc_2">Caffe Modal Zoo</a>
-</li>
-</ul>
-
-
-<p>我们之前学习过,一个完整的深度学习系统最核心的两个方面是<strong>数据</strong>和<strong>模型</strong>。今大我们 主要关注模型。一个深度学习模型通常由<strong>三部分</strong>参数组成：</p>
-
-<ul>
-<li>可学习参数（Leamable Parameter),又称可训练参数、神经网络权系数、权重，其数值<strong>由模型初始化参数、误差反向传播过程控制</strong>,一般不可人工干预.</li>
-<li>结构参数（Archetecture Parameter),包括<strong>卷积层/全连接层/下采样层数目、卷积核数目、 卷积核大小等描述网络结构的参数</strong>,一旦设定好,在网络训练阶段不能更改;值得注意的是,训练阶段网络结构参数和预测阶段结构参数很可能不同。</li>
-<li>训练超参数（Hyper-Parameter),用来控制网络训练收敛的参数，训练阶段可以自动或手动调节以获得更好的效果，预测阶段不需要该参数.</li>
-</ul>
-
-<p>在Caffe中，一个模型的三部分参数分别由<strong>不同模块定义和实现</strong>:</p>
-
-<ul>
-<li><strong>可学习参数</strong>在内存中使用Blob对象保持，必要时以二进制ProtoBuffer文件(*.caffemodel)形态序列化并存储于磁盘上，便于进一步微调（finetune,又称精调）、共享（例如参数服务器Parameter Server, PS)、性能评估（benchmark)。</li>
-<li><strong>结构参数</strong>使用ProtoBuffer文本格式（*.prototxt)描述，网络初始化时通过该描述文件构建Net对象、Layer对象形成有向无环图结构，在Layer与Layer之间、Net输入源和输出阱均为持有数据和中间结果的Blob对象。</li>
-<li><strong>训练超参数</strong>同样使用ProtoBuffer文本格式（*.prototxt)描述，训练阶段利用该描述文件构建求解器（Solver)对象，该对象按照一定规则在训练网络时自动调节这些超参数值。</li>
-</ul>
-
-<p>我们在MNIST例子中对LeNet-5模型稍微修改一下.变成逻辑回归（Logistic Regression, LR)分类器。<br/>
-<img src="media/14986110416063/14986122892113.jpg" alt=""/></p>
-
-<p>复制一份<code>examples/mnist/lenet_train_test.prototxt</code>,重命名为 <code>lenet_lr.prototxt</code>，修改内容如下:</p>
-
-<pre><code class="language-protobuf">
-name: &quot;LeNet&quot;
-layer {
-  name: &quot;mnist&quot;
-  type: &quot;Data&quot;
-  top: &quot;data&quot;
-  top: &quot;label&quot;
-  include {
-    phase: TRAIN
-  }
-  transform_param {
-    scale: 0.00390625
-  }
-  data_param {
-    source: &quot;examples/mnist/mnist_train_lmdb&quot;
-    batch_size: 64
-    backend: LMDB
-  }
-}
-layer {
-  name: &quot;mnist&quot;
-  type: &quot;Data&quot;
-  top: &quot;data&quot;
-  top: &quot;label&quot;
-  include {
-    phase: TEST
-  }
-  transform_param {
-    scale: 0.00390625
-  }
-  data_param {
-    source: &quot;examples/mnist/mnist_test_lmdb&quot;
-    batch_size: 100
-    backend: LMDB
-  }
-}
-layer {
-  name: &quot;ip&quot;
-  type: &quot;InnerProduct&quot;
-  bottom: &quot;data&quot;
-  top: &quot;ip&quot;
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  inner_product_param {
-    num_output: 20
-    weight_filler {
-      type: &quot;xavier&quot;
-    }
-    bias_filler {
-      type: &quot;constant&quot;
-    }
-  }
-}
-layer {
-  name: &quot;accuracy&quot;
-  type: &quot;Accuracy&quot;
-  bottom: &quot;ip&quot;
-  bottom: &quot;label&quot;
-  top: &quot;accuracy&quot;
-  include {
-    phase:TEST
-  }
-}
-layer {
-  name: &quot;loss&quot;
-  type: &quot;SoftmaxWithLoss&quot;
-  bottom: &quot;ip&quot;
-  bottom: &quot;label&quot;
-  top: &quot;loss&quot;
-}
-
-</code></pre>
-
-<p>复制一份<code>examples/mnist/lenet_solver.prototxt</code>，重命名为<code>lenet_lr_solver.prototxt</code>,修改内容<br/>
-如下:</p>
-
-<pre><code class="language-protobuf">
-# The train/test net protocol buffer definition
-net: &quot;examples/mnist/lenet_lr.prototxt&quot;
-# test_iter specifies how many forward passes the test should carry out.
-# In the case of MNIST, we have test batch size 100 and 100 test iterations,
-# covering the full 10,000 testing images.
-test_iter: 100
-# Carry out testing every 500 training iterations.
-test_interval: 500
-# The base learning rate, momentum and the weight decay of the network.
-base_lr: 0.01
-momentum: 0.9
-weight_decay: 0.0005
-# The learning rate policy
-lr_policy: &quot;inv&quot;
-gamma: 0.0001
-power: 0.75
-# Display every 100 iterations
-display: 100
-# The maximum number of iterations
-max_iter: 10000
-# snapshot intermediate results
-snapshot: 5000
-snapshot_prefix: &quot;examples/mnist/lenet&quot;
-# solver mode: CPU or GPU
-solver_mode: CPU
-
-</code></pre>
-
-<p>然后运行训练命令,在命令行输入:</p>
-
-<pre><code>./build/tools/caffe train --solver=examples/mnist/lenet_lr_solver.prototxt
-</code></pre>
-
-<p>但是发现报错了:<br/>
-<img src="media/14986110416063/14986154204478.jpg" alt=""/></p>
-
-<p>通过上述错误描述,发现是lmdb数据文件没有的问题....</p>
-
-<p>运行<code>./examples/mnist/create_mnist.sh</code>脚本,将之前下载过的数据转化成lmdb形式.中间的报错和解决如截图所示:</p>
-
-<p><img src="media/14986110416063/14986155733551.jpg" alt=""/></p>
-
-<p>我们成功获得到了lmdb文件.</p>
-
-<p>再次执行训练命令:</p>
-
-<pre><code>master) ✗ ./build/tools/caffe train --solver=examples/mnist/lenet_lr_solver.prototxt
-</code></pre>
-
-<p>然后就发现已经开始训练了.</p>
-
-<p>最后得到结果如图所示:<br/>
-<img src="media/14986110416063/14986195740444.jpg" alt=""/></p>
-
-<p>经过训练，可以获得在测试集上分类准确率为0.9908的模型。相比LeNet-5而言准确率降低了，这也符合直觉，因为将模型简化后参数变少，层数变少，网络表达能力变差。我们今天不关注准确率，只关注模型的表达方式。</p>
-
-<h2 id="toc_0">内存中的表示</h2>
-
-<p>从运行的log文件可以追踪模型是如何从prototxt描述变为内存中表示方式的,</p>
-
-<p>看到这行:</p>
-
-<pre><code>
- Creating training net from net file:
-examples/mnist/lenet_lr.prototxt
-
-// ...不要在意这些细节
-Initializing net from parameters:
-
-</code></pre>
-
-<p>追踪<code>solver.cpp</code>的第87行，看到如下代码：</p>
-
-<pre><code class="language-c++">
-//前面省略..
-//在solver.hpp 中声明了SolverParameterparam_
-//它是ProtoBuffer工具生成的结构体,用来解析lenet_lr_solver.prototxt
-if (param_.has_net()) {
-    LOG_IF(INFO, Caffe::root_solver()) //打印log
-        //这里param_.net()会返回examples/mnist/lenet_lr.prototxt 
-        &lt;&lt; &quot;Creating training net from net file: &quot; &lt;&lt; param_.net();
-    ReadNetParamsFromTextFileOrDie(param_.net(), &amp;net_param);
-  }
-  
-</code></pre>
-
-<h2 id="toc_1">磁盘上表示</h2>
-
-<p>Caffe使用ProtoBuffer二进制文件有最小文件尺寸，并由ProtoBuffer工具自动生成高效的序列化/反序列化接U口(多语言支持，包括C++、Java、Python)，以及可读性好、兼容二进制文件的文本格式.</p>
-
-<p>我们仍然从运行log查找线索:</p>
-
-<pre><code>Snapshotting to binary proto file
-examples/mn is t/lenet__iter_l 0000. caffemodel
-
-Snapshotting solver state to binary proto file examples/mnist/Xenet_iter_10000.solverstate
-
-</code></pre>
-
-<p>其中,<code>.caffemodel</code>文件是在特定训练间隙保存的二进制文件，包含当前网络各层的权值状态;而<code>.solverstate</code>是与<code>.caffemodel</code>一起产生的二进制文件，<strong>包含从上次停止点恢复训练模型所需的信息</strong>。我们具体看下列代码：</p>
-
-<p>追踪<code>solver.cpp</code>的第445行,上下文信息如下所示:</p>
-
-<pre><code class="language-c++">
-template &lt;typename Dtype&gt;
-string Solver&lt;Dtype&gt;::SnapshotToBinaryProto() {
-//得到模型文件名
-  string model_filename = SnapshotFilename(&quot;.caffemodel&quot;);
-  LOG(INFO) &lt;&lt; &quot;Snapshotting to binary proto file &quot; &lt;&lt; model_filename;
-  NetParameter net_param;
-  //将net_转换为Netparameter
-  net_-&gt;ToProto(&amp;net_param, param_.snapshot_diff());
-  ///写入 ProtoBuffer 二进制文件，这里是 lenet_iter_10000.caffemodel
-    WriteProtoToBinaryFile(net_param, model_filename);
-  return model_filename;
-}
-
-</code></pre>
-
-<p>追踪<code>sgd_solver.cpp</code>的259行:</p>
-
-<pre><code class="language-c++">
-template &lt;typename Dtype&gt;
-void SGDSolver&lt;Dtype&gt;::SnapshotSolverStateToBinaryProto(
-    const string&amp; model_filename) {
-  SolverState state;    //创建一个序列化对象
-  state.set_iter(this-&gt;iter_);  //记录当前的迭代次数
-  state.set_learned_net(model_filename); //记录网络描述文件
-  state.set_current_step(this-&gt;current_step_);  //记录当前步进值
-  state.clear_history();    //清空容器,准备接纳新内容
-  for (int i = 0; i &lt; history_.size(); ++i) {
-    // Add history 记录权值的历史信息
-    BlobProto* history_blob = state.add_history();
-    history_[i]-&gt;ToProto(history_blob);
-  }
-  string snapshot_filename = Solver&lt;Dtype&gt;::SnapshotFilename(&quot;.solverstate&quot;);
-  LOG(INFO)
-    &lt;&lt; &quot;Snapshotting solver state to binary proto file &quot; &lt;&lt; snapshot_filename;
-    //将SolverState对象写入二进制文件（*.solverstate)
-  WriteProtoToBinaryFile(state, snapshot_filename.c_str());
-}
-
-</code></pre>
-
-<p><strong>从磁盘上将模型、求解器状态文件载入内存的过程与上面代码刚好相反，我们可自行跟踪阅读。</strong></p>
-
-<h2 id="toc_2">Caffe Modal Zoo</h2>
-
-<p>对于前面我们运行的简单模型，可以从头训练（from scrash)。然而，对于规模更大、结构更复杂的模型，从头训练需耍解决两个问题：首先是硬件计算能力。模型训练十分消耗计算资源，使用普通计算机需要相当长的时间，不经济：而且世界上每个研究机构都从头训练，重复性工作太多，不环保。其次是调参能力。<strong>同样的模型设计，可能每个人训练结果都不一致，中间调参是项技术活，控制不当会引起训练发散或训练不充分，无法达到理想的分类效果</strong>。</p>
-
-<p>为了解决上述问题,<strong>Caffe Model Zoo</strong>则提供了一个分享模型的平台，世界各地的研究人员都可以把自己的训练成果共享给社区中更多的人使用，节省人力、物力。</p>
-
-<p><strong>今天我们也站在前人的肩膀上，运行一个基于已训练模型的图片分类例程</strong>。我们首先需要下载几个文件。</p>
-
-<p>下载meta数据到当前目录:</p>
-
-<pre><code>➜  caffe git:(master) ✗ cd data/ilsvrc12
-
-➜  ilsvrc12 git:(master) ✗ ./get_ilsvrc_aux.sh
-
-Downloading...
---2017-06-29 10:54:55--  http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz
-Resolving dl.caffe.berkeleyvision.org... 169.229.222.251
-Connecting to dl.caffe.berkeleyvision.org|169.229.222.251|:80... connected.
-HTTP request sent, awaiting response... 302 Found
-Location: http://202.114.49.110/cache/9/02/berkeleyvision.org/6b5ff42be9dd0690a814318a14401a7f/caffe_ilsvrc12.tar.gz [following]
---2017-06-29 10:54:56--  http://202.114.49.110/cache/9/02/berkeleyvision.org/6b5ff42be9dd0690a814318a14401a7f/caffe_ilsvrc12.tar.gz
-Connecting to 202.114.49.110:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 17858008 (17M) [application/octet-stream]
-Saving to: ‘caffe_ilsvrc12.tar.gz’
-
-caffe_ilsvrc12.tar. 100%[===================&gt;]  17.03M  9.67MB/s    in 1.8s
-
-2017-06-29 10:54:58 (9.67 MB/s) - ‘caffe_ilsvrc12.tar.gz’ saved [17858008/17858008]
-
-Unzipping...
-Done.
-
-</code></pre>
-
-<p>下载caffenet模型:</p>
-
-<pre><code>➜  ilsvrc12 git:(master) ✗ cd ../../models/bvlc_reference_caffenet
-
-➜  bvlc_reference_caffenet git:(master) ✗ wget http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
---2017-06-29 11:14:10--  http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
-Resolving dl.caffe.berkeleyvision.org... 169.229.222.251
-Connecting to dl.caffe.berkeleyvision.org|169.229.222.251|:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 243862418 (233M) [application/octet-stream]
-Saving to: ‘bvlc_reference_caffenet.caffemodel’
-
-bvlc_reference_caffen 100%[=========================&gt;] 232.56M   129KB/s    in 21m 50s
-
-2017-06-29 11:36:01 (182 KB/s) - ‘bvlc_reference_caffenet.caffemodel’ saved [243862418/243862418]
-
-</code></pre>
-
-<p>回到根目录执行:</p>
-
-<pre><code>
-➜  caffe git:(master) ✗ ./build/examples/cpp_classification/classification.bin \
-models/bvlc_reference_caffenet/deploy.prototxt \
-models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel \
-data/ilsvrc12/imagenet_mean.binaryproto \
-data/ilsvrc12/synset_words.txt \
-examples/images/cat.jpg
-
-
-</code></pre>
-
-<p>发现报错:<br/>
-<img src="media/14986110416063/14987195644285.jpg" alt=""/></p>
-
-<p>执行:</p>
-
-<pre><code>
-➜  caffe git:(master) ✗ install_name_tool -add_rpath &#39;/Users/liangzhonghao/anaconda2/lib&#39;  /usr/local/Cellar/caffe/./build/examples/cpp_classification/classification.bin
-
-</code></pre>
-
-<p>再次运行上面命令,得出结果:<br/>
-<img src="media/14986110416063/14987199347439.jpg" alt=""/></p>
-
-<p>命令行解释如下:</p>
-
-<pre><code class="language-c++">➜  caffe git:(master) ✗ ./build/examples/cpp_classification/classification.bin \        //二进制程序名
-models/bvlc_reference_caffenet/deploy.prototxt \    //模型描述文件
-models/bvlc_reference_caffenet/     bvlc_reference_caffenet.caffemodel \        //*.caffemodel模型权值文件
-data/ilsvrc12/imagenet_mean.binaryproto \       //图像均值文件
-data/ilsvrc12/synset_words.txt \    //图像类别标签信息
-examples/images/mouse.png   //输入待分类图像
-
-</code></pre>
-
-<p>打开输入图像<code>examples/images/cat.jpg</code>:</p>
-
-<p><img src="media/14986110416063/cat.jpg" alt="cat"/></p>
-
-<p>命令行输出的预测结果为:</p>
-
-<p><img src="media/14986110416063/14987205986830.jpg" alt=""/></p>
-
-<p>可见给出了5个预测结果，按照概率分布从高到低的顺序排列。这种预测结果称为<code>Top-5</code>预测结果，对当前样本而言，分类准确率为5项之和。除<code>Top-5</code>预测结果之外，还有<code>Top-3、 Top-1等</code>预测结果，对当前样木的分类正确率分别为0.6749、0.3134。</p>
-
-<p>分类准确率不仅与验证数据集有关，与模型的关系也非常密切。我们在<code>Caffe Model Zoo</code>上找到几个模型在ILSVRC 2012验证数据集上的分类效果，如图所示。<br/>
-<img src="media/14986110416063/14987207716731.jpg" alt=""/></p>
-
-<p>可见单模型<strong>分类性能最好的是BVLC GoogLeNet</strong>。</p>
-
-<p>通过掌握上面的内容，并学习其他更多深度学习模型的设计和训练方法.</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Caffe%E6%A8%A1%E5%9E%8B.html'>Caffe模型</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14985505390356.html">
-                
-                  <h1>使用SQLite</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>SQLite是一种嵌入式数据库，它的数据库就是一个文件。由于SQLite本身是C写的，而且体积很小，所以，经常被集成到各种应用程序中，甚至在iOS和Android的App中都可以集成。</p>
-
-<p>Python就内置了SQLite3，所以，在Python中使用SQLite，不需要安装任何东西，直接使用。</p>
-
-<p>在使用SQLite前，我们先要搞清楚几个概念：</p>
-
-<ol>
-<li><p>表是数据库中存放关系数据的集合，一个数据库里面通常都包含多个表，比如学生的表，班级的表，学校的表，等等。表和表之间通过外键关联。</p></li>
-<li><p>要操作关系数据库，首先需要连接到数据库，一个数据库连接称为Connection；</p></li>
-<li><p>连接到数据库后，需要打开游标，称之为Cursor，通过Cursor执行SQL语句，然后，获得执行结果。</p></li>
-<li><p>Python定义了一套操作数据库的API接口，任何数据库要连接到Python，只需要提供符合Python标准的数据库驱动即可。</p></li>
-</ol>
-
-<p>由于SQLite的驱动内置在Python标准库中，所以我们可以直接来操作SQLite数据库。</p>
-
-<p>我们在Python交互式命令行实践一下：</p>
-
-<pre><code class="language-python">
-# 导入SQLite驱动:
-&gt;&gt;&gt; import sqlite3
-
-# 连接到SQLite数据库
-# 数据库文件是test.db
-# 如果文件不存在，会自动在当前目录创建:
-&gt;&gt;&gt; conn = sqlite3.connect(&#39;test.db&#39;)
-# 创建一个Cursor:
-&gt;&gt;&gt; cursor = conn.cursor()
-# 执行一条SQL语句，创建user表:
-&gt;&gt;&gt; cursor.execute(&#39;create table user (id varchar(20) primary key, name varchar(20))&#39;)
-&lt;sqlite3.Cursor object at 0x104082490&gt;
-# 继续执行一条SQL语句，插入一条记录:
-&gt;&gt;&gt; cursor.execute(&#39;insert into user (id, name) values (\&#39;1\&#39; , \&#39;Michale\&#39;)&#39;)
-&lt;sqlite3.Cursor object at 0x104082490&gt;
-# 通过rowcount获得插入的行数:
-&gt;&gt;&gt; cursor.rowcount
-1
-# 关闭Cursor:
-&gt;&gt;&gt; cursor.close()
-# 提交事务:
-&gt;&gt;&gt; conn.commit()
-# 关闭Connection:
-&gt;&gt;&gt; conn.close()
-
-</code></pre>
-
-<p>创建和插入表数据后,我们来查询:</p>
-
-<pre><code class="language-python">
-&gt;&gt;&gt; conn = sqlite3.connect(&#39;test.db&#39;)
-&gt;&gt;&gt; cursor = conn.cursor()
-# 执行查询语句:
-&gt;&gt;&gt; cursor.execute(&#39;select * from user where id = ? &#39;, (&#39;1&#39;,))
-&lt;sqlite3.Cursor object at 0x104082500&gt;
-# 获得查询结果集:
-&gt;&gt;&gt; values = cursor.fetchall()
-&gt;&gt;&gt; values
-[(u&#39;1&#39;, u&#39;Michale&#39;)]
-&gt;&gt;&gt; cursor.close()
-&gt;&gt;&gt; conn.close()
-</code></pre>
-
-<p><font color=red><strong>注意事项</strong></font></p>
-
-<ol>
-<li><p>使用Python的DB-API时，只要搞清楚Connection和Cursor对象，打开后一定记得关闭，就可以放心地使用。</p></li>
-<li><p>使用Cursor对象执行<code>insert</code>，<code>update</code>，<code>delete</code>语句时，执行结果由<code>rowcount</code>返回影响的行数，就可以拿到执行结果。</p></li>
-<li><p>使用Cursor对象执行<code>select</code>语句时，通过<code>featchall()</code>可以拿到结果集。结果集是一个<code>list</code>，每个元素都是一个<code>tuple</code>，对应一行记录。</p></li>
-<li><p>如果SQL语句带有参数，那么需要把参数按照位置传递给<code>execute()</code>方法，有几个<code>?</code>占位符就必须对应几个参数，例如：</p></li>
-</ol>
-
-<pre><code class="language-py">
-cursor.execute(&#39;select * from user where name=? and pwd=?&#39;, (&#39;abc&#39;, &#39;123456&#39;))
-
-</code></pre>
-
-<p>SQLite支持常见的标准SQL语句以及几种常见的数据类型。具体文档请参阅SQLite官方网站。</p>
-
-<h2 id="toc_0">小结</h2>
-
-<p>在Python中操作数据库时，要先导入数据库对应的驱动，然后，通过Connection对象和Cursor对象操作数据。</p>
-
-<p>要确保打开的Connection对象和Cursor对象都正确地被关闭，否则，资源就会泄露。</p>
-
-<p>如何才能确保出错的情况下也关闭掉Connection对象和Cursor对象呢？请回忆<code>try:...except:...finally:...</code>的用法。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
           				   
                   </div>
                   <div class="more-right right">
@@ -1672,31 +1446,31 @@ cursor.execute(&#39;select * from user where name=? and pwd=?&#39;, (&#39;abc&#3
 	      
 		      
 			      <li class="post">
-			        <a href="15162636130743.html">First Missing Positive</a>
+			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162583169716.html">Find the Duplicate Number</a>
+			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162440984880.html">Set Mismatch</a>
+			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162401864030.html">Find Anagram Mappings</a>
+			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162389890253.html">Length of Last Word</a>
+			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

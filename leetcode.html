@@ -117,6 +117,280 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15166061069994.html">
+                
+                  <h1>Longest Word in Dictionary through Deleting</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15166061069994/15166062200635.jpg" alt=""/></p>
+
+<p><strong>比较字符的大小时，若字符串a的首字符大于b的首字符则a比较大，不对后续字符进行判断。</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string findLongestWord(string s, vector&lt;string&gt;&amp; d) {
+            string ans;
+            for (int i = 0; i &lt; d.size(); i++) {
+                int pi = 0, pj = 0;
+                for (; pi &lt; s.size() &amp;&amp; pj &lt; d[i].size(); pi++) {
+                    pj += s[pi] == d[i][pj];
+                }
+                if (pj == d[i].size() &amp;&amp; (ans.size() &lt; d[i].size() || (ans.size() == d[i].size() &amp;&amp; ans &gt; d[i])))
+                    ans = d[i];
+            }
+            return ans;
+        }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15165851014842.html">
+                
+                  <h1>Longest Word in Dictionary</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15165851014842/15165851083732.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string longestWord(vector&lt;string&gt;&amp; words) {
+        sort(words.begin(), words.end());  //对字符串排好序，按照字符的ascll编码，匹配字典的排序
+        unordered_set&lt;string&gt; set;
+        string res = &quot;&quot;;
+        for (int i = 0 ; i&lt;words.size(); i++) {
+            if (words[i].size()==1||set.count(words[i].substr(0,words[i].size()-1))) {
+                res = words[i].size()&gt;res.size() ? words[i]:res;
+                set.insert(words[i]);
+            }
+        }
+
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/22</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15164332920131.html">
+                
+                  <h1>Maximum Length of Repeated Subarray</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15164332920131/15164336142430.jpg" alt=""/></p>
+
+<p>运用了动态规划，从A的尾部，来遍历B。</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findLength(vector&lt;int&gt;&amp; A, vector&lt;int&gt;&amp; B) {
+        int m = A.size(), n = B.size();
+        if (!m||!n) {
+            return 0;
+        }
+        vector&lt;int&gt; dp(n+1); //要比B的长度多一位，在下面j=为n-1时需要获取dp[j+1]的值
+        int res = 0;
+        for (int i = m-1; i&gt;=0; i--) {
+            for (int j = 0; j&lt;n; j++) {
+                dp[j] = A[i]==B[j] ? dp[j+1]+1 : 0;
+                res = max(res, dp[j]);
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15164320874129.html">
+                
+                  <h1>Largest Number At Least Twice of Others</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15164320874129/15164320973707.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int dominantIndex(vector&lt;int&gt;&amp; nums) {
+        int max = 0, tmp = 0,index = 0;
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if(nums[i]&gt;=max) {
+                tmp = max;
+                max = nums[i];
+                index = i;
+            }else if (nums[i]&gt;tmp){
+                tmp = nums[i];
+            }
+            if (i==nums.size()-1 &amp;&amp; tmp*2&lt;=max) return index;
+        }
+        return -1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15163372118775.html">
+                
+                  <h1>Reverse Linked List</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15163372118775/15163372241677.jpg" alt=""/></p>
+
+<p>迭代法:</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        ListNode* pre = NULL;
+        while (head) {
+            ListNode* next = head -&gt; next;
+            head -&gt; next = pre;
+            pre = head;
+            head = next;
+        } 
+        return pre;
+    }
+};
+</code></pre>
+
+<p>递归法：</p>
+
+<pre><code class="language-objc">class Solution {
+public:   
+    ListNode* reverseList(ListNode* head) {
+        if (!head || !(head -&gt; next)) return head;
+        ListNode* node = reverseList(head -&gt; next);
+        head -&gt; next -&gt; next = head;
+        head -&gt; next = NULL;
+        return node; 
+    }
+}; 
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15162636130743.html">
                 
                   <h1>First Missing Positive</h1>
@@ -126,7 +400,7 @@
                         
                         	<p><img src="media/15162636130743/15162636149442.jpg" alt=""/></p>
 
-<pre><code class="language-objc">class Solution {
+<pre><code class="language-c++">class Solution {
 public:
     int firstMissingPositive(vector&lt;int&gt;&amp; nums) {
         unordered_map&lt;int, int&gt; map;
@@ -164,279 +438,6 @@ public:
                   <div class="more-left left">
                   
                     <span class="date">2018/1/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15162583169716.html">
-                
-                  <h1>Find the Duplicate Number</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15162583169716/15162583183298.jpg" alt=""/></p>
-
-<pre><code class="language-objc">class Solution {
-public:
-    int findDuplicate(vector&lt;int&gt;&amp; nums) {
-        unordered_map&lt;int, int&gt; map;
-        int res = 0;
-        for (int i = 0; i&lt;nums.size(); i++) {
-            if (map[nums[i]]==0) {
-                map[nums[i]]++;
-            }else{
-                res = nums[i];
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2018/1/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15162440984880.html">
-                
-                  <h1>Set Mismatch</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15162440984880/15162441100081.jpg" alt=""/></p>
-
-<pre><code class="language-objc">class Solution {
-public:
-    vector&lt;int&gt; findErrorNums(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size();
-        vector&lt;int&gt; res;
-        vector&lt;int&gt; a(len+1);   //因为数组从0开始，所以除去0，在后面加上1位
-
-        for (int i = 0; i&lt;len; i++) {
-            if (a[nums[i]]==0) {
-                a[nums[i]]+=1;
-            }else{
-                res.push_back(nums[i]);
-            }
-        }
-
-        for (int j = 1; j&lt;=len; j++) {
-            if (a[j]==0) {
-                res.push_back(j);
-            }
-        }
-
-        return res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2018/1/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15162401864030.html">
-                
-                  <h1>Find Anagram Mappings</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15162401864030/15162401885331.jpg" alt=""/></p>
-
-<pre><code class="language-objc">class Solution {
-public:
-    vector&lt;int&gt; anagramMappings(vector&lt;int&gt;&amp; A, vector&lt;int&gt;&amp; B) {
-        unordered_map&lt;int, int&gt; map;
-        vector&lt;int&gt; res;
-        for (int i = 0; i&lt;B.size(); i++) {
-            map[B[i]]=i;
-        }
-        for (int j = 0; j&lt;A.size(); j++) {
-            res.push_back(map[A[j]]);
-        }
-        return res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2018/1/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15162389890253.html">
-                
-                  <h1>Length of Last Word</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<pre><code>![](media/15162389890253/15162389958774.jpg)
-</code></pre>
-
-<pre><code class="language-objc">class Solution {
-public:
-    int lengthOfLastWord(string s) {
-        int len = s.size();
-        int cout = 0;
-        for (int i=len-1; i&gt;=0; i--) {
-            if(cout&gt;0&amp;&amp;s[i]==&#39; &#39;) break;
-
-            if (s[i]==&#39; &#39;) {
-                continue;
-            }else{
-                cout++;
-            }
-
-        }
-        return cout;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2018/1/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15139334894228.html">
-                
-                  <h1> Longest Univalue Path</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15139334894228/15139334918786.jpg" alt=""/></p>
-
-<pre><code class="language-c++">/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
-class Solution {
-public:
-    int dfs(TreeNode* node, int&amp; lup) {
-        int l = node-&gt;left ? dfs(node-&gt;left, lup) : 0;
-        int r = node-&gt;right ? dfs(node-&gt;right, lup) : 0;
-        int resl = node-&gt;left &amp;&amp; node-&gt;left-&gt;val == node-&gt;val ? l + 1 : 0;
-        int resr = node-&gt;right &amp;&amp; node-&gt;right-&gt;val == node-&gt;val ? r + 1 : 0;
-        lup = max(lup, resl + resr);
-        return max(resl, resr);
-    }
-
-    int longestUnivaluePath(TreeNode* root) {
-        int lup = 0;
-        if (root) dfs(root, lup);
-        return lup;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/22</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -541,31 +542,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15162636130743.html">First Missing Positive</a>
+			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162583169716.html">Find the Duplicate Number</a>
+			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162440984880.html">Set Mismatch</a>
+			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162401864030.html">Find Anagram Mappings</a>
+			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162389890253.html">Length of Last Word</a>
+			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

@@ -117,30 +117,158 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15128043838038.html">
+                <a class="clearlink" href="15129738955534.html">
                 
-                  <h1>Valid Anagram</h1>
+                  <h1>Beauty Contest（旋转卡壳）</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15128043838038/15128043943990.jpg" alt=""/></p>
+                        	<p>Description<br/>
+Bessie, Farmer John&#39;s prize cow, has just won first place in a bovine beauty contest, earning the title &#39;Miss Cow World&#39;. As a result, Bessie will make a tour of N (2 &lt;= N &lt;= 50,000) farms around the world in order to spread goodwill between farmers and their cows. For simplicity, the world will be represented as a two-dimensional plane, where each farm is located at a pair of integer coordinates (x,y), each having a value in the range -10,000 ... 10,000. No two farms share the same pair of coordinates.</p>
 
-<pre><code class="language-c++">class Solution {
-public:
-    bool isAnagram(string s, string t) {
-        if (s.length() != t.length()) return false;
-        unordered_map&lt;char, int&gt; map;
-        for (int i =0; i&lt;s.length(); i++) {
-            map[s[i]]++;
-            map[t[i]]--;
-        }
-        for(auto s:map){
-            if(s.second&lt;0) return 0;
-        }
-        return 1;
-    }
-};
+<p>Even though Bessie travels directly in a straight line between pairs of farms, the distance between some farms can be quite large, so she wants to bring a suitcase full of hay with her so she has enough food to eat on each leg of her journey. Since Bessie refills her suitcase at every farm she visits, she wants to determine the maximum possible distance she might need to travel so she knows the size of suitcase she must bring.Help Bessie by computing the maximum distance among all pairs of farms.</p>
+
+<p>Input<br/>
+ Line 1: A single integer, N</p>
+
+<p>Lines 2..N+1: Two space-separated integers x and y specifying coordinate of each farm</p>
+
+<p>Output<br/>
+Line 1: A single integer that is the squared distance between the pair of farms that are farthest apart from each other.</p>
+
+<p>Sample Input</p>
+
+<p>4<br/>
+0 0<br/>
+0 1<br/>
+1 1<br/>
+1 0</p>
+
+<p>Sample Output</p>
+
+<p>2</p>
+
+<h2 id="toc_0">算法思想</h2>
+
+<h3 id="toc_1">流程：</h3>
+
+<ol>
+<li><p>求凸包：最远点对一定在凸包上（可以反证法证之），所以找出凸包后在其上找最远点对就可以少考虑很多点。求凸包可用<code>andrew</code>算法，它是基于<code>graham</code>算法，且更快更稳定。不同于<code>graham</code>算法的逆时针排序，<code>andrew</code>算法采用了点的水平排序，然后分别求下凸包以及上凸包，这样下来整个的凸包便求好了。而且该算法可以解决凸包中有重合点、共线点等问题<img src="media/15129738955534/15129741482264.jpg" alt=""/></p></li>
+<li><p>旋转卡壳<br/>
+就是两个平行线正好把凸包卡住，其中卡着的点称为对踵点对.<br/>
+<img src="media/15129738955534/15129741907694.jpg" alt=""/></p></li>
+</ol>
+
+<p>那么怎么才能找到最远点对呢？<br/>
+<img src="media/15129738955534/15129742545712.jpg" alt=""/></p>
+
+<p>对于上图中的6个三角形的公共底边，可知当三角形的顶点在凸包上按逆时针旋转时，三角形的面积先由小变大再由大变小，即成单峰函数变化。所以在峰值时对应的凸包顶点距底边对应的两个对踵点的距离比其他情况大，这样，枚举每一个边并找到其面积单峰函数峰值对应的顶点，同时更新最大距离，旋转一趟下来便可以得到最后的结果。求面积单峰函数的峰值也很简单，就是通过叉积比较两个三角形的大小，当后者的面积比前者小时便找到了峰值，然后求距离更新最大值即可。</p>
+
+<pre><code class="language-c++">    #include &lt;cstdio&gt;  
+    #include &lt;vector&gt;  
+    #include &lt;algorithm&gt;  
+    #include &lt;cstring&gt;  
+    using namespace std;  
+    const int maxn = 50000 + 10;  
+    typedef int type_xy;  
+      
+    struct P  
+    {  
+        type_xy x, y;  
+        P() {}  
+        P(type_xy x, type_xy y) : x(x), y(y) {}  
+        P operator + (P p){ return P(x + p.x, y + p.y); }  
+        P operator - (P p){ return P(x - p.x, y - p.y); }  
+        P operator * (type_xy d){ return P(x*d, y*d); }  
+        bool operator &lt; (const P&amp; a) const  
+        {  
+            if (x != a.x) return x &lt; a.x;  
+            else return y &lt; a.y;  
+        }  
+        type_xy dot(P p) { return x*p.x + y*p.y; }  
+        type_xy det(P p) { return x*p.y - y*p.x; }  
+    };  
+      
+    int N;  
+    P ps[maxn];  
+      
+    //字典序比较  
+    bool cmp_x(const P&amp; p, const P&amp; q)  
+    {  
+        if (p.x != q.x)  
+            return p.x &lt; q.x;  
+        return p.y &lt; q.y;  
+    }  
+      
+    //求凸包  
+    vector&lt;P&gt; convex_hull(P* ps, int n)  
+    {  
+        sort(ps, ps + n, cmp_x);  
+        int k = 0;          //凸包的顶点数  
+        vector&lt;P&gt; qs(n * 2);        //构造中的凸包  
+        //构造凸包的下侧  
+        for (int i = 0; i &lt; n; i++){  
+            while (k &gt; 1 &amp;&amp; (qs[k - 1] - qs[k - 2]).det(ps[i] - qs[k - 1]) &lt;= 0)  
+                k--;  
+            qs[k++] = ps[i];  
+        }  
+        //构造凸包的上侧  
+        for (int i = n - 2, t = k; i &gt;= 0; i--){  
+            while (k &gt; t &amp;&amp; (qs[k - 1] - qs[k - 2]).det(ps[i] - qs[k - 1]) &lt;= 0)  
+                k--;  
+            qs[k++] = ps[i];  
+        }  
+        qs.resize(k - 1);  
+        return qs;  
+    }  
+      
+    //距离的平方  
+    double dist(P p, P q)  
+    {  
+        return (p - q).dot(p - q);  
+    }  
+      
+      
+    void solve()  
+    {  
+        vector&lt;P&gt; qs = convex_hull(ps, N);  
+        int n = qs.size();  
+        if (n == 2){         //特别处理凸包退化的情况  
+            printf(&quot;%.0f\n&quot;, dist(qs[0], qs[1]));  
+            return;  
+        }  
+        int i = 0, j = 0;           //某个方向上的对踵点对  
+        //求出x轴方向上的对踵点对  
+        for (int k = 0; k &lt; n; k++){  
+            if (!cmp_x(qs[i], qs[k]))  
+                i = k;  
+            if (cmp_x(qs[j], qs[k]))  
+                j = k;  
+        }  
+        double res = 0;  
+        int si = i, sj = j;  
+        while (i != sj || j != si){     //将方向逐步旋转180度  
+            res = max(res, dist(qs[i], qs[j]));  
+            //判断先转到边i-(i+1)的法线方向还是边j-(j+1)的法线方向  
+            if ((qs[(i + 1) % n] - qs[i]).det(qs[(j + 1) % n] - qs[j]) &lt; 0)  
+                i = (i + 1) % n;        //先转到边i-(i+1)的法线方向  
+            else  
+                j = (j + 1) % n;        //先转到边j-(j+1)的法线方向  
+        }  
+        printf(&quot;%.0f\n&quot;, res);  
+    }  
+      
+    int main()  
+    {  
+        while (scanf(&quot;%d&quot;, &amp;N) != EOF){  
+            for (int i = 0; i &lt; N; i++){  
+                scanf(&quot;%d%d&quot;, &amp;ps[i].x, &amp;ps[i].y);  
+            }  
+            solve();  
+        }  
+        return 0;  
+    }  
 </code></pre>
 
                         
@@ -150,7 +278,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/9</span>
+                    <span class="date">2017/12/11</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -167,27 +295,24 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15128026901484.html">
+                <a class="clearlink" href="15129633578167.html">
                 
-                  <h1>Assign Cookies</h1>
+                  <h1>Excel Sheet Column Title</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15128026901484/15128027017206.jpg" alt=""/></p>
+                        	<p><img src="media/15129633578167/15129633692969.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    int findContentChildren(vector&lt;int&gt;&amp; g, vector&lt;int&gt;&amp; s) {
-        sort(g.begin(), g.end());
-        sort(s.begin(), s.end());
-        int logG=0;
-        for (int i=0; i&lt;s.size(); i++) {
-            if (g[logG]&lt;=s[i]&amp;&amp;logG&lt;g.size()) {
-                logG++;
-            }
+    string convertToTitle(int n) {
+        string res = &quot;&quot;;
+        while (n!=0) {
+            res = char(&#39;A&#39;+(--n)%26)+res;
+            n=n/26;
         }
-        return logG;
+        return res;
     }
 };
 </code></pre>
@@ -199,7 +324,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/9</span>
+                    <span class="date">2017/12/11</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -216,26 +341,23 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15128009688279.html">
+                <a class="clearlink" href="15129586256568.html">
                 
-                  <h1>Ransom Note</h1>
+                  <h1>Excel Sheet Column Number</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15128009688279/15128009813033.jpg" alt=""/></p>
+                        	<p><img src="media/15129586256568/15129586339253.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    bool canConstruct(string ransomNote, string magazine) {
-        unordered_map&lt;char, int&gt; map;
-        for (int i = 0; i&lt;magazine.length(); i++) {
-            map[magazine[i]]++;
+    int titleToNumber(string s) {
+        int res = 0;
+        for (int i=0; i&lt;s.length(); i++) {
+            res = res * 26 + (s[i] - &#39;A&#39; + 1);
         }
-        for (int j = 0; j&lt;ransomNote.length(); j++) {
-            if(--map[ransomNote[j]]&lt;0) return 0;
-        }
-        return 1;
+        return res;
     }
 };
 </code></pre>
@@ -247,7 +369,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/9</span>
+                    <span class="date">2017/12/11</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -264,24 +386,44 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15127898937133.html">
+                <a class="clearlink" href="15129573661731.html">
                 
-                  <h1>Reverse String II</h1>
+                  <h1>Flood Fill</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15127898937133/15127899074799.jpg" alt=""/></p>
-
-<p>运用内置的<code>reverse</code>函数</p>
+                        	<p><img src="media/15129573661731/15129573748798.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    string reverseStr(string s, int k) {
-        for (int i = 0; i&lt;s.length(); i+=2*k) {
-            reverse(s.begin()+i, min(s.begin()+i+k, s.end()));
+    void fillColor(vector&lt;vector&lt;int&gt;&gt;&amp; image,int sr, int sc ,int tmp){
+        if (sr&gt;0&amp;&amp;image[sr-1][sc]==tmp) {
+            image[sr-1][sc]=image[sr][sc];
+            fillColor(image, sr-1, sc, tmp);
         }
-        return s;
+        if (sr&lt;image.size()-1&amp;&amp;image[sr+1][sc]==tmp) {
+            image[sr+1][sc]=image[sr][sc];
+            fillColor(image, sr+1, sc, tmp);
+        }
+        if (sc&gt;0&amp;&amp;image[sr][sc-1]==tmp) {
+            image[sr][sc-1]=image[sr][sc];
+            fillColor(image, sr, sc-1, tmp);
+        }
+        if (sc&lt;image[0].size()-1&amp;&amp;image[sr][sc+1]==tmp) {
+            image[sr][sc+1]=image[sr][sc];
+            fillColor(image, sr, sc+1, tmp);
+        }
+    }
+
+    vector&lt;vector&lt;int&gt;&gt; floodFill(vector&lt;vector&lt;int&gt;&gt;&amp; image, int sr, int sc, int newColor) {
+        int tmp = image[sr][sc];
+        if (tmp == newColor) {
+            return image;
+        }
+        image[sr][sc] = newColor;
+        fillColor(image, sr, sc, tmp);
+        return image;
     }
 };
 </code></pre>
@@ -293,7 +435,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/9</span>
+                    <span class="date">2017/12/11</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -310,24 +452,21 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15127884486398.html">
+                <a class="clearlink" href="15129554975886.html">
                 
-                  <h1>Base 7</h1>
+                  <h1>Construct the Rectangle</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15127884486398/15127884572899.jpg" alt=""/></p>
+                        	<p><img src="media/15129554975886/15129555123983.jpg" alt=""/></p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    string convertToBase7(int num) {
-        int x = abs(num); string res;
-        do {
-          res = to_string(x%7)+res;
-        } while (x/=7);
-        
-        return (num&gt;=0? &quot;&quot; : &quot;-&quot;) + res;
+    vector&lt;int&gt; constructRectangle(int area) {
+        for(int mid = sqrt(area); mid&gt;0; mid--)
+            if (!(area%mid))
+                return {area/mid, mid};
     }
 };
 </code></pre>
@@ -339,7 +478,7 @@ public:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/12/9</span>
+                    <span class="date">2017/12/11</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
@@ -356,71 +495,38 @@ public:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15127864249320.html">
+                <a class="clearlink" href="15128072112005.html">
                 
-                  <h1>License Key Formatting</h1>
+                  <h1>Relative Ranks</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15127864249320/15127864500019.jpg" alt=""/></p>
+                        	<p>Given scores of <strong>N</strong> athletes, find their relative ranks and the people with the top three highest scores, who will be awarded medals: &quot;Gold Medal&quot;, &quot;Silver Medal&quot; and &quot;Bronze Medal&quot;.</p>
 
-<p>第一版：</p>
+<p><img src="media/15128072112005/15128073582183.jpg" alt=""/></p>
 
-<pre><code class="language-c++">    int log = 0;
-    string ele=&quot;&quot;;
-    string re=&quot;&quot;;
-    for (int i = S.length()-1; i&gt;=0; i--) {
-        if (S[i]!=&#39;-&#39;) {
-            log++;
-            S[i]=toupper(S[i]);
-            ele = S[i]+ele;
-        }
-        if (log==K||i==0) {
-            if (i==0) {
-                re = ele+re;
-            }else{
-                re = &#39;-&#39;+ele+re;
-            }
-            log = 0;
-            ele = &quot;&quot;;
-        }
-    }
-    return re[0]==&#39;-&#39;?re.substr(1,re.length()-1):re;
-</code></pre>
-
-<p>第二版：运用栈</p>
+<p><code>pair</code>的用法和优先队列的使用</p>
 
 <pre><code class="language-c++">class Solution {
 public:
-    string licenseKeyFormatting(string S, int K) {
-        stack&lt;string&gt; st;
-        string line;
-        for(int i=S.length()-1;i&gt;=0;i--){
-            if(S[i]==&#39;-&#39;) continue;
-            
-            if(line.length()&lt;K){
-                if(S[i]&gt;=&#39;a&#39; &amp;&amp; S[i]&lt;=&#39;z&#39;) line.insert(0, 1, S[i]-&#39;a&#39;+&#39;A&#39;);
-                else line.insert(0, 1, S[i]);
-                
-                if(line.length()==K){
-                    st.push(line);
-                    line=&quot;&quot;;
-                }
-            }
+    vector&lt;string&gt; findRelativeRanks(vector&lt;int&gt;&amp; nums) {
+        priority_queue&lt;pair&lt;int,int&gt; &gt; pq;
+        for(int i=0;i&lt;nums.size();i++)
+        {
+            pq.push(make_pair(nums[i],i));
         }
-        if(st.empty()) return line;
-        
-        if(line.length() == 0){
-            line += st.top();
-            st.pop();
+        vector&lt;string&gt; res(nums.size(),&quot;&quot;);
+        int count = 1;
+        for(int i=0; i&lt;nums.size();i++)
+        {
+            if(count==1) {res[pq.top().second] = &quot;Gold Medal&quot;; count++;}
+            else if(count==2) {res[pq.top().second] = &quot;Silver Medal&quot;; count++;}
+            else if(count==3) {res[pq.top().second] = &quot;Bronze Medal&quot;; count++;}
+            else {res[pq.top().second] = to_string(count); count++;}
+            pq.pop();
         }
-        while(!st.empty()){
-            line+=&#39;-&#39;;
-            line+=st.top();
-            st.pop();
-        }
-        return line;
+        return res;
     }
 };
 </code></pre>
@@ -537,31 +643,31 @@ public:
 	      
 		      
 			      <li class="post">
-			        <a href="15162636130743.html">First Missing Positive</a>
+			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162583169716.html">Find the Duplicate Number</a>
+			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162440984880.html">Set Mismatch</a>
+			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162401864030.html">Find Anagram Mappings</a>
+			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15162389890253.html">Length of Last Word</a>
+			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  
