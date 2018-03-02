@@ -117,6 +117,122 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15164320874129.html">
+                
+                  <h1>Largest Number At Least Twice of Others</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15164320874129/15164320973707.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int dominantIndex(vector&lt;int&gt;&amp; nums) {
+        int max = 0, tmp = 0,index = 0;
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if(nums[i]&gt;=max) {
+                tmp = max;
+                max = nums[i];
+                index = i;
+            }else if (nums[i]&gt;tmp){
+                tmp = nums[i];
+            }
+            if (i==nums.size()-1 &amp;&amp; tmp*2&lt;=max) return index;
+        }
+        return -1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15163372118775.html">
+                
+                  <h1>Reverse Linked List</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15163372118775/15163372241677.jpg" alt=""/></p>
+
+<p>迭代法:</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        ListNode* pre = NULL;
+        while (head) {
+            ListNode* next = head -&gt; next;
+            head -&gt; next = pre;
+            pre = head;
+            head = next;
+        } 
+        return pre;
+    }
+};
+</code></pre>
+
+<p>递归法：</p>
+
+<pre><code class="language-objc">class Solution {
+public:   
+    ListNode* reverseList(ListNode* head) {
+        if (!head || !(head -&gt; next)) return head;
+        ListNode* node = reverseList(head -&gt; next);
+        head -&gt; next -&gt; next = head;
+        head -&gt; next = NULL;
+        return node; 
+    }
+}; 
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15162636130743.html">
                 
                   <h1>First Missing Positive</h1>
@@ -337,130 +453,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15162389890253.html">
-                
-                  <h1>Length of Last Word</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<pre><code>![](media/15162389890253/15162389958774.jpg)
-</code></pre>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int lengthOfLastWord(string s) {
-        int len = s.size();
-        int cout = 0;
-        for (int i=len-1; i&gt;=0; i--) {
-            if(cout&gt;0&amp;&amp;s[i]==&#39; &#39;) break;
-
-            if (s[i]==&#39; &#39;) {
-                continue;
-            }else{
-                cout++;
-            }
-
-        }
-        return cout;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2018/1/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15155525710565.html">
-                
-                  <h1>Find matching parenthesis</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15155525710565/15155525754064.jpg" alt=""/><br/>
-<img src="media/15155525710565/15155525919147.jpg" alt=""/></p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-int findParenMatch(NSString *s, int n) {
-    int res = -1;
-    NSString *tmp = [s substringWithRange:NSMakeRange(n, 1)];
-    if ([tmp isEqualToString:@&quot;(&quot;]) {
-        int logF = 0;
-        for (int i = n+1; i&lt;s.length; i++) {
-            NSString *tmpStrF = [s substringWithRange:NSMakeRange(i, 1)];
-            if ([tmpStrF isEqualToString:@&quot;(&quot;]) logF++;
-            if ([tmpStrF isEqualToString:@&quot;)&quot;]) {
-                logF--;
-                if (logF&lt;0) {
-                    res = i;
-                    break;
-                }
-            }
-        }
-    }else if ([tmp isEqualToString:@&quot;)&quot;]){
-        int logB = 0;
-        for (int i = n-1; i&gt;=0; i--) {
-            NSString *tmpStrB = [s substringWithRange:NSMakeRange(i, 1)];
-            if ([tmpStrB isEqualToString:@&quot;)&quot;]) logB++;
-            if ([tmpStrB isEqualToString:@&quot;(&quot;]) {
-                logB--;
-                if (logB&lt;0) {
-                    res = i;
-                    break;
-                }
-            }
-        }
-    }
-    return res;
-}
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2018/1/10</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -550,6 +542,18 @@ int findParenMatch(NSString *s, int n) {
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -563,18 +567,6 @@ int findParenMatch(NSString *s, int n) {
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

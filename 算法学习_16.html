@@ -117,6 +117,125 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15119430001845.html">
+                
+                  <h1>Max Consecutive Ones</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a binary array, find the maximum number of consecutive 1s in this array.<br/>
+<img src="media/15119430001845/15119430248541.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findMaxConsecutiveOnes(vector&lt;int&gt;&amp; nums) {
+        int sum1 = 0;
+        int tmp = 0;
+        for (int i=0; i&lt;nums.size(); i++) {
+        if (nums[i]==1) {
+            tmp++;
+        }else{
+            tmp = 0;
+        }
+            sum1 = max(tmp, sum1);
+        }
+    
+        return sum1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/29</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15119407096444.html">
+                
+                  <h1>Range Sum Query 2D - Immutable</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a 2D matrix matrix, find the sum of the elements inside the rectangle defined by its upper left corner (row1, col1) and lower right corner (row2, col2).<br/>
+<img src="media/15119407096444/15119407391245.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class NumMatrix {
+private:
+    int col,row;
+    vector&lt;vector&lt;int&gt;&gt; sums;
+public:
+    NumMatrix(vector&lt;vector&lt;int&gt;&gt; matrix) {
+        row = matrix.size();
+        col =row&gt;0 ? matrix[0].size():0;
+        sums = vector&lt;vector&lt;int&gt;&gt;(row+1, vector&lt;int&gt;(col+1,0));
+        for(int i=1;i&lt;=row;i++)
+        {
+            for(int j=1;j&lt;=col;j++)
+            {
+                sums[i][j] = sums[i-1][j]+sums[i][j-1]+matrix[i-1][j-1]-sums[i-1][j-1];
+            }
+        }
+    }
+    
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        return sums[row2+1][col2+1]-sums[row2+1][col1]-sums[row1][col2+1]+sums[row1][col1];
+    }
+};
+
+/**
+ * Your NumMatrix object will be instantiated and called as such:
+ * NumMatrix obj = new NumMatrix(matrix);
+ * int param_1 = obj.sumRegion(row1,col1,row2,col2);
+ */
+</code></pre>
+
+<p><a href="https://leetcode.com/problems/range-sum-query-2d-immutable/description/">题目详细链接</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/29</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15119406678576.html">
                 
                   <h1>Reshape the Matrix</h1>
@@ -357,108 +476,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15114062990936.html">
-                
-                  <h1>Best Time to Buy and Sell Stock</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Say you have an array for which the \(i^{th}\) element is the price of a given stock on day i.</p>
-
-<p>If you were only permitted to complete at most one transaction (ie, buy one and sell one share of the stock), design an algorithm to find the maximum profit.</p>
-
-<p><img src="media/15114062990936/15114063447573.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maxProfit(vector&lt;int&gt;&amp; prices) {
-        int minPrice=INT_MAX;
-        int maxProfit = 0;
-        
-        for (int i=0; i&lt;prices.size(); i++) {
-            minPrice = min(prices[i], minPrice);
-            maxProfit = max(maxProfit, prices[i]-minPrice);
-        }
-        
-        return maxProfit;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15114035796843.html">
-                
-                  <h1>Array Partition I</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of <strong>2n</strong> integers, your task is to group these integers into n pairs of integer, say (a1, b1), (a2, b2), ..., (an, bn) which makes sum of min(ai, bi) for all i from 1 to n as large as possible.</p>
-
-<p><img src="media/15114035796843/15114036022226.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int arrayPairSum(vector&lt;int&gt;&amp; nums) {
-        
-        sort(nums.begin(),nums.end());
-        int result=0;
-        for (int i=0; i&lt;nums.size(); i+=2) {
-            result+=nums[i];
-        }
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -548,6 +565,18 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -561,18 +590,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

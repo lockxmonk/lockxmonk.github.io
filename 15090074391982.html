@@ -137,7 +137,237 @@
       </div><!-- article -->
 
       <div class="article-content">
-      
+      <ul>
+<li>
+<a href="#toc_0">详细理解Objective-C的3个动态特性</a>
+</li>
+<li>
+<a href="#toc_1">iOS中的静态库和Framework区别是什么？</a>
+</li>
+<li>
+<a href="#toc_2">NullSafe 的原理是什么?</a>
+</li>
+<li>
+<a href="#toc_3">objc_msgForward函数是做什么的，直接调用它将会发生什么？</a>
+</li>
+<li>
+<a href="#toc_4">Toll-Free Bridging 是什么？什么情况下会使用？</a>
+</li>
+<li>
+<a href="#toc_5">import 跟#include 又什么区别，@class呢, #import&lt;&gt; 跟 #import””又什么区别?</a>
+</li>
+<li>
+<a href="#toc_6">属性readwrite，readonly，assign，retain，copy，nonatomic 各是什么作用，在那种情况下用?</a>
+</li>
+<li>
+<a href="#toc_7">写一个setter方法用于完成<code>@property (nonatomic,retain)NSString *name</code>,写一个setter方法用于完成<code>@property(nonatomic，copy)NSString *name</code></a>
+</li>
+<li>
+<a href="#toc_8">常见的object-c的数据类型有那些， 和C的基本数据类型有什么区别?如：NSInteger和int</a>
+</li>
+<li>
+<a href="#toc_9">原子(atomic)跟非原子(non-atomic)属性有什么区别?</a>
+</li>
+<li>
+<a href="#toc_10">MVC设计模式是什么？ 你还熟悉什么设计模式？</a>
+</li>
+</ul>
+
+
+<h2 id="toc_0">详细理解Objective-C的3个动态特性</h2>
+
+<ol>
+<li>动态类型
+简单点说就是id 类型，可以理解为通用对象类型，一旦被赋值，可以被强制转化为其它类型。可以通过[obj isKindOfClass:aClass]，来判断其具体类型，作相应操作，在委托（delegate）中体现得比较充分；</li>
+<li>动态绑定
+基于动态类型的，某个实例被确定后，其类型也是确定的，其对应的属性和方法将会因为类型的确定而确定，这就是动态绑定；</li>
+<li>动态加载
+程序启动时动态加载可执行代码和资源。如多国语言的程序，会在程序启动时只加载设定为某一种语言的资源，而不是全部加载。基于Utility Application的程序，分别在iPhone和iPad上运行的时候，只会加载对应的代码和资源，当然兼容视网膜技术的@2x 图片加载也是这样的；</li>
+</ol>
+
+<h2 id="toc_1">iOS中的静态库和Framework区别是什么？</h2>
+
+<p>库是共享程序代码的方式，一般分为静态库和动态库。</p>
+
+<p>静态库与动态库的区别</p>
+
+<p>静态库：链接时完整地拷贝至可执行文件中，被多次使用就有多份冗余拷贝。</p>
+
+<p>动态库：链接时不复制，程序运行时由系统动态加载到内存，供程序调用，系统只加载一次，多个程序共用，节省内存。</p>
+
+<p>iOS里静态库形式</p>
+
+<p>.a和.framework</p>
+
+<p>iOS里动态库形式</p>
+
+<p>.dylib和.framework</p>
+
+<p>framework为什么既是静态库又是动态库</p>
+
+<p>系统的.framework是动态库，我们自己建立的.framework是静态库。</p>
+
+<p>a与.framework有什么区别</p>
+
+<p>.a是一个纯二进制文件，.framework中除了有二进制文件之外还有资源文件。</p>
+
+<p>.a文件不能直接使用，至少要有.h文件配合，.framework文件可以直接使用。</p>
+
+<p>.a + .h + sourceFile = .framework。</p>
+
+<p>建议用.framework.</p>
+
+<p>为什么要使用静态库</p>
+
+<p>方便共享代码，便于合理使用。</p>
+
+<p>实现iOS程序的模块化。可以把固定的业务模块化成静态库。</p>
+
+<p>和别人分享你的代码库，但不想让别人看到你代码的实现。</p>
+
+<p>开发第三方sdk的需要。</p>
+
+<p>制作静态库时的几点注意</p>
+
+<p>注意理解</p>
+
+<p>无论是.a静态库还.framework静态库，我们需要的都是二进制文件+.h+其它资源文件的形式，不同的是，.a本身就是二进制文件，需要我们自己配上.h和其它文件才能使用，而.framework本身已经包含了.h和其它文件，可以直接使用。</p>
+
+<p>图片资源的处理</p>
+
+<p>两种静态库，一般都是把图片文件单独的放在一个.bundle文件中，一般.bundle的名字和.a或.framework的名字相同。.bundle文件很好弄，新建一个文件夹，把它改名为.bundle就可以了，右键，显示包内容可以向其中添加图片资源。</p>
+
+<p>category处理</p>
+
+<p>category是我们实际开发项目中经常用到的，把category打成静态库是没有问题的，但是在用这个静态库的工程中，调用category中的方法时会有找不到该方法的运行时错误（selector not recognized），解决办法是：在使用静态库的工程中配置other linker flags的值为-ObjC。</p>
+
+<p>复杂的静态库</p>
+
+<p>如果一个静态库很复杂，需要暴露的.h比较多的话，就可以在静态库的内部创建一个.h文件（一般这个.h文件的名字和静态库的名字相同），然后把所有需要暴露出来的.h文件都集中放在这个.h文件中，而那些原本需要暴露的.h都不需要再暴露了，只需要把.h暴露出来就可以了。</p>
+
+<h2 id="toc_2">NullSafe 的原理是什么?</h2>
+
+<p>NullSafe is a simple category on NSNull that returns nil for unrecognised messages instead of throwing an exception.</p>
+
+<p>当给一个NSNull对象发送消息的话，可能会崩溃（null是有内存的），而发送给nil的话，是不会崩溃的。<br/>
+作者就是使用了这么一个原理，把发送给NSNull的而NSNull又无法处理的消息经过如下几步处理：</p>
+
+<p>创建一个方法缓存，这个缓存会缓存项目中类的所有类名。</p>
+
+<p>遍历缓存，寻找是否已经有可以执行此方法的类。</p>
+
+<p>如果有的话，返回这个NSMethodSignature。</p>
+
+<p>如果没有的话，返回nil,接下来会走forwardInvocation:方法。</p>
+
+<p>[invocation invokeWithTarget:nil];将消息转发给nil。</p>
+
+<p>那么，如何判断NSNull无法处理这个消息呢，在OC中，系统如果对某个实例发送消息之后，它（及其父类）无法处理（比如，没有这个方法等），系统就会发送methodSignatureForSelector消息，如果这个方法返回非空，那么就去执行返回的方法，如果为nil,则发送forwardInvocation消息。</p>
+
+<p>题外话：一般来说，我们不应该在我们的项目中使用NSNull类（大部分NSNull类的来源来自于接口的返回），而使用nil，在来源上，就应该堵上（要么你解析到null进行处理，要么和你的服务端说，不要给我返回null）</p>
+
+<h2 id="toc_3">objc_msgForward函数是做什么的，直接调用它将会发生什么？</h2>
+
+<p>objc_msgForward是IMP类型，用于消息转发的：当向一个对象发送一条消息，但它并没有实现的时候，_objc_msgForward会尝试做消息转发。<br/>
+IMP msgForward =  <u>objc</u>msgForward;<br/>
+如果手动调用objcmsgForward，将跳过查找IMP的过程，而是直接触发“消息转发”，进入如下流程：</p>
+
+<p>•    第一步：+ (BOOL)resolveInstanceMethod:(SEL)sel实现方法，指定是否动态添加方法。若返回NO，则进入下一步，若返回YES，则通过class_addMethod函数动态地添加方法，消息得到处理，此流程完毕。</p>
+
+<p>•    第二步：在第一步返回的是NO时，就会进入- (id)forwardingTargetForSelector:(SEL)aSelector方法，这是运行时给我们的第二次机会，用于指定哪个对象响应这个selector。不能指定为self。若返回nil，表示没有响应者，则会进入第三步。若返回某个对象，则会调用该对象的方法。</p>
+
+<p>•    第三步：若第二步返回的是nil，则我们首先要通过- (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector指定方法签名，若返回nil，则表示不处理。若返回方法签名，则会进入下一步。</p>
+
+<p>•    第四步：当第三步返回方法方法签名后，就会调用- (void)forwardInvocation:(NSInvocation *)anInvocation方法，我们可以通过anInvocation对象做很多处理，比如修改实现方法，修改响应对象等</p>
+
+<p>•    第五步：若没有实现- (void)forwardInvocation:(NSInvocation *)anInvocation方法，那么会进入- (void)doesNotRecognizeSelector:(SEL)aSelector方法。若我们没有实现这个方法，那么就会crash，然后提示打不到响应的方法。到此，动态解析的流程就结束了。</p>
+
+<h2 id="toc_4">Toll-Free Bridging 是什么？什么情况下会使用？</h2>
+
+<p>Toll-Free Bridging用于在Foundation对象与Core Foundation对象之间交换数据,俗称桥接；<br/>
+在ARC环境下,Foundation对象转成 Core Foundation对象；<br/>
+使用__bridge桥接以后ARC会自动管理2个对象；<br/>
+使用__bridge_retained桥接需要手动释放Core Foundation对象；<br/>
+在ARC环境下, Core Foundation对象转成 Foundation对象；<br/>
+使用__bridge桥接,如果Core Foundation对象被释放,Foundation对象也同时不能使用了,需要手动管理Core Foundation对象；<br/>
+使用__bridge_transfer桥接,系统会自动管理2个对象。 </p>
+
+<h2 id="toc_5">import 跟#include 又什么区别，@class呢, #import&lt;&gt; 跟 #import””又什么区别?</h2>
+
+<p>答:#import是Objective-C导入头文件的关键字，#include是C/C++导入头文件的关键字,使用#import头文件会自动只导入一次，不会重复导入，相当于#include和#pragma once;@class告诉编译器某个类的声明，当执行时，才去查看类的实现文件，可以解决头文件的相互包含;#import&lt;&gt;用来包含系统的头文件，#import””用来包含用户头文件。 </p>
+
+<h2 id="toc_6">属性readwrite，readonly，assign，retain，copy，nonatomic 各是什么作用，在那种情况下用?</h2>
+
+<p>1). readwrite 是可读可写特性;需要生成getter方法和setter方法时</p>
+
+<p>2). readonly 是只读特性 只会生成getter方法 不会生成setter方法 ;不希望属性在类外改变</p>
+
+<p>3). assign 是赋值特性，setter方法将传入参数赋值给实例变量;仅设置变量时;</p>
+
+<p>4). retain 表示持有特性，setter方法将传入参数先保留，再赋值，传入参数的retaincount会+1;</p>
+
+<p>5). copy 表示赋值特性，setter方法将传入对象复制一份;需要完全一份新的变量时。</p>
+
+<p>6).nonatomic 非原子操作，决定编译器生成的setter getter是否是原子操作，atomic表示多线程安全，一般使用nonatomic </p>
+
+<p><strong>weak和assign的区别</strong></p>
+
+<p><img src="media/15090074391982/15199795362688.jpg" alt=""/></p>
+
+<p><strong>weak</strong> 只可以修饰对象。如果修饰基本数据类型，编译器会报错-“Property with ‘weak’ attribute must be of object type”。</p>
+
+<p><strong>assign</strong> 可修饰对象，和基本数据类型。当需要修饰对象类型时，MRC时代使用unsafe_unretained。当然，unsafe_unretained也<strong>可能产生野指针</strong>，所以它名字是&quot;unsafe_”。</p>
+
+<h2 id="toc_7">写一个setter方法用于完成<code>@property (nonatomic,retain)NSString *name</code>,写一个setter方法用于完成<code>@property(nonatomic，copy)NSString *name</code></h2>
+
+<pre><code class="language-objc">- (void) setName:(NSString*) str
+{
+    [str retain];
+    [name release];
+    name = str;
+}
+- (void)setName:(NSString *)str
+{
+    id t = [str copy];
+    [name release];
+    name = t;
+}
+</code></pre>
+
+<h2 id="toc_8">常见的object-c的数据类型有那些， 和C的基本数据类型有什么区别?如：NSInteger和int</h2>
+
+<p>object-c的数据类型有NSString，NSNumber，NSArray，NSMutableArray，NSData等等，这些都是class，创建后便是对象，而C语言的基本数据类型int，只是一定字节的内存空间，用于存放数值;NSInteger是基本数据类型，并不是NSNumber的子类，当然也不是NSObject的子类。NSInteger是基本数据类型Int或者Long的别名(NSInteger的定义typedef long NSInteger)，它的区别在于，NSInteger会根据系统是32位还是64位来决定是本身是int还是Long。</p>
+
+<h2 id="toc_9">原子(atomic)跟非原子(non-atomic)属性有什么区别?</h2>
+
+<p>1). atomic提供多线程安全。是防止在写未完成的时候被另外一个线程读取，造成数据错误</p>
+
+<p>2). non-atomic:在自己管理内存的环境中，解析的访问器保留并自动释放返回的值，如果指定了 nonatomic ，那么访问器只是简单地返回这个值。 </p>
+
+<h2 id="toc_10">MVC设计模式是什么？ 你还熟悉什么设计模式？</h2>
+
+<p>设计模式：并不是一种新技术，而是一种编码经验，使用比如java中的接口，iphone中的协议，继承关系等基本手段，用比较成熟的逻辑去处理某一种类型的事情，总结为所谓设计模式。面向对象编程中，java已经归纳了23种设计模式。</p>
+
+<p>mvc设计模式 ：模型，视图，控制器，可以将整个应用程序在思想上分成三大块，对应是的数据的存储或处理，前台的显示，业务逻辑的控制。 Iphone本身的设计思想就是遵循mvc设计模式。其不属于23种设计模式范畴。</p>
+
+<p>代理模式：代理模式给某一个对象提供一个代理对象，并由代理对象控制对源对象的引用.比如一个工厂生产了产品，并不想直接卖给用户，而是搞了很多代理商，用户可以直接找代理商买东西，代理商从工厂进货.常见的如QQ的自动回复就属于代理拦截，代理模式在iphone中得到广泛应用.</p>
+
+<p>单例模式：说白了就是一个类不通过alloc方式创建对象，而是用一个静态方法返回这个类的对象。系统只需要拥有一个的全局对象，这样有利于我们协调系统整体的行为，比如想获得[UIApplication sharedApplication];任何地方调用都可以得到 UIApplication的对象，这个对象是全局唯一的。</p>
+
+<p>观察者模式： 当一个物体发生变化时，会通知所有观察这个物体的观察者让其做出反应。实现起来无非就是把所有观察者的对象给这个物体，当这个物体的发生改变，就会调用遍历所有观察者的对象调用观察者的方法从而达到通知观察者的目的。</p>
+
+<p>工厂模式：</p>
+
+<pre><code class="language-c++">public class Factory{
+    public static Sample creator(int which){
+        if (which==1)
+            return new SampleA();
+        else if (which==2)
+            return new SampleB();
+    }   
+} 
+</code></pre>
+
 
     
 
@@ -247,6 +477,18 @@
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -260,18 +502,6 @@
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

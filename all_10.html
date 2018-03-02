@@ -117,6 +117,119 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15127150080101.html">
+                
+                  <h1>Sum of Two Integers</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15127150080101/15127150099516.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int getSum(int a, int b) {
+        int sum = a;
+        while (b!=0) {
+            sum = a^b;
+            b = (a&amp;b)&lt;&lt;1;
+            a = sum;
+        }
+        return a;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/8</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15127074753393.html">
+                
+                  <h1>Employee Importance</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15127074753393/15127075000371.jpg" alt=""/></p>
+
+<pre><code class="language-c++">/*
+// Employee info
+class Employee {
+public:
+    // It&#39;s the unique ID of each node.
+    // unique id of this employee
+    int id;
+    // the importance value of this employee
+    int importance;
+    // the id of direct subordinates
+    vector&lt;int&gt; subordinates;
+};
+*/
+class Solution {
+public:
+    int getImportance(vector&lt;Employee*&gt; employees, int id) {
+        unordered_map&lt;int ,Employee*&gt; map;
+        for(auto emp:employees){
+            map[emp-&gt;id] = emp;
+        }
+        return help(map,id);
+    }
+    
+    int help(unordered_map&lt;int, Employee*&gt;&amp; map, int id){
+        int sum = map[id]-&gt;importance;
+        for(auto element : map[id]-&gt;subordinates){
+            sum += help(map, element);
+        }
+        return sum;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/8</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15127037334925.html">
                 
                   <h1>Single Number</h1>
@@ -325,119 +438,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15126119727244.html">
-                
-                  <h1>Hamming Distance</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15126119727244/15126119824070.jpg" alt=""/></p>
-
-<p>利用按位异或操作<code>^</code>来标记不同的位置。<br/>
-<code>c++<br/>
-class Solution {<br/>
-public:<br/>
-    int hammingDistance(int x, int y) {<br/>
-        int tmp = x^y;<br/>
-        int res = 0;<br/>
-        while (tmp) {<br/>
-            if ((tmp&gt;&gt;1)&lt;&lt;1!=tmp) {<br/>
-                res++;<br/>
-            }<br/>
-            tmp&gt;&gt;=1;<br/>
-        }<br/>
-        return res;<br/>
-    }<br/>
-};<br/>
-</code></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/7</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15125498375074.html">
-                
-                  <h1>Keyboard Row</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15125498375074/15125498549999.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;string&gt; findWords(vector&lt;string&gt;&amp; words) {
-        set&lt;char&gt; row1 = {&#39;q&#39;, &#39;w&#39;, &#39;e&#39;, &#39;r&#39;, &#39;t&#39;, &#39;y&#39;,&#39;u&#39;, &#39;i&#39;, &#39;o&#39;, &#39;p&#39;};
-        set&lt;char&gt; row2 = {&#39;a&#39;, &#39;s&#39;, &#39;d&#39;, &#39;f&#39;, &#39;g&#39;, &#39;h&#39;, &#39;j&#39;, &#39;k&#39;, &#39;l&#39;};
-        set&lt;char&gt; row3 = { &#39;z&#39;, &#39;x&#39;, &#39;c&#39;, &#39;v&#39;, &#39;b&#39; ,&#39;n&#39;, &#39;m&#39;};
-        vector&lt;set&lt;char&gt;&gt; rows = {row1,row2,row3};
-        vector&lt;string&gt; res;
-        for (auto str: words) {
-            int log = 0;
-            for (int i = 0; i&lt;rows.size(); i++) {
-                if (rows[i].count((char)tolower(str[0]))&gt;0) {
-                    log = i;
-                }
-            }
-            for (int j = 0; j&lt;str.length(); j++) {
-                if (rows[log].count((char)tolower(str[j]))==0) {
-                    break;
-                }
-                if (j==str.length()-1) {
-                    res.push_back(str);
-                }
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/6</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -527,6 +527,18 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -540,18 +552,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

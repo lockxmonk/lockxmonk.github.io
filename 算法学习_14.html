@@ -117,6 +117,140 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15121123646545.html">
+                
+                  <h1>Can Place Flowers</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Suppose you have a long flowerbed in which some of the plots are planted and some are not. However, flowers cannot be planted in adjacent plots - they would compete for water and both would die.</p>
+
+<p>Given a flowerbed (represented as an array containing 0 and 1, where 0 means empty and 1 means not empty), and a number n, return if n new flowers can be planted in it without violating the no-adjacent-flowers rule.</p>
+
+<p><img src="media/15121123646545/15121188914337.jpg" alt=""/></p>
+
+<p><strong>第一种：3格的滑动窗口</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
+        int str = 0 ,end = 2;
+        int tol = 0;
+        if (flowerbed.size()==1&amp;&amp;flowerbed[0]==0) {
+            tol++;
+        }else if(flowerbed[0]==0&amp;&amp;flowerbed[1]==0) {
+            flowerbed[0]=1;
+            tol++;
+        }
+        
+        while (end&lt;=flowerbed.size()-1) {
+            if (!(flowerbed[str]||flowerbed[str+1]||flowerbed[end])) {
+                flowerbed[str+1] = 1;
+                tol++;
+            }
+            str++;
+            end++;
+        }
+        if (flowerbed.size()&gt;=3&amp;&amp;flowerbed[flowerbed.size()-1]==0&amp;&amp;flowerbed[flowerbed.size()-2]==0) {
+            tol++;
+        }
+        return tol&gt;=n?1:0;
+    }
+};
+</code></pre>
+
+<p>第二种：</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool canPlaceFlowers(vector&lt;int&gt;&amp; flowerbed, int n) {
+        for (int i = 0; i &lt; flowerbed.size(); i++) {
+            if (!flowerbed[i] &amp;&amp; (i == 0 || !flowerbed[i - 1]) &amp;&amp; (i == flowerbed.size() - 1 || !flowerbed[i + 1])) {
+                flowerbed[i] = 1;
+                n--;
+            }
+        }
+        return n &lt;= 0;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15121120473287.html">
+                
+                  <h1>Contains Duplicate II</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of integers and an integer <code>k</code>, find out whether there are two distinct indices <code>i</code> and <code>j</code> in the array such that <code>nums[i] = nums[j]</code> and the absolute difference between <code>i</code> and <code>j</code> is at most <code>k</code>.</p>
+
+<p>判断数组中是否有重复的元素，并且下标之差不超过<code>k</code>。</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool containsNearbyDuplicate(vector&lt;int&gt;&amp; nums, int k) {
+        unordered_map&lt;int, int&gt; hash;
+        for (int i=0; i&lt;nums.size(); i++) {
+            if (hash.find(nums[i])!=hash.end()&amp;&amp;i-hash[nums[i]]&lt;=k) {
+                return 1;
+            }else{
+                hash[nums[i]] = i;
+            }
+        }
+        return 0;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15120990794732.html">
                 
                   <h1>Maximum Average Subarray I</h1>
@@ -384,109 +518,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15120258790187.html">
-                
-                  <h1>Given an integer array, find three numbers whose product is maximum and output the maximum product.</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15120258790187/15120319341000.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maximumProduct(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        int len = nums.size();
-        int tmp1 = nums[len-1]*nums[len-2]*nums[len-3];
-        int tmp2 = nums[len-1]*nums[0]*nums[1];
-        return max(tmp1, tmp2);
-    }
-};
-</code></pre>
-
-<p>主要考虑含有负数的情况。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120258181532.html">
-                
-                  <h1>Two Sum II - Input array is sorted</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of integers that is already <strong><em>sorted in ascending order</em></strong>, find two numbers such that they add up to a specific target number.</p>
-
-<p>The function twoSum should return indices of the two numbers such that they add up to the target, where index1 must be less than index2. Please note that your returned answers (both index1 and index2) are not zero-based.</p>
-
-<p>You may assume that each input would have exactly one solution and you may not use the same element twice.</p>
-
-<p><img src="media/15120258181532/15120258628279.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; numbers, int target) {
-        int str = 0;
-        int end = numbers.size()-1;
-        while (numbers[str]+numbers[end]!=target) {
-            if (numbers[str]+numbers[end]&gt;target) {
-                end--;
-            }else{
-                str++;
-            }
-        }
-        return vector&lt;int&gt;({str+1,end+1});
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -576,6 +607,18 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -589,18 +632,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

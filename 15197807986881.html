@@ -1,0 +1,740 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  2015年蓝桥杯省赛C/C++ A组题解 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
+        
+            <li><a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html">常见面试问题</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>2015年蓝桥杯省赛C/C++ A组题解</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2018/2/28</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E8%93%9D%E6%A1%A5%E6%9D%AF%E9%A2%98%E7%9B%AE.html'>蓝桥杯题目</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <ul>
+<li>
+<a href="#toc_0">方程整数解</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_1">include <bits/stdc++.h></a>
+<ul>
+<li>
+<a href="#toc_2">星系炸弹</a>
+</li>
+<li>
+<a href="#toc_3">Excel电子表格法：</a>
+</li>
+<li>
+<a href="#toc_4">奇妙的数字</a>
+</li>
+<li>
+<a href="#toc_5">格子中输出</a>
+</li>
+<li>
+<a href="#toc_6">九数组分数</a>
+</li>
+<li>
+<a href="#toc_7">牌型种数</a>
+</li>
+<li>
+<a href="#toc_8">手链样式</a>
+</li>
+<li>
+<a href="#toc_9">饮料换购</a>
+</li>
+</ul>
+
+
+<h2 id="toc_0">方程整数解</h2>
+
+<p>方程: a<sup>2</sup> + b<sup>2</sup> + c<sup>2</sup> = 1000 <br/>
+这个方程有整数解吗？有：a,b,c=6,8,30 就是一组解。 <br/>
+你能算出另一组合适的解吗？ <br/>
+请填写该解中最小的数字。 <br/>
+注意：你提交的应该是一个整数，不要填写任何多余的内容或说明性文字。</p>
+
+<p>直接暴力枚举。。<br/>
+```c++</p>
+
+<h1 id="toc_1">include <bits/stdc++.h></h1>
+
+<p>using namespace std;</p>
+
+<p>int main()<br/>
+{<br/>
+    for (int i=1;i&lt;=33;i++) {<br/>
+        for (int j=i;j&lt;=33;j++) {<br/>
+            for (int k=j;k&lt;=33;k++) {<br/>
+                if (i<em>i+j</em>j+k*k==1000) {<br/>
+                    printf(&quot;%d %d %d\n&quot;,i,j,k);<br/>
+                }<br/>
+            }<br/>
+        }<br/>
+    }<br/>
+    return 0;<br/>
+}<br/>
+```</p>
+
+<p>答案是10.</p>
+
+<h2 id="toc_2">星系炸弹</h2>
+
+<p>在X星系的广袤空间中漂浮着许多X星人造“炸弹”，用来作为宇宙中的路标。 <br/>
+每个炸弹都可以设定多少天之后爆炸。 <br/>
+比如：阿尔法炸弹2015年1月1日放置，定时为15天，则它在2015年1月16日爆炸。 <br/>
+有一个贝塔炸弹，2014年11月9日放置，定时为1000天，请你计算它爆炸的准确日期。 <br/>
+请填写该日期，格式为 yyyy-mm-dd <br/>
+即4位年份2位月份2位日期。比如： <br/>
+2015-02-19 <br/>
+请严格按照格式书写。不能出现其它文字或符号。</p>
+
+<p>这个直接excel或者手算就可以了。。</p>
+
+<p>计算： <br/>
+    2014.11. 9----2015. 1. 1       53天<br/><br/>
+    2015. 1. 1 ----2017. 1. 1     731天<br/><br/>
+    2017. 1. 1 ----2017. 8. 1     212天<br/><br/>
+    2017. 8. 1 ----2017. 8. 5      4天<br/>
+    53+731+212+4=1000天</p>
+
+<h2 id="toc_3">Excel电子表格法：</h2>
+
+<p>打开Excel电子表格，在单元格A1中输入2014/11/9，在单元格B1中输入公式=A1+1000即可得到答案。<br/>
+但是Excel中有效日期为1900年1月1日以后的日期，1900年以前的日期无法正常显示。<img src="media/15197807986881/15197811893178.jpg" alt=""/></p>
+
+<h2 id="toc_4">奇妙的数字</h2>
+
+<p>小明发现了一个奇妙的数字。它的平方和立方正好把0~9的10个数字每个用且只用了一次。 <br/>
+你能猜出这个数字是多少吗？ <br/>
+请填写该数字，不要填写任何多余的内容。</p>
+
+<p>还是暴力枚举就可以了。</p>
+
+<pre><code class="language-c++">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int b[10];
+
+void solu(int x,int b[])
+{
+    while (x) {
+        b[x%10]++;
+        x/=10;
+    }
+}
+
+int main()
+{
+    for (int i=1,j;i&lt;9999;i++) {
+        memset(b,0,sizeof(b));
+        solu(i*i,b);
+        solu(i*i*i,b);
+        for (j=0;j&lt;=9;j++)
+            if (b[j]!=1) break;
+        //每个b[i]都等于1，j才会大于9
+        if (j&gt;9) {
+            printf(&quot;%d\n&quot;,i);
+            break;
+        }
+    }
+    return 0;
+}
+</code></pre>
+
+<h2 id="toc_5">格子中输出</h2>
+
+<p>StringInGrid函数会在一个指定大小的格子中打印指定的字符串。 <br/>
+要求字符串在水平、垂直两个方向上都居中。 <br/>
+如果字符串太长，就截断。 <br/>
+如果不能恰好居中，可以稍稍偏左或者偏上一点。 <br/>
+<strong>下面的程序实现这个逻辑，请填写划线部分缺少的代码。</strong></p>
+
+<pre><code class="language-c++">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+void StringInGrid(int width, int height, const char* s)
+{
+    int i,k;
+    char buf[1000];
+    strcpy(buf, s);
+    if(strlen(s)&gt;width-2) buf[width-2]=0;
+    
+    printf(&quot;+&quot;);
+    for(i=0;i&lt;width-2;i++) printf(&quot;-&quot;);
+    printf(&quot;+\n&quot;);
+    
+    for(k=1; k&lt;(height-1)/2;k++){
+        printf(&quot;|&quot;);
+        for(i=0;i&lt;width-2;i++) printf(&quot; &quot;);
+        printf(&quot;|\n&quot;);
+    }
+    
+    printf(&quot;|&quot;);
+    
+    printf(&quot;%*s%s%*s&quot;,_____________________________________________);  //填空
+              
+    printf(&quot;|\n&quot;);
+    
+    for(k=(height-1)/2+1; k&lt;height-1; k++){
+        printf(&quot;|&quot;);
+        for(i=0;i&lt;width-2;i++) printf(&quot; &quot;);
+        printf(&quot;|\n&quot;);
+    }   
+    
+    printf(&quot;+&quot;);
+    for(i=0;i&lt;width-2;i++) printf(&quot;-&quot;);
+    printf(&quot;+\n&quot;);  
+}
+
+int main()
+{
+    StringInGrid(20,6,&quot;abcd1234&quot;);
+    return 0;
+}
+</code></pre>
+
+<p>很明显，填空的上面是输出上半部分，下面是输出下半部分，所以我们填的这个就是正中间那行。 <br/>
+要做这题首先要知道<code>%*s</code>是个什么。。。<br/>
+反正当年是没填出的居多 <strong>输出控制符</strong> <br/>
+也就是说碰到<code>*</code>的时候我们要额外给一个整型参数控制宽度。</p>
+
+<p>我们看到第9行，buf已经完成了截断，而s没有截断，所以我们要用也只能用buf。 <br/>
+然后我们算出左边右边的宽度，<strong>值得注意的是，左右的宽度表达式是不一样的。 <br/>
+因为题目里说了不对称是要靠左，</strong>可以把abcd1234最后的4去掉看看效果。 <br/>
+感觉查了这么多博客都没一个人填对的。。。唉= =</p>
+
+<p><code>答案：(width-strlen(buf)-2)/2,&quot;&quot;,buf,(width-strlen(buf)-2+1)/2,&quot;&quot;</code></p>
+
+<h2 id="toc_6">九数组分数</h2>
+
+<p>1,2,3…9 这九个数字组成一个分数，其值恰好为1/3，如何组法？ <br/>
+下面的程序实现了该功能，请填写划线部分缺失的代码。</p>
+
+<pre><code class="language-c++">#include &lt;stdio.h&gt;
+
+void test(int x[])
+{
+    int a = x[0]*1000 + x[1]*100 + x[2]*10 + x[3];
+    int b = x[4]*10000 + x[5]*1000 + x[6]*100 + x[7]*10 + x[8];
+
+    if(a*3==b) printf(&quot;%d / %d\n&quot;, a, b);
+}
+
+void f(int x[], int k)
+{
+    int i,t;
+    if(k&gt;=9){
+        test(x);
+        return;
+    }
+
+    for(i=k; i&lt;9; i++){
+        {t=x[k]; x[k]=x[i]; x[i]=t;}
+        f(x,k+1);
+        _________________________________ // 填空处
+    }
+}
+
+int main()
+{
+    int x[] = {1,2,3,4,5,6,7,8,9};
+    f(x,0);  
+    return 0;
+}
+</code></pre>
+
+<p>这主要考的是回溯的基本概念 回溯资料<br/><br/>
+简单的说这一次做的改变肯定要复原。</p>
+
+<p><strong>答案：{t=x[k]; x[k]=x[i]; x[i]=t;}</strong></p>
+
+<h2 id="toc_7">牌型种数</h2>
+
+<p>小明被劫持到X赌城，被迫与其他3人玩牌。 <br/>
+一副扑克牌（去掉大小王牌，共52张），均匀发给4个人，每个人13张。 <br/>
+这时，小明脑子里突然冒出一个问题： <br/>
+如果不考虑花色，只考虑点数，也不考虑自己得到的牌的先后顺序，自己手里能拿到的初始牌型组合一共有多少种呢？ </p>
+
+<p>请填写该整数，不要填写任何多余的内容或说明文字。</p>
+
+<p>dfs，当然首先要知道每个数字都有四张牌。</p>
+
+<pre><code class="language-c++">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int cnt[15],ans=0;
+
+void dfs(int dep,int last)
+{
+    if (dep&gt;13) {
+        ans++;
+        return;
+    }
+    for (int i=last;i&lt;=13;i++) {
+        if (cnt[i]&lt;4) {
+            cnt[i]++;
+            dfs(dep+1,i);
+            cnt[i]--;
+        }
+    }
+}
+
+int main()
+{
+    dfs(1,1);
+    printf(&quot;%d\n&quot;,ans);
+    return 0;
+}
+</code></pre>
+
+<p>答案：3598180</p>
+
+<h2 id="toc_8">手链样式</h2>
+
+<p>小明有3颗红珊瑚，4颗白珊瑚，5颗黄玛瑙。 <br/>
+他想用它们串成一圈作为手链，送给女朋友。 <br/>
+现在小明想知道：如果考虑手链可以随意转动或翻转，一共可以有多少不同的组合样式呢？ 请你提交该整数。不要填写任何多余的内容或说明性的文字。</p>
+
+<pre><code class="language-c++">#include &lt;cstdio&gt;
+#include &lt;cstring&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int res[10000][12],a[12];
+
+bool same(int a[],int b[])
+{
+    for (int k=0;k&lt;12;k++) {
+        bool f=true;
+        for (int i=0;i&lt;12;i++) {
+            if (a[i]!=b[(i+k)%12]) {        //因为是环形，不固定起点。所以用(i+k)%12
+                f=false;
+                break;
+            }
+        }
+        if (f) return true;
+        f=true;
+        for (int i=0;i&lt;12;i++) {
+            if (a[11-i]!=b[(i+k)%12]) {     //又因为可以翻转所以 从左边或者右边都应该检查。
+                f=false;
+                break;
+            }
+        }
+        if (f) return true;
+    }
+    return false;
+}
+
+int main()
+{
+    int ans=0;
+    a[0]=a[1]=a[2]=1;
+    a[3]=a[4]=a[5]=a[6]=2;
+    a[7]=a[8]=a[9]=a[10]=a[11]=3;
+    do {
+        bool ok=true;
+        for (int i=1;i&lt;=ans;i++) {
+            if (same(res[i],a)) {
+                ok=false;
+                break;
+            }
+        }
+        if (ok) {
+            ans++;
+            for (int i=0;i&lt;12;i++) {
+                res[ans][i]=a[i];
+            }
+        }
+    } while (next_permutation(a,a+12));
+    printf(&quot;%d\n&quot;,ans);
+    return 0;
+}
+
+</code></pre>
+
+<p>首先来分析一下题目：3类珠子，一共12个，我们用字符串a=&quot;333444455555“表示，要求环形的排列数，注意理解可以随意转动或翻转，这跟直线型的有不同。举个例子：</p>
+
+<p>例如，在直线型排列中a=&quot;333444455555“ 和 b=&quot;444455555333“ 是不同的排列，原因是直线型的起点是固定的，对应位置元素只要有一个不同，则排列不同。但是在环形里面，由于可以任意转动，也就是起点不固定的，当b以第一个3为起点时往右数时，它就和a完全一样了。另外，任意翻转的意思是b不但起点不固定，而且排列的方向可以往右数，也可以往左数。</p>
+
+<p>dfs写起来比较难受，这题就用next_permutation，改函数的方法是对数组从低到高逐次进行全排列。若可以进行排列就返回true，反之false<br/>
+所以只要把所有答案都记录下来，每次都正反判断一遍即可。</p>
+
+<h2 id="toc_9">饮料换购</h2>
+
+<p>乐羊羊饮料厂正在举办一次促销优惠活动。乐羊羊C型饮料，凭3个瓶盖可以再换一瓶C型饮料，并且可以一直循环下去(但不允许暂借或赊账)。<br/>
+请你计算一下，如果小明不浪费瓶盖，尽量地参加活动，那么，对于他初始买入的n瓶饮料，最后他一共能喝到多少瓶饮料。</p>
+
+<p>输入：一个整数n，表示开始购买的饮料数量（0 &lt; n &lt; 10000） <br/>
+输出：一个整数，表示实际得到的饮料数<br/>
+例如： <br/>
+用户输入： <br/>
+100 <br/>
+程序应该输出： <br/>
+149<br/>
+用户输入： <br/>
+101 <br/>
+程序应该输出： <br/>
+151<br/>
+资源约定： <br/>
+峰值内存消耗 &lt; 256M <br/>
+CPU消耗 &lt; 1000ms</p>
+
+<p>这道题简单模拟即可。</p>
+
+<pre><code class="language-c++">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int main()
+{
+    int s,n;
+    scanf(&quot;%d&quot;,&amp;n);
+    s=n;
+    while (n&gt;=3) {
+        s+=n/3;
+        n=n/3+n%3;
+    }
+    printf(&quot;%d\n&quot;,s);
+    return 0;
+}
+</code></pre>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15196931743279.html" 
+          title="Next Post: 2016年第七届蓝桥杯C/C++程序设计本科B组省赛">2016年第七届蓝桥杯C/C++程序设计本科B组省赛 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <div class="site-a-logo"><img src="/asset/img/logn.png" /></div>
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+<a target="_blank" class="github" target="_blank" href="https://github.com/lockxmonk" title="GitHub">GitHub</a>
+<a target="_blank" class="email" href="mailto:lzhabc007@163.com" title="Email">Email</a>
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
+        
+            <a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html"><strong>常见面试问题</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15165851014842.html">Longest Word in Dictionary</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+          <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1265629731'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s22.cnzz.com/z_stat.php%3Fid%3D1265629731%26online%3D1' type='text/javascript'%3E%3C/script%3E"));</script>    
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2017
+Powered by <a target="_blank" href="https://lockxmonk.github.io/index.html">LZH</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

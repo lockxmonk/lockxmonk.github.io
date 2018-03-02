@@ -117,6 +117,134 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15139993814636.html">
+                
+                  <h1>Moves in squared strings (I)</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15139993814636/15139993826350.jpg" alt=""/><br/>
+<img src="media/15139993814636/15139994003399.jpg" alt=""/></p>
+
+<p>题目链接：<a href="https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc">https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc</a></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+NSString *vertMirror(NSString *strng) {
+    NSMutableString *res = [[NSMutableString alloc] init];
+    NSArray *stringArray = [strng componentsSeparatedByString:@&quot;\n&quot;];
+    for (NSString *tmpStr in stringArray) {
+        NSMutableString * reverseString = [NSMutableString string];
+        for(int i = 0 ; i &lt; tmpStr.length; i ++){
+            //倒序读取字符并且存到可变数组数组中
+            unichar c = [tmpStr characterAtIndex:tmpStr.length- i -1];
+            [reverseString appendFormat:@&quot;%c&quot;,c];
+        }
+        
+        if ([tmpStr isEqualToString:[stringArray lastObject]]) {
+            [res appendString:reverseString];
+            break;
+        }
+        
+        [reverseString appendString:@&quot;\n&quot;];
+        [res appendString:reverseString];
+    }
+    
+    return res;
+}
+
+NSString *horMirror(NSString *strng) {
+    NSMutableString *res = [[NSMutableString alloc] init];;
+    NSArray *stringAry = [strng componentsSeparatedByString:@&quot;\n&quot;];
+    for (int i = stringAry.count-1; i&gt;=0; i--) {
+        [res appendString:stringAry[i]];
+        if (i==0) {
+            break;
+        }
+        [res appendString:@&quot;\n&quot;];
+    }
+    return res;
+}
+
+NSString *oper(NSString *(*f)(NSString *), NSString *s) {
+    return f(s);
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15139938131506.html">
+                
+                  <h1>Sum of many ints</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15139938131506/15139938214932.jpg" alt=""/></p>
+
+<p>题目链接：<a href="https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc">https://www.codewars.com/kata/moves-in-squared-strings-i/train/objc</a></p>
+
+<p>注意<code>long long</code>类型。</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+long long f(long long n, long long m) {
+    long long sum = 0;
+    long long q = n/m;
+    long long p = n%m;
+    sum+= (m*(m-1)/2)*q;
+    sum+= (p+1)*p/2;
+    return sum;
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15139334894228.html">
                 
                   <h1> Longest Univalue Path</h1>
@@ -373,142 +501,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15134129335933.html">
-                
-                  <h1>Linked List Cycle II</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>题目链接：<a href="https://leetcode.com/problems/linked-list-cycle-ii/description/">https://leetcode.com/problems/linked-list-cycle-ii/description/</a></p>
-
-<p>Given a linked list, return the node where the cycle begins. If there is no cycle, return null.</p>
-
-<p>Note: Do not modify the linked list.</p>
-
-<pre><code class="language-c++">/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    ListNode *detectCycle(ListNode *head) {
-        if (head==NULL||head-&gt;next==NULL) {
-            return NULL;
-        }
-        ListNode *slow = head;
-        ListNode *fast = head;
-        ListNode *entry = head;
-        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
-            fast = fast-&gt;next-&gt;next;
-            slow = slow-&gt;next;
-            if (fast==slow) {
-                while (slow!=entry) {
-                    slow = slow-&gt;next;
-                    entry = entry-&gt;next;
-                }
-                return entry;;
-            }
-        }
-        return NULL;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/16</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15134088955356.html">
-                
-                  <h1>Linked List Cycle</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a linked list, determine if it has a cycle in it.</p>
-
-<p>Follow up:<br/>
-Can you solve it without using extra space?</p>
-
-<p><strong>使用快慢两个指针来判断是否有环，当有环的时候，快指针会停留在环内知道慢指针赶上与之相等。</strong></p>
-
-<pre><code class="language-c++">/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    bool hasCycle(ListNode *head) {
-        if (head==NULL||head-&gt;next==NULL) {
-            return 0;
-        }
-        ListNode *slow = head;
-        ListNode *fast = head;
-        while (fast-&gt;next&amp;&amp;fast-&gt;next-&gt;next) {
-            fast = fast-&gt;next-&gt;next;
-            slow = slow-&gt;next;
-            if (fast==slow) {
-                return 1;
-            }
-        }
-        return 0;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/16</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -598,6 +590,18 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -611,18 +615,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

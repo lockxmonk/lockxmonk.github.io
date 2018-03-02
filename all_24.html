@@ -117,6 +117,195 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15041689865677.html">
+                
+                  <h1>指针问题</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<pre><code>#include &lt;stdio.h&gt;  
+   
+int main() {  
+      
+    int num = 10;  
+    int *p1 = &amp;num//p1存储num的地址  
+    int **p2 = &amp;p1;//p2存储p1的地址  
+    int ***p3 = &amp;p2;//p3存储p2的地址  
+      
+    *p1 = 100;//*p1取出num变量  
+    **p2 = 200;//**p2取出num变量  
+    ***p3 = 300;//***p3也是取出num变量  
+    printf(&quot;num = %d\n&quot;,num);  
+    printf(&quot;num = %d\n&quot;,***p3);  
+      
+    return 0;  
+}  
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15041475233104.html">
+                
+                  <h1>消息转发机制的简单实现</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">第一种</h2>
+
+<p>首先我们来实现这两个方法：<br/><br/>
++(BOOL)resolveInstanceMethod:    (SEL)sel</p>
+
+<p>+(BOOL)resolveClassMethod:(SEL)sel</p>
+
+<p>这两个方法用于方法的动态解析，当一个对象执行一个方法时，发现没有找到所对应的实现。这是就要靠上面的方法来动态添加实现了</p>
+
+<p>举例来说：</p>
+
+<pre><code class="language-objc">//
+//  Person.h
+//  消息转发
+
+#import &lt;Foundation/Foundation.h&gt;
+
+@interface Person : NSObject
+//接口中声明一个方法
+-(void)run;
+
+@end
+
+//
+//  Person.m
+//  消息转发
+
+
+#import &quot;Person.h&quot;
+#import &lt;objc/runtime.h&gt;
+@implementation Person //在部署的时候我们没有实现接口中声明的run方法
+
+
+//编写C函数实现代码
+void addrun (id self, SEL _cmd){
+    NSLog(@&quot;%@　%s&quot;,self,sel_getName(_cmd));
+}
+
++(BOOL)resolveInstanceMethod:(SEL)sel{
+    if (sel ==@selector(run)) {
+    //如果响应run方法，我们动态将上面实现的addrun方法添加到当前类中。
+        class_addMethod(self, sel, (IMP)addrun, &quot;v@:&quot;);
+    }
+    
+    return [super resolveInstanceMethod:sel];
+}
+
+@end
+
+//  main.m
+//  消息转发
+
+
+#import &lt;Foundation/Foundation.h&gt;
+#import &quot;Person.h&quot;
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+    //执行代码
+        Person *man = [Person new];
+        [man run];
+    }
+    return 0;
+}
+</code></pre>
+
+<p>结果为：<img src="media/15041475233104/15041480973843.jpg" alt=""/><br/>
+说明执行了我们添加的那个方法，而并没有报错。</p>
+
+<h2 id="toc_1">第二种</h2>
+
+<p>我们可以动态的向类中添加方法来解决无选择子的问题，我们也可以选择转换接受者来选择可以处理该选择子的对象。</p>
+
+<p>首先当我们，没有处理第一种方法的时候，运行期系统会给我们第二个机会，询问是否有备用的接受者。我们就要实现<code>orwardingTargetForSelector</code>了</p>
+
+<p>我们举例来看：</p>
+
+<p>首先我们先创建一个新类Car，并且创建一个<code>run</code>方法：</p>
+
+<p><img src="media/15041475233104/15041487720558.jpg" alt=""/></p>
+
+<p>然后在Person.m中，不对<code>resolveInstanceMethod</code>进行任何处理，在<code>forwardingTargetForSelector</code>中返回一个<code>Car</code>实例：<br/>
+<img src="media/15041475233104/15041488721835.jpg" alt=""/></p>
+
+<p>然后继续执行<code>main.m</code>文件，运行为：<br/>
+<img src="media/15041475233104/15041489461207.jpg" alt=""/></p>
+
+<p>说明系统已经将所要实现方法的对象转换为<code>Car</code>的实例对象。</p>
+
+<h2 id="toc_2">第三种</h2>
+
+<p>如果前两种我们都没有实现的话，就会进入第三种，执行完整的消息转发机制。</p>
+
+<p>就会调用两个方法<code>methodSignatureForSelector</code>和<code>forwardInvocation</code></p>
+
+<p><code>methodSignatureForSelector</code>方法用来指定方法签名，返回<code>nil</code>表示不处理，否则会进入下一步调用<code>forwardInvocation</code>方法。其中这个签名就是给<code>forwardInvocation</code>中的参数<code>NSInvocation</code>调用的。</p>
+
+<p><img src="media/15041475233104/15041604848181.jpg" alt=""/></p>
+
+<p>开头我们要找的错误<code>unrecognized selector sent to instance</code>原因，原来就是因为<code>methodSignatureForSelector</code>这个方法中，由于没有找到<code>run</code>对应的实现方法，所以返回了一个空的方法签名，最终导致程序报错崩溃。</p>
+
+<p>所以我们需要做的是自己新建方法签名，再在<code>forwardInvocation</code>中用你要转发的那个对象调用这个对应的签名，这样也实现了消息转发。</p>
+
+<p>关于生成签名的类型<code>&quot;v@:&quot;</code>解释一下。每一个方法会默认隐藏两个参数，<code>self</code>、<code>_cmd</code>，<code>self</code>代表方法调用者，<code>_cmd</code>代表这个方法的<code>SEL</code>，签名类型就是用来描述这个方法的返回值、参数的，<code>v</code>代表返回值为<code>void</code>，<code>@</code>表示<code>self</code>，<code>:</code>表示<code>_cmd</code>。</p>
+
+<p><strong>所以第二个和第三个字符必须是<code>“@:”</code> ，第一个字符是返回类型.</strong></p>
+
+<p><strong>具体的可以看一下了解</strong>：<a href="https://developer.apple.com/library/etc/redirect/xcode/content/1189/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100">Type Encodeing</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15041406291157.html">
                 
                   <h1>第24条 将类的实现代码分散到便于管理的数个分类之中</h1>
@@ -663,238 +852,6 @@ if ([_delegate respondsToSelector:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15038893459243.html">
-                
-                  <h1>iOS 中协议和委托传值的用法</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>虽然之前一直听过和看过委托模式，但是并没有实际的操作。这次来实现一个简单的委托样例。来加深自己的了解。</p>
-
-<p>项目目录结构为：<br/>
-<img src="media/15038893459243/15039018875452.jpg" alt=""/></p>
-
-<p>首先我们创建一个协议：<code>ProtocolA</code></p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-@protocol ProtocolA &lt;NSObject&gt;
-
-@required
-
--(void)sendValue:(NSString*)str;
-
-
-@end
-</code></pre>
-
-<p>其中有一个方法<code>sendValue:</code>，由于加上了<code>@required</code>前缀，所以这个方法时必须实现的。如果想要一个方法是可选则实现与否，则要加上<code>@optional</code>。</p>
-
-<p>之后我们创建一个类<code>ClassA</code>：</p>
-
-<pre><code class="language-objc">//该类遵循ProtocolA，并且实现了它的方法
-
-//ClassA.h
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;ProtocolA.h&quot;
-
-@interface ClassA : NSObject&lt;ProtocolA&gt;
-
-@end
-
-//ClassA.m
-#import &quot;ClassA.h&quot;
-
-@implementation ClassA
-
--(void)sendValue:(NSString *)str{
-    NSLog(@&quot;我是传过来的值：%@&quot; , str);
-}
-
-@end
-
-</code></pre>
-
-<p>写到这里，我们大概可以猜到，我们想让<code>ClassA</code>的实例来接受一个委托实现<code>ProtocolA</code>中的方法。</p>
-
-<p>所以我们这里继续创建一个<code>ClassB</code>，让它来发出一个委托，让<code>ClassA</code>代替它实现。</p>
-
-<pre><code class="language-objc">//ClassB.h
-
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;ClassA.h&quot;
-
-@interface ClassB : NSObject
-//这里我们创建了一个delegate对象，用于设置委托对象。
-@property(weak,nonatomic) id&lt;ProtocolA&gt; delegate;
-//创建一个方法来执行委托操作
--(void)dowork;
-
-@end
-
-//ClassB.m
-
-#import &quot;ClassB.h&quot;
-
-@implementation ClassB
-
-//创建a的实例，将a设置为接受委托的对象。
--(void)dowork{
-    ClassA *a = [ClassA new];
-    self.delegate = a;
-    //当响应了委托方法时，执行sendValue：
-    if ([self.delegate respondsToSelector:@selector(sendValue:)]) { // 如果协议响应了sendValue:方法
-        [self.delegate sendValue:@&quot;Hello&quot;]; // 通知执行协议方法
-    }
-}
-
-@end
-</code></pre>
-
-<p>最后在<code>main.m</code>中，执行：</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-#import &quot;ClassB.h&quot;
-
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        ClassB *b = [ClassB new];
-        [b dowork];
-    }
-    return 0;
-}
-</code></pre>
-
-<p><strong>运行结果为：</strong><br/>
-<img src="media/15038893459243/15039016722409.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15038851180831.html">
-                
-                  <h1>第二十一条 理解Objective-C的错误模型</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><code>Objective-C</code>语言不例外的也有“异常”（exception)机制，但是与其它语言肯定存在差异。我们要重新学习一下。</p>
-
-<p>首先就是，<code>“自动引用计数”（Automatic ReferenceCounting, ARC)</code>在默认情况下不是<code>“异常安全的&quot;（exception safe)</code>。具体来说，这意味着：如果抛出异常，那么本应在作用域末尾释放的对象现在却不会自动释放了。<strong><font color=red>如果想生成“异常安全”的代码，可以通过设置编译器的标志来实现，不过这将引入一些额外代码，在不抛出异常时，也照样要执行这部分代码。</font></strong>需要打开的编译器标志叫做<code>-fobjc-arc-exceptions</code>。</p>
-
-<p>但是我们应该注意，<mark>Objective-C语言只有在极其罕见的情况下拋出异常，异常拋出之后，无须考虑恢复问题，而且应用程序此时也应该退出。</mark>这就是说，不用再编写复杂的“异常安全”代码了。</p>
-
-<p>异常只应该用于极其严重的错误，比如说，你编写了某个抽象基类，它的正确用法是先从中继承一个子类，然后使用这个子类。在这种情况下，如果有人直接使用了这个抽象基类，那么可以考虑抛出异常。</p>
-
-<p>与其他语言不同，Objective-C中没办法将某个类标识为“抽象 类”。要想达成类似效果，最好的办法是在那些子类必须覆写的超类方法里抛出异常。这样的话，只要有人直接创建抽象基类的实例并使用它，即会拋出异常：</p>
-
-<pre><code class="language-objc">-(void)mustOverrideMethod {
-NSString *reason = [NSStringstringWithFormat: 
-                    @&quot;%@ must be overridden&quot;,
-                    NSStringFromSelector(_cmd)];
-@throw [NSException
-    exceptionWithName:NSInternalInconsistencyException 
-    reason:reason 
-    userInfo：nil];
-}
-</code></pre>
-
-<p>既然异常只用于处理严重错误（fatal error,致命错误)，那么对其他错误怎么办呢？在出 现“不那么严重的错误&quot;（nonfatal error,非致命错误）时，Objective-C语言所用的编程范式为: 令方法返回<code>nil/0</code>,或是使用<code>NSError</code>，以表明其中有错误发生。例如，如果初始化方法无法根据传入的参数来初始化当前实例，那么就可以令其返回nil/0:</p>
-
-<pre><code class="language-objc">-(id)initWithValue:(id)value { 
-    if ((self = [super init])){
-        if ( /* Value means instance can11 be created */ ) { 
-        self = nil;
-     } else {
-        // Initialize instance
-        }
-     }
-    return self;
-}
-</code></pre>
-
-<p>在这种情况下，如果<code>if</code>语句发现无法用传人的参数值来初始化当前实例（比如这个方法 要求传入的value参数必须是<code>non-nil</code>的)，那么就把<code>self</code>设置成<code>nil</code>,这样的话，整个方法的 返回值也就是<code>nil</code>了。调用者发现初始化方法并没有把实例创建好，于是便可确定其中发生了错误。</p>
-
-<p><code>NSError</code>的用法更加灵活，因为经由此对象，我们可以把导致错误的原因回报给调用者。 <code>NSError</code>对象里封装了三条信息：</p>
-
-<ul>
-<li><p><strong>Error domain(错误范围，其类型为字符串）</strong><br/>
-错误发生的范围。也就是产生错误的根源，通常用一个特有的全局变量来定义。比方说，<code>“处理URL的子系统”（URL-handling subsystem)</code>在从URL中解析或取得数据时如果出错了，那么就会使用<code>NSURLErrorDomain</code>来表示错误范围。</p></li>
-<li><p><strong>Error code(错误码，其类型为整数）</strong><br/>
-独有的错误代码，用以指明在某个范围内具体发生了何种错误。某个特定范围内可能会发生一系列相关错误，这些错误情况通常采用<code>enum</code>来定义。例如，当<code>HTTP</code>请求出错时，可能会把<code>HTTP</code>状态码设为错误码。</p></li>
-<li><p><strong>Uesr info(用户信息，其类型为字典）</strong><br/>
-有关此错误的额外信息，其中或许包含一段“<code>本地化的描述”（localized description)</code>, 或许还含有导致该错误发生的另外一个错误，经由此种信息，可将相关错误串成一条 <code>“错误链”（chain of errors)</code>。</p></li>
-</ul>
-
-<p>NSError的一种常见用法是，经由方法的“输出参数”返回给调用者。比如像这样：</p>
-
-<pre><code class="language-objc">-(BOOL)doSomething: (NSError**)error
-</code></pre>
-
-<p>用例为：</p>
-
-<pre><code class="language-objc">NSError *error = nil;
-BOOL ret = [object doSomething:&amp;error];
-    if (error) {
-//There was an error
-}
-</code></pre>
-
-<p>也可以通过委托协议来传递此错误。有错误发生时，当前对象会把错误信息经由协议中的某个方法传给其<code>委托对象（delegate)</code>。这里不做过多说明。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>只有发生了可使整个应用程序崩溃的严重错误时，才应使用异常。</li>
-<li>在错误不那么严重的情况下，可以指派“委托方法”（delegate method)来处理错误，也可以把错误信息放在<code>NSError</code>对象里，经由“输出参数”返回给调用者。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -984,6 +941,18 @@ BOOL ret = [object doSomething:&amp;error];
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -997,18 +966,6 @@ BOOL ret = [object doSomething:&amp;error];
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

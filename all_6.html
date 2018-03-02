@@ -117,6 +117,142 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15130621165951.html">
+                
+                  <h1>Longest Palindromic Substring</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15130621165951/15130621284508.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string longestPalindrome(string s) {
+        if (s.empty()) return &quot;&quot;;
+        if (s.size() == 1) return s;
+        int min_start = 0, max_len = 1;
+        for (int i = 0; i &lt; s.size();) {
+            if (s.size() - i &lt;= max_len / 2) break;
+            int j = i, k = i;
+            while (k &lt; s.size()-1 &amp;&amp; s[k+1] == s[k]) ++k; // Skip duplicate characters.
+            i = k+1;
+            while (k &lt; s.size()-1 &amp;&amp; j &gt; 0 &amp;&amp; s[k + 1] == s[j - 1]) { ++k; --j; } // Expand.
+            int new_len = k - j + 1;
+            if (new_len &gt; max_len) { min_start = j; max_len = new_len; }
+        }
+        return s.substr(min_start, max_len);
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/12</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15130603513802.html">
+                
+                  <h1>Palindrome Pairs</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15130603513802/15130603727154.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool isPalindrome(string s) {
+        if (s.size() &lt;= 1) return true;
+        int i = 0;
+        int j = s.size() - 1;
+        while (i &lt; j) {
+            if (s[i++] != s[j--]) return false;
+        }
+
+        return true;
+    }
+
+    vector&lt;vector&lt;int&gt;&gt; palindromePairs(vector&lt;string&gt;&amp; words) {
+        vector&lt;vector&lt;int&gt;&gt; res;
+        if (!words.size()) return res;
+        unordered_map&lt;string, int&gt; word_idx;
+        for (int i = 0; i &lt; words.size(); ++i) {
+            word_idx[words[i]] = i;
+        }
+        vector&lt;int&gt; slu(2);
+        for (int i = 0; i &lt; words.size(); ++i) {
+            int len = words[i].length();
+            for (int l = 0; l &lt;= len; ++l) {
+                string left = words[i].substr(0, l);
+                string right = words[i].substr(l);
+                string rleft = left;
+                string rright = right;
+                reverse(rleft.begin(), rleft.end());
+                reverse(rright.begin(), rright.end());
+                if (word_idx.find(rleft) != word_idx.end()) {
+                    if (word_idx[rleft] != i &amp;&amp; isPalindrome(right)) {
+                        res.push_back({i,word_idx[rleft]});
+                    }
+
+                }
+                if (l != 0 &amp;&amp; word_idx.find(rright) != word_idx.end()) {
+                    if (word_idx[rright] != i &amp;&amp; isPalindrome(left)) {
+                        res.push_back({word_idx[rright],i});
+                    }
+
+                }
+
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/12</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15130426368802.html">
                 
                   <h1>Intersection of Two Arrays II</h1>
@@ -321,102 +457,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15129788527282.html">
-                
-                  <h1>Minimum Moves to Equal Array Elements</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15129788527282/15129788644532.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int minMoves(vector&lt;int&gt;&amp; nums) {
-        int n = nums.size();
-        if(n &lt;= 1)
-            return 0;
-        int mn = nums[0];   //mn为最小数字
-        int sum = nums[0];
-        for(int i = 1; i &lt; n; ++i)
-        {
-            mn = min(mn,nums[i]);
-            sum += nums[i];
-        }
-        return sum - mn*n;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/11</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15129760305793.html">
-                
-                  <h1>Range Addition II</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15129760305793/15129772098038.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maxCount(int m, int n, vector&lt;vector&lt;int&gt;&gt;&amp; ops) {
-        for (auto tmp:ops) {
-            m = min(m, tmp[0]);
-            n = min(n, tmp[1]);
-        }
-        return m*n;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/11</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -506,6 +546,18 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -519,18 +571,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

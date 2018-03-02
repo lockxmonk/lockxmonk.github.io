@@ -117,6 +117,118 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15121892650067.html">
+                
+                  <h1>K-diff Pairs in an Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15121892650067/15121892810535.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findPairs(vector&lt;int&gt;&amp; nums, int k) {
+        if (k&lt;0) {
+            return 0;
+        }
+        unordered_set&lt;int&gt; result;  //用集合避免重复
+        unordered_map&lt;int, int&gt; hash;   //hash表来映射所需数值
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if (hash.count(nums[i]+k)) {
+                result.insert(nums[i]+k);
+            }
+            if (hash.count(nums[i]-k)) {
+                result.insert(nums[i]);
+            }
+            hash[nums[i]] += 1;
+        }
+        return result.size();
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15121252648085.html">
+                
+                  <h1>Shortest Unsorted Continuous Subarray</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an integer array, you need to find one <strong>continuous</strong> subarray that if you only sort this subarray in ascending order, then the whole array will be sorted in ascending order, too.</p>
+
+<p>You need to find the <strong>shortest</strong> such subarray and output its length.</p>
+
+<p><img src="media/15121252648085/15121252900217.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findUnsortedSubarray(vector&lt;int&gt;&amp; nums) {
+        vector&lt;int&gt; sortNums = nums;
+        sort(sortNums.begin(), sortNums.end());
+        int str = 0,end = nums.size()-1;
+        while (nums[str]==sortNums[str]) {
+            if (str==end) {
+                return 0;
+            }
+            str++;
+        }
+        while (nums[end]==sortNums[end]) {
+            end--;
+        }
+        return end-str+1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15121123646545.html">
                 
                   <h1>Can Place Flowers</h1>
@@ -355,110 +467,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15120964350892.html">
-                
-                  <h1>Pascal's Triangle</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given numRows, generate the first numRows of Pascal&#39;s triangle.</p>
-
-<p>For example, given numRows = 5,<br/>
-Return<img src="media/15120964350892/15120964567125.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; generate(int numRows) {
-        vector&lt;vector&lt;int&gt;&gt;result(numRows);
-        for (int i = 0; i&lt;numRows; i++) {
-            result[i].resize(i+1);
-            result[i][0] = result[i][i] = 1;
-        
-            for (int j = 1; j&lt;i; j++) {
-                result[i][j] = result[i-1][j-1]+result[i-1][j];
-            }
-        }
-        return result;
-        
-     }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15120931328273.html">
-                
-                  <h1>Search Insert Position</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.</p>
-
-<p>You may assume no duplicates in the array.<br/>
-<img src="media/15120931328273/15120931550538.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
-        int result = 0;
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (nums[i]&gt;=target) {
-                return i;
-            }
-        }
-        return nums.size();
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -548,6 +556,18 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -561,18 +581,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

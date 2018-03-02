@@ -117,6 +117,109 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15129554975886.html">
+                
+                  <h1>Construct the Rectangle</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15129554975886/15129555123983.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; constructRectangle(int area) {
+        for(int mid = sqrt(area); mid&gt;0; mid--)
+            if (!(area%mid))
+                return {area/mid, mid};
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/11</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15128072112005.html">
+                
+                  <h1>Relative Ranks</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given scores of <strong>N</strong> athletes, find their relative ranks and the people with the top three highest scores, who will be awarded medals: &quot;Gold Medal&quot;, &quot;Silver Medal&quot; and &quot;Bronze Medal&quot;.</p>
+
+<p><img src="media/15128072112005/15128073582183.jpg" alt=""/></p>
+
+<p><code>pair</code>的用法和优先队列的使用</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;string&gt; findRelativeRanks(vector&lt;int&gt;&amp; nums) {
+        priority_queue&lt;pair&lt;int,int&gt; &gt; pq;
+        for(int i=0;i&lt;nums.size();i++)
+        {
+            pq.push(make_pair(nums[i],i));
+        }
+        vector&lt;string&gt; res(nums.size(),&quot;&quot;);
+        int count = 1;
+        for(int i=0; i&lt;nums.size();i++)
+        {
+            if(count==1) {res[pq.top().second] = &quot;Gold Medal&quot;; count++;}
+            else if(count==2) {res[pq.top().second] = &quot;Silver Medal&quot;; count++;}
+            else if(count==3) {res[pq.top().second] = &quot;Bronze Medal&quot;; count++;}
+            else {res[pq.top().second] = to_string(count); count++;}
+            pq.pop();
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15128043838038.html">
                 
                   <h1>Valid Anagram</h1>
@@ -309,145 +412,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15127884486398.html">
-                
-                  <h1>Base 7</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15127884486398/15127884572899.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string convertToBase7(int num) {
-        int x = abs(num); string res;
-        do {
-          res = to_string(x%7)+res;
-        } while (x/=7);
-        
-        return (num&gt;=0? &quot;&quot; : &quot;-&quot;) + res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15127864249320.html">
-                
-                  <h1>License Key Formatting</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15127864249320/15127864500019.jpg" alt=""/></p>
-
-<p>第一版：</p>
-
-<pre><code class="language-c++">    int log = 0;
-    string ele=&quot;&quot;;
-    string re=&quot;&quot;;
-    for (int i = S.length()-1; i&gt;=0; i--) {
-        if (S[i]!=&#39;-&#39;) {
-            log++;
-            S[i]=toupper(S[i]);
-            ele = S[i]+ele;
-        }
-        if (log==K||i==0) {
-            if (i==0) {
-                re = ele+re;
-            }else{
-                re = &#39;-&#39;+ele+re;
-            }
-            log = 0;
-            ele = &quot;&quot;;
-        }
-    }
-    return re[0]==&#39;-&#39;?re.substr(1,re.length()-1):re;
-</code></pre>
-
-<p>第二版：运用栈</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    string licenseKeyFormatting(string S, int K) {
-        stack&lt;string&gt; st;
-        string line;
-        for(int i=S.length()-1;i&gt;=0;i--){
-            if(S[i]==&#39;-&#39;) continue;
-            
-            if(line.length()&lt;K){
-                if(S[i]&gt;=&#39;a&#39; &amp;&amp; S[i]&lt;=&#39;z&#39;) line.insert(0, 1, S[i]-&#39;a&#39;+&#39;A&#39;);
-                else line.insert(0, 1, S[i]);
-                
-                if(line.length()==K){
-                    st.push(line);
-                    line=&quot;&quot;;
-                }
-            }
-        }
-        if(st.empty()) return line;
-        
-        if(line.length() == 0){
-            line += st.top();
-            st.pop();
-        }
-        while(!st.empty()){
-            line+=&#39;-&#39;;
-            line+=st.top();
-            st.pop();
-        }
-        return line;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/9</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -537,6 +501,18 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -550,18 +526,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

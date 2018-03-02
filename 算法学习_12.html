@@ -117,6 +117,133 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15123924891077.html">
+                
+                  <h1>Implement strStr()</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15123924891077/15123924935113.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int strStr(string haystack, string needle) {
+        int j = 0;  //标记needle的初始位置
+        int h = haystack.length(), n = needle.length();
+        if (!n) {
+            return 0;
+        }
+        for (int i =0; i&lt;h-n+1; i++) {
+            int tmp = i;
+            while (tmp&lt;h &amp;&amp; j&lt;n &amp;&amp; haystack[tmp]==needle[j]) {
+                tmp++;
+                j++;
+            }
+            if (j==n) {
+                return i;
+            }else{
+                j=0;
+            }
+        }
+        return -1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15123884479504.html">
+                
+                  <h1>String Compression</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of characters, compress it in-place.</p>
+
+<p>The length after compression must always be smaller than or equal to the original array.</p>
+
+<p>Every element of the array should be a character (not int) of length 1.</p>
+
+<p>After you are done modifying the input array in-place, return the new length of the array.</p>
+
+<p>Follow up:<br/>
+Could you solve it using only O(1) extra space?</p>
+
+<p><img src="media/15123884479504/15123884710226.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int compress(vector&lt;char&gt;&amp; chars) {
+        int tol = 1;    //统计相同字符的数量
+        for (int i = 0; i&lt;chars.size(); i++) {
+            while (i!=chars.size()-1 &amp;&amp; chars[i]==chars[i+1]) {
+                chars.erase(chars.begin()+i+1);
+                tol++;
+            }
+            int log = 0; //标记插入数字是1的情况
+            int logNum = 0;  //统计插入的数字个数
+            while (log==1||tol!=1 &amp;&amp; tol&gt;0) {
+                chars.insert(chars.begin()+i+1, char(tol%10+&#39;0&#39;));
+                tol/=10;
+                log = tol==1?tol:0;
+                logNum++;
+            }
+            i+=logNum;
+            tol = 1;
+        }
+        return chars.size();
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15123785215963.html">
                 
                   <h1>Count Binary Substrings</h1>
@@ -331,111 +458,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15122038176626.html">
-                
-                  <h1>Judge Route Circle</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15122038176626/15122038286763.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool judgeCircle(string moves) {
-        int UD = 0 ,LR = 0;
-        for(char a:moves){
-            if (a==&#39;U&#39;) {
-                UD++;
-            }else if (a==&#39;D&#39;){
-                UD--;
-            }else if (a==&#39;L&#39;){
-                LR++;
-            }else if (a==&#39;R&#39;){
-                LR--;
-            }
-        }
-        return (UD==0&amp;&amp;LR==0) ? 1:0;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/2</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15122027653799.html">
-                
-                  <h1>Self Dividing Numbers</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15122027653799/15122027840243.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; selfDividingNumbers(int left, int right) {
-        vector&lt;int&gt; v;
-        for (int i = left; i &lt;= right; ++i) {
-            int j= i;
-            bool ok = 1;
-            while (j) {
-                int d= (j%10);
-                if (d == 0 || i % d) ok = 0;
-                j/=10;
-            }
-            if (ok) v.push_back(i);
-        }
-        return v;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/2</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -525,6 +547,18 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -538,18 +572,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

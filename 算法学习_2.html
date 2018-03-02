@@ -117,6 +117,130 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15162389890253.html">
+                
+                  <h1>Length of Last Word</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<pre><code>![](media/15162389890253/15162389958774.jpg)
+</code></pre>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int lengthOfLastWord(string s) {
+        int len = s.size();
+        int cout = 0;
+        for (int i=len-1; i&gt;=0; i--) {
+            if(cout&gt;0&amp;&amp;s[i]==&#39; &#39;) break;
+
+            if (s[i]==&#39; &#39;) {
+                continue;
+            }else{
+                cout++;
+            }
+
+        }
+        return cout;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/18</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15155525710565.html">
+                
+                  <h1>Find matching parenthesis</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15155525710565/15155525754064.jpg" alt=""/><br/>
+<img src="media/15155525710565/15155525919147.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+int findParenMatch(NSString *s, int n) {
+    int res = -1;
+    NSString *tmp = [s substringWithRange:NSMakeRange(n, 1)];
+    if ([tmp isEqualToString:@&quot;(&quot;]) {
+        int logF = 0;
+        for (int i = n+1; i&lt;s.length; i++) {
+            NSString *tmpStrF = [s substringWithRange:NSMakeRange(i, 1)];
+            if ([tmpStrF isEqualToString:@&quot;(&quot;]) logF++;
+            if ([tmpStrF isEqualToString:@&quot;)&quot;]) {
+                logF--;
+                if (logF&lt;0) {
+                    res = i;
+                    break;
+                }
+            }
+        }
+    }else if ([tmp isEqualToString:@&quot;)&quot;]){
+        int logB = 0;
+        for (int i = n-1; i&gt;=0; i--) {
+            NSString *tmpStrB = [s substringWithRange:NSMakeRange(i, 1)];
+            if ([tmpStrB isEqualToString:@&quot;)&quot;]) logB++;
+            if ([tmpStrB isEqualToString:@&quot;(&quot;]) {
+                logB--;
+                if (logB&lt;0) {
+                    res = i;
+                    break;
+                }
+            }
+        }
+    }
+    return res;
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/10</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15152183997863.html">
                 
                   <h1>Where my anagrams at?</h1>
@@ -388,117 +512,6 @@ NSString *pigIt(NSString *s) {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15143439533653.html">
-                
-                  <h1>Sum without highest and lowest number</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15143439533653/15143439550035.jpg" alt=""/></p>
-
-<pre><code class="language-objc">int sum(int* numbers, int numbersCount)
-{
-    if(numbersCount&lt;=1) return 0;
-    int min = INT_MAX;
-    int max = INT_MIN;
-    int sum = 0;
-    for (int i = 0; i&lt;numbersCount; i++)
-    {
-        if(numbers[i]&gt;max) max = numbers[i];
-        if(numbers[i]&lt;min) min = numbers[i];
-        sum+= numbers[i];
-    }
-    return sum-min-max;
-}
-
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15142765984953.html">
-                
-                  <h1>Find the missing term in an Arithmetic Progression</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15142765984953/15142766000094.jpg" alt=""/></p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-NSNumber *findMissing(NSArray *list) {
-    int len = [list count];
-    int n = len+1;
-    int d1 = [list[1] intValue]-[list[0] intValue];
-    int d2 = [list[len-1] intValue]-[list[len-2] intValue];
-    int d = 0;
-    if (d1&lt;0) {
-        d = d1&gt;d2?d1:d2;
-    }else{
-        d = d1&lt;d2?d1:d2;
-    }
-    if (n == 3) {
-        return @(([[list firstObject] intValue]+[[list lastObject] intValue])/2);
-    }
-    int num = [[list firstObject] intValue];
-    for (int i = 0;i&lt;len;i++) {
-        if ([list[i] intValue]!=num) {
-            return @(num);
-        }
-        num+=d;
-    }
-    
-    return @(0);
-}
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -588,6 +601,18 @@ NSNumber *findMissing(NSArray *list) {
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -601,18 +626,6 @@ NSNumber *findMissing(NSArray *list) {
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

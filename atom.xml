@@ -4,13 +4,1061 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2018-01-22T15:32:31+08:00</updated>
+  <updated>2018-02-27T17:05:56+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[2015年蓝桥杯省赛C/C++ A组题解]]></title>
+    <link href="https://lockxmonk.github.io/15197807986881.html"/>
+    <updated>2018-02-28T09:19:58+08:00</updated>
+    <id>https://lockxmonk.github.io/15197807986881.html</id>
+    <content type="html"><![CDATA[
+<ul>
+<li>
+<a href="#toc_0">方程整数解</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_1">include <bits/stdc++.h></a>
+<ul>
+<li>
+<a href="#toc_2">星系炸弹</a>
+</li>
+<li>
+<a href="#toc_3">Excel电子表格法：</a>
+</li>
+<li>
+<a href="#toc_4">奇妙的数字</a>
+</li>
+<li>
+<a href="#toc_5">格子中输出</a>
+</li>
+<li>
+<a href="#toc_6">九数组分数</a>
+</li>
+<li>
+<a href="#toc_7">牌型种数</a>
+</li>
+<li>
+<a href="#toc_8">手链样式</a>
+</li>
+<li>
+<a href="#toc_9">饮料换购</a>
+</li>
+</ul>
+
+
+<h2 id="toc_0">方程整数解</h2>
+
+<p>方程: a<sup>2</sup> + b<sup>2</sup> + c<sup>2</sup> = 1000 <br/>
+这个方程有整数解吗？有：a,b,c=6,8,30 就是一组解。 <br/>
+你能算出另一组合适的解吗？ <br/>
+请填写该解中最小的数字。 <br/>
+注意：你提交的应该是一个整数，不要填写任何多余的内容或说明性文字。</p>
+
+<p>直接暴力枚举。。<br/>
+```c++</p>
+
+<h1 id="toc_1">include <bits/stdc++.h></h1>
+
+<p>using namespace std;</p>
+
+<p>int main()<br/>
+{<br/>
+    for (int i=1;i&lt;=33;i++) {<br/>
+        for (int j=i;j&lt;=33;j++) {<br/>
+            for (int k=j;k&lt;=33;k++) {<br/>
+                if (i<em>i+j</em>j+k*k==1000) {<br/>
+                    printf(&quot;%d %d %d\n&quot;,i,j,k);<br/>
+                }<br/>
+            }<br/>
+        }<br/>
+    }<br/>
+    return 0;<br/>
+}<br/>
+```</p>
+
+<p>答案是10.</p>
+
+<h2 id="toc_2">星系炸弹</h2>
+
+<p>在X星系的广袤空间中漂浮着许多X星人造“炸弹”，用来作为宇宙中的路标。 <br/>
+每个炸弹都可以设定多少天之后爆炸。 <br/>
+比如：阿尔法炸弹2015年1月1日放置，定时为15天，则它在2015年1月16日爆炸。 <br/>
+有一个贝塔炸弹，2014年11月9日放置，定时为1000天，请你计算它爆炸的准确日期。 <br/>
+请填写该日期，格式为 yyyy-mm-dd <br/>
+即4位年份2位月份2位日期。比如： <br/>
+2015-02-19 <br/>
+请严格按照格式书写。不能出现其它文字或符号。</p>
+
+<p>这个直接excel或者手算就可以了。。</p>
+
+<p>计算： <br/>
+    2014.11. 9----2015. 1. 1       53天<br/><br/>
+    2015. 1. 1 ----2017. 1. 1     731天<br/><br/>
+    2017. 1. 1 ----2017. 8. 1     212天<br/><br/>
+    2017. 8. 1 ----2017. 8. 5      4天<br/>
+    53+731+212+4=1000天</p>
+
+<h2 id="toc_3">Excel电子表格法：</h2>
+
+<p>打开Excel电子表格，在单元格A1中输入2014/11/9，在单元格B1中输入公式=A1+1000即可得到答案。<br/>
+但是Excel中有效日期为1900年1月1日以后的日期，1900年以前的日期无法正常显示。<img src="media/15197807986881/15197811893178.jpg" alt=""/></p>
+
+<h2 id="toc_4">奇妙的数字</h2>
+
+<p>小明发现了一个奇妙的数字。它的平方和立方正好把0~9的10个数字每个用且只用了一次。 <br/>
+你能猜出这个数字是多少吗？ <br/>
+请填写该数字，不要填写任何多余的内容。</p>
+
+<p>还是暴力枚举就可以了。</p>
+
+<pre><code class="language-c++">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int b[10];
+
+void solu(int x,int b[])
+{
+    while (x) {
+        b[x%10]++;
+        x/=10;
+    }
+}
+
+int main()
+{
+    for (int i=1,j;i&lt;9999;i++) {
+        memset(b,0,sizeof(b));
+        solu(i*i,b);
+        solu(i*i*i,b);
+        for (j=0;j&lt;=9;j++)
+            if (b[j]!=1) break;
+        //每个b[i]都等于1，j才会大于9
+        if (j&gt;9) {
+            printf(&quot;%d\n&quot;,i);
+            break;
+        }
+    }
+    return 0;
+}
+</code></pre>
+
+<h2 id="toc_5">格子中输出</h2>
+
+<p>StringInGrid函数会在一个指定大小的格子中打印指定的字符串。 <br/>
+要求字符串在水平、垂直两个方向上都居中。 <br/>
+如果字符串太长，就截断。 <br/>
+如果不能恰好居中，可以稍稍偏左或者偏上一点。 <br/>
+<strong>下面的程序实现这个逻辑，请填写划线部分缺少的代码。</strong></p>
+
+<pre><code class="language-c++">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+
+void StringInGrid(int width, int height, const char* s)
+{
+    int i,k;
+    char buf[1000];
+    strcpy(buf, s);
+    if(strlen(s)&gt;width-2) buf[width-2]=0;
+    
+    printf(&quot;+&quot;);
+    for(i=0;i&lt;width-2;i++) printf(&quot;-&quot;);
+    printf(&quot;+\n&quot;);
+    
+    for(k=1; k&lt;(height-1)/2;k++){
+        printf(&quot;|&quot;);
+        for(i=0;i&lt;width-2;i++) printf(&quot; &quot;);
+        printf(&quot;|\n&quot;);
+    }
+    
+    printf(&quot;|&quot;);
+    
+    printf(&quot;%*s%s%*s&quot;,_____________________________________________);  //填空
+              
+    printf(&quot;|\n&quot;);
+    
+    for(k=(height-1)/2+1; k&lt;height-1; k++){
+        printf(&quot;|&quot;);
+        for(i=0;i&lt;width-2;i++) printf(&quot; &quot;);
+        printf(&quot;|\n&quot;);
+    }   
+    
+    printf(&quot;+&quot;);
+    for(i=0;i&lt;width-2;i++) printf(&quot;-&quot;);
+    printf(&quot;+\n&quot;);  
+}
+
+int main()
+{
+    StringInGrid(20,6,&quot;abcd1234&quot;);
+    return 0;
+}
+</code></pre>
+
+<p>很明显，填空的上面是输出上半部分，下面是输出下半部分，所以我们填的这个就是正中间那行。 <br/>
+要做这题首先要知道<code>%*s</code>是个什么。。。<br/>
+反正当年是没填出的居多 <strong>输出控制符</strong> <br/>
+也就是说碰到<code>*</code>的时候我们要额外给一个整型参数控制宽度。</p>
+
+<p>我们看到第9行，buf已经完成了截断，而s没有截断，所以我们要用也只能用buf。 <br/>
+然后我们算出左边右边的宽度，<strong>值得注意的是，左右的宽度表达式是不一样的。 <br/>
+因为题目里说了不对称是要靠左，</strong>可以把abcd1234最后的4去掉看看效果。 <br/>
+感觉查了这么多博客都没一个人填对的。。。唉= =</p>
+
+<p><code>答案：(width-strlen(buf)-2)/2,&quot;&quot;,buf,(width-strlen(buf)-2+1)/2,&quot;&quot;</code></p>
+
+<h2 id="toc_6">九数组分数</h2>
+
+<p>1,2,3…9 这九个数字组成一个分数，其值恰好为1/3，如何组法？ <br/>
+下面的程序实现了该功能，请填写划线部分缺失的代码。</p>
+
+<pre><code class="language-c++">#include &lt;stdio.h&gt;
+
+void test(int x[])
+{
+    int a = x[0]*1000 + x[1]*100 + x[2]*10 + x[3];
+    int b = x[4]*10000 + x[5]*1000 + x[6]*100 + x[7]*10 + x[8];
+
+    if(a*3==b) printf(&quot;%d / %d\n&quot;, a, b);
+}
+
+void f(int x[], int k)
+{
+    int i,t;
+    if(k&gt;=9){
+        test(x);
+        return;
+    }
+
+    for(i=k; i&lt;9; i++){
+        {t=x[k]; x[k]=x[i]; x[i]=t;}
+        f(x,k+1);
+        _________________________________ // 填空处
+    }
+}
+
+int main()
+{
+    int x[] = {1,2,3,4,5,6,7,8,9};
+    f(x,0);  
+    return 0;
+}
+</code></pre>
+
+<p>这主要考的是回溯的基本概念 回溯资料<br/><br/>
+简单的说这一次做的改变肯定要复原。</p>
+
+<p><strong>答案：{t=x[k]; x[k]=x[i]; x[i]=t;}</strong></p>
+
+<h2 id="toc_7">牌型种数</h2>
+
+<p>小明被劫持到X赌城，被迫与其他3人玩牌。 <br/>
+一副扑克牌（去掉大小王牌，共52张），均匀发给4个人，每个人13张。 <br/>
+这时，小明脑子里突然冒出一个问题： <br/>
+如果不考虑花色，只考虑点数，也不考虑自己得到的牌的先后顺序，自己手里能拿到的初始牌型组合一共有多少种呢？ </p>
+
+<p>请填写该整数，不要填写任何多余的内容或说明文字。</p>
+
+<p>dfs，当然首先要知道每个数字都有四张牌。</p>
+
+<pre><code class="language-c++">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int cnt[15],ans=0;
+
+void dfs(int dep,int last)
+{
+    if (dep&gt;13) {
+        ans++;
+        return;
+    }
+    for (int i=last;i&lt;=13;i++) {
+        if (cnt[i]&lt;4) {
+            cnt[i]++;
+            dfs(dep+1,i);
+            cnt[i]--;
+        }
+    }
+}
+
+int main()
+{
+    dfs(1,1);
+    printf(&quot;%d\n&quot;,ans);
+    return 0;
+}
+</code></pre>
+
+<p>答案：3598180</p>
+
+<h2 id="toc_8">手链样式</h2>
+
+<p>小明有3颗红珊瑚，4颗白珊瑚，5颗黄玛瑙。 <br/>
+他想用它们串成一圈作为手链，送给女朋友。 <br/>
+现在小明想知道：如果考虑手链可以随意转动或翻转，一共可以有多少不同的组合样式呢？ 请你提交该整数。不要填写任何多余的内容或说明性的文字。</p>
+
+<pre><code class="language-c++">#include &lt;cstdio&gt;
+#include &lt;cstring&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int res[10000][12],a[12];
+
+bool same(int a[],int b[])
+{
+    for (int k=0;k&lt;12;k++) {
+        bool f=true;
+        for (int i=0;i&lt;12;i++) {
+            if (a[i]!=b[(i+k)%12]) {        //因为是环形，不固定起点。所以用(i+k)%12
+                f=false;
+                break;
+            }
+        }
+        if (f) return true;
+        f=true;
+        for (int i=0;i&lt;12;i++) {
+            if (a[11-i]!=b[(i+k)%12]) {     //又因为可以翻转所以 从左边或者右边都应该检查。
+                f=false;
+                break;
+            }
+        }
+        if (f) return true;
+    }
+    return false;
+}
+
+int main()
+{
+    int ans=0;
+    a[0]=a[1]=a[2]=1;
+    a[3]=a[4]=a[5]=a[6]=2;
+    a[7]=a[8]=a[9]=a[10]=a[11]=3;
+    do {
+        bool ok=true;
+        for (int i=1;i&lt;=ans;i++) {
+            if (same(res[i],a)) {
+                ok=false;
+                break;
+            }
+        }
+        if (ok) {
+            ans++;
+            for (int i=0;i&lt;12;i++) {
+                res[ans][i]=a[i];
+            }
+        }
+    } while (next_permutation(a,a+12));
+    printf(&quot;%d\n&quot;,ans);
+    return 0;
+}
+
+</code></pre>
+
+<p>首先来分析一下题目：3类珠子，一共12个，我们用字符串a=&quot;333444455555“表示，要求环形的排列数，注意理解可以随意转动或翻转，这跟直线型的有不同。举个例子：</p>
+
+<p>例如，在直线型排列中a=&quot;333444455555“ 和 b=&quot;444455555333“ 是不同的排列，原因是直线型的起点是固定的，对应位置元素只要有一个不同，则排列不同。但是在环形里面，由于可以任意转动，也就是起点不固定的，当b以第一个3为起点时往右数时，它就和a完全一样了。另外，任意翻转的意思是b不但起点不固定，而且排列的方向可以往右数，也可以往左数。</p>
+
+<p>dfs写起来比较难受，这题就用next_permutation，改函数的方法是对数组从低到高逐次进行全排列。若可以进行排列就返回true，反之false<br/>
+所以只要把所有答案都记录下来，每次都正反判断一遍即可。</p>
+
+<h2 id="toc_9">饮料换购</h2>
+
+<p>乐羊羊饮料厂正在举办一次促销优惠活动。乐羊羊C型饮料，凭3个瓶盖可以再换一瓶C型饮料，并且可以一直循环下去(但不允许暂借或赊账)。<br/>
+请你计算一下，如果小明不浪费瓶盖，尽量地参加活动，那么，对于他初始买入的n瓶饮料，最后他一共能喝到多少瓶饮料。</p>
+
+<p>输入：一个整数n，表示开始购买的饮料数量（0 &lt; n &lt; 10000） <br/>
+输出：一个整数，表示实际得到的饮料数<br/>
+例如： <br/>
+用户输入： <br/>
+100 <br/>
+程序应该输出： <br/>
+149<br/>
+用户输入： <br/>
+101 <br/>
+程序应该输出： <br/>
+151<br/>
+资源约定： <br/>
+峰值内存消耗 &lt; 256M <br/>
+CPU消耗 &lt; 1000ms</p>
+
+<p>这道题简单模拟即可。</p>
+
+<pre><code class="language-c++">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int main()
+{
+    int s,n;
+    scanf(&quot;%d&quot;,&amp;n);
+    s=n;
+    while (n&gt;=3) {
+        s+=n/3;
+        n=n/3+n%3;
+    }
+    printf(&quot;%d\n&quot;,s);
+    return 0;
+}
+</code></pre>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[2016年第七届蓝桥杯C/C++程序设计本科B组省赛]]></title>
+    <link href="https://lockxmonk.github.io/15196931743279.html"/>
+    <updated>2018-02-27T08:59:34+08:00</updated>
+    <id>https://lockxmonk.github.io/15196931743279.html</id>
+    <content type="html"><![CDATA[
+<ul>
+<li>
+<a href="#toc_0">1.煤球数目</a>
+</li>
+<li>
+<a href="#toc_1">2.生日蜡烛</a>
+</li>
+<li>
+<a href="#toc_2">3.凑算式</a>
+</li>
+<li>
+<a href="#toc_3">4.快速排序</a>
+</li>
+<li>
+<a href="#toc_4">网友年龄（A组）</a>
+</li>
+<li>
+<a href="#toc_5">方格填数</a>
+</li>
+<li>
+<a href="#toc_6">消除尾一</a>
+</li>
+<li>
+<a href="#toc_7">寒假作业</a>
+</li>
+<li>
+<a href="#toc_8">剪邮票</a>
+</li>
+<li>
+<a href="#toc_9">四平方和</a>
+</li>
+<li>
+<a href="#toc_10">密码脱落</a>
+</li>
+</ul>
+
+
+<h2 id="toc_0">1.煤球数目</h2>
+
+<p>有一堆煤球，堆成三角棱锥形。具体：<br/>
+第一层放1个，<br/>
+第二层3个（排列成三角形），<br/>
+第三层6个（排列成三角形），<br/>
+第四层10个（排列成三角形），<br/>
+....<br/>
+如果一共有100层，共有多少个煤球？</p>
+
+<p>请填表示煤球总数目的数字。</p>
+
+<p>思路：1 2 3 4 5 6……这一个等差数列的前n项和为(1+n)*n/2</p>
+
+<p>第1层的煤球数目为1</p>
+
+<p>第2层的煤球数目为1+2</p>
+
+<p>第3层的煤球数目为1+2+3</p>
+
+<p>……</p>
+
+<p>第i层的煤球数组为(1+n)*n/2</p>
+
+<pre><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+int main()
+{
+    int sum=0,n;
+    cin&gt;&gt;n;
+    for(int i=1;i&lt;=n;i++)
+    {
+        sum+=i*(i+1)/2;
+    }
+    cout&lt;&lt;sum&lt;&lt;endl;
+    return 0;
+}
+
+</code></pre>
+
+<h2 id="toc_1">2.生日蜡烛</h2>
+
+<p>某君从某年开始每年都举办一次生日party，并且每次都要吹熄与年龄相同根数的蜡烛。<br/>
+现在算起来，他一共吹熄了236根蜡烛。<br/>
+请问，他从多少岁开始过生日party的？<br/>
+请填写他开始过生日party的年龄数</p>
+
+<p>思路：1 2 3 4 5 6……这一个等差数列的前n项和为(1+n)*n/2</p>
+
+<p>设从a岁开始过生日，到了b岁一共吹熄了236根蜡烛。</p>
+
+<p>即为：(a+b)(b-a+1)/2=236</p>
+
+<pre><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+int main()
+{
+    for(int i=1;i&lt;=100;i++)
+        for(int j=i;j&lt;=100;j++)
+        {
+            if((i+j)*(j-i+1)/2==236)
+                cout&lt;&lt;i&lt;&lt;&quot; &quot;&lt;&lt;j&lt;&lt;endl;
+        }
+    
+    return 0;
+}
+
+</code></pre>
+
+<h2 id="toc_2">3.凑算式</h2>
+
+<p>如图，这个算式中A~I代表1~9的数字，不同的字母代表不同的数字。<br/>
+<img src="media/15196931743279/15196949623359.jpg" alt=""/></p>
+
+<p>比如：<br/>
+6+8/3+952/714 就是一种解法，<br/>
+5+3/1+972/486 是另一种解法。</p>
+
+<p>这个算式一共有多少种解法？</p>
+
+<p>思路：暴力解决，注意每个字母代表的数字不相等。</p>
+
+<p>答案：29</p>
+
+<pre><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+int main()
+{
+    int sum=0;
+    for(int a=1; a&lt;=9; a++)
+        for(int b=1; b&lt;=9; b++)
+        {
+            if(a==b) continue;
+            for(int c=1; c&lt;=9; c++)
+            {
+                if(c==a||c==b) continue;
+                for(int d=1; d&lt;=9; d++)
+                {
+                    if(d==a||d==b||d==c)continue;
+                    for(int e=1; e&lt;=9; e++)
+                    {
+                        if(e==a||e==b||e==c||e==d) continue;
+                        for(int f=1; f&lt;=9; f++)
+                        {
+                            if(f==a||f==b||f==c||f==d||f==e) continue;
+                            for(int g=1; g&lt;=9; g++)
+                            {
+                                if(g==a||g==b||g==c||g==d||g==e||g==f) continue;
+                                for(int h=1; h&lt;=9; h++)
+                                {
+                                    if(h==a||h==b||h==c||h==d||h==e||h==f||h==g) continue;
+                                    for(int i=1; i&lt;=9; i++)
+                                    {
+                                        if(i==a||i==b||i==c||i==d||i==e||i==f||i==g||i==h) continue;
+                                        int t1=a*c*(100*g+10*h+i);
+                                        int t2=b*(100*g+10*h+i);
+                                        int t3=c*(100*d+10*e+f);
+                                        int t4=10*c*(100*g+10*h+i);
+                                        if(t1+t2+t3==t4)
+                                            sum++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    cout&lt;&lt;sum&lt;&lt;endl;
+    return 0;
+}
+</code></pre>
+
+<h2 id="toc_3">4.快速排序</h2>
+
+<p>排序在各种场合经常被用到。<br/>
+快速排序是十分常用的高效率的算法。</p>
+
+<p>其思想是：先选一个“标尺”，<br/>
+用它把整个队列过一遍筛子，<br/>
+以保证：其左边的元素都不大于它，其右边的元素都不小于它。</p>
+
+<p>这样，排序问题就被分割为两个子区间。<br/>
+再分别对子区间排序就可以了。</p>
+
+<p>下面的代码是一种实现，请分析并填写划线部分缺少的代码。</p>
+
+<pre><code class="language-c++">#include &lt;stdio.h&gt;
+
+void swap(int a[], int i, int j)
+{
+    int t = a[i];
+    a[i] = a[j];
+    a[j] = t;
+}
+
+int partition(int a[], int p, int r)
+{
+    int i = p;
+    int j = r + 1;
+    int x = a[p];
+    while(1){
+        while(i&lt;r &amp;&amp; a[++i]&lt;x);
+        while(a[--j]&gt;x);
+        if(i&gt;=j) break;
+        swap(a,i,j);
+    }
+    _______________;//填空位置
+    return j;
+}
+
+void quicksort(int a[], int p, int r)
+{
+    if(p&lt;r){
+        int q = partition(a,p,r);
+        quicksort(a,p,q-1);
+        quicksort(a,q+1,r);
+    }
+}
+    
+int main()
+{
+    int i;
+    int a[] = {5,13,6,24,2,8,19,27,6,12,1,17};
+    int N = 12;
+    
+    quicksort(a, 0, N-1);
+    
+    for(i=0; i&lt;N; i++) printf(&quot;%d &quot;, a[i]);
+    printf(&quot;\n&quot;);
+    
+    return 0;
+}
+
+</code></pre>
+
+<p>思路：快速排序，填空位置为经过比较之后，将最初选的“标尺”放在中间，即：标尺左边的数小于标尺，右边的数则大于它。注意不要多填分号。</p>
+
+<p>答案：<code>swap(a,p,j)</code></p>
+
+<h2 id="toc_4">网友年龄（A组）</h2>
+
+<p>某君新认识一网友。 当问及年龄时，他的网友说： “我的年龄是个2位数，我比儿子大27岁, 如果把我的年龄的两位数字交换位置，刚好就是我儿子的年龄” <br/>
+请你计算：网友的年龄一共有多少种可能情况？ <br/>
+提示：30岁就是其中一种可能哦. 请填写表示可能情况的种数。 <br/>
+注意：你提交的应该是一个整数，不要填写任何多余的内容或说明性文字。</p>
+
+<pre><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+int main()
+{
+    int m = 0;
+    for(int i=0;i&lt;=9;i++)
+        for(int j=0;j&lt;=9;j++)
+        {
+            if(9*(i-j)==27){
+                m++;
+            }
+                
+        }
+    cout&lt;&lt;m&lt;&lt;endl;
+    return 0;
+}
+
+</code></pre>
+
+<p><strong>枚举一下：7</strong></p>
+
+<h2 id="toc_5">方格填数</h2>
+
+<p>如下的10个格子 <br/>
+<img src="media/15196931743279/15196986302778.jpg" alt=""/><br/>
+填入0~9的数字。要求：连续的两个数字不能相邻。 （左右、上下、对角都算相邻） <br/>
+一共有多少种可能的填数方案？ <br/>
+请填写表示方案数目的整数。 <br/>
+注意：你提交的应该是一个整数，不要填写任何多余的内容或说明性文字。</p>
+
+<pre><code class="language-c++">#include &lt;stdio.h&gt;
+#include &lt;math.h&gt;
+#include &lt;stdlib.h&gt;
+using namespace std;
+
+/*本来要判断八个格子，
+ *但是由于是从左往右从上往下填的，
+ *只要判断左、左上、上、右上
+ */
+const int dx[]={0,-1,-1,-1};
+const int dy[]={-1,-1,0,1};
+const int INF=1e9;
+bool used[10];
+int ans=0;
+int a[5][5];
+
+bool alright(int n,int x,int y)
+{
+    for (int i=0;i&lt;4;i++) {
+        int xx=x+dx[i],yy=y+dy[i];
+        if (xx&lt;1||yy&lt;1||xx&gt;3||yy&gt;4) continue;
+        if (abs(n-a[xx][yy])==1) return false;
+    }
+    return true;
+}
+
+void dfs(int x,int y)
+{
+    if (x==3&amp;&amp;y==4) {
+        ans++;
+        return;
+    }
+    for (int i=0;i&lt;=9;i++) {
+        if (!used[i]&amp;&amp;alright(i,x,y)) {
+            a[x][y]=i;
+            used[i]=true;
+            if (y==4) dfs(x+1,1);
+            else dfs(x,y+1);
+            used[i]=false;
+            a[x][y]=-INF;
+        }
+    }
+}
+
+int main()
+{
+    for (int i=1;i&lt;=3;i++) {
+        for (int j=1;j&lt;=4;j++) {
+            a[i][j]=-INF;
+        }
+    }
+    dfs(1,2);
+    printf(&quot;%d\n&quot;,ans);
+    return 0;
+}
+
+</code></pre>
+
+<p><strong>正确答案：1580</strong></p>
+
+<h2 id="toc_6">消除尾一</h2>
+
+<p>下面的代码把一个整数的二进制表示的最右边的连续的1全部变成0 <br/>
+如果最后一位是0，则原数字保持不变。 <br/>
+如果采用代码中的测试数据，应该输出：</p>
+
+<blockquote>
+<p>00000000000000000000000001100111     00000000000000000000000001100000<br/>
+00000000000000000000000000001100     00000000000000000000000000001100  </p>
+</blockquote>
+
+<p>请仔细阅读程序，填写划线部分缺少的代码。</p>
+
+<pre><code class="language-c++">#include &lt;stdio.h&gt;
+
+void f(int x) 
+{  
+    int i; 
+    for(i=0; i&lt;32; i++) printf(&quot;%d&quot;, (x&gt;&gt;(31-i))&amp;1);  
+    printf(&quot;   &quot;);
+
+    x = _______________________;   
+
+    for(i=0; i&lt;32; i++) printf(&quot;%d&quot;, (x&gt;&gt;(31-i))&amp;1);  
+    printf(&quot;\n&quot;);  
+}
+
+int main() 
+{ 
+    f(103);  
+    f(12);  
+    return 0; 
+}
+</code></pre>
+
+<p>要消除x末尾所有的1，可以先把x加上1：</p>
+
+<p>00000000000000000000000001100111 + 1 =<br/>
+00000000000000000000000001101000</p>
+
+<p>答案为：x&amp;(x+1)</p>
+
+<h2 id="toc_7">寒假作业</h2>
+
+<p>现在小学的数学题目也不是那么好玩的。 <br/>
+看看这个寒假作业： <br/>
+□ + □ = □ <br/>
+□ - □ = □ <br/>
+□ × □ = □ <br/>
+□ ÷ □ = □ <br/>
+每个方块代表1~13中的某一个数字，但不能重复。 <br/>
+比如： <br/>
+6 + 7 = 13 <br/>
+9 - 8 = 1 <br/>
+3 * 4 = 12 <br/>
+10 / 2 = 5 <br/>
+以及： <br/>
+7 + 6 = 13 <br/>
+9 - 8 = 1 <br/>
+3 * 4 = 12 <br/>
+10 / 2 = 5 <br/>
+就算两种解法。（加法，乘法交换律后算不同的方案） <br/>
+你一共找到了多少种方案？ <br/>
+请填写表示方案数目的整数。 <br/>
+注意：你提交的应该是一个整数，不要填写任何多余的内容或说明性文字。</p>
+
+<pre><code class="language-c++">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+bool used[15];
+int a[15];
+int ans=0;
+
+void dfs(int dep)
+{
+    if (dep==13) {
+        //必须整除，变成乘法判断
+        if (a[10]==a[11]*a[12]) ans++;
+        return;
+    }
+    if (dep==10) {
+        if (a[7]*a[8]!=a[9]) return;
+    }
+    if (dep==7) {
+        if (a[4]-a[5]!=a[6]) return;
+    }
+    if (dep==4) {
+        if (a[1]+a[2]!=a[3]) return;
+    }
+    for (int i=1;i&lt;=13;i++) {
+        if (!used[i]) {
+            used[i]=true;
+            a[dep]=i;
+            dfs(dep+1);
+            a[dep]=-1;
+            used[i]=false;
+        }
+    }
+}
+
+int main()
+{
+    dfs(1);
+    printf(&quot;%d\n&quot;,ans);
+    return 0;
+}
+</code></pre>
+
+<p>**答案：64 **</p>
+
+<h2 id="toc_8">剪邮票</h2>
+
+<p>如【图1.jpg】, 有12张连在一起的12生肖的邮票。 <br/>
+现在你要从中剪下5张来，要求必须是连着的。 （仅仅连接一个角不算相连） <br/>
+比如，【图2.jpg】，【图3.jpg】中，粉红色所示部分就是合格的剪取。<img src="media/15196931743279/15196995565395.jpg" alt=""/><br/>
+<img src="media/15196931743279/15196995582711.jpg" alt=""/><br/>
+<img src="media/15196931743279/15196995604055.jpg" alt=""/></p>
+
+<p>思路：先找到5个数的组合，然后从第一个数字开始遍历，经过上下左右操作检测5个数是否都被访问一遍，如果5个数都可以遍历到则种类+1。</p>
+
+<p>在原图中向上为-4，向下为+4，向左为-1，向右为+1，但是遇到3 4 5 7 8这种4+1=5但是这种情况不符合，所以重构一下原图：<br/>
+<img src="media/15196931743279/15196999942024.jpg" alt=""/></p>
+
+<p>这样，向上为-5，向下为+5，向左为-1，向右为+1，避免了每行最后一个+1后等于下一行第一个的情况。</p>
+
+<pre><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+int mp[12]= {1,2,3,4,6,7,8,9,11,12,13,14};
+int aa[5],vis[5],sum=0;
+int b[4]= {-1,1,-5,+5};
+void dfs(int n)
+{
+    for(int i=0; i&lt;4; i++)
+    {
+        int t=aa[n]+b[i];
+        if(t&lt;1||t&gt;14||t==5||t==10) continue;
+        for(int j=0; j&lt;5; j++)
+            if(!vis[j]&amp;&amp;aa[j]==t)
+            {
+                vis[j]=1;
+                dfs(j);
+            }
+    }
+}
+
+int main()
+{
+
+    for(int a=0; a&lt;12; a++)
+        for(int b=a+1; b&lt;12; b++)
+            for(int c=b+1; c&lt;12; c++)
+                for(int d=c+1; d&lt;12; d++)
+                    for(int e=d+1; e&lt;12; e++)
+                    {
+                        aa[0]=mp[a];
+                        aa[1]=mp[b];
+                        aa[2]=mp[c];
+                        aa[3]=mp[d];
+                        aa[4]=mp[e];
+                        for(int i=0; i&lt;5; i++)
+                            vis[i]=0;
+                        vis[0]=1;
+                        dfs(0);
+                        int flag=1;;
+                        for(int i=0; i&lt;5; i++)
+                        {
+                            if(vis[i]!=1)
+                            {
+                                flag=0;
+                                break;
+                            }
+                        }
+                        if(flag==0) continue;
+                        else
+                            sum++;
+                    }
+
+    cout&lt;&lt;sum&lt;&lt;endl;
+
+    return 0;
+}
+</code></pre>
+
+<p><strong>答案：116</strong></p>
+
+<h2 id="toc_9">四平方和</h2>
+
+<p>四平方和定理，又称为拉格朗日定理： <br/>
+每个正整数都可以表示为至多4个正整数的平方和。 <br/>
+如果把0包括进去，就正好可以表示为4个数的平方和。<br/>
+比如： <br/>
+5 = 0<sup>2</sup> + 0<sup>2</sup> + 1<sup>2</sup> + 2<sup>2</sup> <br/>
+7 = 1<sup>2</sup> + 1<sup>2</sup> + 1<sup>2</sup> + 2<sup>2</sup> <br/>
+（<sup>符号表示乘方的意思）</sup><br/>
+对于一个给定的正整数，可能存在多种平方和的表示法。 <br/>
+要求你对4个数排序： 0 &lt;= a &lt;= b &lt;= c &lt;= d <br/>
+并对所有的可能表示法按 a,b,c,d 为联合主键升序排列，最后输出第一个表示法<br/>
+程序输入为一个正整数N (N&lt;5000000) <br/>
+要求输出4个非负整数，按从小到大排序，中间用空格分开<br/>
+例如，输入： <br/>
+5 <br/>
+则程序应该输出： <br/>
+0 0 1 2 <br/>
+再例如，输入： <br/>
+12 <br/>
+则程序应该输出： <br/>
+0 2 2 2 <br/>
+再例如，输入： <br/>
+773535 <br/>
+则程序应该输出： <br/>
+1 1 267 838<br/>
+资源约定： <br/>
+峰值内存消耗 &lt; 256M <br/>
+CPU消耗 &lt; 3000ms</p>
+
+<p>直接暴力解决。。</p>
+
+<pre><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;math.h&gt;
+using namespace std;
+int mp[12]= {1,2,3,4,6,7,8,9,11,12,13,14};
+int aa[5],vis[5],sum=0;
+int b[4]= {-1,1,-5,+5};
+
+void resolve(int n){
+    for (int d = 0; d&lt;=sqrt(n); d++) {
+        for (int c=0; c&lt;=sqrt(n); c++) {
+            for (int b=0; b&lt;=sqrt(n); b++) {
+                for (int a=0; a&lt;=sqrt(n); a++) {
+                    if (a*a+b*b+c*c+d*d==n) {
+                        cout&lt;&lt;d&lt;&lt;c&lt;&lt;b&lt;&lt;a&lt;&lt;endl;
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+int main()
+{
+    int n=0;
+    cin&gt;&gt;n;
+    resolve(n);
+    return 0;
+}
+
+</code></pre>
+
+<h2 id="toc_10">密码脱落</h2>
+
+<p>X星球的考古学家发现了一批古代留下来的密码。 <br/>
+这些密码是由A、B、C、D 四种植物的种子串成的序列。 <br/>
+仔细分析发现，这些密码串当初应该是前后对称的（也就是我们说的镜像串）。 <br/>
+由于年代久远，其中许多种子脱落了，因而可能会失去镜像的特征。<br/>
+你的任务是： 给定一个现在看到的密码串，计算一下从当初的状态，它要至少脱落多少个种子，才可能会变成现在的样子。<br/>
+输入一行，表示现在看到的密码串（长度不大于1000） <br/>
+要求输出一个正整数，表示至少脱落了多少个种子。<br/>
+例如，输入： <br/>
+ABCBA <br/>
+则程序应该输出： <br/>
+0 <br/>
+再例如，输入： <br/>
+ABDCDCBABC <br/>
+则程序应该输出： <br/>
+3<br/>
+资源约定： <br/>
+峰值内存消耗 &lt; 256M <br/>
+CPU消耗 &lt; 1000ms</p>
+
+<hr/>
+
+<p>由于是对称的，所以本体可以使用动态规划来将原字符串跟逆序字符串进行比较，来求最大公共子序列（不是串，可以是不连续的）</p>
+
+<p>dp[i][j]保存的是原串的i号位置之前的所有字符跟逆序串的j号位置之前的所有字符的最大公共子序列（包括i,j号位置）</p>
+
+<p>最后用当前字符串长度n减去dp[n][n]就是结果，dp[n][n]是对所有字符进行计算之后的结果。</p>
+
+<hr/>
+
+<pre><code class="language-c++">#include &lt;cstdio&gt;
+#include &lt;cstring&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+char s[1010];
+int dp[1010][1010];
+
+int main()
+{
+    scanf(&quot;%s&quot;,s+1);
+    int n=strlen(s+1);
+    for (int i=1;i&lt;=n;i++) {
+        for (int j=1;j&lt;=n;j++) {
+            if (s[i]==s[n+1-j]) {
+                dp[i][j]=dp[i-1][j-1]+1;
+            } else {
+                dp[i][j]=max(dp[i-1][j],dp[i][j-1]);
+            }
+        }
+    }
+    printf(&quot;%d\n&quot;,n-dp[n][n]);
+    return 0;
+}
+</code></pre>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[2017第八届蓝桥杯C/C++ B组省赛]]></title>
@@ -1345,73 +2393,6 @@ NSString *pigIt(NSString *s) {
   NSMutableArray *result = [s componentsSeparatedByString: @&quot; &quot;];
   for (size_t i = 0; i &lt; [result count]; i++) result[i] = [[[result[i] substringFromIndex: 1] stringByAppendingString: [result[i] substringToIndex: 1]] stringByAppendingString: @&quot;ay&quot;];
   return [result componentsJoinedByString: @&quot; &quot;];
-}
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Sum without highest and lowest number]]></title>
-    <link href="https://lockxmonk.github.io/15143439533653.html"/>
-    <updated>2017-12-27T11:05:53+08:00</updated>
-    <id>https://lockxmonk.github.io/15143439533653.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15143439533653/15143439550035.jpg" alt=""/></p>
-
-<pre><code class="language-objc">int sum(int* numbers, int numbersCount)
-{
-    if(numbersCount&lt;=1) return 0;
-    int min = INT_MAX;
-    int max = INT_MIN;
-    int sum = 0;
-    for (int i = 0; i&lt;numbersCount; i++)
-    {
-        if(numbers[i]&gt;max) max = numbers[i];
-        if(numbers[i]&lt;min) min = numbers[i];
-        sum+= numbers[i];
-    }
-    return sum-min-max;
-}
-
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Find the missing term in an Arithmetic Progression]]></title>
-    <link href="https://lockxmonk.github.io/15142765984953.html"/>
-    <updated>2017-12-26T16:23:18+08:00</updated>
-    <id>https://lockxmonk.github.io/15142765984953.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15142765984953/15142766000094.jpg" alt=""/></p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-NSNumber *findMissing(NSArray *list) {
-    int len = [list count];
-    int n = len+1;
-    int d1 = [list[1] intValue]-[list[0] intValue];
-    int d2 = [list[len-1] intValue]-[list[len-2] intValue];
-    int d = 0;
-    if (d1&lt;0) {
-        d = d1&gt;d2?d1:d2;
-    }else{
-        d = d1&lt;d2?d1:d2;
-    }
-    if (n == 3) {
-        return @(([[list firstObject] intValue]+[[list lastObject] intValue])/2);
-    }
-    int num = [[list firstObject] intValue];
-    for (int i = 0;i&lt;len;i++) {
-        if ([list[i] intValue]!=num) {
-            return @(num);
-        }
-        num+=d;
-    }
-    
-    return @(0);
 }
 </code></pre>
 

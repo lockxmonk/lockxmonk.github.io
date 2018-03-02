@@ -117,6 +117,178 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15036443106558.html">
+                
+                  <h1>第十六条 提供"全能初始化方法"</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我们知道,所有的对象都要初始化但是有些对象可能有很多初始化方法(根据初始的信息来选择用哪个).我们以iOS的UI框架UIKit为例，其中有个类叫做<code>UITableViewCell</code>,初始化该类对象 时，需要指明其样式及标识符，标识符能够区分不同类型的单元格。由于这种对象的创 建成本较高，所以绘制表格时可依照标识符来复用，以提升程序效率。<strong><font color=red>我们把这种可为 对象提供必要信息以便其能完成工作的初始化方法叫做“全能初始化方法”（designated initializer)</font></strong></p>
+
+<p>我们看下面这个NSDate的例子：</p>
+
+<pre><code class="language-objc">-(id)init
+-(id)initWithString:(NSString*)string
+-(id)initWithTimelntervalSinceNow:(NSTimelnterval)seconds
+-(id)initWithTimelnterval:(NSTimelnterval)seconds
+                sinceDate:(NSDate*)refDate
+-(id)initWithTimeIntervalSinceReferenceDate:(NSTimelnterval)seconds
+-(id)initWithTimeIntervalSincel970:(NSTimelnterval)seconds
+</code></pre>
+
+<p><mark><strong>那么多的初始化方法中，我们要选一个全能初始化方法，让其他的初始化方法都来调用它。</strong></mark>，只有在全能初始化方法中，才会存储内部数据。这样的话，当底层数据存储机制改变时，只需修改此方法的代码就好，无须改动其他初始化方法。</p>
+
+<p>我们来用代码举例：</p>
+
+<p><em>首先定义一个表示矩形的类：</em></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+@interface EOCRectangle : NSObject
+@property (nonatomic, assign, readonly) float width;
+@property (nonatomic, assign, readonly) float height; 
+@end
+</code></pre>
+
+<p>然后定义一个初始化方法：</p>
+
+<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight:(float)height
+{
+    if ((self = [super init])) {
+        _width = width;
+        _height = height;
+    }
+    return self;
+}
+</code></pre>
+
+<p>这样就会有一个问题，当有人用<code>[[EOCRectanglealloc]init]</code>来创建矩形时，因为<code>NSObject</code>中已经实现了<code>init</code>方法，如果把<code>alloc</code>方法分配好的<code>EOCRectangle</code>交由此方法来初始化，那么矩形的宽度与高度就是0,因为全部实例变量都设为0了。这种情况我们应该覆写<code>init</code>方法：</p>
+
+<pre><code class="language-objc">// Using default values
+-(id)init {
+    return [self initWithWidth:5.Of andHeight:10.Of];
+)
+// Throwing an exception
+-(id)init {
+    @throw [NSException
+    exceptionWithName:NSInternalInconsistencyException 
+    reason:@&quot;Must use initWithWidth:andHeight: instead.&quot; 
+    userInfo：nil]；
+}
+</code></pre>
+
+<p>还有一种情况，当我们创建名叫<code>EOCSquare</code>的类，令其成为<code>EOCRectangle</code>的子类时，新类的初始化方法写的时候要注意：</p>
+
+<pre><code class="language-objc">@import &quot;EOCRectangle.h&quot;
+@interface EOCSquare : EOCRectangle 
+-(id)initWithDimension:(float)dimension; 
+@end
+
+@implementation EOCSquare
+-(id)initWithDimension:(float)dimension {
+    return [super initwithwidth:dimension andHeightidimension];
+}
+@end
+</code></pre>
+
+<p>这了我们发现上面代码的初始化方法调用了父类的初始化方法，这样可能会导致一个问题：创建出一个”高度”和“宽度”不相等的正方形。所以：<strong><font color=red>如果子类的全能初始化方法与超类方法的名称不 同，那么总应覆写超类的全能初始化方法。</font></strong>在<code>EOCSquare</code>这个例子中，应该像下面这样覆写<code>EOCRectangle</code>的全能初始化方法：</p>
+
+<pre><code class="language-objc">-(id)initWithWidth:(float)width andHeight:(float)height { 
+    float dimension = MAX (width, height);  
+    return [self initWithDimension:dimension];
+}
+</code></pre>
+
+<p>覆写了这个方法之后，即便使用<code>init</code>来初始化<code>EOCSquare</code>对象，也能照常工作。原因在于, <code>EOCRectangle</code>类覆写了 <code>init</code>方法，并以默认值为参数，调用了该类的全能初始化方法。在用<code>init</code>方法初始化<code>EOCSquare</code>对象时，也会这么调用，不过由于<code>“initWithWidth:andHeight:”</code>已经在子类中覆写了，所以实际上执行的是<code>EOCSquare</code>类的这一份实现代码，而此代码又会调用本类的全能初始化方法。因此一切正常，调用者不可能创建出边长不相等的<code>EOCSquare</code>对象。</p>
+
+<p>当然如果我们不想覆写父类的全能初始化方法，认为这是调用者自己犯了错误。在这种情况下，常用的办法是覆写超类的全能初始化方法并于其中抛出异常：</p>
+
+<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight: (float) height {
+    @throw 
+        [NSException 
+            exceptionWithName:NSInternallnconsistencyException
+            reason: @&quot;Must use initWithDimension: instead.&quot;
+             userInfo：nil];
+</code></pre>
+
+<p><strong><mark>有时如果某个队形对象的实例有两种完全不同的创建方式，必须分开处理，所以就要编写多个全能初始化方法。</mark></strong>只要记住每个子类的全能初始化方法都应该调用其超类的对应方法，并逐层向上，应该先调用超类的相关方法，然后再执行与本类有关的任务。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>在类中提供一个全能初始化方法，并于文档里指明。其他初始化方法均应调用此方法。</li>
+<li><p>若全能初始化方法与超类不同，则需覆写超类中的对应方法。</p></li>
+<li><p>如果超类的初始化方法不适用于子类，那么应该覆写这个超类方法，并在其中抛出异常。</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/25</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15036306506140.html">
+                
+                  <h1>第十五条 用前缀避免命名空间冲突</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>oc与其他语言一个主要区别是没有那种内置的命名空间(namespace)机制. <mark>所以我们在编码时一定要注意命名冲突,尤其是潜在的命名冲突.</mark></p>
+
+<p>我们在创建应用程序时一定要注意,使用Cocoa创建应用程序时一定要注意,<strong><font color=red>Apple宣称保留使用&quot;两个字母前缀&quot;的权利</font></strong>,也就是说选用的前缀应该都是<strong><font color=red>三个字母</font></strong>.</p>
+
+<p>我们尤其应该注意,当你使用的一个三方库引入了一个你之前引入过的三方库.如果引入的这两个库的作者都没有给自己的库加前缀,那么应用程序很容易出现重复符号错误.</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li><p>选择与你公司,应用程序或二者有关联的名称作为类名的前缀,并在所有代码中均使用这一前缀.</p></li>
+<li><p>若自己所开发的程序库用到了第三方库,则应该为其中的名称加上前缀.</p></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/25</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15035622628066.html">
                 
                   <h1>第十四条 理解"类对象"的用意</h1>
@@ -789,141 +961,6 @@ id returnValue = objc_msgSend(someObject,
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15032784762045.html">
-                
-                  <h1>小论文想法</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>1,结合雾天道路行进过程中,图像在远端,中端和近处的雾气浓度不同,进行评估,来自动化调节去雾强度.可以结合边缘检测算法(OTSU),来检测出天空的区域(当前方有车时,检测),然后将图像分割为远中近三个部分.</p>
-
-<p>2.</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/21</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14993030681229.html">
-                
-                  <h1>Caffe最优化求解过程</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">求解器是什么</a>
-</li>
-<li>
-<a href="#toc_1">求解器是如何实现的</a>
-<ul>
-<li>
-<a href="#toc_2">算法描述</a>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<p>将前面几天讲述的不同Layer组合起来就可以构建起完整的<code>CNN/DNN</code>。今天将从Caffe的Solver类入手，对Caffe训练时的流程做深入分析，也就是看Caffe实际是如何“动”起来的。</p>
-
-<h2 id="toc_0">求解器是什么</h2>
-
-<p>从前两天内容我们学习到，Net己经完成部分学习任务（数据前向传播、误差反向传播),<mark>而CNN剩下有监督的优化过程、利用每层的梯度生成权值增量则由求解器(Solver)负责.</mark></p>
-
-<p>求解器负责对模型优化,它的KPI(Key Performance Indicator,关键绩效指你，某公司常用的一种员工绩效评定方式）就是让损失函数达到全局最小。</p>
-
-<p>求解器的特性如下:</p>
-
-<ul>
-<li>负责记录优化过程，创建用于学习的训练网络和用于评估学习效果的测试网络。</li>
-<li>调用Forward\(\rightarrow\)调用Backward\(\rightarrow\)更新权值，反复迭代优化模型。</li>
-<li>周期性的评估测试网络</li>
-<li>在优化过程中为模型,求解器状态打快照.</li>
-</ul>
-
-<p>为了让权值从初始化状态向着更好的模型前进，求解器在每次迭代中做了如下事情：</p>
-
-<ul>
-<li>调用Net的前向传播函数来计算输出和损失函数。</li>
-<li>调用Net的反向传播函数来计算梯度。</li>
-<li>根据求解器方法,将梯度转换为权值增量</li>
-<li>根据学习速率、历史权值、所用方法更新求解器状态。</li>
-</ul>
-
-<h2 id="toc_1">求解器是如何实现的</h2>
-
-<p>在卷积神经网络中,有两种类型的层需要学习:卷积层和全连接层（统称权值层，因为它们都有<code>weight</code>参数）。<mark>在设计求解器时，学习速率参数的设置也是针对这两个层的</mark>。</p>
-
-<p>在caffe中我们要适当把握度,控制收敛的参数---学习速率.</p>
-
-<p>我们来具体看一下Caffe是如何对权值学习做到“不偏不倚”的。</p>
-
-<h3 id="toc_2">算法描述</h3>
-
-<p>Caffe中的求解器有以下几种:</p>
-
-<ul>
-<li>随机梯度下降法（Stochastic Gradient Descent, SGD),最常用的一种</li>
-<li>AdaDelta</li>
-<li>自适应梯度法（Adaptive Gradient, ADAGRAD)</li>
-<li>Adam</li>
-<li>Nesterov加速梯度法（Nesterov’s Accelerated Gradient, NAG)</li>
-<li>RMSprop</li>
-</ul>
-
-<p><mark>求解器方法重点是最小化损失函数的全局优化问题</mark>,对于数据集D,优化目标是在全数据集D上损失函数平均值：<br/>
-\[<br/>
-L(W)=\frac{1}{|{D}|}\sum^{|D|}_{i}{f_w(X^{(i)}) + \lambda{r}(W)}<br/>
-\]</p>
-
-<p>其中，\(f_w(X^{(i)})\)是在数据实例\(X^{(i)\)上的损失函数，\(r(W)\)为规整项，\(\lambda\)为规整项的权重。数据集\(D\)可能非常大，工程上一般在每次迭代中使用这个目标函数的随机逼近，即小批量数据\(N&lt;&lt;|D|\)个数据实例:</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/7/6</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Caffe%E6%9C%80%E4%BC%98%E5%8C%96%E6%B1%82%E8%A7%A3%E8%BF%87%E7%A8%8B.html'>Caffe最优化求解过程</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1013,6 +1050,18 @@ L(W)=\frac{1}{|{D}|}\sum^{|D|}_{i}{f_w(X^{(i)}) + \lambda{r}(W)}<br/>
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -1026,18 +1075,6 @@ L(W)=\frac{1}{|{D}|}\sum^{|D|}_{i}{f_w(X^{(i)}) + \lambda{r}(W)}<br/>
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  

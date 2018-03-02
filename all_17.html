@@ -117,6 +117,127 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15119708919827.html">
+                
+                  <h1>Find All Numbers Disappeared in an Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array of integers where 1 ≤ a[i] ≤ n (n = size of array), some elements appear twice and others appear once.</p>
+
+<p>Find all the elements of [1, n] inclusive that do not appear in this array.</p>
+
+<p>Could you do it without extra space and in O(n) runtime? You may assume the returned list does not count as extra space.</p>
+
+<p><img src="media/15119708919827/15119710141999.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; findDisappearedNumbers(vector&lt;int&gt;&amp; nums) {
+        int len = nums.size();
+        for(int i=0; i&lt;len; i++) {
+            int m = abs(nums[i])-1;  // index start from 0
+            nums[m] = nums[m]&gt;0 ? -nums[m] : nums[m];
+        }
+        vector&lt;int&gt; res;
+        for(int i = 0; i&lt;len; i++) {
+            if(nums[i] &gt; 0) res.push_back(i+1);
+        }
+        return res;
+    }
+};
+</code></pre>
+
+<p>该题用了一个特殊的方法，<strong>取负法</strong>。</p>
+
+<p><strong>含义是：将元素对应的位置取负。简单一句话可能不好理解，我们举个例子。假设在位置k放了元素i，则在取负的过程中i的取值有两种可能：为正，表示当前尚未遇到元素k将该位置取负；为负，表示当前已经有元素k出现，并将元素取负。但是我们不关心k，我们关心元素i。元素i既然出现，我们就看一下位置i：为正，表示这是元素i第一次出现，我们将位置i取负；为负，表示元素i已经出现过一次，我们不做任何操作。不管一个元素出现一次还是两次，只要出现它对应的位置就会被取负。当某个元素不出现的时候，该元素对应的位置始终访问不到，所以还是正值，通过这种方法我们就可以找到哪些元素没有出现。</strong> </p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/29</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15119656914314.html">
+                
+                  <h1>Max Area of Island</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a non-empty 2D array <code>grid</code> of 0&#39;s and 1&#39;s, an island is a group of 1&#39;s (representing land) connected 4-directionally (horizontal or vertical.) You may assume all four edges of the grid are surrounded by water.</p>
+
+<p>Find the maximum area of an island in the given 2D array. (If there is no island, the maximum area is 0.)<br/>
+<img src="media/15119656914314/15119657218724.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int areaNum(vector&lt;vector&lt;int&gt;&gt;&amp; grid, int m ,int n){
+        if (m&lt;grid.size()&amp;&amp;m&gt;=0&amp;&amp;n&lt;grid[0].size()&amp;&amp;n&gt;=0&amp;&amp;grid[m][n]==1) {
+            //将经过的位置标记为0，避免循环检验
+            grid[m][n] = 0;
+            return 1+ areaNum(grid, m+1, n)+areaNum(grid, m, n+1)+areaNum(grid, m-1, n)+areaNum(grid, m, n-1);
+        }
+        return 0;
+    }
+    
+    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        int result = 0;
+        for (int i =0; i&lt;grid.size(); i++) {
+            for (int j=0; j&lt;grid[0].size(); j++) {
+                if (grid[i][j]==1) {
+                    result = max(result, areaNum(grid, i, j));
+                }
+            }
+        }
+        return result;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/29</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15119430001845.html">
                 
                   <h1>Max Consecutive Ones</h1>
@@ -365,117 +486,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15114222067093.html">
-                
-                  <h1>Find Pivot Index</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array of integers <code>nums</code>, write a method that returns the &quot;pivot&quot; index of this array.</p>
-
-<p>We define the pivot index as the index where the sum of the numbers to the left of the index is equal to the sum of the numbers to the right of the index.</p>
-
-<p>If no such index exists, we should return -1. If there are multiple pivot indexes, you should return the left-most pivot index.</p>
-
-<p><img src="media/15114222067093/15114222397308.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int pivotIndex(vector&lt;int&gt;&amp; nums) {
-        
-        if(nums.empty()) return -1;
-        
-        int sum = 0;
-        for(int i=0;i&lt;nums.size();i++) sum+=nums[i];
-    
-        int leftSum = 0;
-        for(int j=0;j&lt;nums.size();j++)
-        {
-            if (leftSum == sum - nums[j] -leftSum) {
-                return j;
-        }
-            leftSum += nums[j];
-        }
-        
-        return -1;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15114072257756.html">
-                
-                  <h1>Best Time to Buy and Sell Stock II</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Say you have an array for which the \(i^{th}\) element is the price of a given stock on day i.</p>
-
-<p>Design an algorithm to find the maximum profit. You may complete as many transactions as you like (ie, buy one and sell one share of the stock multiple times). However, you may not engage in multiple transactions at the same time (ie, you must sell the stock before you buy again).</p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maxProfit(vector&lt;int&gt;&amp; prices) {
-        int result = 0;
-        for(int i = 1;i&lt;prices.size();i++)
-        {
-            result += max(prices[i]-prices[i-1] , 0);
-        }
-        return result;
-    }
-};
-
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -565,6 +575,18 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
 			      </li>
 		     
@@ -578,18 +600,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15165851014842.html">Longest Word in Dictionary</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164332920131.html">Maximum Length of Repeated Subarray</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15164320874129.html">Largest Number At Least Twice of Others</a>
 			      </li>
 		     
 		  
