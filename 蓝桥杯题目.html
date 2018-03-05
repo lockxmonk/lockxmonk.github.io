@@ -93,8 +93,6 @@
             <li><a href="English%20Study.html">English Study</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
-        
-            <li><a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html">常见面试问题</a></li>
          
 
       </ul>
@@ -128,34 +126,31 @@
 <li>
 <a href="#toc_0">方程整数解</a>
 </li>
+<li>
+<a href="#toc_1">星系炸弹</a>
+<ul>
+<li>
+<a href="#toc_2">Excel电子表格法：</a>
+</li>
 </ul>
 </li>
 <li>
-<a href="#toc_1">include <bits/stdc++.h></a>
-<ul>
-<li>
-<a href="#toc_2">星系炸弹</a>
+<a href="#toc_3">奇妙的数字</a>
 </li>
 <li>
-<a href="#toc_3">Excel电子表格法：</a>
+<a href="#toc_4">格子中输出</a>
 </li>
 <li>
-<a href="#toc_4">奇妙的数字</a>
+<a href="#toc_5">九数组分数</a>
 </li>
 <li>
-<a href="#toc_5">格子中输出</a>
+<a href="#toc_6">牌型种数</a>
 </li>
 <li>
-<a href="#toc_6">九数组分数</a>
+<a href="#toc_7">手链样式</a>
 </li>
 <li>
-<a href="#toc_7">牌型种数</a>
-</li>
-<li>
-<a href="#toc_8">手链样式</a>
-</li>
-<li>
-<a href="#toc_9">饮料换购</a>
+<a href="#toc_8">饮料换购</a>
 </li>
 </ul>
 
@@ -168,31 +163,29 @@
 请填写该解中最小的数字。 <br/>
 注意：你提交的应该是一个整数，不要填写任何多余的内容或说明性文字。</p>
 
-<p>直接暴力枚举。。<br/>
-```c++</p>
+<p>直接暴力枚举。。</p>
 
-<h1 id="toc_1">include <bits/stdc++.h></h1>
+<pre><code class="language-c++">#include &lt;bits/stdc++.h&gt;
+using namespace std;
 
-<p>using namespace std;</p>
-
-<p>int main()<br/>
-{<br/>
-    for (int i=1;i&lt;=33;i++) {<br/>
-        for (int j=i;j&lt;=33;j++) {<br/>
-            for (int k=j;k&lt;=33;k++) {<br/>
-                if (i<em>i+j</em>j+k*k==1000) {<br/>
-                    printf(&quot;%d %d %d\n&quot;,i,j,k);<br/>
-                }<br/>
-            }<br/>
-        }<br/>
-    }<br/>
-    return 0;<br/>
-}<br/>
-```</p>
+int main()
+{
+    for (int i=1;i&lt;=33;i++) {
+        for (int j=i;j&lt;=33;j++) {
+            for (int k=j;k&lt;=33;k++) {
+                if (i*i+j*j+k*k==1000) {
+                    printf(&quot;%d %d %d\n&quot;,i,j,k);
+                }
+            }
+        }
+    }
+    return 0;
+}
+</code></pre>
 
 <p>答案是10.</p>
 
-<h2 id="toc_2">星系炸弹</h2>
+<h2 id="toc_1">星系炸弹</h2>
 
 <p>在X星系的广袤空间中漂浮着许多X星人造“炸弹”，用来作为宇宙中的路标。 <br/>
 每个炸弹都可以设定多少天之后爆炸。 <br/>
@@ -212,12 +205,12 @@
     2017. 8. 1 ----2017. 8. 5      4天<br/>
     53+731+212+4=1000天</p>
 
-<h2 id="toc_3">Excel电子表格法：</h2>
+<h3 id="toc_2">Excel电子表格法：</h3>
 
 <p>打开Excel电子表格，在单元格A1中输入2014/11/9，在单元格B1中输入公式=A1+1000即可得到答案。<br/>
 但是Excel中有效日期为1900年1月1日以后的日期，1900年以前的日期无法正常显示。<img src="media/15197807986881/15197811893178.jpg" alt=""/></p>
 
-<h2 id="toc_4">奇妙的数字</h2>
+<h2 id="toc_3">奇妙的数字</h2>
 
 <p>小明发现了一个奇妙的数字。它的平方和立方正好把0~9的10个数字每个用且只用了一次。 <br/>
 你能猜出这个数字是多少吗？ <br/>
@@ -256,7 +249,7 @@ int main()
 }
 </code></pre>
 
-<h2 id="toc_5">格子中输出</h2>
+<h2 id="toc_4">格子中输出</h2>
 
 <p>StringInGrid函数会在一个指定大小的格子中打印指定的字符串。 <br/>
 要求字符串在水平、垂直两个方向上都居中。 <br/>
@@ -320,7 +313,7 @@ int main()
 
 <p><code>答案：(width-strlen(buf)-2)/2,&quot;&quot;,buf,(width-strlen(buf)-2+1)/2,&quot;&quot;</code></p>
 
-<h2 id="toc_6">九数组分数</h2>
+<h2 id="toc_5">九数组分数</h2>
 
 <p>1,2,3…9 这九个数字组成一个分数，其值恰好为1/3，如何组法？ <br/>
 下面的程序实现了该功能，请填写划线部分缺失的代码。</p>
@@ -363,7 +356,7 @@ int main()
 
 <p><strong>答案：{t=x[k]; x[k]=x[i]; x[i]=t;}</strong></p>
 
-<h2 id="toc_7">牌型种数</h2>
+<h2 id="toc_6">牌型种数</h2>
 
 <p>小明被劫持到X赌城，被迫与其他3人玩牌。 <br/>
 一副扑克牌（去掉大小王牌，共52张），均匀发给4个人，每个人13张。 <br/>
@@ -404,7 +397,7 @@ int main()
 
 <p>答案：3598180</p>
 
-<h2 id="toc_8">手链样式</h2>
+<h2 id="toc_7">手链样式</h2>
 
 <p>小明有3颗红珊瑚，4颗白珊瑚，5颗黄玛瑙。 <br/>
 他想用它们串成一圈作为手链，送给女朋友。 <br/>
@@ -474,7 +467,7 @@ int main()
 <p>dfs写起来比较难受，这题就用next_permutation，改函数的方法是对数组从低到高逐次进行全排列。若可以进行排列就返回true，反之false<br/>
 所以只要把所有答案都记录下来，每次都正反判断一遍即可。</p>
 
-<h2 id="toc_9">饮料换购</h2>
+<h2 id="toc_8">饮料换购</h2>
 
 <p>乐羊羊饮料厂正在举办一次促销优惠活动。乐羊羊C型饮料，凭3个瓶盖可以再换一瓶C型饮料，并且可以一直循环下去(但不允许暂借或赊账)。<br/>
 请你计算一下，如果小明不浪费瓶盖，尽量地参加活动，那么，对于他初始买入的n瓶饮料，最后他一共能喝到多少瓶饮料。</p>
@@ -2015,8 +2008,6 @@ int main()
             <a href="English%20Study.html"><strong>English Study</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
-        
-            <a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html"><strong>常见面试问题</strong></a>
          
         </p>
 

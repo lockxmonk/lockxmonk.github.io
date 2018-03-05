@@ -93,8 +93,6 @@
             <li><a href="English%20Study.html">English Study</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
-        
-            <li><a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html">常见面试问题</a></li>
          
 
       </ul>
@@ -116,521 +114,6 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
-			<div class="article">
-                <a class="clearlink" href="14986110416063.html">
-                
-                  <h1>Caffe模型</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ul>
-<li>
-<a href="#toc_0">内存中的表示</a>
-</li>
-<li>
-<a href="#toc_1">磁盘上表示</a>
-</li>
-<li>
-<a href="#toc_2">Caffe Modal Zoo</a>
-</li>
-</ul>
-
-
-<p>我们之前学习过,一个完整的深度学习系统最核心的两个方面是<strong>数据</strong>和<strong>模型</strong>。今大我们 主要关注模型。一个深度学习模型通常由<strong>三部分</strong>参数组成：</p>
-
-<ul>
-<li>可学习参数（Leamable Parameter),又称可训练参数、神经网络权系数、权重，其数值<strong>由模型初始化参数、误差反向传播过程控制</strong>,一般不可人工干预.</li>
-<li>结构参数（Archetecture Parameter),包括<strong>卷积层/全连接层/下采样层数目、卷积核数目、 卷积核大小等描述网络结构的参数</strong>,一旦设定好,在网络训练阶段不能更改;值得注意的是,训练阶段网络结构参数和预测阶段结构参数很可能不同。</li>
-<li>训练超参数（Hyper-Parameter),用来控制网络训练收敛的参数，训练阶段可以自动或手动调节以获得更好的效果，预测阶段不需要该参数.</li>
-</ul>
-
-<p>在Caffe中，一个模型的三部分参数分别由<strong>不同模块定义和实现</strong>:</p>
-
-<ul>
-<li><strong>可学习参数</strong>在内存中使用Blob对象保持，必要时以二进制ProtoBuffer文件(*.caffemodel)形态序列化并存储于磁盘上，便于进一步微调（finetune,又称精调）、共享（例如参数服务器Parameter Server, PS)、性能评估（benchmark)。</li>
-<li><strong>结构参数</strong>使用ProtoBuffer文本格式（*.prototxt)描述，网络初始化时通过该描述文件构建Net对象、Layer对象形成有向无环图结构，在Layer与Layer之间、Net输入源和输出阱均为持有数据和中间结果的Blob对象。</li>
-<li><strong>训练超参数</strong>同样使用ProtoBuffer文本格式（*.prototxt)描述，训练阶段利用该描述文件构建求解器（Solver)对象，该对象按照一定规则在训练网络时自动调节这些超参数值。</li>
-</ul>
-
-<p>我们在MNIST例子中对LeNet-5模型稍微修改一下.变成逻辑回归（Logistic Regression, LR)分类器。<br/>
-<img src="media/14986110416063/14986122892113.jpg" alt=""/></p>
-
-<p>复制一份<code>examples/mnist/lenet_train_test.prototxt</code>,重命名为 <code>lenet_lr.prototxt</code>，修改内容如下:</p>
-
-<pre><code class="language-protobuf">
-name: &quot;LeNet&quot;
-layer {
-  name: &quot;mnist&quot;
-  type: &quot;Data&quot;
-  top: &quot;data&quot;
-  top: &quot;label&quot;
-  include {
-    phase: TRAIN
-  }
-  transform_param {
-    scale: 0.00390625
-  }
-  data_param {
-    source: &quot;examples/mnist/mnist_train_lmdb&quot;
-    batch_size: 64
-    backend: LMDB
-  }
-}
-layer {
-  name: &quot;mnist&quot;
-  type: &quot;Data&quot;
-  top: &quot;data&quot;
-  top: &quot;label&quot;
-  include {
-    phase: TEST
-  }
-  transform_param {
-    scale: 0.00390625
-  }
-  data_param {
-    source: &quot;examples/mnist/mnist_test_lmdb&quot;
-    batch_size: 100
-    backend: LMDB
-  }
-}
-layer {
-  name: &quot;ip&quot;
-  type: &quot;InnerProduct&quot;
-  bottom: &quot;data&quot;
-  top: &quot;ip&quot;
-  param {
-    lr_mult: 1
-  }
-  param {
-    lr_mult: 2
-  }
-  inner_product_param {
-    num_output: 20
-    weight_filler {
-      type: &quot;xavier&quot;
-    }
-    bias_filler {
-      type: &quot;constant&quot;
-    }
-  }
-}
-layer {
-  name: &quot;accuracy&quot;
-  type: &quot;Accuracy&quot;
-  bottom: &quot;ip&quot;
-  bottom: &quot;label&quot;
-  top: &quot;accuracy&quot;
-  include {
-    phase:TEST
-  }
-}
-layer {
-  name: &quot;loss&quot;
-  type: &quot;SoftmaxWithLoss&quot;
-  bottom: &quot;ip&quot;
-  bottom: &quot;label&quot;
-  top: &quot;loss&quot;
-}
-
-</code></pre>
-
-<p>复制一份<code>examples/mnist/lenet_solver.prototxt</code>，重命名为<code>lenet_lr_solver.prototxt</code>,修改内容<br/>
-如下:</p>
-
-<pre><code class="language-protobuf">
-# The train/test net protocol buffer definition
-net: &quot;examples/mnist/lenet_lr.prototxt&quot;
-# test_iter specifies how many forward passes the test should carry out.
-# In the case of MNIST, we have test batch size 100 and 100 test iterations,
-# covering the full 10,000 testing images.
-test_iter: 100
-# Carry out testing every 500 training iterations.
-test_interval: 500
-# The base learning rate, momentum and the weight decay of the network.
-base_lr: 0.01
-momentum: 0.9
-weight_decay: 0.0005
-# The learning rate policy
-lr_policy: &quot;inv&quot;
-gamma: 0.0001
-power: 0.75
-# Display every 100 iterations
-display: 100
-# The maximum number of iterations
-max_iter: 10000
-# snapshot intermediate results
-snapshot: 5000
-snapshot_prefix: &quot;examples/mnist/lenet&quot;
-# solver mode: CPU or GPU
-solver_mode: CPU
-
-</code></pre>
-
-<p>然后运行训练命令,在命令行输入:</p>
-
-<pre><code>./build/tools/caffe train --solver=examples/mnist/lenet_lr_solver.prototxt
-</code></pre>
-
-<p>但是发现报错了:<br/>
-<img src="media/14986110416063/14986154204478.jpg" alt=""/></p>
-
-<p>通过上述错误描述,发现是lmdb数据文件没有的问题....</p>
-
-<p>运行<code>./examples/mnist/create_mnist.sh</code>脚本,将之前下载过的数据转化成lmdb形式.中间的报错和解决如截图所示:</p>
-
-<p><img src="media/14986110416063/14986155733551.jpg" alt=""/></p>
-
-<p>我们成功获得到了lmdb文件.</p>
-
-<p>再次执行训练命令:</p>
-
-<pre><code>master) ✗ ./build/tools/caffe train --solver=examples/mnist/lenet_lr_solver.prototxt
-</code></pre>
-
-<p>然后就发现已经开始训练了.</p>
-
-<p>最后得到结果如图所示:<br/>
-<img src="media/14986110416063/14986195740444.jpg" alt=""/></p>
-
-<p>经过训练，可以获得在测试集上分类准确率为0.9908的模型。相比LeNet-5而言准确率降低了，这也符合直觉，因为将模型简化后参数变少，层数变少，网络表达能力变差。我们今天不关注准确率，只关注模型的表达方式。</p>
-
-<h2 id="toc_0">内存中的表示</h2>
-
-<p>从运行的log文件可以追踪模型是如何从prototxt描述变为内存中表示方式的,</p>
-
-<p>看到这行:</p>
-
-<pre><code>
- Creating training net from net file:
-examples/mnist/lenet_lr.prototxt
-
-// ...不要在意这些细节
-Initializing net from parameters:
-
-</code></pre>
-
-<p>追踪<code>solver.cpp</code>的第87行，看到如下代码：</p>
-
-<pre><code class="language-c++">
-//前面省略..
-//在solver.hpp 中声明了SolverParameterparam_
-//它是ProtoBuffer工具生成的结构体,用来解析lenet_lr_solver.prototxt
-if (param_.has_net()) {
-    LOG_IF(INFO, Caffe::root_solver()) //打印log
-        //这里param_.net()会返回examples/mnist/lenet_lr.prototxt 
-        &lt;&lt; &quot;Creating training net from net file: &quot; &lt;&lt; param_.net();
-    ReadNetParamsFromTextFileOrDie(param_.net(), &amp;net_param);
-  }
-  
-</code></pre>
-
-<h2 id="toc_1">磁盘上表示</h2>
-
-<p>Caffe使用ProtoBuffer二进制文件有最小文件尺寸，并由ProtoBuffer工具自动生成高效的序列化/反序列化接U口(多语言支持，包括C++、Java、Python)，以及可读性好、兼容二进制文件的文本格式.</p>
-
-<p>我们仍然从运行log查找线索:</p>
-
-<pre><code>Snapshotting to binary proto file
-examples/mn is t/lenet__iter_l 0000. caffemodel
-
-Snapshotting solver state to binary proto file examples/mnist/Xenet_iter_10000.solverstate
-
-</code></pre>
-
-<p>其中,<code>.caffemodel</code>文件是在特定训练间隙保存的二进制文件，包含当前网络各层的权值状态;而<code>.solverstate</code>是与<code>.caffemodel</code>一起产生的二进制文件，<strong>包含从上次停止点恢复训练模型所需的信息</strong>。我们具体看下列代码：</p>
-
-<p>追踪<code>solver.cpp</code>的第445行,上下文信息如下所示:</p>
-
-<pre><code class="language-c++">
-template &lt;typename Dtype&gt;
-string Solver&lt;Dtype&gt;::SnapshotToBinaryProto() {
-//得到模型文件名
-  string model_filename = SnapshotFilename(&quot;.caffemodel&quot;);
-  LOG(INFO) &lt;&lt; &quot;Snapshotting to binary proto file &quot; &lt;&lt; model_filename;
-  NetParameter net_param;
-  //将net_转换为Netparameter
-  net_-&gt;ToProto(&amp;net_param, param_.snapshot_diff());
-  ///写入 ProtoBuffer 二进制文件，这里是 lenet_iter_10000.caffemodel
-    WriteProtoToBinaryFile(net_param, model_filename);
-  return model_filename;
-}
-
-</code></pre>
-
-<p>追踪<code>sgd_solver.cpp</code>的259行:</p>
-
-<pre><code class="language-c++">
-template &lt;typename Dtype&gt;
-void SGDSolver&lt;Dtype&gt;::SnapshotSolverStateToBinaryProto(
-    const string&amp; model_filename) {
-  SolverState state;    //创建一个序列化对象
-  state.set_iter(this-&gt;iter_);  //记录当前的迭代次数
-  state.set_learned_net(model_filename); //记录网络描述文件
-  state.set_current_step(this-&gt;current_step_);  //记录当前步进值
-  state.clear_history();    //清空容器,准备接纳新内容
-  for (int i = 0; i &lt; history_.size(); ++i) {
-    // Add history 记录权值的历史信息
-    BlobProto* history_blob = state.add_history();
-    history_[i]-&gt;ToProto(history_blob);
-  }
-  string snapshot_filename = Solver&lt;Dtype&gt;::SnapshotFilename(&quot;.solverstate&quot;);
-  LOG(INFO)
-    &lt;&lt; &quot;Snapshotting solver state to binary proto file &quot; &lt;&lt; snapshot_filename;
-    //将SolverState对象写入二进制文件（*.solverstate)
-  WriteProtoToBinaryFile(state, snapshot_filename.c_str());
-}
-
-</code></pre>
-
-<p><strong>从磁盘上将模型、求解器状态文件载入内存的过程与上面代码刚好相反，我们可自行跟踪阅读。</strong></p>
-
-<h2 id="toc_2">Caffe Modal Zoo</h2>
-
-<p>对于前面我们运行的简单模型，可以从头训练（from scrash)。然而，对于规模更大、结构更复杂的模型，从头训练需耍解决两个问题：首先是硬件计算能力。模型训练十分消耗计算资源，使用普通计算机需要相当长的时间，不经济：而且世界上每个研究机构都从头训练，重复性工作太多，不环保。其次是调参能力。<strong>同样的模型设计，可能每个人训练结果都不一致，中间调参是项技术活，控制不当会引起训练发散或训练不充分，无法达到理想的分类效果</strong>。</p>
-
-<p>为了解决上述问题,<strong>Caffe Model Zoo</strong>则提供了一个分享模型的平台，世界各地的研究人员都可以把自己的训练成果共享给社区中更多的人使用，节省人力、物力。</p>
-
-<p><strong>今天我们也站在前人的肩膀上，运行一个基于已训练模型的图片分类例程</strong>。我们首先需要下载几个文件。</p>
-
-<p>下载meta数据到当前目录:</p>
-
-<pre><code>➜  caffe git:(master) ✗ cd data/ilsvrc12
-
-➜  ilsvrc12 git:(master) ✗ ./get_ilsvrc_aux.sh
-
-Downloading...
---2017-06-29 10:54:55--  http://dl.caffe.berkeleyvision.org/caffe_ilsvrc12.tar.gz
-Resolving dl.caffe.berkeleyvision.org... 169.229.222.251
-Connecting to dl.caffe.berkeleyvision.org|169.229.222.251|:80... connected.
-HTTP request sent, awaiting response... 302 Found
-Location: http://202.114.49.110/cache/9/02/berkeleyvision.org/6b5ff42be9dd0690a814318a14401a7f/caffe_ilsvrc12.tar.gz [following]
---2017-06-29 10:54:56--  http://202.114.49.110/cache/9/02/berkeleyvision.org/6b5ff42be9dd0690a814318a14401a7f/caffe_ilsvrc12.tar.gz
-Connecting to 202.114.49.110:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 17858008 (17M) [application/octet-stream]
-Saving to: ‘caffe_ilsvrc12.tar.gz’
-
-caffe_ilsvrc12.tar. 100%[===================&gt;]  17.03M  9.67MB/s    in 1.8s
-
-2017-06-29 10:54:58 (9.67 MB/s) - ‘caffe_ilsvrc12.tar.gz’ saved [17858008/17858008]
-
-Unzipping...
-Done.
-
-</code></pre>
-
-<p>下载caffenet模型:</p>
-
-<pre><code>➜  ilsvrc12 git:(master) ✗ cd ../../models/bvlc_reference_caffenet
-
-➜  bvlc_reference_caffenet git:(master) ✗ wget http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
---2017-06-29 11:14:10--  http://dl.caffe.berkeleyvision.org/bvlc_reference_caffenet.caffemodel
-Resolving dl.caffe.berkeleyvision.org... 169.229.222.251
-Connecting to dl.caffe.berkeleyvision.org|169.229.222.251|:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 243862418 (233M) [application/octet-stream]
-Saving to: ‘bvlc_reference_caffenet.caffemodel’
-
-bvlc_reference_caffen 100%[=========================&gt;] 232.56M   129KB/s    in 21m 50s
-
-2017-06-29 11:36:01 (182 KB/s) - ‘bvlc_reference_caffenet.caffemodel’ saved [243862418/243862418]
-
-</code></pre>
-
-<p>回到根目录执行:</p>
-
-<pre><code>
-➜  caffe git:(master) ✗ ./build/examples/cpp_classification/classification.bin \
-models/bvlc_reference_caffenet/deploy.prototxt \
-models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel \
-data/ilsvrc12/imagenet_mean.binaryproto \
-data/ilsvrc12/synset_words.txt \
-examples/images/cat.jpg
-
-
-</code></pre>
-
-<p>发现报错:<br/>
-<img src="media/14986110416063/14987195644285.jpg" alt=""/></p>
-
-<p>执行:</p>
-
-<pre><code>
-➜  caffe git:(master) ✗ install_name_tool -add_rpath &#39;/Users/liangzhonghao/anaconda2/lib&#39;  /usr/local/Cellar/caffe/./build/examples/cpp_classification/classification.bin
-
-</code></pre>
-
-<p>再次运行上面命令,得出结果:<br/>
-<img src="media/14986110416063/14987199347439.jpg" alt=""/></p>
-
-<p>命令行解释如下:</p>
-
-<pre><code class="language-c++">➜  caffe git:(master) ✗ ./build/examples/cpp_classification/classification.bin \        //二进制程序名
-models/bvlc_reference_caffenet/deploy.prototxt \    //模型描述文件
-models/bvlc_reference_caffenet/     bvlc_reference_caffenet.caffemodel \        //*.caffemodel模型权值文件
-data/ilsvrc12/imagenet_mean.binaryproto \       //图像均值文件
-data/ilsvrc12/synset_words.txt \    //图像类别标签信息
-examples/images/mouse.png   //输入待分类图像
-
-</code></pre>
-
-<p>打开输入图像<code>examples/images/cat.jpg</code>:</p>
-
-<p><img src="media/14986110416063/cat.jpg" alt="cat"/></p>
-
-<p>命令行输出的预测结果为:</p>
-
-<p><img src="media/14986110416063/14987205986830.jpg" alt=""/></p>
-
-<p>可见给出了5个预测结果，按照概率分布从高到低的顺序排列。这种预测结果称为<code>Top-5</code>预测结果，对当前样本而言，分类准确率为5项之和。除<code>Top-5</code>预测结果之外，还有<code>Top-3、 Top-1等</code>预测结果，对当前样木的分类正确率分别为0.6749、0.3134。</p>
-
-<p>分类准确率不仅与验证数据集有关，与模型的关系也非常密切。我们在<code>Caffe Model Zoo</code>上找到几个模型在ILSVRC 2012验证数据集上的分类效果，如图所示。<br/>
-<img src="media/14986110416063/14987207716731.jpg" alt=""/></p>
-
-<p>可见单模型<strong>分类性能最好的是BVLC GoogLeNet</strong>。</p>
-
-<p>通过掌握上面的内容，并学习其他更多深度学习模型的设计和训练方法.</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Caffe%E6%A8%A1%E5%9E%8B.html'>Caffe模型</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="14985505390356.html">
-                
-                  <h1>使用SQLite</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>SQLite是一种嵌入式数据库，它的数据库就是一个文件。由于SQLite本身是C写的，而且体积很小，所以，经常被集成到各种应用程序中，甚至在iOS和Android的App中都可以集成。</p>
-
-<p>Python就内置了SQLite3，所以，在Python中使用SQLite，不需要安装任何东西，直接使用。</p>
-
-<p>在使用SQLite前，我们先要搞清楚几个概念：</p>
-
-<ol>
-<li><p>表是数据库中存放关系数据的集合，一个数据库里面通常都包含多个表，比如学生的表，班级的表，学校的表，等等。表和表之间通过外键关联。</p></li>
-<li><p>要操作关系数据库，首先需要连接到数据库，一个数据库连接称为Connection；</p></li>
-<li><p>连接到数据库后，需要打开游标，称之为Cursor，通过Cursor执行SQL语句，然后，获得执行结果。</p></li>
-<li><p>Python定义了一套操作数据库的API接口，任何数据库要连接到Python，只需要提供符合Python标准的数据库驱动即可。</p></li>
-</ol>
-
-<p>由于SQLite的驱动内置在Python标准库中，所以我们可以直接来操作SQLite数据库。</p>
-
-<p>我们在Python交互式命令行实践一下：</p>
-
-<pre><code class="language-python">
-# 导入SQLite驱动:
-&gt;&gt;&gt; import sqlite3
-
-# 连接到SQLite数据库
-# 数据库文件是test.db
-# 如果文件不存在，会自动在当前目录创建:
-&gt;&gt;&gt; conn = sqlite3.connect(&#39;test.db&#39;)
-# 创建一个Cursor:
-&gt;&gt;&gt; cursor = conn.cursor()
-# 执行一条SQL语句，创建user表:
-&gt;&gt;&gt; cursor.execute(&#39;create table user (id varchar(20) primary key, name varchar(20))&#39;)
-&lt;sqlite3.Cursor object at 0x104082490&gt;
-# 继续执行一条SQL语句，插入一条记录:
-&gt;&gt;&gt; cursor.execute(&#39;insert into user (id, name) values (\&#39;1\&#39; , \&#39;Michale\&#39;)&#39;)
-&lt;sqlite3.Cursor object at 0x104082490&gt;
-# 通过rowcount获得插入的行数:
-&gt;&gt;&gt; cursor.rowcount
-1
-# 关闭Cursor:
-&gt;&gt;&gt; cursor.close()
-# 提交事务:
-&gt;&gt;&gt; conn.commit()
-# 关闭Connection:
-&gt;&gt;&gt; conn.close()
-
-</code></pre>
-
-<p>创建和插入表数据后,我们来查询:</p>
-
-<pre><code class="language-python">
-&gt;&gt;&gt; conn = sqlite3.connect(&#39;test.db&#39;)
-&gt;&gt;&gt; cursor = conn.cursor()
-# 执行查询语句:
-&gt;&gt;&gt; cursor.execute(&#39;select * from user where id = ? &#39;, (&#39;1&#39;,))
-&lt;sqlite3.Cursor object at 0x104082500&gt;
-# 获得查询结果集:
-&gt;&gt;&gt; values = cursor.fetchall()
-&gt;&gt;&gt; values
-[(u&#39;1&#39;, u&#39;Michale&#39;)]
-&gt;&gt;&gt; cursor.close()
-&gt;&gt;&gt; conn.close()
-</code></pre>
-
-<p><font color=red><strong>注意事项</strong></font></p>
-
-<ol>
-<li><p>使用Python的DB-API时，只要搞清楚Connection和Cursor对象，打开后一定记得关闭，就可以放心地使用。</p></li>
-<li><p>使用Cursor对象执行<code>insert</code>，<code>update</code>，<code>delete</code>语句时，执行结果由<code>rowcount</code>返回影响的行数，就可以拿到执行结果。</p></li>
-<li><p>使用Cursor对象执行<code>select</code>语句时，通过<code>featchall()</code>可以拿到结果集。结果集是一个<code>list</code>，每个元素都是一个<code>tuple</code>，对应一行记录。</p></li>
-<li><p>如果SQL语句带有参数，那么需要把参数按照位置传递给<code>execute()</code>方法，有几个<code>?</code>占位符就必须对应几个参数，例如：</p></li>
-</ol>
-
-<pre><code class="language-py">
-cursor.execute(&#39;select * from user where name=? and pwd=?&#39;, (&#39;abc&#39;, &#39;123456&#39;))
-
-</code></pre>
-
-<p>SQLite支持常见的标准SQL语句以及几种常见的数据类型。具体文档请参阅SQLite官方网站。</p>
-
-<h2 id="toc_0">小结</h2>
-
-<p>在Python中操作数据库时，要先导入数据库对应的驱动，然后，通过Connection对象和Cursor对象操作数据。</p>
-
-<p>要确保打开的Connection对象和Cursor对象都正确地被关闭，否则，资源就会泄露。</p>
-
-<p>如何才能确保出错的情况下也关闭掉Connection对象和Cursor对象呢？请回忆<code>try:...except:...finally:...</code>的用法。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/6/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python%E7%BB%83%E4%B9%A0.html'>Python练习</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
 			<div class="article">
                 <a class="clearlink" href="14984437069936.html">
                 
@@ -2548,6 +2031,616 @@ DISABLE_COPY_AND_ASSIGN(Net);
                 </div>
               </div><!-- article -->
         
+			<div class="article">
+                <a class="clearlink" href="14974936829967.html">
+                
+                  <h1>Caffe中Layer的学习</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Layer是Caffe的基本计算单元，至少有一个输入Blob (Bottom Blob)和一个输出Blob (Top Blob),部分Layer带有权值(Weight)和偏置项（Bias),<strong>有两个运算方向</strong>：前向传播（Forward)和反向传播（Backward)，其中前向传播计算会对输入Blob进行某种处理（存权值和偏置项的Layer会利用这些对输入进行处理）,得到输出Blob;而反向传播计算则对输出Blob的diff进行某种处理，得到输入Blob的diff(有权值和偏置项的Layer可能也会计算权值Blob、偏置项Blob的diff)。</p>
+
+<h2 id="toc_0">layer中的数据结构描述</h2>
+
+<p>我们可以搜索caffe中关于<code>message LayerParameter</code>的类,来了解.<br/>
+如果你一开始找不到这个类在那个文件描述,可以用下面这个命令去搜索:</p>
+
+<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;message LayerParameter&quot; *
+</code></pre>
+
+<p><img src="media/14974936829967/14974948024735.jpg" alt=""/><br/>
+得到它的路径.</p>
+
+<p>我们发现是在<code>src/caffe/proto/caffe.proto</code>这个路径中.因为caffe使用<code>google_protobuf</code>数据类型来声明layer.关于<code>google_protobuf</code>的相关内容,之后可以研究一下.</p>
+
+<p>这里我们看一下源码:</p>
+
+<pre><code class="language-protobuf">//注意：如果你增加了1个新的LayerParameter域，一定记得更新一个可用ID
+// LayerParameter 下一个layer-specific ID: 147 (last added: recurrent_param)
+message LayerParameter {
+  optional string name = 1; // the layer name
+  optional string type = 2; // the layer type
+  repeated string bottom = 3; // 输入Blob(bottom Blob)的名称
+  repeated string top = 4; // 输出Blob(Top Blob)的名称
+
+  // 当前计算阶段（TRAIN 或 TEST)
+    optional Phase phase = 10;
+
+  // 为每个Top Blob分配对损失函数的权重，毎个Layer都有默认值，要么为0,表示不参与目标函数计算：要么为1，表示参与损失函数计算
+  repeated float loss_weight = 5;
+
+  // 指定训练参数（例如相对全局学习常数的缩放因子，以及用于权值共享 的名称或其他设置)
+  repeated ParamSpec param = 6;
+
+  // 承载了该层数值参数的Blob
+  repeated BlobProto blobs = 7;
+  //是否对Bottom Blob进行反向传播过程。该字段的维度应与 Bottom Blob个数一致
+  // Specifies whether to backpropagate to each bottom. If unspecified,
+  // Caffe will automatically infer whether each input needs backpropagation
+  // to compute parameter gradients. If set to true for some inputs,
+  // backpropagation to those inputs is forced; if set false for some inputs,
+  // backpropagation to those inputs is skipped.
+  //
+  // The size must be either 0 or equal to the number of bottoms.
+  repeated bool propagate_down = 11;
+
+ //控制某个层在某个时刻是否包含在网络中，基于当前NetState。你可以为include或exclude(不要同时）指定非零值。如果没有任何规则，那么该层一直包含在网络中：如果当前NetState满足了任何1个指定规则，耶么该层会被包含或排斥
+  // Rules controlling whether and when a layer is included in the network,
+  // based on the current NetState.  You may specify a non-zero number of rules
+  // to include OR exclude, but not both.  If no include or exclude rules are
+  // specified, the layer is always included.  If the current NetState meets
+  // ANY (i.e., one or more) of the specified rules, the layer is
+  // included/excluded.
+  repeated NetStateRule include = 8;
+  repeated NetStateRule exclude = 9;
+
+  // Parameters for data pre-processing.数据预处理参数
+  optional TransformationParameter transform_param = 100;
+
+  // Parameters shared by loss layers.所有损失层共享的参数
+  optional LossParameter loss_param = 101;
+  
+  
+  //特定类型层的参数。注意一些层实现时可能有多于一种的计算引擎，这些层包括一个引擎类型和引擎参数来选择实现.默认引擎是在编译阶段由引擎开关设置的
+  // Layer type-specific parameters.
+  //
+  // Note: certain layers may have more than one computational engine
+  // for their implementation. These layers include an Engine type and
+  // engine parameter for selecting the implementation.
+  // The default for the engine is set by the ENGINE switch at compile-time.
+  optional AccuracyParameter accuracy_param = 102;
+  optional ArgMaxParameter argmax_param = 103;
+  optional BatchNormParameter batch_norm_param = 139;
+  optional BiasParameter bias_param = 141;
+  optional ConcatParameter concat_param = 104;
+  optional ContrastiveLossParameter contrastive_loss_param = 105;
+  optional ConvolutionParameter convolution_param = 106;
+  optional CropParameter crop_param = 144;
+  optional DataParameter data_param = 107;
+  optional DropoutParameter dropout_param = 108;
+  optional DummyDataParameter dummy_data_param = 109;
+  optional EltwiseParameter eltwise_param = 110;
+  optional ELUParameter elu_param = 140;
+  optional EmbedParameter embed_param = 137;
+  optional ExpParameter exp_param = 111;
+  optional FlattenParameter flatten_param = 135;
+  optional HDF5DataParameter hdf5_data_param = 112;
+  optional HDF5OutputParameter hdf5_output_param = 113;
+  optional HingeLossParameter hinge_loss_param = 114;
+  optional ImageDataParameter image_data_param = 115;
+  optional InfogainLossParameter infogain_loss_param = 116;
+  optional InnerProductParameter inner_product_param = 117;
+  optional InputParameter input_param = 143;
+  optional LogParameter log_param = 134;
+  optional LRNParameter lrn_param = 118;
+  optional MemoryDataParameter memory_data_param = 119;
+  optional MVNParameter mvn_param = 120;
+  optional ParameterParameter parameter_param = 145;
+  optional PoolingParameter pooling_param = 121;
+  optional PowerParameter power_param = 122;
+  optional PReLUParameter prelu_param = 131;
+  optional PythonParameter python_param = 130;
+  optional RecurrentParameter recurrent_param = 146;
+  optional ReductionParameter reduction_param = 136;
+  optional ReLUParameter relu_param = 123;
+  optional ReshapeParameter reshape_param = 133;
+  optional ScaleParameter scale_param = 142;
+  optional SigmoidParameter sigmoid_param = 124;
+  optional SoftmaxParameter softmax_param = 125;
+  optional SPPParameter spp_param = 132;
+  optional SliceParameter slice_param = 126;
+  optional TanHParameter tanh_param = 127;
+  optional ThresholdParameter threshold_param = 128;
+  optional TileParameter tile_param = 138;
+  optional WindowDataParameter window_data_param = 129;
+}
+
+</code></pre>
+
+<h2 id="toc_1">Layer是怎么炼成的</h2>
+
+<p>Layer头文件位于<code>include/caffe/layer.hpp</code>中，我们来解析一下: </p>
+
+<pre><code class="language-c++">#ifndef CAFFE_LAYER_H_
+#define CAFFE_LAYER_H_
+
+#include &lt;algorithm&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+
+#include &quot;caffe/blob.hpp&quot;
+#include &quot;caffe/common.hpp&quot;
+#include &quot;caffe/layer_factory.hpp&quot;
+#include &quot;caffe/proto/caffe.pb.h&quot;
+#include &quot;caffe/util/math_functions.hpp&quot;
+
+/**
+ Forward declare boost::thread instead of including boost/thread.hpp
+ to avoid a boost/NVCC issues (#1009, #1010) on OSX.
+ */
+namespace boost { class mutex; }
+
+namespace caffe {
+
+/**
+ * @brief An interface for the units of computation which can be composed into a
+ *        Net.
+ *
+ * Layer%s must implement a Forward function, in which they take their input
+ * (bottom) Blob%s (if any) and compute their output Blob%s (if any).
+ * They may also implement a Backward function, in which they compute the error
+ * gradients with respect to their input Blob%s, given the error gradients with
+ * their output Blob%s.
+ */
+template &lt;typename Dtype&gt;
+class Layer {
+ public:
+  /**
+   * You should not implement your own constructor. Any set up code should go
+   * to SetUp(), where the dimensions of the bottom blobs are provided to the
+   * layer.
+   */
+   //显式构造函数，从LayerParameter对象中加载配置
+  explicit Layer(const LayerParameter&amp; param)
+    : layer_param_(param) {
+      // Set phase(训练/预测) and copy blobs (if there are any).
+      phase_ = param.phase();
+      if (layer_param_.blobs_size() &gt; 0) {
+        //按 layer_param_设置本身Blob对象个数，并依次将每个Blob对象尺寸调整为与layer_param_中的Blob尺寸一致
+        blobs_.resize(layer_param_.blobs_size());
+        for (int i = 0; i &lt; layer_param_.blobs_size(); ++i) {
+          blobs_[i].reset(new Blob&lt;Dtype&gt;());
+          blobs_[i]-&gt;FromProto(layer_param_.blobs(i));
+        }
+      }
+    }
+    //析构函数
+  virtual ~Layer() {}
+
+  /**
+   * @brief Implements common layer setup functionality.
+   *
+   * @param bottom the preshaped input blobs
+   * @param top
+   *     the allocated but unshaped output blobs, to be shaped by Reshape
+   *
+   * Checks that the number of bottom and top blobs is correct.
+   * Calls LayerSetUp to do special layer setup for individual layer types,
+   * followed by Reshape to set up sizes of top blobs and internal buffers.
+   * Sets up the loss weight multiplier blobs for any non-zero loss weights.
+   * This method may not be overridden.
+   */
+   
+   //配置函数,实现常用层配置接口，不可被覆盖
+  void SetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    CheckBlobCounts(bottom, top);   //检查Blob
+    LayerSetUp(bottom, top);        //  与层类型相关的配置过程
+    Reshape(bottom, top);       //对Top Blob变形
+    SetLossWeights(top);        //设置损失权值因子Blob
+  }
+
+  /**
+   * @brief Does layer-specific setup: your layer should implement this function
+   *        as well as Reshape.
+   *
+   * @param bottom
+   *     the preshaped input blobs, whose data fields store the input data for
+   *     this layer
+   * @param top
+   *     the allocated but unshaped output blobs
+   *
+   * This method should do one-time layer specific setup. This includes reading
+   * and processing relevent parameters from the &lt;code&gt;layer_param_&lt;/code&gt;.
+   * Setting up the shapes of top blobs and internal buffers should be done in
+   * &lt;code&gt;Reshape&lt;/code&gt;, which will be called before the forward pass to
+   * adjust the top blob sizes.
+   */
+   
+   //层配置（虚）函数，做特定类型层相关的配置，由该类型层自己实现
+  virtual void LayerSetUp(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {}
+   
+   //变形（纯虚）函数，修改Top Blob以及内部Blob缓冲区的形状
+  virtual void Reshape(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) = 0;
+
+ 
+   //前向传播函数,给定Bottom Blob,计算Top Blob和loss,返回值为当前层loss
+   //该函数会调用相应设裕包装闲数，如Forward_cpu或Forward_gpu来实现真正的计算过程。如果该层有任意非零loss_weights参数，那么包装函数会计算并返回loss
+   //派生类应该实现Forward_cpu和Forward_gpu (可选〉
+  inline Dtype Forward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top);
+
+  //反向传播函数，给定Top Blob误差梯度，汁算Bottom Blob误差梯度
+  //参数说明:
+  // top-Top Blob，其diff域包含来自上一层的误差梯度
+  // propagate_down -- 多路幵关，与Bottom Blob矢量维度相问，每个值表示是否将误差梯度传递到对应的 Bottom Blob
+  // bottom—Bottom Blob，其diff域需要由该函数计算得到
+  // 该函数会调用相应设备包装函数，如Backward_cpu或Backward_gpu来实现真正的计算过程，由派生类负责实现
+  inline void Backward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom);
+
+  //返回Layer内部可训练的权值、偏置项Blob向量
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt;&amp; blobs() {
+    return blobs_;
+  }
+
+  //返回Layer初始化参数（由ProtoBuffer提供)
+  const LayerParameter&amp; layer_param() const { return layer_param_; }
+
+  //将Layer初始化参数写入ProtoBuffer缓冲区
+  virtual void ToProto(LayerParameter* param, bool write_diff = false);
+
+  //返回与某个Top Blob相关的标量loss值
+  inline Dtype loss(const int top_index) const {
+    return (loss_.size() &gt; top_index) ? loss_[top_index] : Dtype(0);
+  }
+
+  //设置与某个Top Blob相关的标量loss值
+  inline void set_loss(const int top_index, const Dtype value) {
+    if (loss_.size() &lt;= top_index) {
+      loss_.resize(top_index + 1, Dtype(0));
+    }
+    loss_[top_index] = value;
+  }
+
+  //返回层类型字符串,便于识別,由派生类负责实现
+  virtual inline const char* type() const { return &quot;&quot;; }
+
+ //返回该Layer需要的输入Blob数目.-1表示不关心。由派生类负责实现
+  virtual inline int ExactNumBottomBlobs() const { return -1; }
+
+  virtual inline int MinBottomBlobs() const { return -1; }
+  
+  virtual inline int MaxBottomBlobs() const { return -1; }
+  //返回该Layer需要的输出Blob数目.-1表示不关心。由派生类负责实现
+  virtual inline int ExactNumTopBlobs() const { return -1; }
+ 
+  virtual inline int MinTopBlobs() const { return -1; }
+  
+  virtual inline int MaxTopBlobs() const { return -1; }
+  
+  //返回该Layer是否有相同的输入/输出Blob，由派生类负责实现
+  virtual inline bool EqualNumBottomTopBlobs() const { return false; }
+
+  //返回是否允许匿名Top Blob,即由该Layer自动创建。若为真，在Net::Init()函数中会创建足够多的匿名Top Blob来满足该 Layer ExactNumTopBlobs()、MinTopBlobs()需求
+  virtual inline bool AutoTopBlobs() const { return false; }
+
+  //返回某些Bottom Blob足否允许强制反向传播，如果AllowForceBackward(i) === false,将会忽略 force_backward 设定
+  virtual inline bool AllowForceBackward(const int bottom_index) const {
+    return true;
+  }
+
+  //指定该Layer是否计算相对权值或偏置项的梯度，具体相对谁由param_id指定
+  inline bool param_propagate_down(const int param_id) {
+    return (param_propagate_down_.size() &gt; param_id) ?
+        param_propagate_down_[param_id] : false;
+  }
+  
+  //设置该Layer是否计算相对权值或偏置项的梯度，具体相对谁由param_id指定
+  inline void set_param_propagate_down(const int param_id, const bool value) {
+    if (param_propagate_down_.size() &lt;= param_id) {
+      param_propagate_down_.resize(param_id + 1, true);
+    }
+    param_propagate_down_[param_id] = value;
+  }
+
+
+ protected:
+  /** The protobuf that stores the layer parameters */
+  LayerParameter layer_param_;
+  /** 当前所处阶段: TRAIN or TEST */
+  Phase phase_;
+  /** The vector that stores the learnable parameters as a set of blobs. */
+  //Layer 内部权值或偏置项，以 Blob 方式组织
+  vector&lt;shared_ptr&lt;Blob&lt;Dtype&gt; &gt; &gt; blobs_;
+  /** Vector indicating whether to compute the diff of each param blob. */
+  //标志位，是否计算对应参数的误差梯度
+  vector&lt;bool&gt; param_propagate_down_;
+
+  //标志位，在目标函数中，是否每个Top Blob都有非零权重
+  vector&lt;Dtype&gt; loss_;
+
+//下面4个函数，我们会在各个Layer派生类中经常看到
+
+  /** @brief Using the CPU device, compute the layer output. */
+  virtual void Forward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) = 0;
+  /**
+   * @brief Using the GPU device, compute the layer output.
+   *        Fall back to Forward_cpu() if unavailable.
+   */
+  virtual void Forward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    // LOG(WARNING) &lt;&lt; &quot;Using CPU code as backup.&quot;;
+    return Forward_cpu(bottom, top);
+  }
+
+  /**
+   * @brief Using the CPU device, compute the gradients for any parameters and
+   *        for the bottom blobs if propagate_down is true.
+   */
+  virtual void Backward_cpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) = 0;
+  /**
+   * @brief Using the GPU device, compute the gradients for any parameters and
+   *        for the bottom blobs if propagate_down is true.
+   *        Fall back to Backward_cpu() if unavailable.
+   */
+  virtual void Backward_gpu(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+      const vector&lt;bool&gt;&amp; propagate_down,
+      const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+    // LOG(WARNING) &lt;&lt; &quot;Using CPU code as backup.&quot;;
+    Backward_cpu(top, propagate_down, bottom);
+  }
+
+  /**
+   * Called by the parent Layer&#39;s SetUp to check that the number of bottom
+   * and top Blobs provided as input match the expected numbers specified by
+   * the {ExactNum,Min,Max}{Bottom,Top}Blobs() functions.
+   */
+   //校验输入/输出Blob数目是否满足Layer要求
+  virtual void CheckBlobCounts(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+                               const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+    if (ExactNumBottomBlobs() &gt;= 0) {
+      CHECK_EQ(ExactNumBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes &quot; &lt;&lt; ExactNumBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (MinBottomBlobs() &gt;= 0) {
+      CHECK_LE(MinBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes at least &quot; &lt;&lt; MinBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (MaxBottomBlobs() &gt;= 0) {
+      CHECK_GE(MaxBottomBlobs(), bottom.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer takes at most &quot; &lt;&lt; MaxBottomBlobs()
+          &lt;&lt; &quot; bottom blob(s) as input.&quot;;
+    }
+    if (ExactNumTopBlobs() &gt;= 0) {
+      CHECK_EQ(ExactNumTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces &quot; &lt;&lt; ExactNumTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (MinTopBlobs() &gt;= 0) {
+      CHECK_LE(MinTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces at least &quot; &lt;&lt; MinTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (MaxTopBlobs() &gt;= 0) {
+      CHECK_GE(MaxTopBlobs(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces at most &quot; &lt;&lt; MaxTopBlobs()
+          &lt;&lt; &quot; top blob(s) as output.&quot;;
+    }
+    if (EqualNumBottomTopBlobs()) {
+      CHECK_EQ(bottom.size(), top.size())
+          &lt;&lt; type() &lt;&lt; &quot; Layer produces one top blob as output for each &quot;
+          &lt;&lt; &quot;bottom blob input.&quot;;
+    }
+  }
+
+  /**
+   * Called by SetUp to initialize the weights associated with any top blobs in
+   * the loss function. Store non-zero loss weights in the diff blob.
+   */
+   //该函数在Layer的Setup函数中被调用，主要目的是初始化与Top Blob相关的loss权重，放到Top Blob的diff域，实际由Forward()计算loss函数
+   //loss_weight == 0,表示当前层不参与loss函数汁算，大部分Layer属于这一类
+   //loss_weight ==1,表示当前层参与loss函数汁算，损失层（LossLayer) 属于这一类
+  inline void SetLossWeights(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  //从ProtoBuffer对象中获得Layer参数，这里需要用loss_weight参数
+    const int num_loss_weights = layer_param_.loss_weight_size();
+    //如果 ProtoBuffer中存在至少一个loss_weight参数,loss_weight参数个数应当与Top Blob数目相同，或者不要loss_weight参数
+    if (num_loss_weights) {
+      CHECK_EQ(top.size(), num_loss_weights) &lt;&lt; &quot;loss_weight must be &quot;
+          &quot;unspecified or specified once per top blob.&quot;;
+    //遍历每个Top Blob
+      for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      // 从 ProtoBuffer 对象拿到 loss_weight 实际值(0 或者1)
+        const Dtype loss_weight = layer_param_.loss_weight(top_id);
+        //若为0,跳过
+        if (loss_weight == Dtype(0)) { continue; }\
+        //若不为0,则对网络进行相关设置
+        this-&gt;set_loss(top_id, loss_weight);    //本地记录loss_weight值
+        const int count = top[top_id]-&gt;count();
+        Dtype* loss_multiplier = top[top_id]-&gt;mutable_cpu_diff();
+        //将loss_weight值入 Top Blob 的diff域，传递到其他需耍使用的地一方，实现远程同步
+        caffe_set(count, loss_weight, loss_multiplier);
+      }
+    }
+  }
+
+ private:
+ //禁用拷贝构造函数和賦值运算函数 
+  DISABLE_COPY_AND_ASSIGN(Layer);
+};  // class Layer
+
+// Forward and backward wrappers. You should implement the cpu and
+// gpu specific implementations instead, and should not change these
+// functions.
+//使用时只需在派生类中改写 Forward_cpu、Forward_gpu、Backward_cpu、Backward_gpu
+template &lt;typename Dtype&gt;
+inline Dtype Layer&lt;Dtype&gt;::Forward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom,
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top) {
+  Dtype loss = 0;
+  Reshape(bottom, top);
+  switch (Caffe::mode()) {      //判断计算设备
+  case Caffe::CPU:      //在CPU上执行Forward计算
+    Forward_cpu(bottom, top);   //调用CPU版本的 Forward函数
+    //还没完，要计算loss (如果有的话)
+    for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      if (!this-&gt;loss(top_id)) { continue; }
+      const int count = top[top_id]-&gt;count();
+      // 若为 LossLayer，则已经通过Forward函数计算出全局损失函数，放在Top Blob data域
+      const Dtype* data = top[top_id]-&gt;cpu_data();
+      // 若loss_weight不为0,则己经在SetLossWeights函数中将loss权重放在Top Blob diff域
+      const Dtype* loss_weights = top[top_id]-&gt;cpu_diff();
+      // 计算加权后的loss之和，得到标量loss值
+      loss += caffe_cpu_dot(count, data, loss_weights);
+    }
+    break;
+  case Caffe::GPU:
+    Forward_gpu(bottom, top);
+#ifndef CPU_ONLY
+    for (int top_id = 0; top_id &lt; top.size(); ++top_id) {
+      if (!this-&gt;loss(top_id)) { continue; }
+      const int count = top[top_id]-&gt;count();
+      const Dtype* data = top[top_id]-&gt;gpu_data();
+      const Dtype* loss_weights = top[top_id]-&gt;gpu_diff();
+      Dtype blob_loss = 0;
+      caffe_gpu_dot(count, data, loss_weights, &amp;blob_loss);
+      loss += blob_loss;
+    }
+#endif
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
+  }
+  return loss;
+}
+//反向传播函数,直接调用对应设备函数
+template &lt;typename Dtype&gt;
+inline void Layer&lt;Dtype&gt;::Backward(const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; top,
+    const vector&lt;bool&gt;&amp; propagate_down,
+    const vector&lt;Blob&lt;Dtype&gt;*&gt;&amp; bottom) {
+  switch (Caffe::mode()) {
+  case Caffe::CPU:
+    Backward_cpu(top, propagate_down, bottom);
+    break;
+  case Caffe::GPU:
+    Backward_gpu(top, propagate_down, bottom);
+    break;
+  default:
+    LOG(FATAL) &lt;&lt; &quot;Unknown caffe mode.&quot;;
+  }
+}
+
+//将层配置参数序列化为ProtoBuffer
+template &lt;typename Dtype&gt;
+void Layer&lt;Dtype&gt;::ToProto(LayerParameter* param, bool write_diff) {
+  param-&gt;Clear();
+  param-&gt;CopyFrom(layer_param_);
+  param-&gt;clear_blobs();
+  for (int i = 0; i &lt; blobs_.size(); ++i) { //权值和偏置项也会保存
+    blobs_[i]-&gt;ToProto(param-&gt;add_blobs(), write_diff);
+  }
+}
+
+}  // namespace caffe
+
+#endif  // CAFFE_LAYER_H_
+
+</code></pre>
+
+<p><code>Layer</code>源文件位于<code>src/caffe/layer.cpp</code>中:</p>
+
+<pre><code class="language-c++">#include &quot;caffe/layer.hpp&quot;
+
+namespace caffe {
+
+INSTANTIATE_CLASS(Layer);
+
+}  // namespace caffe
+
+</code></pre>
+
+<p>可见Layer大部分函数并没有实现，只有虚函数，真正的实现都在派生类中。具体代码可以进一步阅读 <code>src/caffe/丨ayers/*.cpp</code>。</p>
+
+<p>在使用 Layer 之前，需要先包含头文件<code>#include &lt;caffe/layer.hpp&gt;</code>，再通过<code>using namespace caffe;</code>使用命名空间caffe。如果代码中试图创建Layer对象，编译时会报错：</p>
+
+<p><code>error: cannot declare variable &#39;a^ to be of abstract type &#39;caffe：:Layer&lt;float&gt;</code></p>
+
+<p>这是因为Layer类是一个虚基类，不能直接创建对象。关于虚基类,这里不再过多说明.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/15</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Caffe%20%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.html'>Caffe 数据结构</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="14974281629389.html">
+                
+                  <h1>怎样移除OSXRESERVED分区(如果BootCamp Assistant在安装之后没有成功删除这个分区)</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ol>
+<li>打开磁盘工具</li>
+<li>点击主物理磁盘(不是下边的分区)</li>
+<li>点击分区按钮</li>
+<li>When you see the pie chart, click on the OSXRESERVED partition in the pie chart</li>
+<li>点击<code>-</code>标志</li>
+<li>click apply</li>
+</ol>
+
+<p>Thats it! </p>
+
+<p><strong>DON&#39;T use the ERASE Button in Disk Utility! That will cause problems and it won&#39;t reallocate space back.</strong></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/14</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='MAC%20OS.html'>MAC OS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
               
 
 
@@ -2619,8 +2712,6 @@ DISABLE_COPY_AND_ASSIGN(Net);
             <a href="English%20Study.html"><strong>English Study</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
-        
-            <a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html"><strong>常见面试问题</strong></a>
          
         </p>
 

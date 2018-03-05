@@ -1,0 +1,583 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  常见iOS面试题基础篇2 - LZH007
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="LZH007" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:lockxmonk.github.io ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="http://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; LZH007</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+       
+       <li><a href="index.html">HOME</a></li>
+    <li><a href="archives.html">Archives</a></li>
+    <li><a href="about.html">ABOUT</a></li>
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="MAC%20OS.html">MAC OS</a></li>
+        
+            <li><a href="Effective%20OC2.0.html">Effective OC2.0</a></li>
+        
+            <li><a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html">机器学习</a></li>
+        
+            <li><a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html">统计学习方法</a></li>
+        
+            <li><a href="Python%E7%BB%83%E4%B9%A0.html">Python练习</a></li>
+        
+            <li><a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html">图像去雾技术</a></li>
+        
+            <li><a href="iOS.html">iOS</a></li>
+        
+            <li><a href="English%20Study.html">English Study</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
+        
+            <li><a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html">常见面试问题</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>常见iOS面试题基础篇2</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2018/3/3</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html'>常见面试问题</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <ul>
+<li>
+<a href="#toc_0">问:类别的作用?继承和类别在实现中有何区别?</a>
+</li>
+<li>
+<a href="#toc_1">问:在项目什么时候选择使用GCD，什么时候选择NSOperation?</a>
+</li>
+<li>
+<a href="#toc_2">问:Object-C有私有方法吗？私有变量呢？</a>
+</li>
+<li>
+<a href="#toc_3">问:内存管理 Autorelease、retain、copy、assign的set方法和含义？</a>
+</li>
+<li>
+<a href="#toc_4">问:Object-C有多继承吗？没有的话用什么代替？cocoa 中所有的类都是NSObject 的子类</a>
+</li>
+<li>
+<a href="#toc_5">问:Objective-C堆和栈的区别？</a>
+</li>
+<li>
+<a href="#toc_6">问:什么时候用delegate,什么时候用Notification?</a>
+</li>
+<li>
+<a href="#toc_7">问:写一个”标准&quot;宏MIN ，这个宏输入两个参数并返回较小的一个。</a>
+</li>
+<li>
+<a href="#toc_8">问:关键字const有什么含意？修饰类呢?static的作用,用于类呢?还有extern c的作用</a>
+</li>
+<li>
+<a href="#toc_9">问: http和scoket通信的区别？</a>
+</li>
+<li>
+<a href="#toc_10">问:TCP和UDP的区别？</a>
+</li>
+<li>
+<a href="#toc_11">问:请简要说明viewDidLoad和viewDidUnload何时调用</a>
+</li>
+</ul>
+
+
+<h2 id="toc_0">问:类别的作用?继承和类别在实现中有何区别?</h2>
+
+<p>答:category 可以在不获悉，不改变原来代码的情况下往里面添加新的方法，只能添加，不能删除修改，并且如果类别和原来类中的方法产生名称冲突，则类别将覆盖原来的方法，因为类别具有更高的优先级。</p>
+
+<p>类别主要有3个作用：</p>
+
+<p>1).将类的实现分散到多个不同文件或多个不同框架中。</p>
+
+<p>2).创建对私有方法的前向引用。</p>
+
+<p>3).向对象添加非正式协议。</p>
+
+<p>继承可以增加，修改或者删除方法，并且可以增加属性。 </p>
+
+<h2 id="toc_1">问:在项目什么时候选择使用GCD，什么时候选择NSOperation?</h2>
+
+<p>答:项目中使用NSOperation的优点是NSOperation是对线程的高度抽象，在项目中使用它，会使项目的程序结构更好，子类化NSOperation的设计思路，是具有面向对象的优点(复用、封装)，使得实现是多线程支持，而接口简单，建议在复杂项目中使用。</p>
+
+<p>项目中使用GCD的优点是GCD本身非常简单、易用，对于不复杂的多线程操作，会节省代码量，而Block参数的使用，会是代码更为易读，建议在简单项目中使用。 </p>
+
+<h2 id="toc_2">问:Object-C有私有方法吗？私有变量呢？</h2>
+
+<p>答:objective-c – 类里面的方法只有两种, 静态方法和实例方法. 这似乎就不是完整的面向对象了,按照OO的原则就是一个对象只暴露有用的东西. 如果没有了私有方法的话, 对于一些小范围的代码重用就不那么顺手了. 在类里面声名一个私有方法</p>
+
+<p>@interface Controller : NSObject { NSString *something; }<br/>
++ (void)thisIsAStaticMethod;<br/>
+– (void)thisIsAnInstanceMethod;<br/>
+@end<br/>
+@interface Controller (private) -<br/>
+(void)thisIsAPrivateMethod;<br/>
+@end<br/>
+@private可以用来修饰私有变量</p>
+
+<p>在Objective‐C中，所有实例变量默认都是私有的，所有实例方法默认都是公有的 </p>
+
+<h2 id="toc_3">问:内存管理 Autorelease、retain、copy、assign的set方法和含义？</h2>
+
+<p>答:1).你初始化(alloc/init)的对象，你需要释放(release)它。例如：</p>
+
+<p>NSMutableArray aArray = [[NSArray alloc] init]; 后，需要 [aArray release];</p>
+
+<p>2).你retain或copy的，你需要释放它。例如：</p>
+
+<p>[aArray retain] 后，需要 [aArray release];</p>
+
+<p>3).被传递(assign)的对象，你需要斟酌的retain和release。例如：</p>
+
+<p>obj2 = [[obj1 someMethod] autorelease];</p>
+
+<p>对象2接收对象1的一个自动释放的值，或传递一个基本数据类型(NSInteger，NSString)时：你或希望将对象2进行retain，以防止它在被使用之前就被自动释放掉。但是在retain后，一定要在适当的时候进行释放。</p>
+
+<p>关于索引计数(Reference Counting)的问题</p>
+
+<p>retain值 = 索引计数(Reference Counting)</p>
+
+<p>NSArray对象会retain(retain值加一)任何数组中的对象。当NSArray被卸载(dealloc)的时候，所有数组中的对象会 被 执行一次释放(retain值减一)。不仅仅是NSArray，任何收集类(Collection Classes)都执行类似操作。例如 NSDictionary，甚至UINavigationController。</p>
+
+<p>Alloc/init建立的对象，索引计数为1。无需将其再次retain。</p>
+
+<p>[NSArray array]和[NSDate date]等“方法”建立一个索引计数为1的对象，但是也是一个自动释放对象。所以是本地临时对象，那么无所谓了。如果是打算在全Class中使用的变量(iVar)，则必须retain它。</p>
+
+<p>缺省的类方法返回值都被执行了“自动释放”方法。(*如上中的NSArray)</p>
+
+<p>在类中的卸载方法“dealloc”中，release所有未被平衡的NS对象。(*所有未被autorelease，而retain值为1的) </p>
+
+<h2 id="toc_4">问:Object-C有多继承吗？没有的话用什么代替？cocoa 中所有的类都是NSObject 的子类</h2>
+
+<p>答:多继承在这里是用protocol 委托代理 来实现的</p>
+
+<p>你不用去考虑繁琐的多继承 ,虚基类的概念.</p>
+
+<p>ood的多态特性 在 obj-c 中通过委托来实现. 来自:<a href="http://api.codertopic.com/itapi/html5/itshare.htm">http://api.codertopic.com/itapi/html5/itshare.htm</a><br/>
+我的手机  11:00:25<br/>
+问:C和obj-c 如何混用?<br/>
+答:1).obj-c的编译器处理后缀为m的文件时，可以识别obj-c和c的代码，处理mm文件可以识别obj-c,c,c++代码，但cpp文件必须只能用c/c++代码，而且cpp文件include的头文件中，也不能出现obj-c的代码，因为cpp只是cpp</p>
+
+<p>2).在mm文件中混用cpp直接使用即可，所以obj-c混cpp不是问题</p>
+
+<p>3).在cpp中混用obj-c其实就是使用obj-c编写的模块是我们想要的。</p>
+
+<p>如果模块以类实现，那么要按照cpp class的标准写类的定义，头文件中不能出现obj-c的东西，包括#import cocoa的。实现文件中，即类的实现代码中可以使用obj-c的东西，可以import,只是后缀是mm。</p>
+
+<p>如果模块以函数实现，那么头文件要按c的格式声明函数，实现文件中，c++函数内部可以用obj-c，但后缀还是mm或m。</p>
+
+<p>总结：只要cpp文件和cpp include的文件中不包含obj-c的东西就可以用了，cpp混用obj-c的关键是使用接口，而不能直接使用 实现代 码，实际上cpp混用的是obj-c编译后的o文件，这个东西其实是无差别的，所以可以用。obj-c的编译器支持cpp </p>
+
+<h2 id="toc_5">问:Objective-C堆和栈的区别？</h2>
+
+<p>答:管理方式：对于栈来讲，是由编译器自动管理，无需我们手工控制；对于堆来说，释放工作由程序员控制，容易产生memory leak。</p>
+
+<p>申请大小：</p>
+
+<p>栈：在Windows下,栈是向低地址扩展的数据结构，是一块连续的内存的区域。这句话的意思是栈顶的地址和栈的最大容量是系统预先规定好的，在 WINDOWS下，栈的大小是2M（也有的说是1M，总之是一个编译时就确定的常数），如果申请的空间超过栈的剩余空间时，将提示overflow。因 此，能从栈获得的空间较小。</p>
+
+<p>堆：堆是向高地址扩展的数据结构，是不连续的内存区域。这是由于系统是用链表来存储的空闲内存地址的，自然是不连续的，而链表的遍历方向是由低地址向高地址。堆的大小受限于计算机系统中有效的虚拟内存。由此可见，堆获得的空间比较灵活，也比较大。</p>
+
+<p>碎片问题：对于堆来讲，频繁的new/delete势必会造成内存空间的不连续，从而造成大量的碎片，使程序效率降低。对于栈来讲，则不会存在这个问题，因为栈是先进后出的队列，他们是如此的一一对应，以至于永远都不可能有一个内存块从栈中间弹出</p>
+
+<p>分配方式：堆都是动态分配的，没有静态分配的堆。栈有2种分配方式：静态分配和动态分配。静态分配是编译器完成的，比如局部变量的分配。动态分配由alloca函数进行分配，但是栈的动态分配和堆是不同的，他的动态分配是由编译器进行释放，无需我们手工实现。</p>
+
+<p>分配效率：栈是机器系统提供的数据结构，计算机会在底层对栈提供支持：分配专门的寄存器存放栈的地址，压栈出栈都有专门的指令执行，这就决定了栈的效率比较高。堆则是C/C++函数库提供的，它的机制是很复杂的。 </p>
+
+<h2 id="toc_6">问:什么时候用delegate,什么时候用Notification?</h2>
+
+<p>答:delegate针对one-to-one关系，用于sender接受到reciever的某个功能反馈值。</p>
+
+<p>notification针对one-to-one/many/none,reciver,用于通知多个object某个事件。</p>
+
+<h2 id="toc_7">问:写一个”标准&quot;宏MIN ，这个宏输入两个参数并返回较小的一个。</h2>
+
+<p>答:#define MIN(A,B) （（A） &lt;= (B) ? (A) : (B))<br/>
+这个测试是为下面的目的而设的：</p>
+
+<p>标识#define在宏中应用的基本知识。这是很重要的，因为直到嵌入(inline)操作符变为标准C的一部分，宏是方便产生嵌入代码的唯一方</p>
+
+<p>法，</p>
+
+<p>对于嵌入式系统来说，为了能达到要求的性能，嵌入代码经常是必须的方法。</p>
+
+<p>三重条件操作符的知识。这个操作符存在C语言中的原因是它使得编译器能产生比 if-then-else 更优化的代码，了解这个用法是很重要的。</p>
+
+<p>懂得在宏中小心地把参数用括号括起来</p>
+
+<p>我也用这个问题开始讨论宏的副作用，例如：当你写下面的代码时会发生什么事？</p>
+
+<p>least = MIN(*p++, b);<br/>
+结果是：</p>
+
+<p><code>((*p++) &lt;= (b) ? (*p++) : (*p++))</code><br/>
+这个表达式会产生副作用，指针p会作三次++自增操作。 </p>
+
+<h2 id="toc_8">问:关键字const有什么含意？修饰类呢?static的作用,用于类呢?还有extern c的作用</h2>
+
+<p>答:const 意味着&quot;只读&quot;，下面的声明都是什么意思？<br/>
+const int a;<br/>
+int const a;<br/>
+const int *a;<br/>
+int * const a;<br/>
+int const * a const;<br/>
+前两个的作用是一样，a是一个常整型数。</p>
+
+<p>第三个意味着a是一个指向常整型数的指针（也就是，整型数是不可修改的，但指针可以）。</p>
+
+<p>第四个意思a是一个指向整型数的常指针（也就是说，指针指向的整型数是可以修改的，但指针是不可修改的）。</p>
+
+<p>最后一个意味着a是一个指向常整型数的常指针（也就是说，指针指向的整型数是不可修改的，同时指针也是不可修改的）。</p>
+
+<p>结论：</p>
+
+<p>关键字const的作用是为给读你代码的人传达非常有用的信息，实际上，声明一个参数为常量是为了告诉了用户这个参数的应用目的。</p>
+
+<p>如果你曾花很多时间清理其它人留下的垃圾，你就会很快学会感谢这点多余的信息。（当然，懂得用const的程序员很少会留下的垃圾让别人来清理的）  通过给优化器一些附加的信息，使用关键字const也许能产生更紧凑的代码。合理地使用关键字const可以使编译器很自然地保护那些不希望被改变的参数，防止其被无意的代码修改。简而言之，这样可以减少bug的出现。</p>
+
+<p>1).欲阻止一个变量被改变，可以使用 const 关键字。在定义该 const 变量时，通常需要对它进行初</p>
+
+<p>始化，因为以后就没有机会再去改变它了；</p>
+
+<p>2).对指针来说，可以指定指针本身为 const，也可以指定指针所指的数据为 const，或二者同时指</p>
+
+<p>定为 const；</p>
+
+<p>3).在一个函数声明中，const 可以修饰形参，表明它是一个输入参数，在函数内部不能改变其值；</p>
+
+<p>4).对于类的成员函数，若指定其为 const 类型，则表明其是一个常函数，不能修改类的成员变量；</p>
+
+<p>5).对于类的成员函数，有时候必须指定其返回值为 const 类型，以使得其返回值不为“左值”。 </p>
+
+<h2 id="toc_9">问: http和scoket通信的区别？</h2>
+
+<p>答:http是客户端用http协议进行请求，发送请求时候需要封装http请求头，并绑定请求的数据，服务器一般有web服务器配合（当然也非绝对）。 http请求方式为客户端主动发起请求，服务器才能给响应，一次请求完毕后则断开连接，以节省资源。服务器不能主动给客户端响应（除非采取http长连接 技术）。iphone主要使用类是NSUrlConnection。</p>
+
+<p>scoket是客户端跟服务器直接使用socket“套接字”进行连接，并没有规定连接后断开，所以客户端和服务器可以保持连接通道，双方 都可以主动发送数据。一般在游戏开发或股票开发这种要求即时性很强并且保持发送数据量比较大的场合使用。主要使用类是CFSocketRef。</p>
+
+<h2 id="toc_10">问:TCP和UDP的区别？</h2>
+
+<p>答:TCP全称是Transmission Control Protocol，中文名为传输控制协议，它可以提供可靠的、面向连接的网络数据传递服务。传输控制协议主要包含下列任务和功能：</p>
+
+<ul>
+<li><p>确保IP数据报的成功传递。</p></li>
+<li><p>对程序发送的大块数据进行分段和重组。</p></li>
+<li><p>确保正确排序及按顺序传递分段的数据。</p></li>
+<li><p>通过计算校验和，进行传输数据的完整性检查。</p></li>
+</ul>
+
+<p>TCP提供的是面向连接的、可靠的数据流传输，而UDP提供的是非面向连接的、不可靠的数据流传输。</p>
+
+<p>简单的说，TCP注重数据安全，而UDP数据传输快点，但安全性一般 </p>
+
+<h2 id="toc_11">问:请简要说明viewDidLoad和viewDidUnload何时调用</h2>
+
+<p>答:viewDidLoad在view从nib文件初始化时调用，loadView在controller的view为nil时调用。此方法在编程实现view时调用，view控制器默认会注册memory warning notification，当view controller的任何view没有用的时候，viewDidUnload会被调用，在这里实现将retain的view release，如果是retain的IBOutlet view 属性则不要在这里release，IBOutlet会负责release 。</p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15197807986881.html" 
+          title="Next Post: 2015年蓝桥杯省赛C/C++ A组题解">2015年蓝桥杯省赛C/C++ A组题解 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <div class="site-a-logo"><img src="/asset/img/logn.png" /></div>
+            
+                <h1>LZH007</h1>
+                <div class="site-des">LZH的技术杂事小博客~</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+<a target="_blank" class="github" target="_blank" href="https://github.com/lockxmonk" title="GitHub">GitHub</a>
+<a target="_blank" class="email" href="mailto:lzhabc007@163.com" title="Email">Email</a>
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="MAC%20OS.html"><strong>MAC OS</strong></a>
+        
+            <a href="Effective%20OC2.0.html"><strong>Effective OC2.0</strong></a>
+        
+            <a href="%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0.html"><strong>机器学习</strong></a>
+        
+            <a href="%E7%BB%9F%E8%AE%A1%E5%AD%A6%E4%B9%A0%E6%96%B9%E6%B3%95.html"><strong>统计学习方法</strong></a>
+        
+            <a href="Python%E7%BB%83%E4%B9%A0.html"><strong>Python练习</strong></a>
+        
+            <a href="%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html"><strong>图像去雾技术</strong></a>
+        
+            <a href="iOS.html"><strong>iOS</strong></a>
+        
+            <a href="English%20Study.html"><strong>English Study</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
+        
+            <a href="%E5%B8%B8%E8%A7%81%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.html"><strong>常见面试问题</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15200663417517.html">常见iOS面试题基础篇2</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196931743279.html">2016年第七届蓝桥杯C/C++程序设计本科B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+          <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1265629731'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s22.cnzz.com/z_stat.php%3Fid%3D1265629731%26online%3D1' type='text/javascript'%3E%3C/script%3E"));</script>    
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2017
+Powered by <a target="_blank" href="https://lockxmonk.github.io/index.html">LZH</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    <script src="asset/chart/all-min.js"></script><script type="text/javascript">$(function(){    var mwebii=0;    var mwebChartEleId = 'mweb-chart-ele-';    $('pre>code').each(function(){        mwebii++;        var eleiid = mwebChartEleId+mwebii;        if($(this).hasClass('language-sequence')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = Diagram.parse($(this).text());            diagram.drawSVG(eleiid,{theme: 'simple'});        }else if($(this).hasClass('language-flow')){            var ele = $(this).addClass('nohighlight').parent();            $('<div id="'+eleiid+'"></div>').insertAfter(ele);            ele.hide();            var diagram = flowchart.parse($(this).text());            diagram.drawSVG(eleiid);        }    });});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>
