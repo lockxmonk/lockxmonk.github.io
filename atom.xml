@@ -4,13 +4,273 @@
   <title><![CDATA[LZH007]]></title>
   <link href="https://lockxmonk.github.io/atom.xml" rel="self"/>
   <link href="https://lockxmonk.github.io/"/>
-  <updated>2018-03-05T22:42:18+08:00</updated>
+  <updated>2018-03-22T14:37:10+08:00</updated>
   <id>https://lockxmonk.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[UITableView-FDTemplateLayoutCell源码学习]]></title>
+    <link href="https://lockxmonk.github.io/15389627333795.html"/>
+    <updated>2018-10-08T09:38:53+08:00</updated>
+    <id>https://lockxmonk.github.io/15389627333795.html</id>
+    <content type="html"><![CDATA[
+<ul>
+<li>
+<a href="#toc_0">前言</a>
+</li>
+<li>
+<a href="#toc_1">框架文件结构</a>
+</li>
+<li>
+<a href="#toc_2">使用方式</a>
+<ul>
+<li>
+<a href="#toc_3">不缓存高度的实现方式</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_4">通过index Path来缓存的实现</a>
+</li>
+<li>
+<a href="#toc_5">通过key来缓存的实现</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="#toc_6">总结</a>
+
+
+<h2 id="toc_0">前言</h2>
+
+<p>该框架是前百度员工孙大神开源的一个用于动态计算cell高度框架，通过该框架对cell的高度进行计算并缓存。从而优化UITableView的流畅性。</p>
+
+<h2 id="toc_1">框架文件结构</h2>
+
+<p><img src="media/15389627333795/15389630674220.jpg" alt=""/><br/>
+该框架比较文件结构简单，一共只有4个类（8个文件）。</p>
+
+<p>UITableView+FDIndexPathHeightCache ：以index path为key缓存高度的具体实现<br/>
+UITableVIew+FDKeyedHeightCache ：以自定义的key缓存高度的具体实现<br/>
+UITableView+FDTemplateLayoutCell ：对外提供的接口文件<br/>
+UITableView+FDTemplateLayoutCellDebug ：给分类添加了一个fd_debugLogEnabled，通过设置该属性来控制是否打印日志。</p>
+
+<h2 id="toc_2">使用方式</h2>
+
+<p>使用方式分为三种，分别为无缓存，通过index path缓存，通过key缓存。使用方式分别如下所示：</p>
+
+<p><img src="media/15389627333795/15389669919545.jpg" alt=""/></p>
+
+<p>可以看到方法的使用时机为在<code>UITableViewDelegate</code>委托协议中的计算高度方法中。</p>
+
+<h3 id="toc_3">不缓存高度的实现方式</h3>
+
+<p>首先我们来看第一个方法<code>- (CGFloat)fd_heightForCellWithIdentifier:(NSString *)identifier configuration:(void (^)(id cell))configuration</code>的实现方式。</p>
+
+<pre><code class="language-objc">
+- (CGFloat)fd_heightForCellWithIdentifier:(NSString *)identifier configuration:(void (^)(id cell))configuration {
+    if (!identifier) {
+        return 0;
+    }
+    
+    UITableViewCell *templateLayoutCell = [self fd_templateCellForReuseIdentifier:identifier];
+    
+    // Manually calls to ensure consistent behavior with actual cells. (that are displayed on screen)
+    [templateLayoutCell prepareForReuse];
+    
+    // Customize and provide content for our template cell.
+    if (configuration) {
+        configuration(templateLayoutCell);
+    }
+    
+    return [self fd_systemFittingHeightForConfiguratedCell:templateLayoutCell];
+}
+
+</code></pre>
+
+<p>可以看到实现主要分为三部分，第一部分为通过<code>- (__kindof UITableViewCell *)fd_templateCellForReuseIdentifier:(NSString *)identifier</code>方法获取一个cell。这里我们先看一下该方法如何获取的，该方法的实现如下所示：</p>
+
+<pre><code class="language-objc">- (__kindof UITableViewCell *)fd_templateCellForReuseIdentifier:(NSString *)identifier {
+    NSAssert(identifier.length &gt; 0, @&quot;Expect a valid identifier - %@&quot;, identifier);
+    
+    NSMutableDictionary&lt;NSString *, UITableViewCell *&gt; *templateCellsByIdentifiers = objc_getAssociatedObject(self, _cmd);
+    if (!templateCellsByIdentifiers) {
+        templateCellsByIdentifiers = @{}.mutableCopy;
+        objc_setAssociatedObject(self, _cmd, templateCellsByIdentifiers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    
+    UITableViewCell *templateCell = templateCellsByIdentifiers[identifier];
+    
+    if (!templateCell) {
+        templateCell = [self dequeueReusableCellWithIdentifier:identifier];
+        NSAssert(templateCell != nil, @&quot;Cell must be registered to table view for identifier - %@&quot;, identifier);
+        templateCell.fd_isTemplateLayoutCell = YES;
+        templateCell.contentView.translatesAutoresizingMaskIntoConstraints = NO;
+        templateCellsByIdentifiers[identifier] = templateCell;
+        [self fd_debugLog:[NSString stringWithFormat:@&quot;layout cell created - %@&quot;, identifier]];
+    }
+    
+    return templateCell;
+}
+</code></pre>
+
+<p>可以看到该方法通过关联属性添加了一个<code>templateCellsByIdentifiers</code>字典属性，来保证相同的identifier第二次获取cell的时候不再重新获取，直接取的字典属性里面的值（cell）。</p>
+
+<p>第二部分，通过configuration block让用户有机会对创建好的cell进行定制化<br/>
+第三部分，针对frame layout 和 auto layout对cell进行高度的适应计算（包括判断辅助视图来调节cell的宽度等）</p>
+
+<h2 id="toc_4">通过index Path来缓存的实现</h2>
+
+<p>首先来看一下<code>- (CGFloat)fd_heightForCellWithIdentifier:(NSString *)identifier cacheByIndexPath:(NSIndexPath *)indexPath configuration:(void (^)(id cell))configuration</code>方法的实现。</p>
+
+<pre><code class="language-objc">- (CGFloat)fd_heightForCellWithIdentifier:(NSString *)identifier cacheByIndexPath:(NSIndexPath *)indexPath configuration:(void (^)(id cell))configuration {
+    if (!identifier || !indexPath) {
+        return 0;
+    }
+    
+    // Hit cache
+    if ([self.fd_indexPathHeightCache existsHeightAtIndexPath:indexPath]) {
+        [self fd_debugLog:[NSString stringWithFormat:@&quot;hit cache by index path[%@:%@] - %@&quot;, @(indexPath.section), @(indexPath.row), @([self.fd_indexPathHeightCache heightForIndexPath:indexPath])]];
+        return [self.fd_indexPathHeightCache heightForIndexPath:indexPath];
+    }
+    
+    CGFloat height = [self fd_heightForCellWithIdentifier:identifier configuration:configuration];
+    [self.fd_indexPathHeightCache cacheHeight:height byIndexPath:indexPath];
+    [self fd_debugLog:[NSString stringWithFormat: @&quot;cached by index path[%@:%@] - %@&quot;, @(indexPath.section), @(indexPath.row), @(height)]];
+    
+    return height;
+}
+</code></pre>
+
+<p>该方法主要分为两部分，命中缓存的indexpath与没命中两部分处理。</p>
+
+<p><strong>第一部分</strong>为若命中indexpath缓存时的实现：</p>
+
+<pre><code class="language-objc"> // Hit cache
+    if ([self.fd_indexPathHeightCache existsHeightAtIndexPath:indexPath]) {
+        [self fd_debugLog:[NSString stringWithFormat:@&quot;hit cache by index path[%@:%@] - %@&quot;, @(indexPath.section), @(indexPath.row), @([self.fd_indexPathHeightCache heightForIndexPath:indexPath])]];
+        return [self.fd_indexPathHeightCache heightForIndexPath:indexPath];
+    }
+</code></pre>
+
+<p>该部分主要使用<code>- (BOOL)existsHeightAtIndexPath:(NSIndexPath *)indexPath</code>来判断是否命中<code>indexPath</code>缓存，实习细节如下：</p>
+
+<pre><code class="language-objc">- (BOOL)existsHeightAtIndexPath:(NSIndexPath *)indexPath {
+    [self buildCachesAtIndexPathsIfNeeded:@[indexPath]];
+    NSNumber *number = self.heightsBySectionForCurrentOrientation[indexPath.section][indexPath.row];
+    return ![number isEqualToNumber:@-1];
+}
+
+- (void)buildCachesAtIndexPathsIfNeeded:(NSArray *)indexPaths {
+    // Build every section array or row array which is smaller than given index path.
+    [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
+        [self buildSectionsIfNeeded:indexPath.section];
+        [self buildRowsIfNeeded:indexPath.row inExistSection:indexPath.section];
+    }];
+}
+
+- (void)buildSectionsIfNeeded:(NSInteger)targetSection {
+    [self enumerateAllOrientationsUsingBlock:^(FDIndexPathHeightsBySection *heightsBySection) {
+        for (NSInteger section = 0; section &lt;= targetSection; ++section) {
+            if (section &gt;= heightsBySection.count) {
+                heightsBySection[section] = [NSMutableArray array];
+            }
+        }
+    }];
+}
+
+- (void)buildRowsIfNeeded:(NSInteger)targetRow inExistSection:(NSInteger)section {
+    [self enumerateAllOrientationsUsingBlock:^(FDIndexPathHeightsBySection *heightsBySection) {
+        NSMutableArray&lt;NSNumber *&gt; *heightsByRow = heightsBySection[section];
+        for (NSInteger row = 0; row &lt;= targetRow; ++row) {
+            if (row &gt;= heightsByRow.count) {
+                heightsByRow[row] = @-1;
+            }
+        }
+    }];
+}
+</code></pre>
+
+<p>可以看到上述方法的主要功能是调用<code>buildCachesAtIndexPathsIfNeeded</code>及其函数内的子方法来将所有比当前所传入的indexPath小的section以及row所组成的数组值赋值为-1（准确的描述为将当前indexPath的section和row与当前的高度缓存数组<code>heightsBySectionForCurrentOrientation</code>相比，将所有下标大于等于缓存数组下标并且小于等于indexpath的元素赋值为-1）；</p>
+
+<p>之后根据当前的row是否等于-1，来判断是否命中缓存。</p>
+
+<p>需要注意的是横屏和竖屏的高度可能存在不一致，所以需要设置<code>heightsBySectionForPortrait</code>和<code>heightsBySectionForLandscape</code>两个数组属性来分别保存高度，之后用<code>heightsBySectionForCurrentOrientation</code>来透明其中的判断过程。</p>
+
+<p>若命中缓存则调用<code>- (CGFloat)heightForIndexPath:(NSIndexPath *)indexPath</code>该方法进行缓存高度获取。方法实现细节为：</p>
+
+<pre><code class="language-objc">- (CGFloat)heightForIndexPath:(NSIndexPath *)indexPath {
+    [self buildCachesAtIndexPathsIfNeeded:@[indexPath]];
+    NSNumber *number = self.heightsBySectionForCurrentOrientation[indexPath.section][indexPath.row];
+#if CGFLOAT_IS_DOUBLE
+    return number.doubleValue;
+#else
+    return number.floatValue;
+#endif
+}
+</code></pre>
+
+<p><strong>第二部分</strong>为没有命中缓存时所遇到的情况：若没有命中缓存，则需要调用<code>- (CGFloat)fd_heightForCellWithIdentifier:(NSString *)identifier configuration:(void (^)(id cell))configuration</code>方法来计算相应的高度。该方法之前已经学习过，就不再废话了。 计算好高度之后需要调用<code>- (void)cacheHeight:(CGFloat)height byIndexPath:(NSIndexPath *)indexPath</code>方法来进行高度的缓存。</p>
+
+<pre><code class="language-objc">- (void)cacheHeight:(CGFloat)height byIndexPath:(NSIndexPath *)indexPath {
+    self.automaticallyInvalidateEnabled = YES;
+    [self buildCachesAtIndexPathsIfNeeded:@[indexPath]];
+    self.heightsBySectionForCurrentOrientation[indexPath.section][indexPath.row] = @(height);
+}
+</code></pre>
+
+<p>根据上述实现可看到缓存的主要实现为 向<code>self.heightsBySectionForCurrentOrientation</code>数组中设置当前的高度值。</p>
+
+<h2 id="toc_5">通过key来缓存的实现</h2>
+
+<p>该部分的主要使用<code>- (CGFloat)fd_heightForCellWithIdentifier:(NSString *)identifier cacheByKey:(id&lt;NSCopying&gt;)key configuration:(void (^)(id cell))configuration</code>方法来实现：</p>
+
+<pre><code class="language-objc">- (CGFloat)fd_heightForCellWithIdentifier:(NSString *)identifier cacheByKey:(id&lt;NSCopying&gt;)key configuration:(void (^)(id cell))configuration {
+    if (!identifier || !key) {
+        return 0;
+    }
+    
+    // Hit cache
+    if ([self.fd_keyedHeightCache existsHeightForKey:key]) {
+        CGFloat cachedHeight = [self.fd_keyedHeightCache heightForKey:key];
+        [self fd_debugLog:[NSString stringWithFormat:@&quot;hit cache by key[%@] - %@&quot;, key, @(cachedHeight)]];
+        return cachedHeight;
+    }
+    
+    CGFloat height = [self fd_heightForCellWithIdentifier:identifier configuration:configuration];
+    [self.fd_keyedHeightCache cacheHeight:height byKey:key];
+    [self fd_debugLog:[NSString stringWithFormat:@&quot;cached by key[%@] - %@&quot;, key, @(height)]];
+    
+    return height;
+}
+</code></pre>
+
+<p>可以看到基本也分为两个部分，命中缓存与未命中缓存的情况。</p>
+
+<p>首先第一部分为命中缓存部分，该部分使用<code>- (BOOL)existsHeightForKey:(id&lt;NSCopying&gt;)key</code>来进行判断。<br/>
+改函数实现细节为：</p>
+
+<pre><code class="language-objc">- (BOOL)existsHeightForKey:(id&lt;NSCopying&gt;)key {
+    NSNumber *number = self.mutableHeightsByKeyForCurrentOrientation[key];
+    return number &amp;&amp; ![number isEqualToNumber:@-1];
+}
+</code></pre>
+
+<p>可以看到该方法和indexpath的缓存类似。就不过多介绍了。</p>
+
+<h1 id="toc_6">总结</h1>
+
+<p>该框架主要的功能及其实现即为上述这些：<br/>
+1.提供两种缓存方式（<code>cacheByIndexPath</code>和<code>cacheByKey</code>）<br/>
+2.支持frame 和 autolayout两种方式的高度计算（<code>- (CGFloat)fd_heightForCellWithIdentifier:(NSString *)identifier configuration:(void (^)(id cell))configuration</code>方法）。<br/>
+3.利用runtime重写tableView的<code>reloadData</code>方法，来判断是否重置缓存标识以及判断是否清空缓存。</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[2015年蓝桥杯省赛C/C++ A组题解]]></title>
@@ -2340,54 +2600,6 @@ NSArray *possibilities(NSString *s) {
   if ([s rangeOfString: @&quot;?&quot;].length == 0) return @[s];
   NSString *r = [s stringByReplacingOccurrencesOfString: @&quot;?&quot; withString: @&quot;0&quot; options: 0 range: [s rangeOfString: @&quot;?&quot;]], *t = [s stringByReplacingOccurrencesOfString: @&quot;?&quot; withString: @&quot;1&quot; options: 0 range: [s rangeOfString: @&quot;?&quot;]];
   return [possibilities(r) arrayByAddingObjectsFromArray: possibilities(t)];
-}
-</code></pre>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Simple Pig Latin]]></title>
-    <link href="https://lockxmonk.github.io/15143494387976.html"/>
-    <updated>2017-12-27T12:37:18+08:00</updated>
-    <id>https://lockxmonk.github.io/15143494387976.html</id>
-    <content type="html"><![CDATA[
-<p><img src="media/15143494387976/15143494406501.jpg" alt=""/></p>
-
-<p>一开始的复杂版:</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-NSString *pigIt(NSString *s) {
-    NSMutableArray *str = [s componentsSeparatedByString:@&quot; &quot;].mutableCopy;
-    NSMutableString *res = @&quot;&quot;.mutableCopy;
-    for (NSString *tmp in str) {
-        unichar c = [tmp characterAtIndex:0];
-        if ((c&gt;=&#39;a&#39;&amp;&amp;c&lt;=&#39;z&#39;)||(c&gt;=&#39;A&#39;&amp;&amp;c&lt;=&#39;Z&#39;)) {
-            NSMutableString *change = tmp.mutableCopy;
-            [change appendFormat:@&quot;%c&quot;,c];
-            if ([tmp isEqualToString:[str lastObject]]) {
-                [change appendString:@&quot;ay&quot;];
-            }else{
-                [change appendString:@&quot;ay &quot;];
-            }
-            [res appendString:[change substringFromIndex:1]];
-        }else{
-            [res appendFormat:@&quot;%c&quot;,c];
-        }
-    }
-    return res;
-}
-</code></pre>
-
-<p>简化版</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-NSString *pigIt(NSString *s) {
-  NSMutableArray *result = [s componentsSeparatedByString: @&quot; &quot;];
-  for (size_t i = 0; i &lt; [result count]; i++) result[i] = [[[result[i] substringFromIndex: 1] stringByAppendingString: [result[i] substringToIndex: 1]] stringByAppendingString: @&quot;ay&quot;];
-  return [result componentsJoinedByString: @&quot; &quot;];
 }
 </code></pre>
 

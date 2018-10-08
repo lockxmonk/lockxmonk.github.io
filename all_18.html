@@ -86,7 +86,7 @@
         
             <li><a href="iOS.html">iOS</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
+            <li><a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html">iOS三方框架源码学习</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
          
@@ -110,6 +110,75 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="15114255869932.html">
+                
+                  <h1>Degree of an Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given a non-empty array of non-negative integers <code>nums</code>, the degree of this array is defined as the maximum frequency of any one of its elements.</p>
+
+<p>Your task is to find the smallest possible length of a (contiguous) subarray of <code>nums</code>, that has the same degree as <code>nums</code>.</p>
+
+<p><img src="media/15114255869932/15114256313220.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int findShortestSubArray(vector&lt;int&gt;&amp; nums) {
+        
+        if (nums.size()&lt;2) {
+            return nums.size();
+        }
+        unordered_map&lt;int, int&gt;startIndex , number;
+        int len = nums.size();
+        int fre = 0;
+        for (int i=0; i&lt;nums.size(); i++) {
+            if (startIndex.count(nums[i])==0) {
+                startIndex[nums[i]]=i;
+            }
+            number[nums[i]]++;
+            if (number[nums[i]]==fre) {
+                len = min(i-startIndex[nums[i]]+1, len);
+            }
+            if (number[nums[i]]&gt;fre) {
+                len = i - startIndex[nums[i]] + 1;
+                fre = number[nums[i]];
+            }
+        }
+        
+        return len;
+    }
+};
+</code></pre>
+
+<p>该算法主要使用了两个<code>hash_map</code>:<br/>
+一个来记录数字所出现的次数，另一个记录数字最开始出现的位置。一旦有一个数字的频数超过了当前的<code>len</code>，则更新<code>len</code>，若两个数字出现的频率相等则取长度最小的。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="15114222067093.html">
                 
@@ -414,66 +483,6 @@ for same values, we only use the first one and pass the rest.</p></li>
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15113375347657.html">
-                
-                  <h1>Arranging Coins</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>You have a total of n coins that you want to form in a staircase shape, where every k-th row must have exactly k coins.</p>
-
-<p>Given n, find the total number of full staircase rows that can be formed.</p>
-
-<p>n is a non-negative integer and fits within the range of a 32-bit signed integer.</p>
-
-<p><img src="media/15113375347657/15113375557158.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int arrangeCoins(int n) {
-        return floor(-0.5+sqrt((double)2*n+0.25));
-    }
-};
-</code></pre>
-
-<p>这道题的主要考虑<code>1+2+3+...+x&lt;=n</code>下，使x左边等式最接近n，并且不超过。</p>
-
-<p>推导为：</p>
-
-<pre><code>-&gt; 1+2+3+...+x = n
--&gt; (1+x)x/2 = n
--&gt; x^2+x = 2n
--&gt; x^2+x+1/4 = 2n +1/4
--&gt; (x+1/2)^2 = 2n +1/4
--&gt; (x+0.5) = sqrt(2n+0.25)
--&gt; x = -0.5 + sqrt(2n+0.25)
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/22</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -538,7 +547,7 @@ public:
         
             <a href="iOS.html"><strong>iOS</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
+            <a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html"><strong>iOS三方框架源码学习</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
          
@@ -555,6 +564,12 @@ public:
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
@@ -576,12 +591,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  

@@ -86,7 +86,7 @@
         
             <li><a href="iOS.html">iOS</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
+            <li><a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html">iOS三方框架源码学习</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
          
@@ -110,6 +110,58 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="15123751997678.html">
+                
+                  <h1>Detect Capital</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15123751997678/15123752096895.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool detectCapitalUse(string word) {
+        int a[word.length()];
+        int r = 0;
+        for (int i = 0; i&lt;word.length(); i++) {
+            if (word[i]&gt;=&#39;A&#39;&amp;&amp;word[i]&lt;=&#39;Z&#39;) {
+                a[i] = 1;
+                r+=a[i];
+            }
+        }
+        if (r==word.length()||(a[0]==1&amp;&amp;r==1)||r==0) {
+            return true;
+        }
+        return false;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="15123699886595.html">
                 
@@ -388,56 +440,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15121974728141.html">
-                
-                  <h1>Third Maximum Number</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15121974728141/15121974890265.jpg" alt=""/></p>
-
-<p><strong>利用set的自动排序和去除重复元素来解决问题。</strong></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int thirdMax(vector&lt;int&gt;&amp; nums) {
-        set&lt;int&gt; result;
-        for (int num:nums) {
-            result.insert(num);
-            if (result.size()&gt;3) {
-                result.erase(result.begin());
-            }
-        }
-        return result.size()&lt;3? *result.rbegin():*result.begin();
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/2</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -502,7 +504,7 @@ public:
         
             <a href="iOS.html"><strong>iOS</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
+            <a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html"><strong>iOS三方框架源码学习</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
          
@@ -519,6 +521,12 @@ public:
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
@@ -540,12 +548,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  

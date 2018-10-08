@@ -86,7 +86,7 @@
         
             <li><a href="iOS.html">iOS</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
+            <li><a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html">iOS三方框架源码学习</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
          
@@ -110,6 +110,104 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="15050942669581.html">
+                
+                  <h1>第四十二条 多用GCD，少用performSelector系列方法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><code>Objective-C</code>本质上是一门非常动态的语言（参见第11条)，<code>NSObject</code>定义了几个方法, <mark>令开发者可以随意调用任何方法。这几个方法可以推迟执行方法调用，也可以指定运行方法所用的线程。</mark>这些功能原来很有用，但是在出现了<code>GCD</code>之后，这些功能就尽量不要使用了，尽量用<code>GCD</code>来取代他们。</p>
+
+<p>其中他们又如下几个方法：</p>
+
+<pre><code class="language-objc">-(id)performSelector : (SEL) selector
+//可以传两个参数
+-(id)performSelector : (SEL) selector
+           withObject:（id）objectA
+           withObject:（id）objectB
+//传一个参数
+-(id)performSelector : (SEL) selector
+           withObject:（id）object
+</code></pre>
+
+<p>具体用法如：</p>
+
+<pre><code class="language-objc">[object performSelector: @selector(selectorName)];
+
+[object performSelector: @selector(setValue:)
+             withObject: newValue];
+</code></pre>
+
+<p>上面的用法，会有很多局限，比如在<code>ARC</code>下，会发出警告表示：<code>也许会内存泄露</code>，这是因为编译器并不知道将要的选择子是什么，因此，也就不了解其方法签名及返回值，甚至连是否有返回值都不清楚，而且由于编译器不知道方法名，所以就没办法运用<code>ARC</code>的内存管麵则来判定返回值是不是该释放。鉴于此，<code>ARC</code>采用了比较谨慎的做法，就是不添加释放操作。然而这么<br/>
+做可能导致内存泄漏，因为方法在返回对象时可能已经将其保留了。</p>
+
+<p>另一个局限性是：返回值只能是<code>void</code>或对象类型。尽管所要执行的 选择子也可以返回<code>void</code>，但是<code>performSelector</code>方法的返回值类型毕竟是<code>id</code>。如果想返回整数或浮点数等类型的值，那么就需要执行一些复杂的转换操作了，而这种转换很容易出错。</p>
+
+<p>第三个局限是：这个方法最多只能传递两个参数，当选择子得到参数超过两个时，只能运用字典来传送数据（但是容易增加开销和造成bug）。</p>
+
+<p>所以我们的解决方法是：我们使用<code>块</code>来代替，并且<code>performSelector</code>系列方法都可以使用<code>GCD</code>机制使用块来实现。我们来举几个例子说明：</p>
+
+<p>如果我们想要延后执行某个任务：</p>
+
+<pre><code class="language-objc">//Using performSelector:withObjectrafterDelay: 
+[self performSelector:@selector(doSomething)
+           withObject:nil 
+           afterDelay:5.0];
+
+//Using dispatch_after
+dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, (int64 t)(5.0 * NSEC PER SEC));
+
+dispatch_after(time, dispatch_get_main—queue(), ^(void){
+     [self doSomething];
+})；
+</code></pre>
+
+<p>后者想要在主线程执行某个任务：</p>
+
+<pre><code class="language-objc">// Using performSelectorOnMainThread: withObject .-waitUntilDone :
+[self performSelectorOnMainThread:@selector(doSomething)
+                      withObject:nil 
+                      waitUntilDone:NO];
+//Using dispatch_async
+// (or if waitUntilDone is YES, then dispatchasync) 
+dispatch_async(dispatch_get_main_queue(), ^{
+        [self doSomething];
+});
+</code></pre>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li><code>performSelector</code>系列方法在内存管理方面容易有疏失。它无法确定将要执行的选择子具体是什么，因而<code>ARC</code>编译器也就无法插入适当的内存管理方法。</li>
+<li><code>performSelector</code>系列方法所能处理的选择子太过局限了，选择子的返回值类型及发送给方法的参数个数都受到限制。</li>
+<li>如果想把任务放在另一个线程上执行，那么最好不要用<code>performSelector</code>系列方法，而是应该把任务封装到块里，然后调用大中枢派发机制的相关方法来实现。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/11</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E5%85%AD%E7%AB%A0%20%E5%9D%97%E4%B8%8EGCD.html'>第六章 块与GCD</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="15049238737460.html">
                 
@@ -786,61 +884,6 @@ block();
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15043134527493.html">
-                
-                  <h1>通过协议提供匿名方法</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>协议定义了一系列方法，遵从此协议的对象应该实现它们（如果这些方法不是可选的, 那么就必须实现)。于是，我们可以用协议把自己所写的<code>API</code>之中的实现细节隐藏起来，将返回的对象设计为遵从此协议的纯<code>id</code>类型。</p>
-
-<p>这样的话，想要隐藏的类名就不会出现在<code>API</code>之中了。若是接口背后有多个不同的实现类，而你又不想指明具体使用哪个类，那么可以考虑用这个办法——因为有时候这些类可能会变，有时候它们又无法容纳于标准的类继承体系中，因而不能以某个公共基类来统一表示。</p>
-
-<p>此概念经常称为<code>“匿名对象&quot;(anonymous object)</code>，这与其他语言中的“匿名对象”不同，在那些语言中，该词是指以内联形式所创建出来的无名类，而此词在<code>Objective-C</code>中则不是这个意思。</p>
-
-<p>我们之前说的委托与数据源对象，就用到了这个方法。例如在定义“受委托者（delegate）”属性时：</p>
-
-<pre><code class="language-objc">@property {nonatomic, weak) id &lt;EOCDelegate&gt; delegate;
-
-</code></pre>
-
-<p>由于该属性的类型是<code>id&lt;EOCDelegate&gt;</code>,所以实际上任何类的对象都能充当这一属性, 即便该类不继承自<code>NSObject</code>也可以，只要遵循<code>EOCDelegate</code>协议就行。对于具备此属性的类来说，<code>delegate</code>就是“匿名的”（ammymous)。如有需要，可在运行期査出此对象所属的类型（参见第14条）。然而这样做不太好，因为指定属性类型时所写的那个<code>EOCDelegate</code>契约已经表明此对象的具体类型无关紧要了。</p>
-
-<p>当然还有其它的用法，这里我们就不举例了。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>协议可在某种程度上提供匿名类型。具体的对象类型可以淡化成遵从某协议的<code>id</code>类型，协议里规定了对象所应实现的方法。</li>
-<li>使用匿名对象来隐藏类型名称（或类名）。</li>
-<li>如果具体类型不重要，重要的是对象能够响应（定义在协议里的）特定方法，那么可使用匿名对象来表示。</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/2</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E5%9B%9B%E7%AB%A0%20%E5%8D%8F%E8%AE%AE%E4%B8%8E%E5%88%86%E7%B1%BB.html'>第四章 协议与分类</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -905,7 +948,7 @@ block();
         
             <a href="iOS.html"><strong>iOS</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
+            <a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html"><strong>iOS三方框架源码学习</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
          
@@ -922,6 +965,12 @@ block();
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
@@ -943,12 +992,6 @@ block();
 		      
 			      <li class="post">
 			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  

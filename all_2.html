@@ -86,7 +86,7 @@
         
             <li><a href="iOS.html">iOS</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
+            <li><a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html">iOS三方框架源码学习</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
          
@@ -110,6 +110,55 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="15162401864030.html">
+                
+                  <h1>Find Anagram Mappings</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15162401864030/15162401885331.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; anagramMappings(vector&lt;int&gt;&amp; A, vector&lt;int&gt;&amp; B) {
+        unordered_map&lt;int, int&gt; map;
+        vector&lt;int&gt; res;
+        for (int i = 0; i&lt;B.size(); i++) {
+            map[B[i]]=i;
+        }
+        for (int j = 0; j&lt;A.size(); j++) {
+            res.push_back(map[A[j]]);
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/18</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="15162389890253.html">
                 
@@ -394,77 +443,6 @@ unsigned long long perimeter(int n) {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15151211562254.html">
-                
-                  <h1>AFNetworking遇到的问题</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>由于<code>AFNetworking</code>运用了官方<code>NSURLSession</code>所以其中有一些坑</p>
-
-<h2 id="toc_0">1.苹果运用NSJSONSerialization解析，出现数字类型精度问题</h2>
-
-<p>当服务器给我传回来一个<code>3.0</code>的数字类型时，在安卓端是没有问题的，但是在iOS这里会出现<code>2.99999</code>这样的问题。</p>
-
-<p><font color=red><strong>出现这个问题的原因是：苹果在json解析时，默认为双精度的double类型。</strong></font></p>
-
-<pre><code>我们相处的解决方案有两种：
-1. 跟后台协商将数字型的值改为`字符型`
-2. 使用第三方的json解析。
-</code></pre>
-
-<p>最后我们使用的是第一种方法，因为第二种势必要修改了AFNetwork的源码，开发与维护成本相比较来说要大。</p>
-
-<h2 id="toc_1">2.json解析失败</h2>
-
-<p>由于AF默认的解析方式为<code>0</code>（返回的对象是不可变的，<code>NSDictionary</code>或<code>NSArray</code>）：<br/>
-<img src="media/15151211562254/15151222443779.jpg" alt=""/></p>
-
-<p>我们来看一下都有什么选项：<br/>
-<img src="media/15151211562254/15151222806031.jpg" alt=""/></p>
-
-<p>所以当我们服务器返回的json数据是<strong>碎片化</strong>的（最外层既不是<code>NSArray</code>也不是<code>NSDictionary</code>），那么解析的时候就会出错了。</p>
-
-<p>解决方法是：</p>
-
-<p><img src="media/15151211562254/15151327758647.jpg" alt=""/><br/>
-在0后添加<code>|</code>字符，增加这种情况，允许碎片化数据。</p>
-
-<h2 id="toc_2">3. 请求后response的状态码范围问题</h2>
-
-<p>正常项目中正常请求成功会返回200，但是服务器若是给你返回了500（我不知道后台为啥会返回这个码），问题就出现了：</p>
-
-<p>这是由于下面的原因：<br/>
-<img src="media/15151211562254/15151343155944.jpg" alt=""/><br/>
-会发现上图中可接受状态码的范围是200-300；</p>
-
-<p>具体解决方法就不说了。。。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2018/1/5</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -529,7 +507,7 @@ unsigned long long perimeter(int n) {
         
             <a href="iOS.html"><strong>iOS</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
+            <a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html"><strong>iOS三方框架源码学习</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
          
@@ -546,6 +524,12 @@ unsigned long long perimeter(int n) {
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
@@ -567,12 +551,6 @@ unsigned long long perimeter(int n) {
 		      
 			      <li class="post">
 			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  

@@ -86,7 +86,7 @@
         
             <li><a href="iOS.html">iOS</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
+            <li><a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html">iOS三方框架源码学习</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
          
@@ -110,6 +110,52 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="15127898937133.html">
+                
+                  <h1>Reverse String II</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15127898937133/15127899074799.jpg" alt=""/></p>
+
+<p>运用内置的<code>reverse</code>函数</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string reverseStr(string s, int k) {
+        for (int i = 0; i&lt;s.length(); i+=2*k) {
+            reverse(s.begin()+i, min(s.begin()+i+k, s.end()));
+        }
+        return s;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="15127884486398.html">
                 
@@ -406,63 +452,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15127166881202.html">
-                
-                  <h1>Fizz Buzz</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Write a program that outputs the string representation of numbers from 1 to n.</p>
-
-<p>But for multiples of three it should output “Fizz” instead of the number and for the multiples of five output “Buzz”. For numbers which are multiples of both three and five output “FizzBuzz”.</p>
-
-<p><img src="media/15127166881202/15127167059726.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;string&gt; fizzBuzz(int n) {
-        vector&lt;string&gt; res;
-        for (int i=1; i&lt;=n; i++) {
-            if (i%3==0&amp;&amp;i%5==0) {
-                res.push_back(&quot;FizzBuzz&quot;);
-            }else if (i%5==0){
-                res.push_back(&quot;Buzz&quot;);
-            }else if(i%3==0){
-                res.push_back(&quot;Fizz&quot;);
-            }else{
-                res.push_back(to_string(i));
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/8</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -527,7 +516,7 @@ public:
         
             <a href="iOS.html"><strong>iOS</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
+            <a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html"><strong>iOS三方框架源码学习</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
          
@@ -544,6 +533,12 @@ public:
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
@@ -565,12 +560,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  

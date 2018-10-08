@@ -86,7 +86,7 @@
         
             <li><a href="iOS.html">iOS</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
+            <li><a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html">iOS三方框架源码学习</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
          
@@ -110,6 +110,97 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="15124576449217.html">
+                
+                  <h1>Complex Number Multiplication</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15124576449217/15124576549963.jpg" alt=""/></p>
+
+<p>第一次写的复杂版：</p>
+
+<pre><code class="language-c++">string complexNumberMultiply(string a, string b) {
+    int a1=0 ,b1=0 ,a2=0 ,b2=0;
+    for (int i = 0; i&lt;a.length(); i++) {
+        int log = 0;
+        if (a[i]==&#39;+&#39;) {
+            log = i;
+            string tmp;
+            for (int j=0; j&lt;i; j++) {
+                tmp+=a[j];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;a1);
+            tmp = &quot;&quot;;
+            for (int m = i+1; m&lt;a.length()-1; m++) {
+                tmp+=a[m];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;b1);
+        }
+    }
+    for (int i = 0; i&lt;b.length(); i++) {
+        int log = 0;
+        if (b[i]==&#39;+&#39;) {
+            log = i;
+            string tmp;
+            for (int j=0; j&lt;i; j++) {
+                tmp+=b[j];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;a2);
+            tmp = &quot;&quot;;
+            for (int m = i+1; m&lt;b.length()-1; m++) {
+                tmp+=b[m];
+            }
+            sscanf(tmp.c_str(), &quot;%d&quot;,&amp;b2);
+        }
+    }
+    string res = to_string(a1*a2-b1*b2)+&quot;+&quot;+to_string(a1*b2+a2*b1)+&quot;i&quot;;
+    return res;
+}
+</code></pre>
+
+<p>精简版：</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    string complexNumberMultiply(string a, string b) {
+        int c,d,e,f;
+        char ret[100];
+        sscanf(a.c_str(),&quot;%d+%di&quot;,&amp;c,&amp;d);
+        sscanf(b.c_str(),&quot;%d+%di&quot;,&amp;e,&amp;f);
+        cout&lt;&lt;c&lt;&lt;&quot; &quot;&lt;&lt;d&lt;&lt;&quot; &quot;&lt;&lt;e&lt;&lt;&quot; &quot;&lt;&lt;f&lt;&lt;endl;
+        sprintf(ret,&quot;%d+%di&quot;,(c*e-f*d),(d*e+c*f));
+        string ans(ret);
+        return ans;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/5</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="15124550672696.html">
                 
@@ -441,58 +532,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15123751997678.html">
-                
-                  <h1>Detect Capital</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15123751997678/15123752096895.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    bool detectCapitalUse(string word) {
-        int a[word.length()];
-        int r = 0;
-        for (int i = 0; i&lt;word.length(); i++) {
-            if (word[i]&gt;=&#39;A&#39;&amp;&amp;word[i]&lt;=&#39;Z&#39;) {
-                a[i] = 1;
-                r+=a[i];
-            }
-        }
-        if (r==word.length()||(a[0]==1&amp;&amp;r==1)||r==0) {
-            return true;
-        }
-        return false;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -557,7 +596,7 @@ public:
         
             <a href="iOS.html"><strong>iOS</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
+            <a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html"><strong>iOS三方框架源码学习</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
          
@@ -574,6 +613,12 @@ public:
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
@@ -595,12 +640,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  

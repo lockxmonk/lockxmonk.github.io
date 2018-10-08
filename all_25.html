@@ -86,7 +86,7 @@
         
             <li><a href="iOS.html">iOS</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
+            <li><a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html">iOS三方框架源码学习</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
          
@@ -110,6 +110,108 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="15038851180831.html">
+                
+                  <h1>第二十一条 理解Objective-C的错误模型</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><code>Objective-C</code>语言不例外的也有“异常”（exception)机制，但是与其它语言肯定存在差异。我们要重新学习一下。</p>
+
+<p>首先就是，<code>“自动引用计数”（Automatic ReferenceCounting, ARC)</code>在默认情况下不是<code>“异常安全的&quot;（exception safe)</code>。具体来说，这意味着：如果抛出异常，那么本应在作用域末尾释放的对象现在却不会自动释放了。<strong><font color=red>如果想生成“异常安全”的代码，可以通过设置编译器的标志来实现，不过这将引入一些额外代码，在不抛出异常时，也照样要执行这部分代码。</font></strong>需要打开的编译器标志叫做<code>-fobjc-arc-exceptions</code>。</p>
+
+<p>但是我们应该注意，<mark>Objective-C语言只有在极其罕见的情况下拋出异常，异常拋出之后，无须考虑恢复问题，而且应用程序此时也应该退出。</mark>这就是说，不用再编写复杂的“异常安全”代码了。</p>
+
+<p>异常只应该用于极其严重的错误，比如说，你编写了某个抽象基类，它的正确用法是先从中继承一个子类，然后使用这个子类。在这种情况下，如果有人直接使用了这个抽象基类，那么可以考虑抛出异常。</p>
+
+<p>与其他语言不同，Objective-C中没办法将某个类标识为“抽象 类”。要想达成类似效果，最好的办法是在那些子类必须覆写的超类方法里抛出异常。这样的话，只要有人直接创建抽象基类的实例并使用它，即会拋出异常：</p>
+
+<pre><code class="language-objc">-(void)mustOverrideMethod {
+NSString *reason = [NSStringstringWithFormat: 
+                    @&quot;%@ must be overridden&quot;,
+                    NSStringFromSelector(_cmd)];
+@throw [NSException
+    exceptionWithName:NSInternalInconsistencyException 
+    reason:reason 
+    userInfo：nil];
+}
+</code></pre>
+
+<p>既然异常只用于处理严重错误（fatal error,致命错误)，那么对其他错误怎么办呢？在出 现“不那么严重的错误&quot;（nonfatal error,非致命错误）时，Objective-C语言所用的编程范式为: 令方法返回<code>nil/0</code>,或是使用<code>NSError</code>，以表明其中有错误发生。例如，如果初始化方法无法根据传入的参数来初始化当前实例，那么就可以令其返回nil/0:</p>
+
+<pre><code class="language-objc">-(id)initWithValue:(id)value { 
+    if ((self = [super init])){
+        if ( /* Value means instance can11 be created */ ) { 
+        self = nil;
+     } else {
+        // Initialize instance
+        }
+     }
+    return self;
+}
+</code></pre>
+
+<p>在这种情况下，如果<code>if</code>语句发现无法用传人的参数值来初始化当前实例（比如这个方法 要求传入的value参数必须是<code>non-nil</code>的)，那么就把<code>self</code>设置成<code>nil</code>,这样的话，整个方法的 返回值也就是<code>nil</code>了。调用者发现初始化方法并没有把实例创建好，于是便可确定其中发生了错误。</p>
+
+<p><code>NSError</code>的用法更加灵活，因为经由此对象，我们可以把导致错误的原因回报给调用者。 <code>NSError</code>对象里封装了三条信息：</p>
+
+<ul>
+<li><p><strong>Error domain(错误范围，其类型为字符串）</strong><br/>
+错误发生的范围。也就是产生错误的根源，通常用一个特有的全局变量来定义。比方说，<code>“处理URL的子系统”（URL-handling subsystem)</code>在从URL中解析或取得数据时如果出错了，那么就会使用<code>NSURLErrorDomain</code>来表示错误范围。</p></li>
+<li><p><strong>Error code(错误码，其类型为整数）</strong><br/>
+独有的错误代码，用以指明在某个范围内具体发生了何种错误。某个特定范围内可能会发生一系列相关错误，这些错误情况通常采用<code>enum</code>来定义。例如，当<code>HTTP</code>请求出错时，可能会把<code>HTTP</code>状态码设为错误码。</p></li>
+<li><p><strong>Uesr info(用户信息，其类型为字典）</strong><br/>
+有关此错误的额外信息，其中或许包含一段“<code>本地化的描述”（localized description)</code>, 或许还含有导致该错误发生的另外一个错误，经由此种信息，可将相关错误串成一条 <code>“错误链”（chain of errors)</code>。</p></li>
+</ul>
+
+<p>NSError的一种常见用法是，经由方法的“输出参数”返回给调用者。比如像这样：</p>
+
+<pre><code class="language-objc">-(BOOL)doSomething: (NSError**)error
+</code></pre>
+
+<p>用例为：</p>
+
+<pre><code class="language-objc">NSError *error = nil;
+BOOL ret = [object doSomething:&amp;error];
+    if (error) {
+//There was an error
+}
+</code></pre>
+
+<p>也可以通过委托协议来传递此错误。有错误发生时，当前对象会把错误信息经由协议中的某个方法传给其<code>委托对象（delegate)</code>。这里不做过多说明。</p>
+
+<h2 id="toc_0">要点</h2>
+
+<ul>
+<li>只有发生了可使整个应用程序崩溃的严重错误时，才应使用异常。</li>
+<li>在错误不那么严重的情况下，可以指派“委托方法”（delegate method)来处理错误，也可以把错误信息放在<code>NSError</code>对象里，经由“输出参数”返回给调用者。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/28</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="15038831182450.html">
                 
@@ -665,50 +767,6 @@ int main(int argc, const char * argv[]) {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15036306506140.html">
-                
-                  <h1>第十五条 用前缀避免命名空间冲突</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>oc与其他语言一个主要区别是没有那种内置的命名空间(namespace)机制. <mark>所以我们在编码时一定要注意命名冲突,尤其是潜在的命名冲突.</mark></p>
-
-<p>我们在创建应用程序时一定要注意,使用Cocoa创建应用程序时一定要注意,<strong><font color=red>Apple宣称保留使用&quot;两个字母前缀&quot;的权利</font></strong>,也就是说选用的前缀应该都是<strong><font color=red>三个字母</font></strong>.</p>
-
-<p>我们尤其应该注意,当你使用的一个三方库引入了一个你之前引入过的三方库.如果引入的这两个库的作者都没有给自己的库加前缀,那么应用程序很容易出现重复符号错误.</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li><p>选择与你公司,应用程序或二者有关联的名称作为类名的前缀,并在所有代码中均使用这一前缀.</p></li>
-<li><p>若自己所开发的程序库用到了第三方库,则应该为其中的名称加上前缀.</p></li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/25</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -773,7 +831,7 @@ int main(int argc, const char * argv[]) {
         
             <a href="iOS.html"><strong>iOS</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
+            <a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html"><strong>iOS三方框架源码学习</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
          
@@ -790,6 +848,12 @@ int main(int argc, const char * argv[]) {
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
@@ -811,12 +875,6 @@ int main(int argc, const char * argv[]) {
 		      
 			      <li class="post">
 			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  

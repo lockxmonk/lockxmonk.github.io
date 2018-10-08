@@ -86,7 +86,7 @@
         
             <li><a href="iOS.html">iOS</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
+            <li><a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html">iOS三方框架源码学习</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
          
@@ -110,6 +110,54 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="14974276192148.html">
+                
+                  <h1>重新利用boot camp安装win10</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>由于原来给win10分的磁盘容量太小,而mac又不能在后续动态给win分区增加磁盘容量,所以只能重新安装分区了.</p>
+
+<ol>
+<li>打开mac系统工具中的磁盘<code>磁盘工具</code>选择总的磁盘,点击上方的<code>分区</code>按钮,将系统中其它分区删掉(通过点击饼图中的对应区域,点击下方的<code>-</code>号),就可以将分区删掉,合并到mac系统磁盘.其他分区比如之前安装win产生的<code>OSXRESERVED Partition</code> </li>
+<li>打开bootcamp,点击恢复按钮,将之前的win系统抹掉,之后就会发现,你的mac系统磁盘变回来了.</li>
+<li>重启一下,之后打开bootcamp,点击下方的<code>继续</code>按钮,选择系统iso镜像,为win系统选择分区大小(这回分多些😓).</li>
+<li>点击确定,等待下载Windows支持软件.
+<img src="media/14974276192148/14974281373736.jpg" alt=""/></li>
+<li>安装之后,在OSRESEVER分区中,的bootcamp文件夹中打开安装驱动的程序.</li>
+</ol>
+
+<p>到此win10 应该就安装好了~</p>
+
+<h2 id="toc_0">注意</h2>
+
+<p><strong>由于apple公司更新了最新的文件系统APFS，导致bootcamp并没有很好的支持。现在，win下是不能识别到mac系统启动程序的。</strong></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/14</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='MAC%20OS.html'>MAC OS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="14970763342670.html">
                 
@@ -1930,114 +1978,6 @@ parser.event_list()
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14955929300450.html">
-                
-                  <h1>Caffe目录结构</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我们这里先了解一下caffe的目录结构:<br/>
-<img src="media/14955929300450/14961936456285.jpg" alt=""/><br/>
-<img src="media/14955929300450/14961936868967.jpg" alt=""/><br/>
-<img src="media/14955929300450/14961937240927.jpg" alt=""/><br/>
-其中主要关注的就是:include/,src/和tools/,三个目录,需要分析的代码都包含在这里面.</p>
-
-<p>在阅读代码时,如何快速追踪某个关键词?传统的方法是打开某个文件,之后用查找命令来查找关键词.<br/>
-这了我们介绍另一种方法,利用<code>grep</code>命令:</p>
-
-<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;REGISTER_LAYER_CREATOR&quot; *
-</code></pre>
-
-<p><img src="media/14955929300450/14955931415464.jpg" alt=""/><br/>
-我们可以看到,日志输出了很多文件.这种方法无需分别打开每个文件,也能直观的显示了所有包含这个宏的文件名和行号.</p>
-
-<p>这里我们用<code>grep</code>命令来搜索一个宏调用:<code>REGISTER_LAYER_CREATOR</code>,<br/>
-命令行参数解释为:</p>
-
-<blockquote>
-<p>-n  ---显示行号,便于定位<br/>
--H  ---显示文件名,便与定位<br/>
--R  ---递归查找每个子目录,适合工程较大,分多个目录存放的场景</p>
-</blockquote>
-
-<p>利用这种方法可以很容易的在caffe源码中定位很多内容.</p>
-
-<h2 id="toc_0">卷基层</h2>
-
-<p>这里我们假定卷积层有<code>L</code>个输出通道和<code>K</code>个输入通道,于是需要有<code>LK,L=50,K=20</code>个卷积核实现通道数目的转换.这里我们假定卷集核大小为<code>I*J = 5*5</code>,每个输出通道的特征图大小为<code>M*N = 8*8</code>,则该层每个样本做一次前向传播时卷积层计算量为:<br/>
-<code>Calculations(MAC) = I*J*M*N*K*L = 5*5*8*8*50*20=1600000MAC</code><br/>
-实际中使送入一批样本(batch),所以我们这里还需要计算量乘上批量尺寸.</p>
-
-<p>我们这里卷积层的学习参数量为:<br/>
-<code>Params = I*J*K*L = 25000</code><br/>
-所以计算量-参数量之比为<code>CPR=Calculations/Params = M*N = 64</code><br/>
-<font color=red><strong>所以我们得出结论是:卷基层的输出特征图尺寸越大,CPR值越大,参数重复利用率越高.,若一次性输入一批数据(B个样本),则CPR值可再提高B倍.</strong></font></p>
-
-<h2 id="toc_1">全连接层</h2>
-
-<p>早在卷积神经网络出现之前,最早的深度学习网络计算类型都是全连接形式的.如下所示.<br/>
-<img src="media/14955929300450/14961962825939.jpg" alt=""/><br/>
-每个节点与相邻层的所有节点都有连接关系,这是全连接层名称的由来.</p>
-
-<p>全连接层的主要计算类型为矩阵-向量乘(GEMV).假设输入节点组成的向量为x,维度为D,输出节点组成的向量为y,维度为V,则全连接层计算可以表示为:<br/>
-\[y=Wx\]<br/>
-其中,W为<code>V*D</code>维权值矩阵.</p>
-
-<p>我们分析全连接层的参数:<br/>
-<img src="media/14955929300450/14961986814721.jpg" alt=""/></p>
-
-<p><img src="media/14955929300450/14961986616938.jpg" alt=""/></p>
-
-<p>得出输出<code>V=500</code>,输入<code>D=50*4*4 = 800</code>(其中50是输入数量,4*4位图的尺寸)</p>
-
-<p>则全连接层单样本前向传播计算量为:<br/>
-\[<br/>
-CalculationsMAC = V*D<br/>
-                = 800 * 500<br/>
-                = 400000<br/>
-\]<br/>
-参数统计量为:<br/>
-\[<br/>
-Params = V*D<br/>
-       = 800 * 500<br/>
-       = 400000<br/>
-\]<br/>
-所以CPR值为1</p>
-
-<p>所以得出结论,全连接层的CPR值始终为1,与输入,输出维度无关.所以单样本前向向传播计算时,权值重复利用率很低.<br/>
-    我们将一批(B个)样本逐列拼接成矩阵X,一次性通过全连接层,得到一批输出向量构成的矩阵Y,称作批处理(矩阵-矩阵乘计算GEMM):<br/>
-    \[<br/>
-    Y=WX<br/>
-    \]<br/>
-这样全连接层前向计算量提高了B倍,而参数量不变,因此CPR提高了B倍.</p>
-
-<p>与卷积层相比，全连接层参数量是其16倍，而计算量只有其25%.如果输出特征图尺寸相同<code>（M*V = V)</code>，卷积层的CPR值为全连接层的<code>M*N</code>倍。也就是说，卷积层在输出特征图维度实现了<mark>权值共享</mark>。这是降低参数量的重要举措。与此同吋，卷枳层<mark>局部连接</mark>特性 (相比全连接）也大幅减少了参数量,这使得CNN网络中前几层卷积层参数量占比小，计算量占比大；而后几层全连接层参数量占比大，计算量占比小。大多数CNN模型都符合这个特点。<font color=red><strong>因此我们在进行计算加速优化时,重点放在卷积层；而在进行参数优化、权值剪裁时，重点放在全连接层，</strong></font></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/24</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Caffe%E4%BB%A3%E7%A0%81%E6%A2%B3%E7%90%86.html'>Caffe代码梳理</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -2102,7 +2042,7 @@ Params = V*D<br/>
         
             <a href="iOS.html"><strong>iOS</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
+            <a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html"><strong>iOS三方框架源码学习</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
          
@@ -2119,6 +2059,12 @@ Params = V*D<br/>
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
@@ -2140,12 +2086,6 @@ Params = V*D<br/>
 		      
 			      <li class="post">
 			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  

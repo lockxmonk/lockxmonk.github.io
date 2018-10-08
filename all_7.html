@@ -86,7 +86,7 @@
         
             <li><a href="iOS.html">iOS</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
+            <li><a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html">iOS三方框架源码学习</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
          
@@ -110,6 +110,58 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="15129796221707.html">
+                
+                  <h1>Minimum Moves to Equal Array Elements II</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15129796221707/15129796318879.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int minMoves2(vector&lt;int&gt;&amp; nums) {
+        int n = nums.size();
+        if(n &lt;= 1) return 0;
+        sort(nums.begin(), nums.end());
+        int mid = nums.size()/2 ,res = 0;
+        for(int i = 0; i &lt; mid; ++i)
+        {
+            res+=nums[mid]-nums[i];
+        }
+        for (int j = n-1; j&gt;mid; j--) {
+            res+=nums[j]-nums[mid];
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/11</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="15129788527282.html">
                 
@@ -475,72 +527,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15129573661731.html">
-                
-                  <h1>Flood Fill</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15129573661731/15129573748798.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    void fillColor(vector&lt;vector&lt;int&gt;&gt;&amp; image,int sr, int sc ,int tmp){
-        if (sr&gt;0&amp;&amp;image[sr-1][sc]==tmp) {
-            image[sr-1][sc]=image[sr][sc];
-            fillColor(image, sr-1, sc, tmp);
-        }
-        if (sr&lt;image.size()-1&amp;&amp;image[sr+1][sc]==tmp) {
-            image[sr+1][sc]=image[sr][sc];
-            fillColor(image, sr+1, sc, tmp);
-        }
-        if (sc&gt;0&amp;&amp;image[sr][sc-1]==tmp) {
-            image[sr][sc-1]=image[sr][sc];
-            fillColor(image, sr, sc-1, tmp);
-        }
-        if (sc&lt;image[0].size()-1&amp;&amp;image[sr][sc+1]==tmp) {
-            image[sr][sc+1]=image[sr][sc];
-            fillColor(image, sr, sc+1, tmp);
-        }
-    }
-
-    vector&lt;vector&lt;int&gt;&gt; floodFill(vector&lt;vector&lt;int&gt;&gt;&amp; image, int sr, int sc, int newColor) {
-        int tmp = image[sr][sc];
-        if (tmp == newColor) {
-            return image;
-        }
-        image[sr][sc] = newColor;
-        fillColor(image, sr, sc, tmp);
-        return image;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/11</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -605,7 +591,7 @@ public:
         
             <a href="iOS.html"><strong>iOS</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
+            <a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html"><strong>iOS三方框架源码学习</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
          
@@ -622,6 +608,12 @@ public:
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
@@ -643,12 +635,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  

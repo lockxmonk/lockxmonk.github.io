@@ -86,7 +86,7 @@
         
             <li><a href="iOS.html">iOS</a></li>
         
-            <li><a href="English%20Study.html">English Study</a></li>
+            <li><a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html">iOS三方框架源码学习</a></li>
         
             <li><a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html">算法学习</a></li>
          
@@ -110,6 +110,60 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="15120990794732.html">
+                
+                  <h1>Maximum Average Subarray I</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15120990794732/15120991082558.jpg" alt=""/></p>
+
+<p><strong>解决方法：滑动窗口方案</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    double findMaxAverage(vector&lt;int&gt;&amp; nums, int k) {
+        double r = INT_MIN;
+        double sum = 0;
+        for (int i = 0; i&lt;nums.size(); i++) {
+            if (i&lt;k) {
+                sum+=nums[i];
+            }else{
+                r = max(sum, r);
+                sum +=nums[i]-nums[i-k];
+            }
+        }
+        r = max(sum, r);
+        return r/double(k);
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="15120964350892.html">
                 
@@ -464,53 +518,6 @@ public:<br/>
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15120258790187.html">
-                
-                  <h1>Given an integer array, find three numbers whose product is maximum and output the maximum product.</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15120258790187/15120319341000.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int maximumProduct(vector&lt;int&gt;&amp; nums) {
-        sort(nums.begin(), nums.end());
-        int len = nums.size();
-        int tmp1 = nums[len-1]*nums[len-2]*nums[len-3];
-        int tmp2 = nums[len-1]*nums[0]*nums[1];
-        return max(tmp1, tmp2);
-    }
-};
-</code></pre>
-
-<p>主要考虑含有负数的情况。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -575,7 +582,7 @@ public:
         
             <a href="iOS.html"><strong>iOS</strong></a>
         
-            <a href="English%20Study.html"><strong>English Study</strong></a>
+            <a href="iOS%E4%B8%89%E6%96%B9%E6%A1%86%E6%9E%B6%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0.html"><strong>iOS三方框架源码学习</strong></a>
         
             <a href="%E7%AE%97%E6%B3%95%E5%AD%A6%E4%B9%A0.html"><strong>算法学习</strong></a>
          
@@ -592,6 +599,12 @@ public:
                 <div class="side-content">
                 <ul class="posts-list">
 	      
+		      
+			      <li class="post">
+			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
+			      </li>
+		     
+		  
 		      
 			      <li class="post">
 			        <a href="15197807986881.html">2015年蓝桥杯省赛C/C++ A组题解</a>
@@ -613,12 +626,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15165851014842.html">Longest Word in Dictionary</a>
 			      </li>
 		     
 		  
