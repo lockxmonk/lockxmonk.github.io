@@ -111,6 +111,138 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15391408783293.html">
+                
+                  <h1>UIStackView的简单使用与理解</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>之前一直在吐槽iOS的布局方式（frame和autolayout）相比前端的flex布局方式很落后，也在想有没有其它的方式来改善。最近偶然发现UIStackView的存在（苹果爸爸原谅我😂），了解后发现其中的使用与布局方式类似于flex布局，感觉这就是苹果爸爸借鉴flex布局特点所构造的一种布局实现方式吧。</p>
+
+<h2 id="toc_0">实现方式</h2>
+
+<p>这里我们看一下如何简单的使用stackview来创造一个拥有众多子item的水平视图。代码如下：</p>
+
+<pre><code class="language-objc">- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+    
+    containerView = [[UIStackView alloc]initWithFrame:CGRectMake(0, 100, CGRectGetWidth(self.view.bounds), 200)];
+    //子视图布局方向：水平或垂直
+    containerView.axis = UILayoutConstraintAxisHorizontal;//水平布局
+    //子控件依据何种规矩布局
+    containerView.distribution = UIStackViewDistributionFillEqually;//子控件均分
+    //子控件之间的最小间距
+    containerView.spacing = 10;
+    //子控件的对齐方式
+    containerView.alignment = UIStackViewAlignmentFill;
+    NSArray *tempArray = @[@&quot;1&quot;,@&quot;2&quot;,@&quot;3&quot;,@&quot;4&quot;];
+    for (NSInteger i = 0; i &lt; 4; i++) {
+//        UIView *view = [[UIView alloc]init];
+        UILabel *label = [[UILabel alloc] init];
+        label.textAlignment = NSTextAlignmentCenter;
+        label.backgroundColor = [UIColor colorWithRed:random()%256/255.0 green:random()%256/255.0 blue:random()%256/255.0 alpha:1];
+        label.numberOfLines = 0;
+        label.text = tempArray[i];
+        
+        [containerView addArrangedSubview:label];
+        
+    }
+    [self.view addSubview:containerView];
+}
+</code></pre>
+
+<p>可以看到stackView的使用和view没有大的区别，使用时根绝需要来设置stackView的<code>axis（布局方向）</code>,<code>distribution（子控件依据何种规矩布局）</code>,<code>spacing（子控件之间的最小间距）</code>,<code>alignment（子控件的对齐方式）</code>等属性。</p>
+
+<p>这里详细说明一下个属性的主要参数：</p>
+
+<p><strong>axis：</strong><br/>
+ 子控件的布局方向，水平（UILayoutConstraintAxisHorizontal）或垂直（UILayoutConstraintAxisVertical）， 这个不用过多解释了</p>
+
+<p><strong>UIStackViewDistribution：</strong></p>
+
+<pre><code>UIStackViewDistributionFill ：它就是将 arrangedSubviews 填充满整个 StackView ，如果设置了spacing，那么这些 arrangedSubviews 之间的间距就是spacing。如果减去所有的spacing，所有的 arrangedSubview 的固有尺寸( intrinsicContentSize )不能填满或者超出 StackView 的尺寸，那就会按照 Hugging 或者 CompressionResistance 的优先级来拉伸或压缩一些 arrangedSubview 。如果出现优先级相同的情况，就按排列顺序来拉伸或压缩。
+
+UIStackViewDistributionFillEqually ：这种就是 StackView 的尺寸减去所有的spacing之后均分给 arrangedSubviews ，每个 arrangedSubview 的尺寸是相同的。
+
+UIStackViewDistributionFillProportionally ：这种跟FillEqually差不多，只不过这个不是讲尺寸均分给 arrangedSubviews ，而是根据 arrangedSubviews 的 intrinsicContentSize 按比例分配。
+
+UIStackViewDistributionEqualSpacing ：这种是使 arrangedSubview 之间的spacing相等，但是这个spacing是有可能大于 StackView 所设置的spacing，但是绝对不会小于。这个类型的布局可以这样理解，先按所有的 arrangedSubview 的 intrinsicContentSize 布局，然后余下的空间均分为spacing，如果大约 StackView 设置的spacing那这样就OK了，如果小于就按照 StackView 设置的spacing，然后按照 CompressionResistance 的优先级来压缩一个 arrangedSubview 。
+
+UIStackViewDistributionEqualCentering ：这种是使 arrangedSubview 的中心点之间的距离相等，这样没两个 arrangedSubview 之间的spacing就有可能不是相等的，但是这个spacing仍然是大于等于 StackView 设置的spacing的，不会是小于。这个类型布局仍然是如果 StackView 有多余的空间会均分给 arrangedSubviews 之间的spacing，如果空间不够那就按照 CompressionResistance 的优先级压缩 arrangedSubview 。
+</code></pre>
+
+<p><strong>alignment：</strong></p>
+
+<pre><code>UIStackViewAlignmentFill = 默认方式， 如果子控件水平布局, 则指子控件的垂直方向填充满stackView. 反之亦然
+
+UIStackViewAlignmentLeading = 如果子控件竖直布局, 则指子控件左边对齐stackView左边. 反之亦然, 即 UIStackViewAlignmentTop = UIStackViewAlignmentLeading。
+
+UIStackViewAlignmentTop = UIStackViewAlignmentLeading,
+
+UIStackViewAlignmentFirstBaseline = 根据上方基线布局所有子视图的 y 值(适用于 Horizontal 模式)
+
+UIStackViewAlignmentLastBaseline = 根据下方基线布局所有子视图的 y 值(适用于 Horizontal 模式)
+
+UIStackViewAlignmentCenter = 中心对齐
+
+UIStackViewAlignmentTrailing = 如果子控件竖直布局, 则指子控件左边对齐stackView右边. 反之亦然, 即UIStackViewAlignmentBottom = UIStackViewAlignmentTrailing
+
+UIStackViewAlignmentBottom = UIStackViewAlignmentTrailing
+</code></pre>
+
+<p>这里还要说明几个方法：<code>addArrangedSubview</code>、<code>removeArrangedSubview</code>和<code>insertArrangedSubview</code>，日常view的添加和子视图从复视图删除使用的是<code>addSubview</code>和<code>removeFromSuperview</code>。</p>
+
+<p>其中完整方法如下：</p>
+
+<pre><code class="language-objc">初始化数组:
+- (instancetype)initWithArrangedSubviews:(NSArray *)views;
+添加子视图: 
+- (void)addArrangedSubview:(UIView *)view;
+移除子视图:
+- (void)removeArrangedSubview:(UIView *)view;
+根据下标插入视图:
+- (void)insertArrangedSubview:(UIView *)viewatIndex:(NSUInteger)stackIndex;
+</code></pre>
+
+<p><strong>注意</strong>： addArrangedSubview 和 insertArrangedSubview， 会把子控件加到arrangedSubviews数组的同时添加到StackView的subView数组中，但是removeArrangedSubview， 只会把子控件从arrangedSubviews数组中移除，不会从subviews中移除，如果需要调用removeFromSuperview</p>
+
+<p>若我们需要删除stackView中subView数组的最后一个视图，可以用如下方式：</p>
+
+<pre><code class="language-objc">//removeArrangedSubview， 只会把子控件从arrangedSubviews数组中移除，
+//不会从subviews中移除，如果需要可调用removeFromSuperview
+UIView *view = [_containerView.subviews lastObject];
+[_containerView removeArrangedSubview:view];
+[view removeFromSuperview];
+</code></pre>
+
+<p>到此stackView的一个简单使用方式就知道了。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/10/10</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15153763176511.html">
                 
                   <h1>KVO自己的理解</h1>
@@ -1056,204 +1188,6 @@ typedef void (^RWSignInResponse)(BOOL);
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15082871830637.html">
-                
-                  <h1>使用Masonry框架来构造iOS布局</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>之前一直都是在使用<code>storyboards</code>来创建iOS布局，突然某一天看到使用代码布局后，界面元素的清晰易懂，就迷上了。。。</p>
-
-<p>所以这次简单学习一下使用<code>Masonry</code>帮助构建<code>iOS</code>界面元素。</p>
-
-<p>在阅读了<code>Masonry</code>的<a href="https://github.com/SnapKit/Masonry">github</a>主页之后，学习并安装了框架。</p>
-
-<h2 id="toc_0">框架的安装</h2>
-
-<p>安装框架非常简单，我们只需要在<code>podfile</code>中加上下面一句：</p>
-
-<pre><code class="language-objc">pod &#39;Masonry&#39;
-</code></pre>
-
-<p>之后为了语法的缩写以及代码自动补全我们来创建<code>Code Snippets</code></p>
-
-<pre><code class="language-objc">mas_make -&gt; [&lt;#view#&gt; mas_makeConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
-
-mas_update -&gt; [&lt;#view#&gt; mas_updateConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
-
-mas_remake -&gt; [&lt;#view#&gt; mas_remakeConstraints:^(MASConstraintMaker *make) { &lt;#code#&gt; }];
-</code></pre>
-
-<p>将上述语句放到<code>~/Library/Developer/Xcode/UserData/CodeSnippets</code>中，之后我们在写相关代码的时候就会有代码提示了。</p>
-
-<p>我们在要使用<code>Masonry</code>的文件要频繁的导入<code>&quot;Masonry.h&quot;</code>头文件，所以为了方便，我们创建一个<code>Supporting Files</code>文件夹，并在其中创建一个<code>prefix.pch</code>文件。文件内容为：</p>
-
-<pre><code class="language-objc">//
-//  MBMasonry-Prefix.pch
-
-#import &lt;Availability.h&gt;
-
-// Include any system framework and library headers here that should be included in all compilation units.
-// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
-
-#ifndef __IPHONE_3_0
-#warning &quot;This project uses features only available in iOS SDK 3.0 and later.&quot;
-#endif
-
-#ifdef __OBJC__
-#import &lt;UIKit/UIKit.h&gt;
-#import &lt;Foundation/Foundation.h&gt;
-#import &lt;QuartzCore/QuartzCore.h&gt;
-
-//define this constant if you want to use Masonry without the &#39;mas_&#39; prefix
-// 只要添加了这个宏，就不用带mas_前缀
-#define MAS_SHORTHAND
-
-//define this constant if you want to enable auto-boxing for default syntax
-// 只要添加了这个宏，equalTo就等价于mas_equalTo
-#define MAS_SHORTHAND_GLOBALS
-//在这里导入头文件。
-#import &quot;Masonry.h&quot;
-
-#endif /* MBMasonry_Prefix_pch */
-
-</code></pre>
-
-<p>之后我们在使用的时候，就不用每个文件都导入一遍头文件了。</p>
-
-<h2 id="toc_1">使用方法</h2>
-
-<p>原声的iOS代码，对界面布局使用的是<code>NSLayoutAttribute</code>，用了<code>Masonry</code>后，我们使用封装好的<code>MASViewAttribute</code>。具体的属性等价关系如下图所示：<br/>
-<img src="media/15082871830637/15082883366505.jpg" alt=""/></p>
-
-<p>我们来举例说明一下，假入我们想要创建一个登陆界面。界面中要有<code>Name</code>和<code>Pass</code>两个<code>TextField</code>，并对应两个<code>Label</code>。</p>
-
-<p>那么我们可以按照如下方式来写：</p>
-
-<pre><code class="language-objc">//
-//  ViewController.m
-//  FirstRAC
-//
-//  Created by 梁中豪 on 2017/10/17.
-//  Copyright © 2017年 梁中豪. All rights reserved.
-//
-
-#import &quot;ViewController.h&quot;
-
-@interface ViewController ()
-@property(nonatomic,strong) UIView *login;
-@property(nonatomic,strong) UILabel *nameLabel;
-@property(nonatomic,strong) UILabel *passLabel;
-@property(nonatomic,strong) UITextField *name;
-@property(nonatomic,strong) UITextField *pass;
-
-
-@end
-
-@implementation ViewController
-
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    self.login = [[UIView alloc] initWithFrame:CGRectZero];
-    
-    _name = [[UITextField alloc] init];
-    _name.borderStyle = UIFontWeightBold;
-    _name.font = [UIFont systemFontOfSize:15];
-    _name.placeholder = @&quot;Enter Name&quot;;
-    [_login addSubview:_name];
-    
-    _pass = [[UITextField alloc] init];
-    _pass.borderStyle = UIFontWeightBold;
-    _pass.font = [UIFont systemFontOfSize:15];
-    _pass.placeholder = @&quot;Enter Pass&quot;;
-    [_login addSubview:_pass];
-    
-    _nameLabel = [[UILabel alloc] init];
-    _nameLabel.backgroundColor = UIColor.whiteColor;
-    _nameLabel.font = [UIFont systemFontOfSize:14.0];
-    _nameLabel.lineBreakMode = NSLineBreakByTruncatingTail;
-    _nameLabel.text = @&quot;Name&quot;;
-    [_login addSubview:_nameLabel];
-    
-    _passLabel = [[UILabel alloc] init];
-    _passLabel.backgroundColor = UIColor.whiteColor;
-    _passLabel.font = [UIFont systemFontOfSize:14.0];
-    _passLabel.lineBreakMode = NSLineBreakByTruncatingTail;
-    _passLabel.text = @&quot;Pass&quot;;
-    [_login addSubview:_passLabel];
-    [self.view addSubview:_login];
-    [self buildElem];
-}
-
-//为所创建的控件，创建约束
-- (void)buildElem{
-    [_login mas_makeConstraints:^(MASConstraintMaker *make){
-        make.left.right.and.bottom.equalTo(self.view);
-        make.top.equalTo(self.mas_topLayoutGuide);
-    }];
-    [_nameLabel mas_makeConstraints:^(MASConstraintMaker *make){
-        make.top.equalTo(_login.top);
-        make.height.equalTo(@20);
-        make.left.equalTo(_login.left).with.offset(20);
-    }];
-    [_passLabel mas_makeConstraints:^(MASConstraintMaker *make){
-        make.top.equalTo(_nameLabel.bottom).with.offset(10);
-        make.centerX.equalTo(_nameLabel.centerX);
-        make.height.equalTo(@20);
-    }];
-    [_name mas_makeConstraints:^(MASConstraintMaker *make){
-        make.left.equalTo(_nameLabel.right).with.offset(5);
-        make.centerY.equalTo(_nameLabel.centerY);
-        make.height.equalTo(@20);
-    }];
-    [_pass mas_makeConstraints:^(MASConstraintMaker *make){
-        make.left.equalTo(_passLabel.right).with.offset(5);
-        make.centerY.equalTo(_passLabel.centerY);
-        make.height.equalTo(@20);
-    }];
-
-}
-
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-@end
-
-</code></pre>
-
-<p>从上面可以看到，我们为元素创建了约束。当然这只是基本的方法。还有更多的<code>API</code>接口可以使用。我们这里就不在过多说明了。</p>
-
-<p>大概知道上面的用法，我们就可以开心的撸代码写界面去了。<br/>
-:smile:smile:smile:smile:smile:smile:smile:</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1337,6 +1271,12 @@ mas_remake -&gt; [&lt;#view#&gt; mas_remakeConstraints:^(MASConstraintMaker *mak
 	      
 		      
 			      <li class="post">
+			        <a href="15391408783293.html">UIStackView的简单使用与理解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
 			      </li>
 		     
@@ -1356,12 +1296,6 @@ mas_remake -&gt; [&lt;#view#&gt; mas_remakeConstraints:^(MASConstraintMaker *mak
 		      
 			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  

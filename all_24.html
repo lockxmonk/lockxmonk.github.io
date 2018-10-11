@@ -111,6 +111,56 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15041689865677.html">
+                
+                  <h1>指针问题</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<pre><code>#include &lt;stdio.h&gt;  
+   
+int main() {  
+      
+    int num = 10;  
+    int *p1 = &amp;num//p1存储num的地址  
+    int **p2 = &amp;p1;//p2存储p1的地址  
+    int ***p3 = &amp;p2;//p3存储p2的地址  
+      
+    *p1 = 100;//*p1取出num变量  
+    **p2 = 200;//**p2取出num变量  
+    ***p3 = 300;//***p3也是取出num变量  
+    printf(&quot;num = %d\n&quot;,num);  
+    printf(&quot;num = %d\n&quot;,***p3);  
+      
+    return 0;  
+}  
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15041475233104.html">
                 
                   <h1>消息转发机制的简单实现</h1>
@@ -796,136 +846,6 @@ if ([_delegate respondsToSelector:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15038893459243.html">
-                
-                  <h1>iOS 中协议和委托传值的用法</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>虽然之前一直听过和看过委托模式，但是并没有实际的操作。这次来实现一个简单的委托样例。来加深自己的了解。</p>
-
-<p>项目目录结构为：<br/>
-<img src="media/15038893459243/15039018875452.jpg" alt=""/></p>
-
-<p>首先我们创建一个协议：<code>ProtocolA</code></p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-@protocol ProtocolA &lt;NSObject&gt;
-
-@required
-
--(void)sendValue:(NSString*)str;
-
-
-@end
-</code></pre>
-
-<p>其中有一个方法<code>sendValue:</code>，由于加上了<code>@required</code>前缀，所以这个方法时必须实现的。如果想要一个方法是可选则实现与否，则要加上<code>@optional</code>。</p>
-
-<p>之后我们创建一个类<code>ClassA</code>：</p>
-
-<pre><code class="language-objc">//该类遵循ProtocolA，并且实现了它的方法
-
-//ClassA.h
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;ProtocolA.h&quot;
-
-@interface ClassA : NSObject&lt;ProtocolA&gt;
-
-@end
-
-//ClassA.m
-#import &quot;ClassA.h&quot;
-
-@implementation ClassA
-
--(void)sendValue:(NSString *)str{
-    NSLog(@&quot;我是传过来的值：%@&quot; , str);
-}
-
-@end
-
-</code></pre>
-
-<p>写到这里，我们大概可以猜到，我们想让<code>ClassA</code>的实例来接受一个委托实现<code>ProtocolA</code>中的方法。</p>
-
-<p>所以我们这里继续创建一个<code>ClassB</code>，让它来发出一个委托，让<code>ClassA</code>代替它实现。</p>
-
-<pre><code class="language-objc">//ClassB.h
-
-#import &lt;Foundation/Foundation.h&gt;
-#import &quot;ClassA.h&quot;
-
-@interface ClassB : NSObject
-//这里我们创建了一个delegate对象，用于设置委托对象。
-@property(weak,nonatomic) id&lt;ProtocolA&gt; delegate;
-//创建一个方法来执行委托操作
--(void)dowork;
-
-@end
-
-//ClassB.m
-
-#import &quot;ClassB.h&quot;
-
-@implementation ClassB
-
-//创建a的实例，将a设置为接受委托的对象。
--(void)dowork{
-    ClassA *a = [ClassA new];
-    self.delegate = a;
-    //当响应了委托方法时，执行sendValue：
-    if ([self.delegate respondsToSelector:@selector(sendValue:)]) { // 如果协议响应了sendValue:方法
-        [self.delegate sendValue:@&quot;Hello&quot;]; // 通知执行协议方法
-    }
-}
-
-@end
-</code></pre>
-
-<p>最后在<code>main.m</code>中，执行：</p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-#import &quot;ClassB.h&quot;
-
-int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        ClassB *b = [ClassB new];
-        [b dowork];
-    }
-    return 0;
-}
-</code></pre>
-
-<p><strong>运行结果为：</strong><br/>
-<img src="media/15038893459243/15039016722409.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -1009,6 +929,12 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
+			        <a href="15391408783293.html">UIStackView的简单使用与理解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
 			      </li>
 		     
@@ -1028,12 +954,6 @@ int main(int argc, const char * argv[]) {
 		      
 			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  

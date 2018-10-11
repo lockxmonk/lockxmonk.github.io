@@ -111,6 +111,64 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15126354530210.html">
+                
+                  <h1>Next Greater Element I</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15126354530210/15126354552862.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    vector&lt;int&gt; nextGreaterElement(vector&lt;int&gt;&amp; findNums, vector&lt;int&gt;&amp; nums) {
+        vector&lt;int&gt; res;
+        for(auto num1:findNums){
+            for (int i = 0; i&lt;nums.size(); i++) {
+                int log = 0;
+                if (nums[i]==num1) {
+                    for (int j = i; j&lt;nums.size(); j++) {
+                        if (nums[j]&gt;num1) {
+                            res.push_back(nums[j]);
+                            log = 1;
+                            break;
+                        }
+                    }
+                    if (log == 0) res.push_back(-1);
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/7</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15126325722591.html">
                 
                   <h1>Island Perimeter</h1>
@@ -375,57 +433,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15124598875437.html">
-                
-                  <h1>Battleships in a Board</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15124598875437/15124598979272.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int countBattleships(vector&lt;vector&lt;char&gt;&gt;&amp; board) {
-        int m = board.size();
-        int n = board[0].size();
-        int res = 0;
-        for (int i=0; i&lt;m; i++) {
-            for (int j =0; j&lt;n; j++) {
-                if ((board[i][j]==&#39;X&#39;)&amp;&amp;(i==0||board[i-1][j]!=&#39;X&#39;)&amp;&amp;(j==0||board[i][j-1]!=&#39;X&#39;)) {
-                    ++res;
-                }
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/5</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -509,6 +516,12 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15391408783293.html">UIStackView的简单使用与理解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
 			      </li>
 		     
@@ -528,12 +541,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  

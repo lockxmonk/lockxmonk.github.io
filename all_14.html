@@ -111,6 +111,71 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15122009526780.html">
+                
+                  <h1>Non-decreasing Array</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15122009526780/15122009632510.jpg" alt=""/></p>
+
+<p><strong>用到了<code>is_sorted</code>来判断是否升序排列</strong></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool checkPossibility(vector&lt;int&gt;&amp; nums) {
+        for (int i=0; i &lt; nums.size()-1; i++){
+            if (nums[i] &gt; nums[i+1]){
+                
+                int temp = nums[i];
+                //
+                // &quot;erase&quot; nums[i], then check if nums is sorted without nums[i]
+                //
+                nums[i] = nums[i+1];
+                if (is_sorted(nums.begin(), nums.end())) { return true; }
+                
+                //
+                // &quot;erase&quot; nums[i+1], then check if nums is sorted without nums[i+1]
+                //
+                nums[i+1] = nums[i] = temp;
+                if (is_sorted(nums.begin(), nums.end())) { return true; }
+                
+                //
+                // nums is NOT sorted (without nums[i] XOR without nums[i+1])
+                //
+                return false;
+            }
+        }
+        return true;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15121974728141.html">
                 
                   <h1>Third Maximum Number</h1>
@@ -406,57 +471,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15121110105671.html">
-                
-                  <h1>Two Sum</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15121110105671/15121110244234.jpg" alt=""/></p>
-
-<p><strong>运用hash表</strong></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; nums, int target) {
-        unordered_map&lt;int, int&gt; hash;
-        vector&lt;int&gt; result;
-        for (int i=0; i&lt;nums.size(); i++) {
-            int numToFind = target - nums[i];
-            if (hash.find(numToFind)!=hash.end()) {
-                result.push_back(hash[numToFind]);
-                result.push_back(i);
-            }
-            hash[nums[i]] = i;
-        }
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/1</span>
-                    
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -540,6 +554,12 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15391408783293.html">UIStackView的简单使用与理解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
 			      </li>
 		     
@@ -559,12 +579,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  

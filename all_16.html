@@ -111,6 +111,88 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15120333911660.html">
+                
+                  <h1>Missing Number</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array containing n distinct numbers taken from <code>0, 1, 2, ..., n</code>, find the one that is missing from the array.</p>
+
+<p>For example,<br/>
+Given <code>nums = [0, 1, 3]</code> return <code>2</code>.</p>
+
+<p>Note:<br/>
+Your algorithm should run in linear runtime complexity. Could you implement it using only constant extra space complexity?</p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int missingNumber(vector&lt;int&gt;&amp; nums) {
+        int len = nums.size();
+        if (len==1) {
+            return nums[0]==1?0:1;
+        }
+        sort(nums.begin(), nums.end());
+        if (nums[0]!=0) {
+            return 0;
+        }
+        for (int i=1; i&lt;len; i++) {
+            if (i==0&amp;&amp;nums[i]!=0) {
+                return 0;
+            }
+            if (nums[i]!=nums[i-1]+1) {
+                return nums[i]-1;
+            }
+        }
+        return nums[len-1]+1;
+    }
+};
+</code></pre>
+
+<p>第二种解法：<br/>
+```c++<br/>
+class Solution {<br/>
+public:<br/>
+    int missingNumber(vector<int>&amp; nums) {<br/>
+        int result = nums.size();<br/>
+        int i=0;</p>
+
+<pre><code>    for(int num:nums){
+        result ^= num;
+        result ^= i;
+        i++;
+    }
+
+    return result;
+}
+</code></pre>
+
+<p>};<br/>
+```</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/30</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15120258790187.html">
                 
                   <h1>Given an integer array, find three numbers whose product is maximum and output the maximum product.</h1>
@@ -400,61 +482,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15120073985530.html">
-                
-                  <h1>Remove Element</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Given an array and a value, remove all instances of that value <strong>in-place</strong> and return the new length.</p>
-
-<p>Do not allocate extra space for another array, you must do this by modifying the input array <strong>in-place</strong> with O(1) extra memory.</p>
-
-<p>The order of elements can be changed. It doesn&#39;t matter what you leave beyond the new length.</p>
-
-<p><img src="media/15120073985530/15120074297000.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int removeElement(vector&lt;int&gt;&amp; nums, int val) {
-        int total = 0;
-        for (int i =0; i&lt;nums.size(); i++) {
-            if (nums[i]==val) {
-                total++;
-            }else{
-                nums[i-total] = nums[i];
-            }
-        }
-        return nums.size()-total;
-    }
-};
-</code></pre>
-
-<p><img src="media/15120073985530/15120074551545.jpg" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/30</span>
-                    
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -538,6 +565,12 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15391408783293.html">UIStackView的简单使用与理解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
 			      </li>
 		     
@@ -557,12 +590,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  

@@ -111,6 +111,64 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="14956131169957.html">
+                
+                  <h1>在ios中判断一个viewcontroller是否已经正常present</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>之前present一个视图的时候,从来没有研究过如何判断一个视图是都已经正常弹出.比如下面这个方法是否正常执行:</p>
+
+<pre><code class="language-oc">[documentInteractionController presentPreviewAnimated:YES]
+</code></pre>
+
+<p>然而今天有一个需求需要知道上述方法是否正常执行,并弹出视图.</p>
+
+<p>之后通过阅读该方法的api文档后发现:</p>
+
+<pre><code class="language-oc">// Bypasses the menu and opens the full screen preview window for the item at URL.  Returns NO if the item could not be previewed.
+// Note that you must implement the delegate method documentInteractionControllerViewControllerForPreview: to preview the document.
+- (BOOL)presentPreviewAnimated:(BOOL)animated;
+</code></pre>
+
+<p>该方法返回一个BOOL类型的值:当没有正常执行该方法时,会返回NO.正常返回YES.</p>
+
+<p>类似的还有如下方法:</p>
+
+<pre><code class="language-oc">- (BOOL)isBeingPresented NS_AVAILABLE_IOS(5_0);
+- (BOOL)isBeingDismissed NS_AVAILABLE_IOS(5_0);
+
+- (BOOL)isMovingToParentViewController NS_AVAILABLE_IOS(5_0);
+- (BOOL)isMovingFromParentViewController NS_AVAILABLE_IOS(5_0);
+</code></pre>
+
+<p>来判断viewController是消失还是出现在当前页面中.</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/5/24</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="14955929300450.html">
                 
                   <h1>Caffe目录结构</h1>
@@ -3766,53 +3824,6 @@ I0513 11:37:11.208425 3659862976 caffe.cpp:330] loss = 0.0304018 (* 1 = 0.030401
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="14938936328646.html">
-                
-                  <h1>图像去雾相关基础</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">暗原色</h2>
-
-<p>暗原色先验理论指出，在无雾图像的 非天空区域里，若把图像分为多个子块，则在每个子块中都会 有某些像素点的一个颜色通道的亮度接近于 0</p>
-
-<p><img src="media/14938936328646/14938938844517.jpg" alt=""/><br/>
-<img src="media/14938936328646/14938939404387.jpg" alt=""/><br/>
-<img src="media/14938936328646/14938939611430.jpg" alt=""/></p>
-
-<h2 id="toc_1">HSV</h2>
-
-<p>HSL 和 HSV（也叫做 HSB）是对RGB 色彩空间中点的两种有关系的表示，它们尝试描述比 RGB 更准确的感知颜色联系，并仍保持在计算上简单。<code>HSL 表示hue（色相）、saturation（饱和度）、lightness（亮度）</code>，<strong>HSV 表示</strong> <code>hue、 saturation、value(色调) 而 HSB 表示hue、saturation、brightness（明度）</code>。</p>
-
-<p>HSL 和 HSV 二者都把颜色描述在圆柱体内的点，这个圆柱的中心轴取值为<strong>自底部的黑色到顶部的白色而在它们中间是的灰色</strong>，绕这个轴的<strong>角度</strong>对应于“色相”，<strong>到这个轴的距离</strong>对应于“饱和度”，而<strong>沿着这个轴的距离</strong>对应于“亮度”，“色调”或“明度”。</p>
-
-<p>HSV（色相，饱和度，明度）在概念上可以被认为是颜色的倒圆锥体（黑点在下顶点，白色在上底面圆心）</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/5/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E5%9B%BE%E5%83%8F%E5%8E%BB%E9%9B%BE%E6%8A%80%E6%9C%AF.html'>图像去雾技术</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -3896,6 +3907,12 @@ I0513 11:37:11.208425 3659862976 caffe.cpp:330] loss = 0.0304018 (* 1 = 0.030401
 	      
 		      
 			      <li class="post">
+			        <a href="15391408783293.html">UIStackView的简单使用与理解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
 			      </li>
 		     
@@ -3915,12 +3932,6 @@ I0513 11:37:11.208425 3659862976 caffe.cpp:330] loss = 0.0304018 (* 1 = 0.030401
 		      
 			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  

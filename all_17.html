@@ -111,6 +111,61 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15120073985530.html">
+                
+                  <h1>Remove Element</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Given an array and a value, remove all instances of that value <strong>in-place</strong> and return the new length.</p>
+
+<p>Do not allocate extra space for another array, you must do this by modifying the input array <strong>in-place</strong> with O(1) extra memory.</p>
+
+<p>The order of elements can be changed. It doesn&#39;t matter what you leave beyond the new length.</p>
+
+<p><img src="media/15120073985530/15120074297000.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    int removeElement(vector&lt;int&gt;&amp; nums, int val) {
+        int total = 0;
+        for (int i =0; i&lt;nums.size(); i++) {
+            if (nums[i]==val) {
+                total++;
+            }else{
+                nums[i-total] = nums[i];
+            }
+        }
+        return nums.size()-total;
+    }
+};
+</code></pre>
+
+<p><img src="media/15120073985530/15120074551545.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/30</span>
+                    
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15120064619713.html">
                 
                   <h1>Move Zeroes</h1>
@@ -403,67 +458,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15119406678576.html">
-                
-                  <h1>Reshape the Matrix</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>In MATLAB, there is a very useful function called &#39;reshape&#39;, which can reshape a matrix into a new one with different size but keep its original data.</p>
-
-<p>You&#39;re given a matrix represented by a two-dimensional array, and two positive integers r and c representing the row number and column number of the wanted reshaped matrix, respectively.</p>
-
-<p>The reshaped matrix need to be filled with all the elements of the original matrix in the same row-traversing order as they were.</p>
-
-<p>If the &#39;reshape&#39; operation with given parameters is possible and legal, output the new reshaped matrix; Otherwise, output the original matrix.</p>
-
-<p><img src="media/15119406678576/15119406900999.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; matrixReshape(vector&lt;vector&lt;int&gt;&gt;&amp; nums, int r, int c) {
-        int sumNum = nums.size() * nums[0].size();
-        int r1 = nums.size();
-        int c1 = nums[0].size();
-        if (sumNum != r*c) {
-            return nums;
-        }
-        vector&lt;vector&lt;int&gt;&gt; result = vector&lt;vector&lt;int&gt;&gt;(r,vector&lt;int&gt;(c,0));
-        int j = 0;
-        for (int i =0; i&lt;r*c; i++) {
-            result[i/c][i%c] = nums[i/c1][i%c1];
-        }
-        
-        return result;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/11/29</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -547,6 +541,12 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15391408783293.html">UIStackView的简单使用与理解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
 			      </li>
 		     
@@ -566,12 +566,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  

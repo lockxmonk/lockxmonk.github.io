@@ -111,6 +111,85 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15141803762335.html">
+                
+                  <h1>Valid Parentheses</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15141803762335/15141803778513.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+bool validParentheses(NSString *s) {
+    // TODO: Return a boolean value indicating whether the
+    // order of parentheses in the given string is valid
+    if (s.length==0) {
+        return 0;
+    }
+    int sum = 0;
+    NSMutableArray *res = @[].mutableCopy;
+    for (int i = 0; i&lt;s.length; i++) {
+        if ([s characterAtIndex:i]==(unichar)&#39;(&#39;) {
+            [res addObject:@(&#39;(&#39;)];
+            sum++;
+        }
+        if ([s characterAtIndex:i]==(unichar)&#39;)&#39;) {
+            if ([[res lastObject] isEqual:@(&#39;(&#39;)]) {
+                [res removeObjectAtIndex:res.count-1];
+            }else{
+                [res addObject:@(&#39;)&#39;)];
+            }
+            sum--;
+        }
+    }
+    if (sum!=0||[res count]!=0) {
+        return 0;
+    }
+    return 1;
+}
+</code></pre>
+
+<p>简化版：</p>
+
+<pre><code class="language-objc">
+#import &lt;Foundation/Foundation.h&gt;
+
+bool validParentheses(NSString *s) {
+  int brackets = 0;
+  for (int i = 0; i &lt; [s length]; i++) {
+    if ([s characterAtIndex: i] == &#39;(&#39;) brackets++;
+    else if ([s characterAtIndex: i] == &#39;)&#39;) if (--brackets &lt; 0) return false;
+  }
+  return !brackets;
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/25</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15140206056964.html">
                 
                   <h1>Follow that Spy</h1>
@@ -444,67 +523,6 @@ long long f(long long n, long long m) {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15139334894228.html">
-                
-                  <h1> Longest Univalue Path</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15139334894228/15139334918786.jpg" alt=""/></p>
-
-<pre><code class="language-c++">/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
-class Solution {
-public:
-    int dfs(TreeNode* node, int&amp; lup) {
-        int l = node-&gt;left ? dfs(node-&gt;left, lup) : 0;
-        int r = node-&gt;right ? dfs(node-&gt;right, lup) : 0;
-        int resl = node-&gt;left &amp;&amp; node-&gt;left-&gt;val == node-&gt;val ? l + 1 : 0;
-        int resr = node-&gt;right &amp;&amp; node-&gt;right-&gt;val == node-&gt;val ? r + 1 : 0;
-        lup = max(lup, resl + resr);
-        return max(resl, resr);
-    }
-
-    int longestUnivaluePath(TreeNode* root) {
-        int lup = 0;
-        if (root) dfs(root, lup);
-        return lup;
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/22</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -588,6 +606,12 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15391408783293.html">UIStackView的简单使用与理解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
 			      </li>
 		     
@@ -607,12 +631,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  

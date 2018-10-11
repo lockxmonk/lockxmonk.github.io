@@ -111,6 +111,136 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15038893459243.html">
+                
+                  <h1>iOS 中协议和委托传值的用法</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>虽然之前一直听过和看过委托模式，但是并没有实际的操作。这次来实现一个简单的委托样例。来加深自己的了解。</p>
+
+<p>项目目录结构为：<br/>
+<img src="media/15038893459243/15039018875452.jpg" alt=""/></p>
+
+<p>首先我们创建一个协议：<code>ProtocolA</code></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+@protocol ProtocolA &lt;NSObject&gt;
+
+@required
+
+-(void)sendValue:(NSString*)str;
+
+
+@end
+</code></pre>
+
+<p>其中有一个方法<code>sendValue:</code>，由于加上了<code>@required</code>前缀，所以这个方法时必须实现的。如果想要一个方法是可选则实现与否，则要加上<code>@optional</code>。</p>
+
+<p>之后我们创建一个类<code>ClassA</code>：</p>
+
+<pre><code class="language-objc">//该类遵循ProtocolA，并且实现了它的方法
+
+//ClassA.h
+#import &lt;Foundation/Foundation.h&gt;
+#import &quot;ProtocolA.h&quot;
+
+@interface ClassA : NSObject&lt;ProtocolA&gt;
+
+@end
+
+//ClassA.m
+#import &quot;ClassA.h&quot;
+
+@implementation ClassA
+
+-(void)sendValue:(NSString *)str{
+    NSLog(@&quot;我是传过来的值：%@&quot; , str);
+}
+
+@end
+
+</code></pre>
+
+<p>写到这里，我们大概可以猜到，我们想让<code>ClassA</code>的实例来接受一个委托实现<code>ProtocolA</code>中的方法。</p>
+
+<p>所以我们这里继续创建一个<code>ClassB</code>，让它来发出一个委托，让<code>ClassA</code>代替它实现。</p>
+
+<pre><code class="language-objc">//ClassB.h
+
+#import &lt;Foundation/Foundation.h&gt;
+#import &quot;ClassA.h&quot;
+
+@interface ClassB : NSObject
+//这里我们创建了一个delegate对象，用于设置委托对象。
+@property(weak,nonatomic) id&lt;ProtocolA&gt; delegate;
+//创建一个方法来执行委托操作
+-(void)dowork;
+
+@end
+
+//ClassB.m
+
+#import &quot;ClassB.h&quot;
+
+@implementation ClassB
+
+//创建a的实例，将a设置为接受委托的对象。
+-(void)dowork{
+    ClassA *a = [ClassA new];
+    self.delegate = a;
+    //当响应了委托方法时，执行sendValue：
+    if ([self.delegate respondsToSelector:@selector(sendValue:)]) { // 如果协议响应了sendValue:方法
+        [self.delegate sendValue:@&quot;Hello&quot;]; // 通知执行协议方法
+    }
+}
+
+@end
+</code></pre>
+
+<p>最后在<code>main.m</code>中，执行：</p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+#import &quot;ClassB.h&quot;
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        ClassB *b = [ClassB new];
+        [b dowork];
+    }
+    return 0;
+}
+</code></pre>
+
+<p><strong>运行结果为：</strong><br/>
+<img src="media/15038893459243/15039016722409.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/28</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='iOS.html'>iOS</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15038851180831.html">
                 
                   <h1>第二十一条 理解Objective-C的错误模型</h1>
@@ -639,134 +769,6 @@ int main(int argc, const char * argv[]) {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15036443106558.html">
-                
-                  <h1>第十六条 提供"全能初始化方法"</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>我们知道,所有的对象都要初始化但是有些对象可能有很多初始化方法(根据初始的信息来选择用哪个).我们以iOS的UI框架UIKit为例，其中有个类叫做<code>UITableViewCell</code>,初始化该类对象 时，需要指明其样式及标识符，标识符能够区分不同类型的单元格。由于这种对象的创 建成本较高，所以绘制表格时可依照标识符来复用，以提升程序效率。<strong><font color=red>我们把这种可为 对象提供必要信息以便其能完成工作的初始化方法叫做“全能初始化方法”（designated initializer)</font></strong></p>
-
-<p>我们看下面这个NSDate的例子：</p>
-
-<pre><code class="language-objc">-(id)init
--(id)initWithString:(NSString*)string
--(id)initWithTimelntervalSinceNow:(NSTimelnterval)seconds
--(id)initWithTimelnterval:(NSTimelnterval)seconds
-                sinceDate:(NSDate*)refDate
--(id)initWithTimeIntervalSinceReferenceDate:(NSTimelnterval)seconds
--(id)initWithTimeIntervalSincel970:(NSTimelnterval)seconds
-</code></pre>
-
-<p><mark><strong>那么多的初始化方法中，我们要选一个全能初始化方法，让其他的初始化方法都来调用它。</strong></mark>，只有在全能初始化方法中，才会存储内部数据。这样的话，当底层数据存储机制改变时，只需修改此方法的代码就好，无须改动其他初始化方法。</p>
-
-<p>我们来用代码举例：</p>
-
-<p><em>首先定义一个表示矩形的类：</em></p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-@interface EOCRectangle : NSObject
-@property (nonatomic, assign, readonly) float width;
-@property (nonatomic, assign, readonly) float height; 
-@end
-</code></pre>
-
-<p>然后定义一个初始化方法：</p>
-
-<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight:(float)height
-{
-    if ((self = [super init])) {
-        _width = width;
-        _height = height;
-    }
-    return self;
-}
-</code></pre>
-
-<p>这样就会有一个问题，当有人用<code>[[EOCRectanglealloc]init]</code>来创建矩形时，因为<code>NSObject</code>中已经实现了<code>init</code>方法，如果把<code>alloc</code>方法分配好的<code>EOCRectangle</code>交由此方法来初始化，那么矩形的宽度与高度就是0,因为全部实例变量都设为0了。这种情况我们应该覆写<code>init</code>方法：</p>
-
-<pre><code class="language-objc">// Using default values
--(id)init {
-    return [self initWithWidth:5.Of andHeight:10.Of];
-)
-// Throwing an exception
--(id)init {
-    @throw [NSException
-    exceptionWithName:NSInternalInconsistencyException 
-    reason:@&quot;Must use initWithWidth:andHeight: instead.&quot; 
-    userInfo：nil]；
-}
-</code></pre>
-
-<p>还有一种情况，当我们创建名叫<code>EOCSquare</code>的类，令其成为<code>EOCRectangle</code>的子类时，新类的初始化方法写的时候要注意：</p>
-
-<pre><code class="language-objc">@import &quot;EOCRectangle.h&quot;
-@interface EOCSquare : EOCRectangle 
--(id)initWithDimension:(float)dimension; 
-@end
-
-@implementation EOCSquare
--(id)initWithDimension:(float)dimension {
-    return [super initwithwidth:dimension andHeightidimension];
-}
-@end
-</code></pre>
-
-<p>这了我们发现上面代码的初始化方法调用了父类的初始化方法，这样可能会导致一个问题：创建出一个”高度”和“宽度”不相等的正方形。所以：<strong><font color=red>如果子类的全能初始化方法与超类方法的名称不 同，那么总应覆写超类的全能初始化方法。</font></strong>在<code>EOCSquare</code>这个例子中，应该像下面这样覆写<code>EOCRectangle</code>的全能初始化方法：</p>
-
-<pre><code class="language-objc">-(id)initWithWidth:(float)width andHeight:(float)height { 
-    float dimension = MAX (width, height);  
-    return [self initWithDimension:dimension];
-}
-</code></pre>
-
-<p>覆写了这个方法之后，即便使用<code>init</code>来初始化<code>EOCSquare</code>对象，也能照常工作。原因在于, <code>EOCRectangle</code>类覆写了 <code>init</code>方法，并以默认值为参数，调用了该类的全能初始化方法。在用<code>init</code>方法初始化<code>EOCSquare</code>对象时，也会这么调用，不过由于<code>“initWithWidth:andHeight:”</code>已经在子类中覆写了，所以实际上执行的是<code>EOCSquare</code>类的这一份实现代码，而此代码又会调用本类的全能初始化方法。因此一切正常，调用者不可能创建出边长不相等的<code>EOCSquare</code>对象。</p>
-
-<p>当然如果我们不想覆写父类的全能初始化方法，认为这是调用者自己犯了错误。在这种情况下，常用的办法是覆写超类的全能初始化方法并于其中抛出异常：</p>
-
-<pre><code class="language-objc">-(id) initwithwidth: (float) width andHeight: (float) height {
-    @throw 
-        [NSException 
-            exceptionWithName:NSInternallnconsistencyException
-            reason: @&quot;Must use initWithDimension: instead.&quot;
-             userInfo：nil];
-</code></pre>
-
-<p><strong><mark>有时如果某个队形对象的实例有两种完全不同的创建方式，必须分开处理，所以就要编写多个全能初始化方法。</mark></strong>只要记住每个子类的全能初始化方法都应该调用其超类的对应方法，并逐层向上，应该先调用超类的相关方法，然后再执行与本类有关的任务。</p>
-
-<h2 id="toc_0">要点</h2>
-
-<ul>
-<li>在类中提供一个全能初始化方法，并于文档里指明。其他初始化方法均应调用此方法。</li>
-<li><p>若全能初始化方法与超类不同，则需覆写超类中的对应方法。</p></li>
-<li><p>如果超类的初始化方法不适用于子类，那么应该覆写这个超类方法，并在其中抛出异常。</p></li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/25</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AC%AC%E4%B8%89%E7%AB%A0%20%E6%8E%A5%E5%8F%A3%E4%B8%8EAPI%E8%AE%BE%E8%AE%A1.html'>第三章 接口与API设计</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -850,6 +852,12 @@ int main(int argc, const char * argv[]) {
 	      
 		      
 			      <li class="post">
+			        <a href="15391408783293.html">UIStackView的简单使用与理解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
 			      </li>
 		     
@@ -869,12 +877,6 @@ int main(int argc, const char * argv[]) {
 		      
 			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  

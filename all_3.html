@@ -111,6 +111,58 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15152039082618.html">
+                
+                  <h1>Perimeter of squares in a rectangle</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15152039082618/15152039109281.jpg" alt=""/></p>
+
+<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
+
+unsigned long long perimeter(int n) {
+    NSMutableArray *numQu = @[@0,@1].mutableCopy;
+    unsigned long long n0 = 0,n1=1;
+    for (int i = 2; i&lt;=n+1; i++) {
+        unsigned long long sum = n0+n1;
+        n0 = n1;
+        n1 = sum;
+        [numQu addObject:@(sum)];
+    }
+    unsigned long long tol = 0;
+    for (NSNumber* ele in numQu) {
+        tol+=[ele unsignedLongLongValue];
+    }
+    return tol*4;
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2018/1/6</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15151211562254.html">
                 
                   <h1>AFNetworking遇到的问题</h1>
@@ -441,85 +493,6 @@ NSNumber *findMissing(NSArray *list) {
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15141803762335.html">
-                
-                  <h1>Valid Parentheses</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15141803762335/15141803778513.jpg" alt=""/></p>
-
-<pre><code class="language-objc">#import &lt;Foundation/Foundation.h&gt;
-
-bool validParentheses(NSString *s) {
-    // TODO: Return a boolean value indicating whether the
-    // order of parentheses in the given string is valid
-    if (s.length==0) {
-        return 0;
-    }
-    int sum = 0;
-    NSMutableArray *res = @[].mutableCopy;
-    for (int i = 0; i&lt;s.length; i++) {
-        if ([s characterAtIndex:i]==(unichar)&#39;(&#39;) {
-            [res addObject:@(&#39;(&#39;)];
-            sum++;
-        }
-        if ([s characterAtIndex:i]==(unichar)&#39;)&#39;) {
-            if ([[res lastObject] isEqual:@(&#39;(&#39;)]) {
-                [res removeObjectAtIndex:res.count-1];
-            }else{
-                [res addObject:@(&#39;)&#39;)];
-            }
-            sum--;
-        }
-    }
-    if (sum!=0||[res count]!=0) {
-        return 0;
-    }
-    return 1;
-}
-</code></pre>
-
-<p>简化版：</p>
-
-<pre><code class="language-objc">
-#import &lt;Foundation/Foundation.h&gt;
-
-bool validParentheses(NSString *s) {
-  int brackets = 0;
-  for (int i = 0; i &lt; [s length]; i++) {
-    if ([s characterAtIndex: i] == &#39;(&#39;) brackets++;
-    else if ([s characterAtIndex: i] == &#39;)&#39;) if (--brackets &lt; 0) return false;
-  }
-  return !brackets;
-}
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/25</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='codeWars.html'>codeWars</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -603,6 +576,12 @@ bool validParentheses(NSString *s) {
 	      
 		      
 			      <li class="post">
+			        <a href="15391408783293.html">UIStackView的简单使用与理解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
 			      </li>
 		     
@@ -622,12 +601,6 @@ bool validParentheses(NSString *s) {
 		      
 			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  

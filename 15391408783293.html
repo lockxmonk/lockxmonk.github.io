@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  Caffe目录结构 - LZH007
+  UIStackView的简单使用与理解 - LZH007
   
   </title>
   
@@ -111,14 +111,14 @@
       <div class="markdown-body article-wrap">
        <div class="article">
           
-          <h1>Caffe目录结构</h1>
+          <h1>UIStackView的简单使用与理解</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/5/24</span>
+          <span class="date">2018/10/10</span>
 
           <span>posted in&nbsp;</span> 
           
-              <span class="posted-in"><a href='Caffe%E4%BB%A3%E7%A0%81%E6%A2%B3%E7%90%86.html'>Caffe代码梳理</a></span>
+              <span class="posted-in"><a href='iOS.html'>iOS</a></span>
            
          
           <span class="comments">
@@ -131,82 +131,106 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p>我们这里先了解一下caffe的目录结构:<br/>
-<img src="media/14955929300450/14961936456285.jpg" alt=""/><br/>
-<img src="media/14955929300450/14961936868967.jpg" alt=""/><br/>
-<img src="media/14955929300450/14961937240927.jpg" alt=""/><br/>
-其中主要关注的就是:include/,src/和tools/,三个目录,需要分析的代码都包含在这里面.</p>
+      <p>之前一直在吐槽iOS的布局方式（frame和autolayout）相比前端的flex布局方式很落后，也在想有没有其它的方式来改善。最近偶然发现UIStackView的存在（苹果爸爸原谅我😂），了解后发现其中的使用与布局方式类似于flex布局，感觉这就是苹果爸爸借鉴flex布局特点所构造的一种布局实现方式吧。</p>
 
-<p>在阅读代码时,如何快速追踪某个关键词?传统的方法是打开某个文件,之后用查找命令来查找关键词.<br/>
-这了我们介绍另一种方法,利用<code>grep</code>命令:</p>
+<h2 id="toc_0">实现方式</h2>
 
-<pre><code>➜  caffe git:(master) ✗ grep -n -H -R &quot;REGISTER_LAYER_CREATOR&quot; *
+<p>这里我们看一下如何简单的使用stackview来创造一个拥有众多子item的水平视图。代码如下：</p>
+
+<pre><code class="language-objc">- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+    
+    containerView = [[UIStackView alloc]initWithFrame:CGRectMake(0, 100, CGRectGetWidth(self.view.bounds), 200)];
+    //子视图布局方向：水平或垂直
+    containerView.axis = UILayoutConstraintAxisHorizontal;//水平布局
+    //子控件依据何种规矩布局
+    containerView.distribution = UIStackViewDistributionFillEqually;//子控件均分
+    //子控件之间的最小间距
+    containerView.spacing = 10;
+    //子控件的对齐方式
+    containerView.alignment = UIStackViewAlignmentFill;
+    NSArray *tempArray = @[@&quot;1&quot;,@&quot;2&quot;,@&quot;3&quot;,@&quot;4&quot;];
+    for (NSInteger i = 0; i &lt; 4; i++) {
+//        UIView *view = [[UIView alloc]init];
+        UILabel *label = [[UILabel alloc] init];
+        label.textAlignment = NSTextAlignmentCenter;
+        label.backgroundColor = [UIColor colorWithRed:random()%256/255.0 green:random()%256/255.0 blue:random()%256/255.0 alpha:1];
+        label.numberOfLines = 0;
+        label.text = tempArray[i];
+        
+        [containerView addArrangedSubview:label];
+        
+    }
+    [self.view addSubview:containerView];
+}
 </code></pre>
 
-<p><img src="media/14955929300450/14955931415464.jpg" alt=""/><br/>
-我们可以看到,日志输出了很多文件.这种方法无需分别打开每个文件,也能直观的显示了所有包含这个宏的文件名和行号.</p>
+<p>可以看到stackView的使用和view没有大的区别，使用时根绝需要来设置stackView的<code>axis（布局方向）</code>,<code>distribution（子控件依据何种规矩布局）</code>,<code>spacing（子控件之间的最小间距）</code>,<code>alignment（子控件的对齐方式）</code>等属性。</p>
 
-<p>这里我们用<code>grep</code>命令来搜索一个宏调用:<code>REGISTER_LAYER_CREATOR</code>,<br/>
-命令行参数解释为:</p>
+<p>这里详细说明一下个属性的主要参数：</p>
 
-<blockquote>
-<p>-n  ---显示行号,便于定位<br/>
--H  ---显示文件名,便与定位<br/>
--R  ---递归查找每个子目录,适合工程较大,分多个目录存放的场景</p>
-</blockquote>
+<p><strong>axis：</strong><br/>
+ 子控件的布局方向，水平（UILayoutConstraintAxisHorizontal）或垂直（UILayoutConstraintAxisVertical）， 这个不用过多解释了</p>
 
-<p>利用这种方法可以很容易的在caffe源码中定位很多内容.</p>
+<p><strong>UIStackViewDistribution：</strong></p>
 
-<h2 id="toc_0">卷基层</h2>
+<pre><code>UIStackViewDistributionFill ：它就是将 arrangedSubviews 填充满整个 StackView ，如果设置了spacing，那么这些 arrangedSubviews 之间的间距就是spacing。如果减去所有的spacing，所有的 arrangedSubview 的固有尺寸( intrinsicContentSize )不能填满或者超出 StackView 的尺寸，那就会按照 Hugging 或者 CompressionResistance 的优先级来拉伸或压缩一些 arrangedSubview 。如果出现优先级相同的情况，就按排列顺序来拉伸或压缩。
 
-<p>这里我们假定卷积层有<code>L</code>个输出通道和<code>K</code>个输入通道,于是需要有<code>LK,L=50,K=20</code>个卷积核实现通道数目的转换.这里我们假定卷集核大小为<code>I*J = 5*5</code>,每个输出通道的特征图大小为<code>M*N = 8*8</code>,则该层每个样本做一次前向传播时卷积层计算量为:<br/>
-<code>Calculations(MAC) = I*J*M*N*K*L = 5*5*8*8*50*20=1600000MAC</code><br/>
-实际中使送入一批样本(batch),所以我们这里还需要计算量乘上批量尺寸.</p>
+UIStackViewDistributionFillEqually ：这种就是 StackView 的尺寸减去所有的spacing之后均分给 arrangedSubviews ，每个 arrangedSubview 的尺寸是相同的。
 
-<p>我们这里卷积层的学习参数量为:<br/>
-<code>Params = I*J*K*L = 25000</code><br/>
-所以计算量-参数量之比为<code>CPR=Calculations/Params = M*N = 64</code><br/>
-<font color=red><strong>所以我们得出结论是:卷基层的输出特征图尺寸越大,CPR值越大,参数重复利用率越高.,若一次性输入一批数据(B个样本),则CPR值可再提高B倍.</strong></font></p>
+UIStackViewDistributionFillProportionally ：这种跟FillEqually差不多，只不过这个不是讲尺寸均分给 arrangedSubviews ，而是根据 arrangedSubviews 的 intrinsicContentSize 按比例分配。
 
-<h2 id="toc_1">全连接层</h2>
+UIStackViewDistributionEqualSpacing ：这种是使 arrangedSubview 之间的spacing相等，但是这个spacing是有可能大于 StackView 所设置的spacing，但是绝对不会小于。这个类型的布局可以这样理解，先按所有的 arrangedSubview 的 intrinsicContentSize 布局，然后余下的空间均分为spacing，如果大约 StackView 设置的spacing那这样就OK了，如果小于就按照 StackView 设置的spacing，然后按照 CompressionResistance 的优先级来压缩一个 arrangedSubview 。
 
-<p>早在卷积神经网络出现之前,最早的深度学习网络计算类型都是全连接形式的.如下所示.<br/>
-<img src="media/14955929300450/14961962825939.jpg" alt=""/><br/>
-每个节点与相邻层的所有节点都有连接关系,这是全连接层名称的由来.</p>
+UIStackViewDistributionEqualCentering ：这种是使 arrangedSubview 的中心点之间的距离相等，这样没两个 arrangedSubview 之间的spacing就有可能不是相等的，但是这个spacing仍然是大于等于 StackView 设置的spacing的，不会是小于。这个类型布局仍然是如果 StackView 有多余的空间会均分给 arrangedSubviews 之间的spacing，如果空间不够那就按照 CompressionResistance 的优先级压缩 arrangedSubview 。
+</code></pre>
 
-<p>全连接层的主要计算类型为矩阵-向量乘(GEMV).假设输入节点组成的向量为x,维度为D,输出节点组成的向量为y,维度为V,则全连接层计算可以表示为:<br/>
-\[y=Wx\]<br/>
-其中,W为<code>V*D</code>维权值矩阵.</p>
+<p><strong>alignment：</strong></p>
 
-<p>我们分析全连接层的参数:<br/>
-<img src="media/14955929300450/14961986814721.jpg" alt=""/></p>
+<pre><code>UIStackViewAlignmentFill = 默认方式， 如果子控件水平布局, 则指子控件的垂直方向填充满stackView. 反之亦然
 
-<p><img src="media/14955929300450/14961986616938.jpg" alt=""/></p>
+UIStackViewAlignmentLeading = 如果子控件竖直布局, 则指子控件左边对齐stackView左边. 反之亦然, 即 UIStackViewAlignmentTop = UIStackViewAlignmentLeading。
 
-<p>得出输出<code>V=500</code>,输入<code>D=50*4*4 = 800</code>(其中50是输入数量,4*4位图的尺寸)</p>
+UIStackViewAlignmentTop = UIStackViewAlignmentLeading,
 
-<p>则全连接层单样本前向传播计算量为:<br/>
-\[<br/>
-CalculationsMAC = V*D<br/>
-                = 800 * 500<br/>
-                = 400000<br/>
-\]<br/>
-参数统计量为:<br/>
-\[<br/>
-Params = V*D<br/>
-       = 800 * 500<br/>
-       = 400000<br/>
-\]<br/>
-所以CPR值为1</p>
+UIStackViewAlignmentFirstBaseline = 根据上方基线布局所有子视图的 y 值(适用于 Horizontal 模式)
 
-<p>所以得出结论,全连接层的CPR值始终为1,与输入,输出维度无关.所以单样本前向向传播计算时,权值重复利用率很低.<br/>
-    我们将一批(B个)样本逐列拼接成矩阵X,一次性通过全连接层,得到一批输出向量构成的矩阵Y,称作批处理(矩阵-矩阵乘计算GEMM):<br/>
-    \[<br/>
-    Y=WX<br/>
-    \]<br/>
-这样全连接层前向计算量提高了B倍,而参数量不变,因此CPR提高了B倍.</p>
+UIStackViewAlignmentLastBaseline = 根据下方基线布局所有子视图的 y 值(适用于 Horizontal 模式)
 
-<p>与卷积层相比，全连接层参数量是其16倍，而计算量只有其25%.如果输出特征图尺寸相同<code>（M*V = V)</code>，卷积层的CPR值为全连接层的<code>M*N</code>倍。也就是说，卷积层在输出特征图维度实现了<mark>权值共享</mark>。这是降低参数量的重要举措。与此同吋，卷枳层<mark>局部连接</mark>特性 (相比全连接）也大幅减少了参数量,这使得CNN网络中前几层卷积层参数量占比小，计算量占比大；而后几层全连接层参数量占比大，计算量占比小。大多数CNN模型都符合这个特点。<font color=red><strong>因此我们在进行计算加速优化时,重点放在卷积层；而在进行参数优化、权值剪裁时，重点放在全连接层，</strong></font></p>
+UIStackViewAlignmentCenter = 中心对齐
+
+UIStackViewAlignmentTrailing = 如果子控件竖直布局, 则指子控件左边对齐stackView右边. 反之亦然, 即UIStackViewAlignmentBottom = UIStackViewAlignmentTrailing
+
+UIStackViewAlignmentBottom = UIStackViewAlignmentTrailing
+</code></pre>
+
+<p>这里还要说明几个方法：<code>addArrangedSubview</code>、<code>removeArrangedSubview</code>和<code>insertArrangedSubview</code>，日常view的添加和子视图从复视图删除使用的是<code>addSubview</code>和<code>removeFromSuperview</code>。</p>
+
+<p>其中完整方法如下：</p>
+
+<pre><code class="language-objc">初始化数组:
+- (instancetype)initWithArrangedSubviews:(NSArray *)views;
+添加子视图: 
+- (void)addArrangedSubview:(UIView *)view;
+移除子视图:
+- (void)removeArrangedSubview:(UIView *)view;
+根据下标插入视图:
+- (void)insertArrangedSubview:(UIView *)viewatIndex:(NSUInteger)stackIndex;
+</code></pre>
+
+<p><strong>注意</strong>： addArrangedSubview 和 insertArrangedSubview， 会把子控件加到arrangedSubviews数组的同时添加到StackView的subView数组中，但是removeArrangedSubview， 只会把子控件从arrangedSubviews数组中移除，不会从subviews中移除，如果需要调用removeFromSuperview</p>
+
+<p>若我们需要删除stackView中subView数组的最后一个视图，可以用如下方式：</p>
+
+<pre><code class="language-objc">//removeArrangedSubview， 只会把子控件从arrangedSubviews数组中移除，
+//不会从subviews中移除，如果需要可调用removeFromSuperview
+UIView *view = [_containerView.subviews lastObject];
+[_containerView removeArrangedSubview:view];
+[view removeFromSuperview];
+</code></pre>
+
+<p>到此stackView的一个简单使用方式就知道了。</p>
 
 
     
@@ -217,16 +241,13 @@ Params = V*D<br/>
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="14956131169957.html" 
-          title="Previous Post: 在ios中判断一个viewcontroller是否已经正常present">&laquo; 在ios中判断一个viewcontroller是否已经正常present</a>
-      
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="14955245049549.html" 
-          title="Next Post: 运行caffe框架中的cifar10样例">运行caffe框架中的cifar10样例 &raquo;</a>
+          <a  href="15389627333795.html" 
+          title="Next Post: UITableView-FDTemplateLayoutCell源码学习">UITableView-FDTemplateLayoutCell源码学习 &raquo;</a>
       
       </p>
         </div>

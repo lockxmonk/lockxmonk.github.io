@@ -111,6 +111,54 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15128009688279.html">
+                
+                  <h1>Ransom Note</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/15128009688279/15128009813033.jpg" alt=""/></p>
+
+<pre><code class="language-c++">class Solution {
+public:
+    bool canConstruct(string ransomNote, string magazine) {
+        unordered_map&lt;char, int&gt; map;
+        for (int i = 0; i&lt;magazine.length(); i++) {
+            map[magazine[i]]++;
+        }
+        for (int j = 0; j&lt;ransomNote.length(); j++) {
+            if(--map[ransomNote[j]]&lt;0) return 0;
+        }
+        return 1;
+    }
+};
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/12/9</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15127898937133.html">
                 
                   <h1>Reverse String II</h1>
@@ -402,56 +450,6 @@ public:
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15127198152754.html">
-                
-                  <h1>Distribute Candies</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><img src="media/15127198152754/15127198177167.jpg" alt=""/></p>
-
-<pre><code class="language-c++">class Solution {
-public:
-    int distributeCandies(vector&lt;int&gt;&amp; candies) {
-        int res = 0;
-        unordered_map&lt;int, vector&lt;int&gt;&gt; map;
-        for (int i =0; i&lt;candies.size(); i++) {
-            map[candies[i]].push_back(candies[i]);
-        }
-        if (map.size()&lt;=candies.size()/2) {
-            return map.size();
-        }else{
-            return candies.size()/2;
-        }
-    }
-};
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/12/8</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='leetcode.html'>leetcode</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -535,6 +533,12 @@ public:
 	      
 		      
 			      <li class="post">
+			        <a href="15391408783293.html">UIStackView的简单使用与理解</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="15389627333795.html">UITableView-FDTemplateLayoutCell源码学习</a>
 			      </li>
 		     
@@ -554,12 +558,6 @@ public:
 		      
 			      <li class="post">
 			        <a href="15196116405308.html">2017第八届蓝桥杯C/C++ B组省赛</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15166061069994.html">Longest Word in Dictionary through Deleting</a>
 			      </li>
 		     
 		  
